@@ -49,6 +49,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> next) {
 		if(patternToMatch != null) {
 			//If we have a securePath, we act as a NotFoundFilter so we want to redirect to Login ONLY if this is a secure path request
+			//This hides known vs. unknown pages
 			Matcher matcher = patternToMatch.matcher(meta.getCtx().getRequest().relativePath);
 			if(!matcher.matches())
 				return next.invoke(meta);

@@ -52,4 +52,9 @@ public class FilterInfo<T> {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return "FilterInfo [path=" + path + ", filter=" + filter + ", portType=" + portType + "]";
+	}
+	
 }

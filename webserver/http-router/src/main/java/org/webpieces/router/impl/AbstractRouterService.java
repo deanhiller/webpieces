@@ -93,8 +93,7 @@ public abstract class AbstractRouterService implements RouterService {
 	
 	@Override
 	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
-		throw new UnsupportedOperationException("not done yet");
-		//return routeLoader.convertToUrl(routeId, args, isValidating);
+		return routeLoader.convertToUrl(routeId, args, isValidating);
 	}
 	
 	@Override

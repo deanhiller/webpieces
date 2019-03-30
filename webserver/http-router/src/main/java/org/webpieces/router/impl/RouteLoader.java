@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +56,8 @@ public class RouteLoader {
 	private RouteInvoker2 invoker2;
 
 	private MasterRouter masterRouter;
+
+	private ReverseRoutes reverseRoutes;
 	
 	@Inject
 	public RouteLoader(
@@ -197,7 +200,7 @@ public class RouteLoader {
 	public void loadAllRoutes(WebAppMeta rm, Injector injector, RoutingHolder routingHolder) {
 		log.info("adding routes");
 		
-		ReverseRoutes reverseRoutes = new ReverseRoutes(config);
+		reverseRoutes = new ReverseRoutes(config);
 		//routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
 		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, injector, config, invoker2);
 		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(holder);
@@ -252,5 +255,9 @@ public class RouteLoader {
 	
 	public FileMeta relativeUrlToHash(String urlPath) {
 		return compressionCacheSetup.relativeUrlToHash(urlPath);
+	}
+
+	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
+		return reverseRoutes.convertToUrl(routeId, args, isValidating);
 	}
 }

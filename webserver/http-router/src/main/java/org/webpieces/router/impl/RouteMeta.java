@@ -185,7 +185,7 @@ public class RouteMeta {
 		}).thenCompose(Function.identity());
 	}
 
-	public CompletableFuture<Void> invokeError(RequestContext ctx, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> invokeFallbackRoute(RequestContext ctx, ResponseStreamer responseCb) {
 		MatchResult result = new MatchResult(this);
 		return route.invokeImpl(result, ctx, responseCb);
 	}

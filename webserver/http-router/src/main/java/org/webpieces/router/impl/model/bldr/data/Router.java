@@ -1,6 +1,5 @@
 package org.webpieces.router.impl.model.bldr.data;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -90,7 +89,7 @@ public class Router extends ScopedRouter {
 					+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
 			SupressedExceptionLog.log(exc);
 			
-			return internalSvrErrorRoute.invokeError(requestCtx, responseCb);
+			return internalSvrErrorRoute.invokeFallbackRoute(requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -102,7 +101,7 @@ public class Router extends ScopedRouter {
 	
 	private CompletableFuture<Void> notFound(NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
 		try {
-			return pageNotFoundRoute.invoke(requestCtx, responseCb, new HashMap<>());
+			return pageNotFoundRoute.invokeFallbackRoute(requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
