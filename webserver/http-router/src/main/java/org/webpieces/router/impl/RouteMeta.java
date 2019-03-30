@@ -165,7 +165,7 @@ public class RouteMeta {
 		MatchResult result = new MatchResult(this, pathParams);
 
 		try {
-			future = route.invokeImpl(result, ctx, responseCb);
+			future = route.invokeImpl(result, ctx, responseCb, false);
 		} catch(Throwable e) {
 			future = new CompletableFuture<Void>();
 			future.completeExceptionally(e);
@@ -185,8 +185,13 @@ public class RouteMeta {
 		}).thenCompose(Function.identity());
 	}
 
-	public CompletableFuture<Void> invokeFallbackRoute(RequestContext ctx, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> invokeErrorRoute(RequestContext ctx, ResponseStreamer responseCb) {
 		MatchResult result = new MatchResult(this);
-		return route.invokeImpl(result, ctx, responseCb);
+		return route.invokeImpl(result, ctx, responseCb, false);
+	}
+
+	public CompletableFuture<Void> invokeNotFoundRoute(RequestContext requestCtx, ResponseStreamer responseCb) {
+		MatchResult result = new MatchResult(this);
+		return route.invokeImpl(result, requestCtx, responseCb, true);
 	}
 }

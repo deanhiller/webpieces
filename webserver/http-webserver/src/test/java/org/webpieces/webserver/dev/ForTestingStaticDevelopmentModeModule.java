@@ -3,8 +3,10 @@ package org.webpieces.webserver.dev;
 import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.devrouter.impl.DevClassForName;
 import org.webpieces.devrouter.impl.DevLoader;
+import org.webpieces.devrouter.impl.DevRouteInvoker;
 import org.webpieces.devrouter.impl.DevRoutingService;
 import org.webpieces.router.api.RouterService;
+import org.webpieces.router.impl.RouteInvoker2;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 
@@ -20,6 +22,7 @@ public class ForTestingStaticDevelopmentModeModule implements Module {
 		binder.bind(ClassForName.class).to(DevClassForName.class).asEagerSingleton();
 		
 		binder.bind(CompileOnDemand.class).to(NoCompiling.class).asEagerSingleton();
+		binder.bind(RouteInvoker2.class).to(DevRouteInvoker.class).asEagerSingleton();
     }
 
 	private static class NoCompiling implements CompileOnDemand {

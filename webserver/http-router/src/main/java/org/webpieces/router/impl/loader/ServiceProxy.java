@@ -76,8 +76,8 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
 		List<Object> argsResult = translator.createArgs(m, meta.getCtx(), meta.getBodyContentBinder());
-		
-		Object retVal = m.invoke(obj, argsResult.toArray());
+		Object[] args = argsResult.toArray();
+		Object retVal = m.invoke(obj, args);
 		
 		if(meta.getBodyContentBinder() != null)
 			return unwrapResult(m, retVal, meta.getBodyContentBinder());

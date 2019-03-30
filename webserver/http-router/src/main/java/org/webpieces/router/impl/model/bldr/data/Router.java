@@ -89,7 +89,7 @@ public class Router extends ScopedRouter {
 					+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
 			SupressedExceptionLog.log(exc);
 			
-			return internalSvrErrorRoute.invokeFallbackRoute(requestCtx, responseCb);
+			return internalSvrErrorRoute.invokeErrorRoute(requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -101,7 +101,7 @@ public class Router extends ScopedRouter {
 	
 	private CompletableFuture<Void> notFound(NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
 		try {
-			return pageNotFoundRoute.invokeFallbackRoute(requestCtx, responseCb);
+			return pageNotFoundRoute.invokeNotFoundRoute(requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...

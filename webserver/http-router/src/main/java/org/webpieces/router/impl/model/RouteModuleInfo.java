@@ -9,8 +9,8 @@ public class RouteModuleInfo {
 	public String i18nBundleName;
 
 	public RouteModuleInfo(Class<?> moduleClazz) {
-		if(!(Routes.class.isAssignableFrom(moduleClazz) &&
-				!BasicRoutes.class.isAssignableFrom(moduleClazz)))
+		if(!Routes.class.isAssignableFrom(moduleClazz) &&
+				!BasicRoutes.class.isAssignableFrom(moduleClazz))
 				throw new IllegalArgumentException("Must be of type Routes.class or BasicRoutes.class");
 		this.packageName = getPackage(moduleClazz);
 		this.i18nBundleName = getI18nBundleName(moduleClazz);

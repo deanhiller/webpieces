@@ -40,15 +40,15 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 	protected abstract Object createController(Injector injector, String controllerStr);
 
 	@Override
-	public Service<MethodMeta, Action> createServiceFromFilters(RouteMeta meta) {
+	public Service<MethodMeta, Action> createServiceFromFilters(RouteMeta meta, List<FilterInfo<?>> filterInfos) {
 		Injector injector = meta.getInjector();
-		List<RouteFilter<?>> filters = createFilters(injector, meta.getFilters());
+		List<RouteFilter<?>> filters = createFilters(injector, filterInfos);
 		Service<MethodMeta, Action> svcWithFilters = loader.loadFilters(filters);
 		return svcWithFilters;
 	}
 	
-	public void loadFiltersIntoMeta(RouteMeta meta) {
-		meta.setService(createServiceFromFilters(meta));
+	public void loadFiltersIntoMeta(RouteMeta meta, List<FilterInfo<?>> filterInfos) {
+		meta.setService(createServiceFromFilters(meta, filterInfos));
 	}
 	
 	protected List<RouteFilter<?>> createFilters(Injector injector, List<FilterInfo<?>> filterInfos) {

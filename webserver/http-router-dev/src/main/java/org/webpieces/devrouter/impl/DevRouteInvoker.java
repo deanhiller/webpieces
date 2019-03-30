@@ -15,23 +15,21 @@ import org.webpieces.router.impl.params.ObjectToParamTranslator;
 
 public class DevRouteInvoker extends RouteInvoker2 {
 
-	private ControllerLoader loader;
-
 	@Inject
 	public DevRouteInvoker(ObjectToParamTranslator reverseTranslator, RouterConfig config, ControllerLoader loader) {
-		super(reverseTranslator, config);
-		this.loader = loader;
+		super(reverseTranslator, config, loader);
 	}
 
 	@Override
 	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx,
-			ResponseStreamer responseCb) {
+			ResponseStreamer responseCb, boolean isNotFoundRoute) {
 		
 		RouteMeta meta = result.getMeta();
-		loader.loadControllerIntoMetaObject(meta, false);
-		loader.loadFiltersIntoMeta(meta, false);
+		controllerFinder.loadControllerIntoMetaObject(meta, false);
+		controllerFinder.loadFiltersIntoMeta(meta, false);
 		
-		return super.invokeController(result, requestCtx, responseCb);
+		
+		return super.invokeController(result, requestCtx, responseCb, isNotFoundRoute);
 	}
 	
 }

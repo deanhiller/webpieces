@@ -36,7 +36,7 @@ public interface Route {
 	
 	String getMethod();
 
-	CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb);
+	CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, boolean isNotFoundRoute);
 
 	List<String> getArgNames();
 }

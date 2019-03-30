@@ -39,6 +39,6 @@ public class DevLoader extends AbstractLoader implements MetaLoaderProxy {
 		if(isInitializingAllFilters)
 			return; //skip on startup
 		
-		super.loadFiltersIntoMeta(m);
+		super.loadFiltersIntoMeta(m, m.getFilters());
 	}
 }

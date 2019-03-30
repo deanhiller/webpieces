@@ -137,8 +137,8 @@ public class RouteImpl implements Route {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
-		return routeInvoker.invokeController(result, ctx, responseCb);
+	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, boolean isNotFoundRoute) {
+		return routeInvoker.invokeController(result, ctx, responseCb, isNotFoundRoute);
 	}
 
 	@Override

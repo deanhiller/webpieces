@@ -87,29 +87,49 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 
 	@Test
 	public void testStaticFileFromDomain1() {
-		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public/myfile");
+		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public1/myfile");
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver");
+	}
+	
+	@Test
+	public void testStaticFileFromDomain2NotFoundInDomain1() {
+		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public2/myfile");
+		
+		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
 	@Test
 	public void testStaticFileFromDomain2() {
-		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/public/myfile");
+		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/public2/myfile");
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver");
+	}
+	
+	@Test
+	public void testStaticFileFromDomain1NotFoundInDomain2() {
+		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/public1/myfile");
+		
+		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
 	@Test
 	public void testStaticDirFromDomain1() {
-		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public/asyncMeta.txt");
+		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public1/asyncMeta.txt");
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
@@ -119,8 +139,18 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	}
 	
 	@Test
+	public void testStaticDirFromDomain2NotFoundInDomain1() {
+		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public2/asyncMeta.txt");
+		
+		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+	}
+	
+	@Test
 	public void testStaticDirFromDomain2() {
-		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/public/asyncMeta.txt");
+		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/public2/asyncMeta.txt");
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		

@@ -187,7 +187,7 @@ public class StaticRoute implements Route {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, boolean isNotFoundRoute) {
 		return routeInvoker.invokeStatic(result, ctx, responseCb);
 	}
 

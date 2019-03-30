@@ -1,6 +1,8 @@
 package org.webpieces.router.impl;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
@@ -8,6 +10,7 @@ import javax.inject.Inject;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.PortConfigCallback;
 import org.webpieces.router.api.ResponseStreamer;
@@ -22,6 +25,7 @@ import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
+import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.util.file.VirtualFile;
@@ -31,16 +35,20 @@ public class RouteInvoker2 {
 
 	private ReverseRoutes reverseRoutes;
 
-	private ObjectToParamTranslator reverseTranslator;
-	private PortConfigCallback portCallback;
+	private final ObjectToParamTranslator reverseTranslator;
+	private final PortConfigCallback portCallback;
 	private volatile PortConfig portConfig;
+
+	protected final ControllerLoader controllerFinder;
 
 	@Inject
 	public RouteInvoker2(
 		ObjectToParamTranslator reverseTranslator,
-		RouterConfig config
+		RouterConfig config,
+		ControllerLoader controllerFinder
 	) {
 		this.reverseTranslator = reverseTranslator;
+		this.controllerFinder = controllerFinder;
 		this.portCallback = config.getPortConfigCallback();
 	}
 	
@@ -64,11 +72,15 @@ public class RouteInvoker2 {
 		return processor.renderStaticResponse(resp);
 	}
 	
-	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, boolean isNotFoundRoute) {
+		RouteMeta meta = result.getMeta();
+		Service<MethodMeta, Action> service = meta.getService222();
+		if(isNotFoundRoute) {
+			service = createNotFoundService(meta, requestCtx.getRequest());
+		}
 		
 		if(portConfig == null)
 			portConfig = portCallback.fetchPortConfig();
-		RouteMeta meta = result.getMeta();
 		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb, portConfig);
 		
 		Object obj = meta.getControllerInstance();
@@ -76,7 +88,7 @@ public class RouteInvoker2 {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		if(meta.getService222() == null)
+		if(service == null)
 			throw new IllegalStateException("Bug, service should never be null at this point");
 		
 		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
@@ -86,7 +98,7 @@ public class RouteInvoker2 {
 		Current.setContext(requestCtx);
 		CompletableFuture<Action> response;
 		try {
-			response = invokeMethod(obj, method, meta);
+			response = invokeMethod(service, obj, method, meta);
 		} finally {
 			RequestLocalCtx.set(null);
 			Current.setContext(null);
@@ -96,9 +108,24 @@ public class RouteInvoker2 {
 		return future;
 	}
 	
-	private CompletableFuture<Action> invokeMethod(Object obj, Method m, RouteMeta meta) {
+	public  Service<MethodMeta, Action> createNotFoundService(RouteMeta m, RouterRequest req) {
+		List<FilterInfo<?>> filterInfos = findNotFoundFilters(m.getFilters(), req.relativePath, req.isHttps);
+		return controllerFinder.createNotFoundService(m, filterInfos);
+	}
+
+	public List<FilterInfo<?>> findNotFoundFilters(List<FilterInfo<?>> notFoundFilters, String path, boolean isHttps) {
+		List<FilterInfo<?>> matchingFilters = new ArrayList<>();
+		for(FilterInfo<?> info : notFoundFilters) {
+			if(!info.securityMatch(isHttps))
+				continue; //skip this filter
+			
+			matchingFilters.add(0, info);
+		}
+		return matchingFilters;
+	}
+	
+	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m, RouteMeta meta) {
 		MethodMeta methodMeta = new MethodMeta(obj, m, Current.getContext(), meta.getRoute(), meta.getBodyContentBinder());
-		Service<MethodMeta, Action> service = meta.getService222();
 		return service.invoke(methodMeta);
 	}
 	
