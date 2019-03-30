@@ -1,12 +1,12 @@
 package org.webpieces.webserver.dev.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.router.api.routes.Port.BOTH;
 
-import org.webpieces.router.api.routing.Routes;
-import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
-import org.webpieces.router.impl.model.bldr.RouteBuilder;
-
-import static org.webpieces.router.api.routing.Port.BOTH;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routes.FilterPortType;
+import org.webpieces.router.api.routes.Routes;
 
 public class DevRoutes implements Routes {
 

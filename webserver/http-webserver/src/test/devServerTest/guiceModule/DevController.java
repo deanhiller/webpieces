@@ -3,8 +3,8 @@ package org.webpieces.webserver.dev.app;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
 
 @Singleton
 public class DevController {
