@@ -7,8 +7,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 
 public class ObjectToParamTranslator {
 

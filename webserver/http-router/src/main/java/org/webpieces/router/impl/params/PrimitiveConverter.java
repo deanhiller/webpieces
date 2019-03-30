@@ -2,7 +2,7 @@ package org.webpieces.router.impl.params;
 
 import java.util.function.Function;
 
-import org.webpieces.router.api.ObjectStringConverter;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 
 public class PrimitiveConverter<T> implements ObjectStringConverter<T> {
 

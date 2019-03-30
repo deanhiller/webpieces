@@ -2,8 +2,8 @@ package org.webpieces.router.impl;
 
 import java.util.regex.Pattern;
 
-import org.webpieces.router.api.routing.PortType;
-import org.webpieces.router.api.routing.RouteFilter;
+import org.webpieces.router.api.routes.FilterPortType;
+import org.webpieces.router.api.routes.RouteFilter;
 
 public class FilterInfo<T> {
 
@@ -11,9 +11,9 @@ public class FilterInfo<T> {
 	private Class<? extends RouteFilter<T>> filter;
 	private T initialConfig;
 	private Pattern patternToMatch;
-	private PortType portType;
+	private FilterPortType portType;
 
-	public FilterInfo(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, PortType type) {
+	public FilterInfo(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type) {
 		this.path = path;
 		this.patternToMatch = Pattern.compile(path);
 		this.filter = filter;
@@ -37,16 +37,16 @@ public class FilterInfo<T> {
 		return patternToMatch;
 	}
 
-	public PortType getPortType() {
+	public FilterPortType getPortType() {
 		return portType;
 	}
 
 	public boolean securityMatch(boolean isHttps) {
-		if(portType == PortType.ALL_FILTER)
+		if(portType == FilterPortType.ALL_FILTER)
 			return true;
-		else if(isHttps && portType == PortType.HTTPS_FILTER)
+		else if(isHttps && portType == FilterPortType.HTTPS_FILTER)
 			return true;
-		else if(!isHttps && portType == PortType.HTTP_FILTER)
+		else if(!isHttps && portType == FilterPortType.HTTP_FILTER)
 			return true;
 		
 		return false;

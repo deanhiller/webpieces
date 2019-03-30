@@ -7,11 +7,11 @@ import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_
 import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_POST_DELETE_USER;
 import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_POST_USER_FORM;
 
-import org.webpieces.router.api.routing.CrudRouteIds;
-import org.webpieces.router.api.routing.Port;
-import org.webpieces.router.api.routing.ScopedRoutes;
-import org.webpieces.router.impl.model.bldr.RouteBuilder;
-import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routes.CrudRouteIds;
+import org.webpieces.router.api.routes.Port;
+import org.webpieces.router.api.routes.ScopedRoutes;
 
 public class AjaxHibernateCrudRoutes extends ScopedRoutes {
 

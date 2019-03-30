@@ -2,8 +2,8 @@ package org.webpieces.plugins.hibernate;
 
 import java.util.List;
 
-import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.api.plugins.Plugin;
+import org.webpieces.router.api.routes.Routes;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

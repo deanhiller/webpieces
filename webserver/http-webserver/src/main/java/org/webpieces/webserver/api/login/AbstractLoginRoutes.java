@@ -2,14 +2,14 @@ package org.webpieces.webserver.api.login;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
-import static org.webpieces.router.api.routing.Port.HTTPS;
+import static org.webpieces.router.api.routes.Port.HTTPS;
 
-import org.webpieces.router.api.routing.PortType;
-import org.webpieces.router.api.routing.RouteId;
-import org.webpieces.router.api.routing.Routes;
-import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
-import org.webpieces.router.impl.model.bldr.RouteBuilder;
-import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routes.FilterPortType;
+import org.webpieces.router.api.routes.RouteId;
+import org.webpieces.router.api.routes.Routes;
 
 public abstract class AbstractLoginRoutes implements Routes {
 
@@ -38,10 +38,10 @@ public abstract class AbstractLoginRoutes implements Routes {
 
 		addLoggedInHome(bldr, scopedBldr);
 		
-		bldr.addFilter(securePath, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), PortType.HTTPS_FILTER);
+		bldr.addFilter(securePath, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER);
 		//redirects all queries for non-existent pages to a login (then the clients don't know which urls exist and don't exist which is good)
 		//ie. you can only get not found AFTER logging in
-		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute(), secureFields), PortType.HTTPS_FILTER);
+		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER);
 	}
 
 	protected abstract void addLoggedInHome(RouteBuilder bldr, ScopedRouteBuilder scopedBldr);

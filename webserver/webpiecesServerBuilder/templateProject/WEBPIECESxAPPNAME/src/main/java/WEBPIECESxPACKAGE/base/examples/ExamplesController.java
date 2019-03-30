@@ -5,8 +5,8 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
 
 import WEBPIECESxPACKAGE.base.libs.RemoteService;
 import WEBPIECESxPACKAGE.base.libs.SomeLibrary;

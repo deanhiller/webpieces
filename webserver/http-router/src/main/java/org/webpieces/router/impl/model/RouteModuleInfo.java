@@ -1,7 +1,7 @@
 package org.webpieces.router.impl.model;
 
-import org.webpieces.router.api.routing.BasicRoutes;
-import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.api.routes.BasicRoutes;
+import org.webpieces.router.api.routes.Routes;
 
 public class RouteModuleInfo {
 

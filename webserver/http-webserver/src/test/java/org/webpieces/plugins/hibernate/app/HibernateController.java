@@ -7,9 +7,9 @@ import javax.persistence.EntityManager;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

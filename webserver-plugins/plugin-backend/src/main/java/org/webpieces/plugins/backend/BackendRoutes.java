@@ -1,6 +1,6 @@
 package org.webpieces.plugins.backend;
 
-import org.webpieces.router.api.routing.ScopedRoutes;
+import org.webpieces.router.api.routes.ScopedRoutes;
 
 public abstract class BackendRoutes extends ScopedRoutes {
 	

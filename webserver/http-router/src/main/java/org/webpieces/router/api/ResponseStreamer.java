@@ -2,10 +2,10 @@ package org.webpieces.router.api;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.router.api.dto.RedirectResponse;
-import org.webpieces.router.api.dto.RenderContentResponse;
-import org.webpieces.router.api.dto.RenderResponse;
-import org.webpieces.router.api.dto.RenderStaticResponse;
+import org.webpieces.router.impl.dto.RedirectResponse;
+import org.webpieces.router.impl.dto.RenderContentResponse;
+import org.webpieces.router.impl.dto.RenderResponse;
+import org.webpieces.router.impl.dto.RenderStaticResponse;
 
 public interface ResponseStreamer {
 

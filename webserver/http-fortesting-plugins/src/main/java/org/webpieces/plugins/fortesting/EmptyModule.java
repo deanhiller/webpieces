@@ -1,6 +1,6 @@
 package org.webpieces.plugins.fortesting;
 
-import org.webpieces.router.api.SimpleStorage;
+import org.webpieces.router.api.extensions.SimpleStorage;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

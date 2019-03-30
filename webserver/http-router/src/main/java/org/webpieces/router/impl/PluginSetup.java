@@ -5,9 +5,9 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.BodyContentBinder;
-import org.webpieces.router.api.EntityLookup;
-import org.webpieces.router.api.ObjectStringConverter;
+import org.webpieces.router.api.extensions.BodyContentBinder;
+import org.webpieces.router.api.extensions.EntityLookup;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.loader.MetaLoader;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;

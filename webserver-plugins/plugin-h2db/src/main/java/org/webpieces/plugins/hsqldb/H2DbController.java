@@ -5,8 +5,8 @@ import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
 
 @Singleton
 public class H2DbController {

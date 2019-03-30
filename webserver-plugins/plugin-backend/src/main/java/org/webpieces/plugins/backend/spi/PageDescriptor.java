@@ -1,6 +1,6 @@
 package org.webpieces.plugins.backend.spi;
 
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routes.RouteId;
 
 public class PageDescriptor {
 

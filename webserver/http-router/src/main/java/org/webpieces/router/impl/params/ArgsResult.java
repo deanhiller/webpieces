@@ -3,7 +3,7 @@ package org.webpieces.router.impl.params;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpieces.router.api.BodyContentBinder;
+import org.webpieces.router.api.extensions.BodyContentBinder;
 
 public class ArgsResult {
 

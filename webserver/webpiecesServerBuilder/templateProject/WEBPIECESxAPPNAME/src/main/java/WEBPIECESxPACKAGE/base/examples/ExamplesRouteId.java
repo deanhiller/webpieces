@@ -1,6 +1,6 @@
 package WEBPIECESxPACKAGE.base.examples;
 
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routes.RouteId;
 
 //You can have many RoutId files extending from RouteId so you can group RouteIds together like per package
 public enum ExamplesRouteId implements RouteId {

@@ -1,6 +1,6 @@
 package org.webpieces.plugins.hsqldb;
 
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routes.RouteId;
 
 public enum H2DbRouteId implements RouteId {
 

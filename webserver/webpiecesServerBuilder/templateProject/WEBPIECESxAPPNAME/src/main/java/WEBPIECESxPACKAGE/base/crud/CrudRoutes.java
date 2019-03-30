@@ -7,11 +7,11 @@ import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.LIST_USERS;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_DELETE_USER;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_USER_FORM;
 
-import org.webpieces.router.api.routing.CrudRouteIds;
-import org.webpieces.router.api.routing.Port;
-import org.webpieces.router.api.routing.ScopedRoutes;
-import org.webpieces.router.impl.model.bldr.RouteBuilder;
-import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routes.CrudRouteIds;
+import org.webpieces.router.api.routes.Port;
+import org.webpieces.router.api.routes.ScopedRoutes;
 
 public class CrudRoutes extends ScopedRoutes {
 

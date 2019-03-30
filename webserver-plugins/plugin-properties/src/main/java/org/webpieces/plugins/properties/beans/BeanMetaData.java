@@ -12,9 +12,9 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.webpieces.plugins.properties.PropertiesConfig;
-import org.webpieces.router.api.SimpleStorage;
-import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.api.extensions.SimpleStorage;
+import org.webpieces.router.api.extensions.Startable;
 import org.webpieces.router.impl.mgmt.CachedBean;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
 import org.webpieces.router.impl.params.ObjectTranslator;

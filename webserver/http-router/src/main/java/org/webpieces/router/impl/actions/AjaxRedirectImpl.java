@@ -2,8 +2,8 @@ package org.webpieces.router.impl.actions;
 
 import java.util.Map;
 
-import org.webpieces.router.api.actions.AjaxRedirect;
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.controller.actions.AjaxRedirect;
+import org.webpieces.router.api.routes.RouteId;
 
 public class AjaxRedirectImpl implements AjaxRedirect {
 	private RouteId id;

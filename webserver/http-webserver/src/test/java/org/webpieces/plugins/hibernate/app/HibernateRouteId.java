@@ -1,6 +1,6 @@
 package org.webpieces.plugins.hibernate.app;
 
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routes.RouteId;
 
 public enum HibernateRouteId implements RouteId {
 	SAVE_ENTITY, DISPLAY_ENTITY, ASYNC_SAVE_ENTITY, ASYNC_DISPLAY_ENTITY, ENTITY_LOAD, ASYNC_ENTITY_LOAD, 

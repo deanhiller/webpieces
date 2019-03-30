@@ -2,8 +2,8 @@ package org.webpieces.plugins.sslcert;
 
 import java.util.List;
 
-import org.webpieces.router.api.routing.BackendPlugin;
-import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.api.plugins.BackendPlugin;
+import org.webpieces.router.api.routes.Routes;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;

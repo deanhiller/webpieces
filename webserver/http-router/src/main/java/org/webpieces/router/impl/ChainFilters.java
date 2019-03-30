@@ -3,8 +3,8 @@ package org.webpieces.router.impl;
 import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.util.filters.Filter;
 import org.webpieces.util.filters.Service;
 

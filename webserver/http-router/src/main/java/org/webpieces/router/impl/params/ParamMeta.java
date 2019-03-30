@@ -5,9 +5,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 
+import org.webpieces.router.api.controller.annotations.Nullable;
+import org.webpieces.router.api.controller.annotations.Param;
 import org.webpieces.router.api.exceptions.DataMismatchException;
-import org.webpieces.router.api.routing.Nullable;
-import org.webpieces.router.api.routing.Param;
 
 public class ParamMeta implements Meta {
 

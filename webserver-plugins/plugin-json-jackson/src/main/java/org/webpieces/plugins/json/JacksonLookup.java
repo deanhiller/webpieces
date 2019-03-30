@@ -9,9 +9,9 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.router.api.BodyContentBinder;
-import org.webpieces.router.api.actions.RenderContent;
+import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.ClientDataError;
+import org.webpieces.router.api.extensions.BodyContentBinder;
 
 public class JacksonLookup implements BodyContentBinder {
 

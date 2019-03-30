@@ -10,15 +10,15 @@ import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.routing.Port;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.RoutingHolder;
-import org.webpieces.router.impl.model.bldr.data.DomainRouter;
-import org.webpieces.router.impl.model.bldr.data.Router;
-import org.webpieces.router.impl.model.bldr.data.ScopedRouter;
+import org.webpieces.router.impl.routing.DomainRouter;
+import org.webpieces.router.impl.routing.Router;
+import org.webpieces.router.impl.routing.ScopedRouter;
 
 @Singleton
 public class NotFoundController {

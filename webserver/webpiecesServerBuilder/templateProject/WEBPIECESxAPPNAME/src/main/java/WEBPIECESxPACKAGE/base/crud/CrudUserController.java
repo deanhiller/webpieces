@@ -13,11 +13,11 @@ import javax.persistence.Query;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.plugins.hibernate.UseQuery;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.FlashAndRedirect;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.FlashAndRedirect;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

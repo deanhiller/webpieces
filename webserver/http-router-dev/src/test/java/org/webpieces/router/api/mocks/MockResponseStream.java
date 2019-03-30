@@ -10,10 +10,10 @@ import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.dto.RedirectResponse;
-import org.webpieces.router.api.dto.RenderContentResponse;
-import org.webpieces.router.api.dto.RenderResponse;
-import org.webpieces.router.api.dto.RenderStaticResponse;
+import org.webpieces.router.impl.dto.RedirectResponse;
+import org.webpieces.router.impl.dto.RenderContentResponse;
+import org.webpieces.router.impl.dto.RenderResponse;
+import org.webpieces.router.impl.dto.RenderStaticResponse;
 
 public class MockResponseStream extends MockSuperclass implements ResponseStreamer{
 

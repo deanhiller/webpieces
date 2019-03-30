@@ -3,8 +3,8 @@ package org.webpieces.devrouter.impl;
 import javax.inject.Inject;
 
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.loader.ServiceProxy;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;

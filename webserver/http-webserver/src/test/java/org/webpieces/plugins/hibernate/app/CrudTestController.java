@@ -17,10 +17,10 @@ import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
 import org.webpieces.plugins.hibernate.app.dbo.Role;
 import org.webpieces.plugins.hibernate.app.dbo.UserRoleDbo;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.FlashAndRedirect;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.FlashAndRedirect;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

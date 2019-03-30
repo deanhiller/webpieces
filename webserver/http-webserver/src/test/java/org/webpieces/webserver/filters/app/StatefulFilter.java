@@ -4,9 +4,9 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.dto.MethodMeta;
-import org.webpieces.router.api.routing.RouteFilter;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.routes.RouteFilter;
+import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.util.filters.Service;
 
 public class StatefulFilter extends RouteFilter<Integer> {

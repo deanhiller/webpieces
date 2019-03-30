@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import org.webpieces.router.api.SimpleStorage;
+import org.webpieces.router.api.extensions.SimpleStorage;
 
 public class SimpleStorageImpl implements SimpleStorage {
 	

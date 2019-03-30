@@ -11,7 +11,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.hibernate.cfg.AvailableSettings;
-import org.webpieces.router.api.EntityLookup;
+import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

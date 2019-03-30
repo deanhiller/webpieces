@@ -29,7 +29,7 @@ import org.webpieces.plugins.sslcert.acme.AcmeClientProxy;
 import org.webpieces.plugins.sslcert.acme.AcmeInfo;
 import org.webpieces.plugins.sslcert.acme.ProxyAuthorization;
 import org.webpieces.plugins.sslcert.acme.ProxyOrder;
-import org.webpieces.router.api.SimpleStorage;
+import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;

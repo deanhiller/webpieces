@@ -2,9 +2,9 @@ package org.webpieces.webserver.domains.app;
 
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Render;
 
 @Singleton
 public class DomainsController {

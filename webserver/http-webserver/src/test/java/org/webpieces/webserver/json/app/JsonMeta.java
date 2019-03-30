@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.webpieces.plugins.json.JacksonConfig;
 import org.webpieces.plugins.json.JacksonPlugin;
-import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.Routes;
-import org.webpieces.router.api.routing.WebAppMeta;
+import org.webpieces.router.api.plugins.Plugin;
+import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.webserver.EmptyModule;
 
 import com.google.common.collect.Lists;

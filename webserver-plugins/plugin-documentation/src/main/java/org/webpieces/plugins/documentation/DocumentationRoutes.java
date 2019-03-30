@@ -1,11 +1,11 @@
 package org.webpieces.plugins.documentation;
 
-import static org.webpieces.router.api.routing.Port.BOTH;
+import static org.webpieces.router.api.routes.Port.BOTH;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.ScopedRoutes;
-import org.webpieces.router.impl.model.bldr.RouteBuilder;
-import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routes.ScopedRoutes;
 
 public class DocumentationRoutes extends ScopedRoutes {
 	

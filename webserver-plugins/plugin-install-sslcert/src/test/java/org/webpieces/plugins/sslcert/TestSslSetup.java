@@ -19,7 +19,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.backend.login.BackendLogin;
 import org.webpieces.plugins.fortesting.TestConfig;
 import org.webpieces.plugins.fortesting.WebserverForTest;
-import org.webpieces.router.api.SimpleStorage;
+import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;

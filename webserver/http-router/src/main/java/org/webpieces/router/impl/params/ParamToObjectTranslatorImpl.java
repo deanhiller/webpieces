@@ -19,12 +19,12 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
-import org.webpieces.router.api.BodyContentBinder;
-import org.webpieces.router.api.EntityLookup;
-import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.DataMismatchException;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.api.extensions.BodyContentBinder;
+import org.webpieces.router.api.extensions.EntityLookup;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 
 @Singleton
 public class ParamToObjectTranslatorImpl {

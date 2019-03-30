@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.ObjectStringConverter;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 
 /**
  * This is THE class to translate objects to strings and strings to objects.  Overriding this, you can also add types 

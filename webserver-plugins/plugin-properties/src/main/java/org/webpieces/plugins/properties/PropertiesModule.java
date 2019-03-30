@@ -3,8 +3,8 @@ package org.webpieces.plugins.properties;
 import org.webpieces.plugins.backend.spi.BackendGuiDescriptor;
 import org.webpieces.plugins.properties.beans.BeanMetaData;
 import org.webpieces.plugins.properties.beans.GuiceTypeListener;
-import org.webpieces.router.api.SimpleStorage;
-import org.webpieces.router.api.Startable;
+import org.webpieces.router.api.extensions.SimpleStorage;
+import org.webpieces.router.api.extensions.Startable;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
 import org.webpieces.router.impl.params.ObjectTranslator;
 

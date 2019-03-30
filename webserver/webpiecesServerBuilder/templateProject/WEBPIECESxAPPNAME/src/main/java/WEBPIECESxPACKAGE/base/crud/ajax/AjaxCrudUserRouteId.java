@@ -1,6 +1,6 @@
 package WEBPIECESxPACKAGE.base.crud.ajax;
 
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routes.RouteId;
 
 public enum AjaxCrudUserRouteId  implements RouteId {
 	AJAX_LIST_USERS, 

@@ -1,11 +1,11 @@
 package WEBPIECESxPACKAGE.base.crud.login;
 
-import static org.webpieces.router.api.routing.Port.HTTPS;
+import static org.webpieces.router.api.routes.Port.HTTPS;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.RouteId;
-import org.webpieces.router.impl.model.bldr.RouteBuilder;
-import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
+import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.webserver.api.login.AbstractLoginRoutes;
 
 /** 

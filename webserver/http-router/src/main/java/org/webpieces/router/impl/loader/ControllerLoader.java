@@ -5,10 +5,10 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.util.filters.Service;
 

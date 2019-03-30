@@ -2,8 +2,8 @@ package org.webpieces.webserver.impl;
 
 import javax.inject.Inject;
 
-import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.api.RouterService;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.templating.api.ConverterLookup;
 
 public class ConverterLookupProxy implements ConverterLookup {

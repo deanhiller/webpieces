@@ -6,10 +6,10 @@ import java.util.Set;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.routes.RouteId;
 
 public abstract class AbstractLoginController {
 	

@@ -1,7 +1,7 @@
 package org.webpieces.router.impl;
 
-import org.webpieces.router.api.routing.ReverseRouteLookup;
-import org.webpieces.router.impl.model.bldr.data.DomainRouter;
+import org.webpieces.router.api.plugins.ReverseRouteLookup;
+import org.webpieces.router.impl.routing.DomainRouter;
 
 public class RoutingHolder {
 

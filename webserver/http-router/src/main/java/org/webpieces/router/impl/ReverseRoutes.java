@@ -20,9 +20,9 @@ import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.PortConfigCallback;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
-import org.webpieces.router.api.routing.Port;
-import org.webpieces.router.api.routing.ReverseRouteLookup;
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.plugins.ReverseRouteLookup;
+import org.webpieces.router.api.routes.Port;
+import org.webpieces.router.api.routes.RouteId;
 
 public class ReverseRoutes implements ReverseRouteLookup {
 

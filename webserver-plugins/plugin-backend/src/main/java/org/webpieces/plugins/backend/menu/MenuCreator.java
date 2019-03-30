@@ -13,7 +13,7 @@ import javax.inject.Singleton;
 import org.webpieces.plugins.backend.spi.BackendGuiDescriptor;
 import org.webpieces.plugins.backend.spi.MenuCategory;
 import org.webpieces.plugins.backend.spi.PageDescriptor;
-import org.webpieces.router.api.routing.ReverseRouteLookup;
+import org.webpieces.router.api.plugins.ReverseRouteLookup;
 import org.webpieces.router.impl.RoutingHolder;
 
 @Singleton

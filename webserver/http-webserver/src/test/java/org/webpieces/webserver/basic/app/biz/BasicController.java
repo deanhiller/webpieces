@@ -3,10 +3,10 @@ package org.webpieces.webserver.basic.app.biz;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.webserver.basic.app.BasicRouteId;
 

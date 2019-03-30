@@ -16,11 +16,11 @@ import org.webpieces.plugins.backend.menu.MenuCreator;
 import org.webpieces.plugins.properties.beans.BeanMeta;
 import org.webpieces.plugins.properties.beans.BeanMetaData;
 import org.webpieces.plugins.properties.beans.PropertyInfo;
-import org.webpieces.router.api.ObjectStringConverter;
-import org.webpieces.router.api.SimpleStorage;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
+import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.impl.params.ObjectTranslator;
 
 import com.google.common.collect.Lists;

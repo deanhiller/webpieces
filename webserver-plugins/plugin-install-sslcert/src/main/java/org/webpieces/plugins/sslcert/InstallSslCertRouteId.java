@@ -1,6 +1,6 @@
 package org.webpieces.plugins.sslcert;
 
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routes.RouteId;
 
 public enum InstallSslCertRouteId implements RouteId {
 

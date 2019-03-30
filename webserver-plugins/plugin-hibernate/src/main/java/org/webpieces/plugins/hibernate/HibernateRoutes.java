@@ -1,9 +1,9 @@
 package org.webpieces.plugins.hibernate;
 
-import org.webpieces.router.api.routing.PortType;
-import org.webpieces.router.api.routing.Routes;
-import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
-import org.webpieces.router.impl.model.bldr.RouteBuilder;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routes.FilterPortType;
+import org.webpieces.router.api.routes.Routes;
 
 public class HibernateRoutes implements Routes {
 
@@ -14,7 +14,7 @@ public class HibernateRoutes implements Routes {
 		//as if the database goes down, you will end up with error to error to webpieces fail-safe 500 page which
 		//does not look like your website
 		//Also, we don't wrap NotFound but you could do that as well
-		bldr.addFilter(".*", TransactionFilter.class, null, PortType.ALL_FILTER);
+		bldr.addFilter(".*", TransactionFilter.class, null, FilterPortType.ALL_FILTER);
 	}
 
 }

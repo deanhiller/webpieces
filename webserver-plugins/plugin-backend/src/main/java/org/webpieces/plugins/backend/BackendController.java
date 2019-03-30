@@ -5,9 +5,9 @@ import javax.inject.Singleton;
 
 import org.webpieces.plugins.backend.login.BackendLoginRouteId;
 import org.webpieces.plugins.backend.menu.MenuCreator;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
 
 @Singleton
 public class BackendController {

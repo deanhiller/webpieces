@@ -4,11 +4,11 @@ import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Session;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.FlashAndRedirect;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.FlashAndRedirect;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.webserver.basic.app.biz.UserDto;
 
 @Singleton

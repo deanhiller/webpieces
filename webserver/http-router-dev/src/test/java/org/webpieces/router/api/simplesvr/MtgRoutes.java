@@ -2,15 +2,15 @@ package org.webpieces.router.api.simplesvr;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
-import static org.webpieces.router.api.routing.Port.BOTH;
+import static org.webpieces.router.api.routes.Port.BOTH;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.ASYNC_ROUTE;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.GET_SHOW_MTG;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.POST_MEETING;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
-import org.webpieces.router.api.routing.Routes;
-import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
-import org.webpieces.router.impl.model.bldr.RouteBuilder;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routes.Routes;
 
 public class MtgRoutes implements Routes {
 	

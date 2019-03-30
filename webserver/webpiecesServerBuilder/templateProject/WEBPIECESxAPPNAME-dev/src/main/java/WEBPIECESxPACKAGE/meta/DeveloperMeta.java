@@ -7,9 +7,9 @@ import org.webpieces.plugins.documentation.DocumentationConfig;
 import org.webpieces.plugins.documentation.WebpiecesDocumentationPlugin;
 import org.webpieces.plugins.hsqldb.H2DbConfig;
 import org.webpieces.plugins.hsqldb.H2DbPlugin;
-import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.Routes;
-import org.webpieces.router.api.routing.WebAppMeta;
+import org.webpieces.router.api.plugins.Plugin;
+import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.api.routes.WebAppMeta;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;

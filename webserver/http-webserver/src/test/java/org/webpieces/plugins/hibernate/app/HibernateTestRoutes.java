@@ -8,12 +8,12 @@ import static org.webpieces.plugins.hibernate.app.HibernateRouteId.DELETE_USER;
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.EDIT_USER_PAGE;
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.LIST_USERS;
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.SAVE_USER;
-import static org.webpieces.router.api.routing.Port.BOTH;
+import static org.webpieces.router.api.routes.Port.BOTH;
 
-import org.webpieces.router.api.routing.CrudRouteIds;
-import org.webpieces.router.api.routing.Routes;
-import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
-import org.webpieces.router.impl.model.bldr.RouteBuilder;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routes.CrudRouteIds;
+import org.webpieces.router.api.routes.Routes;
 
 public class HibernateTestRoutes implements Routes {
 

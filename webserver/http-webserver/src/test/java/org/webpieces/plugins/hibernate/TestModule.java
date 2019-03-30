@@ -4,7 +4,7 @@ import org.webpieces.plugins.hibernate.app.ServiceToFail;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
 import org.webpieces.plugins.hibernate.app.dbo.Role;
-import org.webpieces.router.api.ObjectStringConverter;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

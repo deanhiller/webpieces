@@ -14,16 +14,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.dto.MethodMeta;
-import org.webpieces.router.api.dto.RouteType;
-import org.webpieces.router.api.routing.Param;
-import org.webpieces.router.api.routing.RouteFilter;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.annotations.Param;
+import org.webpieces.router.api.extensions.BodyContentBinder;
+import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.ChainFilters;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.dto.MethodMeta;
+import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 

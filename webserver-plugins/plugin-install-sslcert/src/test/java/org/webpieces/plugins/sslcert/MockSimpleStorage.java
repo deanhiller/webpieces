@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.router.api.SimpleStorage;
+import org.webpieces.router.api.extensions.SimpleStorage;
 
 public class MockSimpleStorage implements SimpleStorage {
 

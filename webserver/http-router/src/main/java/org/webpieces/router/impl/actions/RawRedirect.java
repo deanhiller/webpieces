@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.actions;
 
-import org.webpieces.router.api.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Redirect;
 
 public class RawRedirect implements Redirect {
 

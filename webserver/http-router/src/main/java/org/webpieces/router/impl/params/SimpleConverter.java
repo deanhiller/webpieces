@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.params;
 
-import org.webpieces.router.api.ObjectStringConverter;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 
 public class SimpleConverter implements ObjectStringConverter<Object> {
 

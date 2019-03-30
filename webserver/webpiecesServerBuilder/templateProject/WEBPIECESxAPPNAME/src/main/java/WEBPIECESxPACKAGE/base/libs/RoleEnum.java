@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-import org.webpieces.router.api.ObjectStringConverter;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 
 public enum RoleEnum {
 	BADASS('b', "Badass"), 

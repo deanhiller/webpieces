@@ -4,10 +4,10 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.routing.Param;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.annotations.Param;
 import org.webpieces.router.api.simplesvr.MtgRouteId;
 
 @Singleton

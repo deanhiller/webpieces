@@ -4,8 +4,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.plugins.backend.menu.MenuCreator;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Render;
 
 @Singleton
 public class DocumentationController {

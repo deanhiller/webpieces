@@ -2,10 +2,10 @@ package org.webpieces.router.impl.hooks;
 
 import java.util.List;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.loader.ResolvedMethod;
 import org.webpieces.util.filters.Service;
 

@@ -14,11 +14,11 @@ import java.util.regex.Matcher;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.api.extensions.BodyContentBinder;
+import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.MatchResult2;

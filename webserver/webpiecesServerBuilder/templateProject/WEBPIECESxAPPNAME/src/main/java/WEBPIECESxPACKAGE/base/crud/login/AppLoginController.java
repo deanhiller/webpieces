@@ -4,10 +4,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Render;
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Render;
+import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.webserver.api.login.AbstractLoginController;
 
 @Singleton

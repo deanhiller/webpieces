@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.webpieces.ctx.api.Constants;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.controller.actions.Render;
 
 public class RenderImpl implements Render {
 
