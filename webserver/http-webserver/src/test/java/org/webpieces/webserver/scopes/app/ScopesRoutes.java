@@ -12,20 +12,20 @@ public class ScopesRoutes implements Routes {
 
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder router = domainRouteBldr.getAllDomainsRouteBuilder();
-		router.addRoute(BOTH, GET , "/home",               "ScopesController.home", ScopesRouteId.HOME);
+		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
+		bldr.addRoute(BOTH, GET , "/home",               "ScopesController.home", ScopesRouteId.HOME);
 
-		router.addRoute(BOTH, GET , "/displaysession",     "ScopesController.displaySession", ScopesRouteId.DISPLAY_SESSION);
+		bldr.addRoute(BOTH, GET , "/displaysession",     "ScopesController.displaySession", ScopesRouteId.DISPLAY_SESSION);
 		
-		router.addRoute(BOTH, GET , "/sessionTooLarge",    "ScopesController.sessionTooLarge", ScopesRouteId.SESSION_TOO_LARGE);
-		router.addRoute(BOTH, GET , "/receiveTooLarge",    "ScopesController.receiveLongSession", ScopesRouteId.RECEIVE_TOO_LARGE);
+		bldr.addRoute(BOTH, GET , "/sessionTooLarge",    "ScopesController.sessionTooLarge", ScopesRouteId.SESSION_TOO_LARGE);
+		bldr.addRoute(BOTH, GET , "/receiveTooLarge",    "ScopesController.receiveLongSession", ScopesRouteId.RECEIVE_TOO_LARGE);
 		
-		router.addRoute(BOTH, GET , "/flashmessage",      "ScopesController.flashMessage", ScopesRouteId.FLASH_MESSAGE);
-		router.addStaticDir(BOTH, "/public/", "src/test/resources/staticRoutes/", false);
-		router.addRoute(BOTH, GET ,   "/user/new",         "ScopesController.userAddEdit", ScopesRouteId.ADD_USER);
-		router.addRoute(BOTH, GET ,   "/user/edit/{id}",   "ScopesController.userAddEdit", ScopesRouteId.EDIT_USER);
-		router.addRoute(BOTH, POST,   "/user/post",        "ScopesController.postSaveUser", ScopesRouteId.POST_USER, false);
-		router.addRoute(BOTH, GET ,   "/user/list",        "ScopesController.userList", ScopesRouteId.LIST_USER);
+		bldr.addRoute(BOTH, GET , "/flashmessage",      "ScopesController.flashMessage", ScopesRouteId.FLASH_MESSAGE);
+		bldr.addStaticDir(BOTH, "/public/", "src/test/resources/staticRoutes/", false);
+		bldr.addRoute(BOTH, GET ,   "/user/new",         "ScopesController.userAddEdit", ScopesRouteId.ADD_USER);
+		bldr.addRoute(BOTH, GET ,   "/user/edit/{id}",   "ScopesController.userAddEdit", ScopesRouteId.EDIT_USER);
+		bldr.addRoute(BOTH, POST,   "/user/post",        "ScopesController.postSaveUser", ScopesRouteId.POST_USER, false);
+		bldr.addRoute(BOTH, GET ,   "/user/list",        "ScopesController.userList", ScopesRouteId.LIST_USER);
 
 		//Tab state starts when TabState.start() is called in the code
 		//Tab state ends when TabState.end() is called in the code
@@ -40,10 +40,10 @@ public class ScopesRoutes implements Routes {
 //		//This one should result in using the hidden field from #{form} tag
 //		router.addRoute(BOTH, POST, "/postpage3",        "ScopesController.postPage3Form", ScopesRouteId.POST_PAGE3_FORM);
 		
-		router.addStaticDir(BOTH, "/public/", "src/test/resources/staticRoutes/", false);
+		bldr.addStaticDir(BOTH, "/public/", "src/test/resources/staticRoutes/", false);
 		
-		router.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
-		router.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
+		bldr.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		bldr.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

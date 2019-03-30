@@ -21,7 +21,7 @@ public class AjaxCrudRoutes extends ScopedRoutes {
 	}
 	
 	@Override
-	protected void configure(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter) {
+	protected void configure(RouteBuilder baseBldr, ScopedRouteBuilder scopedBldr) {
 		//basic crud example(which just calls the same addRoute methods for you for Create/Read/Update/Delete and 
 		//the GET render page views as well)
 		//it adds all these routes
@@ -35,7 +35,7 @@ public class AjaxCrudRoutes extends ScopedRoutes {
 				AJAX_LIST_USERS, AJAX_ADD_USER_FORM, AJAX_EDIT_USER_FORM,
 				AJAX_POST_USER_FORM, AJAX_CONFIRM_DELETE_USER, AJAX_POST_DELETE_USER);
 		
-		scopedRouter.addCrud(Port.HTTPS, "user", "AjaxCrudUserController", routeIds);
+		scopedBldr.addCrud(Port.HTTPS, "user", "AjaxCrudUserController", routeIds);
 	}
 
 }

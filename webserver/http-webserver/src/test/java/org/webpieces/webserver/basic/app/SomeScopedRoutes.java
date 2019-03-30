@@ -15,11 +15,11 @@ public class SomeScopedRoutes extends ScopedRoutes {
 	}
 
 	@Override
-	protected void configure(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter) {
+	protected void configure(RouteBuilder baseBldr, ScopedRouteBuilder scopedBldr) {
 		//special corner case outside regex that we allow so /scope will match
-		scopedRouter.addRoute(BOTH, GET , "",         "biz/BasicController.myMethod", BasicRouteId.SCOPED_ROOT);
+		scopedBldr.addRoute(BOTH, GET , "",         "biz/BasicController.myMethod", BasicRouteId.SCOPED_ROOT);
 		//special case matching /scope/
-		scopedRouter.addRoute(BOTH, GET , "/",        "biz/BasicController.myMethod", BasicRouteId.SCOPED_ROOT2);
+		scopedBldr.addRoute(BOTH, GET , "/",        "biz/BasicController.myMethod", BasicRouteId.SCOPED_ROOT2);
 	}
 
 }

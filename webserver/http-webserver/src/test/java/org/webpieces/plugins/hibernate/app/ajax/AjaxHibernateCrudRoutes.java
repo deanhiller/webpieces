@@ -21,12 +21,12 @@ public class AjaxHibernateCrudRoutes extends ScopedRoutes {
 	}
 
 	@Override
-	protected void configure(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter) {
+	protected void configure(RouteBuilder baseBldr, ScopedRouteBuilder scopedBldr) {
 		CrudRouteIds routeIds = new CrudRouteIds(
 				AJAX_LIST_USERS, AJAX_ADD_USER_FORM, AJAX_EDIT_USER_FORM,
 				AJAX_POST_USER_FORM, AJAX_CONFIRM_DELETE_USER, AJAX_POST_DELETE_USER);
 		
-		scopedRouter.addCrud(Port.BOTH, "user", "AjaxCrudTestController", routeIds);
+		scopedBldr.addCrud(Port.BOTH, "user", "AjaxCrudTestController", routeIds);
 	}
 
 }

@@ -21,6 +21,6 @@ public abstract class ScopedRoutes implements Routes {
 	 */
 	protected abstract String getScope();
 
-	protected abstract void configure(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter);
+	protected abstract void configure(RouteBuilder baseBldr, ScopedRouteBuilder scopedBldr);
 
 }

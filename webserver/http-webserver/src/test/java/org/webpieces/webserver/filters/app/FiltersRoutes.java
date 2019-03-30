@@ -12,18 +12,18 @@ public class FiltersRoutes implements Routes {
 
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder router = domainRouteBldr.getAllDomainsRouteBuilder();
+		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		
-		router.addRoute(BOTH, GET , "/test/something",      "FiltersController.home", FiltersRouteId.HOME);
+		bldr.addRoute(BOTH, GET , "/test/something",      "FiltersController.home", FiltersRouteId.HOME);
 
 		//Unlike routes which apply regex to request urls, filters regexs are applied to route regexs so if a filter
 		//matches a route, it will be added to all requests for that route.  This is done so we don't have to
 		//figure out which filters to apply on each request and on startup can wire up all filters once
-		router.addFilter("/test/.*", StatefulFilter.class, 1, PortType.ALL_FILTER);
-		router.addFilter("/test/.*", StatefulFilter.class, 2, PortType.ALL_FILTER);
+		bldr.addFilter("/test/.*", StatefulFilter.class, 1, PortType.ALL_FILTER);
+		bldr.addFilter("/test/.*", StatefulFilter.class, 2, PortType.ALL_FILTER);
 		
-		router.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
-		router.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
+		bldr.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		bldr.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

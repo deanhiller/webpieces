@@ -10,7 +10,7 @@ import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
 public class PropertiesRoutes extends BackendRoutes {
 	
 	@Override
-	public void configure(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter1) {
+	public void configure(RouteBuilder baseBldr, ScopedRouteBuilder scopedRouter1) {
 		ScopedRouteBuilder scopedRouter = scopedRouter1.getScopedRouteBuilder("/secure");
 		scopedRouter.addRoute(HTTPS, HttpMethod.GET,  "/properties", "PropertiesController.main", PropertiesRouteId.MAIN_PROPERTIES);
 		scopedRouter.addRoute(HTTPS, HttpMethod.GET, "/bean/{category}/{name}", "PropertiesController.bean", PropertiesRouteId.BEAN_ROUTE);

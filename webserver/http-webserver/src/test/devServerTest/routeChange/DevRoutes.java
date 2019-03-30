@@ -12,13 +12,13 @@ public class DevRoutes implements Routes {
 
 	@Override
 	public void configure(DomainRouteBuilder domainBldr) {
-		RouteBuilder router = domainBldr.getAllDomainsRouteBuilder();
-		router.addRoute(BOTH, GET , "/home",               "DevController.home", DevRouteId.HOME);
+		RouteBuilder bldr = domainBldr.getAllDomainsRouteBuilder();
+		bldr.addRoute(BOTH, GET , "/home",               "DevController.home", DevRouteId.HOME);
 		
-		router.addRoute(BOTH, GET , "/newroute",           "DevController.existingRoute", DevRouteId.EXISTING);
+		bldr.addRoute(BOTH, GET , "/newroute",           "DevController.existingRoute", DevRouteId.EXISTING);
 
-		router.setPageNotFoundRoute("DevController.notFound");
-		router.setInternalErrorRoute("DevController.internalError");
+		bldr.setPageNotFoundRoute("DevController.notFound");
+		bldr.setInternalErrorRoute("DevController.internalError");
 	}
 
 }

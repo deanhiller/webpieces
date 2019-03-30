@@ -14,8 +14,8 @@ public class InstallSslCertRoutes extends BackendRoutes {
 	}
 	
 	@Override
-	protected void configure(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter) {
-		ScopedRouteBuilder subRouter = scopedRouter.getScopedRouteBuilder("/secure");
+	protected void configure(RouteBuilder baseBldr, ScopedRouteBuilder scopedBldr) {
+		ScopedRouteBuilder subRouter = scopedBldr.getScopedRouteBuilder("/secure");
 		subRouter.addRoute(HTTPS, HttpMethod.GET,  "/sslsetup", "InstallSslCertController.sslSetup", InstallSslCertRouteId.INSTALL_SSL_SETUP);
 		subRouter.addRoute(HTTPS, HttpMethod.POST, "/postEmail", "InstallSslCertController.postStartSslInstall", InstallSslCertRouteId.POST_START_SSL_INSTALL);
 		subRouter.addRoute(HTTPS, HttpMethod.GET,  "/step2",  "InstallSslCertController.step2", InstallSslCertRouteId.STEP2);
@@ -24,7 +24,7 @@ public class InstallSslCertRoutes extends BackendRoutes {
 		subRouter.addRoute(HTTPS, HttpMethod.GET,  "/maintainssl", "InstallSslCertController.maintainSsl", InstallSslCertRouteId.MAINTAIN_SSL);
 
 		//route taken from https://shredzone.org/maven/acme4j/challenge/http-01.html AND we made it https and http  
-		baseRouter.addRoute(BOTH, HttpMethod.GET, "/.well-known/acme-challenge/{token}", "InstallSslCertController.renderToken", InstallSslCertRouteId.TOKEN_VERIFY_ROUTE);
+		baseBldr.addRoute(BOTH, HttpMethod.GET, "/.well-known/acme-challenge/{token}", "InstallSslCertController.renderToken", InstallSslCertRouteId.TOKEN_VERIFY_ROUTE);
 	}
 
 }

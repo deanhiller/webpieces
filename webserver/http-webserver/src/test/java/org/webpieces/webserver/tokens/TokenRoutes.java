@@ -11,16 +11,16 @@ public class TokenRoutes implements Routes {
 
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder router = domainRouteBldr.getAllDomainsRouteBuilder();
-		router.addRoute(BOTH, GET , "/requiredNotExist",  "TokenController.requiredNotExist", TokenRouteId.REQUIRED_TEST);
-		router.addRoute(BOTH, GET , "/optionalNotExist",  "TokenController.optionalNotExist", TokenRouteId.OPTIONAL_TEST);
-		router.addRoute(BOTH, GET , "/optionalNotExist2", "TokenController.optionalNotExist2", TokenRouteId.OPTIONAL_TEST2);
-		router.addRoute(BOTH, GET , "/optionalAndNull",   "TokenController.optionalAndNull",  TokenRouteId.OPTIONAL_AND_NULL_TEST);
-		router.addRoute(BOTH, GET , "/requiredAndNull",   "TokenController.requiredAndNull",  TokenRouteId.REQUIRED_AND_NULL_TEST);
-		router.addRoute(BOTH, GET , "/escaping",          "TokenController.escapingTokens",   TokenRouteId.ESCAPING_ROUTE_ID);
+		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
+		bldr.addRoute(BOTH, GET , "/requiredNotExist",  "TokenController.requiredNotExist", TokenRouteId.REQUIRED_TEST);
+		bldr.addRoute(BOTH, GET , "/optionalNotExist",  "TokenController.optionalNotExist", TokenRouteId.OPTIONAL_TEST);
+		bldr.addRoute(BOTH, GET , "/optionalNotExist2", "TokenController.optionalNotExist2", TokenRouteId.OPTIONAL_TEST2);
+		bldr.addRoute(BOTH, GET , "/optionalAndNull",   "TokenController.optionalAndNull",  TokenRouteId.OPTIONAL_AND_NULL_TEST);
+		bldr.addRoute(BOTH, GET , "/requiredAndNull",   "TokenController.requiredAndNull",  TokenRouteId.REQUIRED_AND_NULL_TEST);
+		bldr.addRoute(BOTH, GET , "/escaping",          "TokenController.escapingTokens",   TokenRouteId.ESCAPING_ROUTE_ID);
 
-		router.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
-		router.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
+		bldr.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		bldr.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

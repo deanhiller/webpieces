@@ -19,11 +19,11 @@ public class JacksonRoutes implements Routes {
 	
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder router = domainRouteBldr.getAllDomainsRouteBuilder();
+		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		Pattern pattern = Pattern.compile(filterPattern);
 		
-		router.addFilter(filterPattern, filter, new JsonConfig(pattern, false), PortType.ALL_FILTER);		
-		router.addNotFoundFilter(filter, new JsonConfig(pattern, true), PortType.ALL_FILTER);
+		bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, false), PortType.ALL_FILTER);		
+		bldr.addNotFoundFilter(filter, new JsonConfig(pattern, true), PortType.ALL_FILTER);
 	}
 
 }
