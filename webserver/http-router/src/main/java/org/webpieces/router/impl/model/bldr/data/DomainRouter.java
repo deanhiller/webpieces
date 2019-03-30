@@ -24,11 +24,12 @@ public class DomainRouter {
 	}
 
 	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb) {
+		String relativePath = ctx.getRequest().relativePath;
 		Router specificDomainRouter = getDomainToRouter().get(ctx.getRequest().domain);
 		if(specificDomainRouter != null)
-			return specificDomainRouter.invokeRoute(ctx, responseCb, ctx.getRequest().relativePath);
+			return specificDomainRouter.invokeRoute(ctx, responseCb, relativePath);
 		
-		return allOtherDomainsRouter.invokeRoute(ctx, responseCb, ctx.getRequest().relativePath);
+		return allOtherDomainsRouter.invokeRoute(ctx, responseCb, relativePath);
 	}
 
 	public Router getLeftOverDomains() {

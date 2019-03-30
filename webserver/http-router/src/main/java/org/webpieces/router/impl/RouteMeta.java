@@ -18,6 +18,7 @@ import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.MatchResult2;
@@ -173,7 +174,10 @@ public class RouteMeta {
 		return future.handle((r, t) -> {
 			if(t != null) {
 				CompletableFuture<Void> future1 = new CompletableFuture<Void>();
-				future1.completeExceptionally(new HaveRouteException(result, t));
+				if(t instanceof NotFoundException)
+					future1.completeExceptionally(t);
+				else
+					future1.completeExceptionally(new HaveRouteException(result, t));
 				return future1;
 			}
 			
