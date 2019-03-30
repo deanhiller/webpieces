@@ -25,6 +25,7 @@ import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
+import org.webpieces.router.impl.model.bldr.data.InternalErrorRouteFailedException;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
@@ -41,8 +42,8 @@ public class ErrorCommonTest {
 	public static Collection bothServers() {
 		return Arrays.asList(new Object[][] {
 	         { true, true }
-	         //,
-	         //{ false, true }
+	         ,
+	         { false, true }
 	      });
 	}
 	
@@ -68,6 +69,7 @@ public class ErrorCommonTest {
 		server.incomingCompleteRequest(req, mockResponseStream);
 			
 		Throwable e = mockResponseStream.getOnlyException();
+		Assert.assertEquals(InternalErrorRouteFailedException.class, e.getClass());
 		
 		while(e.getCause() != null) {
 			e = e.getCause();

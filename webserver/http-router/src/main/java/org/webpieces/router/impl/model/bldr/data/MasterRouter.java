@@ -7,7 +7,6 @@ import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.impl.ErrorRoutes;
 
 @Singleton
 public class MasterRouter {
@@ -19,8 +18,8 @@ public class MasterRouter {
 		
 	}
 	
-	public CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
-		return domainRouter.invokeRoute(ctx, responseCb, errorRoutes);
+	public CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb) {
+		return domainRouter.invokeRoute(ctx, responseCb);
 	}
 
 	public void printAllRoutes() {

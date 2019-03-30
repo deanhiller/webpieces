@@ -40,7 +40,8 @@ public class RouteImpl implements Route {
 		this.checkSecureToken = checkSecureToken;
 	}
 
-	public RouteImpl(HttpMethod method, UrlPath path, String controllerMethod, Port port) {
+	public RouteImpl(RouteInvoker2 routeInvoker, HttpMethod method, UrlPath path, String controllerMethod, Port port) {
+		this.routeInvoker = routeInvoker;
 		this.path = path.getFullPath();
 		this.method = method;
 		RegExResult result = RegExUtil.parsePath(path.getSubPath());
@@ -52,7 +53,8 @@ public class RouteImpl implements Route {
 		this.checkSecureToken = false;
 	}
 	
-	public RouteImpl(String controllerMethod, RouteType routeType) {
+	public RouteImpl(RouteInvoker2 routeInvoker, String controllerMethod, RouteType routeType) {
+		this.routeInvoker = routeInvoker;
 		this.routeType = routeType;
 		this.path = null;
 		this.patternToMatch = null;
@@ -137,6 +139,11 @@ public class RouteImpl implements Route {
 	@Override
 	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
 		return routeInvoker.invokeController(result, ctx, responseCb);
+	}
+
+	@Override
+	public List<String> getArgNames() {
+		return this.argNames;
 	}
 	
 }

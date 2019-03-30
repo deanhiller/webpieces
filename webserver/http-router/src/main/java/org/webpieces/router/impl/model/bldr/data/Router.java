@@ -9,7 +9,6 @@ import java.util.function.Function;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.ErrorRoutes;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.RouterInfo;
@@ -30,9 +29,8 @@ public class Router extends ScopedRouter {
 		this.internalSvrErrorRoute = internalSvrErrorRoute;
 	}
 
-	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, ErrorRoutes errorRoutes,
-			String subPath) {
-		return invokeRouteCatchNotFound(ctx, responseCb, errorRoutes, subPath).handle((r, t) -> {
+	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
+		return invokeRouteCatchNotFound(ctx, responseCb, subPath).handle((r, t) -> {
 			if(t != null) {
 				String failedRoute = "<Unknown Route>";
 				if(t instanceof HaveRouteException)
@@ -47,8 +45,7 @@ public class Router extends ScopedRouter {
 	 * NOTE: We have to catch any exception from the method processNotFound so we can't catch and call internalServerError in this
 	 * method without nesting even more!!! UGH, more nesting sucks
 	 */
-	private CompletableFuture<Void> invokeRouteCatchNotFound(RequestContext ctx, ResponseStreamer responseCb, ErrorRoutes errorRoutes,
-			String subPath) {
+	private CompletableFuture<Void> invokeRouteCatchNotFound(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
 		CompletableFuture<Void> future;
 		try{
 			future = super.invokeRoute(ctx, responseCb, subPath);
@@ -93,7 +90,7 @@ public class Router extends ScopedRouter {
 					+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
 			SupressedExceptionLog.log(exc);
 			
-			return internalSvrErrorRoute.invoke(requestCtx, responseCb, new HashMap<>());
+			return internalSvrErrorRoute.invokeError(requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...

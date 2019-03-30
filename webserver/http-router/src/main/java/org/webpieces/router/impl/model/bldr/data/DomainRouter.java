@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.impl.ErrorRoutes;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -24,12 +23,12 @@ public class DomainRouter {
 		this.domainToRouter = domainToRouter;
 	}
 
-	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
+	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb) {
 		Router specificDomainRouter = getDomainToRouter().get(ctx.getRequest().domain);
 		if(specificDomainRouter != null)
-			return specificDomainRouter.invokeRoute(ctx, responseCb, errorRoutes, ctx.getRequest().relativePath);
+			return specificDomainRouter.invokeRoute(ctx, responseCb, ctx.getRequest().relativePath);
 		
-		return allOtherDomainsRouter.invokeRoute(ctx, responseCb, errorRoutes, ctx.getRequest().relativePath);
+		return allOtherDomainsRouter.invokeRoute(ctx, responseCb, ctx.getRequest().relativePath);
 	}
 
 	public Router getLeftOverDomains() {

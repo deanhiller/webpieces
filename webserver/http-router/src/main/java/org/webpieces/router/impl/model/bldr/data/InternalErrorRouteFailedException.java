@@ -7,11 +7,6 @@ public class InternalErrorRouteFailedException extends CompletionException {
 	private static final long serialVersionUID = 1L;
 	private Object failedRoute;
 
-	public InternalErrorRouteFailedException(Throwable t, Object failedRoute) {
-		super();
-		this.failedRoute = failedRoute;
-	}
-
 	public InternalErrorRouteFailedException(String message, Throwable cause) {
 		super(message, cause);
 	}
@@ -20,7 +15,13 @@ public class InternalErrorRouteFailedException extends CompletionException {
 		super(message);
 	}
 
-	public InternalErrorRouteFailedException(Throwable cause) {
+	public InternalErrorRouteFailedException(Throwable cause, Object failedRoute) {
 		super(cause);
+		this.failedRoute = failedRoute;
 	}
+
+	public Object getFailedRoute() {
+		return failedRoute;
+	}
+
 }

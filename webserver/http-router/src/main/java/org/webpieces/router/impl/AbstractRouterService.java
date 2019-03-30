@@ -19,6 +19,7 @@ import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.ResponseFailureProcessor;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
+import org.webpieces.router.impl.model.bldr.data.InternalErrorRouteFailedException;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -70,29 +71,22 @@ public abstract class AbstractRouterService implements RouterService {
 			future = new CompletableFuture<Void>();
 			future.completeExceptionally(e);			
 		}
-		future.exceptionally(e -> processException(responseCb, requestCtx, e));
+		future.exceptionally(e -> finalFailure(responseCb, e, requestCtx));
 		return future;
 	}
 
 	public Void finalFailure(ResponseStreamer responseCb, Throwable e, RequestContext requestCtx) {
-		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
 		ResponseFailureProcessor processor = new ResponseFailureProcessor(requestCtx, responseCb);
+
+		//if it's InternalErrorRouteFailedException, we are 99% sure it's from the webapp logic not webpieces code 
+		if(e instanceof InternalErrorRouteFailedException) {
+			log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
+		} else { 
+			log.error("Bug in webpieces router logic", e);
+		}
+		
 		processor.failureRenderingInternalServerErrorPage(e);
 		return null;
-	}
-	private Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e) {
-		throw new UnsupportedOperationException("not done yet");
-
-//		Object meta = "unknown RouteMeta"; 
-//		//Damn them for wrapping in CompletionException making life really hard....(they should do it the scala way!!!!)
-//		//that decision results in the below mess instead of clean code
-//		if(e instanceof HaveRouteException) {
-//			HaveRouteException exc = (HaveRouteException) e;
-//			meta = exc.getResult().getMeta();
-//		}
-//		ErrorRoutes errorRoutes = getErrorRoutes(requestCtx);
-//		routeLoader.processException(responseCb, requestCtx, e, errorRoutes, meta);
-//		return null;
 	}
 	
 	protected abstract CompletableFuture<Void> incomingRequestImpl(RequestContext req, ResponseStreamer responseCb);

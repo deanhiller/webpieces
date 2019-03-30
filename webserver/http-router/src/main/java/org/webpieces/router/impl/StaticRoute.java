@@ -191,4 +191,9 @@ public class StaticRoute implements Route {
 		return routeInvoker.invokeStatic(result, ctx, responseCb);
 	}
 
+	@Override
+	public List<String> getArgNames() {
+		return null;
+	}
+
 }

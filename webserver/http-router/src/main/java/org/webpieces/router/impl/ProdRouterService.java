@@ -57,7 +57,7 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 		if(log.isDebugEnabled())
 			router.printAllRoutes();
 	
-		return router.invoke(ctx, responseCb, null);
+		return router.invoke(ctx, responseCb);
 
 	}
 

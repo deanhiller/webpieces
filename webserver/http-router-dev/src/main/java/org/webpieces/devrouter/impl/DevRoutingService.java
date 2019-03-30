@@ -12,7 +12,6 @@ import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
 import org.webpieces.router.impl.CookieTranslator;
-import org.webpieces.router.impl.ErrorRoutes;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.model.bldr.data.MasterRouter;
@@ -78,7 +77,7 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 		if(!reloaded)
 			reloadIfClassFilesChanged();
 		
-		return router.invoke(ctx, responseCb, null);
+		return router.invoke(ctx, responseCb);
 	}
 	
 //	private class DevErrorRoutes implements ErrorRoutes {
@@ -182,9 +181,4 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 		routerModule = routeLoader.load(classLoader, startupHook);
 	}
 
-	@Override
-	protected ErrorRoutes getErrorRoutes(RequestContext ctx) {
-		//return new DevErrorRoutes(ctx.getRequest());
-		return null;
-	}
 }

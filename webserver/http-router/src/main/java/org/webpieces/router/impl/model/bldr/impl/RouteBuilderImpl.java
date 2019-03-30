@@ -55,7 +55,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 
 	@Override
 	public void setPageNotFoundRoute(String controllerMethod) {
-		Route route = new RouteImpl(controllerMethod, RouteType.NOT_FOUND);
+		Route route = new RouteImpl(holder.getRouteInvoker2(), controllerMethod, RouteType.NOT_FOUND);
 		setNotFoundRoute(route);
 	}
 
@@ -77,7 +77,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	
 	@Override
 	public void setInternalErrorRoute(String controllerMethod) {
-		Route route = new RouteImpl(controllerMethod, RouteType.INTERNAL_SERVER_ERROR);
+		Route route = new RouteImpl(holder.getRouteInvoker2(), controllerMethod, RouteType.INTERNAL_SERVER_ERROR);
 		setInternalSvrErrorRoute(route);
 	}
 	
@@ -106,7 +106,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		holder.getFinder().loadFiltersIntoMeta(pageNotFoundRoute, true);
 		holder.getFinder().loadFiltersIntoMeta(internalSvrErrorRoute, true);
 		
-		return new Router(routerInfo, pathToRouter, routes, pageNotFoundRoute, internalSvrErrorRoute, holder.getRouteInvoker2());
+		return new Router(routerInfo, pathToRouter, routes, pageNotFoundRoute, internalSvrErrorRoute);
 	}
 
 }

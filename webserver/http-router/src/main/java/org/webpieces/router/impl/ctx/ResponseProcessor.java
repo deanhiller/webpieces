@@ -32,12 +32,11 @@ import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 
-public class ResponseProcessor {
+public class ResponseProcessor extends Processor {
 	
 	private ReverseRoutes reverseRoutes;
 	private RouteMeta matchedMeta;
 	private ObjectToParamTranslator reverseTranslator;
-	private RequestContext ctx;
 	private ResponseStreamer responseCb;
 
 	private boolean responseSent = false;
@@ -45,7 +44,7 @@ public class ResponseProcessor {
 
 	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, 
 			ObjectToParamTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb, PortConfig portConfig) {
-		this.ctx = ctx;
+		super(ctx);
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
 		this.matchedMeta = meta;
@@ -163,23 +162,6 @@ public class ResponseProcessor {
 		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRoute().getRouteType());
 		
 		return wrapFunctionInContext(() -> responseCb.sendRenderHtml(resp));
-	}
-
-	private CompletableFuture<Void> wrapFunctionInContext(Supplier<CompletableFuture<Void>> function) {
-		boolean wasSet = Current.isContextSet();
-		if(!wasSet)
-			Current.setContext(ctx); //Allow html tags to use the contexts
-		try {
-			CompletableFuture<Void> future = function.get();
-			return future;
-		} finally {
-			if(!wasSet) //then reset
-				Current.setContext(null);
-		}
-	}
-
-	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
-		return wrapFunctionInContext(() -> responseCb.failureRenderingInternalServerErrorPage(e));
 	}
 
 	public CompletableFuture<Void> renderStaticResponse(RenderStaticResponse renderStatic) {

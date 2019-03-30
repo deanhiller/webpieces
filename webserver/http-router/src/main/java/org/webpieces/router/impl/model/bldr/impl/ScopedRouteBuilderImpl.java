@@ -83,7 +83,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	@Override
 	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod) {
 		UrlPath p = new UrlPath(routerInfo, path);
-		Route route = new RouteImpl(method, p, controllerMethod, port);
+		Route route = new RouteImpl(holder.getRouteInvoker2(), method, p, controllerMethod, port);
 		RouteMeta meta = addRoute(route);
 		holder.getReverseRoutes().addContentRoute(meta);
 	}

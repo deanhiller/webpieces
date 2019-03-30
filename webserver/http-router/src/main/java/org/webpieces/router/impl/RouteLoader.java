@@ -3,7 +3,6 @@ package org.webpieces.router.impl;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -246,31 +245,6 @@ public class RouteLoader {
 		}
 	}
 	
-//	public CompletableFuture<Void> invokeRoute(MatchResult result, RequestContext routerRequest, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
-//		//This class is purely the RouteLoader so delegate and encapsulate the invocation in RouteInvoker....
-//		return invoker.invoke(result, routerRequest, responseCb, errorRoutes);
-//	}
-//
-//	public Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e, ErrorRoutes errorRoutes, Object meta) {
-//		return invoker.processException(responseCb, requestCtx, e, errorRoutes, meta);
-//	}
-	
-//	public RouteMeta fetchNotFoundRoute(String domain) {
-//		L1AllRouting routerInfo = routerBuilder.getRouterInfo();
-//		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute(domain);
-//		return notfoundRoute;
-//	}
-//
-//	public RouteMeta fetchInternalErrorRoute(String domain) {
-//		L1AllRouting routerInfo = routerBuilder.getRouterInfo();
-//		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute(domain);
-//		return internalErrorRoute;
-//	}
-//
-//	public  Service<MethodMeta, Action> createNotFoundService(RouteMeta m, RouterRequest req) {
-//		List<FilterInfo<?>> filterInfos = routerBuilder.findNotFoundFilters(req.relativePath, req.isHttps);
-//		return controllerFinder.createNotFoundService(m, filterInfos);
-//	}
 
 //	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
 //		return invoker.convertToUrl(routeId, args, isValidating);
@@ -279,20 +253,4 @@ public class RouteLoader {
 	public FileMeta relativeUrlToHash(String urlPath) {
 		return compressionCacheSetup.relativeUrlToHash(urlPath);
 	}
-
-
-//	public void printAllRoutes(Route route) {
-//		if(!log.isDebugEnabled())
-//			return;
-//		else if(route.getRouteType() != RouteType.NOT_FOUND)
-//			return;
-//
-//		L1AllRouting routingInfo = routerBuilder.getRouterInfo();
-//		
-//		//TODO: domain specific routes
-//		//Collection<L2DomainRoutes> domains = routingInfo.getSpecificDomains();
-//
-//		L3PrefixedRouting mainRoutes = routingInfo.getMainRoutes().getRoutesForDomain();
-//		mainRoutes.printRoutes(route.getExposedPorts(), "");
-//	}
 }

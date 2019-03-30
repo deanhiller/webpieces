@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 
 import org.webpieces.ctx.api.RequestContext;
@@ -17,6 +18,7 @@ import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouteModuleInfo;
@@ -158,7 +160,29 @@ public class RouteMeta {
 
 	public CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb,
 			Map<String, String> pathParams) {
+		CompletableFuture<Void> future;
 		MatchResult result = new MatchResult(this, pathParams);
+
+		try {
+			future = route.invokeImpl(result, ctx, responseCb);
+		} catch(Throwable e) {
+			future = new CompletableFuture<Void>();
+			future.completeExceptionally(e);
+		}
+		
+		return future.handle((r, t) -> {
+			if(t != null) {
+				CompletableFuture<Void> future1 = new CompletableFuture<Void>();
+				future1.completeExceptionally(new HaveRouteException(result, t));
+				return future1;
+			}
+			
+			return CompletableFuture.completedFuture(r); 
+		}).thenCompose(Function.identity());
+	}
+
+	public CompletableFuture<Void> invokeError(RequestContext ctx, ResponseStreamer responseCb) {
+		MatchResult result = new MatchResult(this);
 		return route.invokeImpl(result, ctx, responseCb);
 	}
 }
