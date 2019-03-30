@@ -105,7 +105,7 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		response.assertContains("We found a controller for this url, but it threw a not found exception.  Here is the not found page that would be displayed");		
+		response.assertContains("Your app's webpage was not found");		
 	}
 	
 	//This would be very weird but make sure it works in case they do it...

@@ -129,8 +129,8 @@ cd webpiecesexample
 ./bin/webpiecesexample &
 server_pid=$!
 
-echo "sleep 5 seconds"
-sleep 5 
+echo "sleep 7 seconds while server starts up"
+sleep 7 
 echo "Grepping log"
 
 if grep -q "o.w.w.i.WebServerImpl     server started" logs/server.log; then

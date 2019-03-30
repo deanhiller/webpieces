@@ -2,7 +2,6 @@ package org.webpieces.webserver.dev.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
-import org.webpieces.router.api.routing.Router;
 import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
 import org.webpieces.router.impl.model.bldr.RouteBuilder;

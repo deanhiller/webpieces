@@ -53,7 +53,7 @@ page at http://checkstyle.sourceforge.net/config.html -->
     </module>
 
     <module name="ParameterNumber">
-      <property name="max" value="7"/>
+      <property name="max" value="8"/>
       <property name="tokens" value="CTOR_DEF"/>
     </module>
 
