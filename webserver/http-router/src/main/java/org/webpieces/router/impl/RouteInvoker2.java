@@ -12,13 +12,13 @@ import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.PortConfig;
-import org.webpieces.router.api.PortConfigCallback;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.dto.RenderStaticResponse;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.actions.AjaxRedirectImpl;
 import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
@@ -36,10 +36,11 @@ public class RouteInvoker2 {
 	private ReverseRoutes reverseRoutes;
 
 	private final ObjectToParamTranslator reverseTranslator;
-	private final PortConfigCallback portCallback;
-	private volatile PortConfig portConfig;
-
+	protected final RouterConfig config;
 	protected final ControllerLoader controllerFinder;
+
+	
+	private volatile PortConfig portConfig;
 
 	@Inject
 	public RouteInvoker2(
@@ -48,8 +49,8 @@ public class RouteInvoker2 {
 		ControllerLoader controllerFinder
 	) {
 		this.reverseTranslator = reverseTranslator;
+		this.config = config;
 		this.controllerFinder = controllerFinder;
-		this.portCallback = config.getPortConfigCallback();
 	}
 	
 	public CompletableFuture<Void> invokeStatic(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
@@ -72,15 +73,15 @@ public class RouteInvoker2 {
 		return processor.renderStaticResponse(resp);
 	}
 	
-	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, boolean isNotFoundRoute) {
+	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
 		RouteMeta meta = result.getMeta();
 		Service<MethodMeta, Action> service = meta.getService222();
-		if(isNotFoundRoute) {
+		if(notFoundExc != null) {
 			service = createNotFoundService(meta, requestCtx.getRequest());
 		}
 		
 		if(portConfig == null)
-			portConfig = portCallback.fetchPortConfig();
+			portConfig = config.getPortConfigCallback().fetchPortConfig();
 		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb, portConfig);
 		
 		Object obj = meta.getControllerInstance();

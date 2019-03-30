@@ -11,6 +11,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.impl.model.MatchResult;
@@ -137,8 +138,8 @@ public class RouteImpl implements Route {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, boolean isNotFoundRoute) {
-		return routeInvoker.invokeController(result, ctx, responseCb, isNotFoundRoute);
+	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, NotFoundException exc) {
+		return routeInvoker.invokeController(result, ctx, responseCb, exc);
 	}
 
 	@Override

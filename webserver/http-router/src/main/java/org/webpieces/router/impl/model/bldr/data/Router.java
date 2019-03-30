@@ -101,7 +101,7 @@ public class Router extends ScopedRouter {
 	
 	private CompletableFuture<Void> notFound(NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
 		try {
-			return pageNotFoundRoute.invokeNotFoundRoute(requestCtx, responseCb);
+			return pageNotFoundRoute.invokeNotFoundRoute(requestCtx, responseCb, exc);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...

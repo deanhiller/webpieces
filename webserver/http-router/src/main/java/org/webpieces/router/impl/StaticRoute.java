@@ -13,6 +13,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.util.file.FileFactory;
@@ -187,7 +188,7 @@ public class StaticRoute implements Route {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, boolean isNotFoundRoute) {
+	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, NotFoundException exc) {
 		return routeInvoker.invokeStatic(result, ctx, responseCb);
 	}
 

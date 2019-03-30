@@ -165,7 +165,7 @@ public class RouteMeta {
 		MatchResult result = new MatchResult(this, pathParams);
 
 		try {
-			future = route.invokeImpl(result, ctx, responseCb, false);
+			future = route.invokeImpl(result, ctx, responseCb, null);
 		} catch(Throwable e) {
 			future = new CompletableFuture<Void>();
 			future.completeExceptionally(e);
@@ -187,11 +187,11 @@ public class RouteMeta {
 
 	public CompletableFuture<Void> invokeErrorRoute(RequestContext ctx, ResponseStreamer responseCb) {
 		MatchResult result = new MatchResult(this);
-		return route.invokeImpl(result, ctx, responseCb, false);
+		return route.invokeImpl(result, ctx, responseCb, null);
 	}
 
-	public CompletableFuture<Void> invokeNotFoundRoute(RequestContext requestCtx, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> invokeNotFoundRoute(RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException exc) {
 		MatchResult result = new MatchResult(this);
-		return route.invokeImpl(result, requestCtx, responseCb, true);
+		return route.invokeImpl(result, requestCtx, responseCb, exc);
 	}
 }

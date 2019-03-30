@@ -9,6 +9,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.impl.model.MatchResult;
 
@@ -36,7 +37,7 @@ public interface Route {
 	
 	String getMethod();
 
-	CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, boolean isNotFoundRoute);
+	CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, NotFoundException exc);
 
 	List<String> getArgNames();
 }
