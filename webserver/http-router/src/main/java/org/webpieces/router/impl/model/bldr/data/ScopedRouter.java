@@ -10,6 +10,7 @@ import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.logging.Logger;
@@ -57,8 +58,10 @@ public class ScopedRouter {
 	private CompletableFuture<Void> findAndInvokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
 		for(RouteMeta meta : routes) {
 			MatchResult2 result = meta.matches2(ctx.getRequest(), subPath);
-			if(result != null)
+			if(result != null) {
+				ctx.setPathParams(result.getPathParams());
 				return meta.invoke(ctx, responseCb, result.getPathParams());
+			}
 		}
 
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
