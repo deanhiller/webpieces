@@ -1,16 +1,13 @@
 package org.webpieces.router.api.exceptions;
 
-public class IllegalReturnValueException extends RuntimeException {
+import java.util.concurrent.CompletionException;
+
+public class IllegalReturnValueException extends CompletionException {
 
 	private static final long serialVersionUID = -2996758528390443016L;
 
 	public IllegalReturnValueException() {
 		super();
-	}
-
-	public IllegalReturnValueException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
 	}
 
 	public IllegalReturnValueException(String message, Throwable cause) {
