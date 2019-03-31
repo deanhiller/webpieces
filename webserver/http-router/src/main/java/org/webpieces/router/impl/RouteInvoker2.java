@@ -3,6 +3,7 @@ package org.webpieces.router.impl;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
@@ -23,6 +24,7 @@ import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
+import org.webpieces.router.impl.ctx.ResponseStaticProcessor;
 import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.loader.ControllerLoader;
@@ -53,32 +55,93 @@ public class RouteInvoker2 {
 		this.controllerFinder = controllerFinder;
 	}
 	
-	public CompletableFuture<Void> invokeStatic(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
-		RouteMeta meta = result.getMeta();
+	public CompletableFuture<Void> invokeStatic(StaticRoute route, Map<String, String> pathParams, RequestContext ctx, ResponseStreamer responseCb) {
 
-		StaticRoute route = (StaticRoute) meta.getRoute();
 		boolean isOnClassPath = route.getIsOnClassPath();
 
 		RenderStaticResponse resp = new RenderStaticResponse(route.getTargetCacheLocation(), isOnClassPath);
 		if(route.isFile()) {
 			resp.setFilePath(route.getFileSystemPath());
 		} else {
-			String relativeUrl = result.getPathParams().get("resource");
+			String relativeUrl = pathParams.get("resource");
 			VirtualFile fullPath = route.getFileSystemPath().child(relativeUrl);
 			resp.setFileAndRelativePath(fullPath, relativeUrl);
 		}
 
-		ResponseProcessor processor = new ResponseProcessor(ctx, reverseRoutes, reverseTranslator, meta, responseCb, portConfig);
+		ResponseStaticProcessor processor = new ResponseStaticProcessor(ctx, responseCb);
 
 		return processor.renderStaticResponse(resp);
 	}
-	
-	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
+
+	public CompletableFuture<Void> invokeErrorRoute(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
 		RouteMeta meta = result.getMeta();
 		Service<MethodMeta, Action> service = meta.getService222();
-		if(notFoundExc != null) {
-			service = createNotFoundService(meta, requestCtx.getRequest());
+		
+		if(portConfig == null)
+			portConfig = config.getPortConfigCallback().fetchPortConfig();
+		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb, portConfig);
+		
+		Object obj = meta.getControllerInstance();
+		if(obj == null)
+			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
+		Method method = meta.getMethod();
+
+		if(service == null)
+			throw new IllegalStateException("Bug, service should never be null at this point");
+		
+		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
+		requestCtx.setMessages(messages);
+
+		RequestLocalCtx.set(processor);
+		Current.setContext(requestCtx);
+		CompletableFuture<Action> response;
+		try {
+			response = invokeMethod(service, obj, method, meta);
+		} finally {
+			RequestLocalCtx.set(null);
+			Current.setContext(null);
 		}
+		
+		CompletableFuture<Void> future = response.thenCompose(resp -> continueProcessing(processor, resp, responseCb));
+		return future;
+	}
+	
+	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException exc) {
+		RouteMeta meta = result.getMeta();
+		Service<MethodMeta, Action> service = createNotFoundService(meta, requestCtx.getRequest());
+		
+		if(portConfig == null)
+			portConfig = config.getPortConfigCallback().fetchPortConfig();
+		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb, portConfig);
+		
+		Object obj = meta.getControllerInstance();
+		if(obj == null)
+			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
+		Method method = meta.getMethod();
+
+		if(service == null)
+			throw new IllegalStateException("Bug, service should never be null at this point");
+		
+		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
+		requestCtx.setMessages(messages);
+
+		RequestLocalCtx.set(processor);
+		Current.setContext(requestCtx);
+		CompletableFuture<Action> response;
+		try {
+			response = invokeMethod(service, obj, method, meta);
+		} finally {
+			RequestLocalCtx.set(null);
+			Current.setContext(null);
+		}
+		
+		CompletableFuture<Void> future = response.thenCompose(resp -> continueProcessing(processor, resp, responseCb));
+		return future;
+	}
+	
+	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
+		RouteMeta meta = result.getMeta();
+		Service<MethodMeta, Action> service = meta.getService222();
 		
 		if(portConfig == null)
 			portConfig = config.getPortConfigCallback().fetchPortConfig();

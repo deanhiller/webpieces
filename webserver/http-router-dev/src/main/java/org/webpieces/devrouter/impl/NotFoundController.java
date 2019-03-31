@@ -13,8 +13,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.routes.Port;
-import org.webpieces.router.impl.Route;
-import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.RoutingHolder;
 import org.webpieces.router.impl.routing.DomainRouter;
 import org.webpieces.router.impl.routing.Router;
@@ -60,27 +59,13 @@ public class NotFoundController {
 			html += build(entry.getValue());
 		}
 		
-		List<RouteMeta> routes = mainRoutes.getRoutes();
-		for(RouteMeta route: routes) {
-			Route rt = route.getRoute();
-			boolean isHttpsOnly = rt.getExposedPorts() == Port.HTTPS;
-			String http = isHttpsOnly ? "https" : "http";
-			html += "<li>"+pad(rt.getMethod(), 5)+":"+pad(http, 5)+" : "+rt.getFullPath()+"</li>\n";
+		List<AbstractRouteMeta> routes = mainRoutes.getRoutes();
+		for(AbstractRouteMeta route: routes) {
+			html += "<li>"+route.getLoggableString("&nbsp;")+"</li>\n";
 		}
 		
 		html+="</ul>\n";
 		
 		return html;
-	}
-
-	private String pad(String msg, int n) {
-		int left = n-msg.length();
-		if(left < 0)
-			left = 0;
-		
-		for(int i = 0; i < left; i++) {
-			msg += "&nbsp;";
-		}
-		return msg;
 	}
 }

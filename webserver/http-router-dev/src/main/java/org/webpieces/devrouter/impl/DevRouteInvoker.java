@@ -32,8 +32,34 @@ public class DevRouteInvoker extends RouteInvoker2 {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx,
-			ResponseStreamer responseCb, NotFoundException notFoundExc) {
+	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
+		RouteMeta meta = result.getMeta();
+		if(meta.getControllerInstance() == null) {
+			controllerFinder.loadControllerIntoMetaObject(meta, false);
+			controllerFinder.loadFiltersIntoMeta(meta, false);
+		}
+		
+		if(notFoundExc == null) {
+			throw new IllegalArgumentException("must have not found exception to be here");
+		}
+		
+		return invokeCorrectNotFoundRoute(result, requestCtx, responseCb, notFoundExc);
+	}
+	
+	@Override
+	public CompletableFuture<Void> invokeErrorRoute(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
+
+		RouteMeta meta = result.getMeta();
+		if(meta.getControllerInstance() == null) {
+			controllerFinder.loadControllerIntoMetaObject(meta, false);
+			controllerFinder.loadFiltersIntoMeta(meta, false);
+		}
+		return super.invokeErrorRoute(result, requestCtx, responseCb);
+
+	}
+	
+	@Override
+	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
 		
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
@@ -41,11 +67,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 			controllerFinder.loadFiltersIntoMeta(meta, false);
 		}
 		
-		if(notFoundExc != null) {
-			return invokeCorrectNotFoundRoute(result, requestCtx, responseCb, notFoundExc);
-		}
-		
-		return super.invokeController(result, requestCtx, responseCb, notFoundExc);
+		return super.invokeController(result, requestCtx, responseCb);
 	}
 
 	private CompletableFuture<Void> invokeCorrectNotFoundRoute(MatchResult result, RequestContext requestCtx,
@@ -54,7 +76,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		//RouteMeta origMeta, NotFoundException e, RouterRequest req) {
 		if(req.queryParams.containsKey("webpiecesShowPage")) {
 			//This is a callback so render the original webapp developer's not found page into the iframe
-			return super.invokeController(result, requestCtx, responseCb, notFoundExc);
+			return super.invokeNotFound(result, requestCtx, responseCb, notFoundExc);
 		}
 
 		//ok, in dev mode, we hijack the not found page with one with a route list AND an iframe containing the developers original
@@ -66,7 +88,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		RouteMeta origMeta = result.getMeta();
 		RouteImpl r = new RouteImpl(this, "/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
 		RouteModuleInfo info = new RouteModuleInfo("", null);
-		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), info, config.getUrlEncoding());
+		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), controllerFinder, info, config.getUrlEncoding());
 		
 		if(meta.getControllerInstance() == null) {
 			controllerFinder.loadControllerIntoMetaObject(meta, false);
@@ -82,6 +104,6 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		newRequest.putMultipart("url", req.relativePath);
 		
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest);
-		return super.invokeController(new MatchResult(meta), overridenCtx, responseCb, notFoundExc);
+		return super.invokeNotFound(new MatchResult(meta), overridenCtx, responseCb, notFoundExc);
 	}
 }

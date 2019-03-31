@@ -13,7 +13,7 @@ import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.model.MatchResult;
 
-public interface Route {
+public interface Route extends BasicRoute {
 
 	String getFullPath();
 
@@ -37,7 +37,12 @@ public interface Route {
 	
 	String getMethod();
 
-	CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, NotFoundException exc);
-
 	List<String> getArgNames();
+
+	CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb);
+
+	CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext ctx, ResponseStreamer responseCb,
+			NotFoundException exc);
+
+	CompletableFuture<Void> invokeErrorRoute(MatchResult result, RequestContext ctx, ResponseStreamer responseCb);
 }

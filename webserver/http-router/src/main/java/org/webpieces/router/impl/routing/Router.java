@@ -8,6 +8,7 @@ import java.util.function.Function;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.RouterInfo;
@@ -22,14 +23,14 @@ public class Router extends ScopedRouter {
 	private RouteMeta pageNotFoundRoute;
 	private RouteMeta internalSvrErrorRoute;
 
-	public Router(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<RouteMeta> routes, RouteMeta pageNotFoundRoute, RouteMeta internalSvrErrorRoute) {
+	public Router(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<AbstractRouteMeta> routes, RouteMeta pageNotFoundRoute, RouteMeta internalSvrErrorRoute) {
 		super(routerInfo, pathPrefixToNextRouter, routes);
 		this.pageNotFoundRoute = pageNotFoundRoute;
 		this.internalSvrErrorRoute = internalSvrErrorRoute;
 	}
 
 	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
-		return invokeRouteCatchNotFound(ctx, responseCb, subPath).handle((r, t) -> {
+		CompletableFuture<Void> future = invokeRouteCatchNotFound(ctx, responseCb, subPath).handle((r, t) -> {
 			if(t != null) {
 				String failedRoute = "<Unknown Route>";
 				if(t instanceof HaveRouteException)
@@ -39,6 +40,8 @@ public class Router extends ScopedRouter {
 			}
 			return CompletableFuture.completedFuture(r); 
 		}).thenCompose(Function.identity());
+		
+		return future;
 	}
 	/**
 	 * NOTE: We have to catch any exception from the method processNotFound so we can't catch and call internalServerError in this

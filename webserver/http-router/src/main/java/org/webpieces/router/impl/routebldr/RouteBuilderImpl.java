@@ -7,6 +7,7 @@ import java.util.Map;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.FilterPortType;
 import org.webpieces.router.api.routes.RouteFilter;
+import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteImpl;
@@ -63,7 +64,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		if(!"".equals(this.routerInfo.getPath()))
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerInfo+"' adding PAGE_NOT_FOUND route="+r.getFullPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, holder.getInjector(), CurrentPackage.get(), holder.getUrlEncoding());
+		RouteMeta meta = new RouteMeta(r, holder.getInjector(), holder.getFinder(), CurrentPackage.get(), holder.getUrlEncoding());
 		holder.getFinder().loadControllerIntoMetaObject(meta, true);
 		setPageNotFoundRoute(meta);
 	}
@@ -85,7 +86,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		if(!"".equals(this.routerInfo.getPath()))
 			throw new UnsupportedOperationException("setInternalSvrErrorRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerInfo+"' adding INTERNAL_SVR_ERROR route="+r.getFullPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, holder.getInjector(), CurrentPackage.get(), holder.getUrlEncoding());
+		RouteMeta meta = new RouteMeta(r, holder.getInjector(), holder.getFinder(), CurrentPackage.get(), holder.getUrlEncoding());
 		holder.getFinder().loadControllerIntoMetaObject(meta, true);
 		setInternalSvrErrorRoute(meta);
 	}
@@ -97,7 +98,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	}
 	
 	public Router buildRouter() {
-		List<RouteMeta> routes = buildRoutes(routeFilters);
+		List<AbstractRouteMeta> routes = buildRoutes(routeFilters);
 		Map<String, ScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 		
 		pageNotFoundRoute.setFilters(notFoundFilters);

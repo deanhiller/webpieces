@@ -7,10 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.api.routes.Port;
-import org.webpieces.router.impl.Route;
-import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.model.MatchResult;
+import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.logging.Logger;
@@ -21,9 +18,9 @@ public class ScopedRouter {
 
 	protected final RouterInfo routerInfo;
 	private final Map<String, ScopedRouter> pathPrefixToNextRouter;
-	private final List<RouteMeta> routes;
+	private final List<AbstractRouteMeta> routes;
 
-	public ScopedRouter(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<RouteMeta> routes) {
+	public ScopedRouter(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<AbstractRouteMeta> routes) {
 		this.routerInfo = routerInfo;
 		this.pathPrefixToNextRouter = pathPrefixToNextRouter;
 		this.routes = routes;
@@ -56,9 +53,9 @@ public class ScopedRouter {
 	}
 	
 	private CompletableFuture<Void> findAndInvokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
-		for(RouteMeta meta : routes) {
+		for(AbstractRouteMeta meta : routes) {
 			MatchResult2 result = meta.matches2(ctx.getRequest(), subPath);
-			if(result != null) {
+			if(result.isMatches()) {
 				ctx.setPathParams(result.getPathParams());
 				return meta.invoke(ctx, responseCb, result.getPathParams());
 			}
@@ -73,7 +70,7 @@ public class ScopedRouter {
 		return pathPrefixToNextRouter;
 	}
 
-	public List<RouteMeta> getRoutes() {
+	public List<AbstractRouteMeta> getRoutes() {
 		return routes;
 	}
 	
@@ -103,11 +100,9 @@ public class ScopedRouter {
 			text += childRouting.build(spacing + spacing);
 		}
 		
-		List<RouteMeta> routes = getRoutes();
-		for(RouteMeta route: routes) {
-			Route rt = route.getRoute();
-			String http = rt.getExposedPorts() == Port.HTTPS ? "https" : "http";
-			text += spacing+pad(rt.getMethod(), 5)+":"+pad(http, 5)+" : "+rt.getFullPath()+"\n";
+		List<AbstractRouteMeta> routes = getRoutes();
+		for(AbstractRouteMeta route: routes) {
+			text += spacing+route.getLoggableString(" ")+"\n";
 		}
 		
 		text+="\n";
@@ -115,14 +110,5 @@ public class ScopedRouter {
 		return text;
 	}
 
-	private String pad(String msg, int n) {
-		int left = n-msg.length();
-		if(left < 0)
-			left = 0;
-		
-		for(int i = 0; i < left; i++) {
-			msg += " ";
-		}
-		return msg;
-	}	
+
 }

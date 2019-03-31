@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
-import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
@@ -27,7 +25,6 @@ import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
-import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
@@ -164,17 +161,7 @@ public class ResponseProcessor extends Processor {
 		return wrapFunctionInContext(() -> responseCb.sendRenderHtml(resp));
 	}
 
-	public CompletableFuture<Void> renderStaticResponse(RenderStaticResponse renderStatic) {
-		boolean wasSet = Current.isContextSet();
-		if(!wasSet)
-			Current.setContext(ctx); //Allow html tags to use the contexts
-		try {
-			return responseCb.sendRenderStatic(renderStatic);
-		} finally {
-			if(!wasSet) //then reset
-				Current.setContext(null);
-		}
-	}
+
 
 	public CompletableFuture<Void> createContentResponse(RenderContent r) {
 		if(responseSent)

@@ -3,6 +3,7 @@ package org.webpieces.router.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -188,13 +189,29 @@ public class StaticRoute implements Route {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, NotFoundException exc) {
-		return routeInvoker.invokeStatic(result, ctx, responseCb);
+	public List<String> getArgNames() {
+		return null;
+	}
+
+	public CompletableFuture<Void> invokeStatic(Map<String, String> pathParams, RequestContext ctx, ResponseStreamer responseCb) {
+		return routeInvoker.invokeStatic(this, pathParams, ctx, responseCb);
+	}
+	
+	@Override
+	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
+		throw new UnsupportedOperationException("can't be here..delete this method");
 	}
 
 	@Override
-	public List<String> getArgNames() {
-		return null;
+	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext ctx, ResponseStreamer responseCb,
+			NotFoundException exc) {
+		throw new UnsupportedOperationException("can't be here..delete this method");
+	}
+
+	@Override
+	public CompletableFuture<Void> invokeErrorRoute(MatchResult result, RequestContext ctx,
+			ResponseStreamer responseCb) {
+		throw new UnsupportedOperationException("can't be here..delete this method");
 	}
 
 }

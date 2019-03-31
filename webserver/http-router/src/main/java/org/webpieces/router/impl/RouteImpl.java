@@ -138,13 +138,24 @@ public class RouteImpl implements Route {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, NotFoundException exc) {
-		return routeInvoker.invokeController(result, ctx, responseCb, exc);
+	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
+		return routeInvoker.invokeController(result, ctx, responseCb);
 	}
 
 	@Override
+	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, NotFoundException exc) {
+		return routeInvoker.invokeNotFound(result, ctx, responseCb, exc);
+	}
+	
+	@Override
 	public List<String> getArgNames() {
 		return this.argNames;
+	}
+
+	@Override
+	public CompletableFuture<Void> invokeErrorRoute(MatchResult result, RequestContext ctx,
+			ResponseStreamer responseCb) {
+		return routeInvoker.invokeErrorRoute(result, ctx, responseCb);
 	}
 	
 }

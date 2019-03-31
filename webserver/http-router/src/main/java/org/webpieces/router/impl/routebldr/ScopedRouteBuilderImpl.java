@@ -17,11 +17,13 @@ import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
 import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
+import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteImpl;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.StaticRoute;
+import org.webpieces.router.impl.StaticRouteMeta;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.model.LogicHolder;
 import org.webpieces.router.impl.model.RouterInfo;
@@ -40,7 +42,8 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	protected final RouterInfo routerInfo;
 	private final Map<String, ScopedRouteBuilderImpl> pathToBuilder = new HashMap<>();
 	
-	private final List<RouteMeta> routes = new ArrayList<>();
+	private final List<RouteMeta> dynamicRoutes = new ArrayList<>();
+	private final List<StaticRouteMeta> staticRoutes = new ArrayList<>();
 
 	private List<StaticRoute> allStaticRoutes;
 	
@@ -52,12 +55,12 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	
 	private RouteMeta addRoute(Route r) {
 		log.info("scope:'"+routerInfo+"' adding route=(port="+r.getExposedPorts()+")"+r.getMethod()+" "+r.getFullPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, holder.getInjector(), CurrentPackage.get(), holder.getUrlEncoding());
+		RouteMeta meta = new RouteMeta(r, holder.getInjector(), holder.getFinder(), CurrentPackage.get(), holder.getUrlEncoding());
 		//MUST DO HERE so stack trace has customer's line in it so he knows EXACTLY what he did wrong when reading the
 		//exception!!
 		holder.getFinder().loadControllerIntoMetaObject(meta, true);
 
-		routes.add(meta);
+		dynamicRoutes.add(meta);
 		
 		return meta;
 	}
@@ -153,8 +156,8 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		StaticRoute route = new StaticRoute(holder.getRouteInvoker2(), port, new UrlPath(routerInfo, urlPath), file, true, holder.getCachedCompressedDirectory());
 		allStaticRoutes.add(route);
 		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
-		RouteMeta meta = new RouteMeta(route, holder.getInjector(), CurrentPackage.get(), holder.getUrlEncoding());
-		routes.add(meta);
+		StaticRouteMeta meta = new StaticRouteMeta(route, holder.getUrlEncoding());
+		staticRoutes.add(meta);
 	}
 	
 	private void addStaticLocalFile(Port port, String urlPath, String fileSystemPath) {
@@ -167,8 +170,8 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		StaticRoute route = new StaticRoute(holder.getRouteInvoker2(), port, new UrlPath(routerInfo, urlPath), file, false, holder.getCachedCompressedDirectory());
 		allStaticRoutes.add(route);
 		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
-		RouteMeta meta = new RouteMeta(route, holder.getInjector(), CurrentPackage.get(), holder.getUrlEncoding());
-		routes.add(meta);
+		StaticRouteMeta meta = new StaticRouteMeta(route, holder.getUrlEncoding());
+		staticRoutes.add(meta);
 	}
 	
 	/**
@@ -218,7 +221,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	}
 	
 	public ScopedRouter build(List<FilterInfo<?>> routeFilters) {
-		List<RouteMeta> routes = buildRoutes(routeFilters);
+		List<AbstractRouteMeta> routes = buildRoutes(routeFilters);
 		
 		Map<String, ScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 		
@@ -234,14 +237,18 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		return pathToRouter;
 	}
 
-	protected List<RouteMeta> buildRoutes(List<FilterInfo<?>> routeFilters) {
-		for(RouteMeta meta : routes) {
-			String path = meta.getRoute().getFullPath();
-			List<FilterInfo<?>> filters = findMatchingFilters(path, meta.getRoute().getExposedPorts(), routeFilters);
+	protected List<AbstractRouteMeta> buildRoutes(List<FilterInfo<?>> routeFilters) {
+		for(RouteMeta meta : dynamicRoutes) {
+			String path = meta.getFullPath();
+			Port port = meta.getExposedPorts();
+			List<FilterInfo<?>> filters = findMatchingFilters(path, port, routeFilters);
 			meta.setFilters(filters);
-			holder.getFinder().loadFiltersIntoMeta(meta, true);
+			meta.loadFiltersIntoMeta(true);
 		}
 		
+		List<AbstractRouteMeta> routes = new ArrayList<>();
+		routes.addAll(dynamicRoutes);
+		routes.addAll(staticRoutes);
 		return routes;
 	}
 
