@@ -10,7 +10,9 @@ import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.dto.MethodMeta;
+import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
+import org.webpieces.router.impl.hooks.ServiceCreationInfo;
 import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;
@@ -23,7 +25,7 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 		this.loader = loader;
 	}
 
-	protected void loadRouteImpl(RouteMeta meta, ResolvedMethod method) {
+	protected LoadedController loadRouteImpl(ControllerInfo meta, ResolvedMethod method) {
 		String controllerStr = method.getControllerStr();
 		String methodStr = method.getMethodStr();
 		
@@ -34,21 +36,16 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 		if(singleton == null)
 			throw new IllegalArgumentException("EVERY controller must be marked with @javax.inject.Singleton not @com.google.inject.Singleton. bad controller="+controllerInst.getClass().getName());
 		
-		loader.loadInstIntoMeta(meta, controllerInst, methodStr);
+		return loader.loadInstIntoMeta(meta, controllerInst, methodStr);
 	}
 
 	protected abstract Object createController(Injector injector, String controllerStr);
 
-	@Override
-	public Service<MethodMeta, Action> createServiceFromFilters(RouteMeta meta, List<FilterInfo<?>> filterInfos) {
+	protected Service<MethodMeta, Action> createServiceFromFiltersImpl(ServiceCreationInfo meta) {
 		Injector injector = meta.getInjector();
-		List<RouteFilter<?>> filters = createFilters(injector, filterInfos);
+		List<RouteFilter<?>> filters = createFilters(injector, meta.getFilterInfos());
 		Service<MethodMeta, Action> svcWithFilters = loader.loadFilters(filters);
 		return svcWithFilters;
-	}
-	
-	public void loadFiltersIntoMeta(RouteMeta meta, List<FilterInfo<?>> filterInfos) {
-		meta.setService(createServiceFromFilters(meta, filterInfos));
 	}
 	
 	protected List<RouteFilter<?>> createFilters(Injector injector, List<FilterInfo<?>> filterInfos) {

@@ -53,12 +53,15 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		this.holder = holder;
 	}
 	
-	private RouteMeta addRoute(Route r) {
+	private RouteMeta addRoute(Route r, boolean isContentRoute) {
 		log.info("scope:'"+routerInfo+"' adding route=(port="+r.getExposedPorts()+")"+r.getMethod()+" "+r.getFullPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r, holder.getInjector(), holder.getFinder(), CurrentPackage.get(), holder.getUrlEncoding());
 		//MUST DO HERE so stack trace has customer's line in it so he knows EXACTLY what he did wrong when reading the
 		//exception!!
-		holder.getFinder().loadControllerIntoMetaObject(meta, true);
+		if(isContentRoute)
+			holder.getFinder().loadControllerIntoMetaContent(meta, true);
+		else 
+			holder.getFinder().loadControllerIntoMetaHtml(meta, true);
 
 		dynamicRoutes.add(meta);
 		
@@ -79,7 +82,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 			boolean checkToken) {
 		UrlPath p = new UrlPath(routerInfo, path);
 		Route route = new RouteImpl(holder.getRouteInvoker2(), method, p, controllerMethod, routeId, port, checkToken);
-		RouteMeta meta = addRoute(route);
+		RouteMeta meta = addRoute(route, false);
 		holder.getReverseRoutes().addRoute(routeId, meta);
 	}
 
@@ -87,7 +90,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod) {
 		UrlPath p = new UrlPath(routerInfo, path);
 		Route route = new RouteImpl(holder.getRouteInvoker2(), method, p, controllerMethod, port);
-		RouteMeta meta = addRoute(route);
+		RouteMeta meta = addRoute(route, true);
 		holder.getReverseRoutes().addContentRoute(meta);
 	}
 

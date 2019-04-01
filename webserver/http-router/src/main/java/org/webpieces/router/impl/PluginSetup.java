@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
-import org.webpieces.router.impl.loader.MetaLoader;
+import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 
@@ -20,13 +20,13 @@ import com.google.inject.TypeLiteral;
 public class PluginSetup {
 
 	private ParamToObjectTranslatorImpl translator;
-	private MetaLoader loader;
+	private ControllerLoader loader;
 	private ObjectTranslator translation;
 
 	@Inject
 	public PluginSetup(
 			ParamToObjectTranslatorImpl translator, 
-			MetaLoader loader,
+			ControllerLoader loader,
 			ObjectTranslator translation
 	) {
 		this.translator = translator;

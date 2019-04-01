@@ -5,10 +5,14 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.FilterInfo;
-import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.hooks.ClassForName;
+import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
+import org.webpieces.router.impl.hooks.ServiceCreationInfo;
+import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;
 
@@ -29,10 +33,10 @@ public class ProdLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 
 	@Override
-	public void loadControllerIntoMeta(RouteMeta meta, ResolvedMethod method,
+	public LoadedController loadControllerIntoMeta(ControllerInfo meta, ResolvedMethod method,
 			boolean isInitializingAllControllers) {
 		try {
-			loadRouteImpl(meta, method);
+			return loadRouteImpl(meta, method);
 		} catch(RuntimeException e) {
 			String msg = "error=\n'"+e.getMessage()+"'\n"
 					+"Check the stack trace for which client calls were calling addRoute or addXXXXRoute for which route is incorrect";
@@ -41,8 +45,8 @@ public class ProdLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 
 	@Override
-	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
-		super.loadFiltersIntoMeta(m, m.getFilters());
+	public Service<MethodMeta, Action> createServiceFromFilters(ServiceCreationInfo info, boolean isInitializingAllFilters) {
+		return super.createServiceFromFiltersImpl(info);
 	}
 
 }

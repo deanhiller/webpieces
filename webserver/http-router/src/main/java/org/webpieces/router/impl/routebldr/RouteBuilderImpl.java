@@ -65,7 +65,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerInfo+"' adding PAGE_NOT_FOUND route="+r.getFullPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r, holder.getInjector(), holder.getFinder(), CurrentPackage.get(), holder.getUrlEncoding());
-		holder.getFinder().loadControllerIntoMetaObject(meta, true);
+		holder.getFinder().loadControllerIntoMetaHtml(meta, true);
 		setPageNotFoundRoute(meta);
 	}
 
@@ -87,7 +87,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 			throw new UnsupportedOperationException("setInternalSvrErrorRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerInfo+"' adding INTERNAL_SVR_ERROR route="+r.getFullPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r, holder.getInjector(), holder.getFinder(), CurrentPackage.get(), holder.getUrlEncoding());
-		holder.getFinder().loadControllerIntoMetaObject(meta, true);
+		holder.getFinder().loadControllerIntoMetaHtml(meta, true);
 		setInternalSvrErrorRoute(meta);
 	}
 

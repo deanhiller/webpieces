@@ -2,11 +2,16 @@ package org.webpieces.devrouter.impl;
 
 import javax.inject.Inject;
 
-import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.impl.dto.MethodMeta;
+import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
+import org.webpieces.router.impl.hooks.ServiceCreationInfo;
 import org.webpieces.router.impl.loader.AbstractLoader;
+import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.MetaLoader;
 import org.webpieces.router.impl.loader.ResolvedMethod;
+import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;
 
@@ -26,19 +31,19 @@ public class DevLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 	
 	@Override
-	public void loadControllerIntoMeta(RouteMeta meta, ResolvedMethod method,
+	public LoadedController loadControllerIntoMeta(ControllerInfo meta, ResolvedMethod method,
 			boolean isInitializingAllControllers) {
 		if(isInitializingAllControllers)
-			return; //skip on startup
+			return null; //skip on startup
 		
-		super.loadRouteImpl(meta, method);
+		return super.loadRouteImpl(meta, method);
 	}
 
 	@Override
-	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
+	public Service<MethodMeta, Action> createServiceFromFilters(ServiceCreationInfo info, boolean isInitializingAllFilters) {
 		if(isInitializingAllFilters)
-			return; //skip on startup
+			return null; //skip on startup
 		
-		super.loadFiltersIntoMeta(m, m.getFilters());
+		return super.createServiceFromFiltersImpl(info);
 	}
 }

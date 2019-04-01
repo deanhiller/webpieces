@@ -35,7 +35,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
-			controllerFinder.loadControllerIntoMetaObject(meta, false);
+			controllerFinder.loadControllerIntoMetaHtml(meta, false);
 			controllerFinder.loadFiltersIntoMeta(meta, false);
 		}
 		
@@ -51,7 +51,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
-			controllerFinder.loadControllerIntoMetaObject(meta, false);
+			controllerFinder.loadControllerIntoMetaHtml(meta, false);
 			controllerFinder.loadFiltersIntoMeta(meta, false);
 		}
 		return super.invokeErrorRoute(result, requestCtx, responseCb);
@@ -63,7 +63,11 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
-			controllerFinder.loadControllerIntoMetaObject(meta, false);
+			if(meta.getRoute().getRouteType() == RouteType.CONTENT)
+				controllerFinder.loadControllerIntoMetaContent(meta, false);
+			else
+				controllerFinder.loadControllerIntoMetaHtml(meta, false);
+				
 			controllerFinder.loadFiltersIntoMeta(meta, false);
 		}
 		
@@ -91,7 +95,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), controllerFinder, info, config.getUrlEncoding());
 		
 		if(meta.getControllerInstance() == null) {
-			controllerFinder.loadControllerIntoMetaObject(meta, false);
+			controllerFinder.loadControllerIntoMetaHtml(meta, false);
 			meta.setService(serviceCreator.create());
 		}
 		
