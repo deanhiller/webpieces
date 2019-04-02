@@ -74,7 +74,6 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		if(method == HttpMethod.POST)
 			checkSecureToken = true;
 		addRoute(port, method, path, controllerMethod, routeId, checkSecureToken);
-		
 	}
 
 	@Override

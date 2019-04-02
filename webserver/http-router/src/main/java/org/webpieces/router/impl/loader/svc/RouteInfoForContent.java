@@ -2,7 +2,7 @@ package org.webpieces.router.impl.loader.svc;
 
 import org.webpieces.router.api.extensions.BodyContentBinder;
 
-public class RouteInfoForContent implements RouteInfo {
+public class RouteInfoForContent implements RouteData {
 
 	private final BodyContentBinder bodyContentBinder;
 

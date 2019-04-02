@@ -1,5 +1,5 @@
 package org.webpieces.router.impl.loader.svc;
 
-public class RouteInfoForNotFound implements RouteInfo {
+public class RouteInfoForNotFound implements RouteData {
 
 }

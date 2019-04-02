@@ -5,10 +5,10 @@ import org.webpieces.ctx.api.RequestContext;
 public class MethodMeta {
 
 	private RequestContext ctx;
-	private RouteInfo route;
+	private RouteData route;
 	private LoadedController2 loadedController;
 
-	public MethodMeta(LoadedController2 loadedController, RequestContext ctx, RouteInfo route) {
+	public MethodMeta(LoadedController2 loadedController, RequestContext ctx, RouteData route) {
 		this.loadedController = loadedController;
 		this.ctx = ctx;
 		this.route = route;
@@ -18,7 +18,7 @@ public class MethodMeta {
 		return ctx;
 	}
 
-	public RouteInfo getRoute() {
+	public RouteData getRoute() {
 		return route;
 	}
 

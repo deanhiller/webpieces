@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.loader.svc;
 
-public class RouteInfoGeneric implements RouteInfo {
+public class RouteInfoGeneric implements RouteData {
 	private final boolean isCheckSecureToken;
 
 	public RouteInfoGeneric(boolean isCheckSecureToken) {
