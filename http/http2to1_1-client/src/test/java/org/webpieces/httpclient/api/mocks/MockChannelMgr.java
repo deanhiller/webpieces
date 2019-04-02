@@ -50,19 +50,19 @@ public class MockChannelMgr extends MockSuperclass implements ChannelManager {
 
 	@Override
 	public UDPChannel createUDPChannel(String id) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public DatagramChannel createDatagramChannel(String id, int bufferSize, DatagramListener listener) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public void stop() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

@@ -139,7 +139,12 @@ public class RouteImpl implements Route {
 
 	@Override
 	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
-		return routeInvoker.invokeController(result, ctx, responseCb);
+		if(getRouteType() == RouteType.CONTENT)
+			return routeInvoker.invokeContentController(result, ctx, responseCb);
+		else if(getRouteType() == RouteType.HTML)
+			return routeInvoker.invokeHtmlController(result, ctx, responseCb);
+		else
+			throw new IllegalStateException("not supported="+getRouteType());
 	}
 
 	@Override

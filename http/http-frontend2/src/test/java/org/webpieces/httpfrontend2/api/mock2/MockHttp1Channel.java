@@ -130,13 +130,13 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public boolean isConnected() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
@@ -147,31 +147,31 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 
 	@Override
 	public boolean isSslChannel() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public void setReuseAddress(boolean b) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void setName(String string) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public String getChannelId() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -182,7 +182,7 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 
 	@Override
 	public boolean isBlocking() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
@@ -193,25 +193,25 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 
 	@Override
 	public boolean isBound() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public boolean getKeepAlive() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public void setKeepAlive(boolean b) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	

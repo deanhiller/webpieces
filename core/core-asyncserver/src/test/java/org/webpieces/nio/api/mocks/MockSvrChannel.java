@@ -60,26 +60,22 @@ public class MockSvrChannel extends MockSuperclass implements JdkServerSocketCha
 
 	@Override
 	public boolean isBlocking() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public SelectableChannel configureBlocking(boolean block) throws IOException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ServerSocketChannel getRealChannel() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void resetRegisteredOperations(int ops) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

@@ -7,11 +7,11 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.FilterInfo;
-import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.hooks.ServiceCreationInfo;
+import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;

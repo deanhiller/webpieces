@@ -58,9 +58,6 @@ public interface DataListener {
 	 * end either because it can't get there or because the other end is not
 	 * listening, etc. etc.
 	 * 
-	 * @param channel
-	 * @param data TODO
-	 * @param e
 	 */
 	public void failure(Channel channel, ByteBuffer data, Exception e);
 

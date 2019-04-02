@@ -56,6 +56,7 @@ public class ScopedRouter {
 		for(AbstractRouteMeta meta : routes) {
 			MatchResult2 result = meta.matches2(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
+				//TODO: wrap ctx in new object rather than modify it
 				ctx.setPathParams(result.getPathParams());
 				return meta.invoke(ctx, responseCb, result.getPathParams());
 			}

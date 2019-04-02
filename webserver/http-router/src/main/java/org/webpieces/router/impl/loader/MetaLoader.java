@@ -8,26 +8,19 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.annotations.Param;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.ChainFilters;
-import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.hooks.ControllerInfo;
-import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
+import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.util.filters.Service;
 
 @Singleton
 public class MetaLoader {
 
-	private ParamToObjectTranslatorImpl translator;
-	private RouterConfig config;
-
 	@Inject
-	public MetaLoader(ParamToObjectTranslatorImpl translator, RouterConfig config) {
-		this.translator = translator;
-		this.config = config;
+	public MetaLoader() {
 	}
 
 	public LoadedController loadInstIntoMeta(ControllerInfo meta, Object controllerInst, String methodStr) {
@@ -95,8 +88,7 @@ public class MetaLoader {
 		return true;
 	}
 
-	public Service<MethodMeta, Action> loadFilters(List<RouteFilter<?>> filters) {
-		Service<MethodMeta, Action> svc = new ServiceProxy(translator, config);
+	public Service<MethodMeta, Action> loadFilters(Service<MethodMeta, Action> svc, List<RouteFilter<?>> filters) {
 		for(RouteFilter<?> f : filters) {
 			svc = ChainFilters.addOnTop(svc, f);
 		}

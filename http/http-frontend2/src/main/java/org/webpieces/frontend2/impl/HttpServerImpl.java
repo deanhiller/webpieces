@@ -27,7 +27,7 @@ public class HttpServerImpl implements HttpServer {
 	
 	@Override
 	public CompletableFuture<Void> start() {
-		// TODO Auto-generated method stub
+		
 		log.info("starting to listen to port="+config.bindAddress);
 		CompletableFuture<Void> future = server.start(config.bindAddress);
 		return future.thenApply(v -> {

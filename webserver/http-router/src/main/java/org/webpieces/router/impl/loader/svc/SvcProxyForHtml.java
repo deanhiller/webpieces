@@ -1,4 +1,4 @@
-package org.webpieces.router.impl.loader;
+package org.webpieces.router.impl.loader.svc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,27 +9,23 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.ctx.SessionImpl;
-import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
-public class ServiceProxy implements Service<MethodMeta, Action> {
+public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 
-	private final static Logger log = LoggerFactory.getLogger(ServiceProxy.class);
 	private ParamToObjectTranslatorImpl translator;
 	private RouterConfig config;
+	private ServiceInvoker invoker;
 	
-	public ServiceProxy(ParamToObjectTranslatorImpl translator, RouterConfig config) {
+	public SvcProxyForHtml(ParamToObjectTranslatorImpl translator, RouterConfig config, ServiceInvoker invoker) {
 		this.translator = translator;
 		this.config = config;
+		this.invoker = invoker;
 	}
 	
 	@Override
@@ -41,18 +37,12 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 			if(cause instanceof NotFoundException) {
 				return createNotFound((NotFoundException) cause);
 			}
-			return createRuntimeFuture(cause);
+			return invoker.createRuntimeFuture(cause);
 		} catch(NotFoundException e) {
 			return createNotFound(e);
 		} catch(Throwable e) {
-			return createRuntimeFuture(e);
+			return invoker.createRuntimeFuture(e);
 		}			
-	}
-
-	private CompletableFuture<Action> createRuntimeFuture(Throwable e) {
-		CompletableFuture<Action> future = new CompletableFuture<Action>();
-		future.completeExceptionally(e);
-		return future;
 	}
 
 	private CompletableFuture<Action> createNotFound(NotFoundException e) {
@@ -61,36 +51,22 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 		return future;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		RouteInfoGeneric info = (RouteInfoGeneric) meta.getRoute();
 		
-		tokenCheck(meta.getRoute(), meta.getCtx());
-
-		Method m = meta.getMethod();
-		Object obj = meta.getControllerInstance();
+		tokenCheck(info, meta.getCtx());
+		
+		Method m = meta.getLoadedController2().getMethod();
 		
 		//We chose to do this here so any filters ESPECIALLY API filters 
 		//can catch and translate api errors and send customers a logical response
 		//On top of that ORM plugins can have a transaction filter and then in this
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
-		List<Object> argsResult = translator.createArgs(m, meta.getCtx(), meta.getBodyContentBinder());
-		Object[] args = argsResult.toArray();
-		Object retVal = m.invoke(obj, args);
+		List<Object> argsResult = translator.createArgs(m, meta.getCtx(), null);
 		
-		if(meta.getBodyContentBinder() != null)
-			return unwrapResult(m, retVal, meta.getBodyContentBinder());
-
-		if(retVal == null)
-			throw new IllegalStateException("Your controller method returned null which is not allowed.  offending method="+m);
-		
-		if(retVal instanceof CompletableFuture) {
-			return (CompletableFuture<Action>) retVal;
-		} else {
-			Action action = (Action) retVal;
-			return CompletableFuture.completedFuture(action);
-		}
+		return invoker.invokeAndCoerce(meta.getLoadedController2(), argsResult.toArray());
 	}
 
 	/**
@@ -98,13 +74,13 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 	 * a login!!
 	 * 
 	 */
-	private void tokenCheck(Route route, RequestContext ctx) {
+	private void tokenCheck(RouteInfoGeneric info, RequestContext ctx) {
 		RouterRequest req = ctx.getRequest();
 
 		if(req.multiPartFields.size() == 0)
 			return;
 
-		if(config.isTokenCheckOn() && route.isCheckSecureToken()) {
+		if(config.isTokenCheckOn() && info.isCheckSecureToken()) {
 			String token = ctx.getSession().get(SessionImpl.SECURE_TOKEN_KEY);
 			List<String> formToken = req.multiPartFields.get(RequestContext.SECURE_TOKEN_FORM_NAME);
 			if(formToken == null)
@@ -113,22 +89,6 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 						+ "you are not using the #{form}# tag or the #{secureToken}# tag to secure your forms");
 			else if(!token.equals(formToken.get(0)))
 				throw new BadRequestException("bad form token...someone posting form with invalid token(hacker or otherwise)");
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private CompletableFuture<Action> unwrapResult(Method method, Object retVal, BodyContentBinder binder) {
-		Class<?> returnType = method.getReturnType();
-		
-		
-		if(CompletableFuture.class.isAssignableFrom(returnType)) {
-			if(retVal == null)
-				throw new IllegalStateException("Your method returned a null CompletableFuture which it not allowed.  method="+method);
-			CompletableFuture<Object> future = (CompletableFuture<Object>) retVal;
-			return future.thenApply((bean) -> binder.marshal(bean));
-		} else {
-			RenderContent content = binder.marshal(retVal);
-			return CompletableFuture.completedFuture(content);
 		}
 	}
 }

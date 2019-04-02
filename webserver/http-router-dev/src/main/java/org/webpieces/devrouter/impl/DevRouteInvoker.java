@@ -15,6 +15,8 @@ import org.webpieces.router.impl.RouteInvoker2;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.loader.svc.ServiceInvoker;
+import org.webpieces.router.impl.loader.svc.SvcProxyFixedRoutes;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
@@ -23,12 +25,12 @@ import org.webpieces.util.logging.LoggerFactory;
 
 public class DevRouteInvoker extends RouteInvoker2 {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
-	private ServiceCreator serviceCreator;
+	private final ServiceInvoker serviceInvoker;
 
 	@Inject
-	public DevRouteInvoker(ObjectToParamTranslator reverseTranslator, RouterConfig config, ControllerLoader loader, ServiceCreator creator) {
+	public DevRouteInvoker(ObjectToParamTranslator reverseTranslator, RouterConfig config, ControllerLoader loader, ServiceInvoker invoker) {
 		super(reverseTranslator, config, loader);
-		this.serviceCreator = creator;
+		serviceInvoker = invoker;
 	}
 
 	@Override
@@ -36,7 +38,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
 			controllerFinder.loadControllerIntoMetaHtml(meta, false);
-			controllerFinder.loadFiltersIntoMeta(meta, false);
+			meta.setService(new SvcProxyFixedRoutes(serviceInvoker));
 		}
 		
 		if(notFoundExc == null) {
@@ -52,26 +54,34 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
 			controllerFinder.loadControllerIntoMetaHtml(meta, false);
-			controllerFinder.loadFiltersIntoMeta(meta, false);
+			controllerFinder.loadFiltersIntoErrorMeta(meta, false);
 		}
 		return super.invokeErrorRoute(result, requestCtx, responseCb);
 
 	}
+
+	@Override
+	public CompletableFuture<Void> invokeContentController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
+		RouteMeta meta = result.getMeta();
+		//If we haven't loaded it already, load it now
+		if(meta.getControllerInstance() == null) {
+			controllerFinder.loadControllerIntoMetaContent(meta, false);
+			controllerFinder.loadFiltersIntoContentMeta(meta, false);
+		}
+
+		return super.invokeContentController(result, requestCtx, responseCb);
+	}
 	
 	@Override
-	public CompletableFuture<Void> invokeController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> invokeHtmlController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
 		
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
-			if(meta.getRoute().getRouteType() == RouteType.CONTENT)
-				controllerFinder.loadControllerIntoMetaContent(meta, false);
-			else
-				controllerFinder.loadControllerIntoMetaHtml(meta, false);
-				
-			controllerFinder.loadFiltersIntoMeta(meta, false);
+			controllerFinder.loadControllerIntoMetaHtml(meta, false);
+			controllerFinder.loadFiltersIntoHtmlMeta(meta, false);
 		}
 		
-		return super.invokeController(result, requestCtx, responseCb);
+		return super.invokeHtmlController(result, requestCtx, responseCb);
 	}
 
 	private CompletableFuture<Void> invokeCorrectNotFoundRoute(MatchResult result, RequestContext requestCtx,
@@ -96,7 +106,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		
 		if(meta.getControllerInstance() == null) {
 			controllerFinder.loadControllerIntoMetaHtml(meta, false);
-			meta.setService(serviceCreator.create());
+			meta.setService(new SvcProxyFixedRoutes(serviceInvoker));
 		}
 		
 		String reason = "Your route was not found in routes table";

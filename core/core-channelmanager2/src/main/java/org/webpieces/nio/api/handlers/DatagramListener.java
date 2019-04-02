@@ -51,9 +51,6 @@ public interface DatagramListener {
 	 * end either because it can't get there or because the other end is not
 	 * listening, etc. etc.
 	 * 
-	 * @param channel
-	 * @param data TODO
-	 * @param e
 	 */
 	public void failure(DatagramChannel channel, InetSocketAddress fromAddr, ByteBuffer data, Throwable e);   
 }

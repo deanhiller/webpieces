@@ -9,10 +9,10 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.hooks.ServiceCreationInfo;
+import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;
@@ -44,7 +44,7 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 	protected Service<MethodMeta, Action> createServiceFromFiltersImpl(ServiceCreationInfo meta) {
 		Injector injector = meta.getInjector();
 		List<RouteFilter<?>> filters = createFilters(injector, meta.getFilterInfos());
-		Service<MethodMeta, Action> svcWithFilters = loader.loadFilters(filters);
+		Service<MethodMeta, Action> svcWithFilters = loader.loadFilters(meta.getService(), filters);
 		return svcWithFilters;
 	}
 	

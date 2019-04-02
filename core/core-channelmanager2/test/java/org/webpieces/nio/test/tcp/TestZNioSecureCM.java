@@ -85,7 +85,7 @@ public class TestZNioSecureCM extends ZNioSuperclassTest {
 
 	@Override
 	public void testConnectClose() throws Exception {
-		// TODO Auto-generated method stub
+		
 		super.testConnectClose();
 	}
 

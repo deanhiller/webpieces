@@ -13,7 +13,7 @@ public class MockSimpleStorage implements SimpleStorage {
 
 	@Override
 	public CompletableFuture<Void> save(String key, Map<String, String> properties) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 

@@ -33,7 +33,6 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 	private WebAppMeta routerModule;
 	private RouterConfig config;
 	private ControllerLoader finder;
-	private ServiceCreator serviceCreator;
 	private MasterRouter router;
 
 	@Inject
@@ -44,8 +43,7 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 			DevClassForName loader, 
 			ControllerLoader finder,
 			CookieTranslator cookieTranslator,
-			ObjectTranslator objTranslator,
-			ServiceCreator serviceCreator
+			ObjectTranslator objTranslator
 	) {
 		super(routeConfig, cookieTranslator, objTranslator);
 		this.routeLoader = routeConfig;
@@ -53,7 +51,6 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 		this.router = router;
 		this.classLoader = loader;
 		this.finder = finder;
-		this.serviceCreator = serviceCreator;
 		this.lastFileTimestamp = config.getMetaFile().lastModified();
 	}
 

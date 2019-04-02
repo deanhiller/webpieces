@@ -42,25 +42,25 @@ public class MockClientSideJdkChannel extends MockSuperclass implements JdkSocke
 	
 	@Override
 	public void configureBlocking(boolean b) throws IOException {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public boolean isBlocking() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public void bind(SocketAddress addr) throws IOException {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public boolean isBound() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
@@ -114,43 +114,42 @@ public class MockClientSideJdkChannel extends MockSuperclass implements JdkSocke
 
 	@Override
 	public boolean isClosed() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public boolean isConnected() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public void setReuseAddress(boolean b) throws SocketException {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public InetAddress getInetAddress() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public int getPort() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	@Override
 	public InetAddress getLocalAddress() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public int getLocalPort() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -165,19 +164,19 @@ public class MockClientSideJdkChannel extends MockSuperclass implements JdkSocke
 	
 	@Override
 	public void setKeepAlive(boolean b) throws SocketException {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public boolean getKeepAlive() throws SocketException {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public int getSoTimeout() throws SocketException {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 	@Override

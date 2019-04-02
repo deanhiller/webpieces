@@ -53,10 +53,10 @@ public class TestH2Spec {
                 "6.10",  //19
                 "8.1",   //20
                 "8.1.2",  //21
-                //"8.1.2.1", // TODO.  easy to implement
-                //"8.1.2.2", // TODO   easy to implement
-                //"8.1.2.3", // TODO.
-                //"8.1.2.6", //TODO
+                //"8.1.2.1", // TODO.  ALL 4 of these
+                //"8.1.2.2", 
+                //"8.1.2.3", 
+                //"8.1.2.6", 
                 "8.2"
         };
         

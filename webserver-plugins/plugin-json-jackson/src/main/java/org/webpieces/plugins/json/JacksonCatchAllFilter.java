@@ -16,7 +16,7 @@ import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
-import org.webpieces.router.impl.dto.MethodMeta;
+import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;

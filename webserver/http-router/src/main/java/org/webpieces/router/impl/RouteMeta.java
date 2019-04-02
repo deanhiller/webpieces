@@ -14,9 +14,10 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.Port;
-import org.webpieces.router.impl.dto.MethodMeta;
+import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.HaveRouteException;
+import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.util.filters.Service;
@@ -169,7 +170,12 @@ public class RouteMeta extends AbstractRouteMetaImpl {
 	}
 
 	public void loadFiltersIntoMeta(boolean isInitializingAllFilters) {
-		controllerFinder.loadFiltersIntoMeta(this, isInitializingAllFilters);
+		//NEED to move this further up
+		if(getRoute().getRouteType() == RouteType.CONTENT) {
+			controllerFinder.loadFiltersIntoContentMeta(this, isInitializingAllFilters);
+		} else {
+			controllerFinder.loadFiltersIntoHtmlMeta(this, isInitializingAllFilters);
+		}
 	}
 
 	public String getFullPath() {

@@ -107,7 +107,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		//pageNotFoundFilters have to load on demand since filters match a path, some not found paths run filters
 		//and some not found filters don't get applied based on the url
 		//holder.getFinder().loadFiltersIntoMeta(pageNotFoundRoute, true);
-		holder.getFinder().loadFiltersIntoMeta(internalSvrErrorRoute, true);
+		holder.getFinder().loadFiltersIntoErrorMeta(internalSvrErrorRoute, true);
 		
 		return new Router(routerInfo, pathToRouter, routes, pageNotFoundRoute, internalSvrErrorRoute);
 	}

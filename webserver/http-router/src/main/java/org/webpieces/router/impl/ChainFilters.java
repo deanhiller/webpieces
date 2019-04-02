@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.impl.dto.MethodMeta;
+import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.util.filters.Filter;
 import org.webpieces.util.filters.Service;
 
@@ -25,7 +25,7 @@ public class ChainFilters {
 
 		@Override
 		public CompletableFuture<Action> invoke(MethodMeta meta) {
-			Method method = meta.getMethod();
+			Method method = meta.getLoadedController2().getMethod();
 			CompletableFuture<Action> resp = filter.filter(meta, svc).thenApply((r) -> responseCheck(method, r));
 			if(resp == null)
 				throw new IllegalStateException("Filter returned null CompletableFuture<Action> which is not allowed="+filter.getClass()+" after being given request with controller method="+method);

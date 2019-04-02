@@ -6,7 +6,7 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.util.filters.Service;
 

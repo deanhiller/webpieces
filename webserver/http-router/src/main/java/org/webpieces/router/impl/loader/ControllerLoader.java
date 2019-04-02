@@ -14,30 +14,48 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.dto.MethodMeta;
 import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.hooks.ServiceCreationInfo;
+import org.webpieces.router.impl.loader.svc.SvcProxyFixedRoutes;
+import org.webpieces.router.impl.loader.svc.SvcProxyForContent;
+import org.webpieces.router.impl.loader.svc.MethodMeta;
+import org.webpieces.router.impl.loader.svc.ServiceInvoker;
+import org.webpieces.router.impl.loader.svc.SvcProxyForHtml;
+import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 
 @Singleton
 public class ControllerLoader {
 
-	private MetaLoaderProxy loader;
-	private ControllerResolver resolver;
-
+	private final MetaLoaderProxy loader;
+	private final ControllerResolver resolver;
+	private final ParamToObjectTranslatorImpl translator;
+	private final RouterConfig config;
+	private final ServiceInvoker serviceInvoker;
+	
 	private Set<BodyContentBinder> bodyBinderPlugins;
-	private List<String> allBinderAnnotations = new ArrayList<>();
+	private List<String> allBinderAnnotations;
 	
 	@Inject
-	public ControllerLoader(MetaLoaderProxy loader, ControllerResolver resolver) {
+	public ControllerLoader(
+			MetaLoaderProxy loader, 
+			ControllerResolver resolver,
+			ParamToObjectTranslatorImpl translator, 
+			RouterConfig config,
+			ServiceInvoker serviceInvoker
+	) {
 		this.loader = loader;
 		this.resolver = resolver;
+		this.translator = translator;
+		this.config = config;
+		this.serviceInvoker = serviceInvoker;
 	}
 	
 	/**
@@ -83,14 +101,30 @@ public class ControllerLoader {
 		meta.setContentBinder(binder);
 	}
 	
-	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
-		ServiceCreationInfo info = new ServiceCreationInfo(m.getInjector(), m.getFilters());
+	public void loadFiltersIntoHtmlMeta(RouteMeta m, boolean isInitializingAllFilters) {
+		Service<MethodMeta, Action> svc = new SvcProxyForHtml(translator, config, serviceInvoker);
+		ServiceCreationInfo info = new ServiceCreationInfo(m.getInjector(), svc, m.getFilters());
+		Service<MethodMeta, Action> resp = loader.createServiceFromFilters(info, isInitializingAllFilters);
+		m.setService(resp);
+	}
+	
+	public void loadFiltersIntoContentMeta(RouteMeta m, boolean isInitializingAllFilters) {
+		Service<MethodMeta, Action> svc = new SvcProxyForContent(translator, serviceInvoker);
+		ServiceCreationInfo info = new ServiceCreationInfo(m.getInjector(), svc, m.getFilters());
 		Service<MethodMeta, Action> resp = loader.createServiceFromFilters(info, isInitializingAllFilters);
 		m.setService(resp);
 	}
 
+	public void loadFiltersIntoErrorMeta(RouteMeta m, boolean isInitializingAllFilters) {
+		Service<MethodMeta, Action> svc = new SvcProxyFixedRoutes(serviceInvoker);
+		ServiceCreationInfo info = new ServiceCreationInfo(m.getInjector(), svc, m.getFilters());
+		Service<MethodMeta, Action> resp = loader.createServiceFromFilters(info, isInitializingAllFilters);
+		m.setService(resp);
+	}
+	
 	public Service<MethodMeta, Action> createNotFoundService(RouteMeta m, List<FilterInfo<?>> filterInfos) {
-		ServiceCreationInfo info = new ServiceCreationInfo(m.getInjector(), filterInfos);
+		Service<MethodMeta, Action> svc = new SvcProxyFixedRoutes(serviceInvoker);
+		ServiceCreationInfo info = new ServiceCreationInfo(m.getInjector(), svc, filterInfos);
 		return loader.createServiceFromFilters(info, false);
 	}
 	
@@ -171,6 +205,7 @@ public class ControllerLoader {
 	
 	public void install(Set<BodyContentBinder> bodyBinders) {
 		this.bodyBinderPlugins = bodyBinders;
+		this.allBinderAnnotations = new ArrayList<>();
 		for(BodyContentBinder binder : bodyBinders) {
 			allBinderAnnotations.add("@"+binder.getAnnotation().getSimpleName());
 		}
