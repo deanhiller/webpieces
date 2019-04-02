@@ -26,10 +26,10 @@ public class SvcProxyFixedRoutes implements Service<MethodMeta, Action> {
 			//DAMN these damn InvocationTargetExceptions that just fucking wrap the original
 			//GET rid of checked exceptions....in reality InvocationTargetException == FUCKING ANYTHING!!!
 			//This ensures the original thrown exception comes through. 
-			return invoker.createRuntimeFuture(e.getCause());			
+			return invoker.createRuntimeFuture(e.getCause());
 		} catch(Throwable e) {
 			return invoker.createRuntimeFuture(e);
-		}			
+		}
 	}
 	
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
