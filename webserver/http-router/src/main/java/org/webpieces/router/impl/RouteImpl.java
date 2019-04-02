@@ -10,7 +10,6 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.dto.RouteType;
@@ -146,21 +145,10 @@ public class RouteImpl implements Route {
 		else
 			throw new IllegalStateException("not supported="+getRouteType());
 	}
-
-	@Override
-	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext ctx, ResponseStreamer responseCb, NotFoundException exc) {
-		return routeInvoker.invokeNotFound(result, ctx, responseCb, exc);
-	}
 	
 	@Override
 	public List<String> getArgNames() {
 		return this.argNames;
-	}
-
-	@Override
-	public CompletableFuture<Void> invokeErrorRoute(MatchResult result, RequestContext ctx,
-			ResponseStreamer responseCb) {
-		return routeInvoker.invokeErrorRoute(result, ctx, responseCb);
 	}
 	
 }

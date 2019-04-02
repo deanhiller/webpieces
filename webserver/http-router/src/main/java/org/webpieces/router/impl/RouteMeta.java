@@ -35,8 +35,6 @@ public class RouteMeta extends AbstractRouteMetaImpl {
 	//4. NotFoundRoute with controller, method, but no 
 	//5. InternalErrorRoute 
 	//6. Maybe a multi-route that binds one url with many different accept types creating yet another mini-router in the url
-	
-	private ControllerMeta controllerMeta;
 	private final Route route;
 	private final RouteModuleInfo routeModuleInfo; //not static, only html and rawContent, notfoundRoute, internalErrorRoute
 	private final Injector injector; //not static, only html and rawContent, notFoundRoute, internalErrorRoute
@@ -157,16 +155,6 @@ public class RouteMeta extends AbstractRouteMetaImpl {
 			
 			return CompletableFuture.completedFuture(r); 
 		}).thenCompose(Function.identity());
-	}
-
-	public CompletableFuture<Void> invokeErrorRoute(RequestContext ctx, ResponseStreamer responseCb) {
-		MatchResult result = new MatchResult(this);
-		return route.invokeErrorRoute(result, ctx, responseCb);
-	}
-
-	public CompletableFuture<Void> invokeNotFoundRoute(RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException exc) {
-		MatchResult result = new MatchResult(this);
-		return route.invokeNotFound(result, requestCtx, responseCb, exc);
 	}
 
 	public void loadFiltersIntoMeta(boolean isInitializingAllFilters) {

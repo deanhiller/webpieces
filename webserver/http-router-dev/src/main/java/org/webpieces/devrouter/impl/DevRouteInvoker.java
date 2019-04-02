@@ -1,5 +1,6 @@
 package org.webpieces.devrouter.impl;
 
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
@@ -10,13 +11,14 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.RouteImpl;
+import org.webpieces.router.impl.BaseRouteInfo;
+import org.webpieces.router.impl.DynamicInfo;
 import org.webpieces.router.impl.RouteInvoker2;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.svc.ServiceInvoker;
-import org.webpieces.router.impl.loader.svc.SvcProxyFixedRoutes;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
@@ -34,30 +36,29 @@ public class DevRouteInvoker extends RouteInvoker2 {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
-		RouteMeta meta = result.getMeta();
-		if(meta.getControllerInstance() == null) {
-			controllerFinder.loadControllerIntoMetaHtml(meta, false);
-			meta.setService(new SvcProxyFixedRoutes(serviceInvoker));
+	public CompletableFuture<Void> invokeNotFound(BaseRouteInfo route, LoadedController loadedController, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
+//	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
+		if(loadedController == null) {
+			loadedController = controllerFinder.loadControllerIntoMetaNotFound(route, false);
+			//controllerFinder.loadControllerIntoMetaNotFound(meta, false);
+			//controllerFinder.loadFiltersIntoNotFoundMeta(meta, false);
 		}
 		
 		if(notFoundExc == null) {
 			throw new IllegalArgumentException("must have not found exception to be here");
 		}
 		
-		return invokeCorrectNotFoundRoute(result, requestCtx, responseCb, notFoundExc);
+		return invokeCorrectNotFoundRoute(route, loadedController, requestCtx, responseCb, notFoundExc);
 	}
-	
+
 	@Override
-	public CompletableFuture<Void> invokeErrorRoute(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
-
-		RouteMeta meta = result.getMeta();
-		if(meta.getControllerInstance() == null) {
-			controllerFinder.loadControllerIntoMetaHtml(meta, false);
-			controllerFinder.loadFiltersIntoErrorMeta(meta, false);
+	public CompletableFuture<Void> invokeErrorRoute(BaseRouteInfo route, DynamicInfo info, RequestContext requestCtx,
+			ResponseStreamer responseCb) {
+		DynamicInfo newInfo = info;
+		if(info.getLoadedController() == null) {
+			newInfo = controllerFinder.loadControllerAndService(route, false);
 		}
-		return super.invokeErrorRoute(result, requestCtx, responseCb);
-
+		return super.invokeErrorRoute(route, newInfo, requestCtx, responseCb);
 	}
 
 	@Override
@@ -77,20 +78,22 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
-			controllerFinder.loadControllerIntoMetaHtml(meta, false);
+			controllerFinder.loadControllerIntoMetaHtm(meta, false);
 			controllerFinder.loadFiltersIntoHtmlMeta(meta, false);
 		}
 		
 		return super.invokeHtmlController(result, requestCtx, responseCb);
 	}
 
-	private CompletableFuture<Void> invokeCorrectNotFoundRoute(MatchResult result, RequestContext requestCtx,
-			ResponseStreamer responseCb, NotFoundException notFoundExc) {
+	private CompletableFuture<Void> invokeCorrectNotFoundRoute(BaseRouteInfo route, LoadedController loadedController,
+			RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
+	//private CompletableFuture<Void> invokeCorrectNotFoundRoute(MatchResult result, RequestContext requestCtx,
+//			ResponseStreamer responseCb, NotFoundException notFoundExc) {
 		RouterRequest req = requestCtx.getRequest();
 		//RouteMeta origMeta, NotFoundException e, RouterRequest req) {
 		if(req.queryParams.containsKey("webpiecesShowPage")) {
 			//This is a callback so render the original webapp developer's not found page into the iframe
-			return super.invokeNotFound(result, requestCtx, responseCb, notFoundExc);
+			return super.invokeNotFound(route, loadedController, requestCtx, responseCb, notFoundExc);
 		}
 
 		//ok, in dev mode, we hijack the not found page with one with a route list AND an iframe containing the developers original
@@ -99,15 +102,12 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
 				+ " something needs a'fixin.  req="+req, notFoundExc);
 		
-		RouteMeta origMeta = result.getMeta();
-		RouteImpl r = new RouteImpl(this, "/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
-		RouteModuleInfo info = new RouteModuleInfo("", null);
-		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), controllerFinder, info, config.getUrlEncoding());
+		BaseRouteInfo webpiecesNotFoundRoute = new BaseRouteInfo(
+				route.getInjector(), new RouteModuleInfo("", null), 
+				"/org/webpieces/devrouter/impl/NotFoundController.notFound", 
+				new ArrayList<>(), RouteType.NOT_FOUND);
 		
-		if(meta.getControllerInstance() == null) {
-			controllerFinder.loadControllerIntoMetaHtml(meta, false);
-			meta.setService(new SvcProxyFixedRoutes(serviceInvoker));
-		}
+		LoadedController newLoadedController = controllerFinder.loadControllerIntoMetaNotFound(webpiecesNotFoundRoute, false);
 		
 		String reason = "Your route was not found in routes table";
 		if(notFoundExc != null)
@@ -118,6 +118,6 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		newRequest.putMultipart("url", req.relativePath);
 		
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest);
-		return super.invokeNotFound(new MatchResult(meta), overridenCtx, responseCb, notFoundExc);
+		return super.invokeNotFound(webpiecesNotFoundRoute, newLoadedController, overridenCtx, responseCb, notFoundExc);
 	}
 }

@@ -32,7 +32,7 @@ import org.webpieces.router.impl.params.ObjectToParamTranslator;
 public class ResponseProcessor extends Processor {
 	
 	private ReverseRoutes reverseRoutes;
-	private RouteMeta matchedMeta;
+	private ProcessorInfo matchedMeta;
 	private ObjectToParamTranslator reverseTranslator;
 	private ResponseStreamer responseCb;
 
@@ -40,7 +40,7 @@ public class ResponseProcessor extends Processor {
 	private PortConfig portConfig;
 
 	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, 
-			ObjectToParamTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb, PortConfig portConfig) {
+			ObjectToParamTranslator reverseTranslator, ProcessorInfo meta, ResponseStreamer responseCb, PortConfig portConfig) {
 		super(ctx);
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
@@ -133,7 +133,7 @@ public class ResponseProcessor extends Processor {
 		//If the POST route was not found, just render the notFound page that controller sends us violating the
 		//PRG pattern in this one specific case for now (until we test it with the browser to make sure back button is
 		//not broken)
-		if(matchedMeta.getRoute().getRouteType() == RouteType.HTML && HttpMethod.POST == request.method) {
+		if(matchedMeta.getRouteType() == RouteType.HTML && HttpMethod.POST == request.method) {
 			throw new IllegalReturnValueException("Controller method='"+method+"' MUST follow the PRG "
 					+ "pattern(https://en.wikipedia.org/wiki/Post/Redirect/Get) so "
 					+ "users don't have a poor experience using your website with the browser back button.  "
@@ -156,7 +156,7 @@ public class ResponseProcessor extends Processor {
         pageArgs.put("_flash", ctx.getFlash());
 
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
-		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRoute().getRouteType());
+		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRouteType());
 		
 		return wrapFunctionInContext(() -> responseCb.sendRenderHtml(resp));
 	}

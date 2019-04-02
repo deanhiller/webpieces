@@ -9,7 +9,8 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.AbstractRouteMeta;
-import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.InternalErrorRouter;
+import org.webpieces.router.impl.NotFoundRouter;
 import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.logging.Logger;
@@ -20,13 +21,19 @@ public class Router extends ScopedRouter {
 
 	private static final Logger log = LoggerFactory.getLogger(Router.class);
 
-	private RouteMeta pageNotFoundRoute;
-	private RouteMeta internalSvrErrorRoute;
+	private NotFoundRouter pageNotFoundRouter;
+	private InternalErrorRouter internalSvrErrorRouter;
 
-	public Router(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<AbstractRouteMeta> routes, RouteMeta pageNotFoundRoute, RouteMeta internalSvrErrorRoute) {
+	public Router(
+			RouterInfo routerInfo, 
+			Map<String, ScopedRouter> pathPrefixToNextRouter, 
+			List<AbstractRouteMeta> routes, 
+			NotFoundRouter notFoundRouter, 
+			InternalErrorRouter internalErrorRouter
+	) {
 		super(routerInfo, pathPrefixToNextRouter, routes);
-		this.pageNotFoundRoute = pageNotFoundRoute;
-		this.internalSvrErrorRoute = internalSvrErrorRoute;
+		this.pageNotFoundRouter = notFoundRouter;
+		this.internalSvrErrorRouter = internalErrorRouter;
 	}
 
 	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
@@ -92,7 +99,7 @@ public class Router extends ScopedRouter {
 					+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
 			SupressedExceptionLog.log(exc);
 			
-			return internalSvrErrorRoute.invokeErrorRoute(requestCtx, responseCb);
+			return internalSvrErrorRouter.invokeErrorRoute(requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -104,7 +111,7 @@ public class Router extends ScopedRouter {
 	
 	private CompletableFuture<Void> notFound(NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
 		try {
-			return pageNotFoundRoute.invokeNotFoundRoute(requestCtx, responseCb, exc);
+			return pageNotFoundRouter.invokeNotFoundRoute(requestCtx, responseCb, exc);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...

@@ -13,19 +13,14 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
 public class StaticRoute implements Route {
 
-	private static final Logger log = LoggerFactory.getLogger(StaticRoute.class);
-	
 	private String urlPath;
 	private VirtualFile fileSystemPath;
 
@@ -199,18 +194,6 @@ public class StaticRoute implements Route {
 	
 	@Override
 	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
-		throw new UnsupportedOperationException("can't be here..delete this method");
-	}
-
-	@Override
-	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext ctx, ResponseStreamer responseCb,
-			NotFoundException exc) {
-		throw new UnsupportedOperationException("can't be here..delete this method");
-	}
-
-	@Override
-	public CompletableFuture<Void> invokeErrorRoute(MatchResult result, RequestContext ctx,
-			ResponseStreamer responseCb) {
 		throw new UnsupportedOperationException("can't be here..delete this method");
 	}
 

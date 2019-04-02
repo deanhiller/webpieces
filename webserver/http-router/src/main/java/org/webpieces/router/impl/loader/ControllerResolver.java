@@ -13,9 +13,8 @@ public class ControllerResolver {
 	
 	//A webapp could override this class entirely to feed back locations of Class's and methods based on the 
 	//Strings passed in from the RouteModules
-	public ResolvedMethod resolveControllerClassAndMethod(RouteMeta meta) {
-		Route r = meta.getRoute();
-		String controllerAndMethod = r.getControllerMethodString();
+	public ResolvedMethod resolveControllerClassAndMethod(ToResolveInfo meta) {
+		String controllerAndMethod = meta.getControllerMethodString();
 		int index = controllerAndMethod.lastIndexOf(".");
 		String methodStr = controllerAndMethod.substring(index+1);
 		String controllerStr = controllerAndMethod.substring(0, index);

@@ -12,6 +12,14 @@ public class LoadedController {
 	private final Parameter[] parameters;
 
 	public LoadedController(Object controllerInstance, Method controllerMethod, Parameter[] parameters, List<String> paramNames) {
+		if(controllerInstance == null)
+			throw new IllegalArgumentException("controllerInstance can't be null");
+		else if(controllerMethod == null)
+			throw new IllegalArgumentException("controllerMethod can't be null");
+		else if(parameters == null)
+			throw new IllegalArgumentException("parameters can't be null");
+		else if(paramNames == null)
+			throw new IllegalArgumentException("paramNames can't be null");
 		this.controllerInstance = controllerInstance;
 		this.controllerMethod = controllerMethod;
 		this.parameters = parameters;

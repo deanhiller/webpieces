@@ -61,7 +61,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		if(isContentRoute)
 			holder.getFinder().loadControllerIntoMetaContent(meta, true);
 		else 
-			holder.getFinder().loadControllerIntoMetaHtml(meta, true);
+			holder.getFinder().loadControllerIntoMetaHtm(meta, true);
 
 		dynamicRoutes.add(meta);
 		

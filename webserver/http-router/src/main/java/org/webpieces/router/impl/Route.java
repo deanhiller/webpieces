@@ -8,7 +8,6 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.model.MatchResult;
@@ -41,8 +40,4 @@ public interface Route extends BasicRoute {
 
 	CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb);
 
-	CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext ctx, ResponseStreamer responseCb,
-			NotFoundException exc);
-
-	CompletableFuture<Void> invokeErrorRoute(MatchResult result, RequestContext ctx, ResponseStreamer responseCb);
 }
