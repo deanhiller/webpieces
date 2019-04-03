@@ -44,7 +44,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 	@Override
 	public CompletableFuture<Void> invokeNotFound(BaseRouteInfo route, LoadedController loadedController, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
 		if(loadedController == null) {
-			loadedController = controllerFinder.loadNotFoundController(route.getInjector(), route.getRouteInfo(), false);
+			loadedController = controllerFinder.loadController(route.getInjector(), route.getRouteInfo(), false);
 		}
 		
 		if(notFoundExc == null) {
@@ -109,7 +109,7 @@ public class DevRouteInvoker extends RouteInvoker2 {
 				new SvcProxyFixedRoutes(serviceInvoker),
 				new ArrayList<>(), RouteType.NOT_FOUND);
 		
-		LoadedController newLoadedController = controllerFinder.loadNotFoundController(route.getInjector(), routeInfo, false);
+		LoadedController newLoadedController = controllerFinder.loadController(route.getInjector(), routeInfo, false);
 		
 		String reason = "Your route was not found in routes table";
 		if(notFoundExc != null)

@@ -4,16 +4,21 @@ import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
 import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Port;
@@ -97,7 +102,10 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 
 		//MUST DO loadControllerIntoMetat HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		LoadedController loadedController = holder.getFinder().loadHtmlController(resettingLogic.getInjector(), routeInfo, true, isPostOnly);
+		LoadedController loadedController = holder.getFinder().loadController(resettingLogic.getInjector(), routeInfo, true);
+		if(loadedController != null)
+			preconditionCheck(routeInfo, loadedController.getControllerMethod(), isPostOnly);
+		
 		HtmlRouter info = new HtmlRouter(holder.getRouteInvoker2(), p, port, method, routeId, checkToken, holder.getUrlEncoding());		
 		RouterAndInfo routerAndInfo = new RouterAndInfo(info, routeInfo, RouteType.HTML, loadedController);
 		
@@ -106,6 +114,38 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		log.info("scope:'"+routerInfo+"' added route=(port="+info.getExposedPorts()+")"+info.getHttpMethod()+" "+info.getFullPath()+" method="+routeInfo.getControllerMethodString());
 	}
 
+	private void preconditionCheck(Object meta, Method controllerMethod, boolean isPostOnly) {
+		if(isPostOnly) {
+			Class<?> clazz = controllerMethod.getReturnType();
+			if(CompletableFuture.class.isAssignableFrom(clazz)) {
+				Type genericReturnType = controllerMethod.getGenericReturnType();
+				ParameterizedType t = (ParameterizedType) genericReturnType;
+				Type type2 = t.getActualTypeArguments()[0];
+				if(!(type2 instanceof Class))
+					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' for this method="+controllerMethod);
+				@SuppressWarnings("rawtypes")
+				Class<?> type = (Class) type2;
+				if(!Redirect.class.isAssignableFrom(type))
+					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
+			} else if(!Redirect.class.isAssignableFrom(clazz))
+				throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
+		} else {
+			Class<?> clazz = controllerMethod.getReturnType();
+			if(CompletableFuture.class.isAssignableFrom(clazz)) {
+				Type genericReturnType = controllerMethod.getGenericReturnType();
+				ParameterizedType t = (ParameterizedType) genericReturnType;
+				Type type2 = t.getActualTypeArguments()[0];
+				if(!(type2 instanceof Class))
+					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' for this method(and did not)="+controllerMethod);
+				@SuppressWarnings("rawtypes")
+				Class<?> type = (Class) type2;
+				if(!Action.class.isAssignableFrom(type))
+					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
+			} else if(!Action.class.isAssignableFrom(clazz))
+				throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
+		}
+	}
+	
 	@Override
 	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod) {
 		UrlPath p = new UrlPath(routerInfo, path);

@@ -180,7 +180,7 @@ public class RouteInvoker2 {
 	
 	public  Service<MethodMeta, Action> createNotFoundService(BaseRouteInfo route, RouterRequest req) {
 		List<FilterInfo<?>> filterInfos = findNotFoundFilters(route.getFilters(), req.relativePath, req.isHttps);
-		return controllerFinder.createNotFoundService(route, filterInfos);
+		return controllerFinder.loadFilters(route, filterInfos, false);
 	}
 
 	public List<FilterInfo<?>> findNotFoundFilters(List<FilterInfo<?>> notFoundFilters, String path, boolean isHttps) {
