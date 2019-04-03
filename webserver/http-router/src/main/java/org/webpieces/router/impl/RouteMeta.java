@@ -162,7 +162,7 @@ public class RouteMeta extends AbstractRouteMetaImpl {
 		if(getRoute().getRouteType() == RouteType.CONTENT) {
 			controllerFinder.loadFiltersIntoContentMeta(this, isInitializingAllFilters);
 		} else {
-			controllerFinder.loadFiltersIntoHtmlMeta(this, isInitializingAllFilters);
+			throw new IllegalStateException("oops="+getRoute().getRouteType());
 		}
 	}
 

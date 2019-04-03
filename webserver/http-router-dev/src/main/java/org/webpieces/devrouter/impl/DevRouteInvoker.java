@@ -12,16 +12,19 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.BaseRouteInfo;
-import org.webpieces.router.impl.DynamicInfo;
 import org.webpieces.router.impl.RouteInvoker2;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
+import org.webpieces.router.impl.loader.svc.RouteData;
 import org.webpieces.router.impl.loader.svc.ServiceInvoker;
+import org.webpieces.router.impl.loader.svc.SvcProxyFixedRoutes;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
+import org.webpieces.router.impl.routebldr.RouteInfo;
+import org.webpieces.router.impl.routing.DynamicInfo;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -32,16 +35,16 @@ public class DevRouteInvoker extends RouteInvoker2 {
 	@Inject
 	public DevRouteInvoker(ObjectToParamTranslator reverseTranslator, RouterConfig config, ControllerLoader loader, ServiceInvoker invoker) {
 		super(reverseTranslator, config, loader);
-		serviceInvoker = invoker;
+		this.serviceInvoker = invoker;
 	}
 
+	/**
+	 * This one is definitely special
+	 */
 	@Override
 	public CompletableFuture<Void> invokeNotFound(BaseRouteInfo route, LoadedController loadedController, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
-//	public CompletableFuture<Void> invokeNotFound(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException notFoundExc) {
 		if(loadedController == null) {
-			loadedController = controllerFinder.loadControllerIntoMetaNotFound(route, false);
-			//controllerFinder.loadControllerIntoMetaNotFound(meta, false);
-			//controllerFinder.loadFiltersIntoNotFoundMeta(meta, false);
+			loadedController = controllerFinder.loadNotFoundController(route.getInjector(), route.getRouteInfo(), false);
 		}
 		
 		if(notFoundExc == null) {
@@ -62,6 +65,16 @@ public class DevRouteInvoker extends RouteInvoker2 {
 	}
 
 	@Override
+	public CompletableFuture<Void> invokeHtmlController(
+			BaseRouteInfo route, DynamicInfo info, RequestContext requestCtx, ResponseStreamer responseCb, RouteData data) {
+		DynamicInfo newInfo = info;
+		if(info.getLoadedController() == null) {
+			newInfo = controllerFinder.loadControllerAndService(route, false);
+		}
+		return super.invokeHtmlController(route, newInfo, requestCtx, responseCb, data);
+	}
+	
+	@Override
 	public CompletableFuture<Void> invokeContentController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
 		RouteMeta meta = result.getMeta();
 		//If we haven't loaded it already, load it now
@@ -71,18 +84,6 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		}
 
 		return super.invokeContentController(result, requestCtx, responseCb);
-	}
-	
-	@Override
-	public CompletableFuture<Void> invokeHtmlController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
-		
-		RouteMeta meta = result.getMeta();
-		if(meta.getControllerInstance() == null) {
-			controllerFinder.loadControllerIntoMetaHtm(meta, false);
-			controllerFinder.loadFiltersIntoHtmlMeta(meta, false);
-		}
-		
-		return super.invokeHtmlController(result, requestCtx, responseCb);
 	}
 
 	private CompletableFuture<Void> invokeCorrectNotFoundRoute(BaseRouteInfo route, LoadedController loadedController,
@@ -102,12 +103,13 @@ public class DevRouteInvoker extends RouteInvoker2 {
 		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
 				+ " something needs a'fixin.  req="+req, notFoundExc);
 		
+		RouteInfo routeInfo = new RouteInfo(new RouteModuleInfo("", null), "/org/webpieces/devrouter/impl/NotFoundController.notFound");
 		BaseRouteInfo webpiecesNotFoundRoute = new BaseRouteInfo(
-				route.getInjector(), new RouteModuleInfo("", null), 
-				"/org/webpieces/devrouter/impl/NotFoundController.notFound", 
+				route.getInjector(), routeInfo, 
+				new SvcProxyFixedRoutes(serviceInvoker),
 				new ArrayList<>(), RouteType.NOT_FOUND);
 		
-		LoadedController newLoadedController = controllerFinder.loadControllerIntoMetaNotFound(webpiecesNotFoundRoute, false);
+		LoadedController newLoadedController = controllerFinder.loadNotFoundController(route.getInjector(), routeInfo, false);
 		
 		String reason = "Your route was not found in routes table";
 		if(notFoundExc != null)

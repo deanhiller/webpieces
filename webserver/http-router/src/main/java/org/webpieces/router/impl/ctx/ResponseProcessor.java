@@ -28,6 +28,7 @@ import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
+import org.webpieces.router.impl.routing.HtmlRouter;
 
 public class ResponseProcessor extends Processor {
 	
@@ -80,24 +81,22 @@ public class ResponseProcessor extends Processor {
 		responseSent = true;
 		RouterRequest request = ctx.getRequest();
 		Method method = matchedMeta.getMethod();
-		RouteMeta nextRequestMeta = reverseRoutes.get(id);
+		HtmlRouter nextRequestMeta = reverseRoutes.get(id);
 		
 		if(nextRequestMeta == null)
 			throw new IllegalReturnValueException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
-		else if(!nextRequestMeta.getRoute().matchesMethod(HttpMethod.GET))
+		else if(!nextRequestMeta.matchesMethod(HttpMethod.GET))
 			throw new IllegalReturnValueException("method='"+method+"' is trying to redirect to routeid="+id+" but that route is not a GET method route and must be");
 
-		Route route = nextRequestMeta.getRoute();
-		
-		Map<String, String> keysToValues = reverseTranslator.formMap(method, route.getPathParamNames(), args);
+		Map<String, String> keysToValues = reverseTranslator.formMap(method, nextRequestMeta.getPathParamNames(), args);
 
 		Set<String> keySet = keysToValues.keySet();
-		List<String> argNames = route.getPathParamNames();
+		List<String> argNames = nextRequestMeta.getPathParamNames();
 		if(keySet.size() != argNames.size()) {
 			throw new IllegalReturnValueException("Method='"+method+"' returns a Redirect action with wrong number of arguments.  args="+keySet.size()+" when it should be size="+argNames.size());
 		}
 
-		String path = route.getFullPath();
+		String path = nextRequestMeta.getFullPath();
 		
 		for(String name : argNames) {
 			String value = keysToValues.get(name);
@@ -106,7 +105,7 @@ public class ResponseProcessor extends Processor {
 			path = path.replace("{"+name+"}", value);
 		}
 
-		boolean isHttpsOnly = route.getExposedPorts() == Port.HTTPS;
+		boolean isHttpsOnly = nextRequestMeta.getExposedPorts() == Port.HTTPS;
 		
 		//if the request is https, stay in https as everything is accessible on https
 		//if the request is http, then convert to https IF new route is secure

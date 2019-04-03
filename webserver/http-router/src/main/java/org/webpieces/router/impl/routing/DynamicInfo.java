@@ -1,4 +1,4 @@
-package org.webpieces.router.impl;
+package org.webpieces.router.impl.routing;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.loader.LoadedController;

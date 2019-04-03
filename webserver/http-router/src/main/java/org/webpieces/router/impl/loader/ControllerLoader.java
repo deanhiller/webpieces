@@ -19,7 +19,6 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.impl.BaseRouteInfo;
-import org.webpieces.router.impl.DynamicInfo;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.hooks.ControllerInfo;
@@ -31,7 +30,11 @@ import org.webpieces.router.impl.loader.svc.SvcProxyFixedRoutes;
 import org.webpieces.router.impl.loader.svc.SvcProxyForContent;
 import org.webpieces.router.impl.loader.svc.SvcProxyForHtml;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
+import org.webpieces.router.impl.routebldr.RouteInfo;
+import org.webpieces.router.impl.routing.DynamicInfo;
 import org.webpieces.util.filters.Service;
+
+import com.google.inject.Injector;
 
 @Singleton
 public class ControllerLoader {
@@ -60,8 +63,8 @@ public class ControllerLoader {
 		this.serviceInvoker = serviceInvoker;
 	}
 	
-	public LoadedController loadControllerIntoMetaNotFound(BaseRouteInfo base, boolean isInitializingAllControllers) {
-		ToResolveInfo resolveInfo = new ToResolveInfo(base.getInjector(), base.getControllerMethodString(), base.getRouteModuleInfo().packageName);
+	public LoadedController loadNotFoundController(Injector injector, RouteInfo base, boolean isInitializingAllControllers) {
+		ToResolveInfo resolveInfo = new ToResolveInfo(injector, base.getControllerMethodString(), base.getRouteModuleInfo().packageName);
 		ResolvedMethod method = resolver.resolveControllerClassAndMethod(resolveInfo);
 		
 		//This is a hook for the dev server with auto-compile (if isInitializing, dev server skips this piece)
@@ -71,8 +74,8 @@ public class ControllerLoader {
 		return loader.loadControllerIntoMeta(info, method, isInitializingAllControllers);
 	}
 	
-	public LoadedController loadControllerIntoMetaErro(BaseRouteInfo base, boolean isInitializingAllControllers) {
-		ToResolveInfo resolveInfo = new ToResolveInfo(base.getInjector(), base.getControllerMethodString(), base.getRouteModuleInfo().packageName);
+	public LoadedController loadController(Injector injector, RouteInfo base, boolean isInitializingAllControllers) {
+		ToResolveInfo resolveInfo = new ToResolveInfo(injector, base.getControllerMethodString(), base.getRouteModuleInfo().packageName);
 		ResolvedMethod method = resolver.resolveControllerClassAndMethod(resolveInfo);
 		
 		//This is a hook for the dev server with auto-compile (if isInitializing, dev server skips this piece)
@@ -88,30 +91,29 @@ public class ControllerLoader {
 	 * 
 	 * @param meta
 	 * @param isInitializingAllControllers
+	 * @return 
 	 */
-	public void loadControllerIntoMetaHtm(RouteMeta meta, boolean isInitializingAllControllers) {
-		ToResolveInfo resolveInfo = new ToResolveInfo(meta.getInjector(), meta.getRoute().getControllerMethodString(), meta.getPackageContext());
-
+	public LoadedController loadHtmlController(Injector injector, RouteInfo base, boolean isInitializingAllControllers, boolean isPostOnly) {
+		ToResolveInfo resolveInfo = new ToResolveInfo(injector, base.getControllerMethodString(), base.getRouteModuleInfo().packageName);
 		ResolvedMethod method = resolver.resolveControllerClassAndMethod(resolveInfo);
 		
 		//This is a hook for the dev server with auto-compile (if isInitializing, dev server skips this piece)
 		//if not initializing, dev server does this piece.  Production does the opposite.
 
-		ControllerInfo info = new ControllerInfo(meta.getInjector());
+		ControllerInfo info = new ControllerInfo(resolveInfo.getInjector());
 		LoadedController loadedController = loader.loadControllerIntoMeta(info, method, isInitializingAllControllers);
 		if(loadedController == null)
-			return;
+			return null;
 		
-		preconditionCheck(info, loadedController.getControllerMethod(), meta.getRoute().isPostOnly());
+		preconditionCheck(info, loadedController.getControllerMethod(), isPostOnly);
 		
-		meta.setControllerInstance(loadedController.getControllerInstance());
-		meta.setMethod(loadedController.getControllerMethod());
-		meta.setMethodParamNames(loadedController.getParamNames());
+		return loadedController;
 	}
 
 	public void loadControllerIntoMetaContent(RouteMeta meta, boolean isInitializingAllControllers) {
+		//NOTE: We have to resolve both in production AND in DevServer right away so that we can give the stack trace
+		//with customer code of the offending line
 		ToResolveInfo resolveInfo = new ToResolveInfo(meta.getInjector(), meta.getRoute().getControllerMethodString(), meta.getPackageContext());
-
 		ResolvedMethod method = resolver.resolveControllerClassAndMethod(resolveInfo);
 		
 		//This is a hook for the dev server with auto-compile (if isInitializing, dev server skips this piece)
@@ -129,13 +131,6 @@ public class ControllerLoader {
 		meta.setContentBinder(binder);
 	}
 	
-	public void loadFiltersIntoHtmlMeta(RouteMeta m, boolean isInitializingAllFilters) {
-		Service<MethodMeta, Action> svc = new SvcProxyForHtml(translator, config, serviceInvoker);
-		ServiceCreationInfo info = new ServiceCreationInfo(m.getInjector(), svc, m.getFilters());
-		Service<MethodMeta, Action> resp = loader.createServiceFromFilters(info, isInitializingAllFilters);
-		m.setService(resp);
-	}
-	
 	public void loadFiltersIntoContentMeta(RouteMeta m, boolean isInitializingAllFilters) {
 		Service<MethodMeta, Action> svc = new SvcProxyForContent(translator, serviceInvoker);
 		ServiceCreationInfo info = new ServiceCreationInfo(m.getInjector(), svc, m.getFilters());
@@ -143,9 +138,8 @@ public class ControllerLoader {
 		m.setService(resp);
 	}
 
-	public Service<MethodMeta, Action> loadErrorFilters(BaseRouteInfo neededData, boolean isInitializingAllFilters) {
-		Service<MethodMeta, Action> svc = new SvcProxyFixedRoutes(serviceInvoker);
-		ServiceCreationInfo info = new ServiceCreationInfo(neededData.getInjector(), svc, neededData.getFilters());
+	public Service<MethodMeta, Action> loadFilters(BaseRouteInfo neededData, boolean isInitializingAllFilters) {
+		ServiceCreationInfo info = new ServiceCreationInfo(neededData.getInjector(), neededData.getService(), neededData.getFilters());
 		return loader.createServiceFromFilters(info, isInitializingAllFilters);		
 	}
 	
@@ -238,10 +232,10 @@ public class ControllerLoader {
 		}
 	}
 
-	
-	public DynamicInfo loadControllerAndService(BaseRouteInfo route, boolean b) {
-		LoadedController controllerInst = loadControllerIntoMetaErro(route, false);
-		Service<MethodMeta, Action> service = loadErrorFilters(route, false);
+	//Service<MethodMeta, Action> svc = new SvcProxyFixedRoutes(serviceInvoker);
+	public DynamicInfo loadControllerAndService(BaseRouteInfo route, boolean isInitializingAllControllers) {
+		LoadedController controllerInst = loadController(route.getInjector(), route.getRouteInfo(), isInitializingAllControllers);
+		Service<MethodMeta, Action> service = loadFilters(route, isInitializingAllControllers);
 		return new DynamicInfo(controllerInst, service);
 	}
 }

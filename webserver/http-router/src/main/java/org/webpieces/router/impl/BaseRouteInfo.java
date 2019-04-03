@@ -2,29 +2,35 @@ package org.webpieces.router.impl;
 
 import java.util.List;
 
+import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.dto.RouteType;
+import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.router.impl.model.RouteModuleInfo;
+import org.webpieces.router.impl.routebldr.RouteInfo;
+import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;
 
 public class BaseRouteInfo {
 
 	private final Injector injector;
-	private final RouteModuleInfo routeModuleInfo;
-	private final String controllerMethodString;
 	private final List<FilterInfo<?>> filters;
 	private final RouteType routeType;
+	private final RouteInfo routeInfo;
+	private Service<MethodMeta, Action> service;
 
-	public BaseRouteInfo(Injector injector, RouteModuleInfo routeModuleInfo, String controllerMethodString, List<FilterInfo<?>> filters, RouteType routeType) {
+	public BaseRouteInfo(Injector injector, RouteInfo routeInfo, Service<MethodMeta, Action> service, List<FilterInfo<?>> filters, RouteType routeType) {
 		this.injector = injector;
-		this.routeModuleInfo = routeModuleInfo;
-		this.controllerMethodString = controllerMethodString;
+		this.routeInfo = routeInfo;
+		this.service = service;
 		this.filters = filters;
 		this.routeType = routeType;
 	}
 
+
+
 	public String getControllerMethodString() {
-		return controllerMethodString;
+		return routeInfo.getControllerMethodString();
 	}
 
 	public List<FilterInfo<?>> getFilters() {
@@ -32,7 +38,11 @@ public class BaseRouteInfo {
 	}
 
 	public RouteModuleInfo getRouteModuleInfo() {
-		return routeModuleInfo;
+		return routeInfo.getRouteModuleInfo();
+	}
+	
+	public RouteInfo getRouteInfo() {
+		return routeInfo;
 	}
 
 	public Injector getInjector() {
@@ -41,6 +51,10 @@ public class BaseRouteInfo {
 
 	public RouteType getRouteType() {
 		return routeType;
+	}
+
+	public Service<MethodMeta, Action> getService() {
+		return service;
 	}
 	
 }

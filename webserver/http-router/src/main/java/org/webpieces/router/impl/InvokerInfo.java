@@ -1,6 +1,7 @@
 package org.webpieces.router.impl;
 
 import org.webpieces.router.impl.model.RouteModuleInfo;
+import org.webpieces.router.impl.routing.DynamicInfo;
 
 public class InvokerInfo {
 

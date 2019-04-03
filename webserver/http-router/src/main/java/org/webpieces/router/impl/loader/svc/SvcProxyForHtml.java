@@ -11,23 +11,23 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.ctx.SessionImpl;
+import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 
 public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 
-	private ParamToObjectTranslatorImpl translator;
-	private RouterConfig config;
-	private ServiceInvoker invoker;
+	private final ParamToObjectTranslatorImpl translator;
+	private final RouterConfig config;
+	private final ServiceInvoker invoker;
 	
-	public SvcProxyForHtml(ParamToObjectTranslatorImpl translator, RouterConfig config, ServiceInvoker invoker) {
-		this.translator = translator;
-		this.config = config;
-		this.invoker = invoker;
+	public SvcProxyForHtml(SvcProxyLogic svcProxyLogic) {
+		this.translator = svcProxyLogic.getTranslator();
+		this.config = svcProxyLogic.getConfig();
+		this.invoker = svcProxyLogic.getServiceInvoker();
 	}
-	
+
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {
 		try {
@@ -53,7 +53,7 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 	
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		RouteInfoGeneric info = (RouteInfoGeneric) meta.getRoute();
+		RouteInfoForHtml info = (RouteInfoForHtml) meta.getRoute();
 		
 		tokenCheck(info, meta.getCtx());
 		
@@ -74,7 +74,7 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 	 * a login!!
 	 * 
 	 */
-	private void tokenCheck(RouteInfoGeneric info, RequestContext ctx) {
+	private void tokenCheck(RouteInfoForHtml info, RequestContext ctx) {
 		RouterRequest req = ctx.getRequest();
 
 		if(req.multiPartFields.size() == 0)

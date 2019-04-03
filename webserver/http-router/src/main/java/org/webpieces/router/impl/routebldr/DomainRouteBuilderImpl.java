@@ -8,22 +8,27 @@ import java.util.Map.Entry;
 
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.StaticRoute;
-import org.webpieces.router.impl.model.LogicHolder;
+import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.routing.DomainRouter;
 import org.webpieces.router.impl.routing.Router;
 
 public class DomainRouteBuilderImpl implements DomainRouteBuilder {
-	
+
+	private final RouteBuilderLogic holder;
+
 	private final RouteBuilderImpl leftOverDomainsBuilder;
 	private final Map<String, RouteBuilderImpl> domainToRouteBuilder = new HashMap<>();
-	private final LogicHolder holder;
 	private final List<StaticRoute> allStaticRoutes;
+
+	private ResettingLogic resettingLogic;
 	
-	public DomainRouteBuilderImpl(LogicHolder holder) {
+	public DomainRouteBuilderImpl(RouteBuilderLogic holder, ResettingLogic resettingLogic) {
 		this.holder = holder;
+		this.resettingLogic = resettingLogic;
 		this.allStaticRoutes = new ArrayList<>();
-		this.leftOverDomainsBuilder = new RouteBuilderImpl("<any>", allStaticRoutes, holder);
+		this.leftOverDomainsBuilder = new RouteBuilderImpl("<any>", allStaticRoutes, holder, resettingLogic);
 	}
 
 	@Override
@@ -37,7 +42,7 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 		if(builder != null)
 			return builder;
 		
-		builder = new RouteBuilderImpl(domain, allStaticRoutes, holder);
+		builder = new RouteBuilderImpl(domain, allStaticRoutes, holder, resettingLogic);
 		domainToRouteBuilder.put(domain, builder);
 		return builder;
 	}

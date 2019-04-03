@@ -24,7 +24,7 @@ import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
-import org.webpieces.router.impl.model.LogicHolder;
+import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routebldr.CurrentPackage;
@@ -43,41 +43,35 @@ import com.google.inject.util.Modules;
 public class RouteLoader {
 	private static final Logger log = LoggerFactory.getLogger(RouteLoader.class);
 	
-	private final RouterConfig config;
-	private final ControllerLoader controllerFinder;
-	private CompressionCacheSetup compressionCacheSetup;
+	private final CompressionCacheSetup compressionCacheSetup;
 	
-	private PluginSetup pluginSetup;
-
-	private ManagedBeanMeta beanMeta;
-
-	private ObjectTranslator objectTranslator;
-
-	private RouteInvoker2 invoker2;
-
-	private MasterRouter masterRouter;
+	private final PluginSetup pluginSetup;
+	private final ManagedBeanMeta beanMeta;
+	private final ObjectTranslator objectTranslator;
+	private final MasterRouter masterRouter;
+	private final RouterConfig config;
+	private final RouteBuilderLogic routeBuilderLogic;
 
 	private ReverseRoutes reverseRoutes;
-	
+
+
 	@Inject
 	public RouteLoader(
 		RouterConfig config, 
-		RouteInvoker2 invoker2, 
 		MasterRouter masterRouter,
-		ControllerLoader controllerFinder,
 		CompressionCacheSetup compressionCacheSetup,
 		PluginSetup pluginSetup,
 		ManagedBeanMeta beanMeta,
-		ObjectTranslator objectTranslator
+		ObjectTranslator objectTranslator,
+		RouteBuilderLogic routeBuilderLogic
 	) {
 		this.config = config;
-		this.invoker2 = invoker2;
 		this.masterRouter = masterRouter;
-		this.controllerFinder = controllerFinder;
 		this.compressionCacheSetup = compressionCacheSetup;
 		this.pluginSetup = pluginSetup;
 		this.beanMeta = beanMeta;
 		this.objectTranslator = objectTranslator;
+		this.routeBuilderLogic = routeBuilderLogic;
 	}
 	
 	public WebAppMeta load(ClassForName loader, Consumer<Injector> startupFunction) {
@@ -201,13 +195,12 @@ public class RouteLoader {
 		log.info("adding routes");
 		
 		reverseRoutes = new ReverseRoutes(config);
-		//routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
-		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, injector, config, invoker2);
-		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(holder);
+		ResettingLogic resettingLogic = new ResettingLogic(reverseRoutes, injector);
+		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic);
 		
 		routingHolder.setReverseRouteLookup(reverseRoutes);
-		invoker2.init(reverseRoutes);
-		
+		routeBuilderLogic.init(reverseRoutes);
+				
 		List<Routes> all = new ArrayList<>();
 		all.addAll(rm.getRouteModules()); //the core application routes
 		
@@ -238,6 +231,7 @@ public class RouteLoader {
 		compressionCacheSetup.setupCache(routerBuilder.getStaticRoutes());
 	}
 
+	@SuppressWarnings("deprecation")
 	private Object newInstance(Class<?> clazz) {
 		try {
 			return clazz.newInstance();

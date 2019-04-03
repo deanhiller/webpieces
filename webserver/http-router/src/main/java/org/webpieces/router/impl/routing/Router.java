@@ -9,8 +9,6 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.AbstractRouteMeta;
-import org.webpieces.router.impl.InternalErrorRouter;
-import org.webpieces.router.impl.NotFoundRouter;
 import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.logging.Logger;
@@ -28,10 +26,11 @@ public class Router extends ScopedRouter {
 			RouterInfo routerInfo, 
 			Map<String, ScopedRouter> pathPrefixToNextRouter, 
 			List<AbstractRouteMeta> routes, 
+			List<AbstractRouter> routers, 
 			NotFoundRouter notFoundRouter, 
 			InternalErrorRouter internalErrorRouter
 	) {
-		super(routerInfo, pathPrefixToNextRouter, routes);
+		super(routerInfo, pathPrefixToNextRouter, routes, routers);
 		this.pageNotFoundRouter = notFoundRouter;
 		this.internalSvrErrorRouter = internalErrorRouter;
 	}
@@ -64,6 +63,7 @@ public class Router extends ScopedRouter {
 		}
 		
 		return future.handle((r, t) -> {
+			log.warn("error", t);
 			if(t instanceof NotFoundException)
 				return notFound((NotFoundException)t, ctx, responseCb);
 			else if(t != null) {

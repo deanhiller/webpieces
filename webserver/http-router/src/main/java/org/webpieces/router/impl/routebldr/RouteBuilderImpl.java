@@ -11,14 +11,17 @@ import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.BaseRouteInfo;
 import org.webpieces.router.impl.FilterInfo;
-import org.webpieces.router.impl.InternalErrorRouter;
-import org.webpieces.router.impl.NotFoundRouter;
+import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
-import org.webpieces.router.impl.model.LogicHolder;
+import org.webpieces.router.impl.loader.svc.SvcProxyFixedRoutes;
+import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
+import org.webpieces.router.impl.routing.AbstractRouter;
+import org.webpieces.router.impl.routing.InternalErrorRouter;
+import org.webpieces.router.impl.routing.NotFoundRouter;
 import org.webpieces.router.impl.routing.Router;
 import org.webpieces.router.impl.routing.ScopedRouter;
 import org.webpieces.util.filters.Service;
@@ -35,9 +38,12 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 
 	private RouteInfo pageNotFoundInfo;
 	private RouteInfo internalErrorInfo;
+
+	private LoadedController notFoundControllerInst;
+	private LoadedController internalErrorController;
 	
-	public RouteBuilderImpl(String domain, List<StaticRoute> allStaticRoutes, LogicHolder holder) {
-		super(new RouterInfo(domain, ""), allStaticRoutes, holder);
+	public RouteBuilderImpl(String domain, List<StaticRoute> allStaticRoutes, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+		super(new RouterInfo(domain, ""), allStaticRoutes, holder, resettingLogic);
 	}
 
 	@Override
@@ -64,6 +70,10 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 			throw new IllegalStateException("Page Not found for domain="+routerInfo.getDomain()+" was already set.  cannot set again.  previous="+pageNotFoundInfo);
 		RouteInfo route = new RouteInfo(CurrentPackage.get(), controllerMethod);
 		log.info("scope:'"+routerInfo+"' adding PAGE_NOT_FOUND route method="+route.getControllerMethodString());
+		
+		//MUST DO loadController HERE so stack trace has customer's line in it so he knows EXACTLY what 
+		//he did wrong when reading the exception!!
+		this.notFoundControllerInst = holder.getFinder().loadNotFoundController(resettingLogic.getInjector(), route, true);
 		this.pageNotFoundInfo = route;
 	}
 
@@ -73,24 +83,31 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 			throw new IllegalStateException("Internal Error Route for domain="+routerInfo.getDomain()+" was already set.  cannot set again");
 		RouteInfo route = new RouteInfo(CurrentPackage.get(), controllerMethod);
 		log.info("scope:'"+routerInfo+"' adding INTERNAL_SVR_ERROR route method="+route.getControllerMethodString());
+		
+		//MUST DO loadController HERE so stack trace has customer's line in it so he knows EXACTLY what 
+		//he did wrong when reading the exception!!
+		this.internalErrorController = holder.getFinder().loadController(resettingLogic.getInjector(), route, true);
 		this.internalErrorInfo = route;
 	}
 
 	public Router buildRouter() {
 		List<AbstractRouteMeta> routes = buildRoutes(routeFilters);
+		List<AbstractRouter> routers = buildRoutes2(routeFilters);
+
 		Map<String, ScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
-		
+
+		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(holder.getSvcProxyLogic().getServiceInvoker());
+
 		BaseRouteInfo notFoundRoute = new BaseRouteInfo(
-				holder.getInjector(), pageNotFoundInfo.getRouteModuleInfo(), 
-				pageNotFoundInfo.getControllerMethodString(), notFoundFilters,
+				resettingLogic.getInjector(), pageNotFoundInfo, 
+				svcProxy, notFoundFilters,
 				RouteType.NOT_FOUND);
 		BaseRouteInfo internalErrorRoute = new BaseRouteInfo(
-				holder.getInjector(), internalErrorInfo.getRouteModuleInfo(), 
-				internalErrorInfo.getControllerMethodString(), internalErrorFilters,
+				resettingLogic.getInjector(), internalErrorInfo, 
+				svcProxy, internalErrorFilters,
 				RouteType.INTERNAL_SERVER_ERROR);
 
-		LoadedController internalErrorController = holder.getFinder().loadControllerIntoMetaErro(internalErrorRoute, true);
-		Service<MethodMeta, Action> svc = holder.getFinder().loadErrorFilters(internalErrorRoute, true);
+		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorRoute, true);
 		InternalErrorRouter internalErrorRouter = new InternalErrorRouter(holder.getRouteInvoker2(), internalErrorRoute, internalErrorController, svc);
 
 		//NOTE: We do NOT create a Service<MethodMeta, Action> here with Filters
@@ -98,9 +115,8 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		//on the request coming in and then we form the service per request
 		//WE could turn this off and expose an addGlobalNotFoundFilter that applies always to every not found????
 		//it's faster performance due to know pattern matching every request I guess
-		LoadedController notFoundControllerInst = holder.getFinder().loadControllerIntoMetaNotFound(notFoundRoute, true);
 		NotFoundRouter notFoundRouter = new NotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst);
-		return new Router(routerInfo, pathToRouter, routes, notFoundRouter, internalErrorRouter);
+		return new Router(routerInfo, pathToRouter, routes, routers, notFoundRouter, internalErrorRouter);
 	}
 
 }

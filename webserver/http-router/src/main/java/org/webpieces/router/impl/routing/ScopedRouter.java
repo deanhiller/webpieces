@@ -18,12 +18,14 @@ public class ScopedRouter {
 
 	protected final RouterInfo routerInfo;
 	private final Map<String, ScopedRouter> pathPrefixToNextRouter;
+	private List<AbstractRouter> routers;
 	private final List<AbstractRouteMeta> routes;
 
-	public ScopedRouter(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<AbstractRouteMeta> routes) {
+	public ScopedRouter(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<AbstractRouteMeta> routes, List<AbstractRouter> routers) {
 		this.routerInfo = routerInfo;
 		this.pathPrefixToNextRouter = pathPrefixToNextRouter;
 		this.routes = routes;
+		this.routers = routers;
 	}
 	
 	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
@@ -53,6 +55,14 @@ public class ScopedRouter {
 	}
 	
 	private CompletableFuture<Void> findAndInvokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
+		for(AbstractRouter router : routers) {
+			MatchResult2 result = router.matches2(ctx.getRequest(), subPath);
+			if(result.isMatches()) {
+				ctx.setPathParams(result.getPathParams());
+				return router.invoke(ctx, responseCb, result.getPathParams());
+			}			
+		}
+		
 		for(AbstractRouteMeta meta : routes) {
 			MatchResult2 result = meta.matches2(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
