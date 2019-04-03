@@ -20,7 +20,7 @@ import org.webpieces.router.impl.ctx.ResponseFailureProcessor;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.routing.InternalErrorRouteFailedException;
+import org.webpieces.router.impl.routers.InternalErrorRouteFailedException;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

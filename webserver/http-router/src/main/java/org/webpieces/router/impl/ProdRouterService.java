@@ -11,7 +11,7 @@ import org.webpieces.router.api.RouterService;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.routing.MasterRouter;
+import org.webpieces.router.impl.routers.MasterRouter;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

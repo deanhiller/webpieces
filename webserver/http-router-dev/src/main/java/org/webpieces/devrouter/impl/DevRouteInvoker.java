@@ -24,7 +24,7 @@ import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routebldr.RouteInfo;
-import org.webpieces.router.impl.routing.DynamicInfo;
+import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

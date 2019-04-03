@@ -38,7 +38,7 @@ import org.webpieces.router.impl.loader.svc.RouteData;
 import org.webpieces.router.impl.loader.svc.RouteInfoForContent;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
-import org.webpieces.router.impl.routing.DynamicInfo;
+import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 

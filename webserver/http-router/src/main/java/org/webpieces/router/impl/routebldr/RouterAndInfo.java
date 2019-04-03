@@ -2,7 +2,7 @@ package org.webpieces.router.impl.routebldr;
 
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
-import org.webpieces.router.impl.routing.HtmlRouter;
+import org.webpieces.router.impl.routers.HtmlRouter;
 
 public class RouterAndInfo {
 

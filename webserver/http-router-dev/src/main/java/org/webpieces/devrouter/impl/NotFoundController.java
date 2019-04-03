@@ -15,9 +15,9 @@ import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.RoutingHolder;
-import org.webpieces.router.impl.routing.DomainRouter;
-import org.webpieces.router.impl.routing.Router;
-import org.webpieces.router.impl.routing.ScopedRouter;
+import org.webpieces.router.impl.routers.DomainRouter;
+import org.webpieces.router.impl.routers.Router;
+import org.webpieces.router.impl.routers.ScopedRouter;
 
 @Singleton
 public class NotFoundController {

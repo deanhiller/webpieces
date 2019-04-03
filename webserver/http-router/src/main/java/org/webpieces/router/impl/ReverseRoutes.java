@@ -21,7 +21,7 @@ import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.plugins.ReverseRouteLookup;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
-import org.webpieces.router.impl.routing.HtmlRouter;
+import org.webpieces.router.impl.routers.HtmlRouter;
 
 public class ReverseRoutes implements ReverseRouteLookup {
 

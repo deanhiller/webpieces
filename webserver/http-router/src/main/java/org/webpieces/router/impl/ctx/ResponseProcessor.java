@@ -28,7 +28,7 @@ import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
-import org.webpieces.router.impl.routing.HtmlRouter;
+import org.webpieces.router.impl.routers.HtmlRouter;
 
 public class ResponseProcessor extends Processor {
 	

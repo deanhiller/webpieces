@@ -15,7 +15,7 @@ import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.routing.MasterRouter;
+import org.webpieces.router.impl.routers.MasterRouter;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;

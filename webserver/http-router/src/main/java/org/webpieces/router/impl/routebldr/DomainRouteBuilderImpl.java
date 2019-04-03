@@ -11,8 +11,8 @@ import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
-import org.webpieces.router.impl.routing.DomainRouter;
-import org.webpieces.router.impl.routing.Router;
+import org.webpieces.router.impl.routers.DomainRouter;
+import org.webpieces.router.impl.routers.Router;
 
 public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 

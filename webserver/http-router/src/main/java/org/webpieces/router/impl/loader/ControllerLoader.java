@@ -24,7 +24,7 @@ import org.webpieces.router.impl.loader.svc.ServiceInvoker;
 import org.webpieces.router.impl.loader.svc.SvcProxyForContent;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.router.impl.routebldr.RouteInfo;
-import org.webpieces.router.impl.routing.DynamicInfo;
+import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;
