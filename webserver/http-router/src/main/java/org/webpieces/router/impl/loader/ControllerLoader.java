@@ -14,13 +14,11 @@ import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.impl.BaseRouteInfo;
 import org.webpieces.router.impl.FilterInfo;
-import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.hooks.ServiceCreationInfo;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.router.impl.model.BodyContentBinderChecker;
 import org.webpieces.router.impl.routebldr.RouteInfo;
-import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;
@@ -53,18 +51,11 @@ public class ControllerLoader {
 	/**
 	 * isInitializingAllControllers is true if in process of initializing ALL controllers and false if just being called to
 	 * initialize on controller(which is done only in the DevServer)
-	 * 
 	 */
 	public LoadedController loadGenericController(Injector injector, RouteInfo base, boolean isInitializingAllControllers) {
-		//NOTE: We have to resolve both in production AND in DevServer right away so that we can give the stack trace
-		//with customer code of the offending line if this first piece fails
-		ToResolveInfo resolveInfo = new ToResolveInfo(injector, base.getControllerMethodString(), base.getRouteModuleInfo().packageName);
-		ResolvedMethod method = resolver.resolveControllerClassAndMethod(resolveInfo);
+		ResolvedMethod method = resolver.resolveControllerClassAndMethod(base);
 		
-		//This next piece is a hook for the dev server with auto-compile (if isInitializing, dev server skips this piece)
-		//if not initializing, dev server does this piece.  Production does the opposite.
-		ControllerInfo info = new ControllerInfo(resolveInfo.getInjector());
-		return loader.loadControllerIntoMeta(info, method, isInitializingAllControllers);
+		return loader.loadControllerIntoMeta(injector, method, isInitializingAllControllers);
 	}
 	
 	public Service<MethodMeta, Action> loadFilters(BaseRouteInfo neededData, boolean isInitializingAllFilters) {
@@ -76,18 +67,6 @@ public class ControllerLoader {
 		return loader.createServiceFromFilters(info, isInitializingAllFilters);
 	}
 
-	public DynamicInfo loadGenericControllerAndService(BaseRouteInfo route, boolean isInitializingAllControllers) {
-		LoadedController controllerInst = loadGenericController(route.getInjector(), route.getRouteInfo(), isInitializingAllControllers);
-		Service<MethodMeta, Action> service = loadFilters(route, isInitializingAllControllers);
-		return new DynamicInfo(controllerInst, service);
-	}
-
-	public DynamicInfo loadControllerAndService(BaseRouteInfo route, boolean isInitializingAllControllers, boolean isPostOnly) {
-		LoadedController controllerInst = loadHtmlController(route.getInjector(), route.getRouteInfo(), isInitializingAllControllers, isPostOnly);
-		Service<MethodMeta, Action> service = loadFilters(route, isInitializingAllControllers);
-		return new DynamicInfo(controllerInst, service);
-	}
-	
 	private void preconditionCheck(Object meta, Method controllerMethod, boolean isPostOnly) {
 		if(isPostOnly) {
 			Class<?> clazz = controllerMethod.getReturnType();

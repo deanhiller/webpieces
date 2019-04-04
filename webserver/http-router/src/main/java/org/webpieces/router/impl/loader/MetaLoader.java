@@ -12,7 +12,6 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.annotations.Param;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.ChainFilters;
-import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.util.filters.Service;
 
@@ -23,7 +22,7 @@ public class MetaLoader {
 	public MetaLoader() {
 	}
 
-	public LoadedController loadInstIntoMeta(ControllerInfo meta, Object controllerInst, String methodStr) {
+	public LoadedController loadInstIntoMeta(Object controllerInst, String methodStr) {
 		Method[] methods = controllerInst.getClass().getMethods();
 		List<Method> matches = new ArrayList<>();
 		for(Method m : methods) {

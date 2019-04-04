@@ -8,8 +8,6 @@ import javax.inject.Singleton;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.FilterInfo;
-import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.hooks.ServiceCreationInfo;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
@@ -25,18 +23,17 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 		this.loader = loader;
 	}
 
-	protected LoadedController loadRouteImpl(ControllerInfo meta, ResolvedMethod method) {
+	protected LoadedController loadRouteImpl(Injector injector, ResolvedMethod method) {
 		String controllerStr = method.getControllerStr();
 		String methodStr = method.getMethodStr();
 		
-		Injector injector = meta.getInjector();
 		Object controllerInst = createController(injector, controllerStr);
 		
 		Singleton singleton = controllerInst.getClass().getAnnotation(Singleton.class);
 		if(singleton == null)
 			throw new IllegalArgumentException("EVERY controller must be marked with @javax.inject.Singleton not @com.google.inject.Singleton. bad controller="+controllerInst.getClass().getName());
 		
-		return loader.loadInstIntoMeta(meta, controllerInst, methodStr);
+		return loader.loadInstIntoMeta(controllerInst, methodStr);
 	}
 
 	protected abstract Object createController(Injector injector, String controllerStr);

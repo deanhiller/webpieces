@@ -3,7 +3,6 @@ package org.webpieces.devrouter.impl;
 import javax.inject.Inject;
 
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.hooks.ServiceCreationInfo;
 import org.webpieces.router.impl.loader.AbstractLoader;
@@ -31,12 +30,12 @@ public class DevLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 	
 	@Override
-	public LoadedController loadControllerIntoMeta(ControllerInfo meta, ResolvedMethod method,
+	public LoadedController loadControllerIntoMeta(Injector injector, ResolvedMethod method,
 			boolean isInitializingAllControllers) {
 		if(isInitializingAllControllers)
 			return null; //skip on startup
 		
-		return super.loadRouteImpl(meta, method);
+		return super.loadRouteImpl(injector, method);
 	}
 
 	@Override

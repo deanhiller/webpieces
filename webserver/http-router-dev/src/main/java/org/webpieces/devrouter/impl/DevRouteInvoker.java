@@ -68,7 +68,10 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		DynamicInfo newInfo = info;
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
-			newInfo = controllerFinder.loadGenericControllerAndService(invokeInfo.getRoute(), false);
+			BaseRouteInfo route = invokeInfo.getRoute();
+			LoadedController controllerInst = controllerFinder.loadGenericController(route.getInjector(), route.getRouteInfo(), false);
+			Service<MethodMeta, Action> service = controllerFinder.loadFilters(route, false);
+			newInfo = new DynamicInfo(controllerInst, service);
 		}
 		return super.invokeErrorController(invokeInfo, newInfo, data);
 	}

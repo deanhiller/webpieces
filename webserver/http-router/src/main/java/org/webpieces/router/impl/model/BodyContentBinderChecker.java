@@ -12,7 +12,6 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.extensions.BodyContentBinder;
-import org.webpieces.router.impl.hooks.ControllerInfo;
 
 import com.google.inject.Injector;
 

@@ -1,14 +1,10 @@
 package org.webpieces.router.impl.loader;
 
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.hooks.ClassForName;
-import org.webpieces.router.impl.hooks.ControllerInfo;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.hooks.ServiceCreationInfo;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
@@ -33,10 +29,10 @@ public class ProdLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 
 	@Override
-	public LoadedController loadControllerIntoMeta(ControllerInfo meta, ResolvedMethod method,
+	public LoadedController loadControllerIntoMeta(Injector injector, ResolvedMethod method,
 			boolean isInitializingAllControllers) {
 		try {
-			return loadRouteImpl(meta, method);
+			return loadRouteImpl(injector, method);
 		} catch(RuntimeException e) {
 			String msg = "error=\n'"+e.getMessage()+"'\n"
 					+"Check the stack trace for which client calls were calling addRoute or addXXXXRoute for which route is incorrect";
