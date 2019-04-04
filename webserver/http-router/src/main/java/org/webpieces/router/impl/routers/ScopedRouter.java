@@ -56,7 +56,7 @@ public class ScopedRouter {
 	
 	private CompletableFuture<Void> findAndInvokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
 		for(AbstractRouter router : routers) {
-			MatchResult2 result = router.matches2(ctx.getRequest(), subPath);
+			MatchResult2 result = router.getMatchInfo().matches2(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
 				ctx.setPathParams(result.getPathParams());
 				return router.invoke(ctx, responseCb, result.getPathParams());

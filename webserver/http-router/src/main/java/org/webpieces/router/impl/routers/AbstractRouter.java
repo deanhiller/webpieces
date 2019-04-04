@@ -4,19 +4,17 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.routes.Port;
-import org.webpieces.router.impl.model.MatchResult2;
+import org.webpieces.router.impl.BaseRouteInfo;
 
 public interface AbstractRouter {
 
-	String getFullPath();
-
-	Port getExposedPorts();
-
-	MatchResult2 matches2(RouterRequest request, String subPath);
+	MatchInfo getMatchInfo();
 
 	CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb, Map<String, String> pathParams);
+
+	void setBaseRouteInfo(BaseRouteInfo baseRouteInfo);
+
+	void setDynamicInfo(DynamicInfo dynamicInfo);
 
 }

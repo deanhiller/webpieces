@@ -16,8 +16,6 @@ import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.ReverseRoutes;
-import org.webpieces.router.impl.Route;
-import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.actions.AjaxRedirectImpl;
 import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
@@ -29,6 +27,7 @@ import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routers.HtmlRouter;
+import org.webpieces.router.impl.routers.MatchInfo;
 
 public class ResponseProcessor extends Processor {
 	
@@ -82,21 +81,23 @@ public class ResponseProcessor extends Processor {
 		RouterRequest request = ctx.getRequest();
 		Method method = matchedMeta.getMethod();
 		HtmlRouter nextRequestMeta = reverseRoutes.get(id);
-		
 		if(nextRequestMeta == null)
 			throw new IllegalReturnValueException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
-		else if(!nextRequestMeta.matchesMethod(HttpMethod.GET))
+		
+		MatchInfo matchInfo = nextRequestMeta.getMatchInfo();
+
+		if(!matchInfo.matchesMethod(HttpMethod.GET))
 			throw new IllegalReturnValueException("method='"+method+"' is trying to redirect to routeid="+id+" but that route is not a GET method route and must be");
 
-		Map<String, String> keysToValues = reverseTranslator.formMap(method, nextRequestMeta.getPathParamNames(), args);
+		Map<String, String> keysToValues = reverseTranslator.formMap(method, matchInfo.getPathParamNames(), args);
 
 		Set<String> keySet = keysToValues.keySet();
-		List<String> argNames = nextRequestMeta.getPathParamNames();
+		List<String> argNames = matchInfo.getPathParamNames();
 		if(keySet.size() != argNames.size()) {
 			throw new IllegalReturnValueException("Method='"+method+"' returns a Redirect action with wrong number of arguments.  args="+keySet.size()+" when it should be size="+argNames.size());
 		}
 
-		String path = nextRequestMeta.getFullPath();
+		String path = matchInfo.getFullPath();
 		
 		for(String name : argNames) {
 			String value = keysToValues.get(name);
@@ -105,7 +106,7 @@ public class ResponseProcessor extends Processor {
 			path = path.replace("{"+name+"}", value);
 		}
 
-		boolean isHttpsOnly = nextRequestMeta.getExposedPorts() == Port.HTTPS;
+		boolean isHttpsOnly = matchInfo.getExposedPorts() == Port.HTTPS;
 		
 		//if the request is https, stay in https as everything is accessible on https
 		//if the request is http, then convert to https IF new route is secure

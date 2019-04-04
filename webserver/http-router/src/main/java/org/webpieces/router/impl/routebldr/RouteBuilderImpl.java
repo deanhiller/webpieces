@@ -73,7 +73,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		
 		//MUST DO loadController HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		this.notFoundControllerInst = holder.getFinder().loadController(resettingLogic.getInjector(), route, true);
+		this.notFoundControllerInst = holder.getFinder().loadGenericController(resettingLogic.getInjector(), route, true);
 		this.pageNotFoundInfo = route;
 	}
 
@@ -86,7 +86,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		
 		//MUST DO loadController HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		this.internalErrorController = holder.getFinder().loadController(resettingLogic.getInjector(), route, true);
+		this.internalErrorController = holder.getFinder().loadGenericController(resettingLogic.getInjector(), route, true);
 		this.internalErrorInfo = route;
 	}
 

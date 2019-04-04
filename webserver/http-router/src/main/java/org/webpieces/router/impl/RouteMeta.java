@@ -14,7 +14,6 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.Port;
-import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
@@ -158,12 +157,7 @@ public class RouteMeta extends AbstractRouteMetaImpl {
 	}
 
 	public void loadFiltersIntoMeta(boolean isInitializingAllFilters) {
-		//NEED to move this further up
-		if(getRoute().getRouteType() == RouteType.CONTENT) {
-			controllerFinder.loadFiltersIntoContentMeta(this, isInitializingAllFilters);
-		} else {
-			throw new IllegalStateException("oops="+getRoute().getRouteType());
-		}
+		throw new IllegalStateException("oops="+getRoute().getRouteType());
 	}
 
 	public String getFullPath() {

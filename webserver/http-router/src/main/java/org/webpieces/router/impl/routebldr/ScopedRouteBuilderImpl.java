@@ -4,21 +4,16 @@ import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import java.io.File;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
 import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Port;
@@ -27,21 +22,22 @@ import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.BaseRouteInfo;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.ResettingLogic;
-import org.webpieces.router.impl.Route;
-import org.webpieces.router.impl.RouteImpl;
-import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.StaticRouteMeta;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.dto.RouteType;
+import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
+import org.webpieces.router.impl.loader.svc.SvcProxyForContent;
 import org.webpieces.router.impl.loader.svc.SvcProxyForHtml;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractRouter;
+import org.webpieces.router.impl.routers.ContentRouter;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.routers.HtmlRouter;
+import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.router.impl.routers.ScopedRouter;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
@@ -59,8 +55,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	protected final RouterInfo routerInfo;
 	private final Map<String, ScopedRouteBuilderImpl> pathToBuilder = new HashMap<>();
 
-	private List<RouterAndInfo> newDynamicRoutes = new ArrayList<>();
-	private final List<RouteMeta> dynamicRoutes = new ArrayList<>();
+	private final List<RouterAndInfo> newDynamicRoutes = new ArrayList<>();
 	private final List<StaticRouteMeta> staticRoutes = new ArrayList<>();
 
 	private List<StaticRoute> allStaticRoutes;
@@ -72,16 +67,21 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		this.resettingLogic = resettingLogic;
 	}
 	
-	private RouteMeta addContentRouter(Route r, boolean isContentRoute) {
-		log.info("scope:'"+routerInfo+"' adding route=(port="+r.getExposedPorts()+")"+r.getMethod()+" "+r.getFullPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, resettingLogic.getInjector(), holder.getFinder(), CurrentPackage.get(), holder.getUrlEncoding());
+	@Override
+	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod) {
+		UrlPath p = new UrlPath(routerInfo, path);
+		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		holder.getFinder().loadControllerIntoMetaContent(meta, true);
-
-		dynamicRoutes.add(meta);
+		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo, true);
 		
-		return meta;
+		MatchInfo matchInfo = new MatchInfo(p, port, method, holder.getUrlEncoding());
+		ContentRouter router = new ContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
+		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), container.getBinder());
+		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getLoadedController(), svc);
+		
+		newDynamicRoutes.add(routerAndInfo);
+		log.info("scope:'"+routerInfo+"' added content route="+matchInfo+" method="+routeInfo.getControllerMethodString());
 	}
 	
 	@Override
@@ -102,55 +102,16 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 
 		//MUST DO loadControllerIntoMetat HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		LoadedController loadedController = holder.getFinder().loadController(resettingLogic.getInjector(), routeInfo, true);
-		if(loadedController != null)
-			preconditionCheck(routeInfo, loadedController.getControllerMethod(), isPostOnly);
+		LoadedController loadedController = holder.getFinder().loadHtmlController(resettingLogic.getInjector(), routeInfo, true, isPostOnly);
 		
-		HtmlRouter info = new HtmlRouter(holder.getRouteInvoker2(), p, port, method, routeId, checkToken, holder.getUrlEncoding());		
-		RouterAndInfo routerAndInfo = new RouterAndInfo(info, routeInfo, RouteType.HTML, loadedController);
+		MatchInfo matchInfo = new MatchInfo(p, port, method, holder.getUrlEncoding());
+		HtmlRouter router = new HtmlRouter(holder.getRouteInvoker2(), matchInfo, checkToken);	
+		SvcProxyForHtml svc = new SvcProxyForHtml(holder.getSvcProxyLogic());
+		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, loadedController, svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
-		resettingLogic.getReverseRoutes().addRoute(routeId, info);
-		log.info("scope:'"+routerInfo+"' added route=(port="+info.getExposedPorts()+")"+info.getHttpMethod()+" "+info.getFullPath()+" method="+routeInfo.getControllerMethodString());
-	}
-
-	private void preconditionCheck(Object meta, Method controllerMethod, boolean isPostOnly) {
-		if(isPostOnly) {
-			Class<?> clazz = controllerMethod.getReturnType();
-			if(CompletableFuture.class.isAssignableFrom(clazz)) {
-				Type genericReturnType = controllerMethod.getGenericReturnType();
-				ParameterizedType t = (ParameterizedType) genericReturnType;
-				Type type2 = t.getActualTypeArguments()[0];
-				if(!(type2 instanceof Class))
-					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' for this method="+controllerMethod);
-				@SuppressWarnings("rawtypes")
-				Class<?> type = (Class) type2;
-				if(!Redirect.class.isAssignableFrom(type))
-					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
-			} else if(!Redirect.class.isAssignableFrom(clazz))
-				throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
-		} else {
-			Class<?> clazz = controllerMethod.getReturnType();
-			if(CompletableFuture.class.isAssignableFrom(clazz)) {
-				Type genericReturnType = controllerMethod.getGenericReturnType();
-				ParameterizedType t = (ParameterizedType) genericReturnType;
-				Type type2 = t.getActualTypeArguments()[0];
-				if(!(type2 instanceof Class))
-					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' for this method(and did not)="+controllerMethod);
-				@SuppressWarnings("rawtypes")
-				Class<?> type = (Class) type2;
-				if(!Action.class.isAssignableFrom(type))
-					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
-			} else if(!Action.class.isAssignableFrom(clazz))
-				throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
-		}
-	}
-	
-	@Override
-	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod) {
-		UrlPath p = new UrlPath(routerInfo, path);
-		Route route = new RouteImpl(holder.getRouteInvoker2(), method, p, controllerMethod, port);
-		addContentRouter(route, true);
+		resettingLogic.getReverseRoutes().addRoute(routeId, router);
+		log.info("scope:'"+routerInfo+"' added route="+router.getMatchInfo()+" method="+routeInfo.getControllerMethodString());
 	}
 
 	/*
@@ -303,13 +264,14 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	protected List<AbstractRouter> buildRoutes2(List<FilterInfo<?>> routeFilters) {
 		List<AbstractRouter> routers = new ArrayList<>();
 		for(RouterAndInfo routerAndInfo : newDynamicRoutes) {
-			HtmlRouter router = routerAndInfo.getRouter();
-			String path = router.getFullPath();
-			Port port = router.getExposedPorts();
+			AbstractRouter router = routerAndInfo.getRouter();
+			MatchInfo matchInfo = router.getMatchInfo();
+			String path = matchInfo.getFullPath();
+			Port port = matchInfo.getExposedPorts();
 			List<FilterInfo<?>> filters = findMatchingFilters(path, port, routeFilters);
 			
-			SvcProxyForHtml svc = new SvcProxyForHtml(holder.getSvcProxyLogic());
-			BaseRouteInfo baseRouteInfo = new BaseRouteInfo(resettingLogic.getInjector(), routerAndInfo.getRouteInfo(), svc, filters, routerAndInfo.getRouteType());
+			BaseRouteInfo baseRouteInfo = new BaseRouteInfo(
+					resettingLogic.getInjector(), routerAndInfo.getRouteInfo(), routerAndInfo.getSvcProxy(), filters, routerAndInfo.getRouteType());
 			Service<MethodMeta, Action> service = holder.getFinder().loadFilters(baseRouteInfo, true);
 
 			router.setBaseRouteInfo(baseRouteInfo);
@@ -321,16 +283,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	}
 	
 	protected List<AbstractRouteMeta> buildRoutes(List<FilterInfo<?>> routeFilters) {
-		for(RouteMeta meta : dynamicRoutes) {
-			String path = meta.getFullPath();
-			Port port = meta.getExposedPorts();
-			List<FilterInfo<?>> filters = findMatchingFilters(path, port, routeFilters);
-			meta.setFilters(filters);
-			meta.loadFiltersIntoMeta(true);
-		}
-		
 		List<AbstractRouteMeta> routes = new ArrayList<>();
-		routes.addAll(dynamicRoutes);
 		routes.addAll(staticRoutes);
 		return routes;
 	}

@@ -33,9 +33,9 @@ public class StaticRoute implements Route {
 
 	private Port exposedOnPorts;
 
-	private RouteInvoker2 routeInvoker;
+	private RouteInvoker routeInvoker;
 
-	public StaticRoute(RouteInvoker2 routeInvoker, Port port, UrlPath url, VirtualFile file, boolean isOnClassPath, File cachedCompressedDirectory) {
+	public StaticRoute(RouteInvoker routeInvoker, Port port, UrlPath url, VirtualFile file, boolean isOnClassPath, File cachedCompressedDirectory) {
 		this.routeInvoker = routeInvoker;
 		this.fileSystemPath = file;
 		this.isOnClassPath = isOnClassPath;

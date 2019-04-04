@@ -12,7 +12,7 @@ import org.webpieces.devrouter.impl.DevRouteInvoker;
 import org.webpieces.devrouter.impl.DevRoutingService;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
-import org.webpieces.router.impl.RouteInvoker2;
+import org.webpieces.router.impl.RouteInvoker;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
@@ -35,7 +35,7 @@ public class DevRouterModule implements Module {
 		binder.bind(MetaLoaderProxy.class).to(DevLoader.class).asEagerSingleton();
 		binder.bind(ClassForName.class).to(DevClassForName.class).asEagerSingleton();
 		binder.bind(CompressionCacheSetup.class).to(DevCompressionCacheSetup.class).asEagerSingleton();
-		binder.bind(RouteInvoker2.class).to(DevRouteInvoker.class).asEagerSingleton();
+		binder.bind(RouteInvoker.class).to(DevRouteInvoker.class).asEagerSingleton();
 	}
 	
 	@Provides

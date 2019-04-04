@@ -29,20 +29,16 @@ import org.webpieces.router.impl.ctx.ResponseStaticProcessor;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
-import org.webpieces.router.impl.loader.svc.RouteInfoForHtml;
-import org.webpieces.router.impl.loader.svc.RouteInfoForInternalError;
-import org.webpieces.router.impl.loader.svc.RouteInfoForNotFound;
 import org.webpieces.router.impl.loader.svc.LoadedController2;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.router.impl.loader.svc.RouteData;
-import org.webpieces.router.impl.loader.svc.RouteInfoForContent;
-import org.webpieces.router.impl.model.MatchResult;
+import org.webpieces.router.impl.loader.svc.RouteInfoForNotFound;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 
-public class RouteInvoker2 {
+public class ProdRouteInvoker implements RouteInvoker {
 
 	private ReverseRoutes reverseRoutes;
 
@@ -53,7 +49,7 @@ public class RouteInvoker2 {
 	private volatile PortConfig portConfig;
 
 	@Inject
-	public RouteInvoker2(
+	public ProdRouteInvoker(
 		ObjectToParamTranslator reverseTranslator,
 		RouterConfig config,
 		ControllerLoader controllerFinder
@@ -63,6 +59,7 @@ public class RouteInvoker2 {
 		this.controllerFinder = controllerFinder;
 	}
 	
+	@Override
 	public CompletableFuture<Void> invokeStatic(StaticRoute route, Map<String, String> pathParams, RequestContext ctx, ResponseStreamer responseCb) {
 
 		boolean isOnClassPath = route.getIsOnClassPath();
@@ -81,32 +78,43 @@ public class RouteInvoker2 {
 		return processor.renderStaticResponse(resp);
 	}
 
-	public CompletableFuture<Void> invokeErrorRoute(BaseRouteInfo route, DynamicInfo dyanmicInfo, RequestContext requestCtx,
-			ResponseStreamer responseCb) {
-		Service<MethodMeta, Action> service = dyanmicInfo.getService();
-		LoadedController loadedController = dyanmicInfo.getLoadedController();
-		RouteData data = new RouteInfoForInternalError();
-
-		return invoke(route, loadedController, requestCtx, responseCb, service, data);
-	}
-	public CompletableFuture<Void> invokeHtmlController(
-			BaseRouteInfo route, DynamicInfo dyanmicInfo, RequestContext requestCtx, ResponseStreamer responseCb, RouteData data) {
-		Service<MethodMeta, Action> service = dyanmicInfo.getService();
-		LoadedController loadedController = dyanmicInfo.getLoadedController();
-		return invoke(route, loadedController, requestCtx, responseCb, service, data);
+	private CompletableFuture<Void> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		Service<MethodMeta, Action> service = dynamicInfo.getService();
+		LoadedController loadedController = dynamicInfo.getLoadedController();
+		return invoke(invokeInfo, loadedController, service, data);
 	}
 	
-	public CompletableFuture<Void> invokeNotFound(BaseRouteInfo route, LoadedController loadedController, RequestContext requestCtx, ResponseStreamer responseCb, NotFoundException exc) {
-		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
-		//TODO: MOVE THIS UP as an easy way to pass more NotFoundData down to controllers to access and filters
-		RouteData data = new RouteInfoForNotFound();
-		
-		return invoke(route, loadedController, requestCtx, responseCb, service, data);
+	@Override
+	public CompletableFuture<Void> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		return invokeImpl(invokeInfo, dynamicInfo, data);
 	}
+	
+	@Override
+	public CompletableFuture<Void> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		return invokeImpl(invokeInfo, dynamicInfo, data);
+	}
+	
+	@Override
+	public CompletableFuture<Void> invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		return invokeImpl(invokeInfo, dynamicInfo, data);
+	}
+	
+	@Override
+	public CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+		BaseRouteInfo route = invokeInfo.getRoute();
+		RequestContext requestCtx = invokeInfo.getRequestCtx();
+		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
+		return invoke(invokeInfo, loadedController, service, data);
+	}
+	
 
-	private CompletableFuture<Void> invoke(BaseRouteInfo route, LoadedController loadedController,
-			RequestContext requestCtx, ResponseStreamer responseCb, Service<MethodMeta, Action> service,
+
+	private CompletableFuture<Void> invoke(InvokeInfo invokeInfo, LoadedController loadedController, Service<MethodMeta, Action> service,
 			RouteData data) {
+		BaseRouteInfo route = invokeInfo.getRoute();
+		RequestContext requestCtx = invokeInfo.getRequestCtx();
+		ResponseStreamer responseCb = invokeInfo.getResponseCb();
+		
 		if(portConfig == null)
 			portConfig = config.getPortConfigCallback().fetchPortConfig();
 		
@@ -136,46 +144,6 @@ public class RouteInvoker2 {
 		
 		CompletableFuture<Void> future = response.thenCompose(resp -> continueProcessing(processor, resp, responseCb));
 		return future;
-	}
-
-	public CompletableFuture<Void> invokeContentController(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
-		RouteMeta meta = result.getMeta();
-		Service<MethodMeta, Action> service = meta.getService222();
-		
-		if(portConfig == null)
-			portConfig = config.getPortConfigCallback().fetchPortConfig();
-		ProcessorInfo info = new ProcessorInfo(meta.getRoute().getRouteType(), meta.getControllerInstance(), meta.getMethod());
-		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, info, responseCb, portConfig);
-		
-		Object obj = meta.getControllerInstance();
-		if(obj == null)
-			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
-		Method method = meta.getMethod();
-
-		if(service == null)
-			throw new IllegalStateException("Bug, service should never be null at this point");
-		
-		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
-		requestCtx.setMessages(messages);
-
-		RequestLocalCtx.set(processor);
-		Current.setContext(requestCtx);
-		CompletableFuture<Action> response;
-		try {
-			response = invokeContentMethod(service, obj, method, meta);
-		} finally {
-			RequestLocalCtx.set(null);
-			Current.setContext(null);
-		}
-		
-		CompletableFuture<Void> future = response.thenCompose(resp -> continueProcessing(processor, resp, responseCb));
-		return future;
-	}
-	
-	private CompletableFuture<Action> invokeContentMethod(Service<MethodMeta, Action> service, Object obj, Method m, RouteMeta meta) {
-		RouteInfoForContent routeInfo = new RouteInfoForContent(meta.getBodyContentBinder());
-		MethodMeta methodMeta = new MethodMeta(new LoadedController2(obj, m), Current.getContext(), routeInfo);
-		return service.invoke(methodMeta);
 	}
 	
 	public  Service<MethodMeta, Action> createNotFoundService(BaseRouteInfo route, RouterRequest req) {
@@ -213,6 +181,7 @@ public class RouteInvoker2 {
 		}
 	}
 	
+	@Override
 	public void init(ReverseRoutes reverseRoutes) {
 		this.reverseRoutes = reverseRoutes;
 	}

@@ -9,6 +9,7 @@ import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.model.BodyContentBinderChecker;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 
@@ -20,17 +21,17 @@ import com.google.inject.TypeLiteral;
 public class PluginSetup {
 
 	private ParamToObjectTranslatorImpl translator;
-	private ControllerLoader loader;
 	private ObjectTranslator translation;
+	private BodyContentBinderChecker bodyContentChecker;
 
 	@Inject
 	public PluginSetup(
 			ParamToObjectTranslatorImpl translator, 
-			ControllerLoader loader,
+			BodyContentBinderChecker bodyContentChecker,
 			ObjectTranslator translation
 	) {
 		this.translator = translator;
-		this.loader = loader;
+		this.bodyContentChecker = bodyContentChecker;
 		this.translation = translation;
 	}
 
@@ -52,7 +53,7 @@ public class PluginSetup {
 
 		Key<Set<BodyContentBinder>> key2 = Key.get(new TypeLiteral<Set<BodyContentBinder>>(){});
 		Set<BodyContentBinder> bodyBinders = appInjector.getInstance(key2);
-		loader.install(bodyBinders);
+		bodyContentChecker.install(bodyBinders);
 		
 	}
 

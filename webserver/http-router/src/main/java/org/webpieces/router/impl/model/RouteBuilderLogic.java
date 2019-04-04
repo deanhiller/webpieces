@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.ReverseRoutes;
-import org.webpieces.router.impl.RouteInvoker2;
+import org.webpieces.router.impl.RouteInvoker;
 import org.webpieces.router.impl.loader.ControllerLoader;
 
 @Singleton
@@ -16,14 +16,15 @@ public class RouteBuilderLogic {
 	
 	//private final ReverseRoutes reverseRoutes;
 	private final ControllerLoader finder;
-	private final RouteInvoker2 routeInvoker;
+	private final RouteInvoker routeInvoker;
 	private final SvcProxyLogic svcProxyLogic;
 
 	@Inject
 	public RouteBuilderLogic( 
 			ControllerLoader finder, 
-			RouteInvoker2 routeInvoker,
-			SvcProxyLogic svcProxyLogic
+			RouteInvoker routeInvoker,
+			SvcProxyLogic svcProxyLogic,
+			BodyContentBinderChecker binderChecker
 	) {
 		this.finder = finder;
 		this.routeInvoker = routeInvoker;
@@ -46,7 +47,7 @@ public class RouteBuilderLogic {
 		return getSvcProxyLogic().getConfig();
 	}
 
-	public RouteInvoker2 getRouteInvoker2() {
+	public RouteInvoker getRouteInvoker2() {
 		return routeInvoker;
 	}
 

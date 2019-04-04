@@ -153,7 +153,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {		
 		HtmlRouter routeMeta = get(routeId);
 		String urlPath = routeMeta.getFullPath();
-		List<String> pathParamNames = routeMeta.getPathParamNames();
+		List<String> pathParamNames = routeMeta.getMatchInfo().getPathParamNames();
 		for(String param : pathParamNames) {
 			String val = args.get(param);
 			if(val == null) {
@@ -179,7 +179,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		RequestContext ctx = Current.getContext();
 		RouterRequest request = ctx.getRequest();
 		
-		boolean isHttpsOnly = routeMeta.getExposedPorts() == Port.HTTPS;
+		boolean isHttpsOnly = routeMeta.getMatchInfo().getExposedPorts() == Port.HTTPS;
 		if(!isHttpsOnly || request.isHttps)
 			return urlPath;
 		
@@ -203,7 +203,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 
 	@Override
 	public boolean isGetRequest(RouteId routeId) {
-		return get(routeId).getHttpMethod() == HttpMethod.GET;
+		return get(routeId).getMatchInfo().getHttpMethod() == HttpMethod.GET;
 	}
 
 	@Override

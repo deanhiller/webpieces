@@ -25,9 +25,9 @@ public class RouteImpl implements Route {
 	private final RouteType routeType;
 	private String controllerMethodString;
 	private boolean checkSecureToken;
-	private RouteInvoker2 routeInvoker;
+	private RouteInvoker routeInvoker;
 
-	public RouteImpl(RouteInvoker2 routeInvoker, HttpMethod method, UrlPath path, String controllerMethod, RouteId routeId, Port port, boolean checkSecureToken) {
+	public RouteImpl(RouteInvoker routeInvoker, HttpMethod method, UrlPath path, String controllerMethod, RouteId routeId, Port port, boolean checkSecureToken) {
 		this.routeInvoker = routeInvoker;
 		this.path = path.getFullPath();
 		this.method = method;
@@ -40,7 +40,7 @@ public class RouteImpl implements Route {
 		this.checkSecureToken = checkSecureToken;
 	}
 
-	public RouteImpl(RouteInvoker2 routeInvoker, HttpMethod method, UrlPath path, String controllerMethod, Port port) {
+	public RouteImpl(RouteInvoker routeInvoker, HttpMethod method, UrlPath path, String controllerMethod, Port port) {
 		this.routeInvoker = routeInvoker;
 		this.path = path.getFullPath();
 		this.method = method;
@@ -53,7 +53,7 @@ public class RouteImpl implements Route {
 		this.checkSecureToken = false;
 	}
 	
-	public RouteImpl(RouteInvoker2 routeInvoker, String controllerMethod, RouteType routeType) {
+	public RouteImpl(RouteInvoker routeInvoker, String controllerMethod, RouteType routeType) {
 		this.routeInvoker = routeInvoker;
 		this.routeType = routeType;
 		this.path = null;
@@ -138,10 +138,7 @@ public class RouteImpl implements Route {
 
 	@Override
 	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
-		if(getRouteType() == RouteType.CONTENT)
-			return routeInvoker.invokeContentController(result, ctx, responseCb);
-		else
-			throw new IllegalStateException("not supported="+getRouteType());
+		throw new IllegalStateException("not supported="+getRouteType());
 	}
 	
 	@Override

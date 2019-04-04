@@ -8,19 +8,22 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.extensions.BodyContentBinder;
+import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 
 public class SvcProxyForContent implements Service<MethodMeta, Action> {
 
-	private ParamToObjectTranslatorImpl translator;
-	private ServiceInvoker invoker;
+	private final ParamToObjectTranslatorImpl translator;
+	private final ServiceInvoker invoker;
+	private final BodyContentBinder binder;
 	
-	public SvcProxyForContent(ParamToObjectTranslatorImpl translator, ServiceInvoker invoker) {
-		this.translator = translator;
-		this.invoker = invoker;
+	public SvcProxyForContent(SvcProxyLogic svcProxyLogic,  BodyContentBinder binder) {
+		this.binder = binder;
+		this.translator = svcProxyLogic.getTranslator();
+		this.invoker = svcProxyLogic.getServiceInvoker();
 	}
-	
+
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {
 		try {
@@ -53,7 +56,7 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		
 		Object retVal = invoker.invokeController(meta.getLoadedController2(), argsResult.toArray());
 		
-		if(info.getBodyContentBinder() != null)
+		if(binder != null)
 			return unwrapResult(m, retVal, info.getBodyContentBinder());
 
 		return invoker.coerceReturnValue(retVal);
