@@ -3,11 +3,11 @@ package org.webpieces.router.impl.routers;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.logging.Logger;
@@ -57,13 +57,39 @@ public class DScopedRouter {
 			MatchResult2 result = router.matches(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
 				ctx.setPathParams(result.getPathParams());
-				return router.invoke(ctx, responseCb);
-			}			
+				
+				return invokeRouter(router, ctx, responseCb);
+			}
 		}
 
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
 		future.completeExceptionally(new NotFoundException("route not found"));
 		return future;
+	}
+	
+	private CompletableFuture<Void> invokeRouter(AbstractRouter router, RequestContext ctx,
+			ResponseStreamer responseCb) {
+		CompletableFuture<Void> future;
+		try {
+			future = router.invoke(ctx, responseCb);
+		} catch(Throwable e) {
+			future = new CompletableFuture<Void>();
+			future.completeExceptionally(e);
+		}
+		
+		CompletableFuture<Void> local = future.handle((r, t) -> {
+			if(t != null) {
+				CompletableFuture<Void> failedFuture = new CompletableFuture<Void>();
+				if(t instanceof NotFoundException) {
+					failedFuture.completeExceptionally(t);
+				} else
+					failedFuture.completeExceptionally(new SpecificRouterInvokeException(router.getMatchInfo(), t));
+				return failedFuture;
+			}
+			return CompletableFuture.completedFuture(r);
+		}).thenCompose(Function.identity());
+		
+		return local;
 	}
 
 	public Map<String, DScopedRouter> getPathPrefixToNextRouter() {

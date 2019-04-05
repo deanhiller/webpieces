@@ -12,25 +12,25 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.BaseRouteInfo;
-import org.webpieces.router.impl.InvokeInfo;
-import org.webpieces.router.impl.InvokerInfo;
-import org.webpieces.router.impl.ProdRouteInvoker;
+import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
-import org.webpieces.router.impl.loader.svc.MethodMeta;
-import org.webpieces.router.impl.loader.svc.RouteData;
-import org.webpieces.router.impl.loader.svc.RouteInfoForContent;
-import org.webpieces.router.impl.loader.svc.RouteInfoForHtml;
-import org.webpieces.router.impl.loader.svc.RouteInfoForNotFound;
-import org.webpieces.router.impl.loader.svc.ServiceInvoker;
-import org.webpieces.router.impl.loader.svc.SvcProxyFixedRoutes;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
+import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
+import org.webpieces.router.impl.routeinvoker.InvokeInfo;
+import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
 import org.webpieces.router.impl.routers.DynamicInfo;
+import org.webpieces.router.impl.services.RouteData;
+import org.webpieces.router.impl.services.RouteInfoForContent;
+import org.webpieces.router.impl.services.RouteInfoForHtml;
+import org.webpieces.router.impl.services.RouteInfoForNotFound;
+import org.webpieces.router.impl.services.RouteInfoForStatic;
+import org.webpieces.router.impl.services.ServiceInvoker;
+import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -43,6 +43,15 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	public DevRouteInvoker(ObjectToParamTranslator reverseTranslator, RouterConfig config, ControllerLoader loader, ServiceInvoker invoker) {
 		super(reverseTranslator, config, loader);
 		this.serviceInvoker = invoker;
+	}
+	
+	@Override
+	public CompletableFuture<Void> invokeStatic(RequestContext ctx, ResponseStreamer responseCb,
+			RouteInfoForStatic data) {
+		//RESET the encodings to known so we don't try to go the compressed cache which doesn't
+		//exist in dev server since we want the latest files always
+		ctx.getRequest().encodings = new ArrayList<>();
+		return super.invokeStatic(ctx, responseCb, data);
 	}
 
 	/**

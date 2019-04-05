@@ -10,7 +10,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.impl.model.MatchResult2;
 
-public abstract class AbstractRouterImpl {
+public abstract class AbstractRouterImpl implements AbstractRouter {
 
 	protected MatchInfo matchInfo;
 
@@ -24,6 +24,7 @@ public abstract class AbstractRouterImpl {
 		return false;
 	}
 	
+	@Override
 	public MatchResult2 matches(RouterRequest request, String subPath) {
 		Matcher matcher = matchesAndParseParams(request, subPath);
 		if(matcher == null)

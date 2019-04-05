@@ -1,7 +1,8 @@
-package org.webpieces.router.impl;
+package org.webpieces.router.impl.routeinvoker;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 
 public class InvokeInfo {
 	private final BaseRouteInfo route;

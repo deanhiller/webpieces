@@ -1,8 +1,6 @@
 package org.webpieces.router.api;
 
-import org.webpieces.router.impl.ProdRouteInvoker;
 import org.webpieces.router.impl.ProdRouterService;
-import org.webpieces.router.impl.RouteInvoker;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.compression.ProdCompressionCacheSetup;
 import org.webpieces.router.impl.hooks.ClassForName;
@@ -11,6 +9,8 @@ import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.loader.ProdLoader;
 import org.webpieces.router.impl.mgmt.GuiceWebpiecesListener;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
+import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
+import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

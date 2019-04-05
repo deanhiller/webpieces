@@ -12,10 +12,10 @@ import org.webpieces.devrouter.impl.DevRouteInvoker;
 import org.webpieces.devrouter.impl.DevRoutingService;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
-import org.webpieces.router.impl.RouteInvoker;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
+import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

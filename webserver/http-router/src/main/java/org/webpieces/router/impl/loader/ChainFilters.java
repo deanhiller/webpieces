@@ -1,10 +1,10 @@
-package org.webpieces.router.impl;
+package org.webpieces.router.impl.loader;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.impl.loader.svc.MethodMeta;
+import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.util.filters.Filter;
 import org.webpieces.util.filters.Service;
 

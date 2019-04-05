@@ -9,8 +9,8 @@ import java.util.regex.Matcher;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.impl.RouteInvoker;
-import org.webpieces.router.impl.loader.svc.RouteInfoForStatic;
+import org.webpieces.router.impl.routeinvoker.RouteInvoker;
+import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
 
 public class EStaticRouter extends AbstractRouterImpl implements AbstractRouter {

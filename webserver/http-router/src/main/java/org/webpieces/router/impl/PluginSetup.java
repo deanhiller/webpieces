@@ -8,7 +8,6 @@ import javax.inject.Singleton;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
-import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.model.BodyContentBinderChecker;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;

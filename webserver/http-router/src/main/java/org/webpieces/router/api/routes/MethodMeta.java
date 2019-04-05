@@ -1,7 +1,8 @@
-package org.webpieces.router.impl.loader.svc;
+package org.webpieces.router.api.routes;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.impl.loader.LoadedController;
+import org.webpieces.router.impl.services.RouteData;
 
 public class MethodMeta {
 

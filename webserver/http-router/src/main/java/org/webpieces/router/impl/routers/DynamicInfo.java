@@ -1,8 +1,8 @@
 package org.webpieces.router.impl.routers;
 
 import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.loader.LoadedController;
-import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.util.filters.Service;
 
 /**

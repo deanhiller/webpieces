@@ -1,12 +1,11 @@
-package org.webpieces.router.impl;
+package org.webpieces.router.impl.routebldr;
 
 import java.util.List;
 
 import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.dto.RouteType;
-import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.router.impl.model.RouteModuleInfo;
-import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;

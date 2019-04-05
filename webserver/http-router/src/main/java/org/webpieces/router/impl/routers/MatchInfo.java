@@ -12,10 +12,10 @@ import java.util.regex.Pattern;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.routes.Port;
-import org.webpieces.router.impl.RegExResult;
-import org.webpieces.router.impl.RegExUtil;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.model.MatchResult2;
+import org.webpieces.router.impl.routebldr.RegExResult;
+import org.webpieces.router.impl.routebldr.RegExUtil;
 
 public class MatchInfo {
 

@@ -12,12 +12,12 @@ import javax.inject.Singleton;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.extensions.BodyContentBinder;
-import org.webpieces.router.impl.BaseRouteInfo;
-import org.webpieces.router.impl.FilterInfo;
+import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.hooks.ServiceCreationInfo;
-import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.router.impl.model.BodyContentBinderChecker;
+import org.webpieces.router.impl.routebldr.BaseRouteInfo;
+import org.webpieces.router.impl.routebldr.FilterInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.util.filters.Service;
 
@@ -41,6 +41,15 @@ public class ControllerLoader {
 		this.binderChecker = binderChecker;
 	}
 
+	public BinderAndLoader loadContentController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers) {
+		LoadedController loadedController = loadGenericController(injector, routeInfo, isInitializingAllControllers);
+		BodyContentBinder binder = null;
+		if(loadedController != null)
+			binder = binderChecker.contentPreconditionCheck(injector, routeInfo, loadedController.getControllerMethod(), loadedController.getParameters());
+
+		return new BinderAndLoader(loadedController, binder);
+	}
+	
 	public LoadedController loadHtmlController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers, boolean isPostOnly) {
 		LoadedController loadedController = loadGenericController(injector, routeInfo, isInitializingAllControllers);
 		if(loadedController != null)
@@ -54,7 +63,6 @@ public class ControllerLoader {
 	 */
 	public LoadedController loadGenericController(Injector injector, RouteInfo base, boolean isInitializingAllControllers) {
 		ResolvedMethod method = resolver.resolveControllerClassAndMethod(base);
-		
 		return loader.loadControllerIntoMeta(injector, method, isInitializingAllControllers);
 	}
 	
@@ -97,15 +105,5 @@ public class ControllerLoader {
 			} else if(!Action.class.isAssignableFrom(clazz))
 				throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 		}
-	}
-
-	public BinderAndLoader loadContentController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers) {
-		LoadedController loadedController = loadGenericController(injector, routeInfo, isInitializingAllControllers);
-		
-		BodyContentBinder binder = null;
-		if(loadedController != null)
-			binder = binderChecker.contentPreconditionCheck(injector, routeInfo, loadedController.getControllerMethod(), loadedController.getParameters());
-
-		return new BinderAndLoader(loadedController, binder);
 	}
 }

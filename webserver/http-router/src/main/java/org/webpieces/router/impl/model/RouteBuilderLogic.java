@@ -8,8 +8,8 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.ReverseRoutes;
-import org.webpieces.router.impl.RouteInvoker;
 import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 
 @Singleton
 public class RouteBuilderLogic {

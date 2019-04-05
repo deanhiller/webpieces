@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.impl.ResettingLogic;
-import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.routers.BDomainRouter;
 import org.webpieces.router.impl.routers.CRouter;

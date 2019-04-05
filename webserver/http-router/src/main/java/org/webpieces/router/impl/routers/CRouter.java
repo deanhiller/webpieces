@@ -8,7 +8,6 @@ import java.util.function.Function;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -33,12 +32,13 @@ public class CRouter extends DScopedRouter {
 		this.internalSvrErrorRouter = internalErrorRouter;
 	}
 
+	@Override
 	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
 		CompletableFuture<Void> future = invokeRouteCatchNotFound(ctx, responseCb, subPath).handle((r, t) -> {
 			if(t != null) {
 				String failedRoute = "<Unknown Route>";
-				if(t instanceof HaveRouteException)
-					failedRoute = ((HaveRouteException) t).getResult().getMeta()+"";
+				if(t instanceof SpecificRouterInvokeException)
+					failedRoute = ((SpecificRouterInvokeException) t).getMatchInfo()+"";
 				
 				return internalServerError(t, ctx, responseCb, failedRoute);
 			}

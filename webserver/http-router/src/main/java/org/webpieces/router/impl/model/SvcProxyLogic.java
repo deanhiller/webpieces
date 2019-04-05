@@ -4,8 +4,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.impl.loader.svc.ServiceInvoker;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
+import org.webpieces.router.impl.services.ServiceInvoker;
 
 @Singleton
 public class SvcProxyLogic {
