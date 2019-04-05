@@ -21,6 +21,7 @@ import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
+import org.webpieces.router.impl.routeinvoker.AbstractRouteInvoker;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
 import org.webpieces.router.impl.routers.DynamicInfo;
@@ -35,8 +36,9 @@ import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-public class DevRouteInvoker extends ProdRouteInvoker {
+public class DevRouteInvoker extends AbstractRouteInvoker {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
+
 	private final ServiceInvoker serviceInvoker;
 
 	@Inject
@@ -82,7 +84,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 			Service<MethodMeta, Action> service = controllerFinder.loadFilters(route, false);
 			newInfo = new DynamicInfo(controllerInst, service);
 		}
-		return super.invokeErrorController(invokeInfo, newInfo, data);
+		return invokeImpl(invokeInfo, newInfo, data);
 	}
 
 	@Override
@@ -96,7 +98,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 			Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route, false);
 			newInfo = new DynamicInfo(controller, svc);
 		}
-		return super.invokeHtmlController(invokeInfo, newInfo, data);
+		return invokeImpl(invokeInfo, newInfo, data);
 	}
 	
 	@Override
@@ -110,8 +112,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 			newInfo = new DynamicInfo(binderAndLoader.getLoadedController(), svc);
 			data = new RouteInfoForContent(binderAndLoader.getBinder());
 		}
-
-		return super.invokeContentController(invokeInfo, newInfo, data);
+		return invokeImpl(invokeInfo, newInfo, data);
 	}
 
 	private CompletableFuture<Void> invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
