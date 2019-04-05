@@ -290,7 +290,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	}
 	
 	public DScopedRouter build(List<FilterInfo<?>> routeFilters) {
-		List<AbstractRouter> routers = buildRoutes2(routeFilters);
+		List<AbstractRouter> routers = buildRoutes(routeFilters);
 		
 		Map<String, DScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 		
@@ -306,7 +306,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		return pathToRouter;
 	}
 
-	protected List<AbstractRouter> buildRoutes2(List<FilterInfo<?>> routeFilters) {
+	protected List<AbstractRouter> buildRoutes(List<FilterInfo<?>> routeFilters) {
 		List<AbstractRouter> routers = new ArrayList<>();
 		for(RouterAndInfo routerAndInfo : newDynamicRoutes) {
 			AbstractDynamicRouter router = routerAndInfo.getRouter();

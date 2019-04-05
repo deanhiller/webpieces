@@ -87,7 +87,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	}
 
 	public CRouter buildRouter() {
-		List<AbstractRouter> routers = buildRoutes2(routeFilters);
+		List<AbstractRouter> routers = buildRoutes(routeFilters);
 
 		Map<String, DScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 

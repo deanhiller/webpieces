@@ -132,17 +132,20 @@ public class DScopedRouter {
 	}
 
 	public String buildHtml(String spacing) {
+		
 		String html = "<ul>\n";
-		
-		for(Map.Entry<String, DScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
-			DScopedRouter childRouting = entry.getValue();
-			html += spacing+"SCOPE:"+entry.getKey();
-			html += spacing+childRouting.buildHtml(spacing+spacing);
-		}
-		
+
 		for(AbstractRouter route: routers) {
 			html += spacing+"<li>"+route.getMatchInfo().getLoggableString("&nbsp;")+"</li>\n";
 		}
+		
+		for(Map.Entry<String, DScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
+			DScopedRouter childRouting = entry.getValue();
+			html += spacing+"<li>SCOPE:"+entry.getKey()+"</li>\n";
+			html += spacing+childRouting.buildHtml(spacing+spacing);
+		}
+		
+
 		
 		html+="</ul>\n";
 		
