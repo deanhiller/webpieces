@@ -16,7 +16,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 @Singleton
-public class ProdRouterService extends AbstractRouterService implements RouterService {
+public class ProdRouterService extends AbstractRouterService {
 
 	private static final Logger log = LoggerFactory.getLogger(ProdRouterService.class);
 	

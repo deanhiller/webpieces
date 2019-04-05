@@ -31,7 +31,7 @@ public class EmptyPluginModule implements Module {
 		Multibinder.newSetBinder(binder, BodyContentBinder.class);
 		Multibinder.newSetBinder(binder, ObjectStringConverter.class);
 		
-		//special case so the notFound controller can inpsect and list all routes in a web page
+		//special case so the notFound controller can inspect and list all routes in a web page
 		//OR some client application can inject and introspect all web routes as well
 		//OR some plugin on startup can look at all routes as well
 		//Also, special case so the backend plugin can accept route ids and reverse lookup the URL on them
@@ -43,8 +43,8 @@ public class EmptyPluginModule implements Module {
 		binder.bind(ManagedBeanMeta.class).toInstance(managedMeta);
 		//special case exposing webpieces + application converters (object to string and string to object)
 		//This is the lookup class for all those ObjectStringConverter that get installed in the above Multibinder
+		//including if you put an object into a cookie as well, so it gets written as a String
 		binder.bind(ObjectTranslator.class).toInstance(objectTranslator);
 		
-		//well, hot damn, everything is like this special case
 	}
 }

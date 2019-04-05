@@ -22,7 +22,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.google.inject.Injector;
 
-public class DevRoutingService extends AbstractRouterService implements RouterService {
+public class DevRoutingService extends AbstractRouterService {
 
 	private static final Logger log = LoggerFactory.getLogger(DevRoutingService.class);
 	private static final Consumer<Injector> NO_OP = whatever -> {};

@@ -28,7 +28,11 @@ public class HtmlTagLookup {
 	protected ConverterLookup converter;
 	
 	@Inject
-	public HtmlTagLookup(TemplateConfig config, RouterLookup lookup, ConverterLookup converter) {
+	public HtmlTagLookup(
+		TemplateConfig config, 
+		RouterLookup lookup, 
+		ConverterLookup converter
+	) {
 		this.converter = converter;
 		put(new OptionTag(converter));
 		put(new HtmlSetTag());

@@ -14,7 +14,7 @@ import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 
-public class ProdRouteInvoker extends AbstractRouteInvoker implements RouteInvoker {
+public class ProdRouteInvoker extends AbstractRouteInvoker {
 
 	@Inject
 	public ProdRouteInvoker(

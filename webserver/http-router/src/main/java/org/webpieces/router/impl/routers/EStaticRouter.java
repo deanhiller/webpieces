@@ -13,7 +13,7 @@ import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
 
-public class EStaticRouter extends AbstractRouterImpl implements AbstractRouter {
+public class EStaticRouter extends AbstractRouterImpl {
 
 	private final MatchInfo matchInfo;
 	private final RouteInvoker invoker;
