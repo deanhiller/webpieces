@@ -12,13 +12,13 @@ import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.svc.RouteData;
 import org.webpieces.router.impl.loader.svc.RouteInfoForNotFound;
 
-public class NotFoundRouter {
+public class DNotFoundRouter {
 
 	private final RouteInvoker invoker;
 	private final BaseRouteInfo baseRouteInfo;
 	private LoadedController loadedController;
 
-	public NotFoundRouter(RouteInvoker invoker, BaseRouteInfo route,
+	public DNotFoundRouter(RouteInvoker invoker, BaseRouteInfo route,
 			LoadedController loadedController) {
 		this.invoker = invoker;
 		this.baseRouteInfo = route;

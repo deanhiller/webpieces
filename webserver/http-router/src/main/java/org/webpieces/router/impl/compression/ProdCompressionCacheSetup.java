@@ -15,8 +15,8 @@ import java.util.Properties;
 import javax.inject.Inject;
 
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
+import org.webpieces.router.impl.routers.EStaticRouter;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
@@ -43,21 +43,21 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		this.fileUtil = fileUtil;
 	}
 	
-	public void setupCache(List<StaticRoute> staticRoutes) {
+	public void setupCache(List<EStaticRouter> staticRoutes) {
 		if(config.getCachedCompressedDirectory() == null) {
 			log.info("NOT setting up compressed cached directory so performance will not be as good");
 			return;
 		}
 		
 		log.info("setting up compressed cache directories");
-		for(StaticRoute route : staticRoutes) {
-			if(!route.getIsOnClassPath())
+		for(EStaticRouter route : staticRoutes) {
+			if(!route.isOnClassPath())
 				createCache(route);
 		}
 		log.info("all cached directories setup");
 	}
 
-	private void createCache(StaticRoute route) {
+	private void createCache(EStaticRouter route) {
 		File routeCache = route.getTargetCacheLocation();
 		createDirectory(routeCache);
 		
@@ -65,7 +65,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		Properties properties = load(metaFile);
 		
 		boolean modified;
-		if(route.isFile()) {
+		if(route.getFileSystemPath().isFile()) {
 			VirtualFile file = route.getFileSystemPath();
 			log.info("setting up cache for file="+file);
 			File destination = FileFactory.newFile(routeCache, file.getName()+".gz");

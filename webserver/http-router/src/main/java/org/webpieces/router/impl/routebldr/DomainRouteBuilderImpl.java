@@ -11,8 +11,9 @@ import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
-import org.webpieces.router.impl.routers.DomainRouter;
-import org.webpieces.router.impl.routers.Router;
+import org.webpieces.router.impl.routers.BDomainRouter;
+import org.webpieces.router.impl.routers.CRouter;
+import org.webpieces.router.impl.routers.EStaticRouter;
 
 public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 
@@ -20,15 +21,13 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 
 	private final RouteBuilderImpl leftOverDomainsBuilder;
 	private final Map<String, RouteBuilderImpl> domainToRouteBuilder = new HashMap<>();
-	private final List<StaticRoute> allStaticRoutes;
 
 	private ResettingLogic resettingLogic;
 	
 	public DomainRouteBuilderImpl(RouteBuilderLogic holder, ResettingLogic resettingLogic) {
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
-		this.allStaticRoutes = new ArrayList<>();
-		this.leftOverDomainsBuilder = new RouteBuilderImpl("<any>", allStaticRoutes, holder, resettingLogic);
+		this.leftOverDomainsBuilder = new RouteBuilderImpl("<any>", holder, resettingLogic);
 	}
 
 	@Override
@@ -42,24 +41,31 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 		if(builder != null)
 			return builder;
 		
-		builder = new RouteBuilderImpl(domain, allStaticRoutes, holder, resettingLogic);
+		builder = new RouteBuilderImpl(domain, holder, resettingLogic);
 		domainToRouteBuilder.put(domain, builder);
 		return builder;
 	}
 
-	public DomainRouter build() {
-		Router router = leftOverDomainsBuilder.buildRouter();
+	public BDomainRouter build() {
+		CRouter router = leftOverDomainsBuilder.buildRouter();
 		
-		Map<String, Router> domainToRouter = new HashMap<>();
+		Map<String, CRouter> domainToRouter = new HashMap<>();
 		for(Entry<String, RouteBuilderImpl> entry : domainToRouteBuilder.entrySet()) {
-			Router router2 = entry.getValue().buildRouter();
+			CRouter router2 = entry.getValue().buildRouter();
 			domainToRouter.put(entry.getKey(), router2);
 		}
 		
-		return new DomainRouter(router, domainToRouter);
+		return new BDomainRouter(router, domainToRouter);
 	}
 
-	public List<StaticRoute> getStaticRoutes() {
-		return allStaticRoutes;
+	public List<EStaticRouter> getStaticRoutes() {
+		List<EStaticRouter> staticRouters = new ArrayList<>();
+		for(Entry<String, RouteBuilderImpl> entry : domainToRouteBuilder.entrySet()) {
+			staticRouters.addAll(entry.getValue().getStaticRoutes());
+		}		
+		
+		staticRouters.addAll(leftOverDomainsBuilder.getStaticRoutes());
+		return staticRouters;
 	}
+
 }

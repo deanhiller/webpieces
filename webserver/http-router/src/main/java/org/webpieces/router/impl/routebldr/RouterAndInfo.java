@@ -4,19 +4,19 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
-import org.webpieces.router.impl.routers.AbstractRouter;
-import org.webpieces.router.impl.routers.HtmlRouter;
+import org.webpieces.router.impl.routers.AbstractDynamicRouter;
+import org.webpieces.router.impl.routers.EHtmlRouter;
 import org.webpieces.util.filters.Service;
 
 public class RouterAndInfo {
 
-	private final AbstractRouter router;
+	private final AbstractDynamicRouter router;
 	private final RouteInfo routeInfo;
 	private final RouteType routeType;
 	private final LoadedController loadedController;
 	private final Service<MethodMeta, Action>  svcProxy;
 
-	public RouterAndInfo(AbstractRouter router, RouteInfo routeInfo, RouteType routeType, LoadedController loadedController, Service<MethodMeta, Action>  svc) {
+	public RouterAndInfo(AbstractDynamicRouter router, RouteInfo routeInfo, RouteType routeType, LoadedController loadedController, Service<MethodMeta, Action>  svc) {
 		this.router = router;
 		this.routeInfo = routeInfo;
 		this.routeType = routeType;
@@ -24,7 +24,7 @@ public class RouterAndInfo {
 		this.svcProxy = svc;
 	}
 
-	public AbstractRouter getRouter() {
+	public AbstractDynamicRouter getRouter() {
 		return router;
 	}
 

@@ -8,11 +8,9 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.FilterPortType;
 import org.webpieces.router.api.routes.RouteFilter;
-import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.BaseRouteInfo;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.ResettingLogic;
-import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
@@ -20,10 +18,10 @@ import org.webpieces.router.impl.loader.svc.SvcProxyFixedRoutes;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractRouter;
-import org.webpieces.router.impl.routers.InternalErrorRouter;
-import org.webpieces.router.impl.routers.NotFoundRouter;
-import org.webpieces.router.impl.routers.Router;
-import org.webpieces.router.impl.routers.ScopedRouter;
+import org.webpieces.router.impl.routers.CRouter;
+import org.webpieces.router.impl.routers.DInternalErrorRouter;
+import org.webpieces.router.impl.routers.DNotFoundRouter;
+import org.webpieces.router.impl.routers.DScopedRouter;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -42,8 +40,8 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	private LoadedController notFoundControllerInst;
 	private LoadedController internalErrorController;
 	
-	public RouteBuilderImpl(String domain, List<StaticRoute> allStaticRoutes, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
-		super(new RouterInfo(domain, ""), allStaticRoutes, holder, resettingLogic);
+	public RouteBuilderImpl(String domain, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+		super(new RouterInfo(domain, ""), holder, resettingLogic);
 	}
 
 	@Override
@@ -90,11 +88,10 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		this.internalErrorInfo = route;
 	}
 
-	public Router buildRouter() {
-		List<AbstractRouteMeta> routes = buildRoutes(routeFilters);
+	public CRouter buildRouter() {
 		List<AbstractRouter> routers = buildRoutes2(routeFilters);
 
-		Map<String, ScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
+		Map<String, DScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 
 		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(holder.getSvcProxyLogic().getServiceInvoker());
 
@@ -108,15 +105,15 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 				RouteType.INTERNAL_SERVER_ERROR);
 
 		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorRoute, true);
-		InternalErrorRouter internalErrorRouter = new InternalErrorRouter(holder.getRouteInvoker2(), internalErrorRoute, internalErrorController, svc);
+		DInternalErrorRouter internalErrorRouter = new DInternalErrorRouter(holder.getRouteInvoker2(), internalErrorRoute, internalErrorController, svc);
 
 		//NOTE: We do NOT create a Service<MethodMeta, Action> here with Filters
 		//Service<MethodMeta, Action> must be created on demand(it's cheap operation) because filters must pattern match
 		//on the request coming in and then we form the service per request
 		//WE could turn this off and expose an addGlobalNotFoundFilter that applies always to every not found????
 		//it's faster performance due to know pattern matching every request I guess
-		NotFoundRouter notFoundRouter = new NotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst);
-		return new Router(routerInfo, pathToRouter, routes, routers, notFoundRouter, internalErrorRouter);
+		DNotFoundRouter notFoundRouter = new DNotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst);
+		return new CRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter);
 	}
 
 }

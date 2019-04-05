@@ -3,7 +3,6 @@ package org.webpieces.router.impl;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
@@ -17,7 +16,6 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.actions.AjaxRedirectImpl;
 import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
@@ -29,10 +27,9 @@ import org.webpieces.router.impl.ctx.ResponseStaticProcessor;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
-import org.webpieces.router.impl.loader.svc.LoadedController2;
 import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.router.impl.loader.svc.RouteData;
-import org.webpieces.router.impl.loader.svc.RouteInfoForNotFound;
+import org.webpieces.router.impl.loader.svc.RouteInfoForStatic;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.util.file.VirtualFile;
@@ -60,16 +57,16 @@ public class ProdRouteInvoker implements RouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeStatic(StaticRoute route, Map<String, String> pathParams, RequestContext ctx, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> invokeStatic(RequestContext ctx, ResponseStreamer responseCb, RouteInfoForStatic data) {
+		
+		boolean isOnClassPath = data.isOnClassPath();
 
-		boolean isOnClassPath = route.getIsOnClassPath();
-
-		RenderStaticResponse resp = new RenderStaticResponse(route.getTargetCacheLocation(), isOnClassPath);
-		if(route.isFile()) {
-			resp.setFilePath(route.getFileSystemPath());
+		RenderStaticResponse resp = new RenderStaticResponse(data.getTargetCacheLocation(), isOnClassPath);
+		if(data.getFileSystemPath().isFile()) {
+			resp.setFilePath(data.getFileSystemPath());
 		} else {
-			String relativeUrl = pathParams.get("resource");
-			VirtualFile fullPath = route.getFileSystemPath().child(relativeUrl);
+			String relativeUrl = ctx.getPathParams().get("resource");
+			VirtualFile fullPath = data.getFileSystemPath().child(relativeUrl);
 			resp.setFileAndRelativePath(fullPath, relativeUrl);
 		}
 
@@ -133,7 +130,7 @@ public class ProdRouteInvoker implements RouteInvoker {
 		RequestLocalCtx.set(processor);
 		Current.setContext(requestCtx);
 		
-		MethodMeta methodMeta = new MethodMeta(new LoadedController2(obj, method), Current.getContext(), data);
+		MethodMeta methodMeta = new MethodMeta(loadedController, Current.getContext(), data);
 		CompletableFuture<Action> response;
 		try {
 			response = service.invoke(methodMeta);

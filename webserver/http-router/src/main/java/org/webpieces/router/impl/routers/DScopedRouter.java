@@ -13,18 +13,16 @@ import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-public class ScopedRouter {
-	private static final Logger log = LoggerFactory.getLogger(ScopedRouter.class);
+public class DScopedRouter {
+	private static final Logger log = LoggerFactory.getLogger(DScopedRouter.class);
 
 	protected final RouterInfo routerInfo;
-	private final Map<String, ScopedRouter> pathPrefixToNextRouter;
+	private final Map<String, DScopedRouter> pathPrefixToNextRouter;
 	private List<AbstractRouter> routers;
-	private final List<AbstractRouteMeta> routes;
 
-	public ScopedRouter(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<AbstractRouteMeta> routes, List<AbstractRouter> routers) {
+	public DScopedRouter(RouterInfo routerInfo, Map<String, DScopedRouter> pathPrefixToNextRouter, List<AbstractRouter> routers) {
 		this.routerInfo = routerInfo;
 		this.pathPrefixToNextRouter = pathPrefixToNextRouter;
-		this.routes = routes;
 		this.routers = routers;
 	}
 	
@@ -42,7 +40,7 @@ public class ScopedRouter {
 			prefix = subPath.substring(0, index);
 		}
 
-		ScopedRouter routeInfo = getPathPrefixToNextRouter().get(prefix);
+		DScopedRouter routeInfo = getPathPrefixToNextRouter().get(prefix);
 		if(routeInfo != null) {
 			if(index < 0)
 				return routeInfo.invokeRoute(ctx, responseCb, "");
@@ -56,20 +54,11 @@ public class ScopedRouter {
 	
 	private CompletableFuture<Void> findAndInvokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
 		for(AbstractRouter router : routers) {
-			MatchResult2 result = router.getMatchInfo().matches2(ctx.getRequest(), subPath);
+			MatchResult2 result = router.matches(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
 				ctx.setPathParams(result.getPathParams());
-				return router.invoke(ctx, responseCb, result.getPathParams());
+				return router.invoke(ctx, responseCb);
 			}			
-		}
-		
-		for(AbstractRouteMeta meta : routes) {
-			MatchResult2 result = meta.matches2(ctx.getRequest(), subPath);
-			if(result.isMatches()) {
-				//TODO: wrap ctx in new object rather than modify it
-				ctx.setPathParams(result.getPathParams());
-				return meta.invoke(ctx, responseCb, result.getPathParams());
-			}
 		}
 
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
@@ -77,14 +66,10 @@ public class ScopedRouter {
 		return future;
 	}
 
-	public Map<String, ScopedRouter> getPathPrefixToNextRouter() {
+	public Map<String, DScopedRouter> getPathPrefixToNextRouter() {
 		return pathPrefixToNextRouter;
 	}
 
-	public List<AbstractRouteMeta> getRoutes() {
-		return routes;
-	}
-	
 	@Override
 	public String toString() {
 		return build("");
@@ -105,21 +90,39 @@ public class ScopedRouter {
 	public String build(String spacing) {
 		String text = "\n";
 		
-		for(Map.Entry<String, ScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
-			ScopedRouter childRouting = entry.getValue();
+		for(Map.Entry<String, DScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
+			DScopedRouter childRouting = entry.getValue();
 			text += spacing+ "SCOPE:"+entry.getKey();
 			text += childRouting.build(spacing + spacing);
 		}
 		
-		List<AbstractRouteMeta> routes = getRoutes();
-		for(AbstractRouteMeta route: routes) {
-			text += spacing+route.getLoggableString(" ")+"\n";
+		for(AbstractRouter route: routers) {
+			text += spacing+route.getMatchInfo().getLoggableString(" ")+"\n";
 		}
 		
 		text+="\n";
 		
 		return text;
 	}
+
+	public String buildHtml(String spacing) {
+		String html = "<ul>\n";
+		
+		for(Map.Entry<String, DScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
+			DScopedRouter childRouting = entry.getValue();
+			html += spacing+"SCOPE:"+entry.getKey();
+			html += spacing+childRouting.buildHtml(spacing+spacing);
+		}
+		
+		for(AbstractRouter route: routers) {
+			html += spacing+"<li>"+route.getMatchInfo().getLoggableString("&nbsp;")+"</li>\n";
+		}
+		
+		html+="</ul>\n";
+		
+		return html;		
+	}
+
 
 
 }

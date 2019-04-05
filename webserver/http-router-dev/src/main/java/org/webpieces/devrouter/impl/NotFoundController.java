@@ -2,8 +2,6 @@ package org.webpieces.devrouter.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -12,12 +10,10 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
-import org.webpieces.router.api.routes.Port;
-import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.RoutingHolder;
-import org.webpieces.router.impl.routers.DomainRouter;
-import org.webpieces.router.impl.routers.Router;
-import org.webpieces.router.impl.routers.ScopedRouter;
+import org.webpieces.router.impl.routers.BDomainRouter;
+import org.webpieces.router.impl.routers.CRouter;
+import org.webpieces.router.impl.routers.DScopedRouter;
 
 @Singleton
 public class NotFoundController {
@@ -36,11 +32,11 @@ public class NotFoundController {
 			url += "?webpiecesShowPage=true";
 		}
 		
-		DomainRouter domainRouter = routingHolder.getDomainRouter();
-		Router router = domainRouter.getLeftOverDomains();
+		BDomainRouter domainRouter = routingHolder.getDomainRouter();
+		CRouter router = domainRouter.getLeftOverDomains();
 		
-		Collection<Router> routers = new ArrayList<>();
-		for(Router oneRouter : domainRouter.getDomainToRouter().values()) {
+		Collection<CRouter> routers = new ArrayList<>();
+		for(CRouter oneRouter : domainRouter.getDomainToRouter().values()) {
 			routers.add(oneRouter);
 		}
 		
@@ -50,22 +46,7 @@ public class NotFoundController {
 		return Actions.renderThis("domains", routers, "routeHtml", routeHtml, "error", error, "url", url);
 	}
 
-	private String build(ScopedRouter mainRoutes) {
-		String html = "<ul>\n";
-		
-		Map<String, ScopedRouter> scopedRoutes = mainRoutes.getPathPrefixToNextRouter();
-		for(Map.Entry<String, ScopedRouter> entry : scopedRoutes.entrySet()) {
-			html += "<li>"+ "SCOPE:"+entry.getKey()+"</li>";
-			html += build(entry.getValue());
-		}
-		
-		List<AbstractRouteMeta> routes = mainRoutes.getRoutes();
-		for(AbstractRouteMeta route: routes) {
-			html += "<li>"+route.getLoggableString("&nbsp;")+"</li>\n";
-		}
-		
-		html+="</ul>\n";
-		
-		return html;
+	private String build(DScopedRouter mainRoutes) {
+		return mainRoutes.buildHtml(" ");
 	}
 }

@@ -4,7 +4,9 @@ import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,12 +20,11 @@ import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
 import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
-import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.BaseRouteInfo;
 import org.webpieces.router.impl.FilterInfo;
+import org.webpieces.router.impl.RegExResult;
+import org.webpieces.router.impl.RegExUtil;
 import org.webpieces.router.impl.ResettingLogic;
-import org.webpieces.router.impl.StaticRoute;
-import org.webpieces.router.impl.StaticRouteMeta;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
@@ -33,12 +34,15 @@ import org.webpieces.router.impl.loader.svc.SvcProxyForContent;
 import org.webpieces.router.impl.loader.svc.SvcProxyForHtml;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
+import org.webpieces.router.impl.routers.AbstractDynamicRouter;
 import org.webpieces.router.impl.routers.AbstractRouter;
-import org.webpieces.router.impl.routers.ContentRouter;
+import org.webpieces.router.impl.routers.DScopedRouter;
 import org.webpieces.router.impl.routers.DynamicInfo;
-import org.webpieces.router.impl.routers.HtmlRouter;
+import org.webpieces.router.impl.routers.EContentRouter;
+import org.webpieces.router.impl.routers.EHtmlRouter;
+import org.webpieces.router.impl.routers.EStaticRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
-import org.webpieces.router.impl.routers.ScopedRouter;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.file.VirtualFileFactory;
@@ -56,13 +60,13 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	private final Map<String, ScopedRouteBuilderImpl> pathToBuilder = new HashMap<>();
 
 	private final List<RouterAndInfo> newDynamicRoutes = new ArrayList<>();
-	private final List<StaticRouteMeta> staticRoutes = new ArrayList<>();
+	private final List<EStaticRouter> staticRouters = new ArrayList<>();
 
-	private List<StaticRoute> allStaticRoutes;
+	//private final List<StaticRouteMeta> staticRoutes = new ArrayList<>();
+	//private List<StaticRoute> allStaticRoutes;
 	
-	public ScopedRouteBuilderImpl(RouterInfo routerInfo, List<StaticRoute> allStaticRoutes, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+	public ScopedRouteBuilderImpl(RouterInfo routerInfo, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
 		this.routerInfo = routerInfo;
-		this.allStaticRoutes = allStaticRoutes;
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
 	}
@@ -75,13 +79,20 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		//he did wrong when reading the exception!!
 		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo, true);
 		
-		MatchInfo matchInfo = new MatchInfo(p, port, method, holder.getUrlEncoding());
-		ContentRouter router = new ContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
+		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
+		EContentRouter router = new EContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), container.getBinder());
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getLoadedController(), svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
 		log.info("scope:'"+routerInfo+"' added content route="+matchInfo+" method="+routeInfo.getControllerMethodString());
+	}
+	
+	private MatchInfo createMatchInfo(UrlPath urlPath, Port exposedPort, HttpMethod httpMethod, Charset urlEncoding) {
+		RegExResult result = RegExUtil.parsePath(urlPath.getSubPath());
+		Pattern patternToMatch = Pattern.compile(result.regExToMatch);
+		List<String> pathParamNames = result.argNames;
+		return new MatchInfo(urlPath, exposedPort, httpMethod, urlEncoding, patternToMatch, pathParamNames);
 	}
 	
 	@Override
@@ -104,14 +115,14 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		//he did wrong when reading the exception!!
 		LoadedController loadedController = holder.getFinder().loadHtmlController(resettingLogic.getInjector(), routeInfo, true, isPostOnly);
 		
-		MatchInfo matchInfo = new MatchInfo(p, port, method, holder.getUrlEncoding());
-		HtmlRouter router = new HtmlRouter(holder.getRouteInvoker2(), matchInfo, checkToken);	
+		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
+		EHtmlRouter router = new EHtmlRouter(holder.getRouteInvoker2(), matchInfo, checkToken);	
 		SvcProxyForHtml svc = new SvcProxyForHtml(holder.getSvcProxyLogic());
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, loadedController, svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
 		resettingLogic.getReverseRoutes().addRoute(routeId, router);
-		log.info("scope:'"+routerInfo+"' added route="+router.getMatchInfo()+" method="+routeInfo.getControllerMethodString());
+		log.info("scope:'"+routerInfo+"' added route="+matchInfo+" method="+routeInfo.getControllerMethodString());
 	}
 
 	/*
@@ -161,40 +172,69 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 			throw new IllegalArgumentException("Static file so urlPath must NOT end with a /");
 		addStaticRoute(port, urlPath, fileSystemPath, isOnClassPath);
 	}
-
+	
 	private void addStaticRoute(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		if(!urlPath.startsWith("/"))
+			throw new IllegalArgumentException("static resource url paths must start with / path="+urlPath);
+		
 		if(isOnClassPath)
 			addStaticClasspathFile(port, urlPath, fileSystemPath);
 		else
 			addStaticLocalFile(port, urlPath, fileSystemPath);
 	}
 	
-	private void addStaticClasspathFile(Port port, String urlPath, String fileSystemPath) {
+	private void addStaticClasspathFile(Port port, String urlSubPath, String fileSystemPath) {
 		if(!fileSystemPath.startsWith("/"))
 			throw new IllegalArgumentException("Classpath resources must start with a / and be absolute on the classpath");
 		
 		boolean isDirectory = fileSystemPath.endsWith("/");
 		VirtualFile file = new VirtualFileClasspath(fileSystemPath, getClass(), isDirectory);
 		
-		StaticRoute route = new StaticRoute(holder.getRouteInvoker2(), port, new UrlPath(routerInfo, urlPath), file, true, holder.getCachedCompressedDirectory());
-		allStaticRoutes.add(route);
-		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
-		StaticRouteMeta meta = new StaticRouteMeta(route, holder.getUrlEncoding());
-		staticRoutes.add(meta);
+		UrlPath p = new UrlPath(routerInfo, urlSubPath);
+		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, true);
 	}
-	
-	private void addStaticLocalFile(Port port, String urlPath, String fileSystemPath) {
+	private void addStaticLocalFile(Port port, String path, String fileSystemPath) {
 		if(fileSystemPath.startsWith("/"))
 			throw new IllegalArgumentException("Absolute file system path is not supported as it is not portable across OS when done wrong.  Override the modules working directory instead");
 		
 		File workingDir = holder.getConfig().getWorkingDirectory();
 		VirtualFile file = VirtualFileFactory.newFile(workingDir, fileSystemPath);
+		UrlPath p = new UrlPath(routerInfo, path);
+		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, false);
+	}
+	
+	private void createStaticRouter(UrlPath urlPath, Port exposedPort, HttpMethod httpMethod, Charset urlEncoding, VirtualFile file, boolean isOnClassPath) {
+		if(!file.exists())
+			throw new IllegalArgumentException("Static File="+file.getCanonicalPath()+" does not exist. fileSysPath="+file+" abs="+file.getAbsolutePath());
+
+		String urlSubPath = urlPath.getSubPath();
+		List<String> pathParamNames = new ArrayList<>();
+		Pattern patternToMatch;
+		if(isDirectory(urlSubPath)) {
+			if(!file.isDirectory())
+				throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
+			else if(!file.isDirectory())
+				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a directory and must be for static directories");
+			patternToMatch = Pattern.compile("^"+urlSubPath+"(?<resource>.*)$");
+			pathParamNames.add("resource");
+		} else {
+			if(file.isDirectory())
+				throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
+			else if(!file.isFile())
+				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a file and must be for static file route");
+			patternToMatch = Pattern.compile("^"+urlSubPath+"$");
+		}		
 		
-		StaticRoute route = new StaticRoute(holder.getRouteInvoker2(), port, new UrlPath(routerInfo, urlPath), file, false, holder.getCachedCompressedDirectory());
-		allStaticRoutes.add(route);
-		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
-		StaticRouteMeta meta = new StaticRouteMeta(route, holder.getUrlEncoding());
-		staticRoutes.add(meta);
+		MatchInfo matchInfo = new MatchInfo(urlPath, exposedPort, httpMethod, urlEncoding, patternToMatch, pathParamNames);
+		String relativePath = urlSubPath.substring(1);
+		File targetCacheLocation = FileFactory.newFile(holder.getCachedCompressedDirectory(), relativePath);
+		EStaticRouter router = new EStaticRouter(holder.getRouteInvoker2(), matchInfo, file, isOnClassPath, targetCacheLocation);
+		staticRouters.add(router);
+		log.info("scope:'"+routerInfo+"' added route="+matchInfo+" fileSystemPath="+file);
+	}
+	
+	private boolean isDirectory(String urlSubPath) {
+		return urlSubPath.endsWith("/");
 	}
 	
 	/**
@@ -220,7 +260,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		
 		ScopedRouteBuilderImpl r = pathToBuilder.get(path);
 		if(r == null) {
-			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getDomain(), routerInfo.getPath()+fullPath), allStaticRoutes, holder, resettingLogic);
+			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getDomain(), routerInfo.getPath()+fullPath), holder, resettingLogic);
 			pathToBuilder.put(path, r);
 		}
 		
@@ -243,19 +283,28 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		return new String[] {path, leftover};
 	}
 	
-	public ScopedRouter build(List<FilterInfo<?>> routeFilters) {
-		List<AbstractRouteMeta> routes = buildRoutes(routeFilters);
+	public Collection<? extends EStaticRouter> getStaticRoutes() {
+		List<EStaticRouter> allStaticRouters = new ArrayList<>();
+		for(Entry<String, ScopedRouteBuilderImpl> entry : pathToBuilder.entrySet()) {
+			allStaticRouters.addAll(entry.getValue().getStaticRoutes());
+		}
+		
+		allStaticRouters.addAll(staticRouters);
+		return allStaticRouters;
+	}
+	
+	public DScopedRouter build(List<FilterInfo<?>> routeFilters) {
 		List<AbstractRouter> routers = buildRoutes2(routeFilters);
 		
-		Map<String, ScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
+		Map<String, DScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 		
-		return new ScopedRouter(routerInfo, pathToRouter, routes, routers);
+		return new DScopedRouter(routerInfo, pathToRouter, routers);
 	}
 
-	protected Map<String, ScopedRouter> buildScopedRouters(List<FilterInfo<?>> routeFilters) {
-		Map<String, ScopedRouter> pathToRouter = new HashMap<>();
+	protected Map<String, DScopedRouter> buildScopedRouters(List<FilterInfo<?>> routeFilters) {
+		Map<String, DScopedRouter> pathToRouter = new HashMap<>();
 		for(Entry<String, ScopedRouteBuilderImpl> entry : pathToBuilder.entrySet()) {
-			ScopedRouter router2 = entry.getValue().build(routeFilters);
+			DScopedRouter router2 = entry.getValue().build(routeFilters);
 			pathToRouter.put(entry.getKey(), router2);
 		}
 		return pathToRouter;
@@ -264,7 +313,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	protected List<AbstractRouter> buildRoutes2(List<FilterInfo<?>> routeFilters) {
 		List<AbstractRouter> routers = new ArrayList<>();
 		for(RouterAndInfo routerAndInfo : newDynamicRoutes) {
-			AbstractRouter router = routerAndInfo.getRouter();
+			AbstractDynamicRouter router = routerAndInfo.getRouter();
 			MatchInfo matchInfo = router.getMatchInfo();
 			String path = matchInfo.getFullPath();
 			Port port = matchInfo.getExposedPorts();
@@ -279,13 +328,11 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 			routers.add(router);
 		}
 		
+		//static routes get cached in browser typically so add them last so dynamic routes which are not cached are 
+		//pattern matched first
+		routers.addAll(staticRouters);
+		
 		return routers;
-	}
-	
-	protected List<AbstractRouteMeta> buildRoutes(List<FilterInfo<?>> routeFilters) {
-		List<AbstractRouteMeta> routes = new ArrayList<>();
-		routes.addAll(staticRoutes);
-		return routes;
 	}
 
 	public List<FilterInfo<?>> findMatchingFilters(String path, Port exposedPorts, List<FilterInfo<?>> routeFilters) {

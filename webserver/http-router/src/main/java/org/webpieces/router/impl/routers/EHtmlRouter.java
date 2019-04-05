@@ -1,6 +1,5 @@
 package org.webpieces.router.impl.routers;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
@@ -11,7 +10,7 @@ import org.webpieces.router.impl.RouteInvoker;
 import org.webpieces.router.impl.loader.svc.RouteData;
 import org.webpieces.router.impl.loader.svc.RouteInfoForHtml;
 
-public class HtmlRouter implements AbstractRouter {
+public class EHtmlRouter extends AbstractDynamicRouterImpl {
 	
 	private final RouteInvoker invoker;
 	private final MatchInfo matchInfo;
@@ -23,16 +22,15 @@ public class HtmlRouter implements AbstractRouter {
 	private BaseRouteInfo baseRouteInfo;
 	private DynamicInfo dynamicInfo;
 
-
-	public HtmlRouter(RouteInvoker invoker, MatchInfo matchInfo, boolean checkToken) {
+	public EHtmlRouter(RouteInvoker invoker, MatchInfo matchInfo, boolean checkToken) {
+		super(matchInfo);
 		this.invoker = invoker;
 		this.matchInfo = matchInfo;
 		this.isCheckSecureToken = checkToken;
 	}
 
 	@Override
-	public CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb,
-			Map<String, String> pathParams) {
+	public CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb) {
 		RouteData data = new RouteInfoForHtml(isCheckSecureToken, matchInfo.getHttpMethod());
 		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, responseCb);
 		return invoker.invokeHtmlController(invokeInfo, dynamicInfo, data);
@@ -53,4 +51,5 @@ public class HtmlRouter implements AbstractRouter {
 	public String getFullPath() {
 		return matchInfo.getFullPath();
 	}
+
 }

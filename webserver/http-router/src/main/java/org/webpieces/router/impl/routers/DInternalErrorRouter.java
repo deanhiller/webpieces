@@ -13,14 +13,14 @@ import org.webpieces.router.impl.loader.svc.MethodMeta;
 import org.webpieces.router.impl.loader.svc.RouteInfoForInternalError;
 import org.webpieces.util.filters.Service;
 
-public class InternalErrorRouter {
+public class DInternalErrorRouter {
 
 	private final RouteInvoker invoker;
 	private final BaseRouteInfo baseRouteInfo;
 	private LoadedController loadedController;
 	private Service<MethodMeta, Action> svc;
 
-	public InternalErrorRouter(RouteInvoker invoker, BaseRouteInfo route,
+	public DInternalErrorRouter(RouteInvoker invoker, BaseRouteInfo route,
 			LoadedController loadedController, Service<MethodMeta, Action> svc) {
 		this.invoker = invoker;
 		this.baseRouteInfo = route;

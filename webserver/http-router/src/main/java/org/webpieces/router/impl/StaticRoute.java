@@ -189,7 +189,8 @@ public class StaticRoute implements Route {
 	}
 
 	public CompletableFuture<Void> invokeStatic(Map<String, String> pathParams, RequestContext ctx, ResponseStreamer responseCb) {
-		return routeInvoker.invokeStatic(this, pathParams, ctx, responseCb);
+		//return routeInvoker.invokeStatic(this, pathParams, ctx, responseCb);
+		throw new UnsupportedOperationException("can't be here..delete this method");
 	}
 	
 	@Override

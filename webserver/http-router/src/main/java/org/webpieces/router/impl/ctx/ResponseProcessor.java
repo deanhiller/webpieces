@@ -26,7 +26,7 @@ import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
-import org.webpieces.router.impl.routers.HtmlRouter;
+import org.webpieces.router.impl.routers.EHtmlRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
 
 public class ResponseProcessor extends Processor {
@@ -80,7 +80,7 @@ public class ResponseProcessor extends Processor {
 		responseSent = true;
 		RouterRequest request = ctx.getRequest();
 		Method method = matchedMeta.getMethod();
-		HtmlRouter nextRequestMeta = reverseRoutes.get(id);
+		EHtmlRouter nextRequestMeta = reverseRoutes.get(id);
 		if(nextRequestMeta == null)
 			throw new IllegalReturnValueException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
 		

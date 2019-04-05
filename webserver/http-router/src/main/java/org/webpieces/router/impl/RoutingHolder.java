@@ -1,12 +1,12 @@
 package org.webpieces.router.impl;
 
 import org.webpieces.router.api.plugins.ReverseRouteLookup;
-import org.webpieces.router.impl.routers.DomainRouter;
+import org.webpieces.router.impl.routers.BDomainRouter;
 
 public class RoutingHolder {
 
 	private ReverseRouteLookup reverseRouteLookup;
-	private DomainRouter domainRouter;
+	private BDomainRouter domainRouter;
 
 	public void setReverseRouteLookup(ReverseRouteLookup reverseRouteLookup) {
 		this.reverseRouteLookup = reverseRouteLookup;
@@ -17,12 +17,12 @@ public class RoutingHolder {
 		return reverseRouteLookup;
 	}
 	
-	public DomainRouter getDomainRouter() {
+	public BDomainRouter getDomainRouter() {
 		return domainRouter;
 	}
 
 
-	public void setDomainRouter(DomainRouter domainRouter) {
+	public void setDomainRouter(BDomainRouter domainRouter) {
 		this.domainRouter = domainRouter;
 	}
 

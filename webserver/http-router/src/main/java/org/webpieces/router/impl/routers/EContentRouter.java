@@ -1,6 +1,5 @@
 package org.webpieces.router.impl.routers;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
@@ -11,9 +10,8 @@ import org.webpieces.router.impl.InvokeInfo;
 import org.webpieces.router.impl.RouteInvoker;
 import org.webpieces.router.impl.loader.svc.RouteData;
 import org.webpieces.router.impl.loader.svc.RouteInfoForContent;
-import org.webpieces.router.impl.loader.svc.RouteInfoForHtml;
 
-public class ContentRouter implements AbstractRouter {
+public class EContentRouter extends AbstractDynamicRouterImpl {
 
 	private final RouteInvoker routeInvoker;
 	private final MatchInfo matchInfo;
@@ -22,7 +20,8 @@ public class ContentRouter implements AbstractRouter {
 	private BaseRouteInfo baseRouteInfo;
 	private DynamicInfo dynamicInfo;
 
-	public ContentRouter(RouteInvoker routeInvoker, MatchInfo matchInfo, BodyContentBinder bodyContentBinder) {
+	public EContentRouter(RouteInvoker routeInvoker, MatchInfo matchInfo, BodyContentBinder bodyContentBinder) {
+		super(matchInfo);
 		this.routeInvoker = routeInvoker;
 		this.matchInfo = matchInfo;
 		this.bodyContentBinder = bodyContentBinder;
@@ -34,8 +33,7 @@ public class ContentRouter implements AbstractRouter {
 	}
 	
 	@Override
-	public CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb,
-			Map<String, String> pathParams) {
+	public CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb) {
 		RouteData data = new RouteInfoForContent(bodyContentBinder);
 		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, responseCb);
 		return routeInvoker.invokeContentController(invokeInfo, dynamicInfo, data);	}

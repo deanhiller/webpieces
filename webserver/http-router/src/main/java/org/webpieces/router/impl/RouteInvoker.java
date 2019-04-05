@@ -1,12 +1,12 @@
 package org.webpieces.router.impl;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.svc.RouteData;
+import org.webpieces.router.impl.loader.svc.RouteInfoForStatic;
 import org.webpieces.router.impl.routers.DynamicInfo;
 
 public interface RouteInvoker {
@@ -25,7 +25,6 @@ public interface RouteInvoker {
 	
 	CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data);
 
-	CompletableFuture<Void> invokeStatic(StaticRoute staticRoute, Map<String, String> pathParams, RequestContext ctx,
-			ResponseStreamer responseCb);
+	CompletableFuture<Void> invokeStatic(RequestContext ctx, ResponseStreamer responseCb, RouteInfoForStatic data);
 
 }

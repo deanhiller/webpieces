@@ -8,29 +8,27 @@ import java.util.function.Function;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.AbstractRouteMeta;
 import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
-public class Router extends ScopedRouter {
+public class CRouter extends DScopedRouter {
 
-	private static final Logger log = LoggerFactory.getLogger(Router.class);
+	private static final Logger log = LoggerFactory.getLogger(CRouter.class);
 
-	private NotFoundRouter pageNotFoundRouter;
-	private InternalErrorRouter internalSvrErrorRouter;
+	private DNotFoundRouter pageNotFoundRouter;
+	private DInternalErrorRouter internalSvrErrorRouter;
 
-	public Router(
+	public CRouter(
 			RouterInfo routerInfo, 
-			Map<String, ScopedRouter> pathPrefixToNextRouter, 
-			List<AbstractRouteMeta> routes, 
+			Map<String, DScopedRouter> pathPrefixToNextRouter, 
 			List<AbstractRouter> routers, 
-			NotFoundRouter notFoundRouter, 
-			InternalErrorRouter internalErrorRouter
+			DNotFoundRouter notFoundRouter, 
+			DInternalErrorRouter internalErrorRouter
 	) {
-		super(routerInfo, pathPrefixToNextRouter, routes, routers);
+		super(routerInfo, pathPrefixToNextRouter, routers);
 		this.pageNotFoundRouter = notFoundRouter;
 		this.internalSvrErrorRouter = internalErrorRouter;
 	}

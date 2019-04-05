@@ -57,7 +57,7 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 		
 		tokenCheck(info, meta.getCtx());
 		
-		Method m = meta.getLoadedController2().getMethod();
+		Method m = meta.getLoadedController2().getControllerMethod();
 		
 		//We chose to do this here so any filters ESPECIALLY API filters 
 		//can catch and translate api errors and send customers a logical response

@@ -5,11 +5,12 @@ import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.impl.loader.LoadedController;
 
 public class ServiceInvoker {
 
-	public Object invokeController(LoadedController2 meta, Object[] args) throws IllegalAccessException, InvocationTargetException {
-		Method m = meta.getMethod();
+	public Object invokeController(LoadedController meta, Object[] args) throws IllegalAccessException, InvocationTargetException {
+		Method m = meta.getControllerMethod();
 		Object obj = meta.getControllerInstance();
 		return m.invoke(obj, args);
 	}
@@ -30,12 +31,12 @@ public class ServiceInvoker {
 		}
 	}
 
-	public CompletableFuture<Action> invokeAndCoerce(LoadedController2 loadedController2, Object[] args) 
+	public CompletableFuture<Action> invokeAndCoerce(LoadedController loadedController, Object[] args) 
 			throws IllegalAccessException, InvocationTargetException 
 	{
-		Object resp = invokeController(loadedController2, args);
+		Object resp = invokeController(loadedController, args);
 		if(resp == null)
-			throw new IllegalStateException("Your controller method returned null which is not allowed.  offending method="+loadedController2.getMethod());
+			throw new IllegalStateException("Your controller method returned null which is not allowed.  offending method="+loadedController.getControllerMethod());
 		return coerceReturnValue(resp);
 	}
 }

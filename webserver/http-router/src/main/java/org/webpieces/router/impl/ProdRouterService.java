@@ -11,7 +11,7 @@ import org.webpieces.router.api.RouterService;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.routers.MasterRouter;
+import org.webpieces.router.impl.routers.AMasterRouter;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -22,7 +22,7 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 	
 	private RouteLoader routeLoader;
 	private ClassForName loader;
-	private MasterRouter router;
+	private AMasterRouter router;
 	
 	@Inject
 	public ProdRouterService(
@@ -30,7 +30,7 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 			CookieTranslator cookieTranslator, 
 			ObjectTranslator translator, 
 			ProdClassForName loader,
-			MasterRouter router
+			AMasterRouter router
 	) {
 		super(routeLoader, cookieTranslator, translator);
 		this.routeLoader = routeLoader;

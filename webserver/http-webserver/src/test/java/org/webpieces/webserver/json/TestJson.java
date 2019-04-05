@@ -40,15 +40,15 @@ public class TestJson extends AbstractWebpiecesTest {
 	@Parameterized.Parameters
 	public static Collection bothServers() {
         List<Object[]> args = new ArrayList<Object[]>();
-        args.add(new Object[] { true });
-        args.add(new Object[] { false});
+        args.add(new Object[] { false });
+        args.add(new Object[] { true});
         
 		return args;
 	}
 	 
-	public TestJson(boolean isDirect) {
-		this.isRemote = isDirect;
-		log.info("constructing test suite for client isRemote="+isDirect);
+	public TestJson(boolean isRemote) {
+		this.isRemote = isRemote;
+		log.info("constructing test suite for client isRemote="+isRemote);
 	}
 	
 	@Before

@@ -12,8 +12,9 @@ import org.junit.Test;
 import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routes.Port;
-import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.UrlPath;
+import org.webpieces.router.impl.routers.EStaticRouter;
+import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileFactory;
@@ -56,7 +57,7 @@ public class TestCompressionCache {
 		File stagingDir = FileFactory.newBaseFile("output/staging");
 		FileUtils.copyDirectory(f, stagingDir);
 		
-		List<StaticRoute> routes = runBasicServerOnce(stagingDir);
+		List<EStaticRouter> routes = runBasicServerOnce(stagingDir);
 		
 		//if server is just restarted(no file changes), we should skip reading files...
 		cache.setupCache(routes);
@@ -65,10 +66,15 @@ public class TestCompressionCache {
 		Assert.assertEquals(0, proxy.getCompressedFiles().size());		
 	}
 
-	private List<StaticRoute> runBasicServerOnce(File stagingDir) {
-		List<StaticRoute> routes = new ArrayList<>();
+	private EStaticRouter create(Port port, UrlPath urlPath, VirtualFile fileSystemPath, boolean isOnClassPath, File targetCatchLocation) {
+		MatchInfo info = new MatchInfo(urlPath, port, null, null, null, null);
+		return new EStaticRouter(null, info, fileSystemPath, isOnClassPath, targetCatchLocation);
+	}
+	private List<EStaticRouter> runBasicServerOnce(File stagingDir) {
+		List<EStaticRouter> routes = new ArrayList<>();
 		VirtualFile dir = VirtualFileFactory.newFile(stagingDir);
-		routes.add(new StaticRoute(null, Port.BOTH, new UrlPath("", "/public/"), dir, false, cacheDir));
+		
+		routes.add(create(Port.BOTH, new UrlPath("", "/public/"), dir, false, cacheDir));
 		cache.setupCache(routes);
 		Assert.assertEquals(2, proxy.getReadFiles().size());
 		Assert.assertEquals(2, proxy.getCompressedFiles().size());
@@ -85,9 +91,9 @@ public class TestCompressionCache {
 		
 		runBasicServerOnce(stagingDir);
 		
-		List<StaticRoute> routes2 = new ArrayList<>();
+		List<EStaticRouter> routes2 = new ArrayList<>();
 		VirtualFile dir = VirtualFileFactory.newFile(stagingDir);
-		routes2.add(new StaticRoute(null, Port.BOTH, new UrlPath("", "/public1.4/"), dir, false, cacheDir));
+		routes2.add(create(Port.BOTH, new UrlPath("", "/public1.4/"), dir, false, cacheDir));
 
 		//if server is just restarted(no file changes), we should skip reading files...
 		cache.setupCache(routes2);
@@ -103,7 +109,7 @@ public class TestCompressionCache {
 
 		FileUtils.copyDirectory(f, stagingDir);
 		
-		List<StaticRoute> routes = runBasicServerOnce(stagingDir);
+		List<EStaticRouter> routes = runBasicServerOnce(stagingDir);
 		
 		FileUtils.copyDirectory(f, stagingDir, false); //do not preserve dates here...
 		
@@ -121,7 +127,7 @@ public class TestCompressionCache {
 
 		FileUtils.copyDirectory(f, stagingDir);
 		
-		List<StaticRoute> routes = runBasicServerOnce(stagingDir);
+		List<EStaticRouter> routes = runBasicServerOnce(stagingDir);
 
 		File f2 = new File("src/test/resources/cacheTest2");
 		FileUtils.deleteDirectory(stagingDir);

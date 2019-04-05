@@ -21,20 +21,20 @@ import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.plugins.ReverseRouteLookup;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
-import org.webpieces.router.impl.routers.HtmlRouter;
+import org.webpieces.router.impl.routers.EHtmlRouter;
 
 public class ReverseRoutes implements ReverseRouteLookup {
 
 	//I don't like this solution(this class) all that much but it works for verifying routes in web pages exist with a run of
 	//a special test to find web app errors before deploying it.  good enough beats perfect and lookup is still fast
 	
-	private Map<RouteId, HtmlRouter> routeIdToRoute = new HashMap<>();
+	private Map<RouteId, EHtmlRouter> routeIdToRoute = new HashMap<>();
 	
-	private Map<String, HtmlRouter> routeNameToRoute = new HashMap<>();
+	private Map<String, EHtmlRouter> routeNameToRoute = new HashMap<>();
 	private Set<String> duplicateNames = new HashSet<>();
-	private Map<String, HtmlRouter> classAndNameToRoute = new HashMap<>();
+	private Map<String, EHtmlRouter> classAndNameToRoute = new HashMap<>();
 	private Set<String> duplicateClassAndNames = new HashSet<>();
-	private Map<String, HtmlRouter> fullClassAndNameToRoute = new HashMap<>();
+	private Map<String, EHtmlRouter> fullClassAndNameToRoute = new HashMap<>();
 
 	private Charset urlEncoding;
 	private PortConfigCallback portConfigCallback;
@@ -45,8 +45,8 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		this.urlEncoding = config.getUrlEncoding();		
 	}
 
-	public void addRoute(RouteId routeId, HtmlRouter meta) {
-		HtmlRouter existingRoute = routeIdToRoute.get(routeId);
+	public void addRoute(RouteId routeId, EHtmlRouter meta) {
+		EHtmlRouter existingRoute = routeIdToRoute.get(routeId);
 		if(existingRoute != null) {
 			throw new IllegalStateException("You cannot use a RouteId twice.  routeId="+routeId
 					+" first time="+existingRoute.getFullPath()+" second time="+meta.getFullPath());
@@ -82,14 +82,14 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		}
 	}
 	
-	public HtmlRouter get(RouteId id) {
-		HtmlRouter meta = routeIdToRoute.get(id);
+	public EHtmlRouter get(RouteId id) {
+		EHtmlRouter meta = routeIdToRoute.get(id);
 		if(meta == null)
 			throw new IllegalStateException("addRoute method with param route id="+id+" was never called by your application(your RouteModule files), yet this controller is trying to use it");
 		return meta;
 	}
 
-	public HtmlRouter get(String name) {
+	public EHtmlRouter get(String name) {
 		String[] pieces = name.split("\\.");
 		if(pieces.length == 1)
 			return getByName(name);
@@ -101,14 +101,14 @@ public class ReverseRoutes implements ReverseRouteLookup {
 			throw new IllegalStateException("route not found='"+name+"'");
 	}
 
-	private HtmlRouter getByFullClassAndName(String name) {
-		HtmlRouter meta = fullClassAndNameToRoute.get(name);
+	private EHtmlRouter getByFullClassAndName(String name) {
+		EHtmlRouter meta = fullClassAndNameToRoute.get(name);
 		if(meta == null)
 			throw new RouteNotFoundException("route="+name+" not found.");
 		return meta;
 	}
 
-	private HtmlRouter getByClassAndName(String name) {
+	private EHtmlRouter getByClassAndName(String name) {
 		if(duplicateClassAndNames.contains(name)) {
 			Set<RouteId> keySet = routeIdToRoute.keySet();
 			String routes = "";
@@ -121,13 +121,13 @@ public class ReverseRoutes implements ReverseRouteLookup {
 			throw new RouteNotFoundException("There is more than one route matching the class and name.  Qualify it with the package like org.web."
 					+name+".  These are the conflicting ids which is why you need to be more specific="+routes);
 		}
-		HtmlRouter routeMeta = classAndNameToRoute.get(name);
+		EHtmlRouter routeMeta = classAndNameToRoute.get(name);
 		if(routeMeta == null)
 			throw new RouteNotFoundException("route="+name+" not found");
 		return routeMeta;
 	}
 	
-	private HtmlRouter getByName(String name) {
+	private EHtmlRouter getByName(String name) {
 		if(duplicateNames.contains(name)) {
 			Set<RouteId> keySet = routeIdToRoute.keySet();
 			String routes = "";
@@ -139,7 +139,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 			throw new RouteNotFoundException("There is more than one route matching the name.  Qualify it with the class like XXXRouteId."
 					+name+".  Same names are found in these enum classes="+routes);
 		}
-		HtmlRouter routeMeta = routeNameToRoute.get(name);
+		EHtmlRouter routeMeta = routeNameToRoute.get(name);
 		if(routeMeta == null)
 			throw new RouteNotFoundException("route="+name+" not found.");
 		return routeMeta;
@@ -151,7 +151,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 	}
 
 	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {		
-		HtmlRouter routeMeta = get(routeId);
+		EHtmlRouter routeMeta = get(routeId);
 		String urlPath = routeMeta.getFullPath();
 		List<String> pathParamNames = routeMeta.getMatchInfo().getPathParamNames();
 		for(String param : pathParamNames) {
@@ -175,7 +175,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		return createUrl(routeMeta, urlPath);
 	}
 
-	private String createUrl(HtmlRouter routeMeta, String urlPath) {
+	private String createUrl(EHtmlRouter routeMeta, String urlPath) {
 		RequestContext ctx = Current.getContext();
 		RouterRequest request = ctx.getRequest();
 		
@@ -208,7 +208,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 
 	@Override
 	public String convertToUrl(RouteId routeId) {
-		HtmlRouter routeMeta = get(routeId);
+		EHtmlRouter routeMeta = get(routeId);
 		String urlPath = routeMeta.getFullPath();
 		return createUrl(routeMeta, urlPath);
 	}

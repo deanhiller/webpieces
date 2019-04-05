@@ -2,11 +2,11 @@ package org.webpieces.router.impl.compression;
 
 import java.util.List;
 
-import org.webpieces.router.impl.StaticRoute;
+import org.webpieces.router.impl.routers.EStaticRouter;
 
 public interface CompressionCacheSetup {
 
-	void setupCache(List<StaticRoute> staticRoutes);
+	void setupCache(List<EStaticRouter> list);
 
 	FileMeta relativeUrlToHash(String path);
 	

@@ -15,7 +15,7 @@ import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.routers.MasterRouter;
+import org.webpieces.router.impl.routers.AMasterRouter;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -32,13 +32,13 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 	private DevClassForName classLoader;
 	private WebAppMeta routerModule;
 	private RouterConfig config;
-	private MasterRouter router;
+	private AMasterRouter router;
 
 	@Inject
 	public DevRoutingService(
 			RouteLoader routeConfig, 
 			RouterConfig config, 
-			MasterRouter router, 
+			AMasterRouter router, 
 			DevClassForName loader, 
 			CookieTranslator cookieTranslator,
 			ObjectTranslator objTranslator

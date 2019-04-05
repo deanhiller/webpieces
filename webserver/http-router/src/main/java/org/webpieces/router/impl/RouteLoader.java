@@ -29,8 +29,8 @@ import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routebldr.CurrentPackage;
 import org.webpieces.router.impl.routebldr.DomainRouteBuilderImpl;
-import org.webpieces.router.impl.routers.DomainRouter;
-import org.webpieces.router.impl.routers.MasterRouter;
+import org.webpieces.router.impl.routers.BDomainRouter;
+import org.webpieces.router.impl.routers.AMasterRouter;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -48,7 +48,7 @@ public class RouteLoader {
 	private final PluginSetup pluginSetup;
 	private final ManagedBeanMeta beanMeta;
 	private final ObjectTranslator objectTranslator;
-	private final MasterRouter masterRouter;
+	private final AMasterRouter masterRouter;
 	private final RouterConfig config;
 	private final RouteBuilderLogic routeBuilderLogic;
 
@@ -58,7 +58,7 @@ public class RouteLoader {
 	@Inject
 	public RouteLoader(
 		RouterConfig config, 
-		MasterRouter masterRouter,
+		AMasterRouter masterRouter,
 		CompressionCacheSetup compressionCacheSetup,
 		PluginSetup pluginSetup,
 		ManagedBeanMeta beanMeta,
@@ -221,7 +221,7 @@ public class RouteLoader {
 
 		reverseRoutes.finalSetup();
 		
-		DomainRouter domainRouter = routerBuilder.build();
+		BDomainRouter domainRouter = routerBuilder.build();
 		
 		routingHolder.setDomainRouter(domainRouter);
 		masterRouter.setDomainRouter(domainRouter);
