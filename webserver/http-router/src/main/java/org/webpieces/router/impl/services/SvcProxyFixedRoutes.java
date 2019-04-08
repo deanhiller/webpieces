@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
+import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.filters.Service;
 
 /**
@@ -21,16 +22,7 @@ public class SvcProxyFixedRoutes implements Service<MethodMeta, Action> {
 	
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {
-		try {
-			return invokeMethod(meta);
-		} catch(InvocationTargetException e) {
-			//DAMN these damn InvocationTargetExceptions that just fucking wrap the original
-			//GET rid of checked exceptions....in reality InvocationTargetException == FUCKING ANYTHING!!!
-			//This ensures the original thrown exception comes through. 
-			return invoker.createRuntimeFuture(e.getCause());
-		} catch(Throwable e) {
-			return invoker.createRuntimeFuture(e);
-		}
+		return ExceptionUtil.wrap(() -> invokeMethod(meta));
 	}
 	
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 

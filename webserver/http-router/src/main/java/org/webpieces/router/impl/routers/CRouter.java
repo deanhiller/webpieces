@@ -9,6 +9,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.model.RouterInfo;
+import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.logging.SupressedExceptionLog;
@@ -52,22 +53,17 @@ public class CRouter extends DScopedRouter {
 	 * method without nesting even more!!! UGH, more nesting sucks
 	 */
 	private CompletableFuture<Void> invokeRouteCatchNotFound(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
-		CompletableFuture<Void> future;
-		try{
-			future = super.invokeRoute(ctx, responseCb, subPath);
-		} catch(Throwable e) {
-			future = new CompletableFuture<Void>();
-			future.completeExceptionally(e);
-		}
+
+		CompletableFuture<Void> future = ExceptionUtil.wrap(
+			() -> super.invokeRoute(ctx, responseCb, subPath)
+		);
 		
 		return future.handle((r, t) -> {
 			log.warn("error", t);
 			if(t instanceof NotFoundException)
 				return notFound((NotFoundException)t, ctx, responseCb);
 			else if(t != null) {
-				CompletableFuture<Void> future1 = new CompletableFuture<Void>();
-				future1.completeExceptionally(t);
-				return future1;
+				return CompletableFuture.<Void>failedFuture(t);
 			}
 			
 			return CompletableFuture.completedFuture(r); 
@@ -78,7 +74,11 @@ public class CRouter extends DScopedRouter {
 			Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, Object failedRoute) {
 		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
 		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
-		return internalServerErrorImpl(exc, requestCtx, responseCb, failedRoute).handle((r, t) -> {
+		CompletableFuture<Void> future = ExceptionUtil.wrap(
+			() -> internalServerErrorImpl(exc, requestCtx, responseCb, failedRoute)
+		);
+				
+		return future.handle((r, t) -> {
 			if(t != null) {
 				CompletableFuture<Void> future1 = new CompletableFuture<Void>();
 				future1.completeExceptionally(new InternalErrorRouteFailedException(t, failedRoute));
@@ -90,33 +90,20 @@ public class CRouter extends DScopedRouter {
 	}
 	
 	private CompletableFuture<Void> internalServerErrorImpl(
-			Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, Object failedRoute) {
-		try {
-			log.error("There is three parts to this error message... request, route found, and the exception "
-					+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"
-					+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
-			SupressedExceptionLog.log(exc);
-			
-			return internalSvrErrorRouter.invokeErrorRoute(requestCtx, responseCb);
-		} catch(Throwable e) {
-			//http 500...
-			//return a completed future with the exception inside...
-			CompletableFuture<Void> futExc = new CompletableFuture<Void>();
-			futExc.completeExceptionally(e);
-			return futExc;			
-		}
+		Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, Object failedRoute) {
+		log.error("There is three parts to this error message... request, route found, and the exception "
+				+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"
+				+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
+		SupressedExceptionLog.log(exc);
+		
+		return internalSvrErrorRouter.invokeErrorRoute(requestCtx, responseCb);
 	}
 	
 	private CompletableFuture<Void> notFound(NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
-		try {
-			return pageNotFoundRouter.invokeNotFoundRoute(requestCtx, responseCb, exc);
-		} catch(Throwable e) {
-			//http 500...
-			//return a completed future with the exception inside...
-			CompletableFuture<Void> futExc = new CompletableFuture<Void>();
-			futExc.completeExceptionally(new RuntimeException("NotFound Route had an exception", e));
-			return futExc;
-		}
+		return ExceptionUtil.wrap(
+			() -> pageNotFoundRouter.invokeNotFoundRoute(requestCtx, responseCb, exc),
+			(e) -> new RuntimeException("NotFound Route had an exception", e)
+		);
 	}
 	
 	public String getDomain() {

@@ -53,7 +53,7 @@ public class ControllerLoader {
 	public LoadedController loadHtmlController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers, boolean isPostOnly) {
 		LoadedController loadedController = loadGenericController(injector, routeInfo, isInitializingAllControllers);
 		if(loadedController != null)
-			preconditionCheck(routeInfo, loadedController.getControllerMethod(), isPostOnly);
+			htmlPreconditionCheck(routeInfo, loadedController.getControllerMethod(), isPostOnly);
 		return loadedController;
 	}
 	
@@ -75,7 +75,7 @@ public class ControllerLoader {
 		return loader.createServiceFromFilters(info, isInitializingAllFilters);
 	}
 
-	private void preconditionCheck(Object meta, Method controllerMethod, boolean isPostOnly) {
+	private void htmlPreconditionCheck(Object meta, Method controllerMethod, boolean isPostOnly) {
 		if(isPostOnly) {
 			Class<?> clazz = controllerMethod.getReturnType();
 			if(CompletableFuture.class.isAssignableFrom(clazz)) {

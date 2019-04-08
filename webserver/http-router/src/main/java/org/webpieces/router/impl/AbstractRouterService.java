@@ -21,6 +21,7 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.InternalErrorRouteFailedException;
+import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -64,13 +65,7 @@ public abstract class AbstractRouterService implements RouterService {
 	}
 
 	private CompletableFuture<Void> processRequest(RequestContext requestCtx, ResponseStreamer responseCb) {
-		CompletableFuture<Void> future;
-		try {
-			future = incomingRequestImpl(requestCtx, responseCb);
-		} catch(Throwable e) {
-			future = new CompletableFuture<Void>();
-			future.completeExceptionally(e);			
-		}
+		CompletableFuture<Void> future = ExceptionUtil.wrap(() -> incomingRequestImpl(requestCtx, responseCb));
 		future.exceptionally(e -> finalFailure(responseCb, e, requestCtx));
 		return future;
 	}

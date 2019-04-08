@@ -10,11 +10,11 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.BadRequestException;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
+import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.filters.Service;
 
 public class SvcProxyForHtml implements Service<MethodMeta, Action> {
@@ -31,27 +31,9 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {
-		try {
-			return invokeMethod(meta);
-		} catch(InvocationTargetException e) {
-			Throwable cause = e.getCause();
-			if(cause instanceof NotFoundException) {
-				return createNotFound((NotFoundException) cause);
-			}
-			return invoker.createRuntimeFuture(cause);
-		} catch(NotFoundException e) {
-			return createNotFound(e);
-		} catch(Throwable e) {
-			return invoker.createRuntimeFuture(e);
-		}			
+		return ExceptionUtil.wrap(() -> invokeMethod(meta));
 	}
 
-	private CompletableFuture<Action> createNotFound(NotFoundException e) {
-		CompletableFuture<Action> future = new CompletableFuture<Action>();
-		future.completeExceptionally(e);
-		return future;
-	}
-	
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		RouteInfoForHtml info = (RouteInfoForHtml) meta.getRoute();

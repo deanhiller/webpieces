@@ -5,7 +5,6 @@ import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.routers.AbstractDynamicRouter;
-import org.webpieces.router.impl.routers.EHtmlRouter;
 import org.webpieces.util.filters.Service;
 
 public class RouterAndInfo {

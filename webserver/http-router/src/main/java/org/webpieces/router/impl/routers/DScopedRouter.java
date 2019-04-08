@@ -10,6 +10,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
+import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -62,20 +63,15 @@ public class DScopedRouter {
 			}
 		}
 
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
-		future.completeExceptionally(new NotFoundException("route not found"));
-		return future;
+		return CompletableFuture.<Void>failedFuture(new NotFoundException("route not found"));
 	}
 	
 	private CompletableFuture<Void> invokeRouter(AbstractRouter router, RequestContext ctx,
 			ResponseStreamer responseCb) {
-		CompletableFuture<Void> future;
-		try {
-			future = router.invoke(ctx, responseCb);
-		} catch(Throwable e) {
-			future = new CompletableFuture<Void>();
-			future.completeExceptionally(e);
-		}
+	
+		CompletableFuture<Void> future = ExceptionUtil.wrap(
+			() -> router.invoke(ctx, responseCb)
+		);
 		
 		CompletableFuture<Void> local = future.handle((r, t) -> {
 			if(t != null) {
@@ -144,8 +140,6 @@ public class DScopedRouter {
 			html += spacing+"<li>SCOPE:"+entry.getKey()+"</li>\n";
 			html += spacing+childRouting.buildHtml(spacing+spacing);
 		}
-		
-
 		
 		html+="</ul>\n";
 		

@@ -10,7 +10,7 @@ public abstract class Filter<REQ, RESP> {
 		return new Filter<REQ, RESP>() {
 			@Override
 			public CompletableFuture<RESP> filter(REQ meta, Service<REQ, RESP> nextFilter) {
-				return Filter.this.filter(meta, nextFilter);
+				return ExceptionUtil.wrap(() -> Filter.this.filter(meta, nextFilter));
 			}
 		};
 	}
@@ -19,7 +19,7 @@ public abstract class Filter<REQ, RESP> {
 		return new Service<REQ, RESP>() {
 			@Override
 			public CompletableFuture<RESP> invoke(REQ meta) {
-				return Filter.this.filter(meta, svc);
+				return ExceptionUtil.wrap(() -> Filter.this.filter(meta, svc));
 			}
 		};
 	}

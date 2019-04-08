@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.loader.LoadedController;
+import org.webpieces.util.filters.ExceptionUtil;
 
 public class ServiceInvoker {
 
@@ -13,12 +14,6 @@ public class ServiceInvoker {
 		Method m = meta.getControllerMethod();
 		Object obj = meta.getControllerInstance();
 		return m.invoke(obj, args);
-	}
-
-	public CompletableFuture<Action> createRuntimeFuture(Throwable e) {
-		CompletableFuture<Action> future = new CompletableFuture<Action>();
-		future.completeExceptionally(e);
-		return future;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -37,6 +32,7 @@ public class ServiceInvoker {
 		Object resp = invokeController(loadedController, args);
 		if(resp == null)
 			throw new IllegalStateException("Your controller method returned null which is not allowed.  offending method="+loadedController.getControllerMethod());
+		
 		return coerceReturnValue(resp);
 	}
 }

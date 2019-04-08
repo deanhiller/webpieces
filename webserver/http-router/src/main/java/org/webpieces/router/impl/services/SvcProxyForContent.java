@@ -11,6 +11,7 @@ import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
+import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.filters.Service;
 
 public class SvcProxyForContent implements Service<MethodMeta, Action> {
@@ -27,19 +28,7 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {
-		try {
-			return invokeMethod(meta);
-		} catch(InvocationTargetException e) {
-			//DAMN these damn InvocationTargetExceptions that just fucking wrap the original
-			//GET rid of checked exceptions....in reality InvocationTargetException == FUCKING ANYTHING!!!
-			return invoker.createRuntimeFuture(e.getCause());
-		} catch(Throwable e) {
-			//IT's hard to say for Content routes like a json api, etc. what we should return on 
-			//failure.  They should install a filter that captures their own failures and if not,
-			//we will actually send back the error html page as this throws up to the Router file
-			//that will catch and call the internalErrorRoute for html
-			return invoker.createRuntimeFuture(e);
-		}			
+		return ExceptionUtil.wrap(() -> invokeMethod(meta));
 	}
 
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
