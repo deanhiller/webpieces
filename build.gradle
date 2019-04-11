@@ -245,6 +245,9 @@ println currentJvm
 
    test.dependsOn (":deleteJavaCache")
    test {
+      //Tests fail with wifi OFF and ipv6....force ipv4 for now
+      systemProperty "java.net.preferIPv4Stack", true
+
       beforeTest{ descr ->
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
       }
