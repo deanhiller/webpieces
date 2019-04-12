@@ -15,9 +15,14 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.internal.tasks.compile.CompilerForkUtils;
 import org.gradle.api.logging.LogLevel;
+import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.AbstractCompile;
+import org.gradle.api.tasks.compile.CompileOptions;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templatingdev.api.CompileCallback;
 import org.webpieces.templatingdev.api.DevTemplateModule;
@@ -31,8 +36,27 @@ import com.google.inject.Injector;
 
 import groovy.lang.GroovyClassLoader;
 
+@CacheableTask
 public class TemplateCompilerTask extends AbstractCompile {
 
+    private final CompileOptions compileOptions;
+    //private final GroovyCompileOptions groovyCompileOptions = new GroovyCompileOptions();
+
+    public TemplateCompilerTask() {
+        CompileOptions compileOptions = getServices().get(ObjectFactory.class).newInstance(CompileOptions.class);
+        this.compileOptions = compileOptions;
+        CompilerForkUtils.doNotCacheIfForkingViaExecutable(compileOptions, getOutputs());
+    }
+    
+    /**
+     * Returns the options for Java compilation.
+     *
+     * @return The Java compile options. Never returns null.
+     */
+    @Nested
+    public CompileOptions getOptions() {
+        return compileOptions;
+    }
 //    private TemplateCompileOptions options = new TemplateCompileOptions();
 //
 //    @Nested

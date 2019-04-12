@@ -21,7 +21,7 @@ buildscript {
 plugins {
     //google "gradle build scan" or https://github.com/gradle/gradle-build-scan-quickstart
     // essentially, ./gradlew build -Dscan
-    id 'com.gradle.build-scan' version '1.0' //google "gradle build scan"
+    id 'com.gradle.build-scan' version '1.15.2'
     //id 'com.dorongold.task-tree' version '1.2.2' //This prints out a task tree dependency (pretty print)
 }
 

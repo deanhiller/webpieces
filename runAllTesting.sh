@@ -140,7 +140,7 @@ server_pid=$!
 #
 #SOOO sleep time is increased from 5 seconds to 10 so builds pass...this sucks, my server used to startup in 3 seconds
 
-SLEEP_TIME=10
+SLEEP_TIME=5
 echo "sleep $SLEEP_TIME seconds while server starts up"
 sleep $SLEEP_TIME 
 echo "Grepping log"
@@ -172,7 +172,7 @@ if grep -q "BACKEND Login" downloadedhtml.txt; then
   echo "##################################"
 else
   echo "##################################"
-  echo "2222 Server Startup Failed to be done in 5 seconds"
+  echo "2222 Server Startup Failed to be done in $SLEEP_TIME seconds"
   echo "Failed Download https page.  Server is located at `pwd`"
   echo "##################################"
   kill -9 $server_pid
