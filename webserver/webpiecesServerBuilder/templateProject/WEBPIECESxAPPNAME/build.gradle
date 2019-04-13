@@ -1,0 +1,68 @@
+//This file is used when we build the whole webpieces project AND is not part of template generation
+
+sourceSets {
+    main {
+        resources {
+            srcDirs += ["src/main/java"]
+            excludes = ["logback.xml"]
+        }
+    }
+}
+
+
+    //Intellij Idea has a weird quirk we need to avoid
+    if (System.getProperty('idea.active')) {
+
+        // to have classes and resources in the same output directory
+        idea {
+            module {
+                outputDir file("out/production/classes")
+            }
+        }
+    }
+
+    dependencies {
+        compile project(':webserver:http-webserver')
+        //we start people off with the hibernate plugin
+        compile project(':webserver-plugins:plugin-hibernate')
+        compile project(':webserver-plugins:plugin-json-jackson')
+        compile project(':webserver-plugins:plugin-backend')
+        compile project(':webserver-plugins:plugin-install-sslcert')
+        compile project(':webserver-plugins:plugin-properties')
+        compile deps['commons-lang'] //used in json escaping
+
+        testCompile project(':core:core-ddl')
+        testCompile project(':core:core-mock')
+        testCompile project(':webserver-plugins:plugin-h2db')
+        testCompile project(':webserver:http-webserver-test')
+        testCompile deps['selenium']
+    }
+
+compileJava.doLast {
+   logger.warn("processed resources="+sourceSets.main.output.resourcesDir)
+}
+
+    //task uploadArchives(overwrite: true) << {
+    //}
+
+    //ok, this is the deal here.  JPA/hibernate made the decision to look for a persistence.xml file
+    //and scan for classes with @Entity in the directory OR jar with that xml file only
+    //maven(and I hate this) a long time ago separated src/main/java and src/main/resources but
+    //this screws tools in many situations like this one so this puts it back so the output is at
+    //least put to the same location
+    //sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
+
+task copyPersistenceXml(type: Copy, dependsOn: 'compileTestJava') {
+    from 'src/main/resources/META-INF'
+    into 'output/classes/java/main/META-INF'
+    include 'persistence.xml'
+    //outputs.upToDateWhen { false }
+}
+
+test.dependsOn ("copyPersistenceXml")
+
+test {
+    if (project.hasProperty('excludeSelenium')) {
+        exclude '**/*Selenium*'
+    }
+}

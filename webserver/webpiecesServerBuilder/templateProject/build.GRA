@@ -169,7 +169,9 @@ task codeCoverage(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
 //project BUT we need build and clean to work inline with the java projects
 task build(dependsOn: ':codeCoverage')
 
-task clean() << {
-   delete "${buildDir}"
+task clean {
+   description= "Deletes ${buildDir}"
+   doLast {
+    delete "${buildDir}"
+   }
 }
-

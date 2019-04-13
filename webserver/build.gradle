@@ -6,84 +6,6 @@ project.ext {
   outputStagingDir = new File(buildDir, stagingDirName)
 }
 
-project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
-
-    sourceSets {
-        main {
-            resources {
-                srcDirs += ["src/main/java"]
-                excludes = ["logback.xml"]
-            }
-        }
-    }
-
-    //Intellij Idea has a weird quirk we need to avoid
-    if (System.getProperty('idea.active')) {
-
-        // to have classes and resources in the same output directory
-        idea {
-            module {
-                outputDir file("out/production/classes")
-            }
-        }
-    }
-
-    dependencies {
-        compile project(':webserver:http-webserver')
-        //we start people off with the hibernate plugin 
-        compile project(':webserver-plugins:plugin-hibernate')
-        compile project(':webserver-plugins:plugin-json-jackson')
-        compile project(':webserver-plugins:plugin-backend')
-        compile project(':webserver-plugins:plugin-install-sslcert')
-        compile project(':webserver-plugins:plugin-properties')
-        compile deps['commons-lang'] //used in json escaping
-		
-        testCompile project(':core:core-ddl')
-        testCompile project(':core:core-mock')
-        testCompile project(':webserver-plugins:plugin-h2db')
-        testCompile project(':webserver:http-webserver-test')
-        testCompile deps['selenium']
-    }
-
-    //task uploadArchives(overwrite: true) << {
-    //}
-
-    //ok, this is the deal here.  JPA/hibernate made the decision to look for a persistence.xml file
-    //and scan for classes with @Entity in the directory OR jar with that xml file only
-    //maven(and I hate this) a long time ago separated src/main/java and src/main/resources but
-    //this screws tools in many situations like this one so this puts it back so the output is at
-    //least put to the same location
-    sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
-    compileJava.doLast {
-       logger.warn("processed resources="+sourceSets.main.output.resourcesDir)
-    }
-
-    test {
-        if (project.hasProperty('excludeSelenium')) {
-            exclude '**/*Selenium*'
-        }
-    }
-}
-
-project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME-dev') {
-    dependencies {
-        compile project(':webserver:http-webserver')
-        compile project(':webserver:http-router-dev')
-        compile project(':webserver:http-templating-dev')
-        compile project(':webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME')
-
-        //we start people off with h2 plugin in dev mode that they can delete later if they want(easier to delete then to setup)
-        //h2 works well for in-memory testing if using jdbc.  if using nosql, just delete this and code that no longer compiles after that
-        compile project(':webserver-plugins:plugin-h2db')
-        
-        //we load the documentation plugin in the development server (not the production server)
-        compile project(':webserver-plugins:plugin-documentation')
-    }
-    
-    //task uploadArchives(overwrite: true) << {
-    //}
-}
-
 //Workaround until https://issues.gradle.org/browse/GRADLE-1883 is better from
 //http://stackoverflow.com/questions/29504250/how-to-copy-hidden-resource-files-in-gradle
 org.apache.tools.ant.DirectoryScanner.removeDefaultExclude("**/.gitignore")
@@ -103,6 +25,7 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/templateProject/.project'
     exclude stagingDirName + '/templateProject/.settings'
     exclude stagingDirName + '/templateProject/output'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/build.gradle'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/output'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/out'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/bin'
@@ -110,6 +33,7 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.classpath'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.project'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.settings'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/build.gradle'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/output'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/out'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/bin'

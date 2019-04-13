@@ -6,7 +6,8 @@ cd $DIR
 
 #RUN test first by building fake release THEN building fake project THEN building the fake project to make sure it works
 #./gradlew clean build release -x javadoc
-./gradlew clean build release -PexcludeSelenium=true -x javadoc
+printf "\n*********Running ./gradlew --stacktrace clean build release -PexcludeSelenium=true -x javadoc *****\n"
+./gradlew --stacktrace clean build release -PexcludeSelenium=true -x javadoc
 #./gradlew -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false build -PexcludeSelenium=true -PexcludeH2Spec=true
 
 test_result=$?
@@ -29,6 +30,7 @@ fi
 if [ ! -d "../webpiecesexample-all" ]; then
    echo "legacy project is not on disk so git cloning now so we can test backwards compatibility"
    cd ..
+   printf "\n*******Running git clone https://github.com/deanhiller/webpiecesexample-all.git  *****\n"
    git clone https://github.com/deanhiller/webpiecesexample-all.git
    test_result=$?
    if [ $test_result -eq 0 ]
@@ -50,6 +52,7 @@ fi
 cd ../webpiecesexample-all
 git checkout master # just in case checkout the project to master
 
+printf "\n********** Running ./gradlew clean build assembleDist **************\n"
 ./gradlew clean build assembleDist
 test_result=$?
 if [ $test_result -eq 0 ]
@@ -77,6 +80,7 @@ cd webserver/output/webpiecesServerBuilder
 
 echo path2=$PWD
 
+printf "**********./createProject.sh running from $PWD**********"
 ./createProject.sh WebpiecesExample org.webpieces ..
 
 echo createproject done
@@ -94,7 +98,7 @@ else
 fi
 
 cd ../webpiecesexample-all
-echo about to build assembleDist
+printf "\n******** Running ./gradlew build assembleDist from webpiecesexample-all *********\n"
 ./gradlew build assembleDist
 test_result=$?
 if [ $test_result -eq 0 ]
@@ -126,6 +130,7 @@ fi
 
 #TODO: startup the server in background and run test to grep out success in log files
 cd webpiecesexample
+printf "\n************* Run ./bin/webpiecesexample to start server ***********\n"
 ./bin/webpiecesexample &
 server_pid=$!
 
@@ -140,7 +145,8 @@ server_pid=$!
 #
 #SOOO sleep time is increased from 5 seconds to 10 so builds pass...this sucks, my server used to startup in 3 seconds
 
-SLEEP_TIME=5
+#Logback has a 5 second pause we should go debug on jdk9 at least causing this to be 10 seconds instead of 5
+SLEEP_TIME=10
 echo "sleep $SLEEP_TIME seconds while server starts up"
 sleep $SLEEP_TIME 
 echo "Grepping log"

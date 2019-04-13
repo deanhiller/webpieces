@@ -27,10 +27,19 @@ if (System.getProperty('idea.active')) {
 //maven(and I hate this) a long time ago separated src/main/java and src/main/resources but
 //this screws tools in many situations like this one so this puts it back so the output is at
 //least put to the same location
-sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
+//sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
 
 //we were told to remove this line so do it and retest it all ..cmd line build, eclipse import and test, intellij import and test
-compileJava.doLast { tasks.processResources.execute() }
+//compileJava.doLast { tasks.processResources.execute() }
+
+task copyPersistenceXml(type: Copy, dependsOn: 'compileTestJava') {
+    from 'src/test/resources/META-INF'
+    into 'output/classes/java/test/META-INF'
+    include 'persistence.xml'
+    //outputs.upToDateWhen { false }
+}
+
+test.dependsOn ("copyPersistenceXml")
 
 dependencies {
     compile deps['guice']

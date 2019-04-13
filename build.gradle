@@ -13,7 +13,7 @@ buildscript {
 
         //We use an older version of our own html compiler to pre-build html tags for clients
         //of webpieces...
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.124'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.131'
     }
 }
 
@@ -21,7 +21,7 @@ buildscript {
 plugins {
     //google "gradle build scan" or https://github.com/gradle/gradle-build-scan-quickstart
     // essentially, ./gradlew build -Dscan
-    id 'com.gradle.build-scan' version '1.15.2'
+    id 'com.gradle.build-scan' version '2.2.1'
     //id 'com.dorongold.task-tree' version '1.2.2' //This prints out a task tree dependency (pretty print)
 }
 
@@ -78,8 +78,10 @@ ext {
 
 //Section needed by the above com.gradle.build-scan plugin that was added
 buildScan {
-    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
-    licenseAgree = 'yes'
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
+
+    publishAlways()
 }
 
 allprojects {
