@@ -13,7 +13,7 @@ buildscript {
 
         //We use an older version of our own html compiler to pre-build html tags for clients
         //of webpieces...
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.131'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.135'
     }
 }
 
@@ -301,8 +301,8 @@ subprojects {
             }
          }
          maven {
-            name = 'local'
-            url = "file://${buildDir}/repo"
+            name = 'myTemp'
+            url = "file:/tmp/myRepo/"
          }
       }
       publications {
@@ -368,9 +368,9 @@ task deleteJavaCache {
 }
 
 //WE should not need this target... (it does this by default but we can't seem to depend on it...wait until we are on 5.3)
-task publishToMavenLocal {
+task publishMavenJavaPublicationToMyTempRepository {
    dependsOn {
-      project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("publishToMavenLocal") }
+      project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("publishMavenJavaPublicationToMyTempRepository") }
    }
 }
 
@@ -404,7 +404,7 @@ task printTasks {
 if(project.hasProperty('projVersion')) {
    task release(dependsOn: ':webserver:githubRelease')
 } else {
-   task release(dependsOn: [':webserver:build', ':publishToMavenLocal'])
+   task release(dependsOn: [':webserver:build', ':publishMavenJavaPublicationToMyTempRepository'])
 }
 
 //NOTE: The task name MUST BE this (even though I wanted it to be codeCoverage) because codecov.io looks for files
