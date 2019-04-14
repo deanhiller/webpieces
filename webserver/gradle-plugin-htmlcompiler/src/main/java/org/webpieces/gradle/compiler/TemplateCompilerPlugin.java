@@ -1,17 +1,20 @@
 package org.webpieces.gradle.compiler;
 
+import java.io.File;
+import java.util.concurrent.Callable;
+
 import javax.inject.Inject;
 
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
-import org.gradle.api.Transformer;
 import org.gradle.api.file.FileTreeElement;
+import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.internal.classpath.ModuleRegistry;
-import org.gradle.api.internal.file.SourceDirectorySetFactory;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.internal.tasks.DefaultSourceSet;
+import org.gradle.api.internal.tasks.DefaultSourceSetOutput;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
@@ -19,7 +22,7 @@ import org.gradle.api.plugins.internal.SourceSetUtil;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.compile.CompileOptions;
+import org.gradle.internal.Cast;
 
 /**
  * Based off GroovyBasePlugin.java 
@@ -104,7 +107,9 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
             sourceSet.getAllJava().source(groovySourceSet.getTemplateDirSet());
             sourceSet.getAllSource().source(groovySourceSet.getTemplateDirSet());
 
-            SourceSetUtil.configureOutputDirectoryForSourceSet(sourceSet, groovySourceSet.getTemplateDirSet(), project);
+            //copy over since it is deprecated...
+            configureOutputDirectoryForSourceSet(sourceSet, groovySourceSet.getTemplateDirSet(), project);
+            
             final Provider<TemplateCompilerTask> compileTask = project.getTasks().register(sourceSet.getCompileTaskName("templates"), TemplateCompilerTask.class, new Action<TemplateCompilerTask>() {
                 @Override
                 public void execute(TemplateCompilerTask compile) {
@@ -124,5 +129,23 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
                 }
             });
         }
+    }
+    
+    public static void configureOutputDirectoryForSourceSet(final SourceSet sourceSet, final SourceDirectorySet sourceDirectorySet, final Project target) {
+        final String sourceSetChildPath = "classes/" + sourceDirectorySet.getName() + "/" + sourceSet.getName();
+        sourceDirectorySet.setOutputDir(target.provider(new Callable<File>() {
+            @Override
+            public File call() {
+                return new File(target.getBuildDir(), sourceSetChildPath);
+            }
+        }));
+
+        DefaultSourceSetOutput sourceSetOutput = Cast.cast(DefaultSourceSetOutput.class, sourceSet.getOutput());
+        sourceSetOutput.addClassesDir(new Callable<File>() {
+            @Override
+            public File call() {
+                return sourceDirectorySet.getOutputDir();
+            }
+        });
     }
 }
