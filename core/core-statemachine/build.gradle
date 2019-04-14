@@ -4,6 +4,4 @@ dependencies {
     testCompile project(':core:core-mock')
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='an api to run DDL commands from java'
-}
+description='an api to run DDL commands from java'

@@ -2,6 +2,4 @@ dependencies {
     compile project(':core:core-channelmanager2'), project(':http:http1_1-parser')
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='An http client'
-}
+description='An http 1.1 client'

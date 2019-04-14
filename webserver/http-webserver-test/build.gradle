@@ -11,6 +11,4 @@ dependencies {
     compile project(':webserver:http-templating-dev')
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='The full webpieces server AS A library'
-}
+description='The full webpieces server AS A library'

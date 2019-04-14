@@ -4,6 +4,4 @@ dependencies {
 	testCompile project(':core:core-mock')
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='NIO wrapper on top of core-channelmanager2 making creating a tcp server just 3 lines of code'
-}
+description='NIO wrapper on top of core-channelmanager2 making creating a tcp server just 3 lines of code'

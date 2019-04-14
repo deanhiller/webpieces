@@ -99,15 +99,16 @@ allprojects {
 }
 
 subprojects {
-   apply plugin: 'java'
+   apply plugin: 'java-library'
    apply plugin: 'checkstyle'
    apply plugin: 'eclipse'
    apply plugin: 'idea'
    apply plugin: 'signing'
-   apply plugin: 'maven'
+   apply plugin: 'maven-publish'
 
    def currentJvm = org.gradle.internal.jvm.Jvm.current()
-println currentJvm
+   println currentJvm
+   
    group = 'org.webpieces'
    if(project.hasProperty('projVersion')) {
      project.version = '1.9.'+project.projVersion
@@ -116,6 +117,7 @@ println currentJvm
      project.version = '1.9-developer'
      println("CREATING DEVELOPER VERSION "+version+"  jvm="+currentJvm)
    }
+   version = project.version
 
    ext {
       //This is an input directory that we read jars from if they are not in a repo somewhere
@@ -208,6 +210,7 @@ println currentJvm
 
    task sourcesJar(type: Jar) {
       classifier = 'sources'
+      archiveClassifier = 'sources'
       from sourceSets.main.allSource
       manifest {
         def git_cmd = "git rev-parse HEAD"
@@ -224,12 +227,6 @@ println currentJvm
         archives jar
         archives javadocJar
         archives sourcesJar
-   }
-
-   if(project.hasProperty('projVersion')) {
-       signing {
-          sign configurations.archives
-       }
    }
 
    //This is really only needed for devrouter, embeddablewebserver, http-client, and embeddablehttpproxy
@@ -289,59 +286,63 @@ println currentJvm
          }
       }
    }
-
-   //we only want to upload if the build passed first..ie. tests, etc.
-   uploadArchives.dependsOn('build')
-   uploadArchives {
+   
+   publishing {  
       repositories {
-        mavenDeployer {
-
-            if(project.hasProperty('projVersion')) {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                if("".equals(project.projVersion.trim())) {
-                    throw new InvalidUserDataException("-PprojVersion property was not defined and must be when uploadArchives is run");
-                }
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: sonatypeUsername, password: sonatypePassword)
-                }
-            } else {
-                repository(url: "file://localhost/tmp/myRepo/")
+         maven {
+            name = 'sonatype'
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+               username = sonatypeUsername
+               password = sonatypePassword
             }
-
-            pom.project {
-              name project.name 
-              description 'Someone forgot to fill this in.  See http://stackoverflow.com/questions/38272550/how-to-fail-the-gradle-build-if-subproject-is-missing-a-property'
-              url "https://github.com/${github_org}/${project_name}"
-              licenses {
-                 license {
-                    name 'Apache License 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0'
-                    distribution 'repo'
-                 }
-              }
-              scm {
-                 url "https://github.com/${github_org}/${project_name}.git"
-                 connection "scm:git:https://github.com/${github_org}/${project_name}.git"
-                 developerConnection "scm:git:git@github.com:${github_org}/${project_name}.git"
-              }
-              organization {
-                 name github_org
-                 url "https://github.com/${github_org}"
-              }
-              developers {
-                  developer {
-                      id 'dhiller'
-                      name 'Dean Hiller'
-                  }
-              }
+         }
+         maven {
+            name = 'local'
+            url = "file://${buildDir}/repo"
+         }
+      }
+      publications {
+         mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = project.name
+                description = project.description
+                //'Someone forgot to fill this in.  See http://stackoverflow.com/questions/38272550/how-to-fail-the-gradle-build-if-subproject-is-missing-a-property'
+                url = 'https://github.com/${github_org}/${project_name}'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'dhiller'
+                        name = 'Dean Hiller'
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/${github_org}/${project_name}.git"
+                    developerConnection = "scm:git:git@github.com:${github_org}/${project_name}.git"
+                    url = "https://github.com/${github_org}/${project_name}.git"
+                }
             }
-        }
+               
+            artifact sourcesJar
+         }
       }
    }
 
-}
+   signing {
+      sign publishing.publications.mavenJava
+   }
+   //we only want to upload if the build passed first..ie. tests, etc.
+/*   uploadArchives.dependsOn('build')
+      */
+   
 
+}
 
 if(project.hasProperty('projVersion')) {
     nexusStaging {  
@@ -362,16 +363,27 @@ task deleteJavaCache {
     }
 }
 
-task uploadArchives2 { 
-    doLast {
-    }
+//WE should not need this target... (it does this by default but we can't seem to depend on it...wait until we are on 5.3)
+task publishToMavenLocal {
+   dependsOn {
+      project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("publishToMavenLocal") }
+   }
 }
 
-uploadArchives2.dependsOn {
-    project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("uploadArchives") }
+//Gradle has publishToMavenLocal and publish by default.
+//override the publish to throw an exception if projVersion is not set
+task publish {
+      dependsOn {
+      project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("publishMavenJavaPublicationToSonatypeRepository") }
+   }
+   doFirst {
+      if(!project.hasProperty('projVersion')) {
+         throw new RuntimeException("You must have -PprojVersion set to run publish task which your task depends on")
+      }
+   }
 }
 
-closeRepository.dependsOn('uploadArchives2')
+closeRepository.dependsOn('publish')
 promoteRepository.dependsOn('closeRepository')
 promoteRepository.doFirst {
   println("sleeping after close repo and before promote or promote fails")
@@ -385,7 +397,11 @@ task printTasks {
     }
 }
 
-task release(dependsOn: ':webserver:githubRelease')
+if(project.hasProperty('projVersion')) {
+   task release(dependsOn: ':webserver:githubRelease')
+} else {
+   task release(dependsOn: [':webserver:build', ':publishToMavenLocal'])
+}
 
 //NOTE: The task name MUST BE this (even though I wanted it to be codeCoverage) because codecov.io looks for files
 //which are based off this name
@@ -419,4 +435,5 @@ task clean() {
       delete "${buildDir}"
    }
 }
+
 

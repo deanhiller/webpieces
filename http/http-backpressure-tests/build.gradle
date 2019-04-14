@@ -6,6 +6,4 @@ dependencies {
 	testCompile project(':core:core-mock')
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='An http client'
-}
+description='An http client'

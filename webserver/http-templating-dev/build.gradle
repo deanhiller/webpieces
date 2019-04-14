@@ -14,6 +14,4 @@ dependencies {
     compile project(':webserver:http-templating')
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='Library that swaps out http-templating classes to enable compiling on any incoming request if the source code has changed for development servers'
-}
+description='Library that swaps out http-templating classes to enable compiling on any incoming request if the source code has changed for development servers'

@@ -7,9 +7,7 @@ dependencies {
     testCompile project(':core:core-mock')
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='Create a webserver with this library in just 3 lines of code.  just register your HttpRequestListener and it feeds you a FrontendSocket that you write HttpResponses to'
-}
+description='Create a webserver with this library in just 3 lines of code.  just register your HttpRequestListener and it feeds you a FrontendSocket that you write HttpResponses to'
 
 test {
     if (project.hasProperty('excludeH2Spec')) {

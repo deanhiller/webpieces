@@ -4,9 +4,7 @@ dependencies {
     testCompile project(':core:core-util')
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='A re-usable asynchronous http2 parser'
-}
+description='A re-usable asynchronous http2 parser'
 
 compileTestJava {
   options.compilerArgs += ["--add-modules", "java.xml.bind"]

@@ -1,18 +1,15 @@
 //This file is used when we build the whole webpieces project AND is not part of template generation    
 
 dependencies {
-        compile project(':webserver:http-webserver')
-        compile project(':webserver:http-router-dev')
-        compile project(':webserver:http-templating-dev')
-        compile project(':webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME')
+  compile project(':webserver:http-webserver')
+  compile project(':webserver:http-router-dev')
+  compile project(':webserver:http-templating-dev')
+  compile project(':webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME')
 
-        //we start people off with h2 plugin in dev mode that they can delete later if they want(easier to delete then to setup)
-        //h2 works well for in-memory testing if using jdbc.  if using nosql, just delete this and code that no longer compiles after that
-        compile project(':webserver-plugins:plugin-h2db')
+  //we start people off with h2 plugin in dev mode that they can delete later if they want(easier to delete then to setup)
+  //h2 works well for in-memory testing if using jdbc.  if using nosql, just delete this and code that no longer compiles after that
+  compile project(':webserver-plugins:plugin-h2db')
 
-        //we load the documentation plugin in the development server (not the production server)
-        compile project(':webserver-plugins:plugin-documentation')
-    }
-
-    //task uploadArchives(overwrite: true) << {
-    //}
+  //we load the documentation plugin in the development server (not the production server)
+  compile project(':webserver-plugins:plugin-documentation')
+}

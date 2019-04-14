@@ -20,6 +20,4 @@ dependencies {
     //this keeps us pluggable with ANY http parser implementation
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='Library for helping plugins write tests testing controller and web pages'
-}
+description='Library for helping plugins write tests testing controller and web pages'

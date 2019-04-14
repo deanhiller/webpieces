@@ -7,6 +7,4 @@ dependencies {
 	//this keeps us pluggable with ANY http parser implementation
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='Shared contexts between the router and templating system'
-}
+description='Shared contexts between the router and templating system'

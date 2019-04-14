@@ -14,6 +14,4 @@ repositories {
     mavenLocal()
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='Gradle plugin to compile html files to java Class files for production use'
-}
+description='Gradle plugin to compile html files to java Class files for production use'

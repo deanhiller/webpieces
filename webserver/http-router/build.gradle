@@ -8,6 +8,4 @@ dependencies {
     testCompile deps['apache-commons-io']
 }
 
-uploadArchives.repositories.mavenDeployer.pom.project {
-   description='Http Router where you feed http requests in and get responses in the form of which view needs to be shown with the arguments that you need to give to that view'
-}
+description='Http Router where you feed http requests in and get responses in the form of which view needs to be shown with the arguments that you need to give to that view'
