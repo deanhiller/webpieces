@@ -6,16 +6,20 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.Transformer;
 import org.gradle.api.file.FileTreeElement;
+import org.gradle.api.internal.classpath.ModuleRegistry;
 import org.gradle.api.internal.file.SourceDirectorySetFactory;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.internal.tasks.DefaultSourceSet;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.plugins.internal.SourceSetUtil;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.compile.CompileOptions;
 
 /**
  * Based off GroovyBasePlugin.java 
@@ -25,13 +29,15 @@ import org.gradle.api.tasks.SourceSet;
  */
 public class TemplateCompilerPlugin implements Plugin<Project> {
 	
-    private final SourceDirectorySetFactory sourceDirectorySetFactory;
-
+    private final ObjectFactory objectFactory;
+    private final ModuleRegistry moduleRegistry;
+    
     private Project project;
     
     @Inject
-    public TemplateCompilerPlugin(SourceDirectorySetFactory sourceDirectorySetFactory) {
-        this.sourceDirectorySetFactory = sourceDirectorySetFactory;
+    public TemplateCompilerPlugin(ObjectFactory objectFactory, ModuleRegistry moduleRegistry) {
+		this.objectFactory = objectFactory;
+		this.moduleRegistry = moduleRegistry;
     }
     
     @Override
@@ -70,22 +76,22 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
     private void configureSourceSetDefaults() {
         System.out.println("setup configure source set defaults");  
 
-        project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(new ConfigureAction(project, sourceDirectorySetFactory));
+        project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(new ConfigureAction(project, objectFactory));
     }
 
     private static class ConfigureAction implements Action<SourceSet> {
         private Project project;
-		private SourceDirectorySetFactory sourceDirectorySetFactory;
+		private ObjectFactory objectFactory;
 
-		public ConfigureAction(Project project, SourceDirectorySetFactory sourceDirectorySetFactory) {
+		public ConfigureAction(Project project, ObjectFactory objectFactory) {
         	this.project = project;
-        	this.sourceDirectorySetFactory = sourceDirectorySetFactory;
+        	this.objectFactory = objectFactory;
 		}
 
 		public void execute(final SourceSet sourceSet) {
             System.out.println("executing source set default setup");  
 
-            final DefaultTemplateSourceSet groovySourceSet = new DefaultTemplateSourceSet("templates", ((DefaultSourceSet) sourceSet).getDisplayName(), sourceDirectorySetFactory);
+            final DefaultTemplateSourceSet groovySourceSet = new DefaultTemplateSourceSet("templates", ((DefaultSourceSet) sourceSet).getDisplayName(), objectFactory);
             new DslObject(sourceSet).getConvention().getPlugins().put("templates", groovySourceSet);
             
             groovySourceSet.getTemplateDirSet().srcDir("src/" + sourceSet.getName() + "/java");
@@ -108,7 +114,6 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
                     compile.setSource(groovySourceSet.getTemplateDirSet());
                 }
             });
-
 
             // TODO: `classes` should be a little more tied to the classesDirs for a SourceSet so every plugin
             // doesn't need to do this.

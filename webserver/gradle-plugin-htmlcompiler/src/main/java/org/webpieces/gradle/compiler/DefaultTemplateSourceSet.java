@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import org.gradle.api.Action;
 import org.gradle.api.file.SourceDirectorySet;
-import org.gradle.api.internal.file.SourceDirectorySetFactory;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 
@@ -20,8 +20,8 @@ import groovy.lang.Closure;
 public class DefaultTemplateSourceSet implements TemplateSourceSet, HasPublicType {
     private final SourceDirectorySet templates;
 
-    public DefaultTemplateSourceSet(String name, String displayName, SourceDirectorySetFactory sourceDirectorySetFactory) {
-        templates = sourceDirectorySetFactory.create(name, displayName +  " Template(html/tag/json) source");
+    public DefaultTemplateSourceSet(String name, String displayName, ObjectFactory objectFactory) {
+        templates = objectFactory.sourceDirectorySet(name, displayName +  " Template(html/tag/json) source");
         templates.getFilter().include("**/*.html", "**/*.tag", "**/*.json");
     }
 
