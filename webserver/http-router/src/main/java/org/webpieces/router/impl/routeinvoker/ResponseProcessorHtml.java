@@ -1,4 +1,4 @@
-package org.webpieces.router.impl.ctx;
+package org.webpieces.router.impl.routeinvoker;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -11,6 +11,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.routes.Port;
@@ -29,52 +30,51 @@ import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routers.EHtmlRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
 
-public class ResponseProcessor extends Processor {
-	
+public class ResponseProcessorHtml implements Processor {
+
+	private RequestContext ctx;
 	private ReverseRoutes reverseRoutes;
 	private ProcessorInfo matchedMeta;
 	private ObjectToParamTranslator reverseTranslator;
 	private ResponseStreamer responseCb;
 
 	private boolean responseSent = false;
-	private PortConfig portConfig;
 
-	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, 
-			ObjectToParamTranslator reverseTranslator, ProcessorInfo meta, ResponseStreamer responseCb, PortConfig portConfig) {
-		super(ctx);
+	public ResponseProcessorHtml(RequestContext ctx, ReverseRoutes reverseRoutes, 
+			ObjectToParamTranslator reverseTranslator, ProcessorInfo meta, ResponseStreamer responseCb) {
+		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
 		this.matchedMeta = meta;
 		this.responseCb = responseCb;
-		this.portConfig = portConfig;
 	}
 
 	public CompletableFuture<Void> createRawRedirect(RawRedirect controllerResponse) {
 		String url = controllerResponse.getUrl();
 		if(url.startsWith("http")) {
-			return wrapFunctionInContext(() -> responseCb.sendRedirect(new RedirectResponse(url)));
+			return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(new RedirectResponse(url)));
 		}
 
 		RouterRequest request = ctx.getRequest();
 		RedirectResponse redirectResponse = new RedirectResponse(false, request.isHttps, request.domain, request.port, url);
-		return wrapFunctionInContext(() -> responseCb.sendRedirect(redirectResponse));
+		return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(redirectResponse));
 	}
 	
 
 	
-	public CompletableFuture<Void> createAjaxRedirect(AjaxRedirectImpl action) {
+	public CompletableFuture<Void> createAjaxRedirect(AjaxRedirectImpl action, PortConfig portConfig) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
-		return createRedirect(id, args, true);		
+		return createRedirect(id, args, true, portConfig);		
 	}
 	
-	public CompletableFuture<Void> createFullRedirect(RedirectImpl action) {
+	public CompletableFuture<Void> createFullRedirect(RedirectImpl action, PortConfig portConfig) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
-		return createRedirect(id, args, false);
+		return createRedirect(id, args, false, portConfig);
 	}
 	
-	private CompletableFuture<Void> createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
+	private CompletableFuture<Void> createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect, PortConfig portConfig) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
@@ -118,7 +118,7 @@ public class ResponseProcessor extends Processor {
 		
 		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
 		
-		return wrapFunctionInContext(() -> responseCb.sendRedirect(redirectResponse));
+		return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(redirectResponse));
 	}
 
 	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {
@@ -158,17 +158,30 @@ public class ResponseProcessor extends Processor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRouteType());
 		
-		return wrapFunctionInContext(() -> responseCb.sendRenderHtml(resp));
+		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
 	}
-
-
 
 	public CompletableFuture<Void> createContentResponse(RenderContent r) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
-		return wrapFunctionInContext(() -> responseCb.sendRenderContent(resp));
+		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
+	}
+
+	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb, PortConfig portConfig) {
+		if(controllerResponse instanceof RedirectImpl) {
+			return createFullRedirect((RedirectImpl)controllerResponse, portConfig);
+		} else if(controllerResponse instanceof AjaxRedirectImpl) {
+			return createAjaxRedirect((AjaxRedirectImpl)controllerResponse, portConfig);
+		} else if(controllerResponse instanceof RenderImpl) {
+			return createRenderResponse((RenderImpl)controllerResponse);
+		} else if(controllerResponse instanceof RawRedirect) {
+			//redirects to a raw straight up url
+			return createRawRedirect((RawRedirect)controllerResponse);
+		} else {
+			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed some code to write");
+		}
 	}
 	
 }

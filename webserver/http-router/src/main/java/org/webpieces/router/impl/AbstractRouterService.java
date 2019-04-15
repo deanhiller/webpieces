@@ -16,7 +16,6 @@ import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.Startable;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.ctx.FlashImpl;
-import org.webpieces.router.impl.ctx.ResponseFailureProcessor;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;

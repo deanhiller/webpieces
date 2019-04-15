@@ -56,13 +56,13 @@ public class BasicController {
 		return Actions.renderThis();
 	}
 	
-	public Action notFound() {
+	public Render notFound() {
 		//we use this to mock and throw NotFoundException or some RuntimeException for testing notFound path failures
 		notFoundLib.someBusinessLogic();
 		return Actions.renderThis();
 	}
 	
-	public Action internalError() {
+	public Render internalError() {
 		//we use this to mock and throw exceptions when needed for testing
 		errorLib.someBusinessLogic();
 		return Actions.renderThis();

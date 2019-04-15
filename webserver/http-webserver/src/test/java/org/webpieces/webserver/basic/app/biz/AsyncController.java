@@ -56,12 +56,12 @@ public class AsyncController {
 		return notFoundLib.someBusinessLogic().thenApply(s -> Actions.redirect(AsyncRouteId.SOME_ROUTE));
 	}
 	
-	public CompletableFuture<Action> notFound() {
+	public CompletableFuture<Render> notFound() {
 		//we use this to mock and throw NotFoundException or some RuntimeException for testing notFound path failures
 		return notFoundLib.someBusinessLogic().thenApply(s -> Actions.renderThis());
 	}
 	
-	public CompletableFuture<Action> internalError() {
+	public CompletableFuture<Render> internalError() {
 		//we use this to mock and throw exceptions when needed for testing
 		return errorLib.someBusinessLogic().thenApply(s -> Actions.renderThis());
 	}

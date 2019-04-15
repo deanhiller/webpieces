@@ -7,11 +7,11 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.Render;
 
 import WEBPIECESxPACKAGE.base.libs.RemoteService;
 import WEBPIECESxPACKAGE.base.libs.SomeLibrary;
 import WEBPIECESxPACKAGE.base.mgmt.SomeBean;
-import WEBPIECESxPACKAGE.base.mgmt.SomeBeanWebpiecesManaged;
 
 @Singleton
 public class ExamplesController {
@@ -56,11 +56,11 @@ public class ExamplesController {
 		return Actions.renderThis("value", value);
 	}
 	
-	public Action notFound() {
+	public Render notFound() {
 		return Actions.renderThis();
 	}
 	
-	public Action internalError() {
+	public Render internalError() {
 		return Actions.renderThis();
 	}
 }

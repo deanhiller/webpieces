@@ -21,7 +21,6 @@ import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
-import org.webpieces.router.impl.routeinvoker.AbstractRouteInvoker;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
 import org.webpieces.router.impl.routers.DynamicInfo;
@@ -36,7 +35,7 @@ import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-public class DevRouteInvoker extends AbstractRouteInvoker {
+public class DevRouteInvoker extends ProdRouteInvoker {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
 
 	private final ServiceInvoker serviceInvoker;
@@ -63,7 +62,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	public CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		if(loadedController == null) {
-			loadedController = controllerFinder.loadGenericController(route.getInjector(), route.getRouteInfo(), false);
+			loadedController = controllerFinder.loadNotFoundController(route.getInjector(), route.getRouteInfo(), false);
 		}
 		
 		RouteInfoForNotFound notFoundData = (RouteInfoForNotFound) data;
@@ -80,11 +79,11 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
 			BaseRouteInfo route = invokeInfo.getRoute();
-			LoadedController controllerInst = controllerFinder.loadGenericController(route.getInjector(), route.getRouteInfo(), false);
+			LoadedController controllerInst = controllerFinder.loadErrorController(route.getInjector(), route.getRouteInfo(), false);
 			Service<MethodMeta, Action> service = controllerFinder.loadFilters(route, false);
 			newInfo = new DynamicInfo(controllerInst, service);
 		}
-		return invokeImpl(invokeInfo, newInfo, data);
+		return super.invokeErrorController(invokeInfo, newInfo, data);
 	}
 
 	@Override
@@ -98,7 +97,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 			Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route, false);
 			newInfo = new DynamicInfo(controller, svc);
 		}
-		return invokeImpl(invokeInfo, newInfo, data);
+		return super.invokeHtmlController(invokeInfo, newInfo, data);
 	}
 	
 	@Override
@@ -112,7 +111,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 			newInfo = new DynamicInfo(binderAndLoader.getLoadedController(), svc);
 			data = new RouteInfoForContent(binderAndLoader.getBinder());
 		}
-		return invokeImpl(invokeInfo, newInfo, data);
+		return super.invokeContentController(invokeInfo, newInfo, data);
 	}
 
 	private CompletableFuture<Void> invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {

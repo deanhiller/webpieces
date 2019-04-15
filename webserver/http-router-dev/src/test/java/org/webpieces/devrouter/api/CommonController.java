@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.router.api.controller.annotations.Param;
 import org.webpieces.router.api.simplesvr.MtgRouteId;
 
@@ -15,10 +16,10 @@ public class CommonController {
 
 	private boolean isWantRedirect = false;
 	
-	public Action notFound() {
+	public Render notFound() {
 		return Actions.renderThis();
 	}
-	public Action internalError() {
+	public Render internalError() {
 		throw new IllegalStateException("fail this for testing");
 	}
 	

@@ -59,7 +59,6 @@ public class CRouter extends DScopedRouter {
 		);
 		
 		return future.handle((r, t) -> {
-			log.warn("error", t);
 			if(t instanceof NotFoundException)
 				return notFound((NotFoundException)t, ctx, responseCb);
 			else if(t != null) {

@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
@@ -32,17 +33,22 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	
 	@Override
 	public CompletableFuture<Void> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		return invokeImpl(invokeInfo, dynamicInfo, data);
+		ProcessorInfo info = new ProcessorInfo(RouteType.INTERNAL_SERVER_ERROR, dynamicInfo.getLoadedController());
+		ResponseProcessorAppError processor = new ResponseProcessorAppError(invokeInfo.getRequestCtx(), info, invokeInfo.getResponseCb());
+		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
 	}
 	
 	@Override
 	public CompletableFuture<Void> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		return invokeImpl(invokeInfo, dynamicInfo, data);
+		ProcessorInfo info = new ProcessorInfo(RouteType.HTML, dynamicInfo.getLoadedController());
+		ResponseProcessorHtml processor = new ResponseProcessorHtml(invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, info, invokeInfo.getResponseCb());
+		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
 	}
 	
 	@Override
 	public CompletableFuture<Void> invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		return invokeImpl(invokeInfo, dynamicInfo, data);
+		ResponseProcessorContent processor = new ResponseProcessorContent(invokeInfo.getRequestCtx(), invokeInfo.getResponseCb());
+		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
 	}
 	
 	@Override

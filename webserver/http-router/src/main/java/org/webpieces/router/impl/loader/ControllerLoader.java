@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
@@ -41,6 +42,41 @@ public class ControllerLoader {
 		this.binderChecker = binderChecker;
 	}
 
+	public LoadedController loadNotFoundController(Injector injector, RouteInfo route, boolean isInitializingAllControllers) {
+		LoadedController loadedController = loadGenericController(injector, route, isInitializingAllControllers);
+		if(loadedController != null) {
+			preconditionCheckForErrorRoute(loadedController);
+		}
+		return loadedController;
+	}
+	
+	public LoadedController loadErrorController(Injector injector, RouteInfo route, boolean isInitializingAllControllers) {
+		LoadedController loadedController = loadGenericController(injector, route, isInitializingAllControllers);
+		if(loadedController != null) {
+			preconditionCheckForErrorRoute(loadedController);
+		}
+		return loadedController;
+	}
+
+	private void preconditionCheckForErrorRoute(LoadedController loadedController) {
+		Method controllerMethod = loadedController.getControllerMethod();
+		
+		Class<?> clazz = controllerMethod.getReturnType();
+		if(CompletableFuture.class.isAssignableFrom(clazz)) {
+			Type genericReturnType = controllerMethod.getGenericReturnType();
+			ParameterizedType t = (ParameterizedType) genericReturnType;
+			Type type2 = t.getActualTypeArguments()[0];
+			if(!(type2 instanceof Class))
+				throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'CompletableFuture<Render>' "
+						+ "for this method(and did not)="+controllerMethod);
+			@SuppressWarnings("rawtypes")
+			Class<?> type = (Class) type2;
+			if(!Render.class.isAssignableFrom(type))
+				throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'CompletableFuture<Render>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
+		} else if(!Render.class.isAssignableFrom(clazz))
+			throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'CompletableFuture<Render>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
+	}
+	
 	public BinderAndLoader loadContentController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers) {
 		LoadedController loadedController = loadGenericController(injector, routeInfo, isInitializingAllControllers);
 		BodyContentBinder binder = null;
@@ -106,4 +142,5 @@ public class ControllerLoader {
 				throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 		}
 	}
+
 }
