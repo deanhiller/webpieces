@@ -22,7 +22,9 @@ import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
+import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
+import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routers.EHtmlRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
@@ -30,7 +32,7 @@ import org.webpieces.router.impl.routers.MatchInfo;
 public class ResponseProcessorNotFound implements Processor {
 
 	private RequestContext ctx;
-	private ProcessorInfo matchedMeta;
+	private LoadedController loadedController;
 	private ResponseStreamer responseCb;
 	private ReverseRoutes reverseRoutes;
 	private ObjectToParamTranslator reverseTranslator;
@@ -38,11 +40,11 @@ public class ResponseProcessorNotFound implements Processor {
 	private boolean responseSent = false;
 
 	public ResponseProcessorNotFound(RequestContext ctx, ReverseRoutes reverseRoutes, 
-			ObjectToParamTranslator reverseTranslator, ProcessorInfo meta, ResponseStreamer responseCb) {
+			ObjectToParamTranslator reverseTranslator, LoadedController loadedController, ResponseStreamer responseCb) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
-		this.matchedMeta = meta;
+		this.loadedController = loadedController;
 		this.responseCb = responseCb;
 	}
 
@@ -51,8 +53,8 @@ public class ResponseProcessorNotFound implements Processor {
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
 		
-		String controllerName = matchedMeta.getControllerInstance().getClass().getName();
-		String methodName = matchedMeta.getMethod().getName();
+		String controllerName = loadedController.getControllerInstance().getClass().getName();
+		String methodName = loadedController.getControllerMethod().getName();
 		
 		String relativeOrAbsolutePath = controllerResponse.getRelativeOrAbsolutePath();
 		if(relativeOrAbsolutePath == null) {
@@ -67,7 +69,7 @@ public class ResponseProcessorNotFound implements Processor {
         pageArgs.put("_flash", ctx.getFlash());
 
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
-		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRouteType());
+		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.NOT_FOUND);
 		
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
 	}
@@ -91,7 +93,7 @@ public class ResponseProcessorNotFound implements Processor {
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
 		RouterRequest request = ctx.getRequest();
-		Method method = matchedMeta.getMethod();
+		Method method = loadedController.getControllerMethod();
 		EHtmlRouter nextRequestMeta = reverseRoutes.get(id);
 		if(nextRequestMeta == null)
 			throw new IllegalReturnValueException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");

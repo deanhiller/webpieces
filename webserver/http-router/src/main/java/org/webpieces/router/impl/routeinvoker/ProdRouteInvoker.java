@@ -33,15 +33,16 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	
 	@Override
 	public CompletableFuture<Void> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		ProcessorInfo info = new ProcessorInfo(RouteType.INTERNAL_SERVER_ERROR, dynamicInfo.getLoadedController());
-		ResponseProcessorAppError processor = new ResponseProcessorAppError(invokeInfo.getRequestCtx(), info, invokeInfo.getResponseCb());
+		ResponseProcessorAppError processor = new ResponseProcessorAppError(
+				invokeInfo.getRequestCtx(), dynamicInfo.getLoadedController(), invokeInfo.getResponseCb());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
 	}
 	
 	@Override
 	public CompletableFuture<Void> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		ProcessorInfo info = new ProcessorInfo(RouteType.HTML, dynamicInfo.getLoadedController());
-		ResponseProcessorHtml processor = new ResponseProcessorHtml(invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, info, invokeInfo.getResponseCb());
+		ResponseProcessorHtml processor = new ResponseProcessorHtml(
+				invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, 
+				dynamicInfo.getLoadedController(), invokeInfo.getResponseCb());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
 	}
 	

@@ -106,8 +106,8 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
-		ProcessorInfo info = new ProcessorInfo(route.getRouteType(), loadedController);
-		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, info, invokeInfo.getResponseCb());
+		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
+				invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, loadedController, invokeInfo.getResponseCb());
 		return invoke(invokeInfo, loadedController, service, data, processor);
 	}
 	

@@ -26,6 +26,7 @@ import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
+import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routers.EHtmlRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
@@ -34,18 +35,18 @@ public class ResponseProcessorHtml implements Processor {
 
 	private RequestContext ctx;
 	private ReverseRoutes reverseRoutes;
-	private ProcessorInfo matchedMeta;
+	private LoadedController loadedController;
 	private ObjectToParamTranslator reverseTranslator;
 	private ResponseStreamer responseCb;
 
 	private boolean responseSent = false;
 
 	public ResponseProcessorHtml(RequestContext ctx, ReverseRoutes reverseRoutes, 
-			ObjectToParamTranslator reverseTranslator, ProcessorInfo meta, ResponseStreamer responseCb) {
+			ObjectToParamTranslator reverseTranslator, LoadedController loadedController, ResponseStreamer responseCb) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
-		this.matchedMeta = meta;
+		this.loadedController = loadedController;
 		this.responseCb = responseCb;
 	}
 
@@ -79,7 +80,7 @@ public class ResponseProcessorHtml implements Processor {
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
 		RouterRequest request = ctx.getRequest();
-		Method method = matchedMeta.getMethod();
+		Method method = loadedController.getControllerMethod();
 		EHtmlRouter nextRequestMeta = reverseRoutes.get(id);
 		if(nextRequestMeta == null)
 			throw new IllegalReturnValueException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
@@ -128,20 +129,20 @@ public class ResponseProcessorHtml implements Processor {
 		
 		RouterRequest request = ctx.getRequest();
 
-		Method method = matchedMeta.getMethod();
+		Method method = loadedController.getControllerMethod();
 		//in the case where the POST route was found, the controller canNOT be returning RenderHtml and should follow PRG
 		//If the POST route was not found, just render the notFound page that controller sends us violating the
 		//PRG pattern in this one specific case for now (until we test it with the browser to make sure back button is
 		//not broken)
-		if(matchedMeta.getRouteType() == RouteType.HTML && HttpMethod.POST == request.method) {
+		if(HttpMethod.POST == request.method) {
 			throw new IllegalReturnValueException("Controller method='"+method+"' MUST follow the PRG "
 					+ "pattern(https://en.wikipedia.org/wiki/Post/Redirect/Get) so "
 					+ "users don't have a poor experience using your website with the browser back button.  "
 					+ "This means on a POST request, you cannot return RenderHtml object and must return Redirects");
 		}
 
-		String controllerName = matchedMeta.getControllerInstance().getClass().getName();
-		String methodName = matchedMeta.getMethod().getName();
+		String controllerName = loadedController.getControllerInstance().getClass().getName();
+		String methodName = loadedController.getControllerMethod().getName();
 		
 		String relativeOrAbsolutePath = controllerResponse.getRelativeOrAbsolutePath();
 		if(relativeOrAbsolutePath == null) {
@@ -156,7 +157,7 @@ public class ResponseProcessorHtml implements Processor {
         pageArgs.put("_flash", ctx.getFlash());
 
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
-		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRouteType());
+		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.HTML);
 		
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
 	}

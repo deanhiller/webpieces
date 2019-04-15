@@ -7,23 +7,23 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.impl.actions.RenderImpl;
-import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
+import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
+import org.webpieces.router.impl.loader.LoadedController;
 
 public class ResponseProcessorAppError implements Processor {
 
 	private RequestContext ctx;
-	private ProcessorInfo matchedMeta;
+	private LoadedController loadedController;
 	private ResponseStreamer responseCb;
 
 	private boolean responseSent = false;
 
-	public ResponseProcessorAppError(RequestContext ctx, ProcessorInfo meta, ResponseStreamer responseCb) {
+	public ResponseProcessorAppError(RequestContext ctx, LoadedController loadedController, ResponseStreamer responseCb) {
 		this.ctx = ctx;
-		this.matchedMeta = meta;
+		this.loadedController = loadedController;
 		this.responseCb = responseCb;
 	}
 
@@ -32,8 +32,8 @@ public class ResponseProcessorAppError implements Processor {
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
 		
-		String controllerName = matchedMeta.getControllerInstance().getClass().getName();
-		String methodName = matchedMeta.getMethod().getName();
+		String controllerName = loadedController.getControllerInstance().getClass().getName();
+		String methodName = loadedController.getControllerMethod().getName();
 		
 		String relativeOrAbsolutePath = controllerResponse.getRelativeOrAbsolutePath();
 		if(relativeOrAbsolutePath == null) {
@@ -48,7 +48,7 @@ public class ResponseProcessorAppError implements Processor {
         pageArgs.put("_flash", ctx.getFlash());
 
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
-		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRouteType());
+		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.INTERNAL_SERVER_ERROR);
 		
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
 	}
