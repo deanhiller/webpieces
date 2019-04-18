@@ -1,5 +1,8 @@
 package org.webpieces.plugins.sslcert;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -19,6 +22,8 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.backend.login.BackendLogin;
 import org.webpieces.plugins.fortesting.TestConfig;
 import org.webpieces.plugins.fortesting.WebserverForTest;
+import org.webpieces.plugins.sslcert.acme.AcmeClientProxy;
+import org.webpieces.plugins.sslcert.acme.AcmeInfo;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
@@ -35,6 +40,7 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 	private MockBackendLogin backendLogin = new MockBackendLogin();
 	private MockSimpleStorage mockStorage = new MockSimpleStorage();
 	private HttpSocket https11Socket;
+	private MockAcmeClient mockAcmeClient = new MockAcmeClient();
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
@@ -54,6 +60,7 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 		public void configure(Binder binder) {
 			binder.bind(BackendLogin.class).toInstance(backendLogin);
 			binder.bind(SimpleStorage.class).toInstance(mockStorage);
+			binder.bind(AcmeClientProxy.class).toInstance(mockAcmeClient);
 		}
 	}
 	
@@ -73,7 +80,10 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 	}
 	
 	@Test
-	public void testAlreadyLoggedInAndFirstTimeNoProperties() {
+	public void testAlreadyLoggedInAndFirstTimeNoProperties() throws MalformedURLException {
+		URI terms = URI.create("http://somerandom.com/place");
+		URL website = new URL("http://website.com");
+		
 		mockStorage.addReadResponse(CompletableFuture.completedFuture(new HashMap<>()));
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@backend/secure/sslsetup");
@@ -81,6 +91,8 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 		//set-cookie: webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin; path=/; HttpOnly
 		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
 		
+		mockAcmeClient.setRemoteInfo(CompletableFuture.completedFuture(new AcmeInfo(terms, website)));
+
 		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
