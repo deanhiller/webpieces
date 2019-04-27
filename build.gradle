@@ -6,10 +6,10 @@ buildscript {
         //Comment out to suck in dependencies from local repo
         //sometimes you want to build the gradle plugin and then feed into your current project
         //and this allows you to build the local one then use it
-        maven {
-            name = 'myTemp'
-            url = "file:/tmp/myRepo/"
-        }
+        //maven {
+        //    name = 'myTemp'
+        //    url = "file:/tmp/myRepo/"
+        //}
     }
 
     dependencies {
@@ -21,7 +21,7 @@ buildscript {
 
         //We use an older version of our own html compiler to pre-build html tags for clients
         //of webpieces...
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9-developer'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.140'
     }
 }
 
