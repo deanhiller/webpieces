@@ -6,10 +6,13 @@ dependencies {
 
 description='A re-usable asynchronous http2 parser'
 
-compileTestJava {
-  options.compilerArgs += ["--add-modules", "java.xml.bind"]
-}
+println("Java Version="+ System.getProperty("java.version"))
+if(!System.getProperty("java.version").startsWith("1.8")) {
+  compileTestJava {
+        options.compilerArgs += ["--add-modules", "java.xml.bind"]
+    }
 
-test {
-  jvmArgs += ["--add-modules", "java.xml.bind"]
+  test {
+    jvmArgs += ["--add-modules", "java.xml.bind"]
+  }
 }

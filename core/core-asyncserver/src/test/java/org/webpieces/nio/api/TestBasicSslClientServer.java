@@ -4,8 +4,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +32,7 @@ public class TestBasicSslClientServer {
 	private List<Integer> values = new ArrayList<>();
 
 	@Before
-	public void setup() {
+	public void setup() {		
 		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
 		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
 	}

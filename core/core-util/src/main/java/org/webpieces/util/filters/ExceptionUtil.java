@@ -21,17 +21,24 @@ public class ExceptionUtil {
 			//that instead of this damn InvocationTargetException
 	        return callable.call();
 	    } catch (InvocationTargetException e) {
-	    	return CompletableFuture.<T>failedFuture(e.getCause());
+	    	return failedFuture(e.getCause());
 	    } catch (Exception ex) {
-	        return CompletableFuture.failedFuture(ex);
+	        return failedFuture(ex);
 	    }
 	}
-	
+
+        //In jdk8, they don't have CompletableFuture.failedFuture yet :(	
+        public static <T> CompletableFuture<T> failedFuture(Throwable ex) {
+            CompletableFuture<T> future = new CompletableFuture<>();
+	    future.completeExceptionally(ex);
+            return future;
+        }
+
 	public static <T> CompletableFuture<T> wrap(Callable<CompletableFuture<T>> callable, Function<Throwable, Throwable> wrapException) {
 	    try {
 	        return callable.call();
 	    } catch (Exception ex) {
-	        return CompletableFuture.failedFuture(wrapException.apply(ex));
+	        return failedFuture(wrapException.apply(ex));
 	    }
 	}
 }

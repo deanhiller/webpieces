@@ -62,7 +62,7 @@ public class CRouter extends DScopedRouter {
 			if(t instanceof NotFoundException)
 				return notFound((NotFoundException)t, ctx, responseCb);
 			else if(t != null) {
-				return CompletableFuture.<Void>failedFuture(t);
+				return ExceptionUtil.<Void>failedFuture(t);
 			}
 			
 			return CompletableFuture.completedFuture(r); 

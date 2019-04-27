@@ -2,6 +2,10 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
+        //maven {
+        //    name = 'myTemp'
+        //    url = "file:/tmp/myRepo/"
+        //}
     }
 
     dependencies {
@@ -13,7 +17,7 @@ buildscript {
 
         //We use an older version of our own html compiler to pre-build html tags for clients
         //of webpieces...
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.135'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.140'
     }
 }
 
@@ -111,6 +115,10 @@ subprojects {
    
    group = 'org.webpieces'
    if(project.hasProperty('projVersion')) {
+     println("Java Version="+ System.getProperty("java.version"))
+     if(!System.getProperty("java.version").startsWith("1.8"))
+        throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
+
      project.version = '1.9.'+project.projVersion
      println("CREATING RELEASE VERSION "+project.version+"  jvm="+currentJvm)
    } else {

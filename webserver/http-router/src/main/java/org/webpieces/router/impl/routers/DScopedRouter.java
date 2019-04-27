@@ -63,7 +63,7 @@ public class DScopedRouter {
 			}
 		}
 
-		return CompletableFuture.<Void>failedFuture(new NotFoundException("route not found"));
+		return ExceptionUtil.<Void>failedFuture(new NotFoundException("route not found"));
 	}
 	
 	private CompletableFuture<Void> invokeRouter(AbstractRouter router, RequestContext ctx,

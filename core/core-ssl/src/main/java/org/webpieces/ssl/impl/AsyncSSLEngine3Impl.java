@@ -120,7 +120,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	}
 
 	private boolean needUnwrap(HandshakeStatus hsStatus) {
-		return (hsStatus == HandshakeStatus.NOT_HANDSHAKING || hsStatus == HandshakeStatus.NEED_UNWRAP || hsStatus == HandshakeStatus.NEED_UNWRAP_AGAIN)
+		return (hsStatus == HandshakeStatus.NOT_HANDSHAKING || hsStatus == HandshakeStatus.NEED_UNWRAP)
 				&& mem.getCachedToProcess().hasRemaining();
 	}
 
@@ -299,7 +299,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			lastStatus = result.getStatus();
 			hsStatus = result.getHandshakeStatus();
 		}
-
+		
 		{
 			final Status lastStatus2 = lastStatus;
 			final HandshakeStatus hsStatus2 = hsStatus;

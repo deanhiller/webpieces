@@ -107,7 +107,9 @@ public class InstallSslCertController {
 				});
 			
 		} catch(IOException e) {
-			return CompletableFuture.failedFuture(e);
+                        CompletableFuture future = new CompletableFuture();
+                        future.completeExceptionally(e);
+                        return future;
 		}
 	}
 
