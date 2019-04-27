@@ -26,6 +26,9 @@ public class DevelopmentServer {
 	//webserver classes to put in a place a runtime compiler so we can compile your code as you
 	//develop
 	public static void main(String[] args) throws InterruptedException {
+
+		System.out.println("java.versio="+System.getProperty("java.version"));
+
 		try {
 			log.info("Starting Development Server");
 

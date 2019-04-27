@@ -29,6 +29,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private SslListener listener;
 	private Object wrapLock = new Object();
 	private boolean clientInitiated;
+	private boolean sslEngineIsFarting = false;
 
 	private AtomicBoolean fireClosed = new AtomicBoolean(false);
 	private AtomicBoolean fireConnected = new AtomicBoolean(false);
@@ -101,7 +102,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 		//keep doing work NEED_UNWRAP, NEED_WRAP, NEED_TASK until all done and return all the futures as one
 		//When all futures are done, they will ack this one message that came in
-		while(true) {
+		while(true && !sslEngineIsFarting) {
 			HandshakeStatus hsStatus = engine.getHandshakeStatus();
 
 			if(needUnwrap(hsStatus)) {
@@ -114,6 +115,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				break;
 			}
 		}
+
+		sslEngineIsFarting = false; //it's done farting
 	}
 
 	private boolean needUnwrap(HandshakeStatus hsStatus) {
@@ -227,12 +230,13 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		HandshakeStatus hsStatus = engine.getHandshakeStatus();
 
 		List<CompletableFuture<Void>> futures = new ArrayList<>();
-		while(hsStatus == HandshakeStatus.NEED_WRAP || hsStatus == HandshakeStatus.NEED_TASK) {
+		while((hsStatus == HandshakeStatus.NEED_WRAP && !sslEngineIsFarting) || hsStatus == HandshakeStatus.NEED_TASK) {
 			CompletableFuture<Void> future = doHandshakeWork();
 			futures.add(future);
 			hsStatus = engine.getHandshakeStatus();
 		}
-		
+
+		sslEngineIsFarting = false;
 		CompletableFuture<Void> futureAll = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
 		return futureAll;
 	}
@@ -277,44 +281,61 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		SSLEngine sslEngine = mem.getEngine();
 		log.trace(()->mem+"sending handshake message");
 		//HELPER.eraseBuffer(empty);
-
-		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
-		if(hsStatus != HandshakeStatus.NEED_WRAP)
-			throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus="+hsStatus);
 		
 		ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
 			
 		//CLOSE and all the threads that call feedPlainPacket can have contention on wrapping to encrypt and
 		//must synchronize on sslEngine.wrap
-		Status lastStatus = null;
+		Status lastStatus;
+		HandshakeStatus hsStatus;
 		synchronized (wrapLock ) {
+
+			HandshakeStatus beforeWrapHandshakeStatus = sslEngine.getHandshakeStatus();
+			if (beforeWrapHandshakeStatus != HandshakeStatus.NEED_WRAP)
+				throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus=" + beforeWrapHandshakeStatus);
+
 			//KEEEEEP This very small.  wrap and then listener.packetEncrypted
 			SSLEngineResult result = sslEngine.wrap(SslMementoImpl.EMPTY, engineToSocketData);
 			lastStatus = result.getStatus();
 			hsStatus = result.getHandshakeStatus();
-			
-			{
-				final Status lastStatus2 = lastStatus;
-				final HandshakeStatus hsStatus2 = hsStatus;
-				log.trace(()->mem+"write packet pos="+engineToSocketData.position()+" lim="+
-							engineToSocketData.limit()+" status="+lastStatus2+" hs="+hsStatus2);
-			}
-			if(lastStatus == Status.BUFFER_OVERFLOW || lastStatus == Status.BUFFER_UNDERFLOW)
-				throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
-			
-
 		}
 
+		{
+			final Status lastStatus2 = lastStatus;
+			final HandshakeStatus hsStatus2 = hsStatus;
+			log.trace(()->mem+"write packet pos="+engineToSocketData.position()+" lim="+
+						engineToSocketData.limit()+" status="+lastStatus2+" hs="+hsStatus2);
+		}
+		if(lastStatus == Status.BUFFER_OVERFLOW || lastStatus == Status.BUFFER_UNDERFLOW)
+			throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
+		else if(engineToSocketData.position() == 0) {
+			log.error("ssl engine is farting");
+			//A big hack since the Engine was not working in live testing with FireFox and it would tell us to wrap
+			//and NOT output any data AND not BufferOverflow.....you have to do 1 or the other, right
+			//instead cut out of looping since there seems to be no data
+			sslEngineIsFarting = true;
+		}
+
+		boolean readNoData = engineToSocketData.position() == 0;
 		engineToSocketData.flip();
-		CompletableFuture<Void> sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
-		
-		if(lastStatus == Status.CLOSED && !clientInitiated) {
-			fireClose();
-		} else if(hsStatus == HandshakeStatus.FINISHED) {
-			fireLinkEstablished();
+		try {
+			CompletableFuture<Void> sentMsgFuture;
+			if(readNoData) {
+				log.error("READ 0 data.  hsStatus="+hsStatus+" status="+lastStatus);
+				sentMsgFuture = CompletableFuture.completedFuture(null);
+			} else
+				sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
+
+			if (lastStatus == Status.CLOSED && !clientInitiated) {
+				fireClose();
+			} else if (hsStatus == HandshakeStatus.FINISHED) {
+				fireLinkEstablished();
+			}
+
+			return sentMsgFuture;
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException(e);
 		}
-		
-		return sentMsgFuture;
 	}
 	
 	private void fireClose() {

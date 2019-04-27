@@ -36,7 +36,7 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 	private static final Logger log = LoggerFactory.getLogger(WebSSLFactory.class);
 
 	private String serverKeystore = "/keystore.jks";
-	private	String password = "password1";
+	private	String password = "password";
 	private char[] passphrase = password.toCharArray();
 
 	private SimpleStorage storage;
