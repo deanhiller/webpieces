@@ -61,7 +61,7 @@ dependencies {
 description='The full webpieces server AS A library'
 
 test {
-    if (project.hasProperty('excludeSelenium')) {
+    if (!project.hasProperty('includeSelenium')) {
         exclude '**/*Selenium*'
     }
 }

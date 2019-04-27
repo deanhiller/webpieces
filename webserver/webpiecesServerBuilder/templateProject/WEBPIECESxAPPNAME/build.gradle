@@ -59,7 +59,7 @@ task copyPersistenceXml(type: Copy, dependsOn: 'compileTestJava') {
 test.dependsOn ("copyPersistenceXml")
 
 test {
-    if (project.hasProperty('excludeSelenium')) {
+    if (!project.hasProperty('includeSelenium')) {
         exclude '**/*Selenium*'
     }
 }
