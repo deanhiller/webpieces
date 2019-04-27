@@ -161,6 +161,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			if(message.contains("Received fatal alert: certificate_unknown")) {
 				//This is normal for self signed certs, so just return.  Chrome closes the connection with
 				//a reason and SSLEngine throws an exception :(
+				mem.compareSet(ConnectionState.CONNECTING, ConnectionState.DISCONNECTED);
 				return true;
 			}
 
