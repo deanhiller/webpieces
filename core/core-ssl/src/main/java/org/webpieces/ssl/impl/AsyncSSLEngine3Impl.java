@@ -153,6 +153,17 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		try {
 			result = sslEngine.unwrap(encryptedData, cachedOutBuffer);
 		} catch(SSLException e) {
+			cachedOutBuffer.position(cachedOutBuffer.limit());
+			pool.releaseBuffer(cachedOutBuffer);
+			pool.releaseBuffer(encryptedData);
+
+			String message = e.getMessage();
+			if(message.contains("Received fatal alert: certificate_unknown")) {
+				//This is normal for self signed certs, so just return.  Chrome closes the connection with
+				//a reason and SSLEngine throws an exception :(
+				return true;
+			}
+
 			AsyncSSLEngineException ee = new AsyncSSLEngineException(
 					"before exception status="+status+" hsStatus="+hsStatus+" b="+encryptedData, e);
 			throw ee;
