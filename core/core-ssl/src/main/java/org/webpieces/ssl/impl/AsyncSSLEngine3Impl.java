@@ -308,20 +308,17 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		}
 		if(lastStatus == Status.BUFFER_OVERFLOW || lastStatus == Status.BUFFER_UNDERFLOW)
 			throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
-		else if(engineToSocketData.position() == 0) {
-			log.error("ssl engine is farting");
-			//A big hack since the Engine was not working in live testing with FireFox and it would tell us to wrap
-			//and NOT output any data AND not BufferOverflow.....you have to do 1 or the other, right
-			//instead cut out of looping since there seems to be no data
-			sslEngineIsFarting = true;
-		}
 
 		boolean readNoData = engineToSocketData.position() == 0;
 		engineToSocketData.flip();
 		try {
 			CompletableFuture<Void> sentMsgFuture;
 			if(readNoData) {
-				log.error("READ 0 data.  hsStatus="+hsStatus+" status="+lastStatus);
+				log.trace(() -> "ssl engine is farting. READ 0 data.  hsStatus=\"+hsStatus+\" status=\"+lastStatus");
+				//A big hack since the Engine was not working in live testing with FireFox and it would tell us to wrap
+				//and NOT output any data AND not BufferOverflow.....you have to do 1 or the other, right
+				//instead cut out of looping since there seems to be no data
+				sslEngineIsFarting = true;
 				sentMsgFuture = CompletableFuture.completedFuture(null);
 			} else
 				sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
