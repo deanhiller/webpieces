@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLEngine;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +29,9 @@ public class TestSplitBackpressure {
 
 	@Before
 	public void setup() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
+		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
+		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
+		
 		MockSSLEngineFactory sslEngineFactory = new MockSSLEngineFactory();	
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine client = sslEngineFactory.createEngineForSocket();
@@ -103,6 +107,12 @@ public class TestSplitBackpressure {
 		Assert.assertTrue(clientListener.connected);
 		
 		cliFut2.get(2, TimeUnit.SECONDS);
+	}
+
+	@After
+	public void teardown() {
+		System.clearProperty("jdk.tls.server.protocols");
+		System.clearProperty("jdk.tls.client.protocols");
 	}
 
 	private List<ByteBuffer> split(ByteBuffer engineToSocketData) {

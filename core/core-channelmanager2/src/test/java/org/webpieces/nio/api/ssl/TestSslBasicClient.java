@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +42,9 @@ public class TestSslBasicClient {
 
 	@Before
 	public void setup() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
+		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
+		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
+
 		svrSslParser = TestSslCloseClient.createSslSvrParser();
 		channel = TestSslCloseClient.createClientChannel("server", mockJdk);
 		
@@ -57,7 +61,13 @@ public class TestSslBasicClient {
 		
 		mockChannel.forceDataRead(mockJdk, result.getEncryptedData());
 	}
-	
+
+	@After
+	public void teardown() {
+		System.clearProperty("jdk.tls.server.protocols");
+		System.clearProperty("jdk.tls.client.protocols");
+	}
+
 	//begin handshake results in ONE packet client -> server (server creates runnable, creating ONE
 	//server creates runnable, runs it creating ONE packet server -> client
 	//client creates runnable, runs it creating THREE packets client -> server

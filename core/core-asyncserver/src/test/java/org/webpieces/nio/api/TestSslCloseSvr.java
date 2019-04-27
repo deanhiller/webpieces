@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLEngine;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +55,9 @@ public class TestSslCloseSvr {
 
 	@Before
 	public void setup() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
+		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
+		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
+
 		server = createServer();
 		clientSslParser = createClientParser();
 		
@@ -96,6 +100,12 @@ public class TestSslCloseSvr {
 		Assert.assertEquals(channel, openedInfo.channel);
 		
 		transferBigData();
+	}
+
+	@After
+	public void teardown() {
+		System.clearProperty("jdk.tls.server.protocols");
+		System.clearProperty("jdk.tls.client.protocols");
 	}
 
 	private SSLParser createClientParser() {

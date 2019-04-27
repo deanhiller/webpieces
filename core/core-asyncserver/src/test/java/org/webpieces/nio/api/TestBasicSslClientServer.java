@@ -4,12 +4,16 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncDataListener;
@@ -28,6 +32,18 @@ public class TestBasicSslClientServer {
 	private static final Logger log = LoggerFactory.getLogger(TestBasicSslClientServer.class);
 	private BufferCreationPool pool;
 	private List<Integer> values = new ArrayList<>();
+
+	@Before
+	public void setup() {
+		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
+		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
+	}
+
+	@After
+	public void teardown() {
+		System.clearProperty("jdk.tls.server.protocols");
+		System.clearProperty("jdk.tls.client.protocols");
+	}
 
 	@Test
 	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException {

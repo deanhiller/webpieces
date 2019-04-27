@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLEngine;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +30,9 @@ public class TestHandshakeBackpressure {
 
 	@Before
 	public void setup() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
+		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
+		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
+
 		MockSSLEngineFactory sslEngineFactory = new MockSSLEngineFactory();	
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine client = sslEngineFactory.createEngineForSocket();
@@ -61,6 +65,12 @@ public class TestHandshakeBackpressure {
 		buffers.get(1).future.complete(null);
 		
 		assertFutureJustResolved(clientFuture, buffers.get(2));
+	}
+
+	@After
+	public void teardown() {
+		System.clearProperty("jdk.tls.server.protocols");
+		System.clearProperty("jdk.tls.client.protocols");
 	}
 
 	private void assertFutureJustResolved(CompletableFuture<Void> future, BufferedFuture toSend)
