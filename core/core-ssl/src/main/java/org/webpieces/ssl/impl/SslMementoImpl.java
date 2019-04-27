@@ -9,11 +9,13 @@ import org.webpieces.ssl.api.ConnectionState;
 
 public class SslMementoImpl {
 
+	static final ByteBuffer EMPTY = ByteBuffer.allocate(0);
+
 	private SSLEngine engine;
 	private String id;
 	private AtomicReference<ConnectionState> connectionState = new AtomicReference<ConnectionState>(ConnectionState.NOT_STARTED);
 	private ByteBuffer cachedOut;
-	private ByteBuffer cacheToProcess;
+	private ByteBuffer cacheToProcess = EMPTY;
 	
 	public SslMementoImpl(String id, SSLEngine engine, ByteBuffer cachedOut) {
 		this.id = id;
@@ -38,10 +40,12 @@ public class SslMementoImpl {
 		this.connectionState.compareAndSet(expected, state);
 	}
 
+	@Deprecated
 	public ByteBuffer getCachedOut() {
 		return cachedOut;
 	}
 
+	@Deprecated
 	public void setCachedOut(ByteBuffer cachedOut) {
 		this.cachedOut = cachedOut;
 	}

@@ -34,6 +34,9 @@ public class ByteAckTracker {
 	}
 
 	public Void ackBytes(int numBytes) {
+		if(numBytes == 0)
+			return null; //mine as well short circuit
+
 		numberBytesToAck.addAndGet(numBytes);
 		
 		while(true) {

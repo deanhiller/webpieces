@@ -3,7 +3,7 @@ package org.webpieces.ssl.api;
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.ssl.impl.AsyncSSLEngine2Impl;
+import org.webpieces.ssl.impl.AsyncSSLEngine3Impl;
 import org.webpieces.ssl.impl.SSLParserImpl;
 
 public class AsyncSSLFactory {
@@ -20,7 +20,7 @@ public class AsyncSSLFactory {
 		//to get around verifydesign later AND enforce build breaks on design violations
 		//like api depending on implementation, we need reflection here to create this
 		//instance...
-		return new AsyncSSLEngine2Impl(loggingId, engine, pool, listener);
+		return new AsyncSSLEngine3Impl(loggingId, engine, pool, listener);
 	}
 	
 	public static SSLParser create(String logId, SSLEngine engine, BufferPool pool) {

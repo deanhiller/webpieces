@@ -28,7 +28,7 @@ public class SSLParserImpl implements SSLParser {
 	private boolean isClientInitiatedClosed;
 	
 	public SSLParserImpl(String logId, SSLEngine sslEngine, BufferPool pool) {
-		engine = new AsyncSSLEngine2Impl(logId, sslEngine, pool, new OurListener());
+		engine = new AsyncSSLEngine3Impl(logId, sslEngine, pool, new OurListener());
 	}
 
 	private class OurListener implements SslListener {
