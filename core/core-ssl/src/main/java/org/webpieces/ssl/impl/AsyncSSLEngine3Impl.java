@@ -257,13 +257,6 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			log.warn("buffer underflow. data="+data1.remaining());
 		}
 	}
-	
-	private boolean canDoWork() {
-		SSLEngine engine = mem.getEngine();
-		HandshakeStatus hsStatus = engine.getHandshakeStatus();
-		return hsStatus == HandshakeStatus.NEED_UNWRAP || hsStatus == HandshakeStatus.NEED_UNWRAP_AGAIN
-				|| hsStatus == HandshakeStatus.NEED_TASK || hsStatus == HandshakeStatus.NEED_WRAP;
-	}
 
 	private CompletableFuture<Void> createRunnable() {
 		SSLEngine sslEngine = mem.getEngine();
