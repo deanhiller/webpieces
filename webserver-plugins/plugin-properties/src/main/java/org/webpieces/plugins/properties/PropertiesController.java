@@ -2,10 +2,7 @@ package org.webpieces.plugins.properties;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -113,10 +110,10 @@ public class PropertiesController {
 			}
 
 			List<String> valueList = multiPartFields.get(info.getName());
-			String value = valueList.get(0);
+			String valueAsString = valueList.get(0);
 			try {
-				Object objectValue = converter.stringToObject(value);
-				values.add(new ValueInfo(info, objectValue));
+				Object objectValue = converter.stringToObject(valueAsString);
+				values.add(new ValueInfo(info, objectValue, valueAsString));
 			} catch(Exception e) {
 				Current.validation().addError(info.getName(), "Converter="+converter.getClass().getName()+" cannot convert String to "+returnType.getName());
 			}
@@ -139,9 +136,15 @@ public class PropertiesController {
 		//ALSO, we are taking an apply all properties type of approach to keep it simple for now.  in the future,
 		//we could read all props and only call setXXX on changes (in case they wrote extra not idempotent type code so
 		//that code does not run on accident)
+		Map<String, String> propertiesToSaveToDatabase = new HashMap<>();
 		for(ValueInfo value : values) {
 			updateProperty(value.getInfo(), value.getValue());
+
+			String key = category+":"+name+":"+value.getInfo().getName();
+			propertiesToSaveToDatabase.put(key, value.getValueAsString());
 		}
+
+		storage.save("PLUGIN_PROPERTIES_KEY", propertiesToSaveToDatabase);
 		
 		Current.flash().setMessage("Modified Bean '"+name+".class' and persisted to Database");
 		Current.flash().keep();

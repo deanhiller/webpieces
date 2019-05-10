@@ -10,6 +10,8 @@ import com.google.inject.Module;
 
 public class PropertiesPlugin implements Plugin {
 
+	public static final String PLUGIN_PROPERTIES_KEY = "org.webpieces.plugins.properties";
+
 	private PropertiesConfig config;
 
 	public PropertiesPlugin(PropertiesConfig config) {
