@@ -2,4 +2,4 @@ dependencies {
 	compile project(':core:core-util')
 }
 
-description='a simple mock superclass that mock objects can use to have less code'
+publishing.publications.mavenJava.pom.description='a simple mock superclass that mock objects can use to have less code'

@@ -5,4 +5,4 @@ dependencies {
 	testCompile project(':core:core-mock')
 }
 
-description='a wrapper around SSLEngine in java to make it easier to use'
+publishing.publications.mavenJava.pom.description='a wrapper around SSLEngine in java to make it easier to use'

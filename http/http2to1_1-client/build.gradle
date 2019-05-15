@@ -5,4 +5,4 @@ dependencies {
 	testCompile project(':core:core-mock')
 }
 
-description='An http client'
+publishing.publications.mavenJava.pom.description='http2 client api that talks http1 in case you want to convert from http2 to http1.1 without changing code'

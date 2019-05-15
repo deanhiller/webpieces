@@ -1,4 +1,4 @@
 dependencies {
 }
 
-description='A simple utilitiy library with special executor but rather small amount of code in here'
+publishing.publications.mavenJava.pom.description='A simple utilitiy library with special executor but rather small amount of code in here'

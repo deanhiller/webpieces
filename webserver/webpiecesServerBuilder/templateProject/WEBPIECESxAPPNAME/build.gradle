@@ -1,5 +1,7 @@
 //This file is used when we build the whole webpieces project AND is not part of template generation
 
+publishing.publications.mavenJava.pom.description='fake project used in testing.  ignore this jar'
+
 sourceSets {
     main {
         resources {

@@ -22,3 +22,5 @@ dependencies {
 test {
     systemProperty "gradle.running", "true"
 }
+
+publishing.publications.mavenJava.pom.description='backend plugin for in-memory database usually for development server'

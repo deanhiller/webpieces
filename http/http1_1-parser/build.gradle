@@ -3,4 +3,4 @@ dependencies {
     compile project(':core:core-util')
 }
 
-description='A re-usable asynchronous http 1.1 parser that can be used with any nio client'
+publishing.publications.mavenJava.pom.description='A re-usable asynchronous http 1.1 parser that can be used with any nio client'

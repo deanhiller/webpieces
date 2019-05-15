@@ -7,4 +7,4 @@ dependencies {
 	//this keeps us pluggable with ANY http parser implementation
 }
 
-description='Shared contexts between the router and templating system'
+publishing.publications.mavenJava.pom.description='Shared contexts between the router and templating system'

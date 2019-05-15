@@ -24,3 +24,5 @@ dependencies {
 test {
     systemProperty "gradle.running", "true"
 }
+
+publishing.publications.mavenJava.pom.description='plugin for wizard to install an ssl cert'

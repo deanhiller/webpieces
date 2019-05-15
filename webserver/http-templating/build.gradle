@@ -19,7 +19,7 @@ dependencies {
     compile project(':webserver:http-shared')
 }
 
-description='Templating library using groovy as the scripting language'
+publishing.publications.mavenJava.pom.description='Templating library using groovy as the scripting language'
 
 //This allows the tests to use *_html.class templates since for some reason, I was having trouble
 //getting the *.html files on the classpath WHILE compiling the templates which is needed to build the

@@ -2,4 +2,4 @@ dependencies {
     compile project(':core:core-util')
 }
 
-description='an api to run DDL commands from java'
+publishing.publications.mavenJava.pom.description='an api to run DDL commands from java'

@@ -24,3 +24,5 @@ dependencies {
 test {
     systemProperty "gradle.running", "true"
 }
+
+publishing.publications.mavenJava.pom.description='backend pluggable plugin that all backend plugins can plugin into or not'

@@ -2,4 +2,4 @@ dependencies {
     compile deps['groovy'] //we use groovy in logback.xml
 }
 
-description='Project to create wepieces webservers with a gradle build, dev server, prod server and example app'
+publishing.publications.mavenJava.pom.description='Project to create wepieces webservers with a gradle build, dev server, prod server and example app'

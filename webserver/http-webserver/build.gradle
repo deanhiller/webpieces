@@ -58,7 +58,7 @@ dependencies {
     testCompile deps['selenium']
 }
 
-description='The full webpieces server AS A library'
+publishing.publications.mavenJava.pom.description='The full webpieces server AS A library'
 
 test {
     if (!project.hasProperty('includeSelenium')) {

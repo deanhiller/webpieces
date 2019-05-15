@@ -5,4 +5,4 @@ dependencies {
 	testCompile project(':core:core-mock')
 }
 
-description='Strictly an http/2 client for when you know the server does http2 keeping it KISS'
+publishing.publications.mavenJava.pom.description='Strictly an http/2 client for when you know the server does http2 keeping it KISS'

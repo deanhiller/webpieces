@@ -11,4 +11,4 @@ dependencies {
     compile project(':webserver:http-templating-dev')
 }
 
-description='The full webpieces server AS A library'
+publishing.publications.mavenJava.pom.description='The full webpieces server AS A library'

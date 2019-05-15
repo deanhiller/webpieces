@@ -3,3 +3,5 @@ dependencies {
     compile deps['log4jdbc']
     compile project(':webserver:http-router')
 }
+
+publishing.publications.mavenJava.pom.description='hibernate plugin if you use hibernate installing a filter and other plusses'

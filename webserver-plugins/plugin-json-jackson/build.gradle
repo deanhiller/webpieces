@@ -2,3 +2,5 @@ dependencies {
     compile deps['jackson']
     compile project(':webserver:http-router'), project(':http:http1_1-parser')
 }
+
+publishing.publications.mavenJava.pom.description='plugin that installs an easy method of converting between json and objects and back'

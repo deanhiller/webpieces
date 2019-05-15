@@ -20,4 +20,4 @@ dependencies {
     //this keeps us pluggable with ANY http parser implementation
 }
 
-description='Library for helping plugins write tests testing controller and web pages'
+publishing.publications.mavenJava.pom.description='Library for helping plugins write tests testing controller and web pages'

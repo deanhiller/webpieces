@@ -6,4 +6,4 @@ dependencies {
 	testCompile project(':core:core-mock')
 }
 
-description='An http client'
+publishing.publications.mavenJava.pom.description='Backpressure tests'

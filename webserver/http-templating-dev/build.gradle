@@ -14,4 +14,4 @@ dependencies {
     compile project(':webserver:http-templating')
 }
 
-description='Library that swaps out http-templating classes to enable compiling on any incoming request if the source code has changed for development servers'
+publishing.publications.mavenJava.pom.description='Library that swaps out http-templating classes to enable compiling on any incoming request if the source code has changed for development servers'

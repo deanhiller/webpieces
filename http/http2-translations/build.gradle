@@ -2,4 +2,4 @@ dependencies {
     compile project(':http:http2-hpack'), project(':http:http1_1-parser')
 }
 
-description='Translations from http1_1 to http2 and back'
+publishing.publications.mavenJava.pom.description='Translations from http1_1 to http2 and back'

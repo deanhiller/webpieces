@@ -2,4 +2,4 @@ dependencies {
     compile project(':core:core-channelmanager2'), project(':http:http1_1-parser')
 }
 
-description='An http 1.1 client'
+publishing.publications.mavenJava.pom.description='An http 1.1 client'
