@@ -26,4 +26,4 @@ test {
     systemProperty "gradle.running", "true"
 }
 
-publishing.publications.mavenJava.pom.description='plugin that installs a JMX like thing except IT SAVES to database so you don't lose changes on restarts'
+publishing.publications.mavenJava.pom.description='plugin that installs a JMX like thing except IT SAVES to database so you dont lose changes on restarts'
