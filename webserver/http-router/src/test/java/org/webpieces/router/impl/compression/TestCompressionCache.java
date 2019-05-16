@@ -68,7 +68,7 @@ public class TestCompressionCache {
 
 	private EStaticRouter create(Port port, UrlPath urlPath, VirtualFile fileSystemPath, boolean isOnClassPath, File targetCatchLocation) {
 		MatchInfo info = new MatchInfo(urlPath, port, null, null, null, null);
-		return new EStaticRouter(null, info, fileSystemPath, isOnClassPath, targetCatchLocation);
+		return new EStaticRouter(null, info, fileSystemPath, isOnClassPath, targetCatchLocation, false);
 	}
 	private List<EStaticRouter> runBasicServerOnce(File stagingDir) {
 		List<EStaticRouter> routes = new ArrayList<>();
