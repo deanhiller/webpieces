@@ -206,6 +206,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		String urlSubPath = urlPath.getSubPath();
 		List<String> pathParamNames = new ArrayList<>();
 		Pattern patternToMatch;
+		boolean isFile;
 		if(isDirectory(urlSubPath)) {
 			if(!file.isDirectory())
 				throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
@@ -213,18 +214,20 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a directory and must be for static directories");
 			patternToMatch = Pattern.compile("^"+urlSubPath+"(?<resource>.*)$");
 			pathParamNames.add("resource");
+			isFile = false;
 		} else {
 			if(file.isDirectory())
 				throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
 			else if(!file.isFile())
 				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a file and must be for static file route");
 			patternToMatch = Pattern.compile("^"+urlSubPath+"$");
+			isFile = true;
 		}		
 		
 		MatchInfo matchInfo = new MatchInfo(urlPath, exposedPort, httpMethod, urlEncoding, patternToMatch, pathParamNames);
 		String relativePath = urlSubPath.substring(1);
 		File targetCacheLocation = FileFactory.newFile(holder.getCachedCompressedDirectory(), relativePath);
-		EStaticRouter router = new EStaticRouter(holder.getRouteInvoker2(), matchInfo, file, isOnClassPath, targetCacheLocation);
+		EStaticRouter router = new EStaticRouter(holder.getRouteInvoker2(), matchInfo, file, isOnClassPath, targetCacheLocation, isFile);
 		staticRouters.add(router);
 		log.info("scope:'"+routerInfo+"' added route="+matchInfo+" fileSystemPath="+file);
 	}

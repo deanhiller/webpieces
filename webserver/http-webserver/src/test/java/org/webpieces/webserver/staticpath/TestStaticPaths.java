@@ -148,4 +148,17 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Open Sans");
 	}
+
+	@Test
+	public void testClasspathDirJpb() {
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/testclasspath/image.jpg");
+
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContentType("image/jpeg");
+		int size = response.getBody().getReadableSize();
+		Assert.assertEquals(18066, size);
+	}
 }

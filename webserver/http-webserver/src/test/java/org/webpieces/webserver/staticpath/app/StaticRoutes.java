@@ -19,7 +19,9 @@ public class StaticRoutes implements Routes {
 
 		//relative path(to working directory)
 		bldr.addStaticDir(BOTH, "/public/", "src/test/resources/staticRoutes/", false);
-		
+
+		bldr.addStaticDir(BOTH, "/testclasspath/", "/com/something/", true);
+
 		bldr.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
 		bldr.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}

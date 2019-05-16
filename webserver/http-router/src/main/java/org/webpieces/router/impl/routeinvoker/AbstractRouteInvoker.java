@@ -53,7 +53,11 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		boolean isOnClassPath = data.isOnClassPath();
 
 		RenderStaticResponse resp = new RenderStaticResponse(data.getTargetCacheLocation(), isOnClassPath);
-		if(data.getFileSystemPath().isFile()) {
+
+		//NOTE: Looking up resource pictures in localhost:8080/@documentation stopped working if we
+		//did not use the data.isRouteAFile() and used the filesystem information
+		//we do have a test for this now if you try to fix it
+		if(data.isRouteAFile()) {
 			resp.setFilePath(data.getFileSystemPath());
 		} else {
 			String relativeUrl = ctx.getPathParams().get("resource");

@@ -9,12 +9,14 @@ public class RouteInfoForStatic {
 	private final boolean isOnClassPath;
 	private final File targetCacheLocation;
 	private final VirtualFile fileSystemPath;
-	
-	public RouteInfoForStatic(boolean isOnClassPath, File targetCacheLocation, VirtualFile fileSystemPath) {
+	private final boolean isRouteAFile;
+
+	public RouteInfoForStatic(boolean isOnClassPath, File targetCacheLocation, VirtualFile fileSystemPath, boolean isRouteAFile) {
 		super();
 		this.isOnClassPath = isOnClassPath;
 		this.targetCacheLocation = targetCacheLocation;
 		this.fileSystemPath = fileSystemPath;
+		this.isRouteAFile = isRouteAFile;
 	}
 
 	public boolean isOnClassPath() {
@@ -29,4 +31,7 @@ public class RouteInfoForStatic {
 		return fileSystemPath;
 	}
 
+	public boolean isRouteAFile() {
+		return isRouteAFile;
+	}
 }

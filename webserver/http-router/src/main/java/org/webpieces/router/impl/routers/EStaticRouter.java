@@ -19,16 +19,20 @@ public class EStaticRouter extends AbstractRouterImpl {
 	private final RouteInvoker invoker;
 	private final boolean isOnClassPath;
 	private final File targetCacheLocation;
+	private boolean isFile;
 	private final VirtualFile fileSystemPath;
 	private Properties hashMeta;
 
-	public EStaticRouter(RouteInvoker invoker, MatchInfo matchInfo, VirtualFile fileSystemPath, boolean isOnClassPath, File targetCatchLocation) {
+	public EStaticRouter(RouteInvoker invoker, MatchInfo matchInfo, VirtualFile fileSystemPath, boolean isOnClassPath, File targetCatchLocation, boolean isFile) {
 		super(matchInfo);
 		this.invoker = invoker;
 		this.matchInfo = matchInfo;
 		this.fileSystemPath = fileSystemPath;
 		this.isOnClassPath = isOnClassPath;
 		this.targetCacheLocation = targetCatchLocation;
+
+
+		this.isFile = isFile;
 	}
 	
 	@Override
@@ -38,7 +42,7 @@ public class EStaticRouter extends AbstractRouterImpl {
 
 	@Override
 	public CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb) {
-		RouteInfoForStatic routeInfo = new RouteInfoForStatic(isOnClassPath, targetCacheLocation, fileSystemPath);
+		RouteInfoForStatic routeInfo = new RouteInfoForStatic(isOnClassPath, targetCacheLocation, fileSystemPath, isFile);
 		return invoker.invokeStatic(ctx, responseCb, routeInfo);
 	}
 
