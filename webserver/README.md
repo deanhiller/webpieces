@@ -1,5 +1,19 @@
 # webpieces
 
+Property Management plugin!!!
+
+https://discuss.gradle.org/t/failure-on-reading-non-existent-property-how-to-avoid-this/32119
+https://discuss.gradle.org/t/create-a-property-for-build-script-locations/31787/2
+latest eclipse 2019 not working(using 2018 for now) https://www.eclipse.org/forums/index.php/m/1808065/#msg_1808065
+
+ADD release failure if not calling release.sh under jdk8 for now so we don't accidentally fuck up when switching jdks
+
+test and fix for jdk12 gradle only
+
+fix auto build!!!
+
+Get working in jdk12 as well(keep code releases on jdk8)
+
 #### TODO:
 * @documentation, need threading section
 * @documentation, need section on injecting ScheduledExecutor (hmmmmmmmm, who provides this?)
@@ -11,6 +25,56 @@
 * add test for java enum and list select and multiselect
 * add test for java related entity select and multiselect
 
+Error route is very complex.  We must deal with these situations (write a test for each one!!!)
+1. html POST - in this case, controller must redirect to keep with PRG or deliver weird back button stuff
+2. ajax POST - not sure….if this fails, we should deliver an ajax redirect on behalf of the user I ‘think’ but some ajax stuff can’t deal with it
+3. html GET - in this case, we can redirect or render but rendering would be delivering an error to the url the user accessed(is that ok)
+4. ajax GET - in this case, delivering a error page would be really really weird
+5. json GET/POST - I think the json filters should handle this situation
+6. Should our platform deliver an ajax redirect on behalf of the user?? in which case the user needs to tell us his desired url path for errors
+
+NotFound is complex as well
+   1. Json not found ends up in html not found logic (the filter passes back not found code with json but processor still has to deal with it)
+   2. when redirecting, you can end up in not found??  or at least not found processor gets a Redirect command (seems weird and shouldn’t happen)?
+
+From Guice….
+WARNING: Please consider reporting this to the maintainers of com.google.inject.internal.cglib.core.$ReflectUtils$1
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+
+upgrade groovy…
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.codehaus.groovy.vmplugin.v7.Java7$1 (file:/Users/dhiller/.gradle/caches/modules-2/files-2.1/org.codehaus.groovy/groovy-all/2.4.6/478feadca929a946b2f1fb962bb2179264759821/groovy-all-2.4.6.jar) to constructor java.lang.invoke.MethodHandles$Lookup(java.lang.Class,int)
+WARNING: Please consider reporting this to the maintainers of org.codehaus.groovy.vmplugin.v7.Java7$1
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+
+
+ADD TEST CASE FOR THIS… to make sure we don’t try to go to compressed cache?
+
+                        if(meta.getRoute().getRouteType() == RouteType.STATIC) {
+				//RESET the encodings to known so we don't try to go the compressed cache which doesn't
+				//exist in dev server since we want the latest files always
+				ctx.getRequest().encodings = new ArrayList<>();
+			} else if(meta.getControllerInstance() == null) {
+				finder.loadControllerIntoMetaObject(meta, false);
+				finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
+			}
+
+THIS TEST CASE NEEDS to change in TestDevSynchronousErrors to “A controller for your url was found, but that controller threw NotFoundException”
+
+	@Test
+	public void testWebappThrowsNotFound() {
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
+		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		response.assertContains("Your app's webpage was not found");		
+	}
+
+TEST PRG for internal error on POST….what is the behavior.
 
 * implement https://vladmihalcea.com/how-to-bootstrap-hibernate-without-the-persistence-xml-file/ to get rid of hacks on gradle AND it's just better to control it
 * tie together BufferPool max size, http1.1 max size, http2 max local size, channelmanager backpressure (size*10 (and for ssl*1.2))

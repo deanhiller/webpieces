@@ -25,6 +25,7 @@ ext {
        'plugin-install-sslcert': "org.webpieces:plugin-install-sslcert:${webpiecesVersion}", 
        'plugin-webpieces-documentation': "org.webpieces:plugin-webpieces-documentation:${webpiecesVersion}",
        'plugin-jackson':     "org.webpieces:plugin-json-jackson:${webpiecesVersion}",
+       'plugin-properties':  "org.webpieces:plugin-properties:${webpiecesVersion}",
        'commons-lang':       "org.apache.commons:commons-lang3:3.5",
        
        'plugin-h2':          "org.webpieces:plugin-h2db:${webpiecesVersion}",

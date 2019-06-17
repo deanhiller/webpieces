@@ -13,6 +13,8 @@ import org.webpieces.plugins.hibernate.HibernateConfig;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.plugins.json.JacksonConfig;
 import org.webpieces.plugins.json.JacksonPlugin;
+import org.webpieces.plugins.properties.PropertiesConfig;
+import org.webpieces.plugins.properties.PropertiesPlugin;
 import org.webpieces.plugins.sslcert.InstallSslCertConfig;
 import org.webpieces.plugins.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.plugins.Plugin;
@@ -75,7 +77,7 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 				new HibernatePlugin(new HibernateConfig(persistenceUnit)),
 				new JacksonPlugin(new JacksonConfig("/json/.*", JsonCatchAllFilter.class)),
 				new BackendPlugin(new BackendConfig()),
-				//new PropertiesPlugin(new PropertiesConfig()), //use once released
+				new PropertiesPlugin(new PropertiesConfig()),
 				new InstallSslCertPlugin(new InstallSslCertConfig("acme://letsencrypt.org/staging"))
 				);
 	}

@@ -62,6 +62,8 @@ dependencies {
   compile deps['plugin-hibernate']
   //optional plugin for if you have a json api
   compile deps['plugin-jackson']
+  compile deps['plugin-properties']
+  
   compile deps['commons-lang'] //used in json escaping
  
   //REMOVE once you are on a real database as there is a line testCompile deps['plugin-h2'] that brings this in for tests
