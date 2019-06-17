@@ -61,9 +61,9 @@ One thing to note in the video is I was caught off guard by a minor bug(that is 
 
 ### Eclipse Setup
 
-NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 4.1-milestone-1
+NOTE: last tested running eclipse on jdk-11.0.2.jdk Eclipse 2018-12 (4.10.0) Build id: 20181214-0600
 
-1. install eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
+1. (if not installed already) install eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
    * Click Help menu -> Eclipse Marketplace...
    * Type in 'Gradle' in the Find text box
    * Click install on Buildship Gradle Integration 2.0
@@ -86,8 +86,8 @@ NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 
 
 ### Intellij Setup
 
-IF Intellij, you will have a bit more pain in the debugger(the debugger is not as nice as eclipse BUT the IDE usability is much better). 
-NOTE: last test out on Intellij 2017.2 with fixes(https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000451564-Intellij-2017-1-5-and-gradle-4-1-milestone-upgrade-broke-this-project?page=1#community_comment_115000373970)  
+In Intellij, you will have a bit more pain in the debugger(the debugger is not as nice as eclipse BUT the IDE usability is much better). 
+NOTE: last tested on Intellij 2019.1
 
 1. Import Project
    * From Welcome screen, choose Import Project

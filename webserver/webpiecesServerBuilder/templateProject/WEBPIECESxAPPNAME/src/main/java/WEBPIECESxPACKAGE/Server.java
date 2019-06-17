@@ -159,46 +159,10 @@ public class Server {
 	}
 
 	/**
-	 * I like things to work seamlessly but user.dir is a huge issue in multiple environments I am working in.
-	 * main server has to work in N configurations that should be tested and intellij is a PITA since
-	 * it is inconsistent.  PP means runs in the project the file is in and eclipse is consistent with
-	 * gradle while intellij is only half the time....
+	 * I like things to work seamlessly but user.dir is a huge issue in multiple environments...and Intellij makes it
+	 * harder by giving servers a different user.dir than tests even though they are in the same subproject!!
 	 *
-	 * app dev - The environment when you generate a project and import it into an IDE
-	 * webpieces - The environment where you test the template directly when bringing in webpieces into an IDE
-	 *
-	 *
-	 * * app dev / eclipse -
-	 *    * PP - running myapp/src/tests - user.dir=myapp-all/myapp
-	 *    * PP - DevServer - user.dir=myapp-all/myapp-dev
-	 *    * PP - SemiProductionServer - user.dir=myapp-all/myapp-dev
-	 *    * PP - ProdServer - user.dir=myapp-all/myapp
-	 * * app dev / intellij (it's different paths than eclipse :( ).  user.dir starts as myapp directory
-	 *    * PP - running myapp/src/tests - myapp-all/myapp
-	 *    * NO - DevServer - user.dir=myapp-all :( what the hell!  different from running tests
-	 *    * NO - SemiProductionServer - user.dir=myapp-all
-	 *    * NO - ProdServer - user.dir=myapp-all
-	 * * webpieces / eclipse - same as app dev because eclipse is nice in this aspect
-	 * * webpieces / intellij - ANNOYING and completely different.  Runs out of webpieces a few levels down from actual subproject
-	 * * PP - tests in webpieces gradle - myapp-all/myapp
-	 * * PP - tests in myapp's gradle run - myapp-all/myapp
-	 * * NO - production - user.dir=from distribution myapp directory which has subdirs bin, lib, config, public
-	 * * Future? - run DevSvr,SemiProdSvr,ProdSvr from gradle?....screw that for now..it's easy to run from IDE so why bother(it may just work though too)
-	 *
-	 * - so in production, the relative paths work from myapp so 'public/' is a valid location for html files resolving to myapp/public
-	 * - in testing, IF we want myapp-all/myapp/src/dist/public involved, it would be best to run from myapp-all/myapp/src/dist so 'public/' is still a valid location
-	 * - in devserver, semiprodserver, and prod server, the same idea follows where myapp-all/myapp/src/dist should be the user.dir!!!
-	 *
-	 * - sooooo, algorithm is this
-	 * - if user.dir=myapp-all, modify user.dir to myapp-all/myapp/src/dist (you are in intellij)
-	 * - else if user.dir=myapp-dev, modify to ../myapp/src/dist
-	 * - else if myapp has directories bin, lib, config, public then do nothing
-	 * - else modify user.dir=myapp to myapp/src/dist
-	 *
-	 * Above is wayyyy tooo confusing so this is the start of the new documentation. Below, in the if statements,
-	 * we will document, what causes you to enter those pieces with a special readable format
-	 *
-	 * Format is like this
+	 * Format of comments BELOW in if/else statements is like this
 	 *
 	 * {type}-{isWebpieces}-{IDE or Container}-{subprojectName}
 	 *
@@ -228,27 +192,39 @@ public class Server {
 			//    MainApp | NO  | Production | N/A
 			log.info("Running in production environment");
 			return filePath;
-		} else if(locatorFile1.exists()) {
-			//For ->
-			//    MainApp | NO  | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
-			//    MainApp | NO  | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
-			log.info("You appear to be running a main app from Intellij..but unclear from which subproject");
-			return FileFactory.newFile(filePath, "WEBPIECESxAPPNAME/src/dist");
 		} else if("WEBPIECESxAPPNAME-dev".equals(name)) {
-			//    Test    | NO  | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
-			//    Test    | NO  | Gradle      | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
-			//    Test    | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    Test    | NO  | Gradle     | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    Test    | YES | Gradle     | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    MainApp | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			log.info("You appear to be running test from Intellij or Gradle(xxxx-dev subproject).");
 			File parent = filePath.getParentFile();
 			return FileFactory.newFile(parent, "WEBPIECESxAPPNAME/src/dist");
 		} else if("WEBPIECESxAPPNAME".equals(name)) {
-			//    Test    | NO  | Intellij | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
-			//    Test    | NO  | Gradle   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
-			//    Test    | YES | Intellij | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
-			//    Test    | YES | Gradle | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    Test    | NO  | Gradle     | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    Test    | YES | Gradle     | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    MainApp | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			log.info("You appear to be running test from Intellij or Gradle(main subproject).");
 			return FileFactory.newFile(filePath, "src/dist");
+		} else if(locatorFile1.exists()) {
+			//DAMNIT Intellij...FIX THIS STUFF!!!
+			//For ->
+			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			log.info("You appear to be running a main app from Intellij..but unclear from which subproject");
+			return FileFactory.newFile(filePath, "WEBPIECESxAPPNAME/src/dist");
 		} else if(locatorFile2.exists()) {
+			//DAMNIT Intellij...FIX THIS STUFF!!!
+			//
 			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			log.info("Running DevServer in Intellij, making property modifications(damn intellij..fix that)");
