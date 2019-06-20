@@ -36,7 +36,9 @@ public class DScopedRouter {
 		String prefix = subPath;
 		int index = subPath.indexOf("/", 1);
 		if(index == 1) {
-			throw new IllegalArgumentException("path cannot start with //");
+			CompletableFuture<Void> future = new CompletableFuture<>();
+			future.completeExceptionally(new NotFoundException("Bad path="+ctx.getRequest().relativePath+" request="+ctx.getRequest()));
+			return future;
 		} else if(index > 1) {
 			prefix = subPath.substring(0, index);
 		}
