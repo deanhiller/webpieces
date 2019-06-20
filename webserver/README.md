@@ -1,7 +1,6 @@
 # webpieces
 
-this can now be fixed
-https://discuss.gradle.org/t/failure-on-reading-non-existent-property-how-to-avoid-this/32119/2
+test out release 1.9.146 to make sure properties plugin is working...
 
 Property Management plugin!!!
 * add checkbox for true/false
@@ -10,7 +9,6 @@ Property Management plugin!!!
 * Documentation on plugin properties
 * Documentation on EVERY single html widget with inline examples!!!
 
-https://discuss.gradle.org/t/failure-on-reading-non-existent-property-how-to-avoid-this/32119
 https://discuss.gradle.org/t/create-a-property-for-build-script-locations/31787/2
 latest eclipse 2019 not working(using 2018 for now) https://www.eclipse.org/forums/index.php/m/1808065/#msg_1808065
 https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/2
