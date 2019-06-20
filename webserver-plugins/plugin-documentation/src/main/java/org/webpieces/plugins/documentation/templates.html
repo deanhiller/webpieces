@@ -108,8 +108,8 @@ We have way way too much formal documentation in this world that is boring as he
 <code>*[<h1>Client ${client?.name}$</h1>]*</code>
 </pre>
 
-<p>Which will only display the client name if the client is not null.  Well shucks, we only have tests
-indirectly testing this.  We need to add a basic feature test for just this.  Adding to the todo list.</p>
+<p>Which will only display the client name if the client is not null.  If client OR name is null, then an
+empty string will be displayed</p>
 
 <p>Next, you can prefix variables or tag arguments with 'escOff#' like *[${escOff#body}$]* and that will not do any html 
 escaping.  This is useful when you want to pass the body of a custom tag in like so</p>
@@ -416,7 +416,7 @@ making life grand</p>
 
 <pre><code>*[#{set html:'<h2>Title2</h2>', escaped:false/}#]*</code></pre>
 
-<p>The set body defaults the other way since it is generally what you want so this html is 'not' escapted</p>
+<p>The set body defaults the other way since it is generally what you want so this html is 'not' escaped</p>
 
 <pre><code>*[#{set 'htmlbody'}#<h1 class="">Some Header</h1>#{/set}#]*</code></pre>
 

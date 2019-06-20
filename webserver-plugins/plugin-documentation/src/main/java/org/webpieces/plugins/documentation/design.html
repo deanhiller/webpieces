@@ -22,8 +22,14 @@
    <li>The platform itself not preventing the developer from making this mistake</li>
 </ol>
 
-<p>Webpieces forces you into the PRG pattern such that you cannot send a response to a post that is not a redirect unless you
-are creating an api.  For html pages, POST requests always result in a redirect.</p>
+<p>Webpieces forces you into the PRG pattern such that you cannot send a response to a post that is not a redirect unless</p>
+
+<ol>
+   <li>you are creating an api</li>
+   <li>you are creating an ajax request which requires a response</li>
+</ol>
+
+<p>For all html pages, POST requests always result in a redirect saving you many many headaches.</p>
 
 <p>More information can be found on the <a href="https://en.wikipedia.org/wiki/Post/Redirect/Get">Wikipedia PRG page</a></p>
 

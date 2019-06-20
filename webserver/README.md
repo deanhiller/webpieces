@@ -1,5 +1,8 @@
 # webpieces
 
+this can now be fixed
+https://discuss.gradle.org/t/failure-on-reading-non-existent-property-how-to-avoid-this/32119/2
+
 Property Management plugin!!!
 * add checkbox for true/false
 * add pulldown for enum
