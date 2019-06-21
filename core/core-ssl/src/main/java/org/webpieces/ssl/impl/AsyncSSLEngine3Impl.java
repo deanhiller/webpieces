@@ -292,10 +292,10 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private CompletableFuture<Void> sendHandshakeMessageImpl() throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
 		log.trace(()->mem+"sending handshake message");
-		//HELPER.eraseBuffer(empty);
 		
 		ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
-			
+
+		HandshakeStatus previousStatus = sslEngine.getHandshakeStatus();
 		//CLOSE and all the threads that call feedPlainPacket can have contention on wrapping to encrypt and
 		//must synchronize on sslEngine.wrap
 		Status lastStatus;
@@ -312,12 +312,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			hsStatus = result.getHandshakeStatus();
 		}
 		
-		{
-			final Status lastStatus2 = lastStatus;
-			final HandshakeStatus hsStatus2 = hsStatus;
-			log.trace(()->mem+"write packet pos="+engineToSocketData.position()+" lim="+
-						engineToSocketData.limit()+" status="+lastStatus2+" hs="+hsStatus2);
-		}
+		log.trace(()->mem+"write packet pos="+engineToSocketData.position()+" lim="+
+						engineToSocketData.limit()+" status="+lastStatus+" hs="+hsStatus);
+			
 		if(lastStatus == Status.BUFFER_OVERFLOW || lastStatus == Status.BUFFER_UNDERFLOW)
 			throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
 
@@ -326,12 +323,14 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		try {
 			CompletableFuture<Void> sentMsgFuture;
 			if(readNoData) {
-				log.trace(() -> "ssl engine is farting. READ 0 data.  hsStatus=\"+hsStatus+\" status=\"+lastStatus");
+				log.trace(() -> "ssl engine is farting. READ 0 data.  hsStatus="+hsStatus+" status="+lastStatus);
+				
+				throw new IllegalStateException("Engine issue.  hsStatus="+hsStatus+" status="+lastStatus+" previous hsStatus="+previousStatus);
 				//A big hack since the Engine was not working in live testing with FireFox and it would tell us to wrap
-				//and NOT output any data AND not BufferOverflow.....you have to do 1 or the other, right
+				//and NOT output any data AND not BufferOverflow.....you have to do 1 or the other, right!
 				//instead cut out of looping since there seems to be no data
-				sslEngineIsFarting = true;
-				sentMsgFuture = CompletableFuture.completedFuture(null);
+				//sslEngineIsFarting = true;
+				//sentMsgFuture = CompletableFuture.completedFuture(null);
 			} else
 				sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
 
