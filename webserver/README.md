@@ -2,6 +2,8 @@
 
 test out release 1.9.146 to make sure properties plugin is working...
 
+https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap
+
 Property Management plugin!!!
 * add checkbox for true/false
 * add pulldown for enum

@@ -16,7 +16,10 @@ public class UrlEncodedParser {
 	    for (int i = 0; i < pairs.length; i++) {
 	      String[] fields = pairs[i].split("=");
 	      String name = URLEncoder.decode(fields[0], StandardCharsets.UTF_8);
-	      String value = null;
+	      
+	      //Doing "" instead of null allows us to know which ones passed in a field name vs. what field names
+	      //never existed.  if we do value=null, you have no way of knowing which is which
+	      String value = "";
 	      if(fields.length == 2)
 	    	  value = URLEncoder.decode(fields[1], StandardCharsets.UTF_8);
 	      
