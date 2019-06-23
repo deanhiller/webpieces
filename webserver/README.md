@@ -1,12 +1,10 @@
 # webpieces
 
-test out release 1.9.146 to make sure properties plugin is working...
-
-https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap
-check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
+* https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap
+* check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
    * GEventEvaluator not working(so warn and info are not in red anymore)
    * %caller not working for lazy stuff
-   * source code not downloaded
+* https://discuss.gradle.org/t/create-a-property-for-build-script-locations/31787/2
 
 Property Management plugin!!!
 * add checkbox for true/false
@@ -15,8 +13,6 @@ Property Management plugin!!!
 * Documentation on plugin properties
 * Documentation on EVERY single html widget with inline examples!!!
 
-https://discuss.gradle.org/t/create-a-property-for-build-script-locations/31787/2
-latest eclipse 2019 not working(using 2018 for now) https://www.eclipse.org/forums/index.php/m/1808065/#msg_1808065
 https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/2
 
 ADD release failure if not calling release.sh under jdk8 for now so we don't accidentally fuck up when switching jdks

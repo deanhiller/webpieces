@@ -61,8 +61,8 @@ One thing to note in the video is I was caught off guard by a minor bug(that is 
 
 ### Eclipse Setup
 
-NOTE: last tested running eclipse on jdk-11.0.2.jdk Eclipse 2018-12 (4.10.0) Build id: 20181214-0600
-BIG NOTE: Eclipse 2019-03 is crap and does not even come close to working at all!!!  Dont' use it yet until they fix lotsa issues
+NOTE: last tested running eclipse on jdk-11.0.3.jdk Eclipse 2019-06 Version: 2019-06 (4.12.0) Build id: 20190614-1200
+BIG NOTE: I was having huge troubles with Eclipse 2019-03 but it could have been my environment and I could not figure out what was wrong, so try 2019-06 if you have issues
 
 1. (if not installed already) install eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
    * Click Help menu -> Eclipse Marketplace...
