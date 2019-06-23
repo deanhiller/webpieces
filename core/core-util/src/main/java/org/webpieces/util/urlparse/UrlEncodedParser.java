@@ -19,6 +19,8 @@ public class UrlEncodedParser {
 	      
 	      //Doing "" instead of null allows us to know which ones passed in a field name vs. what field names
 	      //never existed.  if we do value=null, you have no way of knowing which is which
+	      //ALSO, if you change this to null and login to https://localhost:8443/@backend with 
+	      //username=admin and blank password, it will NullPointer so it makes it easier for webapp authors too
 	      String value = "";
 	      if(fields.length == 2)
 	    	  value = URLEncoder.decode(fields[1], StandardCharsets.UTF_8);
