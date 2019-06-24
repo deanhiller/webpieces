@@ -84,4 +84,10 @@ public class DocumentationController {
 	public Render randomFeatures() {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
+	
+	public Render html() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+	
+	
 }

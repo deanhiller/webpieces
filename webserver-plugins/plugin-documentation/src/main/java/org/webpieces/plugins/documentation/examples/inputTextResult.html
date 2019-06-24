@@ -1,0 +1,36 @@
+#{extends '../../backend/main.html'/}#
+#{set title:'Html Reference'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs '../docHome.html'/}#
+
+<h1 id="html">Html Form Input Result</h1>
+
+<p>Hi ${firstName}$</p>
+
+<br/><br/><br/><br/>
+<h2>The Code</h2>
+
+<p>The Controller GET method for this page is:</p>
+
+<pre>
+<code>*[
+	public Render inputTextResult() {
+		String firstName = Current.flash().get("firstName");
+		return Actions.renderThis(
+				"menu", menuCreator.getMenu(),
+				"firstName", firstName
+				);
+	}
+]*</code>
+</pre>
+	
+<p>The html for this page is simply:</p>
+
+<pre>
+<code>*[
+<h1 id="html">Html Form Input Result</h1>
+
+<p>Hi ${firstName}$</p>
+]*</code>
+</pre>

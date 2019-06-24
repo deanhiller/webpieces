@@ -6,6 +6,14 @@
    * %caller not working for lazy stuff
 * https://discuss.gradle.org/t/create-a-property-for-build-script-locations/31787/2
 
+* Documentation on EACH html field
+  * basic <input type="text">
+  * basic select with enum
+  * basic select with list from entity
+  * checkbox
+  * radio buttons
+  * other?
+
 Property Management plugin!!!
 * add checkbox for true/false
 * add pulldown for enum

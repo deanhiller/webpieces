@@ -23,6 +23,7 @@ public class DocumentationRoutes extends ScopedRoutes {
     @Override
     protected void configure(RouteBuilder baseBldr, ScopedRouteBuilder scopedBldr) {
 		scopedBldr.addRoute(BOTH, HttpMethod.GET,  "", "DocumentationController.mainDocs", DocumentationRouteId.MAIN_DOCS);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/html", "DocumentationController.html", DocumentationRouteId.HTML_REFERENCE);
 		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/routes", "DocumentationController.routes", DocumentationRouteId.ROUTES);
 		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/controllers", "DocumentationController.controllers", DocumentationRouteId.CONTROLLERS);
 		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/templates", "DocumentationController.templates", DocumentationRouteId.TEMPLATES);
