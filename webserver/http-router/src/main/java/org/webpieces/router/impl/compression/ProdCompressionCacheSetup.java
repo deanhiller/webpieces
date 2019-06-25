@@ -83,8 +83,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	private void store(File metaFile1, Properties p) {
-		try {
-			FileOutputStream out = new FileOutputStream(metaFile1);
+		try(FileOutputStream out = new FileOutputStream(metaFile1)) {
 			p.store(out, "file hashes for next time.  Single file format(key:urlPathOnly, value:hash), directory format(key:urlPath+relativeFilePath, value:hash)");
 		} catch(IOException e) {
 			throw new RuntimeException(e);
