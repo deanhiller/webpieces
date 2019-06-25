@@ -20,7 +20,6 @@ public class EHtmlRouter extends AbstractDynamicRouterImpl {
 	//hmmmm, this was a bit of a pain.  It is only set once but it's hard to design the code to pass in during construction
 	//without quite a bit of work
 	private BaseRouteInfo baseRouteInfo;
-	private DynamicInfo dynamicInfo;
 
 	public EHtmlRouter(RouteInvoker invoker, MatchInfo matchInfo, boolean checkToken) {
 		super(matchInfo);
@@ -38,10 +37,6 @@ public class EHtmlRouter extends AbstractDynamicRouterImpl {
 	
 	public void setBaseRouteInfo(BaseRouteInfo baseRouteInfo) {
 		this.baseRouteInfo = baseRouteInfo;
-	}
-
-	public void setDynamicInfo(DynamicInfo dynamicInfo) {
-		this.dynamicInfo = dynamicInfo;
 	}
 
 	public MatchInfo getMatchInfo() {

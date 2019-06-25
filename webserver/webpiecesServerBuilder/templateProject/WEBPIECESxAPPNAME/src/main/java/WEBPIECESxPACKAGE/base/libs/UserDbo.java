@@ -45,6 +45,8 @@ public class UserDbo {
 	private String name;
 	private String firstName;
 	private String lastName;
+	
+	private boolean isFun;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	private UserDbo manager;
@@ -105,6 +107,14 @@ public class UserDbo {
 		this.lastName = lastName;
 	}
 
+	public boolean isFun() {
+		return isFun;
+	}
+
+	public void setFun(boolean isFun) {
+		this.isFun = isFun;
+	}
+	
 	public String getPhone() {
 		return phone;
 	}

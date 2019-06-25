@@ -18,7 +18,6 @@ public class EContentRouter extends AbstractDynamicRouterImpl {
 	private final BodyContentBinder bodyContentBinder;
 
 	private BaseRouteInfo baseRouteInfo;
-	private DynamicInfo dynamicInfo;
 
 	public EContentRouter(RouteInvoker routeInvoker, MatchInfo matchInfo, BodyContentBinder bodyContentBinder) {
 		super(matchInfo);
@@ -42,12 +41,5 @@ public class EContentRouter extends AbstractDynamicRouterImpl {
 	public void setBaseRouteInfo(BaseRouteInfo baseRouteInfo) {
 		this.baseRouteInfo = baseRouteInfo;
 	}
-
-	@Override
-	public void setDynamicInfo(DynamicInfo dynamicInfo) {
-		this.dynamicInfo = dynamicInfo;
-	}
-
-
 
 }

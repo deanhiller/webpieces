@@ -14,7 +14,6 @@ import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.templating.impl.html.EscapeHTMLFormatter;
-import org.webpieces.templating.impl.html.NullFormatter;
 
 import groovy.lang.Closure;
 import groovy.lang.MissingPropertyException;
@@ -50,8 +49,10 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	PrintWriter writer = (PrintWriter) getProperty(OUT_PROPERTY_NAME);
     	try {
     		tag.runTag(args, closure, writer, this, srcLocation);
+    	} catch(TemplateException e) {
+    		throw new TemplateException("Error running tag #{"+tagName+"}#. message=("+e.getSubMessage()+")"+srcLocation, e.getSubMessage(), e);
     	} catch(Exception e) {
-			throw new RuntimeException("Error running tag #{"+tagName+"}#.  See exception cause below."+srcLocation, e);
+			throw new TemplateException("Error running tag #{"+tagName+"}#. message=("+e.getMessage()+")"+srcLocation, e.getMessage(), e);
     	}
     }
 
@@ -59,8 +60,10 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	srcLocation = modifySourceLocation2(srcLocation);
     	try {
     		return ClosureUtil.toString(tagName, closure, null);
+    	} catch(TemplateException e) {
+    		throw new TemplateException("Error running tag #{"+tagName+"}#. message=("+e.getSubMessage()+")"+srcLocation, e.getSubMessage(), e);
     	} catch(Exception e) {
-			throw new RuntimeException("Error running tag #{"+tagName+"}#.  See exception cause below."+srcLocation, e);
+			throw new TemplateException("Error running tag #{"+tagName+"}#. message=("+e.getMessage()+")"+srcLocation, e.getMessage(), e);
     	}
     }    
     

@@ -28,9 +28,7 @@ import groovy.lang.Closure;
  * 1. on first GET request must render bean from an enum, array, collection, or just prmitive field as string
  * 2. on second GET request must render flash IF set(even if null!!!) or the bean BUT the twist is flash is all Strings
  *
- * 
  * @author dhiller
- *
  */
 public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 
@@ -150,8 +148,17 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         } else {
         	valAsStr = converter.convert(pageArgValue);
         }
-        field.put("flashOrValue", preferFirst(flashValue, valAsStr));
+        
+        String val = preferFirst(flashValue, valAsStr);
+        field.put("flashOrValue", val);
         field.put("valueOrFlash", preferFirst(valAsStr, flashValue));
+
+    	//Special field only for checkboxes with value 'checked' or value null
+        if(val != null) {
+        	field.put("checked", "checked");
+        } else {
+        	field.put("checked", "");
+        }
         
 		return field;
 	}

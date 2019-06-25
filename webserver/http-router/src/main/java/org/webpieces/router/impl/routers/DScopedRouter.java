@@ -8,6 +8,7 @@ import java.util.function.Function;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.filters.ExceptionUtil;
@@ -74,20 +75,12 @@ public class DScopedRouter {
 		CompletableFuture<Void> future = ExceptionUtil.wrap(
 			() -> router.invoke(ctx, responseCb)
 		);
-		
-		CompletableFuture<Void> local = future.handle((r, t) -> {
-			if(t != null) {
-				CompletableFuture<Void> failedFuture = new CompletableFuture<Void>();
-				if(t instanceof NotFoundException) {
-					failedFuture.completeExceptionally(t);
-				} else
-					failedFuture.completeExceptionally(new SpecificRouterInvokeException(router.getMatchInfo(), t));
-				return failedFuture;
-			}
-			return CompletableFuture.completedFuture(r);
-		}).thenCompose(Function.identity());
-		
-		return local;
+
+		//We re-use this method to avoid chaining when it's a NotFoundException
+		return ExceptionWrap.<Void>wrapException(
+			future,
+			(t) -> new SpecificRouterInvokeException(router.getMatchInfo(), t)
+		);
 	}
 
 	public Map<String, DScopedRouter> getPathPrefixToNextRouter() {

@@ -19,8 +19,7 @@
 <p>The webpieces html code above is:</p>
 
 <pre>
-<code>*[
-#{form action:@[POST_INPUT_TEXT_FORM]@, class:'form-horizontal'}#
+<code>*[#{form action:@[POST_INPUT_TEXT_FORM]@, class:'form-horizontal'}#
 
   #{field 'firstName', label:'First Name'}#
     <input type="text" name="${field.name}$" value="${field.flashOrValue}$">
@@ -28,25 +27,21 @@
 
   <input type="submit" name="submit" value="&{'Save', 'link.save'}&" class="btn btn-primary" />
 
-#{/form}#
-]*</code>
+#{/form}#]*</code>
 </pre>
 
 <p>The webpieces routes for the above is:</p>
 
 <pre>
-<code>*[
-scopedBldr.addRoute(BOTH, HttpMethod.GET , "/examples/input", "ExamplesController.inputText", ExampleRouteId.INPUT_TEXT);
+<code>*[scopedBldr.addRoute(BOTH, HttpMethod.GET , "/examples/input", "ExamplesController.inputText", ExampleRouteId.INPUT_TEXT);
 scopedBldr.addRoute(BOTH, HttpMethod.POST, "/examples/postInput", "ExamplesController.postInputText", ExampleRouteId.POST_INPUT_TEXT_FORM);
-scopedBldr.addRoute(BOTH, HttpMethod.POST, "/examples/inputResult", "ExamplesController.inputTextResult", ExampleRouteId.INPUT_TEXT_RESULT);
-]*</code>
+scopedBldr.addRoute(BOTH, HttpMethod.POST, "/examples/inputResult", "ExamplesController.inputTextResult", ExampleRouteId.INPUT_TEXT_RESULT);]*</code>
 </pre>
 
 <p>The Controller GET and POST methods for this page is:</p>
 
 <pre>
-<code>*[
-	public Render inputText() {
+<code>*[    public Render inputText() {
 		return Actions.renderThis(
 				"menu", menuCreator.getMenu(),
 				"firstName", null);
@@ -59,7 +54,6 @@ scopedBldr.addRoute(BOTH, HttpMethod.POST, "/examples/inputResult", "ExamplesCon
 		Current.flash().put("firstName", firstName);
 		Current.flash().keep();
 		return Actions.redirect(ExampleRouteId.INPUT_TEXT_RESULT);
-	}
-]*</code>
+	}]*</code>
 </pre>
 

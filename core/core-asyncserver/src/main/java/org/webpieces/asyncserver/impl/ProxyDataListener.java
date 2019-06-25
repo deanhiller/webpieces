@@ -68,7 +68,7 @@ public class ProxyDataListener implements DataListener {
 	}
 
 	public void connectionOpened(Channel channel, boolean isReadyForWrites) {
-		log.info("connection opened");
+		log.debug(() -> "connection opened");
 		TCPChannel proxy = lookupExistingOrCreateNew(channel);
 		dataListener.connectionOpened(proxy, isReadyForWrites);
 	}

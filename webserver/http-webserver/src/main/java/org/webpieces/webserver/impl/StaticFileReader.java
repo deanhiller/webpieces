@@ -194,7 +194,7 @@ public class StaticFileReader {
 
 		CompletableFuture<Void> future;
 		try {
-			log.info(()->"sending chunked file via async read="+file);
+			log.debug(()->"sending chunked file via async read="+file);
 			long length = file.toFile().length();
 			AtomicLong remaining = new AtomicLong(length);
 

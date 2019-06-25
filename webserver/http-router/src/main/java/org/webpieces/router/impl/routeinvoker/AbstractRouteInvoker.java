@@ -12,6 +12,7 @@ import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.exceptions.ControllerException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
@@ -22,6 +23,7 @@ import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.FilterInfo;
 import org.webpieces.router.impl.routers.DynamicInfo;
+import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
@@ -73,11 +75,16 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	protected CompletableFuture<Void> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor) {
 		Service<MethodMeta, Action> service = dynamicInfo.getService();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
-		return invoke(invokeInfo, loadedController, service, data, processor);
+		return invokeAny(invokeInfo, loadedController, service, data, processor);
 	}
-	
-	private CompletableFuture<Void> invoke(InvokeInfo invokeInfo, LoadedController loadedController, Service<MethodMeta, Action> service,
-			RouteData data, Processor processor) {
+
+	private CompletableFuture<Void> invokeAny(
+		InvokeInfo invokeInfo, 
+		LoadedController loadedController, 
+		Service<MethodMeta, Action> service,
+		RouteData data, 
+		Processor processor
+	) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ResponseStreamer responseCb = invokeInfo.getResponseCb();
@@ -102,7 +109,11 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		}
 		
 		CompletableFuture<Void> future = response.thenCompose(resp -> processor.continueProcessing(resp, responseCb, portConfig));
-		return future;
+		
+		return ExceptionWrap.wrapException(
+				future, 
+				(t) -> new ControllerException("exception occurred on controller method="+loadedController.getControllerMethod(), t)
+		);
 	}
 	
 	@Override
@@ -112,7 +123,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
 				invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, loadedController, invokeInfo.getResponseCb());
-		return invoke(invokeInfo, loadedController, service, data, processor);
+		return invokeAny(invokeInfo, loadedController, service, data, processor);
 	}
 	
 	private  Service<MethodMeta, Action> createNotFoundService(BaseRouteInfo route, RouterRequest req) {

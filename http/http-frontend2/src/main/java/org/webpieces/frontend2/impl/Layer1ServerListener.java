@@ -102,7 +102,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 
 	@Override
 	public void connectionOpened(TCPChannel channel, boolean isReadyForWrites) {
-		log.info(channel+" socket opened");
+		log.debug(() -> channel+" socket opened");
 		//when a channel is SSL, we can tell right away IF ALPN is installed
 		//boolean isHttp2 = channel.getAlpnDetails().isHttp2();
 

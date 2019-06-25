@@ -1,6 +1,8 @@
-package org.webpieces.router.impl.routers;
+package org.webpieces.router.api.exceptions;
 
 import java.util.concurrent.CompletionException;
+
+import org.webpieces.router.impl.routers.MatchInfo;
 
 /**
  * Wraps a generic exception from the specific router 

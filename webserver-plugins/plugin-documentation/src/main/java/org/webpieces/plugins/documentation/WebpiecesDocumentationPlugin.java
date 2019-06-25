@@ -2,6 +2,7 @@ package org.webpieces.plugins.documentation;
 
 import java.util.List;
 
+import org.webpieces.plugins.documentation.examples.ExampleGuice;
 import org.webpieces.plugins.documentation.examples.ExampleRoutes;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
@@ -20,7 +21,9 @@ public class WebpiecesDocumentationPlugin implements Plugin {
 	
 	@Override
 	public List<Module> getGuiceModules() {
-		return Lists.newArrayList(new DocumentationModule(config));
+		return Lists.newArrayList(
+				new DocumentationModule(config),
+				new ExampleGuice());
 	}
 
 	@Override

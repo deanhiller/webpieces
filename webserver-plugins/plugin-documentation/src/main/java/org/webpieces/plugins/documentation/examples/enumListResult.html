@@ -4,21 +4,22 @@
 
 #{renderTagArgs '../docHome.html'/}#
 
-<h1 id="html">Html Form Input Result</h1>
+<h1 id="html">Pulldown Menu Result</h1>
 
-<p>Hi ${firstName}$</p>
+<p>Hi, you chose the color ${selectedColor}$</p>
 
-<br/><br/><br/><br/>
+<br/><br/>
+
 <h2>The Code</h2>
 
 <p>The Controller GET method for this page is:</p>
 
 <pre>
-<code>*[	public Render inputTextResult() {
-		String firstName = Current.flash().get("firstName");
+<code>*[	public Render enumListResult() {
+		String selectedColor = Current.flash().get("selectedColor");
 		return Actions.renderThis(
 				"menu", menuCreator.getMenu(),
-				"firstName", firstName
+				"selectedColor", selectedColor
 				);
 	}]*</code>
 </pre>
@@ -26,7 +27,7 @@
 <p>The html for this page is simply:</p>
 
 <pre>
-<code>*[<h1 id="html">Html Form Input Result</h1>
+<code>*[<h1 id="html">Pulldown Menu Result</h1>
 
-<p>Hi ${firstName}$</p>]*</code>
+<p>Hi, you chose the color ${selectedColor}$</p>]*</code>
 </pre>

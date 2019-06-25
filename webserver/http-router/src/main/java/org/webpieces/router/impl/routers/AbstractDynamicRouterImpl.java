@@ -7,9 +7,12 @@ import org.webpieces.router.api.routes.Port;
 
 public abstract class AbstractDynamicRouterImpl extends AbstractRouterImpl implements AbstractDynamicRouter {
 
+	protected DynamicInfo dynamicInfo;
+
 	public AbstractDynamicRouterImpl(MatchInfo matchInfo) {
 		super(matchInfo);
 	}
+	
 	@Override
 	protected Matcher matchesAndParseParams(RouterRequest request, String path) {
 		if(matchInfo.getExposedPorts() == Port.HTTPS && !request.isHttps) {
@@ -25,5 +28,10 @@ public abstract class AbstractDynamicRouterImpl extends AbstractRouterImpl imple
 		
 		Matcher matcher = matchInfo.getPattern().matcher(path);
 		return matcher;
+	}
+	
+	@Override
+	public void setDynamicInfo(DynamicInfo dynamicInfo) {
+		this.dynamicInfo = dynamicInfo;
 	}
 }

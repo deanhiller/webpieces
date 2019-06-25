@@ -167,7 +167,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 			if(data.isEndOfStream()) {
 				remove(data);	
 
-				log.info(socket+" done sending response");
+				log.debug(() -> socket+" done sending response");
 				future = future.thenCompose(w -> {
 					return write(new HttpLastChunk());
 				}).thenApply(v -> {

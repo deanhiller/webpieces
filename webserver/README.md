@@ -4,19 +4,18 @@
 * check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
    * GEventEvaluator not working(so warn and info are not in red anymore)
    * %caller not working for lazy stuff
-* https://discuss.gradle.org/t/create-a-property-for-build-script-locations/31787/2
 
 * Documentation on EACH html field
-  * basic <input type="text">
   * basic select with enum
   * basic select with list from entity
-  * checkbox
   * radio buttons
   * other?
 
 Property Management plugin!!!
 * add checkbox for true/false
 * add pulldown for enum
+
+* Implement CRUD with paging ability before code generation wizard
 
 * Documentation on plugin properties
 * Documentation on EVERY single html widget with inline examples!!!
