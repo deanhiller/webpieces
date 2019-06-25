@@ -63,7 +63,13 @@ assemble.dependsOn(['zipGradleTemplate'])
 github {
   owner = 'deanhiller'
   repo = 'webpieces'
-  token = githubToken
+  
+if(project.properties.githubToken) {
+  token = githubTokenToUse
+} else {
+  token = "fake"
+}
+
   tagName = version
   name = 'webpiecesServerBuilder'+version
   body = 'Official Release of '+version
