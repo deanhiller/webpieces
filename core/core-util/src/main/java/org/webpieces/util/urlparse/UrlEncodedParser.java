@@ -21,7 +21,9 @@ public class UrlEncodedParser {
 	      //never existed.  if we do value=null, you have no way of knowing which is which
 	      //ALSO, if you change this to null and login to https://localhost:8443/@backend with 
 	      //username=admin and blank password, it will NullPointer so it makes it easier for webapp authors too
-	      String value = "";
+	      
+	      //BUT this seems to break something else!!
+	      String value = null;
 	      if(fields.length == 2)
 	    	  value = URLEncoder.decode(fields[1], StandardCharsets.UTF_8);
 	      
