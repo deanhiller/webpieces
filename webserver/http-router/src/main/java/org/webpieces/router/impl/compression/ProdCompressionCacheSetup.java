@@ -92,11 +92,12 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	private Properties load(File metaFile) {
-		try {
-			Properties p = new Properties();
-			if(!metaFile.exists())
-				return p;
-			p.load(new FileInputStream(metaFile));
+		Properties p = new Properties();
+		if(!metaFile.exists())
+			return p;
+		
+		try(FileInputStream in = new FileInputStream(metaFile)) {
+			p.load(in);
 			return p;
 		} catch(IOException e) {
 			throw new RuntimeException(e);
