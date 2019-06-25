@@ -41,8 +41,15 @@ public class TestStylesheetScriptTags extends AbstractWebpiecesTest {
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("<img alt=`hi` src=`public/pic.jpg`>".replace('`', '"'));
-		response.assertContains("<link rel=`stylesheet` type=`text/css` href=`/public/fonts.css?hash=kxR6cr1IXKXcWyOAiVdRAQ%3D%3D` />".replace('`', '"'));
-		response.assertContains("<script src=`public/jquery.js?hash=BIgcZnlh8tRzX%2BGIG5TESw%3D%3D`".replace('`', '"'));
+
+		String os = System.getProperty("os.name");
+		if(os.indexOf("win") >= 0) {
+		   response.assertContains("<link rel=`stylesheet` type=`text/css` href=`/public/fonts.css?hash=VWAYKdP6%2FlAd2LCd%2BlGjLw%3D%3D` />".replace('`', '"'));
+		   response.assertContains("<script src=`public/jquery.js?hash=egTcDlenh07PSKhZGFjK9w%3D%3D`".replace('`', '"'));
+		} else {
+		   response.assertContains("<link rel=`stylesheet` type=`text/` href=`/public/fonts.css?hash=kxR6cr1IXKXcWyOAiVdRAQ%3D%3D` />".replace('`', '"'));
+		   response.assertContains("<script src=`public/jquery.js?hash=BIgcZnlh8tRzX%2BGIG5TESw%3D%3D`".replace('`', '"'));
+		}
 	}
 
 }
