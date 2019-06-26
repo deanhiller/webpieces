@@ -1,5 +1,6 @@
 # webpieces
 
+fix -PexcludeH2 bullcrap so gradlew build just works for everyone!!
 UrlEncodedParser String value=null can we change to String value=""  it broke many tests :(
 fix "" vs. null. AND definitely need competing test cases..this shit is tough as balls
 "" needed for what again?
@@ -7,7 +8,7 @@ null needed for translation of basic stuff ints and such
 
 fix needing H2Spec on your machine to run the build
 
-
+* for windows. fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 * https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap
 * check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
    * GEventEvaluator not working(so warn and info are not in red anymore)

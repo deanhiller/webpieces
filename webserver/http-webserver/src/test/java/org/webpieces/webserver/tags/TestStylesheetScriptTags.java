@@ -42,7 +42,7 @@ public class TestStylesheetScriptTags extends AbstractWebpiecesTest {
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("<img alt=`hi` src=`public/pic.jpg`>".replace('`', '"'));
 
-		String os = System.getProperty("os.name");
+		String os = System.getProperty("os.name").toLowerCase();
 		if(os.indexOf("win") >= 0) {
 		   response.assertContains("<link rel=`stylesheet` type=`text/css` href=`/public/fonts.css?hash=VWAYKdP6%2FlAd2LCd%2BlGjLw%3D%3D` />".replace('`', '"'));
 		   response.assertContains("<script src=`public/jquery.js?hash=egTcDlenh07PSKhZGFjK9w%3D%3D`".replace('`', '"'));
