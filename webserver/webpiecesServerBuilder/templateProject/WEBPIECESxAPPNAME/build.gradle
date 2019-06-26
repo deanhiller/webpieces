@@ -40,6 +40,14 @@ sourceSets {
         testCompile deps['selenium']
     }
 
+//NOTE: jar section has to go AFTER dependencies section to read all dependencies
+jar {
+    manifest.attributes(
+            "Class-Path": configurations.runtime.files.collect { it.name }.join(' '),
+            "Main-Class": 'WEBPIECESxPACKAGE.Server'
+    )
+}
+
 compileJava.doLast {
    logger.warn("processed resources="+sourceSets.main.output.resourcesDir)
 }

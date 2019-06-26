@@ -27,6 +27,8 @@ ext {
        'plugin-jackson':     "org.webpieces:plugin-json-jackson:${webpiecesVersion}",
        'plugin-properties':  "org.webpieces:plugin-properties:${webpiecesVersion}",
        'commons-lang':       "org.apache.commons:commons-lang3:3.5",
+       'junit':           'junit:junit:4.11',  
+       'joda-time':       'joda-time:joda-time:2.9.4',
        
        'plugin-h2':          "org.webpieces:plugin-h2db:${webpiecesVersion}",
        'plugin-webpieces-documentation': "org.webpieces:plugin-documentation:${webpiecesVersion}",
@@ -35,13 +37,11 @@ ext {
        'h2db':            'com.h2database:h2:1.4.192',
        //These next two are in case you have libraries that want to use an
        //http-client or a nio library...
-       'web-channelmgr':  "org.webpieces:core-channelmanager2:${webpiecesVersion}",
-       'web-httpclient':  "org.webpieces:http-client:${webpiecesVersion}",
-       'junit':           'junit:junit:4.11',  
-       'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
-       'joda-time':       'joda-time:joda-time:2.9.4',
-       'guava':           'com.google.guava:guava:19.0',
-       'apache-commons-io': 'org.apache.commons:commons-io:1.3.2'
+       //'web-channelmgr':  "org.webpieces:core-channelmanager2:${webpiecesVersion}",
+       //'web-httpclient':  "org.webpieces:http-client:${webpiecesVersion}",
+       //'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
+       //'guava':           'com.google.guava:guava:19.0',
+       //'apache-commons-io': 'org.apache.commons:commons-io:1.3.2'
     ]  
 }
 

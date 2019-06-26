@@ -87,6 +87,14 @@ dependencies {
   testCompile deps['selenium']
 }
 
+//NOTE: jar section has to go AFTER dependencies section to read all dependencies
+jar {
+    manifest.attributes(
+            "Class-Path": configurations.runtime.files.collect { it.name }.join(' '),
+            "Main-Class": 'WEBPIECESxPACKAGE.Server'
+    )
+}
+
 mainClassName = "WEBPIECESxPACKAGE.Server"
 applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
 
