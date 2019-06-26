@@ -83,8 +83,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	private void store(File metaFile1, Properties p) {
-		try {
-			FileOutputStream out = new FileOutputStream(metaFile1);
+		try(FileOutputStream out = new FileOutputStream(metaFile1)) {
 			p.store(out, "file hashes for next time.  Single file format(key:urlPathOnly, value:hash), directory format(key:urlPath+relativeFilePath, value:hash)");
 		} catch(IOException e) {
 			throw new RuntimeException(e);
@@ -92,11 +91,12 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	private Properties load(File metaFile) {
-		try {
-			Properties p = new Properties();
-			if(!metaFile.exists())
-				return p;
-			p.load(new FileInputStream(metaFile));
+		Properties p = new Properties();
+		if(!metaFile.exists())
+			return p;
+		
+		try(FileInputStream in = new FileInputStream(metaFile)) {
+			p.load(in);
 			return p;
 		} catch(IOException e) {
 			throw new RuntimeException(e);

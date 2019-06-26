@@ -134,6 +134,9 @@ public abstract class AbstractCompileTest {
 				if(toFile.exists())
 					toFile.delete();
 				Files.copy(from.toPath(), toFile.toPath());
+				
+				//Windows sucks and we have to update the file lastModified ourselves
+				toFile.setLastModified(System.currentTimeMillis());
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

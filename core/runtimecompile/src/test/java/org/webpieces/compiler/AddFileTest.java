@@ -55,7 +55,9 @@ public class AddFileTest extends AbstractCompileTest {
 		String packageFilter = getPackageFilter();
 		String path = packageFilter.replace('.', File.separatorChar);
 
-		File existingDir = FileFactory.newFile(myCodePath, path);
+		String newPathForWindowsTesting = path.replace("/", "\\");
+		
+		File existingDir = FileFactory.newFile(myCodePath, newPathForWindowsTesting);
 		
 		File javaFile = FileFactory.newFile(existingDir, "MyAddedClass.java");
 		//javaFile must exist for test to be run...

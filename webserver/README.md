@@ -1,5 +1,8 @@
 # webpieces
 
+fix needing H2Spec on your machine to run the build
+
+
 * https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap
 * check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
    * GEventEvaluator not working(so warn and info are not in red anymore)
