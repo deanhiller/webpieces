@@ -65,7 +65,7 @@ github {
   repo = 'webpieces'
   
 if(project.properties.githubToken) {
-  token = githubTokenToUse
+  token = githubToken
 } else {
   token = "fake"
 }

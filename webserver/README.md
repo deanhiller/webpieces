@@ -1,5 +1,10 @@
 # webpieces
 
+UrlEncodedParser String value=null can we change to String value=""  it broke many tests :(
+fix "" vs. null. AND definitely need competing test cases..this shit is tough as balls
+"" needed for what again?
+null needed for translation of basic stuff ints and such
+
 fix needing H2Spec on your machine to run the build
 
 
