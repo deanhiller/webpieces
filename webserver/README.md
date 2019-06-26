@@ -1,6 +1,5 @@
 # webpieces
 
-fix -PexcludeH2 bullcrap so gradlew build just works for everyone!!
 UrlEncodedParser String value=null can we change to String value=""  it broke many tests :(
 fix "" vs. null. AND definitely need competing test cases..this shit is tough as balls
 "" needed for what again?
