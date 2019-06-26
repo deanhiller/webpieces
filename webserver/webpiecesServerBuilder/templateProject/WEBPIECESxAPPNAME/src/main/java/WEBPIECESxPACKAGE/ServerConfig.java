@@ -13,6 +13,7 @@ public class ServerConfig {
 
 	private VirtualFile metaFile;
 	private boolean validateRouteIdsOnStartup = false;
+	private boolean isUseFirewall = false;
 	private int httpPort = 8080;
 	private int httpsPort = 8443;
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
@@ -88,6 +89,14 @@ public class ServerConfig {
 	public ServerConfig setTokenCheckOn(boolean tokenCheckOff) {
 		this.tokenCheckOn = tokenCheckOff;
 		return this;
+	}
+
+	public boolean isUseFirewall() {
+		return isUseFirewall;
+	}
+
+	public void setUseFirewall(boolean isUseFirewall) {
+		this.isUseFirewall = isUseFirewall;
 	}
 
 }

@@ -7,11 +7,13 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Map;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
+import org.webpieces.util.cmdline.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
@@ -49,7 +51,25 @@ public class Server {
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			Server server = new Server(null, null, new ServerConfig("production"));
+			CommandLineParser parser = new CommandLineParser();
+			Map<String, String> arguments = parser.parse(args);
+
+			ServerConfig config = new ServerConfig("production");
+
+			if(arguments.get("httpPort") != null) {
+				if(arguments.get("httpsPort") == null)
+					throw new IllegalArgumentException("httpPort passed in on command line but httpsPort is not.  You must pass in both or neither");
+				//in general, if we are doing custom ports, we may be told which ports and then expose those ports on 80/443
+				//via firewall
+				config.setUseFirewall(true);
+
+				int httpPort = parser.parseInt("httpPort", arguments.get("httpPort"));
+				int httpsPort = parser.parseInt("httpsPort", arguments.get("httpsPort"));
+				config.setHttpPort(httpPort);
+				config.setHttpsPort(httpsPort);
+			}
+			
+			Server server = new Server(null, null, config);
 			
 			server.start();
 			
@@ -105,7 +125,7 @@ public class Server {
 											.setWebappOverrides(appOverrides)
 											.setWebAppMetaProperties(svrConfig.getWebAppMetaProperties())
 											.setSecretKey(signingKey)
-											.setPortConfigCallback(() -> fetchPortsForRedirects())
+											.setPortConfigCallback(() -> fetchPortsForRedirects(svrConfig.isUseFirewall()))
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
 											.setNeedsSimpleStorage(webSSLFactory)
 											.setTokenCheckOn(svrConfig.isTokenCheckOn()); 
@@ -123,16 +143,23 @@ public class Server {
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
 	
-	PortConfig fetchPortsForRedirects() {
-		//NOTE: You will need to modify this so it detects when you are behind a firewall that has ports exposed to 
-		//customers different than the ports your server exposes
-		boolean useFirewallPorts = false;
-		
+	/**
+	 * In issuing a redirect, it is important to send back to clients the correct port so
+	 * instead of redirecting to /asdfsdf:12343 which the server is bound to, we redirect back
+	 * to asdfsdf:80.  
+	 * 
+	 * This is due to if you send no port information in the redirect, some browsers would redirect
+	 * back to port 80 which would be wrong when testing on localhost:8080.  TODO: test again in 
+	 * modern day browsers to see if we can eliminate this code completely and just send a redirect 
+	 * to the url and hope the browser knows which port it originally requested.  test in opera, firefox
+	 * IE, safari and chrome
+	 */
+	PortConfig fetchPortsForRedirects(boolean isUseFirewall) {
 		//NOTE: for running locally and for tests, you must set useFirewallPorts=false
 		
 		int httpPort = 80; //good security teams generally have the firewall on port 80 and your server on something like 8080
 		int httpsPort = 443; //good security teams generally have the firewall on port 443 and your server on something like 8443
-		if(!useFirewallPorts) {
+		if(!isUseFirewall) {
 			//otherwise use the same port the webserver is bound to
 			//this is for running locally AND for local tests
 			httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();

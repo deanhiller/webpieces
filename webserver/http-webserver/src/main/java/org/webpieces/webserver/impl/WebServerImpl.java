@@ -76,10 +76,19 @@ public class WebServerImpl implements WebServer {
 		CompletableFuture<Void> future = httpServer.start();
 		CompletableFuture<Void> fut2 = CompletableFuture.completedFuture(null);
 
-		if(factory != null && config.getHttpsListenAddress() != null) {
+		if(config.getHttpsListenAddress() != null) {
 			HttpSvrConfig secureChanConfig = new HttpSvrConfig("https", config.getHttpsListenAddress(), 10000);
 			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
-			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);
+			
+			//OK, some companies expose https OVER http until the firewall THEN it is SSL from firewall to end customer.  This
+			//does expose the https traffic internally(I generally don't like that, but providing a null factory allows
+			//to use http for all those https pages).  The same port 443 or what you pass in for https will be used but it will
+			//just be http instead of https
+			if(factory != null)
+				httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);
+			else
+				httpsServer = serverMgr.createHttpServer(secureChanConfig, serverListener);
+			
 			fut2 = httpsServer.start();
 		} else {
 			log.info("https port is disabled since configuration had no sslEngineFactory");

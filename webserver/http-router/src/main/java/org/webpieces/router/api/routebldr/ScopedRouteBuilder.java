@@ -7,7 +7,10 @@ import org.webpieces.router.api.routes.RouteId;
 
 public interface ScopedRouteBuilder {
 
+	void addBackendRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId);
+	
 	void addRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId);
+	
 	/**
 	 * Use this route to add POST routes with no token check(for apis generally or to turn of the security IF you really
 	 * want to).  Also, use this route to add form that use the GET method so the token is checked as well.

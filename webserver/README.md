@@ -1,5 +1,9 @@
 # webpieces
 
+see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
+
+modify BackendPlugin to optionally expose a special internal port (https only) in production and any backend plugins wire into backend OR frontend depending on their settings....what about wiring into both(hibernate??).
+
 UrlEncodedParser String value=null can we change to String value=""  it broke many tests :(
 fix "" vs. null. AND definitely need competing test cases..this shit is tough as balls
 "" needed for what again?
