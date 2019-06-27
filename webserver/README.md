@@ -1,21 +1,8 @@
 # webpieces
 
-see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
+REVISIT if still exist:see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
 
-modify BackendPlugin to optionally expose a special internal port (https only) in production and any backend plugins wire into backend OR frontend depending on their settings....what about wiring into both(hibernate??).
-
-UrlEncodedParser String value=null can we change to String value=""  it broke many tests :(
-fix "" vs. null. AND definitely need competing test cases..this shit is tough as balls
-"" needed for what again?
-null needed for translation of basic stuff ints and such
-
-fix needing H2Spec on your machine to run the build
-
-* for windows. fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 * https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap
-* check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
-   * GEventEvaluator not working(so warn and info are not in red anymore)
-   * %caller not working for lazy stuff
 
 * Documentation on EACH html field
   * basic select with enum
@@ -32,14 +19,14 @@ Property Management plugin!!!
 * Documentation on plugin properties
 * Documentation on EVERY single html widget with inline examples!!!
 
-https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/2
+* (6/27)for windows. fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
+* (6/27) check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
+   * GEventEvaluator not working(so warn and info are not in red anymore)
+   * %caller not working for lazy stuff
 
 ADD release failure if not calling release.sh under jdk8 for now so we don't accidentally fuck up when switching jdks
-
+https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/2
 test and fix for jdk12 gradle only
-
-fix auto build!!!
-
 Get working in jdk12 as well(keep code releases on jdk8)
 
 #### TODO:

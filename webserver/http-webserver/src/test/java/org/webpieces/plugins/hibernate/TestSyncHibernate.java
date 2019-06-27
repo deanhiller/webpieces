@@ -190,7 +190,11 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 		HttpFullRequest req = Requests.createPostRequest("/testmerge",
 				"user.id", user.getId()+"",
 				"user.name", "blah1",
-				"user.firstName", "blah2");
+				"user.firstName", "blah2",
+				"user.phone", "");
+		//BIG NOTE: user.phone is not supplied so ....
+		//user.lastName will be filled in with ""
+		//user.phone will be filled in with null...
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		

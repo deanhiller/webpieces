@@ -6,7 +6,7 @@ public class BackendLoginImpl implements BackendLogin {
 
 	@Override
 	public boolean isLoginValid(String username, String password) {
-		if(username.equals("admin") && password.equals("admin"))
+		if("admin".equals(username) && "admin".equals(password))
 			return true;
 		return false;
 	}

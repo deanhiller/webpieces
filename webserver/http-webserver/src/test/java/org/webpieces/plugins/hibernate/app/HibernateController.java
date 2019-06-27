@@ -77,6 +77,16 @@ public class HibernateController {
 	}
 	
 	public Redirect postMergeUserTest(UserTestDbo user) {
+		//BIG NOTE HERE: If a form in a browser is not filled in, you will receive "name=" which we
+		//could parse the value into "" or null.  BUT java beans MUST be filled in with null as most
+		//new developers are not going to check and are just going to save to the database and we
+		//don't want them to save "" to the database.  saving null is better.  (some databases treat
+		//"" as null and some do not)
+		if(user.getPhone() != null) {
+			//for test, make sure "" translated to null
+			throw new RuntimeException("FAIL the test as we need to bind null as developers WILL save these objects to the database");
+			//I would prefer to have "", null, and actual value
+		}		
 		Current.flash().setMessage("User successfully saved");
 		Em.get().merge(user);
         Em.get().flush();
