@@ -13,8 +13,10 @@ import javax.inject.Inject;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.api.ResponseStream;
+import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.router.api.exceptions.WebSocketClosedException;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.dto.RedirectResponse;
@@ -25,6 +27,7 @@ import org.webpieces.router.impl.dto.View;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.tags.BootstrapModalTag;
+import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
@@ -137,7 +140,8 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public CompletableFuture<Void> sendRenderHtml(RenderResponse resp) {
-		log.info(() -> "Sending render html response. req="+request);
+		log.info(() -> "Sending render html response. req="+request+" controller="
+				+resp.view.getControllerName()+"."+resp.view.getMethodName());
 		View view = resp.view;
 		String packageStr = view.getPackageName();
 		//For this type of View, the template is the name of the method..
@@ -173,7 +177,7 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		String content = out.toString();
 		
-		StatusCode statusCode = StatusCode.HTTP_200_OK;
+		StatusCode statusCode;
 		switch(resp.routeType) {
 		case HTML:
 			statusCode = StatusCode.HTTP_200_OK;
@@ -193,14 +197,31 @@ public class ProxyResponse implements ResponseStreamer {
 			extension = "txt";
 		}
 
-		return createResponseAndSend(statusCode, content, extension, "text/plain");
+		String finalExt = extension;
+		
+		return ExceptionUtil.wrapException(
+				 () -> createResponseAndSend(statusCode, content, finalExt, "text/plain"), 
+				 (t) -> convert(t));
 	}
+	
+	private Throwable convert(Throwable t) {
+		if(t instanceof NioClosedChannelException)
+			//router does not know about the nio layer but it knows about WebSocketClosedException
+			//so throw this as a flag to it that it doesn't need to keep trying error pages
+			return new WebSocketClosedException("Socket is already closed", t);
+		else
+			return t;
+	}
+	
 	
 	@Override
 	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
 		log.debug(() -> "Sending render static html response. req="+request);
 		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, stream);
-		return reader.sendRenderStatic(requestInfo, renderStatic);
+		return ExceptionUtil.wrapException(
+			() -> reader.sendRenderStatic(requestInfo, renderStatic), 
+			(t) -> convert(t)
+		);
 	}
 	
 	private String getTemplatePath(String packageStr, String templateClassName, String extension) {

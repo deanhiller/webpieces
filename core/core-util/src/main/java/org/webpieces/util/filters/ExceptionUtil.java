@@ -6,6 +6,50 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class ExceptionUtil {
+	
+
+	/**
+	 * MUST convert all synchronous futures into Future.exception(t) so we can handle them
+	 * all the same 
+	 */
+	public static <T> CompletableFuture<T> wrapException(
+			Callable<CompletableFuture<T>> function, 
+			Function<Throwable, Throwable> chainedException
+	) {
+		//first, must convert any synchronous exceptions to Futures...
+		CompletableFuture<T> future = new CompletableFuture<T>();
+		try {
+			future = function.call();
+			
+	    	//specifically, it's important that NotFoundException is unwrapped so above layers can catch
+			//that instead of this damn InvocationTargetException
+		} catch (InvocationTargetException e) {
+			future.completeExceptionally(e.getCause());
+		} catch(Throwable t) {
+			future.completeExceptionally(t);
+		}
+		
+		return wrapExceptionWithConversion(future, chainedException);
+	}
+	
+	private static <T> CompletableFuture<T> wrapExceptionWithConversion(
+			CompletableFuture<T> future, 
+			Function<Throwable, Throwable> chainedException
+	) {
+		CompletableFuture<T> local = future.handle((r, t) -> {
+			if(t != null) {
+				CompletableFuture<T> failedFuture = new CompletableFuture<>();
+				failedFuture.completeExceptionally(chainedException.apply(t));
+				return failedFuture;
+			}
+			
+			CompletableFuture<T> res = CompletableFuture.<T>completedFuture(r);
+			return res;
+		}).thenCompose(Function.identity());
+	
+		return local;
+	}
+	
 	/**
 	 * Copying Twitter filters, we convert all synchronous exceptions to CompletableFuture.failedFuture
 	 * as there has never been a need over all twitter's 1000's of servers that exist to distinguish 
@@ -27,12 +71,12 @@ public class ExceptionUtil {
 	    }
 	}
 
-        //In jdk8, they don't have CompletableFuture.failedFuture yet :(	
-        public static <T> CompletableFuture<T> failedFuture(Throwable ex) {
-            CompletableFuture<T> future = new CompletableFuture<>();
-	    future.completeExceptionally(ex);
-            return future;
-        }
+    //In jdk8, they don't have CompletableFuture.failedFuture yet :(	
+    public static <T> CompletableFuture<T> failedFuture(Throwable ex) {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        future.completeExceptionally(ex);
+        return future;
+    }
 
 	public static <T> CompletableFuture<T> wrap(Callable<CompletableFuture<T>> callable, Function<Throwable, Throwable> wrapException) {
 	    try {

@@ -41,8 +41,8 @@ public class ErrorCommonTest {
 	@Parameterized.Parameters
 	public static Collection bothServers() {
 		return Arrays.asList(new Object[][] {
-	         { true, true },
-	         { false, true }
+	         { true, true }
+	         //{ false, true }
 	      });
 	}
 	
@@ -67,6 +67,11 @@ public class ErrorCommonTest {
 		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
 		server.incomingCompleteRequest(req, mockResponseStream);
 			
+		//AFTER the first route fails, it then calls the controller internal error route which fails and
+		//then results in ErrorRouteFailedException
+		//Of course, usually you are supposed to put a secondary error like ErrorRouteFailedException
+		//in the suppressed exceptions of the root exception but internal error routes should never fail
+		//so we make it a primary exception to be fixed immediately.
 		Throwable e = mockResponseStream.getOnlyException();
 		Assert.assertEquals(InternalErrorRouteFailedException.class, e.getClass());
 		

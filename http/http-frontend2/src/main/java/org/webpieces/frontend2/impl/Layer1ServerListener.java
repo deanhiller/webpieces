@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.asyncserver.api.AsyncDataListener;
-import org.webpieces.frontend2.api.HttpSocketType;
 import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.nio.api.channels.Channel;

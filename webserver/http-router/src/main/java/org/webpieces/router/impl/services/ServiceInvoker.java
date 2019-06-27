@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.loader.LoadedController;
-import org.webpieces.util.filters.ExceptionUtil;
 
 public class ServiceInvoker {
 

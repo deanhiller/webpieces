@@ -28,4 +28,11 @@ public class BackendController {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
 
+	public Render internalError() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+	
+	public Render notFound() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
 }

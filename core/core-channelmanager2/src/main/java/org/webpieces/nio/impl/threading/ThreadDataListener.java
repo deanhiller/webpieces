@@ -3,6 +3,7 @@ package org.webpieces.nio.impl.threading;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
+import org.slf4j.MDC;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.threading.SessionExecutor;
@@ -23,7 +24,9 @@ public class ThreadDataListener implements DataListener {
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {
+				MDC.put("socket", ""+channel);
 				CompletableFuture<Void> fut = dataListener.incomingData(channel, b);
+				MDC.clear();
 				fut.handle((v, t) -> {
 					if(t == null)
 						future.complete(null);

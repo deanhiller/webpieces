@@ -210,6 +210,15 @@ public class RouteLoader {
 			}
 		}
 		
+		//OK, once in a while(maybe it's this whiskey I'm drinking right now), even I cheat a bit and I 
+		//create some shitty-butt system property global (IIIICKKKKKY), I know, but I got tired and need
+		//this to work for tomorrow.  FIGURE out how to cleanly work this in later!
+		//Worse yet, it's not a constact so you have to file search....UGH, but the dependencies are clean
+		//as fuck and I don't want to muck with that right now on where the constant should live(again,
+		//too much whisky probably, but eh, I am going to get this done).
+		if(config.isAddBackendRoutesOverPort())
+			System.setProperty("BACKEND_PORT_LIVE", "live");
+		
 		for(Routes module : all) {
 			CurrentPackage.set(new RouteModuleInfo(module.getClass()));
 			module.configure(routerBuilder);

@@ -1,6 +1,9 @@
 package org.webpieces.plugins.backend.login;
 
+import static org.webpieces.router.api.routes.Port.BOTH;
+
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
 import org.webpieces.router.api.routes.Port;
@@ -45,6 +48,19 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 		
 		ScopedRouteBuilder scoped2 = baseRouter.getScopedRouteBuilder(basePath);
 		scoped2.addRoute(Port.BOTH, HttpMethod.GET,  "", "org.webpieces.plugins.backend.BackendController.redirectToLogin", BackendLoginRouteId.LOGGED_OUT_LANDING);
+		
+		String property = System.getProperty("BACKEND_PORT_LIVE");
+		if(property != null) {
+			//ok, we are exposed on a port and need our own stuff installed...
+			baseRouter.setInternalErrorRoute("org.webpieces.plugins.backend.BackendController.internalError");
+			baseRouter.setPageNotFoundRoute("org.webpieces.plugins.backend.BackendController.notFound");
+			baseRouter.addStaticDir(BOTH, "/assets/", "/html/", true);
+			baseRouter.addStaticFile(BOTH, "/favicon.ico", "/favicon.ico", true);
+		}
 	}
 
+	@Override
+	protected RouteBuilder fetchBuilder(DomainRouteBuilder domainRouteBldr) {
+		return domainRouteBldr.getBackendRouteBuilder();
+	}
 }

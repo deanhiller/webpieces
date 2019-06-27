@@ -3,11 +3,12 @@ package org.webpieces.plugins.documentation;
 import static org.webpieces.router.api.routes.Port.BOTH;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
-import org.webpieces.router.api.routes.ScopedRoutes;
+import org.webpieces.router.api.routes.Routes;
 
-public class DocumentationRoutes extends ScopedRoutes {
+public class DocumentationRoutes implements Routes {
 	
     public static final String HOME_PATH = "";
 	public static final String TEMPLATES_PATH = "/templates";
@@ -20,8 +21,11 @@ public class DocumentationRoutes extends ScopedRoutes {
 		path = config.getPluginPath();
 	}
 
-    @Override
-    protected void configure(RouteBuilder baseBldr, ScopedRouteBuilder scopedBldr) {
+	@Override
+	public void configure(DomainRouteBuilder domainRouteBldr) {
+		RouteBuilder baseBldr = domainRouteBldr.getBackendRouteBuilder();
+		ScopedRouteBuilder scopedBldr = baseBldr.getScopedRouteBuilder(path);
+		
 		scopedBldr.addRoute(BOTH, HttpMethod.GET,  "", "DocumentationController.mainDocs", DocumentationRouteId.MAIN_DOCS);
 		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/html", "DocumentationController.html", DocumentationRouteId.HTML_REFERENCE);
 		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/routes", "DocumentationController.routes", DocumentationRouteId.ROUTES);
@@ -56,10 +60,5 @@ public class DocumentationRoutes extends ScopedRoutes {
 		//the user passed in :(
 		baseBldr.addStaticDir(BOTH, "/org/webpieces/plugins/documentation/", "/org/webpieces/plugins/documentation/", true);		
     }
-
-	@Override
-	protected String getScope() {
-		return path;
-	}
 
 }

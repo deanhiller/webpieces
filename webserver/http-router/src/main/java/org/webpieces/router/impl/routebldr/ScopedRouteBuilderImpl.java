@@ -187,6 +187,11 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		VirtualFile file = new VirtualFileClasspath(fileSystemPath, getClass(), isDirectory);
 		
 		UrlPath p = new UrlPath(routerInfo, urlSubPath);
+
+		//we can only verify files, not directories :(
+		if(!isDirectory && !file.exists())
+			throw new IllegalArgumentException("Static File="+file.getCanonicalPath()+" does not exist. fileSysPath="+file+" abs="+file.getAbsolutePath());
+
 		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, true);
 	}
 	private void addStaticLocalFile(Port port, String path, String fileSystemPath) {
@@ -196,12 +201,14 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		File workingDir = holder.getConfig().getWorkingDirectory();
 		VirtualFile file = VirtualFileFactory.newFile(workingDir, fileSystemPath);
 		UrlPath p = new UrlPath(routerInfo, path);
+		
+		if(!file.exists())
+			throw new IllegalArgumentException("Static File="+file.getCanonicalPath()+" does not exist. fileSysPath="+file+" abs="+file.getAbsolutePath());
+
 		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, false);
 	}
 	
 	private void createStaticRouter(UrlPath urlPath, Port exposedPort, HttpMethod httpMethod, Charset urlEncoding, VirtualFile file, boolean isOnClassPath) {
-		if(!file.exists())
-			throw new IllegalArgumentException("Static File="+file.getCanonicalPath()+" does not exist. fileSysPath="+file+" abs="+file.getAbsolutePath());
 
 		String urlSubPath = urlPath.getSubPath();
 		List<String> pathParamNames = new ArrayList<>();

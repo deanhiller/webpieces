@@ -168,7 +168,7 @@ public class Layer2Http1_1Handler {
 		
 		PermitQueue permitQueue = socket.getPermitQueue();
 		return permitQueue.runRequest(() -> {
-			Http1_1StreamImpl currentStream = new Http1_1StreamImpl(id, socket, httpParser, permitQueue);
+			Http1_1StreamImpl currentStream = new Http1_1StreamImpl(id, socket, httpParser, permitQueue, http1Req, headers);
 
 			HttpStream streamHandle = httpListener.openStream();
 			currentStream.setStreamHandle(streamHandle);

@@ -1,15 +1,11 @@
 package org.webpieces.router.api.exceptions;
 
-public class ClientDataError extends RuntimeException {
+public class ClientDataError extends WebpiecesException {
 
 	private static final long serialVersionUID = 8725117695723001888L;
 
 	public ClientDataError() {
 		super();
-	}
-
-	public ClientDataError(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
 	}
 
 	public ClientDataError(String message, Throwable cause) {

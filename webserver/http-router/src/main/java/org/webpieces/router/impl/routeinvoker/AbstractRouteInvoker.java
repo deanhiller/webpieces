@@ -13,6 +13,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.ControllerException;
+import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
@@ -27,6 +28,7 @@ import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.filters.Service;
 
 public abstract class AbstractRouteInvoker implements RouteInvoker {
@@ -103,19 +105,23 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		MethodMeta methodMeta = new MethodMeta(loadedController, Current.getContext(), data);
 		CompletableFuture<Action> response;
 		try {
-			response = service.invoke(methodMeta);
+			response = ExceptionUtil.wrapException( 
+				() -> service.invoke(methodMeta),
+				(t) -> convert(loadedController, t)	
+			);
 		} finally {
 			Current.setContext(null);
 		}
 		
-		CompletableFuture<Void> future = response.thenCompose(resp -> processor.continueProcessing(resp, responseCb, portConfig));
-		
-		return ExceptionWrap.wrapException(
-				future, 
-				(t) -> new ControllerException("exception occurred on controller method="+loadedController.getControllerMethod(), t)
-		);
+		return response.thenCompose(resp -> processor.continueProcessing(resp, responseCb, portConfig));
 	}
 	
+	private Throwable convert(LoadedController loadedController, Throwable t) {
+		if(t instanceof WebpiecesException)
+			return t; //no wrapping t so upper layers can detect
+		return new ControllerException("exception occurred on controller method="+loadedController.getControllerMethod(), t);
+	}
+
 	@Override
 	public CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();

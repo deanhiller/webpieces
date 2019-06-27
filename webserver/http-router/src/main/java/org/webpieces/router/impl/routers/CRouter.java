@@ -37,18 +37,26 @@ public class CRouter extends DScopedRouter {
 
 	@Override
 	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
-		CompletableFuture<Void> future = invokeRouteCatchNotFound(ctx, responseCb, subPath).handle((r, t) -> {
+		CompletableFuture<Void> future = invokeRouteCatchNotFound(ctx, responseCb, subPath);
+		
+		return future.handle((r, t) -> {
 			if(t != null) {
 				String failedRoute = "<Unknown Route>";
 				if(t instanceof SpecificRouterInvokeException)
 					failedRoute = ((SpecificRouterInvokeException) t).getMatchInfo()+"";
 				
-				return internalServerError(t, ctx, responseCb, failedRoute);
+				log.error("There is three parts to this error message... request, route found, and the exception "
+						+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"
+						+ctx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", t);
+				SupressedExceptionLog.log(t);
+				
+				if(ExceptionWrap.isChannelClosed(t))
+					return CompletableFuture.<Void>completedFuture(null);
+				CompletableFuture<Void> retVal = invokeWebAppErrorController(t, ctx, responseCb, failedRoute);
+				return retVal;
 			}
 			return CompletableFuture.completedFuture(r); 
 		}).thenCompose(Function.identity());
-		
-		return future;
 	}
 	/**
 	 * NOTE: We have to catch any exception from the method processNotFound so we can't catch and call internalServerError in this
@@ -71,33 +79,18 @@ public class CRouter extends DScopedRouter {
 		}).thenCompose(Function.identity());
 	}
 
-	private CompletableFuture<Void> internalServerError(
+	private CompletableFuture<Void> invokeWebAppErrorController(
 			Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, Object failedRoute) {
 		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
 		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
-		CompletableFuture<Void> future = ExceptionUtil.wrap(
-			() -> internalServerErrorImpl(exc, requestCtx, responseCb, failedRoute)
+		return ExceptionUtil.wrapException(
+			() -> internalSvrErrorRouter.invokeErrorRoute(requestCtx, responseCb),
+			(t) -> convert(failedRoute, t)
 		);
-				
-		return future.handle((r, t) -> {
-			if(t != null) {
-				CompletableFuture<Void> future1 = new CompletableFuture<Void>();
-				future1.completeExceptionally(new InternalErrorRouteFailedException(t, failedRoute));
-				return future1;
-			}
-			
-			return CompletableFuture.completedFuture(r); 
-		}).thenCompose(Function.identity());
 	}
-	
-	private CompletableFuture<Void> internalServerErrorImpl(
-		Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, Object failedRoute) {
-		log.error("There is three parts to this error message... request, route found, and the exception "
-				+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"
-				+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
-		SupressedExceptionLog.log(exc);
-		
-		return internalSvrErrorRouter.invokeErrorRoute(requestCtx, responseCb);
+
+	private InternalErrorRouteFailedException convert(Object failedRoute, Throwable t) {
+		return new InternalErrorRouteFailedException(t, failedRoute);
 	}
 	
 	private CompletableFuture<Void> notFound(NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {

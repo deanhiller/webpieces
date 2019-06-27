@@ -5,21 +5,21 @@ import org.webpieces.data.api.BufferPool;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 
-class RequestInfo {
+public class RequestInfo {
 
 	private RouterRequest routerRequest;
 	private Http2Request request;
 	private BufferPool pool;
 	private ResponseOverrideSender responseSender;
 
-	RequestInfo(RouterRequest routerRequest, Http2Request request, BufferPool pool, ResponseOverrideSender responseSender) {
+	public RequestInfo(RouterRequest routerRequest, Http2Request request, BufferPool pool, ResponseOverrideSender responseSender) {
 		this.routerRequest = routerRequest;
 		this.request = request;
 		this.pool = pool;
 		this.responseSender = responseSender;
 	}
 
-	RouterRequest getRouterRequest() {
+	public RouterRequest getRouterRequest() {
 		return routerRequest;
 	}
 
@@ -27,11 +27,11 @@ class RequestInfo {
 		return request;
 	}
 
-	BufferPool getPool() {
+	public BufferPool getPool() {
 		return pool;
 	}
 
-	ResponseOverrideSender getResponseSender() {
+	public ResponseOverrideSender getResponseSender() {
 		return responseSender;
 	}
 

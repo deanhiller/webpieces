@@ -21,6 +21,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.DataMismatchException;
+import org.webpieces.router.api.exceptions.IllegalArgException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.EntityLookup;
@@ -65,7 +66,7 @@ public class ParamToObjectTranslatorImpl {
 				//urls and instead the developer typed in the wrong url and an issue needs to be fixed(or 
 				//some hacker is doing something so internal error there is fine as well)
 				if(req.multiPartFields.size() > 0)
-					throw new IllegalArgumentException(e);
+					throw new IllegalArgException(e);
 				else //for apis that POST, this is a client error(or developer error when testing)
 					throw new ClientDataError(e);
 			}

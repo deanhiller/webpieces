@@ -20,6 +20,7 @@ import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
+import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -72,14 +73,20 @@ public abstract class AbstractRouterService implements RouterService {
 	public Void finalFailure(ResponseStreamer responseCb, Throwable e, RequestContext requestCtx) {
 		ResponseFailureProcessor processor = new ResponseFailureProcessor(requestCtx, responseCb);
 
-		//if it's InternalErrorRouteFailedException, we are 99% sure it's from the webapp logic not webpieces code 
-		if(e instanceof InternalErrorRouteFailedException) {
-			log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
-		} else { 
-			log.error("Bug in webpieces router logic", e);
-		}
 		
-		processor.failureRenderingInternalServerErrorPage(e);
+		if(ExceptionWrap.isChannelClosed(e))
+			return null;
+
+		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
+
+		CompletableFuture<Void> future = ExceptionUtil.wrap(
+				() -> processor.failureRenderingInternalServerErrorPage(e)
+		);
+		
+		future.exceptionally((t) -> {
+			log.error("Webpieces failed at rendering it's internal error page since webapps internal erorr app page failed", t);
+			return null;
+		});
 		return null;
 	}
 	

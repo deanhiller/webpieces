@@ -16,11 +16,13 @@ import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpPayload;
+import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
@@ -49,11 +51,24 @@ public class Http1_1StreamImpl implements ResponseStream {
 
 	private boolean sentFullRequest;
 
-	public Http1_1StreamImpl(int streamId, FrontendSocketImpl socket, HttpParser http11Parser, PermitQueue permitQueue) {
+	private Http2Request http2Request;
+
+	private HttpRequest http1Req;
+
+	public Http1_1StreamImpl(
+			int streamId, 
+			FrontendSocketImpl socket, 
+			HttpParser http11Parser, 
+			PermitQueue permitQueue, 
+			HttpRequest http1Req, 
+			Http2Request headers
+	) {
 		this.streamId = streamId;
 		this.socket = socket;
 		this.http11Parser = http11Parser;
 		this.permitQueue = permitQueue;
+		this.http1Req = http1Req;
+		this.http2Request = headers;
 	}
 
 	@Override
@@ -72,7 +87,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 			return write(response).thenApply(w -> new ContentLengthResponseWriter(headers));
 		}
 		
-		return write(response).thenApply(c -> new Http11ChunkedWriter());
+		return write(response).thenApply(c -> new Http11ChunkedWriter(http1Req, http2Request));
 	}
 
 	private void closeCheck() {
@@ -154,27 +169,51 @@ public class Http1_1StreamImpl implements ResponseStream {
 	
 	private class Http11ChunkedWriter implements StreamWriter {
 
+		private HttpRequest http1Req2;
+		private Http2Request headers2;
+
+		public Http11ChunkedWriter(HttpRequest http1Req, Http2Request headers) {
+			http1Req2 = http1Req;
+			headers2 = headers;
+		}
+
+		@Override
+		public String toString() {
+			return "Http1ChunkedWriter["+headers2.getSingleHeaderValue(Http2HeaderName.PATH)+"]["+socket+"]";
+		}
+		
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			closeCheck();
 			if(!(data instanceof DataFrame))
 				throw new UnsupportedOperationException("not supported in http1.1="+data);
-			
 			DataFrame frame = (DataFrame) data;
-			
-			CompletableFuture<Void> future = write(new HttpChunk(frame.getData()));
-			
-			if(data.isEndOfStream()) {
-				remove(data);	
 
-				log.debug(() -> socket+" done sending response");
-				future = future.thenCompose(w -> {
-					return write(new HttpLastChunk());
-				}).thenApply(v -> {
-					permitQueue.releasePermit();
-					return null;
-				});
+			
+			//MULTIPLE scenarios here.
+			//1. Someone sends StreamMsg with isEndOfStream=true  WITH data -> send HttpChunk AND HttpLastChunk
+			//2. Someone sends StreamMsg with isEndOfStream=true  WITH NO data -> send HttpLastChunk
+			//3. Someone sends StreamMsg with isEndOfStream=false WITH data -> send HttpChunk
+			//4. Someone sends StreamMsg with isEndOfStream=false WITH NO data -> exception...make clients fix their bugs
+			if(!frame.isEndOfStream()) {
+				if(frame.getData().getReadableSize() == 0)
+					throw new IllegalArgumentException("DataFrame must contain data if isEndOfStream is false");
+				return write(new HttpChunk(frame.getData()));
 			}
+
+			CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
+			if(frame.getData().getReadableSize() > 0)
+				future = write(new HttpChunk(frame.getData()));
+			
+			remove(data);	
+
+			log.debug(() -> socket+" done sending response");
+			future = future.thenCompose(w -> {
+				return write(new HttpLastChunk());
+			}).thenApply(v -> {
+				permitQueue.releasePermit();
+				return null;
+			});
 			
 			return future;
 		}

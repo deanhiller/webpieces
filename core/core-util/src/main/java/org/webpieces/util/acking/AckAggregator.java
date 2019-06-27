@@ -26,8 +26,12 @@ public class AckAggregator {
 	}
 
 	public <T> T ack(T result, Throwable t) {
-		if(t != null) {//on exception just ack the whole thing(as all others quite possibly will not ack at all)
-			log.error("Exception", t);
+		if(t != null) {//on exception just ack the whole thing(as 
+			//all others quite possibly will not ack at all)
+			//This is very confusing and we seem to log at least one case already.
+			//we MAY lose visibility into other cases...ick...not sure..hard to see completely
+			log.error("Exception should have been logged above.  If not, enable trace logs");
+			log.trace(() -> "Exception", new RuntimeException(t));
 			future.complete(null);
 		}
 		

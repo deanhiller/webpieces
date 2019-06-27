@@ -27,7 +27,7 @@ public abstract class AbstractLoginRoutes implements Routes {
 	
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
+		RouteBuilder bldr = fetchBuilder(domainRouteBldr);
 		
 		ScopedRouteBuilder scopedBldr = bldr;
 		if(basePath != null)
@@ -43,6 +43,8 @@ public abstract class AbstractLoginRoutes implements Routes {
 		//ie. you can only get not found AFTER logging in
 		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER);
 	}
+
+	protected abstract RouteBuilder fetchBuilder(DomainRouteBuilder domainRouteBldr);
 
 	protected abstract void addLoggedInHome(RouteBuilder bldr, ScopedRouteBuilder scopedBldr);
 
