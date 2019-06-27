@@ -1,5 +1,6 @@
 package WEBPIECESxPACKAGE;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,9 +77,12 @@ public class DevelopmentServer {
 		
 		ServerConfig config = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT);
 		if(usePortZero) {
-			config.setHttpPort(0);
-			config.setHttpsPort(0);
+			config.setHttpAddress(new InetSocketAddress(0));
+			config.setHttpsAddress(new InetSocketAddress(0));
 		}
+		
+		//Expose management pages over different port instead of merging by uncommenting this...
+		//config.setBackendAddress(new InetSocketAddress(8444));
 		
 		//It is very important to turn off caching or developers will get very confused when they
 		//change stuff and they don't see changes in the website

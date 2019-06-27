@@ -21,7 +21,16 @@ public interface FrontendSocket {
 	 * SSL and then does http to this server!!!  This means you need to have your firewall put in 
 	 * headers indicating from ssl channel or not.
 	 */
-	public boolean isHttps(); 
+	public boolean isForServingHttpsPages(); 
+
+	/**
+	 * Some companies will create a backend website on the same serve served over an internal network port
+	 * so they can go and manage the server.  Plugins generally add backend routes which will show up at
+	 * http://host/@backend OR will show up on the backend port (depending on your mode)
+	 * 
+	 * @return
+	 */
+	boolean isBackendSocket();
 
 	/**
 	 * Gets the bound server socket address of the server socket that this socket was opened from.  
@@ -30,7 +39,7 @@ public interface FrontendSocket {
 	 * if it is SSL if isHttps does not work for you
 	 */
 	public InetSocketAddress getServerLocalBoundAddress();
-	
+
 	/**
 	 * Gets the local address/port of this socket that was opened which is usually not that interesting
 	 */

@@ -49,6 +49,8 @@ public class RouterConfig {
 
 	private NeedsSimpleStorage needsStorage;
 
+	private boolean addBackendRoutesOverPort;
+
 	public RouterConfig(File workingDirectory) {
 		if(!workingDirectory.isAbsolute())
 			throw new IllegalArgumentException("baseDirectory must be absolute and can typically be FileFactory.getBaseDirectory()");
@@ -161,6 +163,15 @@ public class RouterConfig {
 
 	public NeedsSimpleStorage getNeedsStorage() {
 		return needsStorage;
+	}
+
+	public RouterConfig setAddBackendRoutesOverPort(boolean addBackendRoutesOverPort) {
+		this.addBackendRoutesOverPort = addBackendRoutesOverPort;
+		return this;
+	}
+
+	public boolean isAddBackendRoutesOverPort() {
+		return addBackendRoutesOverPort;
 	}
 
 }

@@ -35,7 +35,6 @@ import java.util.Map;
 public class WEBPIECESxCLASSMeta implements WebAppMeta {
 
 	private static final Logger log = LoggerFactory.getLogger(WEBPIECESxCLASSMeta.class);
-	public static final String BACKEND_PATH = "/backend1";
 	private String persistenceUnit;
 
 	@Override

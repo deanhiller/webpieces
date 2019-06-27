@@ -19,14 +19,20 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 	private final RouteBuilderLogic holder;
 
 	private final RouteBuilderImpl leftOverDomainsBuilder;
+	private final RouteBuilderImpl backendRouteBuilder;
 	private final Map<String, RouteBuilderImpl> domainToRouteBuilder = new HashMap<>();
 
 	private ResettingLogic resettingLogic;
 	
-	public DomainRouteBuilderImpl(RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+	public DomainRouteBuilderImpl(RouteBuilderLogic holder, ResettingLogic resettingLogic, boolean isExposeBackendOnInternalPort) {
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
 		this.leftOverDomainsBuilder = new RouteBuilderImpl("<any>", holder, resettingLogic);
+		if(isExposeBackendOnInternalPort)
+			this.backendRouteBuilder = new RouteBuilderImpl("<backend>", holder, resettingLogic);
+		else {
+			this.backendRouteBuilder = this.leftOverDomainsBuilder;
+		}
 	}
 
 	@Override
@@ -34,6 +40,11 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 		return leftOverDomainsBuilder;
 	}
 
+	@Override
+	public RouteBuilder getBackendRouteBuilder() {
+		return backendRouteBuilder;
+	}
+	
 	@Override
 	public RouteBuilder getDomainScopedRouteBuilder(String domain) {
 		RouteBuilderImpl builder = domainToRouteBuilder.get(domain);
@@ -47,6 +58,7 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 
 	public BDomainRouter build() {
 		CRouter router = leftOverDomainsBuilder.buildRouter();
+		CRouter backendRouter = backendRouteBuilder.buildRouter();
 		
 		Map<String, CRouter> domainToRouter = new HashMap<>();
 		for(Entry<String, RouteBuilderImpl> entry : domainToRouteBuilder.entrySet()) {
@@ -54,7 +66,7 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 			domainToRouter.put(entry.getKey(), router2);
 		}
 		
-		return new BDomainRouter(router, domainToRouter);
+		return new BDomainRouter(router, backendRouter, domainToRouter);
 	}
 
 	public List<EStaticRouter> getStaticRoutes() {

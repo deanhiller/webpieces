@@ -112,10 +112,15 @@ public class FrontendSocketImpl implements FrontendSocket {
 	}
 
 	@Override
-	public boolean isHttps() {
-		return svrSocketInfo.isHttps();
+	public boolean isForServingHttpsPages() {
+		return svrSocketInfo.isForServingHttpsPages();
 	}
 
+	@Override
+	public boolean isBackendSocket() {
+		return svrSocketInfo.isBackendSocket();
+	}
+	
 	@Override
 	public InetSocketAddress getServerLocalBoundAddress() {
 		return svrSocketInfo.getLocalBoundAddress();

@@ -37,8 +37,8 @@ public class WebServerImpl implements WebServer {
 	@Inject
 	private WebServerConfig config;
 	
-	@Inject @Nullable
-	private SSLEngineFactory factory;
+//	@Inject @Nullable
+//	private SSLEngineFactory factory;
 	@Inject
 	private HttpFrontendManager serverMgr;
 	@Inject
@@ -48,6 +48,8 @@ public class WebServerImpl implements WebServer {
 	
 	private HttpServer httpServer;
 	private HttpServer httpsServer;
+
+	private HttpServer backendServer;
 
 	@Override
 	public void startSync() {
@@ -74,27 +76,46 @@ public class WebServerImpl implements WebServer {
 		svrChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 		httpServer = serverMgr.createHttpServer(svrChanConfig, serverListener);
 		CompletableFuture<Void> future = httpServer.start();
-		CompletableFuture<Void> fut2 = CompletableFuture.completedFuture(null);
+		CompletableFuture<Void> fut2;
+		CompletableFuture<Void> fut3;
 
 		if(config.getHttpsListenAddress() != null) {
 			HttpSvrConfig secureChanConfig = new HttpSvrConfig("https", config.getHttpsListenAddress(), 10000);
 			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 			
-			//OK, some companies expose https OVER http until the firewall THEN it is SSL from firewall to end customer.  This
-			//does expose the https traffic internally(I generally don't like that, but providing a null factory allows
-			//to use http for all those https pages).  The same port 443 or what you pass in for https will be used but it will
-			//just be http instead of https
-			if(factory != null)
-				httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);
-			else
-				httpsServer = serverMgr.createHttpServer(secureChanConfig, serverListener);
+			//OK, some companies expose https OVER http until the firewall THEN it is SSL from firewall to end customer.  
+			//IF you supply a null factory, this will create an https server served over http.  This means all
+			//the https routes/pages are still served over this server but this server is over http with no ssl 
+			//handshake
+			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, config.getSslEngineFactory());
 			
 			fut2 = httpsServer.start();
 		} else {
+			fut2 = CompletableFuture.completedFuture(null);
 			log.info("https port is disabled since configuration had no sslEngineFactory");
 		}
 
-		return fut2.thenCompose(v -> future).thenApply(v -> {
+		if(config.getBackendListenAddress() != null) {
+			String http = "https";
+			if(config.getSetBackendSslEngineFactory() == null)
+				http = "http";
+			
+			HttpSvrConfig secureChanConfig = new HttpSvrConfig("backend("+http+")", config.getBackendListenAddress(), 10000);
+			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
+			
+			backendServer = serverMgr.createBackendHttpsServer(secureChanConfig, serverListener, config.getSslEngineFactory());
+			
+			fut3 = backendServer.start();
+
+		} else {
+			fut3 = CompletableFuture.completedFuture(null);
+			log.info("Serving the backend over a different port is disabled since there was no address specified");
+		}
+		
+		return future
+				.thenCompose(v -> fut2)
+				.thenCompose(v -> fut3)
+				.thenApply(v -> {
 			log.info("server started");
 			return null;
 		});
@@ -199,6 +220,8 @@ public class WebServerImpl implements WebServer {
 		httpServer.close();
 		if(httpsServer != null)
 			httpsServer.close();
+		if(backendServer != null)
+			backendServer.close();
 	}
 
 	@Override

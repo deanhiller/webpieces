@@ -35,7 +35,9 @@ public class WebServerConfig {
 	private Module platformOverrides = null;
 
 	/**
-	 * If not set, we will not open the SSL port for the webserver
+	 * If not set, we will open the https port as http serving the https paged over that primarily 
+	 * so that some companies can terminate their SSL at the firewall and run http from there to
+	 * the secure pages(though it's not preferred, some do that)
 	 */
 	private SSLEngineFactory sslEngineFactory;
 	
@@ -52,6 +54,8 @@ public class WebServerConfig {
 	private BackpressureConfig backpressureConfig = new BackpressureConfig();
 	
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
+	private InetSocketAddress backendListenAddress;
+	private SSLEngineFactory backendSslEngineFactory;
 
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -169,4 +173,23 @@ public class WebServerConfig {
 		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
 		return this;
 	}
+
+	public WebServerConfig setBackendListenAddress(InetSocketAddress backendListenAddress) {
+		this.backendListenAddress = backendListenAddress;
+		return this;
+	}
+
+	public WebServerConfig setBackendSslEngineFactory(SSLEngineFactory backendSslEngineFactory) {
+		this.backendSslEngineFactory = backendSslEngineFactory;
+		return this;
+	}
+
+	public InetSocketAddress getBackendListenAddress() {
+		return backendListenAddress;
+	}
+
+	public SSLEngineFactory getSetBackendSslEngineFactory() {
+		return backendSslEngineFactory;
+	}
+	
 }

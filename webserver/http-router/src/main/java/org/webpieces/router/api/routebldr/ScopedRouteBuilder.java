@@ -7,8 +7,6 @@ import org.webpieces.router.api.routes.RouteId;
 
 public interface ScopedRouteBuilder {
 
-	void addBackendRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId);
-	
 	void addRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId);
 	
 	/**

@@ -4,19 +4,25 @@ import java.net.InetSocketAddress;
 
 public class ServerSocketInfo {
 
-	private boolean isHttps;
+	private boolean isForServingHttpsPages;
 	private InetSocketAddress localBoundAddress;
+	private boolean isBackendSocket;
 
-	public ServerSocketInfo(boolean isHttps) {
-		this.isHttps = isHttps;
+	public ServerSocketInfo(boolean isForServingHttpsPages, boolean isBackendSocket) {
+		this.isForServingHttpsPages = isForServingHttpsPages;
+		this.isBackendSocket = isBackendSocket;
 	}
 
 	public void setServerSocketAddress(InetSocketAddress localAddr) {
 		this.localBoundAddress = localAddr;
 	}
 
-	public boolean isHttps() {
-		return isHttps;
+	public boolean isForServingHttpsPages() {
+		return isForServingHttpsPages;
+	}
+
+	public boolean isBackendSocket() {
+		return isBackendSocket;
 	}
 
 	public InetSocketAddress getLocalBoundAddress() {

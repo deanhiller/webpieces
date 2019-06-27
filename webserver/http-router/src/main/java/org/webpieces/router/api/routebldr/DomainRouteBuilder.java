@@ -23,5 +23,14 @@ public interface DomainRouteBuilder {
 	 * @return
 	 */
 	RouteBuilder getDomainScopedRouteBuilder(String domainRegEx);
+
+	/**
+	 * A special builder that builds routes along side the application (when run in Development mode
+	 * or not configured) OR if configured will run an internal website for management over a 
+	 * backend port.  This is generally used by plugins to install backend plugins
+	 * 
+	 * @return
+	 */
+	RouteBuilder getBackendRouteBuilder();
 	
 }

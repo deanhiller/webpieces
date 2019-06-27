@@ -19,8 +19,6 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 	@Override
 	public AsyncServer createTcpServer(
 			AsyncConfig config, AsyncDataListener listener, SSLEngineFactory sslFactory) {
-		if(sslFactory == null)
-			throw new IllegalArgumentException("SSLEngineFactory is null but must be supplied");
 		return createTcpServerImpl(config, listener, sslFactory);
 	}
 	

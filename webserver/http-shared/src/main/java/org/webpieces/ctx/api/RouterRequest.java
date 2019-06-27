@@ -55,15 +55,20 @@ public class RouterRequest {
 	/**
 	 * Used by router, not really needed by Controllers
 	 * 
-	 * This is true if the socket we received the request over was secure.  In the future, if you need, you 
-	 * may have the https terminate at a load balancer (though we suggest otherwise in today's world and just
-	 * terminating at every webserver instead especially with http2).  For this reason, submit a feature request
-	 * if you want us to be able to configure this to know if https request came from a load balancer.
+	 * This is true if the socket we received the request over was "secure" sort of.  If you terminate https
+	 * into a firewall and then do http, this will be true as well even though you are serving it up as http
+	 * internally.  You only need to configure that correctly in your webserver startup.
 	 * 
 	 * The router uses this in matching https routes.
 	 */
 	public boolean isHttps;
 	
+	/**
+	 * Also, used by the router.  This is used in determining if it came in over the backend http server port
+	 * which is typically only exposed on the companies internal network and not exposed externally.
+	 */
+	public boolean isBackendRequest;
+
 	/**
 	 * Use by router, not really needed by Controllers
 	 * 

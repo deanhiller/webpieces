@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.asyncserver.api.AsyncDataListener;
+import org.webpieces.frontend2.api.HttpSocketType;
 import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.nio.api.channels.Channel;
@@ -25,10 +26,12 @@ public class Layer1ServerListener implements AsyncDataListener {
 	public Layer1ServerListener(
 			Layer2Http1_1Handler http1_1Listener, 
 			Layer2Http2Handler http2Listener,
-			boolean isHttps) {
+			boolean isHttps, 
+			boolean isBackendRequest
+	) {
 		this.http1_1Handler = http1_1Listener;
 		this.http2Handler = http2Listener;
-		svrSocketInfo = new ServerSocketInfo(isHttps);
+		svrSocketInfo = new ServerSocketInfo(isHttps, isBackendRequest);
 	}
 
 	@Override

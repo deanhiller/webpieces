@@ -1,6 +1,7 @@
 package WEBPIECESxPACKAGE;
 
 import java.io.File;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -14,17 +15,18 @@ public class ServerConfig {
 	private VirtualFile metaFile;
 	private boolean validateRouteIdsOnStartup = false;
 	private boolean isUseFirewall = false;
-	private int httpPort = 8080;
-	private int httpsPort = 8443;
+	private InetSocketAddress httpAddress = new InetSocketAddress(8080);
+	private InetSocketAddress httpsAddress = new InetSocketAddress(8443);
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
 	private File compressionCacheDir;
 	private Map<String, String> webAppMetaProperties = new HashMap<>();
 	private boolean tokenCheckOn = true;
+	private InetSocketAddress backendAddress;
 
 	public ServerConfig(int httpPort, int httpsPort, String persistenceUnit, File compressionCache) {
 		webAppMetaProperties.put(HibernatePlugin.PERSISTENCE_UNIT_KEY, persistenceUnit);
-		this.httpPort = httpPort;
-		this.httpsPort = httpsPort;
+		this.httpAddress = new InetSocketAddress(httpPort);
+		this.httpsAddress = new InetSocketAddress(httpsPort);
 		this.compressionCacheDir = compressionCache;
 	}
 	
@@ -51,17 +53,17 @@ public class ServerConfig {
 	public void setValidateRouteIdsOnStartup(boolean validateRouteIdsOnStartup) {
 		this.validateRouteIdsOnStartup = validateRouteIdsOnStartup;
 	}
-	public int getHttpPort() {
-		return httpPort;
+	public InetSocketAddress getHttpAddress() {
+		return httpAddress;
 	}
-	public void setHttpPort(int httpPort) {
-		this.httpPort = httpPort;
+	public void setHttpAddress(InetSocketAddress httpAddress) {
+		this.httpAddress = httpAddress;
 	}
-	public int getHttpsPort() {
-		return httpsPort;
+	public InetSocketAddress getHttpsAddress() {
+		return httpsAddress;
 	}
-	public void setHttpsPort(int httpsPort) {
-		this.httpsPort = httpsPort;
+	public void setHttpsAddress(InetSocketAddress httpsAddress) {
+		this.httpsAddress = httpsAddress;
 	}
 	public Long getStaticFileCacheTimeSeconds() {
 		return staticFileCacheTimeSeconds ;
@@ -97,6 +99,15 @@ public class ServerConfig {
 
 	public void setUseFirewall(boolean isUseFirewall) {
 		this.isUseFirewall = isUseFirewall;
+	}
+
+	public ServerConfig setBackendAddress(InetSocketAddress backendAddress) {
+		this.backendAddress = backendAddress;
+		return this;
+	}
+
+	public InetSocketAddress getBackendAddress() {
+		return backendAddress;
 	}
 
 }

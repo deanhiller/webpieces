@@ -117,7 +117,8 @@ public class RequestStreamWriter implements StreamWriter {
 		//or the secure routes will not show up
 		//We could add configuration to checking the terminating server socket locally as the firewall could
 		//be defined to terminate ssl and drive to a specific port then.  the info is in stream.getSocket.getSvrSocketAddress
-		routerRequest.isHttps = stream.getSocket().isHttps();
+		routerRequest.isHttps = stream.getSocket().isForServingHttpsPages();
+		routerRequest.isBackendRequest = stream.getSocket().isBackendSocket();
 
 		String domain = requestHeaders.getAuthority();
 		if(domain == null) {

@@ -47,6 +47,10 @@ public class Server {
 	
 	public static final Charset ALL_FILE_ENCODINGS = StandardCharsets.UTF_8;
 	
+	public static final String HTTP_PORT_KEY = "http.port";
+	public static final String HTTPS_PORT_KEY = "https.port";
+	public static final String BACKEND_PORT_KEY = "backend.port";
+	
 	//Welcome to YOUR main method as webpieces webserver is just a library you use that you can
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
@@ -56,21 +60,26 @@ public class Server {
 
 			ServerConfig config = new ServerConfig("production");
 
-			if(arguments.get("httpPort") != null) {
-				if(arguments.get("httpsPort") == null)
-					throw new IllegalArgumentException("httpPort passed in on command line but httpsPort is not.  You must pass in both or neither");
+			if(arguments.get(HTTP_PORT_KEY) != null) {
+				if(arguments.get(HTTPS_PORT_KEY) == null)
+					throw new IllegalArgumentException(HTTP_PORT_KEY+" passed in on command line but "+HTTPS_PORT_KEY+" is not.  You must pass in both or neither");
 				//in general, if we are doing custom ports, we may be told which ports and then expose those ports on 80/443
 				//via firewall
 				config.setUseFirewall(true);
 
-				int httpPort = parser.parseInt("httpPort", arguments.get("httpPort"));
-				int httpsPort = parser.parseInt("httpsPort", arguments.get("httpsPort"));
-				config.setHttpPort(httpPort);
-				config.setHttpsPort(httpsPort);
+				int httpPort = parser.parseInt(HTTP_PORT_KEY, arguments.get(HTTP_PORT_KEY));
+				int httpsPort = parser.parseInt(HTTPS_PORT_KEY, arguments.get(HTTPS_PORT_KEY));
+				config.setHttpAddress(new InetSocketAddress(httpPort));
+				config.setHttpsAddress(new InetSocketAddress(httpsPort));
+			}
+			
+			if(arguments.get(BACKEND_PORT_KEY) != null) {
+				int backendPort = parser.parseInt(BACKEND_PORT_KEY, arguments.get(BACKEND_PORT_KEY));
+				config.setBackendAddress(new InetSocketAddress(backendPort));
 			}
 			
 			Server server = new Server(null, null, config);
-			
+
 			server.start();
 			
 			synchronized (Server.class) {
@@ -111,7 +120,12 @@ public class Server {
 		
 		SecretKeyInfo signingKey = new SecretKeyInfo(fetchKey(), "HmacSHA1");
 		
+		//If your company terminates https into the firewall and then does http to this webserver, change this
+		//to null.  That will then make the https port serve http.  It will still serve all the https pages
+		//but over http over whatever port your use.  All https pages are still not served over the http port
 		WebSSLFactory webSSLFactory = new WebSSLFactory();
+
+		boolean serveBackendOverDifferentPort = true; 
 
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
@@ -128,16 +142,20 @@ public class Server {
 											.setPortConfigCallback(() -> fetchPortsForRedirects(svrConfig.isUseFirewall()))
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
 											.setNeedsSimpleStorage(webSSLFactory)
-											.setTokenCheckOn(svrConfig.isTokenCheckOn()); 
-				
+											.setTokenCheckOn(svrConfig.isTokenCheckOn())
+											.setAddBackendRoutesOverPort(serveBackendOverDifferentPort); 
+
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
-										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
-										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))
+										.setHttpListenAddress(svrConfig.getHttpAddress())
+										.setHttpsListenAddress(svrConfig.getHttpsAddress())
 										.setSslEngineFactory(webSSLFactory)
 										.setFunctionToConfigureServerSocket(s -> configure(s))
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
-										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
+										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds())
+										.setBackendListenAddress(svrConfig.getBackendAddress())
+										.setBackendSslEngineFactory(webSSLFactory); //normally use a different cert for backend but we are self-signed!
+
 		TemplateConfig templateConfig = new TemplateConfig();
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);

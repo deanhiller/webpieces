@@ -22,15 +22,14 @@ import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.hooks.ClassForName;
-import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routebldr.CurrentPackage;
 import org.webpieces.router.impl.routebldr.DomainRouteBuilderImpl;
-import org.webpieces.router.impl.routers.BDomainRouter;
 import org.webpieces.router.impl.routers.AMasterRouter;
+import org.webpieces.router.impl.routers.BDomainRouter;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -196,7 +195,7 @@ public class RouteLoader {
 		
 		reverseRoutes = new ReverseRoutes(config);
 		ResettingLogic resettingLogic = new ResettingLogic(reverseRoutes, injector);
-		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic);
+		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic, config.isAddBackendRoutesOverPort());
 		
 		routingHolder.setReverseRouteLookup(reverseRoutes);
 		routeBuilderLogic.init(reverseRoutes);

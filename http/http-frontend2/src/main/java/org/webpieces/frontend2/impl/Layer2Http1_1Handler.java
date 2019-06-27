@@ -129,7 +129,7 @@ public class Layer2Http1_1Handler {
 	}
 	
 	private CompletableFuture<Void> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
-		Http2Msg msg = Http1_1ToHttp2.translate(payload, socket.isHttps());
+		Http2Msg msg = Http1_1ToHttp2.translate(payload, socket.isForServingHttpsPages());
 
 		if(payload instanceof HttpRequest) {
 			return processInitialPieceOfRequest(socket, (HttpRequest) payload, (Http2Request)msg);

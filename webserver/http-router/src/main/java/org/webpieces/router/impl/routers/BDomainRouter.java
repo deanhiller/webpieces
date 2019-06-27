@@ -17,14 +17,25 @@ public class BDomainRouter {
 
 	private final Map<String, CRouter> domainToRouter;
 	private final CRouter allOtherDomainsRouter;
+	private CRouter backendRouter;
 
-	public BDomainRouter(CRouter allOtherDomainsRouter, Map<String, CRouter> domainToRouter) {
+	public BDomainRouter(
+		CRouter allOtherDomainsRouter, 
+		CRouter backendRouter, //ONLY enabled IF configured
+		Map<String, CRouter> domainToRouter
+	) {
 		this.allOtherDomainsRouter = allOtherDomainsRouter;
+		this.backendRouter = backendRouter;
 		this.domainToRouter = domainToRouter;
 	}
 
 	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb) {
 		String relativePath = ctx.getRequest().relativePath;
+
+		if(ctx.getRequest().isBackendRequest) {
+			return backendRouter.invokeRoute(ctx, responseCb, relativePath);
+		}
+
 		CRouter specificDomainRouter = getDomainToRouter().get(ctx.getRequest().domain);
 		if(specificDomainRouter != null)
 			return specificDomainRouter.invokeRoute(ctx, responseCb, relativePath);
