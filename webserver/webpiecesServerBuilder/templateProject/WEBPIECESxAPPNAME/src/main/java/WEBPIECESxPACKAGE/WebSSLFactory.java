@@ -24,12 +24,12 @@ import javax.net.ssl.SSLEngine;
 
 import org.jose4j.base64url.Base64;
 import org.shredzone.acme4j.util.KeyPairUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.plugins.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.router.api.extensions.SimpleStorage;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 	

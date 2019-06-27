@@ -15,7 +15,7 @@ public class CompressionDecider {
 		else if(mimeType.mime.startsWith("application/javascript"))
 			return true;
 		
-		log.info("skipping compression for file due to extension="+extension+" and mimetype="+mimeType);
+		log.trace(() -> "skipping compression for file due to extension="+extension+" and mimetype="+mimeType);
 		return false;
 	}
 	
