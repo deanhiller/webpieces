@@ -125,7 +125,8 @@ public class Server {
 		//but over http over whatever port your use.  All https pages are still not served over the http port
 		WebSSLFactory webSSLFactory = new WebSSLFactory();
 
-		boolean serveBackendOverDifferentPort = true; 
+		//if serving over different port, route all backend pages to special router 
+		boolean serveBackendOverDifferentPort = svrConfig.getBackendAddress() != null;
 
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 

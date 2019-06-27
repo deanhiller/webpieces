@@ -1,7 +1,10 @@
 package org.webpieces.router.impl.mgmt;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Arrays;
+import java.util.List;
+
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.TypeEncounter;
@@ -20,7 +23,8 @@ public class GuiceWebpiecesListener implements TypeListener {
 	public <T> void hear(TypeLiteral<T> typeLiteral, TypeEncounter<T> typeEncounter) {
 		Class<?> clazz = typeLiteral.getRawType();
 		Class<?>[] interfaces = clazz.getInterfaces();
-		log.info("webpieces platform class="+clazz+" interfaces="+interfaces);
+		List<Class<?>> interfaceList = Arrays.asList(interfaces);
+		log.trace(() -> "webpieces platform class="+clazz+" interfaces="+interfaceList);
 		for(Class<?> interfaze : interfaces) {
 			if(interfaze.getSimpleName().endsWith("WebManaged")) {
 				log.info("FOUND a managed bean="+clazz);
