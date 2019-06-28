@@ -326,12 +326,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		try {
 			CompletableFuture<Void> sentMsgFuture;
 			if(readNoData) {
-				log.trace(() -> "ssl engine is farting. READ 0 data.  hsStatus=\"+hsStatus+\" status=\"+lastStatus");
-				//A big hack since the Engine was not working in live testing with FireFox and it would tell us to wrap
-				//and NOT output any data AND not BufferOverflow.....you have to do 1 or the other, right
-				//instead cut out of looping since there seems to be no data
-				sslEngineIsFarting = true;
-				sentMsgFuture = CompletableFuture.completedFuture(null);
+				throw new IllegalStateException("read 0 data, that should not occur. hsStatus="+hsStatus+" status="+lastStatus);
 			} else
 				sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
 
