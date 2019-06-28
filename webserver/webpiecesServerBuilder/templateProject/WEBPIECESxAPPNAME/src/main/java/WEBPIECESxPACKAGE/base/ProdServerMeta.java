@@ -32,9 +32,13 @@ import java.util.Map;
 //only a RouterModule is needed and in others only a GuiceModule is needed.
 //BIG NOTE: The webserver loads this class from the appmeta.txt file which is passed in the
 //start method below.  This is a hook for the Development server to work that is a necessary evil
-public class WEBPIECESxCLASSMeta implements WebAppMeta {
 
-	private static final Logger log = LoggerFactory.getLogger(WEBPIECESxCLASSMeta.class);
+//We name it ServerMeta so that 'EVERY' webpieces project, you can find this very important file
+//telling you all the locations of all route classes and guice module classes for how the app is
+//wired together(and for seeing which plugins are installed)
+public class ProdServerMeta implements WebAppMeta {
+
+	private static final Logger log = LoggerFactory.getLogger(ProdServerMeta.class);
 	private String persistenceUnit;
 
 	@Override

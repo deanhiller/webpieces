@@ -30,11 +30,12 @@ import com.google.inject.util.Modules;
 import WEBPIECESxPACKAGE.base.tags.TagLookupOverride;
 
 /**
- * Changes to any class in this package (or any classes these classes reference) WILL require a 
- * restart when you are running the DevelopmentServer.  This class should try to remain pretty
- * thin and you should avoid linking any classes in this package to classes outside this
- * package(This is only true if you want to keep using the development server).  In production,
- * we do not play any classloader games at all(unlike play framework) avoiding any prod issues.
+ * Changes to any class in this package (or any classes that classes in this 
+ * package reference) WILL require a restart when you are running the DevelopmentServer.  
+ * This class should try to remain pretty thin and you should avoid linking any 
+ * classes in this package to classes outside this package(This is only true if 
+ * you want to keep using the development server).  In production, we do not 
+ * play any classloader games at all(unlike play framework) avoiding any prod issues.
  */
 public class Server {
 	
@@ -55,6 +56,9 @@ public class Server {
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
 		try {
+			String version = System.getProperty("java.version");
+			log.info("Starting Production Server under java version="+version);
+
 			CommandLineParser parser = new CommandLineParser();
 			Map<String, String> arguments = parser.parse(args);
 

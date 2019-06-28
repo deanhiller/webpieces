@@ -14,11 +14,11 @@ import org.webpieces.router.api.routes.WebAppMeta;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.base.WEBPIECESxCLASSMeta;
+import WEBPIECESxPACKAGE.base.ProdServerMeta;
 
-public class DeveloperMeta implements WebAppMeta {
+public class DevServerMeta implements WebAppMeta {
 
-	private WEBPIECESxCLASSMeta prodMeta = new WEBPIECESxCLASSMeta();
+	private ProdServerMeta prodMeta = new ProdServerMeta();
 	
 	@Override
 	public void initialize(Map<String, String> props) {

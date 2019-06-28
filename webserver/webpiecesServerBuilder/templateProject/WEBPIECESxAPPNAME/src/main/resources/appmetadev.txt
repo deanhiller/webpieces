@@ -1,1 +1,1 @@
-WEBPIECESxPACKAGE.meta.DeveloperMeta
+WEBPIECESxPACKAGE.meta.DevServerMeta
