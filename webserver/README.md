@@ -2,8 +2,6 @@
 
 REVISIT if still exist:see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
 
-* https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap
-
 * Documentation on EACH html field
   * basic select with enum
   * basic select with list from entity
