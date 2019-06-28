@@ -120,9 +120,12 @@ public class Server {
 		
 		SecretKeyInfo signingKey = new SecretKeyInfo(fetchKey(), "HmacSHA1");
 		
-		//If your company terminates https into the firewall and then does http to this webserver, change this
-		//to null.  That will then make the https port serve http.  It will still serve all the https pages
-		//but over http over whatever port your use.  All https pages are still not served over the http port
+		//If your company terminates https into the firewall and then does http to this webserver, change 
+		//this line to WebSSLFactory webSSLFactory = null; so that the https port will be http.
+		//It will still serve all the https pages but over http over whatever port your use.  
+		//All https pages are still not served over the original http port.  The http port still hosts
+		//all normal http pages.  (Setting to null is purely for those who terminate https at the 
+		//firewall.
 		WebSSLFactory webSSLFactory = new WebSSLFactory();
 
 		//if serving over different port, route all backend pages to special router 
