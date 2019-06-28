@@ -245,7 +245,8 @@ public class RouterRequest {
 	
 	@Override
 	public String toString() {
-		return "RouterRequest [isHttps=" + isHttps + ", \nisSendAheadNextResponses=" + isSendAheadNextResponses
+		return "\nRouterRequest [\nisHttps=" + isHttps + ", \nisBackendRequest=" + isBackendRequest
+				+ ", \nisSendAheadNextResponses=" + isSendAheadNextResponses
 				+ ", \nrelativePath=" + relativePath + ", \ndomain=" + domain + ", \nmethod=" + method + ", isAjaxRequest="+isAjaxRequest+"\nqueryParams=\n"
 				+ queryParams + ", \nmultiPartFields=\n" + multiPartFields + "\n"
 				+ "cookies="+cookies+"\n]";

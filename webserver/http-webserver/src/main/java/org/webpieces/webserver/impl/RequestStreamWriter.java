@@ -65,6 +65,7 @@ public class RequestStreamWriter implements StreamWriter {
 		headersSupported.add(Http2HeaderName.CACHE_CONTROL);
 		headersSupported.add(Http2HeaderName.PRAGMA);
 		headersSupported.add(Http2HeaderName.X_REQUESTED_WITH);
+		headersSupported.add(Http2HeaderName.X_FORWARDED_PROTO);
 		
 		//we don't do redirects or anything like that yet...
 		headersSupported.add(Http2HeaderName.UPGRADE_INSECURE_REQUESTS);
@@ -113,11 +114,8 @@ public class RequestStreamWriter implements StreamWriter {
 		RouterRequest routerRequest = new RouterRequest();
 		routerRequest.orginalRequest = requestHeaders;
 		
-		//TODO(dhiller): figure out the firewall way to config when firewall terminates the ssl and we receive http
-		//or the secure routes will not show up
-		//We could add configuration to checking the terminating server socket locally as the firewall could
-		//be defined to terminate ssl and drive to a specific port then.  the info is in stream.getSocket.getSvrSocketAddress
-		routerRequest.isHttps = stream.getSocket().isForServingHttpsPages();
+		fillInHttpsValue(routerRequest);
+		
 		routerRequest.isBackendRequest = stream.getSocket().isBackendSocket();
 
 		String domain = requestHeaders.getAuthority();
@@ -180,6 +178,8 @@ public class RequestStreamWriter implements StreamWriter {
 		if(routerRequest.relativePath.contains("?"))
 			throw new UnsupportedOperationException("not supported yet");
 
+		log.debug(() -> "received request="+requestHeaders+" routerRequest="+routerRequest);
+
 		ProxyResponse streamer = facade.createProxyResponse();
 		try {
 			streamer.init(routerRequest, requestHeaders, stream, facade.getMaxBodySize());
@@ -190,6 +190,19 @@ public class RequestStreamWriter implements StreamWriter {
 			streamer.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
 			return CompletableFuture.completedFuture(null);
 		}
+	}
+
+	private void fillInHttpsValue(RouterRequest routerRequest) {
+		//There are two ways to terminate SSL, x-forwarded-proto header from firewall OR you can configure your
+		//firewall to point to the https port(AND turn that https port so it is only http) so you have TWO http
+		//ports open, one will always be https and the other http.  
+		String header = requestHeaders.getSingleHeaderValue(Http2HeaderName.X_FORWARDED_PROTO);
+		if("https".equals(header))
+			routerRequest.isHttps = true;
+		else if("http".equals(header))
+			routerRequest.isHttps = false;
+		else
+			routerRequest.isHttps = stream.getSocket().isForServingHttpsPages();
 	}
 	
 	private void parseAccept(Http2Headers req, RouterRequest routerRequest) {
@@ -268,9 +281,11 @@ public class RequestStreamWriter implements StreamWriter {
 	private void parseBodyFromContentType(RouterRequest req) {
 		if(req.contentLengthHeaderValue == null)
 			return;
+		else if(req.contentLengthHeaderValue == 0)
+			return;
 		
 		if(req.contentTypeHeaderValue == null) {
-			log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req);
+			log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req+" httpReq="+req.orginalRequest);
 			return;
 		}
 		
@@ -278,7 +293,7 @@ public class RequestStreamWriter implements StreamWriter {
 		
 		BodyParser parser = requestBodyParsers.lookup(req.contentTypeHeaderValue);
 		if(parser == null) {
-			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req);
+			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req+" httpReq="+req.orginalRequest);
 			return;
 		}
 

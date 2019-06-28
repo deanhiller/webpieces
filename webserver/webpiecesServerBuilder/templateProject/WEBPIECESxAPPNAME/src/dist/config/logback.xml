@@ -17,7 +17,7 @@
 			<maxFileSize>25MB</maxFileSize>
 		</triggeringPolicy>
 		<encoder>
-			<pattern>%.-3level %date{ISO8601} [%X{txId}-%X{user}] [%thread] %-25logger{10} %message%n</pattern>
+			<pattern>%.-3level %date{ISO8601} [%thread][%X{socket}] [%X{txId}-%X{user}] %-25logger{10} %message%n</pattern>
 		</encoder>
 	</appender>
 

@@ -72,7 +72,8 @@ public enum Http2HeaderName {
 	PATH(":path", HeaderType.REQUEST), 
 	AUTHORITY(":authority", HeaderType.REQUEST),
 	
-	X_REQUESTED_WITH("x-requested-with", HeaderType.REQUEST),
+	X_REQUESTED_WITH("x-requested-with", HeaderType.REQUEST), 
+	X_FORWARDED_PROTO("x-forwarded-proto", HeaderType.REQUEST),
 
 	;
 
