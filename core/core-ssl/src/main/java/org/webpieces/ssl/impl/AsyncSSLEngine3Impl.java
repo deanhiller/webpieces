@@ -275,9 +275,15 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	}
 
 	private CompletableFuture<Void> createRunnable() {
-		SSLEngine sslEngine = mem.getEngine();
+		SSLEngine sslEngine = mem.getEngine();	   
 		Runnable r = sslEngine.getDelegatedTask();
-		r.run(); //could offload to threadpool but not sure it buys us anything so KISS or YAGNI until later
+		
+		//could offload to YET another threadpool but not sure it buys us anything so KISS or YAGNI until later
+		r.run(); 
+		//after all, we run in a pretty damn nice thread pool already which is N threads to Y sockets and data
+		//coming in from any socket 'may' run in any thread without a race condition(don't ask, it's complicated
+		//but feel free to go look)
+		
 		return CompletableFuture.completedFuture(null);
 	}
 	
@@ -292,7 +298,6 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private CompletableFuture<Void> sendHandshakeMessageImpl() throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
 		log.trace(()->mem+"sending handshake message");
-		//HELPER.eraseBuffer(empty);
 		
 		ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
 			
@@ -300,9 +305,11 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		//must synchronize on sslEngine.wrap
 		Status lastStatus;
 		HandshakeStatus hsStatus;
+		HandshakeStatus beforeWrapHandshakeStatus;
 		synchronized (wrapLock ) {
-
-			HandshakeStatus beforeWrapHandshakeStatus = sslEngine.getHandshakeStatus();
+			//this is in the sync block, so we are synchronized with the engine state!!! and get the actual
+			//state before calling wrap so we know the engine can't be switching states on us in another thread.
+			beforeWrapHandshakeStatus = sslEngine.getHandshakeStatus();
 			if (beforeWrapHandshakeStatus != HandshakeStatus.NEED_WRAP)
 				throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus=" + beforeWrapHandshakeStatus);
 
@@ -312,12 +319,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			hsStatus = result.getHandshakeStatus();
 		}
 		
-		{
-			final Status lastStatus2 = lastStatus;
-			final HandshakeStatus hsStatus2 = hsStatus;
-			log.trace(()->mem+"write packet pos="+engineToSocketData.position()+" lim="+
-						engineToSocketData.limit()+" status="+lastStatus2+" hs="+hsStatus2);
-		}
+		log.trace(()->mem+"write packet pos="+engineToSocketData.position()+" lim="+
+						engineToSocketData.limit()+" status="+lastStatus+" hs="+hsStatus);
+			
 		if(lastStatus == Status.BUFFER_OVERFLOW || lastStatus == Status.BUFFER_UNDERFLOW)
 			throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
 
@@ -326,7 +330,20 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		try {
 			CompletableFuture<Void> sentMsgFuture;
 			if(readNoData) {
-				throw new IllegalStateException("read 0 data, that should not occur. hsStatus="+hsStatus+" status="+lastStatus);
+				log.trace(() -> "ssl engine is farting. READ 0 data.  hsStatus=\"+hsStatus+\" status=\"+lastStatus");
+				//Ok, live testing with firefox and safari.  I am not quite sure what is going on yet but this hack
+				//makes it work SOLID!!!!  To reproduce the issue, throw an exception here and connect to https with
+				//safari and firefox.  Then wait about 5 minutes until a re-handshake occurs and boom, the issue
+				//appears.  I think it is something in my logic regarding futures, or synchronized blocks but I am not
+				//quite sure.  To be honest, it used to happen on every begin handshake with firefox and safari. I
+				//had posted this SO post https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap
+				//which refers to commit c65ced4bd02214ebfb8faf64eda4f87e7d10e655 which is on a branch but gives
+				//the exact date of being able to reproduce the begin handshake issue.  I guess I could git bisect
+				//to find when it stopped from that date on until today (6/27/2019) which is only 6 days of
+				//commits(not that many for open source).  Before I do that, committing back this change to fix
+				//rehandshake.
+				sslEngineIsFarting = true;
+				sentMsgFuture = CompletableFuture.completedFuture(null);
 			} else
 				sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
 

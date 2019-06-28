@@ -168,7 +168,10 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			if(sslEngine == null) {
 				b = setupSSLEngine(channel, b);
-				if(b == null)
+				
+				//this is frustrating so we just ack this set of data as completed(no backpressure basically here)
+				//since b will be null IF we did not receive the full bytes of the ssl clientHello packet
+				if(b == null) //to ack, we send a completed future back is all
 					return CompletableFuture.completedFuture(null); //not fully setup yet
 			}
 			
