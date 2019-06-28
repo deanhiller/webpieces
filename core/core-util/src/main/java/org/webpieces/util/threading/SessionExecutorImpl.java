@@ -120,7 +120,7 @@ public class SessionExecutorImpl implements SessionExecutor {
 				isFromThisPool.set(true);
 				runnable.run();
 			} catch(Throwable e) {
-				log.error("Uncaught Exception", e);
+				log.error("Uncaught Exception(last ditch effort)", e);
 			} finally {
 				isFromThisPool.set(null);
 				executeNext(key);

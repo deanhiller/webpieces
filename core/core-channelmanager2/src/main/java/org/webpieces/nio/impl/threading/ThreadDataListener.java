@@ -6,10 +6,13 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.MDC;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.SessionExecutor;
 
 public class ThreadDataListener implements DataListener {
 
+	private static final Logger log = LoggerFactory.getLogger(ThreadDataListener.class);
 	private DataListener dataListener;
 	private SessionExecutor executor;
 
@@ -25,15 +28,26 @@ public class ThreadDataListener implements DataListener {
 			@Override
 			public void run() {
 				MDC.put("socket", ""+channel);
-				CompletableFuture<Void> fut = dataListener.incomingData(channel, b);
-				MDC.clear();
-				fut.handle((v, t) -> {
-					if(t == null)
-						future.complete(null);
-					else
-						future.completeExceptionally(t);
-					return null;
-				});
+				try {
+					
+					CompletableFuture<Void> fut = dataListener.incomingData(channel, b);
+					fut.handle((v, t) -> {
+						if(t == null)
+							future.complete(null);
+						else
+							future.completeExceptionally(t);
+						return null;
+					});
+					
+				} catch(Throwable e) {
+					log.error("Uncaught Exception", e);
+					future.completeExceptionally(e);
+				} finally {
+					MDC.clear();
+				}
+				
+
+
 			}
 		});
 		
