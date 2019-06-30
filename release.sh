@@ -6,7 +6,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 cd $DIR
 
-./runAllTesting.sh
+./runAllTestingLocalRelease.sh
 test_result=$?
 if [ $test_result -eq 0 ]
 then
