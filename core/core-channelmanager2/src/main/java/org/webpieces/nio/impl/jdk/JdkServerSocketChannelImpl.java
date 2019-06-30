@@ -1,6 +1,8 @@
 package org.webpieces.nio.impl.jdk;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -84,6 +86,13 @@ public class JdkServerSocketChannelImpl implements JdkServerSocketChannel {
 	@Override
 	public boolean isClosed() {
 		return channel.socket().isClosed();
+	}
+
+	@Override
+	public InetSocketAddress getInetSocketAddress() {
+		InetAddress addr = channel.socket().getInetAddress();
+		int port = channel.socket().getLocalPort();
+		return new InetSocketAddress(addr, port);
 	}
 	
 }

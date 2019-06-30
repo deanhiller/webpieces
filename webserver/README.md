@@ -1,5 +1,21 @@
 # webpieces
 
+-Djavax.net.debug=ssl:handshake:verbose:keymanager:trustmanager -Djava.security.debug=access:stack
+
+fix in-memory database in twitter DC so plugin works in production if desired!!!...hmmm, that one is tough without a loop back tunnel port
+fix install ssl cert in twitter land so it works in twitter DC AND in production if desired!!
+modify @backend/secure/loggedinhome to have Document Home(instead of Document) and replace the existing Document Home with Html/Tag QuickRef
+do we want the extra SSLEngineFromStorage..perhaps hide it in WebSSLEngine?
+combine BOTH backendSSLEngineFactory AND backendAddress into it's own object for better clarity
+.........rework RouterConfig to have addNeedsSimpleStorage chaining...it's cleaner
+
+add better parsing of flags after the Map so that arguments can be documented from plugins????  How to discover and print out help cleanly??
+1. optional args with default(default can be null)
+2. required args
+3. extra args that clearly are NOT part of this program should fail and not start the server to keep command line args clean
+
+File 2 tickets on slf4j alpha.  1. %{caller} not working and 2. groovy not working and block that on the groovy not working in some other project?
+
 REVISIT if still exist:see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
 
 * Documentation on EACH html field

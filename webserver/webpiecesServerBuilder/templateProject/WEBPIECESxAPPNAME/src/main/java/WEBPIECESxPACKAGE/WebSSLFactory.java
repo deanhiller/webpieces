@@ -14,6 +14,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -67,7 +68,8 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 	}
 	
 	private Void setupCert(Map<String, String> properties) {
-		//lookup 1st cert installed from plugin
+		//lookup 1st cert installed from the SSL Cert wizard plugin (If you went through the wizard and
+		//configured it)
 		String cert = properties.get(InstallSslCertPlugin.CERT_CHAIN_PREFIX+0);
 		if(cert == null) {
 			log.warn("No cert for SSL installed yet, using self signed cert");
@@ -109,9 +111,17 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 			if(certChain != null)
 				return createSslEngineFromCert();
 
+			CompletableFuture<Map<String, String>> future = CompletableFuture.completedFuture(new HashMap<String, String>());
+			if(storage != null)
 			//otherwise, each request, try to kick off the loading
-			CompletableFuture<Map<String, String>> future = storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
-			future.thenApply( (props) -> setupCert(props));
+				future = storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
+			
+			//TODO: dhiller- I don't really like swallowing....we should weave this upstream to clients as a CompletableFuture
+			//instead so they can catch and fail.
+			future.thenApply( (props) -> setupCert(props)).exceptionally((t) -> {
+				log.error("Exception reading and we swallow it here.  we default then to self-signed cert", t);
+				return null;
+			});
 			
 			return createFromSelfSignedCert();
 		} catch(Exception e) {

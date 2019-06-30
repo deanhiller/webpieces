@@ -32,17 +32,18 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 		DefaultConnectionListener connectionListener = new DefaultConnectionListener(connectedChannels, proxyListener); 
 
 		TCPServerChannel serverChannel;
-		if(sslFactory != null)
+		if(sslFactory != null) {
 			serverChannel = channelManager.createTCPServerChannel(id, connectionListener, sslFactory);
-		else
+		} else {
 			serverChannel = channelManager.createTCPServerChannel(id, connectionListener);
+		}
 
 		//MUST be called before bind...
 		serverChannel.setReuseAddress(true);
 		
 		serverChannel.configure(config.functionToConfigureBeforeBind);
 		
-		return new AsyncServerImpl(serverChannel, connectionListener, proxyListener);
+		return new AsyncServerImpl(serverChannel, connectionListener, proxyListener, sslFactory);
 	}
 
 	@Override

@@ -153,8 +153,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		try {
 			result = sslEngine.unwrap(encryptedData, cachedOutBuffer);
 		} catch(SSLException e) {
-			cachedOutBuffer.position(cachedOutBuffer.limit());
+			cachedOutBuffer.position(cachedOutBuffer.limit()); //simulate consuming all data
 			pool.releaseBuffer(cachedOutBuffer);
+			encryptedData.position(encryptedData.limit()); //simulate consuming all data
 			pool.releaseBuffer(encryptedData);
 
 			String message = e.getMessage();

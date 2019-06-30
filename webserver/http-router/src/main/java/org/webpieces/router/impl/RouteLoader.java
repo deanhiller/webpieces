@@ -154,12 +154,14 @@ public class RouteLoader {
 		SimpleStorage storage = injector.getInstance(SimpleStorage.class);
 		
 		
+		List<CompletableFuture<?>> futures = new ArrayList<>();
+		List<NeedsSimpleStorage> needsStorage = config.getNeedsStorage();
+		for(NeedsSimpleStorage bean : needsStorage) {
+			CompletableFuture<Void> future = bean.init(storage);
+			futures.add(future);
+		}
 		
-		NeedsSimpleStorage needsStorage = config.getNeedsStorage();
-		if(needsStorage != null)
-			return needsStorage.init(storage);
-		else
-			return CompletableFuture.completedFuture(null);
+		return CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]));
 	}
 
 	public Injector createInjector(WebAppMeta routerModule, RoutingHolder routingHolder) {

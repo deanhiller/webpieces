@@ -16,6 +16,9 @@ public abstract class WebServerFactory {
     protected WebServerFactory() {}
 
 	public static WebServer create(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig) {
+		if(!routerConfig.getMetaFile().exists())
+			throw new RuntimeException("file not found="+routerConfig.getMetaFile());
+		
 		Module allModules = getModules(config, routerConfig, templateConfig);
 
 		Module platformOverrides = config.getPlatformOverrides();

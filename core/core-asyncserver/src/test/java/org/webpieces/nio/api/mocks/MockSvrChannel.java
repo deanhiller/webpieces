@@ -1,6 +1,7 @@
 package org.webpieces.nio.api.mocks;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -109,6 +110,11 @@ public class MockSvrChannel extends MockSuperclass implements JdkServerSocketCha
 	@Override
 	public boolean isClosed() {
 		return false;
+	}
+
+	@Override
+	public InetSocketAddress getInetSocketAddress() {
+		return new InetSocketAddress(0);// just fake it right now
 	}
 
 }

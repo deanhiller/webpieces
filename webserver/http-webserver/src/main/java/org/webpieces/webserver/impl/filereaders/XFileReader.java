@@ -59,9 +59,9 @@ public abstract class XFileReader {
 		//must also change the hash automatically and the %%{ }%% tag generates those hashes so the
 	    //files loaded are always the latest
 	    
-		Long timeMs = config.getStaticFileCacheTimeSeconds();
-		if(timeMs != null)
-			response.addHeader(new Http2Header(Http2HeaderName.CACHE_CONTROL, "max-age="+timeMs));
+		Long timeSeconds = config.getStaticFileCacheTimeSeconds();
+		if(timeSeconds != null)
+			response.addHeader(new Http2Header(Http2HeaderName.CACHE_CONTROL, "max-age="+timeSeconds));
 		
 		ChunkReader reader = createFileReader(
 				response, renderStatic, fileName, fullFilePath, info, extension, tuple);

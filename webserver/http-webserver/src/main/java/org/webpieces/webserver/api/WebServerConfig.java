@@ -1,23 +1,17 @@
 package org.webpieces.webserver.api;
 
-import java.net.InetSocketAddress;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.nio.api.BackpressureConfig;
-import org.webpieces.nio.api.SSLEngineFactory;
-import org.webpieces.nio.api.handlers.ConsumerFunc;
 
 import com.google.inject.Module;
 import com.webpieces.http2engine.api.client.Http2Config;
 
 public class WebServerConfig {
 
-	private InetSocketAddress httpListenAddress;
-	private InetSocketAddress httpsListenAddress;
 	//typically only true during a test, but could be done before production server runs as well though it will slow down startup time
 	private boolean validateRouteIdsOnStartup = false;
 	
@@ -33,15 +27,7 @@ public class WebServerConfig {
 	 * The eclipse compiler is not on the production classpath and only on the DevelopmentServer classpath.
 	 */
 	private Module platformOverrides = null;
-
-	/**
-	 * If not set, we will open the https port as http serving the https paged over that primarily 
-	 * so that some companies can terminate their SSL at the firewall and run http from there to
-	 * the secure pages(though it's not preferred, some do that)
-	 */
-	private SSLEngineFactory sslEngineFactory;
 	
-	private ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket;
 	private Locale defaultLocale = Locale.getDefault();
 	
 	//On startup, we protect developers from breaking clients.  In http, all files that change
@@ -54,8 +40,10 @@ public class WebServerConfig {
 	private BackpressureConfig backpressureConfig = new BackpressureConfig();
 	
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
-	private InetSocketAddress backendListenAddress;
-	private SSLEngineFactory backendSslEngineFactory;
+
+	private HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig();
+	private HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig();
+	private HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig();
 
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -72,42 +60,6 @@ public class WebServerConfig {
 
 	public WebServerConfig setPlatformOverrides(Module platformOverrides) {
 		this.platformOverrides = platformOverrides;
-		return this;
-	}
-
-	public SSLEngineFactory getSslEngineFactory() {
-		return sslEngineFactory;
-	}
-
-	public WebServerConfig setSslEngineFactory(SSLEngineFactory sslEngineFactory) {
-		this.sslEngineFactory = sslEngineFactory;
-		return this;
-	}
-
-	public InetSocketAddress getHttpListenAddress() {
-		return httpListenAddress;
-	}
-
-	public WebServerConfig setHttpListenAddress(InetSocketAddress httpListenAddress) {
-		this.httpListenAddress = httpListenAddress;
-		return this;
-	}
-
-	public InetSocketAddress getHttpsListenAddress() {
-		return httpsListenAddress;
-	}
-
-	public WebServerConfig setHttpsListenAddress(InetSocketAddress httpsListenAddress) {
-		this.httpsListenAddress = httpsListenAddress;
-		return this;
-	}
-
-	public ConsumerFunc<ServerSocketChannel> getFunctionToConfigureServerSocket() {
-		return functionToConfigureServerSocket;
-	}
-
-	public WebServerConfig setFunctionToConfigureServerSocket(ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket) {
-		this.functionToConfigureServerSocket = functionToConfigureServerSocket;
 		return this;
 	}
 
@@ -174,22 +126,33 @@ public class WebServerConfig {
 		return this;
 	}
 
-	public WebServerConfig setBackendListenAddress(InetSocketAddress backendListenAddress) {
-		this.backendListenAddress = backendListenAddress;
+	public HttpSvrInstanceConfig getBackendSvrConfig() {
+		return backendSvrConfig;
+	}
+
+	public WebServerConfig setBackendSvrConfig(HttpSvrInstanceConfig backendSvrConfig) {
+		this.backendSvrConfig = backendSvrConfig;
 		return this;
 	}
 
-	public WebServerConfig setBackendSslEngineFactory(SSLEngineFactory backendSslEngineFactory) {
-		this.backendSslEngineFactory = backendSslEngineFactory;
+	public HttpSvrInstanceConfig getHttpConfig() {
+		return httpConfig;
+	}
+
+	public WebServerConfig setHttpConfig(HttpSvrInstanceConfig httpConfig) {
+		if(httpConfig.getSslEngineFactory() != null)
+			throw new IllegalArgumentException("Http Server cannot be configurd with SSL.  SSLEngineFactory must be null but was="+httpConfig.getSslEngineFactory());
+		this.httpConfig = httpConfig;
 		return this;
 	}
 
-	public InetSocketAddress getBackendListenAddress() {
-		return backendListenAddress;
+	public HttpSvrInstanceConfig getHttpsConfig() {
+		return httpsConfig;
 	}
 
-	public SSLEngineFactory getSetBackendSslEngineFactory() {
-		return backendSslEngineFactory;
+	public WebServerConfig setHttpsConfig(HttpSvrInstanceConfig httpsConfig) {
+		this.httpsConfig = httpsConfig;
+		return this;
 	}
 	
 }

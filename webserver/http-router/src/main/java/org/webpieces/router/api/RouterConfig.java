@@ -3,6 +3,8 @@ package org.webpieces.router.api;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
@@ -28,8 +30,6 @@ public class RouterConfig {
 	 */
 	private Module webappOverrides;
 
-
-
 	/**
 	 * Option to turn token checking off mainly for testing as it disables ALL token checking which usually
 	 * you never want to turn all of it off.  Default is for tokenCheck to be on(true)
@@ -47,7 +47,7 @@ public class RouterConfig {
 
 	private File workingDirectory;
 
-	private NeedsSimpleStorage needsStorage;
+	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
 
 	private boolean addBackendRoutesOverPort;
 
@@ -156,12 +156,12 @@ public class RouterConfig {
 		return workingDirectory;
 	}
 
-	public RouterConfig setNeedsSimpleStorage(NeedsSimpleStorage needsStorage) {
-		this.needsStorage = needsStorage;
+	public RouterConfig addNeedsStorage(NeedsSimpleStorage needsStorage) {
+		this.needsStorage.add(needsStorage);
 		return this;
 	}
 
-	public NeedsSimpleStorage getNeedsStorage() {
+	public List<NeedsSimpleStorage> getNeedsStorage() {
 		return needsStorage;
 	}
 
@@ -172,6 +172,11 @@ public class RouterConfig {
 
 	public boolean isAddBackendRoutesOverPort() {
 		return addBackendRoutesOverPort;
+	}
+
+	public RouterConfig setNeedsStorage(List<NeedsSimpleStorage> needsStorage2) {
+		this.needsStorage = needsStorage2;
+		return this;
 	}
 
 }

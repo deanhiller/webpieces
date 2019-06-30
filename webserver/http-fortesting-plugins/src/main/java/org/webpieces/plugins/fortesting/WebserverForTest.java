@@ -17,6 +17,7 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
+import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
@@ -53,11 +54,14 @@ public class WebserverForTest {
 		if(testConfig.getMetaFile() == null)
 			metaFile = new VirtualFileClasspath("basicMeta.txt", WebserverForTest.class.getClassLoader());
 
-		int httpPort = 8080;
-		int httpsPort = 8443;
+		SSLEngineFactoryWebServerTesting sslFactory = new SSLEngineFactoryWebServerTesting();
+		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8080), null);
+		httpConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
+		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8443), sslFactory);
+		httpsConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
 		if(testConfig.isUsePortZero()) {
-			httpPort = 0;
-			httpsPort = 0;
+			httpConfig.setListenAddress(new InetSocketAddress(0));
+			httpsConfig.setListenAddress(new InetSocketAddress(0));
 		}
 		
 		Module platformOverrides = testConfig.getPlatformOverrides();
@@ -67,10 +71,8 @@ public class WebserverForTest {
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
 				.setPlatformOverrides(platformOverrides)
-				.setHttpListenAddress(new InetSocketAddress(httpPort))
-				.setHttpsListenAddress(new InetSocketAddress(httpsPort))
-				.setSslEngineFactory(new SSLEngineFactoryWebServerTesting())
-				.setFunctionToConfigureServerSocket(s -> configure(s));
+				.setHttpConfig(httpConfig)
+				.setHttpsConfig(httpsConfig);
 		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
 											.setMetaFile(metaFile )
 											.setWebappOverrides(testConfig.getAppOverrides())

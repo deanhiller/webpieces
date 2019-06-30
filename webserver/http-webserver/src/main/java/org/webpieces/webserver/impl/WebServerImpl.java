@@ -17,16 +17,17 @@ import javax.inject.Inject;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.HttpSvrConfig;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterService;
-import org.webpieces.router.api.controller.annotations.Nullable;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.net.URLEncoder;
+import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 
@@ -37,8 +38,6 @@ public class WebServerImpl implements WebServer {
 	@Inject
 	private WebServerConfig config;
 	
-//	@Inject @Nullable
-//	private SSLEngineFactory factory;
 	@Inject
 	private HttpFrontendManager serverMgr;
 	@Inject
@@ -71,54 +70,64 @@ public class WebServerImpl implements WebServer {
 
 		//validate html route id's and params on startup if 'org.webpieces.routeId.txt' exists
 		validateRouteIdsFromHtmlFiles();
+
+		//START http server if wanted...
+		HttpSvrInstanceConfig httpConfig = config.getHttpConfig();
+		CompletableFuture<Void> fut1 = startServer(httpConfig, "http", (config, listener, factory) -> {
+			httpServer = serverMgr.createHttpServer(config, listener);
+			return httpServer.start();
+		});
+
+		//START https server if wanted...
+		HttpSvrInstanceConfig httpsConfig = config.getHttpsConfig();
+		CompletableFuture<Void> fut2 = startServer(httpsConfig, "https", (config, listener, factory) -> {
+			httpsServer = serverMgr.createHttpsServer(config, listener, factory);
+			return httpsServer.start();
+		});
+
+		//START backend if wanted (if not, pages are served over https server...if you don't want a backend, remove the plugins)
+		HttpSvrInstanceConfig backendConfig = config.getBackendSvrConfig();
+		String type = "https";
+		if(backendConfig.getSslEngineFactory() == null)
+			type = "http";
+		CompletableFuture<Void> fut3 = startServer(backendConfig, "backend("+type+")", (config, listener, factory) -> {
+			backendServer = serverMgr.createBackendHttpsServer(config, listener, factory);
+			return backendServer.start();
+		});
 		
-		HttpSvrConfig svrChanConfig = new HttpSvrConfig("http", config.getHttpListenAddress());
-		svrChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
-		httpServer = serverMgr.createHttpServer(svrChanConfig, serverListener);
-		CompletableFuture<Void> future = httpServer.start();
-		CompletableFuture<Void> fut2;
+		return CompletableFuture.allOf(fut1, fut2, fut3).thenApply((v) -> {
+			log.info("All servers started");	
+			return null;
+		});
+	}
+
+	private interface TriConsumer<T, X, Y> {
+		public CompletableFuture<Void> apply(T t, X x, Y y);
+	}
+	
+	private CompletableFuture<Void> startServer(
+			HttpSvrInstanceConfig instanceConfig, 
+			String serverName, 
+			TriConsumer<HttpSvrConfig, StreamListener, SSLEngineFactory> function
+	) {
 		CompletableFuture<Void> fut3;
+		if(instanceConfig.getListenAddress() != null) {
+			String type = "https";
+			if(instanceConfig.getSslEngineFactory() == null)
+				type = "http";
+			
+			log.info("Creating and starting the "+serverName+" over port="+instanceConfig.getListenAddress()+" AND using '"+type+"'");
 
-		if(config.getHttpsListenAddress() != null) {
-			HttpSvrConfig secureChanConfig = new HttpSvrConfig("https", config.getHttpsListenAddress(), 10000);
-			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
+			HttpSvrConfig httpSvrConfig = new HttpSvrConfig("backend("+serverName+")", instanceConfig.getListenAddress(), 10000);
+			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = instanceConfig.getFunctionToConfigureServerSocket();
 			
-			//OK, some companies expose https OVER http until the firewall THEN it is SSL from firewall to end customer.  
-			//IF you supply a null factory, this will create an https server served over http.  This means all
-			//the https routes/pages are still served over this server but this server is over http with no ssl 
-			//handshake
-			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, config.getSslEngineFactory());
-			
-			fut2 = httpsServer.start();
-		} else {
-			fut2 = CompletableFuture.completedFuture(null);
-			log.info("https port is disabled since configuration had no sslEngineFactory");
-		}
-
-		if(config.getBackendListenAddress() != null) {
-			String http = "https";
-			if(config.getSetBackendSslEngineFactory() == null)
-				http = "http";
-			
-			HttpSvrConfig secureChanConfig = new HttpSvrConfig("backend("+http+")", config.getBackendListenAddress(), 10000);
-			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
-			
-			backendServer = serverMgr.createBackendHttpsServer(secureChanConfig, serverListener, config.getSslEngineFactory());
-			
-			fut3 = backendServer.start();
+			fut3 = function.apply(httpSvrConfig, serverListener, instanceConfig.getSslEngineFactory());
 
 		} else {
 			fut3 = CompletableFuture.completedFuture(null);
-			log.info("Serving the backend over a different port is disabled since there was no address specified");
+			log.info("Serving the "+serverName+" is disabled since there was no address specified");
 		}
-		
-		return future
-				.thenCompose(v -> fut2)
-				.thenCompose(v -> fut3)
-				.thenApply(v -> {
-			log.info("server started");
-			return null;
-		});
+		return fut3;
 	}
 
 	private void validateRouteIdsFromHtmlFiles() {

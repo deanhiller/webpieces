@@ -1,6 +1,7 @@
 package org.webpieces.nio.api.jdk;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -58,5 +59,7 @@ public interface JdkServerSocketChannel {
 	public boolean isBound();
 	
 	public boolean isClosed();
+	
+	public InetSocketAddress getInetSocketAddress();
 
 }

@@ -17,7 +17,6 @@ import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.threading.NamedThreadFactory;
@@ -29,7 +28,6 @@ import org.webpieces.webserver.api.WebServerConfig;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import com.google.inject.util.Providers;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2engine.api.client.InjectionConfig;
@@ -44,11 +42,6 @@ public class WebServerModule implements Module {
 	
 	@Override
 	public void configure(Binder binder) {
-		if(config.getSslEngineFactory() == null) 
-			binder.bind(SSLEngineFactory.class).toProvider(Providers.of(null));
-		else 
-			binder.bind(SSLEngineFactory.class).toInstance(config.getSslEngineFactory());
-		
 		binder.bind(WebServer.class).to(WebServerImpl.class);
 
 		binder.bind(WebServerConfig.class).toInstance(config);

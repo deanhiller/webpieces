@@ -20,6 +20,7 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
+import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
@@ -52,35 +53,16 @@ public class Server {
 	public static final String HTTPS_PORT_KEY = "https.port";
 	public static final String BACKEND_PORT_KEY = "backend.port";
 	
-	//Welcome to YOUR main method as webpieces webserver is just a library you use that you can
-	//swap literally any piece of
+	/**
+	 * Welcome to YOUR main method as webpieces webserver is just a LIBRARY you use that you can
+	 * swap literally any piece of
+	 */
 	public static void main(String[] args) throws InterruptedException {
 		try {
 			String version = System.getProperty("java.version");
 			log.info("Starting Production Server under java version="+version);
 
-			CommandLineParser parser = new CommandLineParser();
-			Map<String, String> arguments = parser.parse(args);
-
-			ServerConfig config = new ServerConfig("production");
-
-			if(arguments.get(HTTP_PORT_KEY) != null) {
-				if(arguments.get(HTTPS_PORT_KEY) == null)
-					throw new IllegalArgumentException(HTTP_PORT_KEY+" passed in on command line but "+HTTPS_PORT_KEY+" is not.  You must pass in both or neither");
-				//in general, if we are doing custom ports, we may be told which ports and then expose those ports on 80/443
-				//via firewall
-				config.setUseFirewall(true);
-
-				int httpPort = parser.parseInt(HTTP_PORT_KEY, arguments.get(HTTP_PORT_KEY));
-				int httpsPort = parser.parseInt(HTTPS_PORT_KEY, arguments.get(HTTPS_PORT_KEY));
-				config.setHttpAddress(new InetSocketAddress(httpPort));
-				config.setHttpsAddress(new InetSocketAddress(httpsPort));
-			}
-			
-			if(arguments.get(BACKEND_PORT_KEY) != null) {
-				int backendPort = parser.parseInt(BACKEND_PORT_KEY, arguments.get(BACKEND_PORT_KEY));
-				config.setBackendAddress(new InetSocketAddress(backendPort));
-			}
+			ServerConfig config = parseAndConfigure(args);
 			
 			Server server = new Server(null, null, config);
 
@@ -109,14 +91,16 @@ public class Server {
 
 		VirtualFile metaFile = svrConfig.getMetaFile();
 		//Dev server has to override this
-		if(metaFile == null)
+		if(metaFile == null) {
+			//ok, since no metaFile, let's use the production appmeta.txt!!
 			metaFile = new VirtualFileClasspath("appmeta.txt", Server.class.getClassLoader());
+		}
 
-		if(!metaFile.exists())
-			throw new RuntimeException("file not found="+metaFile);
-		
 		//This override is only needed if you want to add your own Html Tags to re-use
-		//you can delete this code if you are not adding your own html tags
+		//you can delete this code if you are not adding your own webpieces html tags
+		//We graciously added #{mytag}# #{id}# and #{myfield}# as examples that you can
+		//tweak so we add that binding here.  This is one example of swapping in pieces
+		//of webpieces (pardon the pun)
 		Module allOverrides = new TagLookupOverride();
 		if(platformOverrides != null) {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
@@ -124,24 +108,17 @@ public class Server {
 		
 		SecretKeyInfo signingKey = new SecretKeyInfo(fetchKey(), "HmacSHA1");
 		
-		//If your company terminates https into the firewall and then does http to this webserver, change 
-		//this line to WebSSLFactory webSSLFactory = null; so that the https port will be http.
-		//It will still serve all the https pages but over http over whatever port your use.  
-		//All https pages are still not served over the original http port.  The http port still hosts
-		//all normal http pages.  (Setting to null is purely for those who terminate https at the 
-		//firewall.
-		WebSSLFactory webSSLFactory = new WebSSLFactory();
-
 		//if serving over different port, route all backend pages to special router 
-		boolean serveBackendOverDifferentPort = svrConfig.getBackendAddress() != null;
+		boolean serveBackendOverDifferentPort = svrConfig.getBackendSvrConfig().getListenAddress() != null;
 
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
 		//by a QA team.  We leave most of these properties right here so changes get tested by QA.
 		
-		//A SECOND note is that some properties can be modified at runtime and so some config objects could be exposed
-		//through JMX or other means for dynamically changing things at runtime
+		//A SECOND note is that webpieces strives to default most configuration and expose it through an
+		//amazing properties plugin that not only has a web page for making changes BUT persists those
+		//changes across the cluster so they are re-applied at startup
 		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
 											.setMetaFile(metaFile)
 											.setWebappOverrides(appOverrides)
@@ -149,23 +126,22 @@ public class Server {
 											.setSecretKey(signingKey)
 											.setPortConfigCallback(() -> fetchPortsForRedirects(svrConfig.isUseFirewall()))
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
-											.setNeedsSimpleStorage(webSSLFactory)
 											.setTokenCheckOn(svrConfig.isTokenCheckOn())
+											.setNeedsStorage(svrConfig.getNeedsStorage())
 											.setAddBackendRoutesOverPort(serveBackendOverDifferentPort); 
 
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
-										.setHttpListenAddress(svrConfig.getHttpAddress())
-										.setHttpsListenAddress(svrConfig.getHttpsAddress())
-										.setSslEngineFactory(webSSLFactory)
-										.setFunctionToConfigureServerSocket(s -> configure(s))
+										.setHttpConfig(svrConfig.getHttpConfig())
+										.setHttpsConfig(svrConfig.getHttpsConfig())
+										.setBackendSvrConfig(svrConfig.getBackendSvrConfig())
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
-										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds())
-										.setBackendListenAddress(svrConfig.getBackendAddress())
-										.setBackendSslEngineFactory(webSSLFactory); //normally use a different cert for backend but we are self-signed!
+										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
 
 		TemplateConfig templateConfig = new TemplateConfig();
 		
+		//Notice that there is a WebServerConfig, a RouterConfig, and a TemplateConfig making up
+		//3 of the major pieces of webpieces.
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
 	
@@ -254,7 +230,7 @@ public class Server {
 			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
-			log.info("You appear to be running test from Intellij or Gradle(xxxx-dev subproject).");
+			log.info("You appear to be running test from Intellij, Eclipse or Gradle(xxxx-dev subproject), or the main app from eclipse");
 			File parent = filePath.getParentFile();
 			return FileFactory.newFile(parent, "WEBPIECESxAPPNAME/src/dist");
 		} else if("WEBPIECESxAPPNAME".equals(name)) {
@@ -266,7 +242,7 @@ public class Server {
 			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
-			log.info("You appear to be running test from Intellij or Gradle(main subproject).");
+			log.info("You appear to be running test from Intellij, Eclipse or Gradle(main subproject), or the main app from eclipse");
 			return FileFactory.newFile(filePath, "src/dist");
 		} else if(locatorFile1.exists()) {
 			//DAMNIT Intellij...FIX THIS STUFF!!!
@@ -292,10 +268,46 @@ public class Server {
 	 * to change our platform every time so you can easily set the new properties rather than waiting for
 	 * us to release a new version 
 	 */
-	public void configure(ServerSocketChannel channel) throws SocketException {
+	public static void configure(ServerSocketChannel channel) throws SocketException {
 		channel.socket().setReuseAddress(true);
 		//channel.socket().setSoTimeout(timeout);
 		//channel.socket().setReceiveBufferSize(size);
+	}
+	
+	private static ServerConfig parseAndConfigure(String[] args) {
+		CommandLineParser parser = new CommandLineParser();
+		Map<String, String> arguments = parser.parse(args); //prelim quick parse into Map
+
+		WebSSLFactory factory = new WebSSLFactory();
+
+		ServerConfig config = new ServerConfig(factory, "production");
+		config.addNeedsStorage(factory);
+
+		if(arguments.get(HTTP_PORT_KEY) != null) {
+			if(arguments.get(HTTPS_PORT_KEY) == null)
+				throw new IllegalArgumentException(HTTP_PORT_KEY+" passed in on command line but "+HTTPS_PORT_KEY+" is not.  You must pass in both or neither");
+			//in general, if we are doing custom ports, we may be told which ports and then expose those ports on 80/443
+			//via firewall
+			config.setUseFirewall(true);
+			
+			int httpPort = parser.parseInt(HTTP_PORT_KEY, arguments.get(HTTP_PORT_KEY));
+			int httpsPort = parser.parseInt(HTTPS_PORT_KEY, arguments.get(HTTPS_PORT_KEY));
+			HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(new InetSocketAddress(httpPort), null);
+			httpConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
+			HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(new InetSocketAddress(httpsPort), factory);
+			httpsConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
+			
+			config.setHttpConfig(httpConfig);
+			config.setHttpsConfig(httpsConfig);
+		}
+		
+		if(arguments.get(BACKEND_PORT_KEY) != null) {
+			int backendPort = parser.parseInt(BACKEND_PORT_KEY, arguments.get(BACKEND_PORT_KEY));
+			HttpSvrInstanceConfig backendConfig = new HttpSvrInstanceConfig(new InetSocketAddress(backendPort), factory);
+			backendConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
+			config.setBackendSvrConfig(backendConfig);
+		}
+		return config;
 	}
 	
 	public void start() {

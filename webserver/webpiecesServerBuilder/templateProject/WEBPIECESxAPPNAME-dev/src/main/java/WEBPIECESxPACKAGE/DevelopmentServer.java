@@ -13,6 +13,7 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -73,16 +74,20 @@ public class DevelopmentServer {
 										new DevRouterModule(devConfig),
 										new DevTemplateModule(templateConfig));
 		
-		ServerConfig config = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT);
+		WebSSLFactory sslFactory = new WebSSLFactory();
+		
+		ServerConfig config = new ServerConfig(sslFactory, HibernatePlugin.PERSISTENCE_TEST_UNIT);
 		if(usePortZero) {
-			config.setHttpAddress(new InetSocketAddress(0));
-			config.setHttpsAddress(new InetSocketAddress(0));
+			config.getHttpConfig().setListenAddress(new InetSocketAddress(0));
+			config.getHttpsConfig().setListenAddress(new InetSocketAddress(0));
 		}
+
+		//READ the documentation in HttpSvrInstanceConfig for more about these settings
+//		HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8444), sslFactory);
+//		backendSvrConfig.setFunctionToConfigureServerSocket((s) -> Server.configure(s));
+//		config.setBackendSvrConfig(backendSvrConfig );
 		
-		//Expose management pages over different port instead of merging by uncommenting this...
-		//config.setBackendAddress(new InetSocketAddress(8444));
-		
-		//It is very important to turn off caching or developers will get very confused when they
+		//It is very important to turn off BROWSER caching or developers will get very confused when they
 		//change stuff and they don't see changes in the website
 		config.setStaticFileCacheTimeSeconds(null);
 		config.setMetaFile(metaFile);
