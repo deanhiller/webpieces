@@ -331,18 +331,17 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		try {
 			CompletableFuture<Void> sentMsgFuture;
 			if(readNoData) {
-				log.trace(() -> "ssl engine is farting. READ 0 data.  hsStatus=\"+hsStatus+\" status=\"+lastStatus");
-				//Ok, live testing with firefox and safari.  I am not quite sure what is going on yet but this hack
-				//makes it work SOLID!!!!  To reproduce the issue, throw an exception here and connect to https with
-				//safari and firefox.  Then wait about 5 minutes until a re-handshake occurs and boom, the issue
-				//appears.  I think it is something in my logic regarding futures, or synchronized blocks but I am not
-				//quite sure.  To be honest, it used to happen on every begin handshake with firefox and safari. I
-				//had posted this SO post https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap
-				//which refers to commit c65ced4bd02214ebfb8faf64eda4f87e7d10e655 which is on a branch but gives
-				//the exact date of being able to reproduce the begin handshake issue.  I guess I could git bisect
-				//to find when it stopped from that date on until today (6/27/2019) which is only 6 days of
-				//commits(not that many for open source).  Before I do that, committing back this change to fix
-				//rehandshake.
+				log.trace(() -> "ssl engine is farting. READ 0 data.  hsStatus="+hsStatus+" status="+lastStatus+" previous="+beforeWrapHandshakeStatus);
+				
+				//Ok, I updated this thread https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap/56822673#56822673
+				//but basicaly, turning on -Djavax.net.debug=ssl:handshake:verbose:keymanager:trustmanager -Djava.security.debug=access:stack
+				//REALLY REALLY helps and you see that clients send a warning close_notify but I put logs before and after the call to
+				//sslEngine.wrap and between those logs, the sslEngine logged ZERO debug information and did NOT generate it's 
+				//response close_notify :(.  crappy sslEngine.  This was in jdk 11.0.3 :(.
+				//On top of this, downgrading to jdk1.8.0_111 which uses TLSv1.2 instead of TLSv1.3 works
+				//just fine and sends back the close messages while jdk 11 is not doing that
+				//so this sslEngineIsFarting is covering up their bug.
+				
 				sslEngineIsFarting = true;
 				sentMsgFuture = CompletableFuture.completedFuture(null);
 			} else

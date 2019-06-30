@@ -13,7 +13,6 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;

@@ -1,8 +1,5 @@
 # webpieces
 
-:
--Djavax.net.debug=ssl:handshake:verbose:keymanager:trustmanager -Djava.security.debug=access:stack
-
 fix in-memory database in twitter DC so plugin works in production if desired!!!...hmmm, that one is tough without a loop back tunnel port
 fix install ssl cert in twitter land so it works in twitter DC AND in production if desired!!
 modify @backend/secure/loggedinhome to have Document Home(instead of Document) and replace the existing Document Home with Html/Tag QuickRef
