@@ -145,13 +145,14 @@ server_pid=$!
 #
 #SOOO sleep time is increased from 5 seconds to 10 so builds pass...this sucks, my server used to startup in 3 seconds
 
+#From before, but no more right now at least:
 #Logback has a 5 second pause we should go debug on jdk9 at least causing this to be 10 seconds instead of 5
-SLEEP_TIME=10
+SLEEP_TIME=5
 echo "sleep $SLEEP_TIME seconds while server starts up"
 sleep $SLEEP_TIME 
 echo "Grepping log"
 
-if grep -q "o.w.w.i.WebServerImpl     server started" logs/server.log; then
+if grep -q "o.w.w.i.WebServerImpl     All servers started" logs/server.log; then
   echo "##################################"
   echo "11111 Server is located at `pwd`"
   echo "Server Startup Succeeded within $SLEEP_TIME seconds!!"
