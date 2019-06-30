@@ -1,5 +1,6 @@
 # webpieces
 
+:
 -Djavax.net.debug=ssl:handshake:verbose:keymanager:trustmanager -Djava.security.debug=access:stack
 
 fix in-memory database in twitter DC so plugin works in production if desired!!!...hmmm, that one is tough without a loop back tunnel port

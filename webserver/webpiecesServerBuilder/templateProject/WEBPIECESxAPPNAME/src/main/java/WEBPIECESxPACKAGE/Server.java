@@ -15,8 +15,6 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
-import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
@@ -89,13 +87,6 @@ public class Server {
 
 		File baseWorkingDir = modifyUserDirForManyEnvironments(filePath);
 
-		VirtualFile metaFile = svrConfig.getMetaFile();
-		//Dev server has to override this
-		if(metaFile == null) {
-			//ok, since no metaFile, let's use the production appmeta.txt!!
-			metaFile = new VirtualFileClasspath("appmeta.txt", Server.class.getClassLoader());
-		}
-
 		//This override is only needed if you want to add your own Html Tags to re-use
 		//you can delete this code if you are not adding your own webpieces html tags
 		//We graciously added #{mytag}# #{id}# and #{myfield}# as examples that you can
@@ -106,11 +97,6 @@ public class Server {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
 		}
 		
-		SecretKeyInfo signingKey = new SecretKeyInfo(fetchKey(), "HmacSHA1");
-		
-		//if serving over different port, route all backend pages to special router 
-		boolean serveBackendOverDifferentPort = svrConfig.getBackendSvrConfig().getListenAddress() != null;
-
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
@@ -120,15 +106,15 @@ public class Server {
 		//amazing properties plugin that not only has a web page for making changes BUT persists those
 		//changes across the cluster so they are re-applied at startup
 		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
-											.setMetaFile(metaFile)
+											.setMetaFile(svrConfig.getMetaFile())
 											.setWebappOverrides(appOverrides)
 											.setWebAppMetaProperties(svrConfig.getWebAppMetaProperties())
-											.setSecretKey(signingKey)
+											.setSecretKey(new SecretKeyInfo(fetchKey(), "HmacSHA1"))
 											.setPortConfigCallback(() -> fetchPortsForRedirects(svrConfig.isUseFirewall()))
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
 											.setTokenCheckOn(svrConfig.isTokenCheckOn())
 											.setNeedsStorage(svrConfig.getNeedsStorage())
-											.setAddBackendRoutesOverPort(serveBackendOverDifferentPort); 
+											.setAddBackendRoutesOverPort(svrConfig.getBackendSvrConfig().getListenAddress() != null); 
 
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
@@ -146,15 +132,9 @@ public class Server {
 	}
 	
 	/**
-	 * In issuing a redirect, it is important to send back to clients the correct port so
-	 * instead of redirecting to /asdfsdf:12343 which the server is bound to, we redirect back
-	 * to asdfsdf:80.  
-	 * 
-	 * This is due to if you send no port information in the redirect, some browsers would redirect
-	 * back to port 80 which would be wrong when testing on localhost:8080.  TODO: test again in 
-	 * modern day browsers to see if we can eliminate this code completely and just send a redirect 
-	 * to the url and hope the browser knows which port it originally requested.  test in opera, firefox
-	 * IE, safari and chrome
+	 * If we get a HTTP request and need to redirect to the https port, we need to know whether to redirect
+	 * to port 443 OR should we redirect to the port the server is running on.  Generally, we always 
+	 * redirect to port 443 when using a firewall as 443 is the standard https port.
 	 */
 	PortConfig fetchPortsForRedirects(boolean isUseFirewall) {
 		//NOTE: for running locally and for tests, you must set useFirewallPorts=false
@@ -171,12 +151,15 @@ public class Server {
 	}
 	
 	private byte[] fetchKey() {
-		//This is purely so it works before template creation
+		String base64Key = "__SECRETKEYHERE__";  //This gets replaced with a unique key each generated project which you need to keep or replace with your own!!!
+
+		//This 'if' statement is purely so it works before template creation
 		//NOTE: our build runs all template tests that are generated to make sure we don't break template 
 		//generation but for that to work pre-generation, we need this code but you are free to delete it...
-		String base64Key = "__SECRETKEYHERE__";  //This gets replaced with a unique key each generated project which you need to keep or replace with your own!!!
 		if(base64Key.startsWith("__SECRETKEY"))  //This does not get replaced (user can remove it from template)
 			return base64Key.getBytes();
+		
+		//This code must stay so we translate the base64 back into bytes...
 		return Base64.getDecoder().decode(base64Key);
 	}
 
@@ -196,7 +179,7 @@ public class Server {
 	 * {type}-{isWebpieces}-{IDE or Container}-{subprojectName}
 	 *
 	 * where type=Test or MainApp (Intellij changes the user.dir for tests vs. mainapp!!  DAMNIT Intellij)
-	 * IDE=Intellij, Eclipse, Gradle, Production
+	 * IDE=Intellij, Eclipse, Gradle, Production Script
 	 * isWebpieces is whether it was a generated project or is the template itself.  ie. you can run tests
 	 *     if you clone https://github.com/deanhiller/webpieces inside the IDE without needing to
 	 *     generate a fake project BUT we need to know which directory it runs for (MAINLY Intellij screwup again)
@@ -254,6 +237,8 @@ public class Server {
 		} else if(locatorFile2.exists()) {
 			//DAMNIT Intellij...FIX THIS STUFF!!!
 			//
+			//   This section is only for webpieces use and can safely be deleted for your project if you want to reduce clutter
+			//
 			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			log.info("Running DevServer in Intellij, making property modifications(damn intellij..fix that)");
@@ -286,8 +271,7 @@ public class Server {
 		if(arguments.get(HTTP_PORT_KEY) != null) {
 			if(arguments.get(HTTPS_PORT_KEY) == null)
 				throw new IllegalArgumentException(HTTP_PORT_KEY+" passed in on command line but "+HTTPS_PORT_KEY+" is not.  You must pass in both or neither");
-			//in general, if we are doing custom ports, we may be told which ports and then expose those ports on 80/443
-			//via firewall
+			//in general, if we are doing custom ports, here we assume you are doing a firewall but feel free to change that
 			config.setUseFirewall(true);
 			
 			int httpPort = parser.parseInt(HTTP_PORT_KEY, arguments.get(HTTP_PORT_KEY));

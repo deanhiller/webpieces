@@ -13,6 +13,7 @@ import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 
 public class ServerConfig {
@@ -20,9 +21,11 @@ public class ServerConfig {
 	/**
 	 * The bootstrap file that separates code that can't be recompiled from all the code
 	 * that can in your DevelopmentServer.  This file references the Meta file needed to
-	 * load your web application
+	 * load your web application.  The default is the 'production' appmeta.txt meta file
+	 * while the DevelopmentServer uses appmetadev.txt such that it can load a few more
+	 * plugins.
 	 */
-	private VirtualFile metaFile;
+	private VirtualFile metaFile= new VirtualFileClasspath("appmeta.txt", Server.class.getClassLoader());
 	
 	/**
 	 * This is not used in production so we default it to false, but a special test that we
