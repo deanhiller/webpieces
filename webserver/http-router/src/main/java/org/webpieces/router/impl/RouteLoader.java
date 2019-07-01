@@ -218,8 +218,13 @@ public class RouteLoader {
 		//Worse yet, it's not a constact so you have to file search....UGH, but the dependencies are clean
 		//as fuck and I don't want to muck with that right now on where the constant should live(again,
 		//too much whisky probably, but eh, I am going to get this done).
-		if(config.isAddBackendRoutesOverPort())
+		if(config.isAddBackendRoutesOverPort()) {
+			log.info("setting backend port to live");
 			System.setProperty("BACKEND_PORT_LIVE", "live");
+		} else {
+			log.info("backend routes being put on https port");
+			System.clearProperty("BACKEND_PORT_LIVE"); //clears property out in case of gradle daemon caching it.
+		}
 		
 		for(Routes module : all) {
 			CurrentPackage.set(new RouteModuleInfo(module.getClass()));

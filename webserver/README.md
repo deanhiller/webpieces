@@ -1,11 +1,10 @@
 # webpieces
 
-fix in-memory database in twitter DC so plugin works in production if desired!!!...hmmm, that one is tough without a loop back tunnel port
-fix install ssl cert in twitter land so it works in twitter DC AND in production if desired!!
 modify @backend/secure/loggedinhome to have Document Home(instead of Document) and replace the existing Document Home with Html/Tag QuickRef
 Remove documentation page in main app...it looks like crap and the plugin documentation is much much better.
 hit backend port and not found page in development server does not list just backend routes :( fix to make it easier to debug
 alphabetize the backend lists as it is annoying when it flips
+remove this damn thing...System.setProperty("BACKEND_PORT_LIVE", "live");
 
 * (6/27)for windows. fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 

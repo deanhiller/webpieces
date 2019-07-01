@@ -20,7 +20,14 @@ public class H2DbModule extends AbstractModule {
 		
 			try {
 				this.config = config;
-				String args[] = new String[] { "-webPort", config.getPort()+"" };
+				String args[];
+				
+				if(config.getConvertDomain() == null) {
+					args = new String[] { "-webPort", config.getPort()+"" };
+				} else {
+					//if we are converting a domain, definitely need to allow other ip addresses in..
+					args = new String[] { "-webPort", config.getPort()+"", "-webAllowOthers"};					
+				}
 				
 				log.info("trying to start H2 webserver GUI interface to serve up as a webpage(for development servers)");
 				// start the TCP Server

@@ -24,6 +24,13 @@ public class H2DbController {
 	}
 	
 	public Redirect redirectToDatabaseGui() {
+		if(h2DbConfig.getConvertDomain() != null) {
+			Function<String, String> function = h2DbConfig.getConvertDomain();
+			String newDomain = function.apply(Current.request().domain);
+			String url = "http://"+newDomain;
+			return Actions.redirectToUrl(url);
+		}
+		
 		//could be https OR could be backend....no matter what, redirect to the http server
 		return Actions.redirect(HttpPort.HTTP, H2DbRouteId.DATABASE_GUI_PAGE);
 	}
@@ -31,13 +38,6 @@ public class H2DbController {
 	//currently needs to be served over http server but this is only for development anyways
 	public Render databaseGui() {
 		String url = "http://localhost:"+config.getPort();
-		if(h2DbConfig.getConvertDomain() != null) {
-			Function<String, String> function = h2DbConfig.getConvertDomain();
-			String newDomain = function.apply(Current.request().domain);
-			url = "http://"+newDomain;
-		}
-			
-		return Actions.renderThis(
-				"url", url);		
+		return Actions.renderThis("url", url);
 	}
 }
