@@ -1,11 +1,13 @@
 # webpieces
 
+* (6/27) check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
+   * GEventEvaluator not working(so warn and info are not in red anymore)
+   * %caller not working for lazy stuff
+
 fix in-memory database in twitter DC so plugin works in production if desired!!!...hmmm, that one is tough without a loop back tunnel port
 fix install ssl cert in twitter land so it works in twitter DC AND in production if desired!!
 modify @backend/secure/loggedinhome to have Document Home(instead of Document) and replace the existing Document Home with Html/Tag QuickRef
-do we want the extra SSLEngineFromStorage..perhaps hide it in WebSSLEngine?
-combine BOTH backendSSLEngineFactory AND backendAddress into it's own object for better clarity
-.........rework RouterConfig to have addNeedsSimpleStorage chaining...it's cleaner
+Remove documentation page in main app...it looks like crap and the plugin documentation is much much better.
 
 add better parsing of flags after the Map so that arguments can be documented from plugins????  How to discover and print out help cleanly??
 1. optional args with default(default can be null)
@@ -31,15 +33,16 @@ Property Management plugin!!!
 * Documentation on plugin properties
 * Documentation on EVERY single html widget with inline examples!!!
 
+* respond in eclipse bug report   https://bugs.eclipse.org/bugs/show_bug.cgi?id=548792!
 * (6/27)for windows. fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
-* (6/27) check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
-   * GEventEvaluator not working(so warn and info are not in red anymore)
-   * %caller not working for lazy stuff
 
 ADD release failure if not calling release.sh under jdk8 for now so we don't accidentally fuck up when switching jdks
 https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/2
 test and fix for jdk12 gradle only
 Get working in jdk12 as well(keep code releases on jdk8)
+
+bump this bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=548792
+bump this bug https://bugreport.java.com/bugreport/submit_start.do
 
 #### TODO:
 * @documentation, need threading section
