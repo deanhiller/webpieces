@@ -15,9 +15,14 @@ public class MockChannelManager implements ChannelManager {
 
 	private ConnectionListener httpConnectionListener;
 	private ConnectionListener httpsConnectionListener;
+	private ConnectionListener backendConnectionListener;
 
 	@Override
 	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener) {
+		if(id.startsWith("backend")) {
+			backendConnectionListener = connectionListener;
+			return new MockServerChannel();
+		}
 		httpConnectionListener = connectionListener;
 		return new MockServerChannel();
 	}
@@ -25,6 +30,10 @@ public class MockChannelManager implements ChannelManager {
 	@Override
 	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener,
 			SSLEngineFactory factory) {
+		if(id.startsWith("backend")) {
+			backendConnectionListener = connectionListener;
+			return new MockServerChannel();
+		}
 		httpsConnectionListener = connectionListener;
 		return new MockServerChannel();
 	}
@@ -59,5 +68,9 @@ public class MockChannelManager implements ChannelManager {
 
 	public ConnectionListener getHttpsConnection() {
 		return httpsConnectionListener;
+	}
+	
+	public ConnectionListener getBackendConnection() {
+		return backendConnectionListener;
 	}
 }

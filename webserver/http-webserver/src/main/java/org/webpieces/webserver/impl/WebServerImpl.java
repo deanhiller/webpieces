@@ -118,7 +118,7 @@ public class WebServerImpl implements WebServer {
 			
 			log.info("Creating and starting the "+serverName+" over port="+instanceConfig.getListenAddress()+" AND using '"+type+"'");
 
-			HttpSvrConfig httpSvrConfig = new HttpSvrConfig("backend("+serverName+")", instanceConfig.getListenAddress(), 10000);
+			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(serverName, instanceConfig.getListenAddress(), 10000);
 			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = instanceConfig.getFunctionToConfigureServerSocket();
 			
 			fut3 = function.apply(httpSvrConfig, serverListener, instanceConfig.getSslEngineFactory());

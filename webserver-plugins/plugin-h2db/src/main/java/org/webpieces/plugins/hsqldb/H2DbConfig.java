@@ -33,4 +33,8 @@ public class H2DbConfig {
 		return convertDomain;
 	}
 
+	public void setConvertDomain(Function<String, String> convertDomain) {
+		this.convertDomain = convertDomain;
+	}
+
 }
