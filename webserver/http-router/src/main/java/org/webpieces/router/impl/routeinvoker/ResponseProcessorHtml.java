@@ -12,12 +12,14 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.HttpPort;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.actions.AjaxRedirectImpl;
+import org.webpieces.router.impl.actions.PortRedirect;
 import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
@@ -66,16 +68,24 @@ public class ResponseProcessorHtml implements Processor {
 	public CompletableFuture<Void> createAjaxRedirect(AjaxRedirectImpl action, PortConfig portConfig) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
-		return createRedirect(id, args, true, portConfig);		
+		return createRedirect(null, id, args, true, portConfig);		
 	}
 	
 	public CompletableFuture<Void> createFullRedirect(RedirectImpl action, PortConfig portConfig) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
-		return createRedirect(id, args, false, portConfig);
+		return createRedirect(null, id, args, false, portConfig);
+	}
+
+	public CompletableFuture<Void> createPortRedirect(PortRedirect action, PortConfig portConfig) {
+		RouteId id = action.getId();
+		Map<String, Object> args = action.getArgs();
+		HttpPort port = action.getPort();
+		return createRedirect(port, id, args, false, portConfig);
 	}
 	
-	private CompletableFuture<Void> createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect, PortConfig portConfig) {
+	private CompletableFuture<Void> createRedirect(
+			HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect, PortConfig portConfig) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
@@ -108,7 +118,7 @@ public class ResponseProcessorHtml implements Processor {
 		}
 
 		boolean isHttpsOnly = matchInfo.getExposedPorts() == Port.HTTPS;
-		
+
 		//if the request is https, stay in https as everything is accessible on https
 		//if the request is http, then convert to https IF new route is secure
 		boolean isSecure = request.isHttps || isHttpsOnly;
@@ -117,6 +127,19 @@ public class ResponseProcessorHtml implements Processor {
 		if(!request.isHttps && isHttpsOnly)
 			port = portConfig.getHttpsPort();
 		
+		//lastly override to requests http or https port if requested
+		if(requestedPort == HttpPort.HTTP && isHttpsOnly)
+			throw new IllegalArgumentException("Your controller is trying to direct to http for a page only served over https");
+		if(requestedPort != null) {
+			if(requestedPort == HttpPort.HTTPS) {
+				port = portConfig.getHttpsPort();
+				isSecure = true;
+			} else {
+				port = portConfig.getHttpPort();
+				isSecure = false;
+			}
+		}
+			
 		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
 		
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(redirectResponse));
@@ -173,6 +196,8 @@ public class ResponseProcessorHtml implements Processor {
 	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb, PortConfig portConfig) {
 		if(controllerResponse instanceof RedirectImpl) {
 			return createFullRedirect((RedirectImpl)controllerResponse, portConfig);
+		} else if(controllerResponse instanceof PortRedirect) {
+			return createPortRedirect((PortRedirect)controllerResponse, portConfig);
 		} else if(controllerResponse instanceof AjaxRedirectImpl) {
 			return createAjaxRedirect((AjaxRedirectImpl)controllerResponse, portConfig);
 		} else if(controllerResponse instanceof RenderImpl) {

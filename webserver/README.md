@@ -1,20 +1,18 @@
 # webpieces
 
-* (6/27) check back on slf4j 2 https://jira.qos.ch/browse/SLF4J-371?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=19658#comment-19658
-   * GEventEvaluator not working(so warn and info are not in red anymore)
-   * %caller not working for lazy stuff
-
 fix in-memory database in twitter DC so plugin works in production if desired!!!...hmmm, that one is tough without a loop back tunnel port
 fix install ssl cert in twitter land so it works in twitter DC AND in production if desired!!
 modify @backend/secure/loggedinhome to have Document Home(instead of Document) and replace the existing Document Home with Html/Tag QuickRef
 Remove documentation page in main app...it looks like crap and the plugin documentation is much much better.
+hit backend port and not found page in development server does not list just backend routes :( fix to make it easier to debug
+alphabetize the backend lists as it is annoying when it flips
+
+* (6/27)for windows. fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
 add better parsing of flags after the Map so that arguments can be documented from plugins????  How to discover and print out help cleanly??
 1. optional args with default(default can be null)
 2. required args
 3. extra args that clearly are NOT part of this program should fail and not start the server to keep command line args clean
-
-File 2 tickets on slf4j alpha.  1. %{caller} not working and 2. groovy not working and block that on the groovy not working in some other project?
 
 REVISIT if still exist:see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
 
@@ -34,15 +32,15 @@ Property Management plugin!!!
 * Documentation on EVERY single html widget with inline examples!!!
 
 * respond in eclipse bug report   https://bugs.eclipse.org/bugs/show_bug.cgi?id=548792!
-* (6/27)for windows. fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
 ADD release failure if not calling release.sh under jdk8 for now so we don't accidentally fuck up when switching jdks
 https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/2
-test and fix for jdk12 gradle only
-Get working in jdk12 as well(keep code releases on jdk8)
 
 bump this bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=548792
 bump this bug https://bugreport.java.com/bugreport/submit_start.do
+https://jira.qos.ch/browse/LOGBACK-1474 - GEventEvaluator
+  blocked on https://lists.apache.org/thread.html/17c553e64b1afb674e2f10f978e366b2b7662319a0c991aa46551241@%3Cusers.groovy.apache.org%3E
+https://jira.qos.ch/browse/LOGBACK-1473 - %caller not working for lambdas
 
 #### TODO:
 * @documentation, need threading section

@@ -4,5 +4,5 @@ import org.webpieces.router.api.routes.RouteId;
 
 public enum H2DbRouteId implements RouteId {
 
-	GET_DATABASE_PAGE
+	REDIRECT_TO_DB_GUI, DATABASE_GUI_PAGE
 }

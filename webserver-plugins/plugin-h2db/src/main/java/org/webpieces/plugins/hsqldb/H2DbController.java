@@ -1,30 +1,43 @@
 package org.webpieces.plugins.hsqldb;
 
+import java.util.function.Function;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
-import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.controller.actions.HttpPort;
+import org.webpieces.router.api.controller.actions.Redirect;
+import org.webpieces.router.api.controller.actions.Render;
 
 @Singleton
 public class H2DbController {
 
 	private ServerConfig config;
-	private String path;
+	private H2DbConfig h2DbConfig;
 
 	@Inject
-	public H2DbController(ServerConfig config, H2DbConfig hdConfig) {
+	public H2DbController(ServerConfig config, H2DbConfig h2DbConfig) {
 		this.config = config;
-		this.path = hdConfig.getPluginPath();
+		this.h2DbConfig = h2DbConfig;
 	}
 	
-	public Action databaseGui() {
-		RouterRequest request = Current.request();
-		if(request.isHttps)
-			return Actions.redirectToUrl("http://localhost:8080"+path);
-		
-		return Actions.renderThis("port", config.getPort());
+	public Redirect redirectToDatabaseGui() {
+		//could be https OR could be backend....no matter what, redirect to the http server
+		return Actions.redirect(HttpPort.HTTP, H2DbRouteId.DATABASE_GUI_PAGE);
+	}
+	
+	//currently needs to be served over http server but this is only for development anyways
+	public Render databaseGui() {
+		String url = "http://localhost:"+config.getPort();
+		if(h2DbConfig.getConvertDomain() != null) {
+			Function<String, String> function = h2DbConfig.getConvertDomain();
+			String newDomain = function.apply(Current.request().domain);
+			url = "http://"+newDomain;
+		}
+			
+		return Actions.renderThis(
+				"url", url);		
 	}
 }

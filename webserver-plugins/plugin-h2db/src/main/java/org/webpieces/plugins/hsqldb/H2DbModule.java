@@ -29,7 +29,13 @@ public class H2DbModule extends AbstractModule {
 				
 				int port = server.getPort();
 				log.info("H2 webserver started on port="+port);
-				this.svrConfig.setPort(port);
+				if(config.getConvertDomain() == null) {
+					log.info("H2 webserver setting webpage to use="+port);
+					this.svrConfig.setPort(port);
+				} else {
+					log.info("H2 webserver using the domain converter="+config.getConvertDomain());
+				}
+				
 				return;
 			} catch(SQLException e) {
 				throw new RuntimeException(e);

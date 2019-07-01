@@ -7,6 +7,7 @@ import java.util.Set;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.actions.AjaxRedirectImpl;
+import org.webpieces.router.impl.actions.PortRedirect;
 import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
@@ -48,6 +49,17 @@ public class Actions {
 		return redirect;
 	}
 
+	/**
+	 * In certain cases, your controller may want to direct a user to some page over 
+	 * on the https port OR on some page on the http port.  By using this, you can let
+	 * webpieces know and it will figure out the port needed in the redirect which
+	 * can be a pain depending on running in multiple configurations.
+	 */
+	public static Redirect redirect(HttpPort port, RouteId route, Object ... args) {
+		PortRedirect redirect = new PortRedirect(port, route, args);
+		return redirect;
+	}
+	
 	/**
 	 * 
 	 * @param routeId

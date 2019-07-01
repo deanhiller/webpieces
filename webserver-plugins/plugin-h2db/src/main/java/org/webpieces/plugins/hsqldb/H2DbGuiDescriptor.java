@@ -12,7 +12,7 @@ public class H2DbGuiDescriptor implements BackendGuiDescriptor {
 	@Override
 	public List<PageDescriptor> getWireIntoGuiDescriptors() {
 		List<PageDescriptor> descriptors = new ArrayList<>();
-		descriptors.add(new PageDescriptor(MenuCategory.MANAGEMENT, "InMemory Database", H2DbRouteId.GET_DATABASE_PAGE, false));
+		descriptors.add(new PageDescriptor(MenuCategory.MANAGEMENT, "InMemory Database", H2DbRouteId.REDIRECT_TO_DB_GUI, false));
 		return descriptors;
 	}
 	
