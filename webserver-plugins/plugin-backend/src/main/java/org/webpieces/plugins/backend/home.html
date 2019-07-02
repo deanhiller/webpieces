@@ -4,7 +4,7 @@
 
 <ul>
     #{list items:menu, as:'menu'}#
-      <li id="tab_${menu.menuCategory.lowerCaseMenuTitle}$"><a id="${menu.menuCategory.lowerCaseMenuTitle}$" href="">${menu.menuCategory.menuTitle}$</a>
+      <li id="tab_${menu.menuCategory.lowerCaseMenuTitle}$">${menu.menuCategory.menuTitle}$
 
         <ul>
             #{list items:menu.menuItems, as:'item'}#

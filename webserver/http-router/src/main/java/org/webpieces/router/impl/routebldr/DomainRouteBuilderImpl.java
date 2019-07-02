@@ -24,11 +24,11 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 
 	private ResettingLogic resettingLogic;
 	
-	public DomainRouteBuilderImpl(RouteBuilderLogic holder, ResettingLogic resettingLogic, boolean isExposeBackendOnInternalPort) {
+	public DomainRouteBuilderImpl(RouteBuilderLogic holder, ResettingLogic resettingLogic, boolean useUniqueBackendRouter) {
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
 		this.leftOverDomainsBuilder = new RouteBuilderImpl("<any>", holder, resettingLogic);
-		if(isExposeBackendOnInternalPort)
+		if(useUniqueBackendRouter)
 			this.backendRouteBuilder = new RouteBuilderImpl("<backend>", holder, resettingLogic);
 		else {
 			this.backendRouteBuilder = this.leftOverDomainsBuilder;

@@ -11,8 +11,12 @@ import com.google.inject.Module;
 
 public class BackendPlugin implements Plugin {
 
+	public static final String USE_PLUGIN_ASSETS = "backend.plugin.assets";
+	private boolean isUsePluginAssets;
+
 	public BackendPlugin(BackendConfig config) {
 		super();
+		isUsePluginAssets = config.isUsePluginAssets();
 	}
 	
 	@Override
@@ -23,7 +27,7 @@ public class BackendPlugin implements Plugin {
 	@Override
 	public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
-			new BackendLoginRoutes("/org/webpieces/plugins/backend/login/BackendLoginController", 
+			new BackendLoginRoutes(isUsePluginAssets, "/org/webpieces/plugins/backend/login/BackendLoginController", 
 					BackendRoutes.BACKEND_ROUTE, BackendRoutes.BACKEND_ROUTE+"/secure.*")
 		);
 	}

@@ -40,10 +40,14 @@ public class ProdServerMeta implements WebAppMeta {
 
 	private static final Logger log = LoggerFactory.getLogger(ProdServerMeta.class);
 	private String persistenceUnit;
+	private boolean isUsePluginAssets;
 
 	@Override
 	public void initialize(Map<String, String> props) {
 		persistenceUnit = props.get(HibernatePlugin.PERSISTENCE_UNIT_KEY);
+		String value = props.get(BackendPlugin.USE_PLUGIN_ASSETS);
+		if("true".equals(value))
+			isUsePluginAssets = true;
 	}
 
 	//When using the Development Server, changes to this inner class will be recompiled automatically
@@ -79,7 +83,7 @@ public class ProdServerMeta implements WebAppMeta {
 				//to transitive dependencies)
 				new HibernatePlugin(new HibernateConfig(persistenceUnit)),
 				new JacksonPlugin(new JacksonConfig("/json/.*", JsonCatchAllFilter.class)),
-				new BackendPlugin(new BackendConfig()),
+				new BackendPlugin(new BackendConfig(isUsePluginAssets)),
 				new PropertiesPlugin(new PropertiesConfig()),
 				new InstallSslCertPlugin(new InstallSslCertConfig("acme://letsencrypt.org/staging"))
 				);

@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.Map;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.plugins.backend.BackendPlugin;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
@@ -97,6 +98,9 @@ public class Server {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
 		}
 		
+		boolean backendHostedOverPort = svrConfig.getBackendSvrConfig().getListenAddress() != null;
+		svrConfig.getWebAppMetaProperties().put(BackendPlugin.USE_PLUGIN_ASSETS, backendHostedOverPort+"");
+		
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
@@ -114,7 +118,7 @@ public class Server {
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
 											.setTokenCheckOn(svrConfig.isTokenCheckOn())
 											.setNeedsStorage(svrConfig.getNeedsStorage())
-											.setAddBackendRoutesOverPort(svrConfig.getBackendSvrConfig().getListenAddress() != null); 
+											.setEnableSeperateBackendRouter(backendHostedOverPort); 
 
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)

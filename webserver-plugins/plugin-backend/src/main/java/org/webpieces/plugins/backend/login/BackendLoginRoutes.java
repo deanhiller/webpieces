@@ -12,13 +12,16 @@ import org.webpieces.webserver.api.login.AbstractLoginRoutes;
 
 public class BackendLoginRoutes extends AbstractLoginRoutes {
 
+	private boolean usePluginAssets;
+
 	/**
 	 * @param controller
 	 * @param basePath The 'unsecure' path that has a login page so you can get to the secure path
 	 * @param securePath The path for the secure filter that ensures everyone under that path is secure
 	 */
-	public BackendLoginRoutes(String controller, String basePath, String securePath) {
+	public BackendLoginRoutes(boolean usePluginAssets, String controller, String basePath, String securePath) {
 		super(controller, basePath, securePath, "password");
+		this.usePluginAssets = usePluginAssets;
 	}
 	
 	@Override
@@ -49,8 +52,7 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 		ScopedRouteBuilder scoped2 = baseRouter.getScopedRouteBuilder(basePath);
 		scoped2.addRoute(Port.BOTH, HttpMethod.GET,  "", "org.webpieces.plugins.backend.BackendController.redirectToLogin", BackendLoginRouteId.LOGGED_OUT_LANDING);
 		
-		String property = System.getProperty("BACKEND_PORT_LIVE");
-		if(property != null) {
+		if(usePluginAssets) {
 			//ok, we are exposed on a port and need our own stuff installed...
 			baseRouter.setInternalErrorRoute("org.webpieces.plugins.backend.BackendController.internalError");
 			baseRouter.setPageNotFoundRoute("org.webpieces.plugins.backend.BackendController.notFound");

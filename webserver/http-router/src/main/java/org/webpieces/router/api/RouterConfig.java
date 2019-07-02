@@ -49,7 +49,7 @@ public class RouterConfig {
 
 	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
 
-	private boolean addBackendRoutesOverPort;
+	private boolean enableSeperateBackendRouter;
 
 	public RouterConfig(File workingDirectory) {
 		if(!workingDirectory.isAbsolute())
@@ -165,13 +165,13 @@ public class RouterConfig {
 		return needsStorage;
 	}
 
-	public RouterConfig setAddBackendRoutesOverPort(boolean addBackendRoutesOverPort) {
-		this.addBackendRoutesOverPort = addBackendRoutesOverPort;
+	public RouterConfig setEnableSeperateBackendRouter(boolean addBackendRoutesOverPort) {
+		this.enableSeperateBackendRouter = addBackendRoutesOverPort;
 		return this;
 	}
 
-	public boolean isAddBackendRoutesOverPort() {
-		return addBackendRoutesOverPort;
+	public boolean isEnableSeperateBackendRouter() {
+		return enableSeperateBackendRouter;
 	}
 
 	public RouterConfig setNeedsStorage(List<NeedsSimpleStorage> needsStorage2) {

@@ -12,7 +12,8 @@ public class DocumentationGuiDescriptor implements BackendGuiDescriptor {
 	@Override
 	public List<PageDescriptor> getWireIntoGuiDescriptors() {
 		List<PageDescriptor> descriptors = new ArrayList<>();
-		descriptors.add(new PageDescriptor(MenuCategory.DOCUMENTATION, "Documentation Home", DocumentationRouteId.MAIN_DOCS, false));
+		descriptors.add(new PageDescriptor(MenuCategory.DOCUMENTATION, "Documentation Home & Quick Start", DocumentationRouteId.MAIN_DOCS, false));
+		descriptors.add(new PageDescriptor(MenuCategory.DOCUMENTATION, "Widget Reference", DocumentationRouteId.HTML_REFERENCE, false));
 		descriptors.add(new PageDescriptor(MenuCategory.DOCUMENTATION, "Routes Reference", DocumentationRouteId.ROUTES, false));
 		descriptors.add(new PageDescriptor(MenuCategory.DOCUMENTATION, "Controllers Reference", DocumentationRouteId.CONTROLLERS, false));
 		descriptors.add(new PageDescriptor(MenuCategory.DOCUMENTATION, "Templates Reference", DocumentationRouteId.TEMPLATES, false));

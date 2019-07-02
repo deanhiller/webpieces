@@ -197,8 +197,8 @@ public class RouteLoader {
 		
 		reverseRoutes = new ReverseRoutes(config);
 		ResettingLogic resettingLogic = new ResettingLogic(reverseRoutes, injector);
-		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic, config.isAddBackendRoutesOverPort());
-		
+		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic, config.isEnableSeperateBackendRouter());
+
 		routingHolder.setReverseRouteLookup(reverseRoutes);
 		routeBuilderLogic.init(reverseRoutes);
 				
@@ -210,20 +210,6 @@ public class RouteLoader {
 			for(Plugin plugin : plugins) {
 				all.addAll(plugin.getRouteModules());
 			}
-		}
-		
-		//OK, once in a while(maybe it's this whiskey I'm drinking right now), even I cheat a bit and I 
-		//create some shitty-butt system property global (IIIICKKKKKY), I know, but I got tired and need
-		//this to work for tomorrow.  FIGURE out how to cleanly work this in later!
-		//Worse yet, it's not a constact so you have to file search....UGH, but the dependencies are clean
-		//as fuck and I don't want to muck with that right now on where the constant should live(again,
-		//too much whisky probably, but eh, I am going to get this done).
-		if(config.isAddBackendRoutesOverPort()) {
-			log.info("setting backend port to live");
-			System.setProperty("BACKEND_PORT_LIVE", "live");
-		} else {
-			log.info("backend routes being put on https port");
-			System.clearProperty("BACKEND_PORT_LIVE"); //clears property out in case of gradle daemon caching it.
 		}
 		
 		for(Routes module : all) {

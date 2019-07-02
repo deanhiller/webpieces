@@ -76,6 +76,10 @@ public class MenuCreator {
 		for(Map.Entry<MenuCategory, List<SingleMenuItem>> entry : secureMenuMap.entrySet()) {
 			menu.add(convert(entry));
 		}
+		
+		//since it was converted to Map, sort to put alphabetically.  The items in a menu sort order is
+		//the way the plugins are ordered and the way descriptors are added
+		menu.sort(new HeadingCompare());
 		return menu;
 	}
 	
