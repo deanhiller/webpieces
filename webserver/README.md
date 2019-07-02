@@ -1,11 +1,14 @@
 # webpieces
 
-* (6/27)for windows. fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
+* (6/27)TEST WINDOWS NOW...should be fixed with ... fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
 add better parsing of flags after the Map so that arguments can be documented from plugins????  How to discover and print out help cleanly??
 1. optional args with default(default can be null)
 2. required args
 3. extra args that clearly are NOT part of this program should fail and not start the server to keep command line args clean
+
+WEBPIECESxPACKAGE.TestLesson4BasicStart > testBasicProdStartup FAILED
+    java.lang.IllegalStateException: Previously existing file is missing=/var/folders/fk/2v2j6fhj4yb681vxdj1l2h740000gp/T/webpieces/WEBPIECESxAPPNAMECache/precompressedFiles/assets/primesTheme/index.html.gz Your file cache was corrupted.  You will need to delete the whole cache directory
 
 REVISIT if still exist:see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
 

@@ -42,6 +42,8 @@ public class TestStylesheetScriptTags extends AbstractWebpiecesTest {
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("<img alt=`hi` src=`public/pic.jpg`>".replace('`', '"'));
 
+		//because windows has different line endings when checking files out of git, the
+		//hashcodes will be different than MAC
 		String os = System.getProperty("os.name").toLowerCase();
 		if(os.indexOf("win") >= 0) {
 		   response.assertContains("<link rel=`stylesheet` type=`text/css` href=`/public/fonts.css?hash=VWAYKdP6%2FlAd2LCd%2BlGjLw%3D%3D` />".replace('`', '"'));

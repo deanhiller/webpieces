@@ -183,11 +183,16 @@ subprojects {
        compile fileTree(dir: 'lib', include: '*.jar')
    }
 
+
    //We could do this just for the template projects, BUT during debugging, it is sooo
    //damn nice to have the var names, it is worth the performance penalty I think though
    //we could change this
    [compileJava, compileTestJava]*.options.collect {options ->
      options.compilerArgs.add '-parameters'
+
+     //For windows only, to get the TestI18n working(there is chinese text in the *.java file screwing 
+     //windows up, we either have to move that to a file(annoying) or turn on utf-8
+     options.encoding = 'UTF-8'
    }
 
    if (JavaVersion.current().isJava8Compatible()) {

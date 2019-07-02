@@ -48,13 +48,6 @@ public class TestI18n extends AbstractWebpiecesTest {
 
 	@Test
 	public void testChineseText() {
-		String os = System.getProperty("os.name").toLowerCase();
-		if(os.indexOf("win") >= 0) {
-			//Test WORKS in Windows run from Intellij BUT not on Windows/Gradle :(
-			//opened issue https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
-			//with the gradle team
-			return;
-		}
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_LANGUAGE, "zh-CN"));
 		
