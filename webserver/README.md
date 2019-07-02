@@ -1,7 +1,5 @@
 # webpieces
 
-hit backend port and not found page in development server does not list just backend routes :( fix to make it easier to debug
-
 * (6/27)for windows. fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
 add better parsing of flags after the Map so that arguments can be documented from plugins????  How to discover and print out help cleanly??

@@ -149,6 +149,8 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		RouterRequest newRequest = new RouterRequest();
 		newRequest.putMultipart("webpiecesError", "Exception message="+reason);
 		newRequest.putMultipart("url", req.relativePath);
+		newRequest.isHttps = req.isHttps;
+		newRequest.isBackendRequest = req.isBackendRequest;
 		
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest);
 		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, responseCb);

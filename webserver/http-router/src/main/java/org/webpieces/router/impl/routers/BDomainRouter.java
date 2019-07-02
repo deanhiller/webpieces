@@ -47,11 +47,15 @@ public class BDomainRouter {
 		return allOtherDomainsRouter;
 	}
 
+	
+	public CRouter getBackendRouter() {
+		return backendRouter;
+	}
+
 	public Map<String, CRouter> getDomainToRouter() {
 		return domainToRouter;
 	}
 
-	
 	public void printRoutes() {
 		String spacing = "   ";
 		for(Entry<String, CRouter> entry : domainToRouter.entrySet()) {

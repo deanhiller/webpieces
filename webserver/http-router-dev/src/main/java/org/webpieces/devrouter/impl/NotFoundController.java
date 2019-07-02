@@ -31,13 +31,19 @@ public class NotFoundController {
 		} else {
 			url += "?webpiecesShowPage=true";
 		}
-		
-		BDomainRouter domainRouter = routingHolder.getDomainRouter();
-		CRouter router = domainRouter.getLeftOverDomains();
-		
+
 		Collection<CRouter> routers = new ArrayList<>();
-		for(CRouter oneRouter : domainRouter.getDomainToRouter().values()) {
-			routers.add(oneRouter);
+		CRouter router;
+		BDomainRouter domainRouter = routingHolder.getDomainRouter();
+
+		if(request.isBackendRequest) {
+			router = domainRouter.getBackendRouter();
+		} else {
+			router = domainRouter.getLeftOverDomains();
+			
+			for(CRouter oneRouter : domainRouter.getDomainToRouter().values()) {
+				routers.add(oneRouter);
+			}
 		}
 		
 		//This is a pain but dynamically build up the html

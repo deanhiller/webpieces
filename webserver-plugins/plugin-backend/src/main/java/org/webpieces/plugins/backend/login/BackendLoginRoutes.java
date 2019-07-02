@@ -54,6 +54,7 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 		
 		if(usePluginAssets) {
 			//ok, we are exposed on a port and need our own stuff installed...
+			baseRouter.addRoute(Port.BOTH, HttpMethod.GET, "/", "org.webpieces.plugins.backend.BackendController.redirectHome", BackendLoginRouteId.REDIRECT_TO_HOME);
 			baseRouter.setInternalErrorRoute("org.webpieces.plugins.backend.BackendController.internalError");
 			baseRouter.setPageNotFoundRoute("org.webpieces.plugins.backend.BackendController.notFound");
 			baseRouter.addStaticDir(BOTH, "/assets/", "/html/", true);

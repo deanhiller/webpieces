@@ -24,6 +24,10 @@ public class BackendController {
 		return Actions.redirect(BackendLoginRouteId.BACKEND_LOGIN);
 	}
 
+	public Redirect redirectHome() {
+		return Actions.redirect(BackendLoginRouteId.BACKEND_LOGGED_IN_HOME);
+	}
+	
 	public Render home() {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
