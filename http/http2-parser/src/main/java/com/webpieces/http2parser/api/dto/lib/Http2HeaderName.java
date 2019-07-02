@@ -11,6 +11,7 @@ public enum Http2HeaderName {
 	DATE("date", HeaderType.GENERAL),
 	PRAGMA("pragma", HeaderType.GENERAL),
 	TRAILER("trailer", HeaderType.GENERAL),
+	//This is NOT supported in http2 and should not be used in http2
 	TRANSFER_ENCODING("transfer-encoding", HeaderType.GENERAL),
 	UPGRADE("upgrade", HeaderType.GENERAL),
 	VIA("via", HeaderType.GENERAL),

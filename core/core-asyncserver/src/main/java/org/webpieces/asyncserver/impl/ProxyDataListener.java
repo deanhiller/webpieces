@@ -31,6 +31,7 @@ public class ProxyDataListener implements DataListener {
 
 	@Override
 	public void farEndClosed(Channel channel) {
+		log.info("async server far end closed");
 		log.debug(() -> channel+"far end closed");
 		connectedChannels.removeChannel((TCPChannel) channel);
 		TCPChannel proxy = lookupExistingOrCreateNew(channel);

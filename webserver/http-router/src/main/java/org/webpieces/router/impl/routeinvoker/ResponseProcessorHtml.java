@@ -41,9 +41,7 @@ public class ResponseProcessorHtml implements Processor {
 	private ObjectToParamTranslator reverseTranslator;
 	private ResponseStreamer responseCb;
 
-	private boolean responseSent = false;
-
-	public ResponseProcessorHtml(RequestContext ctx, ReverseRoutes reverseRoutes, 
+	public ResponseProcessorHtml(RequestContext ctx, ReverseRoutes reverseRoutes,
 			ObjectToParamTranslator reverseTranslator, LoadedController loadedController, ResponseStreamer responseCb) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
@@ -86,9 +84,6 @@ public class ResponseProcessorHtml implements Processor {
 	
 	private CompletableFuture<Void> createRedirect(
 			HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect, PortConfig portConfig) {
-		if(responseSent)
-			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
-		responseSent = true;
 		RouterRequest request = ctx.getRequest();
 		Method method = loadedController.getControllerMethod();
 		EHtmlRouter nextRequestMeta = reverseRoutes.get(id);
@@ -146,10 +141,6 @@ public class ResponseProcessorHtml implements Processor {
 	}
 
 	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {
-		if(responseSent)
-			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
-		responseSent = true;
-		
 		RouterRequest request = ctx.getRequest();
 
 		Method method = loadedController.getControllerMethod();
@@ -186,9 +177,6 @@ public class ResponseProcessorHtml implements Processor {
 	}
 
 	public CompletableFuture<Void> createContentResponse(RenderContent r) {
-		if(responseSent)
-			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
-
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
 	}

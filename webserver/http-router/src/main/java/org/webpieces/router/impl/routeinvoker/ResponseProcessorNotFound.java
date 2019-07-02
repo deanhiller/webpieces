@@ -36,8 +36,6 @@ public class ResponseProcessorNotFound implements Processor {
 	private ResponseStreamer responseCb;
 	private ReverseRoutes reverseRoutes;
 	private ObjectToParamTranslator reverseTranslator;
-	
-	private boolean responseSent = false;
 
 	public ResponseProcessorNotFound(RequestContext ctx, ReverseRoutes reverseRoutes, 
 			ObjectToParamTranslator reverseTranslator, LoadedController loadedController, ResponseStreamer responseCb) {
@@ -49,10 +47,6 @@ public class ResponseProcessorNotFound implements Processor {
 	}
 
 	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {
-		if(responseSent)
-			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
-		responseSent = true;
-		
 		String controllerName = loadedController.getControllerInstance().getClass().getName();
 		String methodName = loadedController.getControllerMethod().getName();
 		
@@ -75,9 +69,6 @@ public class ResponseProcessorNotFound implements Processor {
 	}
 
 	public CompletableFuture<Void> createContentResponse(RenderContent r) {
-		if(responseSent)
-			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
-
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
 	}
@@ -89,9 +80,6 @@ public class ResponseProcessorNotFound implements Processor {
 	}
 	
 	private CompletableFuture<Void> createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect, PortConfig portConfig) {
-		if(responseSent)
-			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
-		responseSent = true;
 		RouterRequest request = ctx.getRequest();
 		Method method = loadedController.getControllerMethod();
 		EHtmlRouter nextRequestMeta = reverseRoutes.get(id);

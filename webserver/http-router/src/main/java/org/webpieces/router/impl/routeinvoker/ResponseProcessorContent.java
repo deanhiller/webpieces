@@ -13,8 +13,6 @@ public class ResponseProcessorContent implements Processor {
 	
 	private ResponseStreamer responseCb;
 
-	private boolean responseSent = false;
-
 	private RequestContext ctx;
 
 	public ResponseProcessorContent(RequestContext ctx, ResponseStreamer responseCb) {
@@ -23,9 +21,6 @@ public class ResponseProcessorContent implements Processor {
 	}
 
 	public CompletableFuture<Void> createContentResponse(RenderContent r) {
-		if(responseSent)
-			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
-
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
 	}

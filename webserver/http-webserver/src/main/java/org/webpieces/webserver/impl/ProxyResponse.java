@@ -34,6 +34,7 @@ import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -64,6 +65,7 @@ public class ProxyResponse implements ResponseStreamer {
 	private Http2Request request;
 
 	private int maxBodySize;
+	private Object responseSent = null;
 
 	public void init(RouterRequest req, Http2Request requestHeaders, ResponseStream responseSender, int maxBodySize) {
 		this.routerRequest = req;
@@ -79,7 +81,7 @@ public class ProxyResponse implements ResponseStreamer {
 		responseCreator.addDeleteCookie(response, badCookieName);
 		
 		log.info("sending REDIRECT(due to bad cookie) response responseSender="+ stream);
-		stream.sendResponse(response);
+		sendStreamHeaderResponse(response);
 
 		channelCloser.closeIfNeeded(request, stream);
 	}
@@ -88,9 +90,9 @@ public class ProxyResponse implements ResponseStreamer {
 	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
 		log.debug(() -> "Sending redirect response. req="+request);
 		Http2Response response = createRedirect(httpResponse);
-
+		
 		log.info("sending REDIRECT response responseSender="+ stream);
-		return stream.sendResponse(response).thenApply(w -> {
+		return sendStreamHeaderResponse(response).thenApply(w -> {
 			channelCloser.closeIfNeeded(request, stream);
 			return null;
 		});
@@ -261,14 +263,23 @@ public class ProxyResponse implements ResponseStreamer {
 
 		if(bytes.length == 0) {
 			resp.setEndOfStream(true);
-			return stream.sendResponse(resp).thenApply(w -> null);
+			return sendStreamHeaderResponse(resp).thenApply(w -> null);
 		}
 
 		return sendChunkedResponse(resp, bytes, compression);
 	}
 
-	private CompletableFuture<Void> sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
-
+	private CompletableFuture<StreamWriter> sendStreamHeaderResponse(Http2Response response) {
+		if(responseSent != null)
+			throw new IllegalStateException("You already sent a response.  "
+					+ "do not call Actions.redirect or Actions.render more than once.  previous response="
+					+responseSent+" 2nd response="+response);
+		responseSent = response;
+		return stream.sendResponse(response);
+	}
+	
+	private CompletableFuture<Void> sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {		
+				
 		boolean compressed = false;
 		Compression usingCompression;
 		if(compression == null) {
@@ -284,7 +295,7 @@ public class ProxyResponse implements ResponseStreamer {
 		boolean isCompressed = compressed;
 
 		// Send the headers and get the responseid.
-		return stream.sendResponse(resp).thenCompose(writer -> {
+		return sendStreamHeaderResponse(resp).thenCompose(writer -> {
 
 			List<DataFrame> frames = possiblyCompress(bytes, usingCompression, isCompressed);
 			

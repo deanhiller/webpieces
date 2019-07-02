@@ -324,7 +324,7 @@ public abstract class BasChannelImpl
 		this.isConnectingTo = addr;
 	}
 
-	protected void setClosed(boolean b, boolean isServerClosing) {
+	protected void setClosed(boolean isServerClosing) {
 		isRemoteEndInitiateClose = isServerClosing;
 		channelState = ChannelState.CLOSED;
 	}
@@ -343,7 +343,7 @@ public abstract class BasChannelImpl
 	        	return future;
 	        }
 	        
-	        setClosed(true, false);
+	        setClosed(false);
 	        CloseRunnable runnable = new CloseRunnable(this, future);
 	        unqueueAndFailWritesThenClose(runnable);
         } catch(Exception e) {
@@ -356,7 +356,7 @@ public abstract class BasChannelImpl
     protected abstract boolean isOpen();
     
     public void serverClosed() throws IOException {
-    	setClosed(true, true);
+    	setClosed(true);
     	closeImpl();
     }
     protected abstract void closeImpl() throws IOException;

@@ -19,8 +19,6 @@ public class ResponseProcessorAppError implements Processor {
 	private LoadedController loadedController;
 	private ResponseStreamer responseCb;
 
-	private boolean responseSent = false;
-
 	public ResponseProcessorAppError(RequestContext ctx, LoadedController loadedController, ResponseStreamer responseCb) {
 		this.ctx = ctx;
 		this.loadedController = loadedController;
@@ -28,10 +26,6 @@ public class ResponseProcessorAppError implements Processor {
 	}
 
 	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {
-		if(responseSent)
-			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
-		responseSent = true;
-		
 		String controllerName = loadedController.getControllerInstance().getClass().getName();
 		String methodName = loadedController.getControllerMethod().getName();
 		

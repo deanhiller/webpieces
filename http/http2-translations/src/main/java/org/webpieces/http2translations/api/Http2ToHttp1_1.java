@@ -14,6 +14,8 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatus;
 import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2HeaderStruct;
 import com.webpieces.hpack.api.dto.Http2Request;
@@ -24,6 +26,8 @@ import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class Http2ToHttp1_1 {
 
+	private static final Logger log = LoggerFactory.getLogger(Http2ToHttp1_1.class);
+	
 	private static Set<String> headersToSkip = new HashSet<>(); 
 	static {
 		headersToSkip.add(Http2HeaderName.METHOD.getHeaderName());
@@ -63,6 +67,9 @@ public class Http2ToHttp1_1 {
 		
 		if(status.getCode() == null)
 			throw new IllegalArgumentException("The header :status is required to send the response");
+
+		//Do a queue instead with last few frames that can be enabled
+		log.info("response="+response);
 		
 		return response;
 	}
