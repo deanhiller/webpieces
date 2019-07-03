@@ -70,7 +70,14 @@ public class ThreadDataListener implements DataListener {
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {
-				dataListener.farEndClosed(channel);
+				MDC.put("socket", ""+channel);
+				try {
+					dataListener.farEndClosed(channel);
+				} catch(RuntimeException e) {
+					throw e;
+				} finally {
+					MDC.clear();
+				}
 			}
 		});
 	}
@@ -80,7 +87,14 @@ public class ThreadDataListener implements DataListener {
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {
-				dataListener.failure(channel, data, e);
+				MDC.put("socket", ""+channel);
+				try {
+					dataListener.failure(channel, data, e);
+				} catch(RuntimeException e) {
+					throw e;
+				} finally {
+					MDC.clear();
+				}
 			}
 		});
 	}

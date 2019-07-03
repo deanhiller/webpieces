@@ -1,5 +1,7 @@
 # webpieces
 
+* ADD response http1.1 queue and http2 to capture LAST 3 frames sent so on exception we know
+
 * (6/27)TEST WINDOWS NOW...should be fixed with ... fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
 add better parsing of flags after the Map so that arguments can be documented from plugins????  How to discover and print out help cleanly??
