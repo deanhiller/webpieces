@@ -127,6 +127,10 @@ public abstract class BasChannelImpl
 		else if(!selMgr.isRunning())
 			throw new IllegalStateException(this+"ChannelManager must be running and is stopped");		
 		else if(channelState == ChannelState.CLOSED) {
+			//TODO: dhiller I feel like we should give the client a few writes before we start throwing if
+			//isRemoteEndInitiateClose = true since this is a likely scenario OR even better, allow 2 seconds
+			//to pass before throwing as by then, the client has been notified and they really should have shut
+			//the fuck up
 			if(isRemoteEndInitiateClose)
 				throw new NioClosedChannelException(this+"Client cannot write after the remote end closed the socket");
 			else

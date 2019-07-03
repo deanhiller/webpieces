@@ -1,9 +1,12 @@
 # webpieces
 
+* release a version AND have generated projects use the sslcert.WebSSLFactory to have 1 less class in that package
+
 * ADD response http1.1 queue and http2 to capture LAST 3 frames sent so on exception we know
 
 * (6/27)TEST WINDOWS NOW...should be fixed with ... fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
+* need a scan of required arguments to begin with!!
 add better parsing of flags after the Map so that arguments can be documented from plugins????  How to discover and print out help cleanly??
 1. optional args with default(default can be null)
 2. required args
@@ -50,6 +53,7 @@ https://jira.qos.ch/browse/LOGBACK-1473 - %caller not working for lambdas
 * rewire redirects so port stuff is done OUTSIDE the router so we no longer need funky callbacks.  (ie. I made a mistake there that we can fix by providing all the info from the router to the webserver and webserver knows the ports).  This is more complex than that!  
 * add test for java enum and list select and multiselect
 * add test for java related entity select and multiselect
+* on client sending close to us, should we allow 2 seconds before we start throwing exceptions...seems reasonable actually as there WILL be race conditions with apps writing back to clients as clients close but we notify them and they should process that notification in 2 seconds (unless under severe load but at that point, not sure anything is a good solution)
 
 Error route is very complex.  We must deal with these situations (write a test for each one!!!)
 1. html POST - in this case, controller must redirect to keep with PRG or deliver weird back button stuff
