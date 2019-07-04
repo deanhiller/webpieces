@@ -1,8 +1,11 @@
 # webpieces
 
-* release a version AND have generated projects use the sslcert.WebSSLFactory to have 1 less class in that package
+* TEST theory.  If request has host header with port 80(or no port), redirect to port 80/443.  If host header has port 443 (or no port), redirect to port 80/443.  If host header has the port we bound too(we can compare easily), then redirect to http/https port!
 
-* ADD response http1.1 queue and http2 to capture LAST 3 frames sent so on exception we know
+* release a version AND have generated projects use the sslcert.WebSSLFactory to have 1 less class in that package
+* start integration of cmdline2 into the webserver more fully.....figure out difference between cmdline AND static properties passed in
+
+* tweak twitter project to return admin page since they close the socket early causing a AsyncWriteException since they don't wait for the whole http response(so annoying when clients do that)
 
 * (6/27)TEST WINDOWS NOW...should be fixed with ... fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 

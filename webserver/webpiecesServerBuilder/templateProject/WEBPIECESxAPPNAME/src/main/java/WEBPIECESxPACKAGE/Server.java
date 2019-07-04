@@ -266,12 +266,18 @@ public class Server {
 	private static ServerConfig parseAndConfigure(String[] args) {
 		CommandLineParser parser = new CommandLineParser();
 		Map<String, String> arguments = parser.parse(args); //prelim quick parse into Map
+		
+//		org.webpieces.util.cmdline2.CommandLineParser parser2 = new org.webpieces.util.cmdline2.CommandLineParser();
+//		Arguments arguments2 = parser2.parse(args);
 
 		WebSSLFactory factory = new WebSSLFactory();
 
 		ServerConfig config = new ServerConfig(factory, "production");
 		config.addNeedsStorage(factory);
 
+//		Supplier<InetSocketAddress> httpAddr = arguments2.consumeOptional(HTTP_PORT_KEY, ":0", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host", (s) -> convertInet(s));
+//		Supplier<InetSocketAddress> httpsAddr = arguments2.consumeOptional(HTTPS_PORT_KEY, ":0", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host", (s) -> convertInet(s));
+//		
 		if(arguments.get(HTTP_PORT_KEY) != null) {
 			if(arguments.get(HTTPS_PORT_KEY) == null)
 				throw new IllegalArgumentException(HTTP_PORT_KEY+" passed in on command line but "+HTTPS_PORT_KEY+" is not.  You must pass in both or neither");
@@ -296,6 +302,20 @@ public class Server {
 			config.setBackendSvrConfig(backendConfig);
 		}
 		return config;
+	}
+	
+	private static InetSocketAddress convertInet(String value) {
+		int index = value.indexOf(":");
+		if(index < 0)
+			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port'");
+		String host = value.substring(0, index);
+		String portStr = value.substring(index+1);
+		try {
+			int port = Integer.parseInt(portStr);
+			return new InetSocketAddress(host, port);
+		} catch(NumberFormatException e) {
+			throw new IllegalArgumentException("Invalid format.  The port piece of '{host}:{port}' or ':port' must be an integer");
+		}
 	}
 	
 	public void start() {
