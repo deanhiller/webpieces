@@ -1,6 +1,9 @@
 # webpieces
 
-* TEST theory.  If request has host header with port 80(or no port), redirect to port 80/443.  If host header has port 443 (or no port), redirect to port 80/443.  If host header has the port we bound too(we can compare easily), then redirect to http/https port!
+* TEST theory.  If request has host header with port 80(or no port), redirect to port 80/443.  If host header has port 443 (or no port), redirect to port 80/443.  If host header has the port we bound too(we can compare easily), then redirect to http/https port! ALSO, must run test when https port is using x-forwarded-proto header since redirect will be what?  oh, port 80/443 still, duh!  definitely need tests..hmm
+
+
+
 
 * release a version AND have generated projects use the sslcert.WebSSLFactory to have 1 less class in that package
 * start integration of cmdline2 into the webserver more fully.....figure out difference between cmdline AND static properties passed in
