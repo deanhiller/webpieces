@@ -14,13 +14,12 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.PortConfig;
-import org.webpieces.router.api.PortConfigCallback;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.plugins.ReverseRouteLookup;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
+import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.EHtmlRouter;
 
 public class ReverseRoutes implements ReverseRouteLookup {
@@ -37,11 +36,11 @@ public class ReverseRoutes implements ReverseRouteLookup {
 	private Map<String, EHtmlRouter> fullClassAndNameToRoute = new HashMap<>();
 
 	private Charset urlEncoding;
-	private PortConfigCallback portConfigCallback;
-	private volatile PortConfig ports;
 
-	public ReverseRoutes(RouterConfig config) {
-		this.portConfigCallback = config.getPortConfigCallback();
+	private RedirectFormation redirectFormation;
+
+	public ReverseRoutes(RouterConfig config, RedirectFormation redirectFormation) {
+		this.redirectFormation = redirectFormation;
 		this.urlEncoding = config.getUrlEncoding();		
 	}
 
@@ -186,10 +185,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		//we are rendering an http page with a link to https so need to do special magic
 		String domain = request.domain;
 
-		if(ports == null)
-			ports = portConfigCallback.fetchPortConfig();
-
-		int httpsPort = ports.getHttpsPort();
+		int httpsPort = redirectFormation.calculateHttpsPort(request);
 		return "https://"+domain+":"+httpsPort +urlPath;
 	}
 	

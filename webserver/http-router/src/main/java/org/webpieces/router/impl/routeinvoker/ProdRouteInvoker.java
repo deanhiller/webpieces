@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 
 import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.router.api.PortConfigLookup;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.dto.RouteType;
@@ -20,10 +21,10 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	@Inject
 	public ProdRouteInvoker(
 		ObjectToParamTranslator reverseTranslator,
-		RouterConfig config,
-		ControllerLoader controllerFinder
+		ControllerLoader controllerFinder,
+		RedirectFormation redirectFormation
 	) {
-		super(reverseTranslator, config, controllerFinder);
+		super(reverseTranslator, controllerFinder, redirectFormation);
 	}
 	
 	@Override
@@ -42,7 +43,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	public CompletableFuture<Void> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
 				invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, 
-				dynamicInfo.getLoadedController(), invokeInfo.getResponseCb());
+				dynamicInfo.getLoadedController(), invokeInfo.getResponseCb(), redirectFormation);
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
 	}
 	

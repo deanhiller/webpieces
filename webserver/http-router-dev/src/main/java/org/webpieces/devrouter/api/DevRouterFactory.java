@@ -3,6 +3,7 @@ package org.webpieces.devrouter.api;
 import java.io.File;
 
 import org.webpieces.compiler.api.CompileConfig;
+import org.webpieces.router.api.EmptyPortConfigLookup;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterSvcFactory;
@@ -20,7 +21,11 @@ public class DevRouterFactory {
 
     public static RouterService create(VirtualFile routersFile, CompileConfig compileConfig) {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
-    		return create(new RouterConfig(baseWorkingDir).setMetaFile(routersFile).setSecretKey(SecretKeyInfo.generateForTest()), compileConfig);
+		RouterConfig config = new RouterConfig(baseWorkingDir)
+									.setMetaFile(routersFile)
+									.setSecretKey(SecretKeyInfo.generateForTest())
+									.setPortLookupConfig(new EmptyPortConfigLookup());
+    	return create(config, compileConfig);
     }
     
 	public static RouterService create(RouterConfig config, CompileConfig compileConfig) {

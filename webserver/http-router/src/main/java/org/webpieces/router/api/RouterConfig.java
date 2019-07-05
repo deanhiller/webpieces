@@ -43,13 +43,13 @@ public class RouterConfig {
 
 	private Map<String, String> webAppMetaProperties;
 
-	private PortConfigCallback portConfigCallback = () -> new PortConfig(8080, 8443);
-
 	private File workingDirectory;
 
 	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
 
 	private boolean enableSeperateBackendRouter;
+
+	private PortConfigLookup portLookup;
 
 	public RouterConfig(File workingDirectory) {
 		if(!workingDirectory.isAbsolute())
@@ -144,13 +144,6 @@ public class RouterConfig {
 	public Map<String, String> getWebAppMetaProperties() {
 		return webAppMetaProperties;
 	}
-	public RouterConfig setPortConfigCallback(PortConfigCallback callback) {
-		this.portConfigCallback = callback;
-		return this;
-	}
-	public PortConfigCallback getPortConfigCallback() {
-		return portConfigCallback;
-	}
 
 	public File getWorkingDirectory() {
 		return workingDirectory;
@@ -179,4 +172,13 @@ public class RouterConfig {
 		return this;
 	}
 
+	public RouterConfig setPortLookupConfig(PortConfigLookup portLookup) {
+		this.portLookup = portLookup;
+		return this;
+	}
+
+	public PortConfigLookup getPortLookup() {
+		return portLookup;
+	}
+	
 }

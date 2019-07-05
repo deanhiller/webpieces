@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
@@ -28,6 +29,7 @@ import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routebldr.CurrentPackage;
 import org.webpieces.router.impl.routebldr.DomainRouteBuilderImpl;
+import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.AMasterRouter;
 import org.webpieces.router.impl.routers.BDomainRouter;
 import org.webpieces.util.file.VirtualFile;
@@ -39,6 +41,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+@Singleton
 public class RouteLoader {
 	private static final Logger log = LoggerFactory.getLogger(RouteLoader.class);
 	
@@ -53,6 +56,8 @@ public class RouteLoader {
 
 	private ReverseRoutes reverseRoutes;
 
+	private RedirectFormation redirectFormation;
+
 
 	@Inject
 	public RouteLoader(
@@ -62,7 +67,8 @@ public class RouteLoader {
 		PluginSetup pluginSetup,
 		ManagedBeanMeta beanMeta,
 		ObjectTranslator objectTranslator,
-		RouteBuilderLogic routeBuilderLogic
+		RouteBuilderLogic routeBuilderLogic,
+		RedirectFormation portLookup
 	) {
 		this.config = config;
 		this.masterRouter = masterRouter;
@@ -71,6 +77,7 @@ public class RouteLoader {
 		this.beanMeta = beanMeta;
 		this.objectTranslator = objectTranslator;
 		this.routeBuilderLogic = routeBuilderLogic;
+		this.redirectFormation = portLookup;
 	}
 	
 	public WebAppMeta load(ClassForName loader, Consumer<Injector> startupFunction) {
@@ -195,7 +202,7 @@ public class RouteLoader {
 	public void loadAllRoutes(WebAppMeta rm, Injector injector, RoutingHolder routingHolder) {
 		log.info("adding routes");
 		
-		reverseRoutes = new ReverseRoutes(config);
+		reverseRoutes = new ReverseRoutes(config, redirectFormation);
 		ResettingLogic resettingLogic = new ResettingLogic(reverseRoutes, injector);
 		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic, config.isEnableSeperateBackendRouter());
 

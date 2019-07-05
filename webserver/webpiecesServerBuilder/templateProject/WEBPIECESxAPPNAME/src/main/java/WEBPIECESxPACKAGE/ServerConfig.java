@@ -35,19 +35,6 @@ public class ServerConfig {
 	private boolean validateRouteIdsOnStartup = false;
 	
 	/**
-	 * In issuing a redirect, it is important to send back to clients the correct port so
-	 * instead of redirecting to /asdfsdf:12343 which the server is bound to, we redirect back
-	 * to asdfsdf:80.  
-	 * 
-	 * This is due to if you send no port information in the redirect, some browsers would redirect
-	 * back to port 80 which would be wrong when testing on localhost:8080.  TODO: test again in 
-	 * modern day browsers to see if we can eliminate this code completely and just send a redirect 
-	 * to the url and hope the browser knows which port it originally requested.  test in opera, firefox
-	 * IE, safari and chrome
-	 */
-	private boolean isUseFirewall = false;
-	
-	/**
 	 * This sets the cache-control: max-age={time} for production server.  The DevelopmentServer
 	 * completely avoids caching.  Also, as long as you use the %%{ }%% tag, webpieces will change
 	 * the url of the updated file for you.  ie. update, the file and the hash changes on all pages
@@ -157,14 +144,6 @@ public class ServerConfig {
 	public ServerConfig setTokenCheckOn(boolean tokenCheckOff) {
 		this.tokenCheckOn = tokenCheckOff;
 		return this;
-	}
-
-	public boolean isUseFirewall() {
-		return isUseFirewall;
-	}
-
-	public void setUseFirewall(boolean isUseFirewall) {
-		this.isUseFirewall = isUseFirewall;
 	}
 
 	public HttpSvrInstanceConfig getHttpConfig() {

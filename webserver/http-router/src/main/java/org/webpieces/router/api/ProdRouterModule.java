@@ -22,6 +22,8 @@ public class ProdRouterModule implements Module {
 
 	public ProdRouterModule(RouterConfig config) {
 		this.config = config;
+		if(config.getPortLookup() == null)
+			throw new IllegalArgumentException("RouterConfig.getPortLookup cannot be null and was");
 	}
 	
 	@Override
@@ -40,6 +42,8 @@ public class ProdRouterModule implements Module {
 		ManagedBeanMeta beanMeta = new ManagedBeanMeta();
 		binder.bind(ManagedBeanMeta.class).toInstance(beanMeta);
 		binder.bindListener(Matchers.any(), new GuiceWebpiecesListener(beanMeta));
+		
+		binder.bind(PortConfigLookup.class).toInstance(config.getPortLookup());
 	}
 	
 }

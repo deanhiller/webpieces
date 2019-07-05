@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.EmptyPortConfigLookup;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterSvcFactory;
@@ -47,7 +48,8 @@ public class TestProdRouter {
 		RouterConfig config = new RouterConfig(baseWorkingDir)
 										.setMetaFile(f)
 										.setWebappOverrides(module)
-										.setSecretKey(SecretKeyInfo.generateForTest());
+										.setSecretKey(SecretKeyInfo.generateForTest())
+										.setPortLookupConfig(new EmptyPortConfigLookup());
 		RouterService prodSvc = RouterSvcFactory.create(config);
 		
 		return Arrays.asList(new Object[][] {

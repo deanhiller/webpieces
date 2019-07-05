@@ -10,6 +10,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.PortConfig;
+import org.webpieces.router.api.PortConfigLookup;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
@@ -36,14 +37,22 @@ public class ResponseProcessorNotFound implements Processor {
 	private ResponseStreamer responseCb;
 	private ReverseRoutes reverseRoutes;
 	private ObjectToParamTranslator reverseTranslator;
+	private RedirectFormation redirectFormation;
 
-	public ResponseProcessorNotFound(RequestContext ctx, ReverseRoutes reverseRoutes, 
-			ObjectToParamTranslator reverseTranslator, LoadedController loadedController, ResponseStreamer responseCb) {
+	public ResponseProcessorNotFound(
+			RequestContext ctx, 
+			ReverseRoutes reverseRoutes, 
+			ObjectToParamTranslator reverseTranslator, 
+			LoadedController loadedController, 
+			ResponseStreamer responseCb,
+			RedirectFormation redirectFormation
+	) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
 		this.loadedController = loadedController;
 		this.responseCb = responseCb;
+		this.redirectFormation = redirectFormation;
 	}
 
 	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {
@@ -73,13 +82,13 @@ public class ResponseProcessorNotFound implements Processor {
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
 	}
 	
-	public CompletableFuture<Void> createFullRedirect(RedirectImpl action, PortConfig portConfig) {
+	public CompletableFuture<Void> createFullRedirect(RedirectImpl action) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
-		return createRedirect(id, args, false, portConfig);
+		return createRedirect(id, args, false);
 	}
 	
-	private CompletableFuture<Void> createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect, PortConfig portConfig) {
+	private CompletableFuture<Void> createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
 		RouterRequest request = ctx.getRequest();
 		Method method = loadedController.getControllerMethod();
 		EHtmlRouter nextRequestMeta = reverseRoutes.get(id);
@@ -108,28 +117,22 @@ public class ResponseProcessorNotFound implements Processor {
 			path = path.replace("{"+name+"}", value);
 		}
 
-		boolean isHttpsOnly = matchInfo.getExposedPorts() == Port.HTTPS;
-		
-		//if the request is https, stay in https as everything is accessible on https
-		//if the request is http, then convert to https IF new route is secure
-		boolean isSecure = request.isHttps || isHttpsOnly;
-		int port = request.port;
-		//if need to change port to https port, this is how we do it...
-		if(!request.isHttps && isHttpsOnly)
-			port = portConfig.getHttpsPort();
+		PortAndIsSecure info = redirectFormation.calculateInfo(matchInfo, null, request);
+		boolean isSecure = info.isSecure();
+		int port = info.getPort();
 		
 		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
 		
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(redirectResponse));
 	}
 	
-	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb, PortConfig portConfig) {
+	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb) {
 		if(controllerResponse instanceof RenderImpl) {
 			return createRenderResponse((RenderImpl) controllerResponse);
 		} else if(controllerResponse instanceof RenderContent) {
 			return createContentResponse((RenderContent) controllerResponse);
 		} else if(controllerResponse instanceof RedirectImpl) {
-			return createFullRedirect((RedirectImpl)controllerResponse, portConfig);
+			return createFullRedirect((RedirectImpl)controllerResponse);
 		} else {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
 					+ "precondition check on NotFound routes to assert the correct return types in "

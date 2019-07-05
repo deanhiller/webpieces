@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.plugins.backend.BackendPlugin;
-import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline.CommandLineParser;
@@ -23,6 +22,7 @@ import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
+import org.webpieces.webserver.impl.PortConfigLookupImpl;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -88,6 +88,8 @@ public class Server {
 
 		File baseWorkingDir = modifyUserDirForManyEnvironments(filePath);
 
+		PortConfigLookupImpl portLookup = new PortConfigLookupImpl();
+		
 		//This override is only needed if you want to add your own Html Tags to re-use
 		//you can delete this code if you are not adding your own webpieces html tags
 		//We graciously added #{mytag}# #{id}# and #{myfield}# as examples that you can
@@ -114,10 +116,10 @@ public class Server {
 											.setWebappOverrides(appOverrides)
 											.setWebAppMetaProperties(svrConfig.getWebAppMetaProperties())
 											.setSecretKey(new SecretKeyInfo(fetchKey(), "HmacSHA1"))
-											.setPortConfigCallback(() -> fetchPortsForRedirects(svrConfig.isUseFirewall()))
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
 											.setTokenCheckOn(svrConfig.isTokenCheckOn())
 											.setNeedsStorage(svrConfig.getNeedsStorage())
+											.setPortLookupConfig(portLookup)
 											.setEnableSeperateBackendRouter(backendHostedOverPort); 
 
 		WebServerConfig config = new WebServerConfig()
@@ -125,6 +127,7 @@ public class Server {
 										.setHttpConfig(svrConfig.getHttpConfig())
 										.setHttpsConfig(svrConfig.getHttpsConfig())
 										.setBackendSvrConfig(svrConfig.getBackendSvrConfig())
+										.setWebServerPortInfo(portLookup)
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
 										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
 
@@ -133,25 +136,6 @@ public class Server {
 		//Notice that there is a WebServerConfig, a RouterConfig, and a TemplateConfig making up
 		//3 of the major pieces of webpieces.
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
-	}
-	
-	/**
-	 * If we get a HTTP request and need to redirect to the https port, we need to know whether to redirect
-	 * to port 443 OR should we redirect to the port the server is running on.  Generally, we always 
-	 * redirect to port 443 when using a firewall as 443 is the standard https port.
-	 */
-	PortConfig fetchPortsForRedirects(boolean isUseFirewall) {
-		//NOTE: for running locally and for tests, you must set useFirewallPorts=false
-		
-		int httpPort = 80; //good security teams generally have the firewall on port 80 and your server on something like 8080
-		int httpsPort = 443; //good security teams generally have the firewall on port 443 and your server on something like 8443
-		if(!isUseFirewall) {
-			//otherwise use the same port the webserver is bound to
-			//this is for running locally AND for local tests
-			httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();
-			httpsPort = getUnderlyingHttpsChannel().getLocalAddress().getPort();
-		}
-		return new PortConfig(httpPort, httpsPort);
 	}
 	
 	private byte[] fetchKey() {
@@ -281,9 +265,7 @@ public class Server {
 		if(arguments.get(HTTP_PORT_KEY) != null) {
 			if(arguments.get(HTTPS_PORT_KEY) == null)
 				throw new IllegalArgumentException(HTTP_PORT_KEY+" passed in on command line but "+HTTPS_PORT_KEY+" is not.  You must pass in both or neither");
-			//in general, if we are doing custom ports, here we assume you are doing a firewall but feel free to change that
-			config.setUseFirewall(true);
-			
+
 			int httpPort = parser.parseInt(HTTP_PORT_KEY, arguments.get(HTTP_PORT_KEY));
 			int httpsPort = parser.parseInt(HTTPS_PORT_KEY, arguments.get(HTTPS_PORT_KEY));
 			HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(new InetSocketAddress(httpPort), null);
@@ -304,19 +286,19 @@ public class Server {
 		return config;
 	}
 	
-	private static InetSocketAddress convertInet(String value) {
-		int index = value.indexOf(":");
-		if(index < 0)
-			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port'");
-		String host = value.substring(0, index);
-		String portStr = value.substring(index+1);
-		try {
-			int port = Integer.parseInt(portStr);
-			return new InetSocketAddress(host, port);
-		} catch(NumberFormatException e) {
-			throw new IllegalArgumentException("Invalid format.  The port piece of '{host}:{port}' or ':port' must be an integer");
-		}
-	}
+//	private static InetSocketAddress convertInet(String value) {
+//		int index = value.indexOf(":");
+//		if(index < 0)
+//			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port'");
+//		String host = value.substring(0, index);
+//		String portStr = value.substring(index+1);
+//		try {
+//			int port = Integer.parseInt(portStr);
+//			return new InetSocketAddress(host, port);
+//		} catch(NumberFormatException e) {
+//			throw new IllegalArgumentException("Invalid format.  The port piece of '{host}:{port}' or ':port' must be an integer");
+//		}
+//	}
 	
 	public void start() {
 		webServer.startSync();

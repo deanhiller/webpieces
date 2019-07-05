@@ -23,6 +23,7 @@ import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
+import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
@@ -41,8 +42,14 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	private final ServiceInvoker serviceInvoker;
 
 	@Inject
-	public DevRouteInvoker(ObjectToParamTranslator reverseTranslator, RouterConfig config, ControllerLoader loader, ServiceInvoker invoker) {
-		super(reverseTranslator, config, loader);
+	public DevRouteInvoker(
+			ObjectToParamTranslator reverseTranslator, 
+			RouterConfig config, 
+			ControllerLoader loader, 
+			ServiceInvoker invoker, 
+			RedirectFormation redirectFormation
+	) {
+		super(reverseTranslator, loader, redirectFormation);
 		this.serviceInvoker = invoker;
 	}
 	

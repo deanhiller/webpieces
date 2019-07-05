@@ -8,23 +8,19 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.ControllerException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
-import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.FilterInfo;
 import org.webpieces.router.impl.routers.DynamicInfo;
-import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
@@ -34,16 +30,19 @@ import org.webpieces.util.filters.Service;
 public abstract class AbstractRouteInvoker implements RouteInvoker {
 
 	protected final ObjectToParamTranslator reverseTranslator;
-	private final RouterConfig config;
 	protected final ControllerLoader controllerFinder;
 	
 	protected ReverseRoutes reverseRoutes;
-	private volatile PortConfig portConfig;
+	protected RedirectFormation redirectFormation;
 
-	public AbstractRouteInvoker(ObjectToParamTranslator reverseTranslator, RouterConfig config, ControllerLoader controllerFinder) {
+	public AbstractRouteInvoker(
+			ObjectToParamTranslator reverseTranslator, 
+			ControllerLoader controllerFinder,
+			RedirectFormation redirectFormation
+	) {
 		this.reverseTranslator = reverseTranslator;
-		this.config = config;
 		this.controllerFinder = controllerFinder;
+		this.redirectFormation = redirectFormation;
 	}
 
 	@Override
@@ -91,9 +90,6 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ResponseStreamer responseCb = invokeInfo.getResponseCb();
 		
-		if(portConfig == null)
-			portConfig = config.getPortConfigCallback().fetchPortConfig();
-
 		if(service == null)
 			throw new IllegalStateException("Bug, service should never be null at this point");
 		
@@ -113,7 +109,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			Current.setContext(null);
 		}
 		
-		return response.thenCompose(resp -> processor.continueProcessing(resp, responseCb, portConfig));
+		return response.thenCompose(resp -> processor.continueProcessing(resp, responseCb));
 	}
 	
 	private Throwable convert(LoadedController loadedController, Throwable t) {
@@ -128,7 +124,8 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
-				invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, loadedController, invokeInfo.getResponseCb());
+				invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, 
+				loadedController, invokeInfo.getResponseCb(), redirectFormation);
 		return invokeAny(invokeInfo, loadedController, service, data, processor);
 	}
 	

@@ -53,6 +53,9 @@ public class WebServerModule implements Module {
 		binder.bind(BufferPool.class).to(BufferCreationPool.class).asEagerSingleton();
 		
 		binder.bind(Time.class).to(TimeImpl.class).asEagerSingleton();
+		
+		//what the webserver writes to
+		binder.bind(WebServerPortInformation.class).toInstance(config.getWebServerPortInfo()); 
 	}
 
 	@Provides

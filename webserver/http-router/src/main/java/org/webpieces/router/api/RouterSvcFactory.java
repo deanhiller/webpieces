@@ -18,7 +18,11 @@ public class RouterSvcFactory {
 
     public static RouterService create(VirtualFile routersFile) {
     		File baseWorkingDir = FileFactory.getBaseWorkingDir();
-    		return create(new RouterConfig(baseWorkingDir).setMetaFile(routersFile).setSecretKey(SecretKeyInfo.generateForTest()));
+    		RouterConfig config = new RouterConfig(baseWorkingDir)
+    									.setMetaFile(routersFile)
+    									.setSecretKey(SecretKeyInfo.generateForTest())
+    									.setPortLookupConfig(new EmptyPortConfigLookup());
+    		return create(config);
     }
     
 	public static RouterService create(RouterConfig config) {

@@ -9,13 +9,11 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.HttpPort;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
-import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.actions.AjaxRedirectImpl;
@@ -40,14 +38,22 @@ public class ResponseProcessorHtml implements Processor {
 	private LoadedController loadedController;
 	private ObjectToParamTranslator reverseTranslator;
 	private ResponseStreamer responseCb;
+	private RedirectFormation redirectFormation;
 
-	public ResponseProcessorHtml(RequestContext ctx, ReverseRoutes reverseRoutes,
-			ObjectToParamTranslator reverseTranslator, LoadedController loadedController, ResponseStreamer responseCb) {
+	public ResponseProcessorHtml(
+			RequestContext ctx, 
+			ReverseRoutes reverseRoutes,
+			ObjectToParamTranslator reverseTranslator, 
+			LoadedController loadedController, 
+			ResponseStreamer responseCb, 
+			RedirectFormation redirectFormation
+	) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
 		this.loadedController = loadedController;
 		this.responseCb = responseCb;
+		this.redirectFormation = redirectFormation;
 	}
 
 	public CompletableFuture<Void> createRawRedirect(RawRedirect controllerResponse) {
@@ -63,27 +69,27 @@ public class ResponseProcessorHtml implements Processor {
 	
 
 	
-	public CompletableFuture<Void> createAjaxRedirect(AjaxRedirectImpl action, PortConfig portConfig) {
+	public CompletableFuture<Void> createAjaxRedirect(AjaxRedirectImpl action) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
-		return createRedirect(null, id, args, true, portConfig);		
+		return createRedirect(null, id, args, true);
 	}
 	
-	public CompletableFuture<Void> createFullRedirect(RedirectImpl action, PortConfig portConfig) {
+	public CompletableFuture<Void> createFullRedirect(RedirectImpl action) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
-		return createRedirect(null, id, args, false, portConfig);
+		return createRedirect(null, id, args, false);
 	}
 
-	public CompletableFuture<Void> createPortRedirect(PortRedirect action, PortConfig portConfig) {
+	public CompletableFuture<Void> createPortRedirect(PortRedirect action) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
 		HttpPort port = action.getPort();
-		return createRedirect(port, id, args, false, portConfig);
+		return createRedirect(port, id, args, false);
 	}
 	
 	private CompletableFuture<Void> createRedirect(
-			HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect, PortConfig portConfig) {
+			HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
 		RouterRequest request = ctx.getRequest();
 		Method method = loadedController.getControllerMethod();
 		EHtmlRouter nextRequestMeta = reverseRoutes.get(id);
@@ -112,28 +118,9 @@ public class ResponseProcessorHtml implements Processor {
 			path = path.replace("{"+name+"}", value);
 		}
 
-		boolean isHttpsOnly = matchInfo.getExposedPorts() == Port.HTTPS;
-
-		//if the request is https, stay in https as everything is accessible on https
-		//if the request is http, then convert to https IF new route is secure
-		boolean isSecure = request.isHttps || isHttpsOnly;
-		int port = request.port;
-		//if need to change port to https port, this is how we do it...
-		if(!request.isHttps && isHttpsOnly)
-			port = portConfig.getHttpsPort();
-		
-		//lastly override to requests http or https port if requested
-		if(requestedPort == HttpPort.HTTP && isHttpsOnly)
-			throw new IllegalArgumentException("Your controller is trying to direct to http for a page only served over https");
-		if(requestedPort != null) {
-			if(requestedPort == HttpPort.HTTPS) {
-				port = portConfig.getHttpsPort();
-				isSecure = true;
-			} else {
-				port = portConfig.getHttpPort();
-				isSecure = false;
-			}
-		}
+		PortAndIsSecure info = redirectFormation.calculateInfo(matchInfo, requestedPort, request);
+		boolean isSecure = info.isSecure();
+		int port = info.getPort();
 			
 		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
 		
@@ -181,13 +168,13 @@ public class ResponseProcessorHtml implements Processor {
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
 	}
 
-	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb, PortConfig portConfig) {
+	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb) {
 		if(controllerResponse instanceof RedirectImpl) {
-			return createFullRedirect((RedirectImpl)controllerResponse, portConfig);
+			return createFullRedirect((RedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof PortRedirect) {
-			return createPortRedirect((PortRedirect)controllerResponse, portConfig);
+			return createPortRedirect((PortRedirect)controllerResponse);
 		} else if(controllerResponse instanceof AjaxRedirectImpl) {
-			return createAjaxRedirect((AjaxRedirectImpl)controllerResponse, portConfig);
+			return createAjaxRedirect((AjaxRedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof RenderImpl) {
 			return createRenderResponse((RenderImpl)controllerResponse);
 		} else if(controllerResponse instanceof RawRedirect) {

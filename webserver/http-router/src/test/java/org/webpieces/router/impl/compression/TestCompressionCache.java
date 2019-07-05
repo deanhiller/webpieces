@@ -9,6 +9,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.router.api.EmptyPortConfigLookup;
+import org.webpieces.router.api.PortConfigLookup;
 import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routes.Port;
@@ -43,7 +45,7 @@ public class TestCompressionCache {
 		File stagingDir = FileFactory.newBaseFile("output/staging");
 		FileUtils.deleteDirectory(stagingDir);
 		
-		RouterConfig config = new RouterConfig(FileFactory.getBaseWorkingDir());
+		RouterConfig config = new RouterConfig(FileFactory.getBaseWorkingDir()).setPortLookupConfig(new EmptyPortConfigLookup());
 		config.setSecretKey(SecretKeyInfo.generateForTest());
 		config.setCachedCompressedDirectory(cacheDir);
 		Module allMods = Modules.override(new ProdRouterModule(config)).with(new TestModule());
@@ -144,6 +146,8 @@ public class TestCompressionCache {
 		@Override
 		public void configure(Binder binder) {
 			binder.bind(FileUtil.class).toInstance(proxy);
+			
+			binder.bind(PortConfigLookup.class).toInstance(new EmptyPortConfigLookup());
 		}
 	}
 }

@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.actions.RenderImpl;
@@ -47,7 +46,7 @@ public class ResponseProcessorAppError implements Processor {
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
 	}
 
-	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb, PortConfig portConfig) {
+	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb) {
 		if(!(controllerResponse instanceof RenderImpl)) {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
 					+ "precondition check on error routes to assert the correct return types in ControllerLoader which is called from the RouteBuilders");

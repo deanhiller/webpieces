@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.nio.api.BackpressureConfig;
+import org.webpieces.webserver.impl.WebServerPortInformation;
 
 import com.google.inject.Module;
 import com.webpieces.http2engine.api.client.Http2Config;
@@ -44,6 +45,8 @@ public class WebServerConfig {
 	private HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig();
 	private HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig();
 	private HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig();
+
+	private WebServerPortInformation webServerPortInfo;
 
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -153,6 +156,15 @@ public class WebServerConfig {
 	public WebServerConfig setHttpsConfig(HttpSvrInstanceConfig httpsConfig) {
 		this.httpsConfig = httpsConfig;
 		return this;
+	}
+
+	public WebServerConfig setWebServerPortInfo(WebServerPortInformation portLookup) {
+		this.webServerPortInfo = portLookup;
+		return this;
+	}
+
+	public WebServerPortInformation getWebServerPortInfo() {
+		return webServerPortInfo;
 	}
 	
 }

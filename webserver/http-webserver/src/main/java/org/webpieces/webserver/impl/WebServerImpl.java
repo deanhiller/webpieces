@@ -20,6 +20,7 @@ import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.impl.compression.FileMeta;
@@ -44,6 +45,8 @@ public class WebServerImpl implements WebServer {
 	private RequestReceiver serverListener;
 	@Inject
 	private RouterService routingService;
+	@Inject
+	private WebServerPortInformation portConfig;
 	
 	private HttpServer httpServer;
 	private HttpServer httpsServer;
@@ -96,6 +99,9 @@ public class WebServerImpl implements WebServer {
 		});
 		
 		return CompletableFuture.allOf(fut1, fut2, fut3).thenApply((v) -> {
+			int httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();
+			int httpsPort = getUnderlyingHttpsChannel().getLocalAddress().getPort();
+			portConfig.setPortConfig(new PortConfig(httpPort, httpsPort));
 			log.info("All servers started");	
 			return null;
 		});

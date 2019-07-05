@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.file.FileFactory;
@@ -21,6 +20,7 @@ import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
+import org.webpieces.webserver.impl.PortConfigLookupImpl;
 
 import com.google.inject.Module;
 
@@ -68,11 +68,14 @@ public class WebserverForTest {
 		
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 
+		PortConfigLookupImpl portLookup = new PortConfigLookupImpl();
+		
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
 				.setPlatformOverrides(platformOverrides)
 				.setHttpConfig(httpConfig)
-				.setHttpsConfig(httpsConfig);
+				.setHttpsConfig(httpsConfig)
+				.setWebServerPortInfo(portLookup);
 		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
 											.setMetaFile(metaFile )
 											.setWebappOverrides(testConfig.getAppOverrides())
@@ -81,16 +84,10 @@ public class WebserverForTest {
 											.setCachedCompressedDirectory(cacheDir)
 											.setSecretKey(SecretKeyInfo.generateForTest())
 											.setTokenCheckOn(testConfig.isUseTokenCheck())
-											.setPortConfigCallback(() -> fetchPortsForRedirects());
+											.setPortLookupConfig(portLookup);
 		TemplateConfig templateConfig = new TemplateConfig();
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
-	}
-
-	PortConfig fetchPortsForRedirects() {
-		int httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();
-		int httpsPort = getUnderlyingHttpsChannel().getLocalAddress().getPort();
-		return new PortConfig(httpPort, httpsPort);
 	}
 	
 	public void configure(ServerSocketChannel channel) throws SocketException {
