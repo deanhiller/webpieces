@@ -77,8 +77,8 @@ public class DevelopmentServer {
 		
 		ServerConfig config = new ServerConfig(sslFactory, HibernatePlugin.PERSISTENCE_TEST_UNIT);
 		if(usePortZero) {
-			config.getHttpConfig().setListenAddress(new InetSocketAddress(0));
-			config.getHttpsConfig().setListenAddress(new InetSocketAddress(0));
+			config.getHttpConfig().setListenAddress(() -> new InetSocketAddress(0));
+			config.getHttpsConfig().setListenAddress(() -> new InetSocketAddress(0));
 		}
 
 		//READ the documentation in HttpSvrInstanceConfig for more about these settings

@@ -8,12 +8,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.plugins.backend.BackendPlugin;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline.CommandLineParser;
+import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -251,54 +253,51 @@ public class Server {
 		CommandLineParser parser = new CommandLineParser();
 		Map<String, String> arguments = parser.parse(args); //prelim quick parse into Map
 		
-//		org.webpieces.util.cmdline2.CommandLineParser parser2 = new org.webpieces.util.cmdline2.CommandLineParser();
-//		Arguments arguments2 = parser2.parse(args);
+		org.webpieces.util.cmdline2.CommandLineParser parser2 = new org.webpieces.util.cmdline2.CommandLineParser();
+		Arguments arguments2 = parser2.parse(args);
 
 		WebSSLFactory factory = new WebSSLFactory();
 
 		ServerConfig config = new ServerConfig(factory, "production");
 		config.addNeedsStorage(factory);
 
-//		Supplier<InetSocketAddress> httpAddr = arguments2.consumeOptional(HTTP_PORT_KEY, ":0", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host", (s) -> convertInet(s));
-//		Supplier<InetSocketAddress> httpsAddr = arguments2.consumeOptional(HTTPS_PORT_KEY, ":0", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host", (s) -> convertInet(s));
-//		
-		if(arguments.get(HTTP_PORT_KEY) != null) {
-			if(arguments.get(HTTPS_PORT_KEY) == null)
-				throw new IllegalArgumentException(HTTP_PORT_KEY+" passed in on command line but "+HTTPS_PORT_KEY+" is not.  You must pass in both or neither");
+		Supplier<InetSocketAddress> httpAddr = arguments2.consumeOptional(HTTP_PORT_KEY, ":8080", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host", (s) -> convertInet(s));
+		Supplier<InetSocketAddress> httpsAddr = arguments2.consumeOptional(HTTPS_PORT_KEY, ":8443", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host", (s) -> convertInet(s));
 
-			int httpPort = parser.parseInt(HTTP_PORT_KEY, arguments.get(HTTP_PORT_KEY));
-			int httpsPort = parser.parseInt(HTTPS_PORT_KEY, arguments.get(HTTPS_PORT_KEY));
-			HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(new InetSocketAddress(httpPort), null);
-			httpConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-			HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(new InetSocketAddress(httpsPort), factory);
-			httpsConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-			
-			config.setHttpConfig(httpConfig);
-			config.setHttpsConfig(httpsConfig);
-		}
+		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(httpAddr, null);
+		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(httpsAddr, factory);
+		httpConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
+		httpsConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
+		config.setHttpConfig(httpConfig);
+		config.setHttpsConfig(httpsConfig);
 		
 		if(arguments.get(BACKEND_PORT_KEY) != null) {
 			int backendPort = parser.parseInt(BACKEND_PORT_KEY, arguments.get(BACKEND_PORT_KEY));
-			HttpSvrInstanceConfig backendConfig = new HttpSvrInstanceConfig(new InetSocketAddress(backendPort), factory);
+			HttpSvrInstanceConfig backendConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(backendPort), factory);
 			backendConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
 			config.setBackendSvrConfig(backendConfig);
 		}
 		return config;
 	}
 	
-//	private static InetSocketAddress convertInet(String value) {
-//		int index = value.indexOf(":");
-//		if(index < 0)
-//			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port'");
-//		String host = value.substring(0, index);
-//		String portStr = value.substring(index+1);
-//		try {
-//			int port = Integer.parseInt(portStr);
-//			return new InetSocketAddress(host, port);
-//		} catch(NumberFormatException e) {
-//			throw new IllegalArgumentException("Invalid format.  The port piece of '{host}:{port}' or ':port' must be an integer");
-//		}
-//	}
+	private static InetSocketAddress convertInet(String value) {
+		if(value == null)
+			return null;
+		else if("".equals(value)) //if command line passes "http.port=", the value will be "" to turn off the port
+			return null;
+		
+		int index = value.indexOf(":");
+		if(index < 0)
+			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port'");
+		String host = value.substring(0, index);
+		String portStr = value.substring(index+1);
+		try {
+			int port = Integer.parseInt(portStr);
+			return new InetSocketAddress(host, port);
+		} catch(NumberFormatException e) {
+			throw new IllegalArgumentException("Invalid format.  The port piece of '{host}:{port}' or ':port' must be an integer");
+		}
+	}
 	
 	public void start() {
 		webServer.startSync();

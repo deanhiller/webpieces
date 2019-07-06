@@ -2,6 +2,7 @@ package org.webpieces.webserver.api;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
+import java.util.function.Supplier;
 
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
@@ -36,23 +37,23 @@ import org.webpieces.nio.api.handlers.ConsumerFunc;
  */
 public class HttpSvrInstanceConfig {
 
-	private InetSocketAddress listenAddress;
+	private Supplier<InetSocketAddress> listenAddress;
 	private SSLEngineFactory sslEngineFactory;
 	public ConsumerFunc<ServerSocketChannel> functionToConfigureBeforeBind;
 
-	public HttpSvrInstanceConfig(InetSocketAddress listenAddress, SSLEngineFactory sslEngineFactory) {
-		this.listenAddress = listenAddress;
+	public HttpSvrInstanceConfig(Supplier<InetSocketAddress> httpAddr, SSLEngineFactory sslEngineFactory) {
+		this.listenAddress = httpAddr;
 		this.sslEngineFactory = sslEngineFactory;
 	}
 	
 	public HttpSvrInstanceConfig() {
 	}
 
-	public InetSocketAddress getListenAddress() {
+	public Supplier<InetSocketAddress> getListenAddress() {
 		return listenAddress;
 	}
 	
-	public HttpSvrInstanceConfig setListenAddress(InetSocketAddress backendListenAddress) {
+	public HttpSvrInstanceConfig setListenAddress(Supplier<InetSocketAddress> backendListenAddress) {
 		this.listenAddress = backendListenAddress;
 		return this;
 	}

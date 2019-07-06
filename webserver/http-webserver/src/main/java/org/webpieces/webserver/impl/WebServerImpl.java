@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -124,7 +125,8 @@ public class WebServerImpl implements WebServer {
 			
 			log.info("Creating and starting the "+serverName+" over port="+instanceConfig.getListenAddress()+" AND using '"+type+"'");
 
-			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(serverName, instanceConfig.getListenAddress(), 10000);
+			InetSocketAddress bindAddress = instanceConfig.getListenAddress().get();
+			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(serverName, bindAddress, 10000);
 			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = instanceConfig.getFunctionToConfigureServerSocket();
 			
 			fut3 = function.apply(httpSvrConfig, serverListener, instanceConfig.getSslEngineFactory());

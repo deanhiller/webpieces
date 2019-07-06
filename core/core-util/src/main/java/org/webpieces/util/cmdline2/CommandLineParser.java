@@ -23,7 +23,13 @@ public class CommandLineParser {
 				continue; //do next key so we can aggregate ALL errors first
 			} else if(split.length == 1) {
 				String key = split[0].substring(1);
-				arguments.put(key, new ValueHolder(null));
+
+				//check for '-' and use "" instead of null in that case which gets past validation
+				if(arg.contains("=")) {
+					arguments.put(key, new ValueHolder(""));
+				} else {
+					arguments.put(key, new ValueHolder(null));
+				}
 				continue;
 			} else if(split.length != 2) {
 				errors.add(new IllegalArgumentException("Argument "+arg+" has bad syntax.  It either has no = in it or has too many"));

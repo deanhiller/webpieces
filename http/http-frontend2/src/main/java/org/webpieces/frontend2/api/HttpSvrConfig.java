@@ -2,6 +2,7 @@ package org.webpieces.frontend2.api;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.function.Supplier;
 
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.data.api.BufferCreationPool;
@@ -10,7 +11,7 @@ public class HttpSvrConfig {
 
 	public AsyncConfig asyncServerConfig = new AsyncConfig();
 	
-	public SocketAddress bindAddress;
+	public InetSocketAddress bindAddress;
 		
 	/**
 	 * When a client connects, they must send a request in this amount of time.  null means disabled.
@@ -39,14 +40,14 @@ public class HttpSvrConfig {
 		this(id, new InetSocketAddress(0));
 	}
 	
-	public HttpSvrConfig(String id, SocketAddress bindAddr) {
+	public HttpSvrConfig(String id, InetSocketAddress bindAddr) {
 		asyncServerConfig.id = id;
 		this.bindAddress = bindAddr;
 	}
 	
-	public HttpSvrConfig(String id, SocketAddress bindAddr, Integer connectToRequestTimeout) {
+	public HttpSvrConfig(String id, InetSocketAddress bindAddress, Integer connectToRequestTimeout) {
 		asyncServerConfig.id = id;
-		this.bindAddress = bindAddr;
+		this.bindAddress = bindAddress;
 		maxConnectToRequestTimeoutMs = connectToRequestTimeout;
 	}
 

@@ -67,12 +67,12 @@ public class ServerConfig {
 	/**
 	 * Configuration for the Http Server.  See the HttpSvrInstanceConfig class documentation for more info.
 	 */
-	private HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8080), null);
+	private HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8080), null);
 	
 	/**
 	 * Configuration for the Https Server.  See the HttpSvrInstanceConfig class documentation for more info.
 	 */
-	private HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8443), new WebSSLFactory());
+	private HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8443), new WebSSLFactory());
 	
 	/**
 	 * Configuration for the Backend Http or Https Server.  See the HttpSvrInstanceConfig class documentation for more info.
@@ -90,8 +90,8 @@ public class ServerConfig {
 
 	public ServerConfig(int httpPort, int httpsPort, SSLEngineFactory sslFactory, String persistenceUnit, File compressionCache) {
 		webAppMetaProperties.put(HibernatePlugin.PERSISTENCE_UNIT_KEY, persistenceUnit);
-		httpConfig = new HttpSvrInstanceConfig(new InetSocketAddress(httpPort), null);
-		httpsConfig = new HttpSvrInstanceConfig(new InetSocketAddress(httpsPort), sslFactory);
+		httpConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(httpPort), null);
+		httpsConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(httpsPort), sslFactory);
 		this.compressionCacheDir = compressionCache;
 	}
 

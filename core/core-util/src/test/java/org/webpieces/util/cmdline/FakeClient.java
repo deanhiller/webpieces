@@ -20,6 +20,7 @@ public class FakeClient {
 	private Supplier<Integer> key6a;
 	private Supplier<Boolean> key6b;
 	private Arguments parse;
+	private Supplier<InetSocketAddress> key7;
 
 	public void fakeMain(String[] args) {
 		
@@ -46,6 +47,10 @@ public class FakeClient {
 		//consume optional and check boolean
 		key6a = parse.consumeOptional("key6", "789", "This is key6", (s) -> convertInt(s));
 		key6b = parse.consumeDoesExist("key6", "This is key6 check");
+		
+		//test for default null...
+		key7 = parse.consumeOptional("key7", null, "This is key7", (s) -> convertInet(s));
+
 	}
 	
 	public void checkArgs() {
@@ -53,6 +58,11 @@ public class FakeClient {
 	}
 	
 	private InetSocketAddress convertInet(String value) {
+		if(value == null)
+			return null;
+		else if("".equals(value))
+			return null;
+		
 		int index = value.indexOf(":");
 		if(index < 0)
 			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port'");
@@ -82,5 +92,9 @@ public class FakeClient {
 
 	public Integer readKey4a() {
 		return key4a.get();
+	}
+
+	public InetSocketAddress readKey7() {
+		return key7.get();
 	}
 }

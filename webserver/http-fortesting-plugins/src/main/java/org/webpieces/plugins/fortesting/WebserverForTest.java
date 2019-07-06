@@ -55,13 +55,13 @@ public class WebserverForTest {
 			metaFile = new VirtualFileClasspath("basicMeta.txt", WebserverForTest.class.getClassLoader());
 
 		SSLEngineFactoryWebServerTesting sslFactory = new SSLEngineFactoryWebServerTesting();
-		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8080), null);
+		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8080), null);
 		httpConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8443), sslFactory);
+		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8443), sslFactory);
 		httpsConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
 		if(testConfig.isUsePortZero()) {
-			httpConfig.setListenAddress(new InetSocketAddress(0));
-			httpsConfig.setListenAddress(new InetSocketAddress(0));
+			httpConfig.setListenAddress(() -> new InetSocketAddress(0));
+			httpsConfig.setListenAddress(() -> new InetSocketAddress(0));
 		}
 		
 		Module platformOverrides = testConfig.getPlatformOverrides();

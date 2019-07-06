@@ -53,6 +53,30 @@ public class CmdLineParser2Test {
 	}
 
 	@Test
+	public void testDefaultNullObjectAfterConversionAllowed() {
+		String[] args = new String[] {"-key2=something2", "-key5=asf" };
+
+		fakeClient.fakeMain(args);
+		
+		fakeClient.checkArgs();
+		
+		InetSocketAddress address = fakeClient.readKey7();
+		Assert.assertEquals(null, address);
+	}
+	
+	@Test
+	public void testNullValueOnCmdLineAllowed() {
+		String[] args = new String[] {"-key7=", "-key2=something2", "-key5=asf" };
+
+		fakeClient.fakeMain(args);
+		
+		fakeClient.checkArgs();
+		
+		InetSocketAddress address = fakeClient.readKey7();
+		Assert.assertEquals(null, address);
+	}
+	
+	@Test
 	public void testKeyRequiresValueButNoValueExistOptionalAndRequired() {
 		String[] args = new String[] {"-key1", "-key2", "-key5=asf", };
 		
