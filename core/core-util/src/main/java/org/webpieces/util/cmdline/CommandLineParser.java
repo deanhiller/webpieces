@@ -16,9 +16,9 @@ public class CommandLineParser {
 		for(String arg: args) {
 			String[] split = arg.split("=");
 			if(split.length != 2)
-				throw new IllegalArgumentException("Argument "+arg+" has bad syntax.  It either has no = in it or has too many");
+				continue; //old parser can't cope with this
 			else if(!split[0].startsWith("-"))
-				throw new IllegalArgumentException("Argument "+arg+" has a key that does not start with - which is required");
+				continue; //let the new parser handle this
 			
 			String key = split[0].substring(1);
 			arguments.put(key, split[1]);

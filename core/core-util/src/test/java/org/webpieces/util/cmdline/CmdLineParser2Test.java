@@ -232,6 +232,30 @@ public class CmdLineParser2Test {
 		}
 	}
 	
+	@Test
+	public void testConsumeExistsKey3TypeOfKeyIsTrue() {
+		String[] args = new String[] {"-key3", "-key5=asdf", "-key2=wqeee"};
+
+		fakeClient.fakeMain(args);
+		
+		fakeClient.checkArgs();
+		
+		boolean value = fakeClient.isKey3();
+		Assert.assertTrue(value);
+	}
+
+	@Test
+	public void testConsumeKey3ExistsTypeOfKeyIsFalse() {
+		String[] args = new String[] {"-key5=asdf", "-key2=wqeee"};
+
+		fakeClient.fakeMain(args);
+		
+		fakeClient.checkArgs();
+		
+		boolean value = fakeClient.isKey3();
+		Assert.assertFalse(value);
+	}
+	
 	private Integer convertInt(String s) {
 		return Integer.parseInt(s);
 	}

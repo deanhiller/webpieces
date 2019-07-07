@@ -97,4 +97,8 @@ public class FakeClient {
 	public InetSocketAddress readKey7() {
 		return key7.get();
 	}
+
+	public boolean isKey3() {
+		return key3.get();
+	}
 }
