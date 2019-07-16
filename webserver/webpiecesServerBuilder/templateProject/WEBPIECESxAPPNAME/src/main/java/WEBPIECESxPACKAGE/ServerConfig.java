@@ -79,8 +79,6 @@ public class ServerConfig {
 	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
 
 	public ServerConfig(SSLEngineFactory sslFactory, File compressionCache) {
-		httpConfig = new HttpSvrInstanceConfig(null, (s) -> {});
-		httpsConfig = new HttpSvrInstanceConfig(sslFactory, (s) -> {});
 		this.compressionCacheDir = compressionCache;
 	}
 	
