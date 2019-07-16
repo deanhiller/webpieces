@@ -13,13 +13,13 @@ import java.util.Map;
  */
 public class CommandLineParser {
 
-	public Arguments parse(String[] args) {
+	public Arguments parse(String ... args) {
 		Map<String, ValueHolder> arguments = new HashMap<>();
 		List<Throwable> errors = new ArrayList<Throwable>();
 		for(String arg: args) {
 			String[] split = arg.split("=");
 			if(!split[0].startsWith("-")) {
-				errors.add(new IllegalArgumentException("Argument "+arg+" has a key that does not start with - which is required"));
+				errors.add(new IllegalArgumentException("Argument '"+arg+"' has a key that does not start with - which is required"));
 				continue; //do next key so we can aggregate ALL errors first
 			} else if(split.length == 1) {
 				String key = split[0].substring(1);

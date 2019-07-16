@@ -1,15 +1,11 @@
 package WEBPIECESxPACKAGE;
 
 import java.io.File;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.nio.api.SSLEngineFactory;
-import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
@@ -51,12 +47,6 @@ public class ServerConfig {
 	private File compressionCacheDir;
 	
 	/**
-	 * This is how properties can be passed to plugins if needed.  See the plugins documentation
-	 * to know if you need to use this.
-	 */
-	private Map<String, String> webAppMetaProperties = new HashMap<>();
-	
-	/**
 	 * For testing, it's easier to turn this off.  When rendering the webpieces #{form}# tag,
 	 * webpieces sticks a special security token as one of the fields that it will verify on the
 	 * POST request for higher security.  This is very annoying for testing and is turned off
@@ -67,18 +57,18 @@ public class ServerConfig {
 	/**
 	 * Configuration for the Http Server.  See the HttpSvrInstanceConfig class documentation for more info.
 	 */
-	private HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8080), null);
+	private HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(null, (s) -> {});
 	
 	/**
 	 * Configuration for the Https Server.  See the HttpSvrInstanceConfig class documentation for more info.
 	 */
-	private HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8443), new WebSSLFactory());
+	private HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(new WebSSLFactory(), (s) -> {});
 	
 	/**
 	 * Configuration for the Backend Http or Https Server.  See the HttpSvrInstanceConfig class documentation for more info.
 	 */
-	private HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig();	
-	
+	private HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig();
+
 	/**
 	 * Because Guice creation happens 'after' you create some classes that need access to the SimpleStorage
 	 * mechanism, you can provide those classes here and we will inject the Storage after it has been created.
@@ -88,21 +78,21 @@ public class ServerConfig {
 	 */
 	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
 
-	public ServerConfig(int httpPort, int httpsPort, SSLEngineFactory sslFactory, String persistenceUnit, File compressionCache) {
-		webAppMetaProperties.put(HibernatePlugin.PERSISTENCE_UNIT_KEY, persistenceUnit);
-		httpConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(httpPort), null);
-		httpsConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(httpsPort), sslFactory);
+	public ServerConfig(SSLEngineFactory sslFactory, File compressionCache) {
+		httpConfig = new HttpSvrInstanceConfig(null, (s) -> {});
+		httpsConfig = new HttpSvrInstanceConfig(sslFactory, (s) -> {});
 		this.compressionCacheDir = compressionCache;
 	}
-
-	public ServerConfig(String persistenceUnit, File compressionCache) {
+	
+	public ServerConfig(File compressionCache) {
 		//For tests, we need to bind to port 0, then lookup the port after that...
-		this(0, 0, new WebSSLFactory(), persistenceUnit, compressionCache);
+		this(new WebSSLFactory(), compressionCache);
 		tokenCheckOn = false;
 	}
 
-	public ServerConfig(SSLEngineFactory factory, String persistenceUnit) {
-		this(8080, 8443, factory, persistenceUnit, FileFactory.newBaseFile("webpiecesCache/precompressedFiles"));
+	//8080, 8443
+	public ServerConfig(SSLEngineFactory factory) {
+		this(factory, FileFactory.newBaseFile("webpiecesCache/precompressedFiles"));
 	}
 	
 	public VirtualFile getMetaFile() {
@@ -124,10 +114,6 @@ public class ServerConfig {
 
 	public void setStaticFileCacheTimeSeconds(Long staticFileCacheTimeSeconds) {
 		this.staticFileCacheTimeSeconds = staticFileCacheTimeSeconds;
-	}
-
-	public Map<String, String> getWebAppMetaProperties() {
-		return webAppMetaProperties;
 	}
 
 	public File getCompressionCacheDir() {

@@ -1,9 +1,9 @@
 package org.webpieces.router.api.simplesvr;
 
 import java.util.List;
-import java.util.Map;
 
 import org.webpieces.router.api.plugins.Plugin;
+import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppMeta;
 
@@ -13,7 +13,7 @@ import com.google.inject.Module;
 public class AppModules implements WebAppMeta {
 
 	@Override
-	public void initialize(Map<String, String> props) {
+	public void initialize(WebAppConfig props) {
 	}
 	
 	public List<Module> getGuiceModules() {

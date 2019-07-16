@@ -1,6 +1,7 @@
 package org.webpieces.webserver;
 
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileClasspath;
 
 import com.google.inject.Module;
 
@@ -8,18 +9,19 @@ public class PrivateTestConfig {
 
 	private Module platformOverrides;
 	private Module appOverrides;
-	private boolean usePortZero = false;
-	private VirtualFile metaFile;
+	private VirtualFile metaFile = new VirtualFileClasspath("basicMeta.txt", PrivateWebserverForTest.class.getClassLoader());
 	private boolean useTokenCheck = false;
 
 	public PrivateTestConfig() {
 	}
 	
-	public PrivateTestConfig(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile, boolean useTokenCheck) {
+	public PrivateTestConfig(Module platformOverrides, Module appOverrides, VirtualFile metaFile, boolean useTokenCheck) {
 		this.platformOverrides = platformOverrides;
 		this.appOverrides = appOverrides;
-		this.usePortZero = usePortZero;
-		this.metaFile = metaFile;
+		if(metaFile == null)
+			this.metaFile = new VirtualFileClasspath("basicMeta.txt", PrivateWebserverForTest.class.getClassLoader());
+		else
+			this.metaFile = metaFile;
 		this.useTokenCheck = useTokenCheck;
 	}
 
@@ -37,14 +39,6 @@ public class PrivateTestConfig {
 
 	public void setAppOverrides(Module appOverrides) {
 		this.appOverrides = appOverrides;
-	}
-
-	public boolean isUsePortZero() {
-		return usePortZero;
-	}
-
-	public void setUsePortZero(boolean usePortZero) {
-		this.usePortZero = usePortZero;
 	}
 
 	public VirtualFile getMetaFile() {

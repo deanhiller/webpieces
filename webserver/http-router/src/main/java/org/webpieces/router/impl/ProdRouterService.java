@@ -11,6 +11,7 @@ import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.AMasterRouter;
+import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -37,12 +38,17 @@ public class ProdRouterService extends AbstractRouterService {
 		this.router = router;
 	}
 
+	@Override
+	public void configure(Arguments arguments) {
+		routeLoader.configure(loader, arguments);
+	}
+	
 	//add Route HOOK callback so translate RouteId -> route and route->controller.method to call
 	@Override
 	public void start() {
 		log.info("Starting PROD server with NO compiling classloader");
 		
-		routeLoader.load(loader, injector -> runStartupHooks(injector));
+		routeLoader.load(injector -> runStartupHooks(injector));
 		started = true;
 	}
 

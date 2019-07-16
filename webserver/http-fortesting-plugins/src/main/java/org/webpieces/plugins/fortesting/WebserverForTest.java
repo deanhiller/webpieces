@@ -1,7 +1,6 @@
 package org.webpieces.plugins.fortesting;
 
 import java.io.File;
-import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
@@ -10,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
+import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
@@ -31,7 +32,7 @@ public class WebserverForTest {
 	public static final Charset CHAR_SET_TO_USE = StandardCharsets.UTF_8;
 
 	public static void main(String[] args) throws InterruptedException {
-		new WebserverForTest(null, null, false, null).start();
+		new WebserverForTest(null, null, null, args).start();
 		
 		synchronized (WebserverForTest.class) {
 			//wait forever for now so server doesn't shut down..
@@ -41,11 +42,13 @@ public class WebserverForTest {
 
 	private WebServer webServer;
 
-	public WebserverForTest(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile) {
-		this(new TestConfig(platformOverrides, appOverrides, usePortZero, metaFile, true));
+	public WebserverForTest(Module platformOverrides, Module appOverrides, VirtualFile metaFile, String ... args) {
+		this(new TestConfig(platformOverrides, appOverrides, metaFile, true), args);
 	}
 	
-	public WebserverForTest(TestConfig testConfig) {
+	public WebserverForTest(TestConfig testConfig, String ...args) {
+		Arguments cmdLineArgs = new CommandLineParser().parse(args);
+
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
 		
@@ -55,14 +58,8 @@ public class WebserverForTest {
 			metaFile = new VirtualFileClasspath("basicMeta.txt", WebserverForTest.class.getClassLoader());
 
 		SSLEngineFactoryWebServerTesting sslFactory = new SSLEngineFactoryWebServerTesting();
-		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8080), null);
-		httpConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8443), sslFactory);
-		httpsConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-		if(testConfig.isUsePortZero()) {
-			httpConfig.setListenAddress(() -> new InetSocketAddress(0));
-			httpsConfig.setListenAddress(() -> new InetSocketAddress(0));
-		}
+		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(null, (s) -> {});
+		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(sslFactory, (s) -> {});
 		
 		Module platformOverrides = testConfig.getPlatformOverrides();
 		
@@ -87,7 +84,9 @@ public class WebserverForTest {
 											.setPortLookupConfig(portLookup);
 		TemplateConfig templateConfig = new TemplateConfig();
 		
-		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
+		webServer = WebServerFactory.create(config, routerConfig, templateConfig, cmdLineArgs);
+		
+		cmdLineArgs.checkConsumedCorrectly();
 	}
 	
 	public void configure(ServerSocketChannel channel) throws SocketException {

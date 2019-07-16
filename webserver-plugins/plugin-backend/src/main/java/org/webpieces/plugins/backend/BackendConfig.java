@@ -1,18 +1,17 @@
 package org.webpieces.plugins.backend;
 
+import org.webpieces.util.cmdline2.Arguments;
+
 public class BackendConfig {
 
-	private boolean isUsePluginAssets;
+	private Arguments arguments;
 
-	public BackendConfig(boolean isUsePluginAssets) {
-		this.isUsePluginAssets = isUsePluginAssets;
-	}
-	
-	public BackendConfig() {
+	public BackendConfig(Arguments arguments) {
+		this.arguments = arguments;
 	}
 
-	public boolean isUsePluginAssets() {
-		return isUsePluginAssets;
+	public Arguments getArguments() {
+		return arguments;
 	}
-	
+
 }

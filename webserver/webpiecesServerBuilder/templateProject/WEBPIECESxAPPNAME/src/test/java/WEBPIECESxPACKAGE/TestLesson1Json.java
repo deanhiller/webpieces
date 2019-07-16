@@ -26,7 +26,6 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
@@ -54,6 +53,7 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 	private final static Logger log = LoggerFactory.getLogger(TestLesson1Json.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
+	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest" };
 	private HttpSocket http11Socket;
 	private ObjectMapper mapper = new ObjectMapper();
 	
@@ -63,13 +63,13 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 		//This line is not really needed but ensures you do not run a test without param names compiled in(which will fail).
 		Asserts.assertWasCompiledWithParamNames("test");
 		
-		String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 		boolean isRemote = false; //you could parameterize the test and run remote or local
-		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(isRemote), new AppOverridesModule(), new ServerConfig(pUnit, JavaCache.getCacheLocation()));
+		Server webserver = new Server(
+			getOverrides(isRemote), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()), args
+		);
 		webserver.start();
 		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

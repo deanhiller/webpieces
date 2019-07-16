@@ -1,12 +1,10 @@
 package WEBPIECESxPACKAGE;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
-import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -14,6 +12,7 @@ import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
@@ -75,11 +74,13 @@ public class DevelopmentServer {
 		
 		WebSSLFactory sslFactory = new WebSSLFactory();
 		
-		ServerConfig config = new ServerConfig(sslFactory, HibernatePlugin.PERSISTENCE_TEST_UNIT);
-		if(usePortZero) {
-			config.getHttpConfig().setListenAddress(() -> new InetSocketAddress(0));
-			config.getHttpsConfig().setListenAddress(() -> new InetSocketAddress(0));
-		}
+		String[] args;
+		if(usePortZero)
+			args = Lists.newArrayList("-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest").toArray(new String[0]);
+		else
+			args = Lists.newArrayList("-hibernate.persistenceunit=hibernatefortest").toArray(new String[0]);
+		
+		ServerConfig config = new ServerConfig(sslFactory);
 
 		//READ the documentation in HttpSvrInstanceConfig for more about these settings
 //		HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8444), sslFactory);
@@ -91,7 +92,7 @@ public class DevelopmentServer {
 		config.setStaticFileCacheTimeSeconds(null);
 		config.setMetaFile(metaFile);
 		
-		server = new Server(platformOverrides, null, config);
+		server = new Server(platformOverrides, null, config, args);
 	}
 	
 	public void start() throws InterruptedException {

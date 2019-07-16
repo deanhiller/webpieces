@@ -3,6 +3,8 @@ package org.webpieces.router.api;
 import java.io.File;
 import java.util.List;
 
+import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.SecretKeyInfo;
@@ -18,11 +20,15 @@ public class RouterSvcFactory {
 
     public static RouterService create(VirtualFile routersFile) {
     		File baseWorkingDir = FileFactory.getBaseWorkingDir();
+    		Arguments arguments = new CommandLineParser().parse();
     		RouterConfig config = new RouterConfig(baseWorkingDir)
     									.setMetaFile(routersFile)
     									.setSecretKey(SecretKeyInfo.generateForTest())
     									.setPortLookupConfig(new EmptyPortConfigLookup());
-    		return create(config);
+    		RouterService svc = create(config);
+    		svc.configure(arguments);
+    		arguments.checkConsumedCorrectly();
+    		return svc;
     }
     
 	public static RouterService create(RouterConfig config) {

@@ -2,6 +2,8 @@ package org.webpieces.plugins.backend.login;
 
 import static org.webpieces.router.api.routes.Port.BOTH;
 
+import java.util.function.Supplier;
+
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
@@ -12,16 +14,16 @@ import org.webpieces.webserver.api.login.AbstractLoginRoutes;
 
 public class BackendLoginRoutes extends AbstractLoginRoutes {
 
-	private boolean usePluginAssets;
+	private Supplier<Boolean> isUsePluginAssets;
 
 	/**
 	 * @param controller
 	 * @param basePath The 'unsecure' path that has a login page so you can get to the secure path
 	 * @param securePath The path for the secure filter that ensures everyone under that path is secure
 	 */
-	public BackendLoginRoutes(boolean usePluginAssets, String controller, String basePath, String securePath) {
+	public BackendLoginRoutes(Supplier<Boolean> isUsePluginAssets, String controller, String basePath, String securePath) {
 		super(controller, basePath, securePath, "password");
-		this.usePluginAssets = usePluginAssets;
+		this.isUsePluginAssets = isUsePluginAssets;
 	}
 	
 	@Override
@@ -52,7 +54,7 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 		ScopedRouteBuilder scoped2 = baseRouter.getScopedRouteBuilder(basePath);
 		scoped2.addRoute(Port.BOTH, HttpMethod.GET,  "", "org.webpieces.plugins.backend.BackendController.redirectToLogin", BackendLoginRouteId.LOGGED_OUT_LANDING);
 		
-		if(usePluginAssets) {
+		if(isUsePluginAssets.get()) {
 			//ok, we are exposed on a port and need our own stuff installed...
 			baseRouter.addRoute(Port.BOTH, HttpMethod.GET, "/", "org.webpieces.plugins.backend.BackendController.redirectHome", BackendLoginRouteId.REDIRECT_TO_HOME);
 			baseRouter.setInternalErrorRoute("org.webpieces.plugins.backend.BackendController.internalError");

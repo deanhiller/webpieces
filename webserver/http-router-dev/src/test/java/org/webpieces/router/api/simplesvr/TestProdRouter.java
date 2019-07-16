@@ -21,6 +21,8 @@ import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.router.impl.dto.RedirectResponse;
+import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
@@ -45,12 +47,15 @@ public class TestProdRouter {
 		
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		TestModule module = new TestModule();
+		Arguments args = new CommandLineParser().parse();
 		RouterConfig config = new RouterConfig(baseWorkingDir)
 										.setMetaFile(f)
 										.setWebappOverrides(module)
 										.setSecretKey(SecretKeyInfo.generateForTest())
 										.setPortLookupConfig(new EmptyPortConfigLookup());
 		RouterService prodSvc = RouterSvcFactory.create(config);
+		prodSvc.configure(args);
+		args.checkConsumedCorrectly();
 		
 		return Arrays.asList(new Object[][] {
 	         { prodSvc, module }

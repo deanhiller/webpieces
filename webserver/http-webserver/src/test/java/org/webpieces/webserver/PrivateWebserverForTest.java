@@ -1,7 +1,6 @@
 package org.webpieces.webserver;
 
 import java.io.File;
-import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
@@ -10,9 +9,10 @@ import java.nio.charset.StandardCharsets;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
+import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
@@ -41,28 +41,38 @@ public class PrivateWebserverForTest {
 
 	private WebServer webServer;
 
+	@Deprecated
 	public PrivateWebserverForTest(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile) {
-		this(new PrivateTestConfig(platformOverrides, appOverrides, usePortZero, metaFile, true));
+		String[] arguments;
+		if(usePortZero)
+			arguments = new String[] {"-http.port=:0", "-https.port=:0"};
+		else
+			arguments = new String[0];
+		
+		PrivateTestConfig testConfig = new PrivateTestConfig(platformOverrides, appOverrides, metaFile, true);
+		init(testConfig, arguments);
+	}
+	
+	public PrivateWebserverForTest(Module platformOverrides, Module appOverrides, VirtualFile metaFile, String ...args) {
+		PrivateTestConfig testConfig = new PrivateTestConfig(platformOverrides, appOverrides, metaFile, true);
+		init(testConfig, args);
 	}
 	
 	public PrivateWebserverForTest(PrivateTestConfig testConfig) {
+		String[] args = {"-hibernate.persistenceunit=webpieces-persistence"};
+		init(testConfig, args);
+	}
+
+	private void init(PrivateTestConfig testConfig, String ... args) {
+		//read here and checked for correctness on last line of server construction
+		Arguments arguments = new CommandLineParser().parse(args);
+		
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
 		
-		VirtualFile metaFile = testConfig.getMetaFile();
-		//Tests can override this...
-		if(testConfig.getMetaFile() == null)
-			metaFile = new VirtualFileClasspath("basicMeta.txt", PrivateWebserverForTest.class.getClassLoader());
-
 		SSLEngineFactoryWebServerTesting sslFactory = new SSLEngineFactoryWebServerTesting();
-		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8080), null);
-		httpConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(8443), sslFactory);
-		httpsConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-		if(testConfig.isUsePortZero()) {
-			httpConfig.setListenAddress(() -> new InetSocketAddress(0));
-			httpsConfig.setListenAddress(() -> new InetSocketAddress(0));
-		}
+		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(null, (s) -> configure(s));
+		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(sslFactory, (s) -> configure(s));
 		
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 
@@ -75,7 +85,7 @@ public class PrivateWebserverForTest {
 				.setHttpsConfig(httpsConfig)
 				.setWebServerPortInfo(portLookup);
 		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
-											.setMetaFile(metaFile )
+											.setMetaFile(testConfig.getMetaFile() )
 											.setWebappOverrides(testConfig.getAppOverrides())
 											.setFileEncoding(CHAR_SET_TO_USE)
 											.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
@@ -85,7 +95,9 @@ public class PrivateWebserverForTest {
 											.setPortLookupConfig(portLookup);
 		TemplateConfig templateConfig = new TemplateConfig();
 		
-		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
+		webServer = WebServerFactory.create(config, routerConfig, templateConfig, arguments);
+		
+		arguments.checkConsumedCorrectly();
 	}
 
 	public void configure(ServerSocketChannel channel) throws SocketException {

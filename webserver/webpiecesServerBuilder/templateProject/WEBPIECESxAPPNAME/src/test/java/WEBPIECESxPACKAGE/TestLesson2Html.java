@@ -20,13 +20,12 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
-import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
+import org.webpieces.webserver.test.ResponseWrapper;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -49,9 +48,9 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
+	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest" };
 
 	private HttpSocket http11Socket;
-	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 	
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
@@ -65,7 +64,7 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(isRemote), new AppOverridesModule(), new ServerConfig(pUnit, JavaCache.getCacheLocation()));
+		Server webserver = new Server(getOverrides(isRemote), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()), args);
 		webserver.start();
 		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

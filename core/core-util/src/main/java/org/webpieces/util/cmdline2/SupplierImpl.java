@@ -25,7 +25,7 @@ public class SupplierImpl<T> implements Supplier<T> {
 	@Override
 	public T get() {
 		if(!isAllArgsConsumed.get())
-			throw new IllegalStateException("Bug in that you are consuming this too early before we are doing creating all arguments");
+			throw new IllegalStateException("Bug in that you are consuming this too early before we are done creating all arguments");
 		return param;
 	}
 

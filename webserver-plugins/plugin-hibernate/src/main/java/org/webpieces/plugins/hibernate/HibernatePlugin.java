@@ -1,6 +1,7 @@
 package org.webpieces.plugins.hibernate;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
@@ -14,14 +15,14 @@ public class HibernatePlugin implements Plugin {
 
 	private static final Logger log = LoggerFactory.getLogger(HibernatePlugin.class);
 	
-	public static final String PERSISTENCE_UNIT_KEY = "hibernate.persistenceunit.key";
+	public static final String PERSISTENCE_UNIT_KEY = "hibernate.persistenceunit";
 	public static final String PERSISTENCE_TEST_UNIT = "hibernatefortest";
-			
-	private String persistenceUnit;
+
+	private Supplier<String> persistenceUnit;
 
 	public HibernatePlugin(HibernateConfig config) {
 		log.info("classloader="+getClass().getClassLoader());
-		this.persistenceUnit = config.getPersistenceUnit();
+		this.persistenceUnit = config.getCmdLineArguments().consumeRequired(PERSISTENCE_UNIT_KEY, "The named persistence unit from the list of them inside META-INF/persistence.xml", (s) -> s);
 	}
 	
 	@Override

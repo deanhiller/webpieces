@@ -1,5 +1,8 @@
 package org.webpieces.plugins.properties.beans;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.webpieces.plugins.properties.PropertiesConfig;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -23,7 +26,8 @@ public class GuiceTypeListener implements TypeListener {
 	public <T> void hear(TypeLiteral<T> typeLiteral, TypeEncounter<T> typeEncounter) {
 		Class<?> clazz = typeLiteral.getRawType();
 		Class<?>[] interfaces = clazz.getInterfaces();
-		log.info("class="+clazz+" interfaces="+interfaces);
+		List<Class<?>> interfazes = Arrays.asList(interfaces);
+		log.info("class="+clazz+" interfaces="+interfazes);
 		for(Class<?> interfaze : interfaces) {
 			if(interfaze.getSimpleName().endsWith(config.getInterfaceSuffixMatch())) {
 				log.info("FOUND a managed bean="+clazz);

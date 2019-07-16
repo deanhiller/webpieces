@@ -1,6 +1,5 @@
 package org.webpieces.router.impl;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,6 +19,7 @@ import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.compression.FileMeta;
@@ -32,10 +33,12 @@ import org.webpieces.router.impl.routebldr.DomainRouteBuilderImpl;
 import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.AMasterRouter;
 import org.webpieces.router.impl.routers.BDomainRouter;
+import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -44,7 +47,8 @@ import com.google.inject.util.Modules;
 @Singleton
 public class RouteLoader {
 	private static final Logger log = LoggerFactory.getLogger(RouteLoader.class);
-	
+	public static final String BACKEND_PORT_KEY = "backend.port";
+
 	private final CompressionCacheSetup compressionCacheSetup;
 	
 	private final PluginSetup pluginSetup;
@@ -57,6 +61,11 @@ public class RouteLoader {
 	private ReverseRoutes reverseRoutes;
 
 	private RedirectFormation redirectFormation;
+	private Supplier<Boolean> backPortExists;
+	private Class<?> clazz;
+	private WebAppMeta routerModule;
+	private RoutingHolder routingHolder;
+	private Module theModule;
 
 
 	@Inject
@@ -80,16 +89,10 @@ public class RouteLoader {
 		this.redirectFormation = portLookup;
 	}
 	
-	public WebAppMeta load(ClassForName loader, Consumer<Injector> startupFunction) {
-		try {
-			return loadImpl(loader, startupFunction);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	private WebAppMeta loadImpl(ClassForName loader, Consumer<Injector> startupFunction) throws IOException {
+	public void configure(ClassForName loader, Arguments arguments) {
 		log.info("loading the master "+WebAppMeta.class.getSimpleName()+" class file");
+
+		backPortExists = arguments.consumeDoesExist(BACKEND_PORT_KEY, "If key exist(no matter the value), we use a backend route builder so backend routes are 'not' exposed on the http/https standard ports");
 
 		VirtualFile fileWithMetaClassName = config.getMetaFile();
 		String moduleName;
@@ -99,8 +102,23 @@ public class RouteLoader {
 		moduleName = contents.trim();
 		
 		log.info(WebAppMeta.class.getSimpleName()+" class to load="+moduleName);
-		Class<?> clazz = loader.clazzForName(moduleName);
+		clazz = loader.clazzForName(moduleName);
 		
+		Object obj = newInstance(clazz);
+		if(!(obj instanceof WebAppMeta))
+			throw new IllegalArgumentException("name="+moduleName+" does not implement "+WebAppMeta.class.getSimpleName());
+
+		log.info(WebAppMeta.class.getSimpleName()+" loaded.  initializing next");
+
+		
+		routerModule = (WebAppMeta) obj;
+		
+		WebAppConfig webConfig = new WebAppConfig(arguments, config.getWebAppMetaProperties());
+		routerModule.initialize(webConfig );
+		log.info(WebAppMeta.class.getSimpleName()+" initialized.");
+		
+		routingHolder = new RoutingHolder();
+
 		//TODO: Move this into a Development class so it's not in production so people are 100% sure it's not used in production
 		//In development mode, the ClassLoader here will be the CompilingClassLoader so stuff it into the thread context
 		//just in case plugins will need it(most won't, hibernate will).  In production, this is really a no-op and does
@@ -111,20 +129,30 @@ public class RouteLoader {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
-		
-			Object obj = newInstance(clazz);
-			if(!(obj instanceof WebAppMeta))
-				throw new IllegalArgumentException("name="+moduleName+" does not implement "+WebAppMeta.class.getSimpleName());
-	
-			log.info(WebAppMeta.class.getSimpleName()+" loaded.  initializing next");
-	
-			RoutingHolder routingHolder = new RoutingHolder();
 			
-			WebAppMeta routerModule = (WebAppMeta) obj;
-			routerModule.initialize(config.getWebAppMetaProperties());
-			log.info(WebAppMeta.class.getSimpleName()+" initialized.");
-			
-			Injector injector = createInjector(routerModule, routingHolder);
+			theModule = createTHEModule(routerModule, routingHolder);
+		} finally {
+			Thread.currentThread().setContextClassLoader(original);
+		}	
+	}
+	
+	/**
+	 * Injector.getInstance should only be used here and NOT in the configure method above!!! or it
+	 * can cause issue with the Arguments help and learning arguments before using any of them
+	 */
+	public WebAppMeta load(Consumer<Injector> startupFunction) {
+		//TODO: Move this into a Development class so it's not in production so people are 100% sure it's not used in production
+		//In development mode, the ClassLoader here will be the CompilingClassLoader so stuff it into the thread context
+		//just in case plugins will need it(most won't, hibernate will).  In production, this is really a no-op and does
+		//nothing.  I don't like dev code existing in production :( so perhaps we should abstract this out at some 
+		//point perhaps with a lambda of a lambda function
+		//OR have a DevelopmentRouteLoader subclass this ProdRouteLoader and add just his needed classloader lines!!! which
+		//would be more clear
+		ClassLoader original = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
+
+			Injector injector = createInjector(theModule);
 
 			CompletableFuture<Void> storageLoadComplete = setupSimpleStorage(injector);
 			
@@ -171,7 +199,7 @@ public class RouteLoader {
 		return CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]));
 	}
 
-	public Injector createInjector(WebAppMeta routerModule, RoutingHolder routingHolder) {
+	public Module createTHEModule(WebAppMeta routerModule, RoutingHolder routingHolder) {
 		List<Module> guiceModules = routerModule.getGuiceModules();
 		if(guiceModules == null)
 			guiceModules = new ArrayList<>();
@@ -193,8 +221,25 @@ public class RouteLoader {
 		if(config.getWebappOverrides() != null)
 			module = Modules.override(module).with(config.getWebappOverrides());
 		
-		Injector injector = Guice.createInjector(module);
-		return injector;
+		return module;
+	}
+	
+	public Injector createInjector(Module module) {
+		try {
+			Injector injector = Guice.createInjector(module);
+			return injector;
+//Leaving the code and comment in PLUS, I think this happend as the classloader was not wrapping the correct stuff
+//at the time for some reason.  specifically, in the configure method above, we didn't set the classloader
+//but I am not completely 100% sure there.  we know we ran into a guice bug.  It doesn't hurt to unwrap it anyways
+		} catch(CreationException e) {
+			//Ironically, in trying to log this, another exception is thrown from google code so
+			//they obviously have some sort of bug, so we instead throw the original exception
+			//specifically, this came from consuming an argument before the arguments.check was called
+			//inside the hibernate plugin
+			//I think we can reproduce by calling this earlier...
+			//String pu = persistenceUnit.get();
+			throw new RuntimeException("Exception", e.getCause());
+		}
 	}
 
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
@@ -204,7 +249,8 @@ public class RouteLoader {
 		
 		reverseRoutes = new ReverseRoutes(config, redirectFormation);
 		ResettingLogic resettingLogic = new ResettingLogic(reverseRoutes, injector);
-		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic, config.isEnableSeperateBackendRouter());
+		Boolean enableSeparateBackend = backPortExists.get();
+		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic, enableSeparateBackend);
 
 		routingHolder.setReverseRouteLookup(reverseRoutes);
 		routeBuilderLogic.init(reverseRoutes);
@@ -262,4 +308,5 @@ public class RouteLoader {
 	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
 		return reverseRoutes.convertToUrl(routeId, args, isValidating);
 	}
+
 }

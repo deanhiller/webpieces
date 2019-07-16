@@ -6,9 +6,20 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.compression.FileMeta;
+import org.webpieces.util.cmdline2.Arguments;
 
 public interface RouterService {
 
+	/**
+	 * Needs to be called before start() so that all Arguments are formed from any application modules and plugins.  
+	 * The command line help is then dynamic spitting out each read of the command line and whether it's optional or
+	 * not.  In this way, adding a plugin or module can change the required command line arguments
+	 * 
+	 * If you are re-using this router jar, you could pass in a no-op Arguments object BUT dynamic help is very
+	 * nice for users
+	 */
+	void configure(Arguments arguments);
+	
 	void start();
 
 	void stop();

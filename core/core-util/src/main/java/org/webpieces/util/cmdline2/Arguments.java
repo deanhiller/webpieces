@@ -1,5 +1,6 @@
 package org.webpieces.util.cmdline2;
 
+import java.net.InetSocketAddress;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -10,6 +11,11 @@ public interface Arguments {
 	<T> Supplier<T> consumeOptional(String argumentKey, String defaultValue, String help, Function<String, T> converter);
 	<T> Supplier<T> consumeRequired(String argumentKey, String help, Function<String, T> converter);
 
+	/**
+	 * Special case convience method converting :{port} or {host}:{port} to InetSocketAddress
+	 */
+	Supplier<InetSocketAddress> consumeOptionalInet(String argumentKey, String defaultValue, String help);
+	
 	/**
 	 * See if an optional key exists or not.  
 	 */

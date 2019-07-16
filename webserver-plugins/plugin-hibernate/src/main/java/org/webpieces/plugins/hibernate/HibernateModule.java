@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
@@ -22,13 +23,13 @@ import com.google.inject.multibindings.Multibinder;
 public class HibernateModule extends AbstractModule {
 
 	private static final Logger log = LoggerFactory.getLogger(HibernateModule.class);
-	private String persistenceUnit;
+	private Supplier<String> persistenceUnit;
 	private ClassLoader entityClassLoader;
 
-	public HibernateModule(String persistenceUnit) {
+	public HibernateModule(Supplier<String> persistenceUnit2) {
 		//get classloader so if we are in development mode, we will use that class loader for entities
 		entityClassLoader = Thread.currentThread().getContextClassLoader();
-		this.persistenceUnit = persistenceUnit;
+		this.persistenceUnit = persistenceUnit2;
 	}
 	
 	@Override
@@ -40,9 +41,10 @@ public class HibernateModule extends AbstractModule {
 	@Singleton
 	@Provides
 	public EntityManagerFactory providesSessionFactory() throws IOException {
-		log.info("Loading Hibernate.  ENTITY classloader="+entityClassLoader+" hibernate classloader="+this.getClass().getClassLoader());
+		String pu = persistenceUnit.get();
+		log.info("Loading Hibernate.  ENTITY classloader="+entityClassLoader+" hibernate classloader="+this.getClass().getClassLoader()+" pu="+pu);
 		Map<String, Object> properties = createClassLoaderProperty();
-		EntityManagerFactory factory = Persistence.createEntityManagerFactory(persistenceUnit, properties );
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory(pu, properties );
 		log.info("Done loading Hibernate");
 		return factory;
 	}

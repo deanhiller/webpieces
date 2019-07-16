@@ -1,21 +1,20 @@
 package WEBPIECESxPACKAGE;
 
 import java.io.File;
-import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
-import java.util.Map;
-import java.util.function.Supplier;
+import java.util.List;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.plugins.backend.BackendPlugin;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
-import org.webpieces.util.cmdline.CommandLineParser;
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -26,6 +25,7 @@ import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
 import org.webpieces.webserver.impl.PortConfigLookupImpl;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
@@ -40,7 +40,7 @@ import WEBPIECESxPACKAGE.base.tags.TagLookupOverride;
  * play any classloader games at all(unlike play framework) avoiding any prod issues.
  */
 public class Server {
-	
+
 	/*******************************************************************************
 	 * When running the dev server, changes to this file AND to any files in this package
 	 * require a server restart(you can try not to but it won't work)
@@ -49,10 +49,6 @@ public class Server {
 	private static final Logger log = LoggerFactory.getLogger(Server.class);
 	
 	public static final Charset ALL_FILE_ENCODINGS = StandardCharsets.UTF_8;
-	
-	public static final String HTTP_PORT_KEY = "http.port";
-	public static final String HTTPS_PORT_KEY = "https.port";
-	public static final String BACKEND_PORT_KEY = "backend.port";
 	
 	/**
 	 * Welcome to YOUR main method as webpieces webserver is just a LIBRARY you use that you can
@@ -63,28 +59,42 @@ public class Server {
 			String version = System.getProperty("java.version");
 			log.info("Starting Production Server under java version="+version);
 
-			ServerConfig config = parseAndConfigure(args);
-			
-			Server server = new Server(null, null, config);
+			//A cheat for more permanent arguments that don't change per environment(production, staging, devel)
+			String[] newArgs = addArgs(args, "-hibernate.persistenceunit=production");
 
+			ServerConfig svrConfig = parseAndConfigure();
+			Server server = new Server(null, null, svrConfig, newArgs);
 			server.start();
-			
+
 			synchronized (Server.class) {
 				//wait forever so server doesn't shut down..
 				Server.class.wait();
-			}	
+			}
 		} catch(Throwable e) {
 			log.error("Failed to startup.  exiting jvm", e);
 			System.exit(1); // should not be needed BUT some 3rd party libraries start non-daemon threads :(
 		}
 	}
-	
+
+	private static String[] addArgs(String[] originalArgs, String ... additionalArgs) {
+		ArrayList<String> listArgs = Lists.newArrayList(originalArgs);
+		for(String arg : additionalArgs) {
+			listArgs.add(arg);
+		}
+		return listArgs.toArray(new String[0]);
+	}
+
 	private WebServer webServer;
 
 	public Server(
-			Module platformOverrides, 
-			Module appOverrides, 
-			ServerConfig svrConfig) {
+		Module platformOverrides, 
+		Module appOverrides, 
+		ServerConfig svrConfig, 
+		String ... args
+	) {
+		//read here and checked for correctness on last line of server construction
+		Arguments arguments = new CommandLineParser().parse(args);
+
 		String filePath = System.getProperty("user.dir");
 		log.info("original user.dir before modification="+filePath);
 
@@ -102,9 +112,6 @@ public class Server {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
 		}
 		
-		boolean backendHostedOverPort = svrConfig.getBackendSvrConfig().getListenAddress() != null;
-		svrConfig.getWebAppMetaProperties().put(BackendPlugin.USE_PLUGIN_ASSETS, backendHostedOverPort+"");
-		
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
@@ -116,13 +123,11 @@ public class Server {
 		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
 											.setMetaFile(svrConfig.getMetaFile())
 											.setWebappOverrides(appOverrides)
-											.setWebAppMetaProperties(svrConfig.getWebAppMetaProperties())
 											.setSecretKey(new SecretKeyInfo(fetchKey(), "HmacSHA1"))
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
 											.setTokenCheckOn(svrConfig.isTokenCheckOn())
 											.setNeedsStorage(svrConfig.getNeedsStorage())
-											.setPortLookupConfig(portLookup)
-											.setEnableSeperateBackendRouter(backendHostedOverPort); 
+											.setPortLookupConfig(portLookup);
 
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
@@ -137,9 +142,13 @@ public class Server {
 		
 		//Notice that there is a WebServerConfig, a RouterConfig, and a TemplateConfig making up
 		//3 of the major pieces of webpieces.
-		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
+		webServer = WebServerFactory.create(config, routerConfig, templateConfig, arguments);
+
+		//Before this line, every module calls into arguments telling it help and required or not and ZERO
+		//arguments can be read in this phase.  After this is called, all arguments can be read
+		arguments.checkConsumedCorrectly();
 	}
-	
+
 	private byte[] fetchKey() {
 		String base64Key = "__SECRETKEYHERE__";  //This gets replaced with a unique key each generated project which you need to keep or replace with your own!!!
 
@@ -248,55 +257,18 @@ public class Server {
 		//channel.socket().setSoTimeout(timeout);
 		//channel.socket().setReceiveBufferSize(size);
 	}
-	
-	private static ServerConfig parseAndConfigure(String[] args) {
-		CommandLineParser parser = new CommandLineParser();
-		Map<String, String> arguments = parser.parse(args); //prelim quick parse into Map
-		
-		org.webpieces.util.cmdline2.CommandLineParser parser2 = new org.webpieces.util.cmdline2.CommandLineParser();
-		Arguments arguments2 = parser2.parse(args);
+
+	private static ServerConfig parseAndConfigure() {
 
 		WebSSLFactory factory = new WebSSLFactory();
 
-		ServerConfig config = new ServerConfig(factory, "production");
+		ServerConfig config = new ServerConfig(factory);
 		config.addNeedsStorage(factory);
-
-		Supplier<InetSocketAddress> httpAddr = arguments2.consumeOptional(HTTP_PORT_KEY, ":8080", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host", (s) -> convertInet(s));
-		Supplier<InetSocketAddress> httpsAddr = arguments2.consumeOptional(HTTPS_PORT_KEY, ":8443", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host", (s) -> convertInet(s));
-
-		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(httpAddr, null);
-		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(httpsAddr, factory);
-		httpConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-		httpsConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-		config.setHttpConfig(httpConfig);
-		config.setHttpsConfig(httpsConfig);
+		config.setHttpConfig(new HttpSvrInstanceConfig(null, (s) -> configure(s)));
+		config.setHttpsConfig(new HttpSvrInstanceConfig(factory, (s) -> configure(s)));		
+		config.setBackendSvrConfig(new HttpSvrInstanceConfig(factory, (s) -> configure(s)));
 		
-		if(arguments.get(BACKEND_PORT_KEY) != null) {
-			int backendPort = parser.parseInt(BACKEND_PORT_KEY, arguments.get(BACKEND_PORT_KEY));
-			HttpSvrInstanceConfig backendConfig = new HttpSvrInstanceConfig(() -> new InetSocketAddress(backendPort), factory);
-			backendConfig.setFunctionToConfigureServerSocket((s) -> configure(s));
-			config.setBackendSvrConfig(backendConfig);
-		}
 		return config;
-	}
-	
-	private static InetSocketAddress convertInet(String value) {
-		if(value == null)
-			return null;
-		else if("".equals(value)) //if command line passes "http.port=", the value will be "" to turn off the port
-			return null;
-		
-		int index = value.indexOf(":");
-		if(index < 0)
-			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port'");
-		String host = value.substring(0, index);
-		String portStr = value.substring(index+1);
-		try {
-			int port = Integer.parseInt(portStr);
-			return new InetSocketAddress(host, port);
-		} catch(NumberFormatException e) {
-			throw new IllegalArgumentException("Invalid format.  The port piece of '{host}:{port}' or ':port' must be an integer");
-		}
 	}
 	
 	public void start() {

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.webserver.EmptyModule;
 
@@ -13,7 +14,7 @@ import com.google.inject.Module;
 
 public class DevMeta implements WebAppMeta {
 	@Override
-	public void initialize(Map<String, String> props) {
+	public void initialize(WebAppConfig pluginConfig) {
 	}
 
 	@Override

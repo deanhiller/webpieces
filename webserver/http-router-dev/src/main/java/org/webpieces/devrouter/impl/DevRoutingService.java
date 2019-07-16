@@ -14,6 +14,7 @@ import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.AMasterRouter;
+import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -31,6 +32,7 @@ public class DevRoutingService extends AbstractRouterService {
 	private WebAppMeta routerModule;
 	private RouterConfig config;
 	private AMasterRouter router;
+	private Arguments arguments;
 
 	@Inject
 	public DevRoutingService(
@@ -49,6 +51,12 @@ public class DevRoutingService extends AbstractRouterService {
 		this.lastFileTimestamp = config.getMetaFile().lastModified();
 	}
 
+	@Override
+	public void configure(Arguments arguments) {
+		this.arguments = arguments;
+		routeLoader.configure(classLoader, arguments);
+	}
+	
 	@Override
 	public void start() {
 		log.info("Starting DEVELOPMENT server with CompilingClassLoader and HotSwap");
@@ -85,7 +93,8 @@ public class DevRoutingService extends AbstractRouterService {
 
 		log.info("text file changed so need to reload RouterModules.java implementation");
 
-		routerModule = routeLoader.load(classLoader, NO_OP);
+		routeLoader.configure(classLoader, arguments);
+		routerModule = routeLoader.load(NO_OP);
 		lastFileTimestamp = metaTextFile.lastModified();
 		return true;
 	}
@@ -104,7 +113,8 @@ public class DevRoutingService extends AbstractRouterService {
 	}
 
 	private void loadOrReload(Consumer<Injector> startupHook) {
-		routerModule = routeLoader.load(classLoader, startupHook);
+		routeLoader.configure(classLoader, arguments);
+		routerModule = routeLoader.load(startupHook);
 	}
 
 }

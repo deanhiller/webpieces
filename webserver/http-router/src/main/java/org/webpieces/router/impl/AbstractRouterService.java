@@ -12,7 +12,6 @@ import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.exceptions.BadCookieException;
-import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.Startable;
 import org.webpieces.router.impl.compression.FileMeta;

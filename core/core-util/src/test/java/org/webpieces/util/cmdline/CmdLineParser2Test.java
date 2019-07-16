@@ -32,7 +32,7 @@ public class CmdLineParser2Test {
 			fakeClient.readKey1();
 			Assert.fail("Should have thrown.  this is not allowed so we can discover ALL arguments");
 		} catch(IllegalStateException e) {
-			Assert.assertEquals("Bug in that you are consuming this too early before we are doing creating all arguments", e.getMessage());
+			Assert.assertEquals("Bug in that you are consuming this too early before we are done creating all arguments", e.getMessage());
 		}
 	}
 	
@@ -207,7 +207,7 @@ public class CmdLineParser2Test {
 		} catch(CommandLineException e) {
 			List<Throwable> errors = e.getErrors();
 			Assert.assertEquals(2, errors.size());
-			Assert.assertEquals("Argument key2=6 has a key that does not start with - which is required", errors.get(0).getMessage());
+			Assert.assertEquals("Argument 'key2=6' has a key that does not start with - which is required", errors.get(0).getMessage());
 			Assert.assertEquals("Argument -key2 is required but was not supplied.  help='key2 help'", errors.get(1).getMessage());
 		}
 	}

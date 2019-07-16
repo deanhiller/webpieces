@@ -3,7 +3,6 @@ package WEBPIECESxPACKAGE;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -66,14 +65,14 @@ public class ProdServerForIDE {
 		Module platformOverrides = new DevTemplateModule(templateConfig);
 		
 		WebSSLFactory sslFactory = new WebSSLFactory();
-		ServerConfig config = new ServerConfig(sslFactory, HibernatePlugin.PERSISTENCE_TEST_UNIT);
+		ServerConfig config = new ServerConfig(sslFactory);
 		
 		//It is very important to turn off caching or developers will get very confused when they
 		//change stuff and they don't see changes in the website
 		config.setStaticFileCacheTimeSeconds(null);
 		//config.setMetaFile(metaFile);
 		
-		server = new Server(platformOverrides, null, config);
+		server = new Server(platformOverrides, null, config, "-hibernate.persistenceunit=hibernatefortest");
 	}
 	
 	public static VirtualFileImpl modifyForIDE() {

@@ -1,15 +1,18 @@
 package org.webpieces.plugins.hibernate;
 
+import org.webpieces.util.cmdline2.Arguments;
+
 public class HibernateConfig {
 
-	private String persistenceUnit;
+	private Arguments cmdLineArguments;
 
-	public HibernateConfig(String persistenceUnit) {
+	public HibernateConfig(Arguments cmdLineArgs) {
 		super();
-		this.persistenceUnit = persistenceUnit;
+		this.cmdLineArguments = cmdLineArgs;
 	}
 
-	public String getPersistenceUnit() {
-		return persistenceUnit;
+	public Arguments getCmdLineArguments() {
+		return cmdLineArguments;
 	}
+
 }

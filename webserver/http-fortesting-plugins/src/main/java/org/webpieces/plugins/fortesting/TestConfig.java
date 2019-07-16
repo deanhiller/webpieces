@@ -8,17 +8,15 @@ public class TestConfig {
 
 	private Module platformOverrides;
 	private Module appOverrides;
-	private boolean usePortZero = false;
 	private VirtualFile metaFile;
 	private boolean useTokenCheck = false;
 
 	public TestConfig() {
 	}
 	
-	public TestConfig(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile, boolean useTokenCheck) {
+	public TestConfig(Module platformOverrides, Module appOverrides, VirtualFile metaFile, boolean useTokenCheck) {
 		this.platformOverrides = platformOverrides;
 		this.appOverrides = appOverrides;
-		this.usePortZero = usePortZero;
 		this.metaFile = metaFile;
 		this.useTokenCheck = useTokenCheck;
 	}
@@ -37,14 +35,6 @@ public class TestConfig {
 
 	public void setAppOverrides(Module appOverrides) {
 		this.appOverrides = appOverrides;
-	}
-
-	public boolean isUsePortZero() {
-		return usePortZero;
-	}
-
-	public void setUsePortZero(boolean usePortZero) {
-		this.usePortZero = usePortZero;
 	}
 
 	public VirtualFile getMetaFile() {

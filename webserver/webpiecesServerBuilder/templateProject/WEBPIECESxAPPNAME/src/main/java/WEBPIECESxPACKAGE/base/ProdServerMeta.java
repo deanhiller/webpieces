@@ -1,12 +1,7 @@
 package WEBPIECESxPACKAGE.base;
 
-import WEBPIECESxPACKAGE.base.crud.CrudRoutes;
-import WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudRoutes;
-import WEBPIECESxPACKAGE.base.crud.login.LoginRoutes;
-import WEBPIECESxPACKAGE.base.json.JsonCatchAllFilter;
-import WEBPIECESxPACKAGE.base.json.JsonRoutes;
-import com.google.common.collect.Lists;
-import com.google.inject.Module;
+import java.util.List;
+
 import org.webpieces.plugins.backend.BackendConfig;
 import org.webpieces.plugins.backend.BackendPlugin;
 import org.webpieces.plugins.hibernate.HibernateConfig;
@@ -19,12 +14,19 @@ import org.webpieces.plugins.sslcert.InstallSslCertConfig;
 import org.webpieces.plugins.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
+import com.google.inject.Module;
+
+import WEBPIECESxPACKAGE.base.crud.CrudRoutes;
+import WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudRoutes;
+import WEBPIECESxPACKAGE.base.crud.login.LoginRoutes;
+import WEBPIECESxPACKAGE.base.json.JsonCatchAllFilter;
+import WEBPIECESxPACKAGE.base.json.JsonRoutes;
 
 //This is where the list of Guice Modules go as well as the list of RouterModules which is the
 //core of anything you want to plugin to your web app.  To make re-usable components, you create
@@ -39,15 +41,11 @@ import java.util.Map;
 public class ProdServerMeta implements WebAppMeta {
 
 	private static final Logger log = LoggerFactory.getLogger(ProdServerMeta.class);
-	private String persistenceUnit;
-	private boolean isUsePluginAssets;
+	private WebAppConfig pluginConfig;
 
 	@Override
-	public void initialize(Map<String, String> props) {
-		persistenceUnit = props.get(HibernatePlugin.PERSISTENCE_UNIT_KEY);
-		String value = props.get(BackendPlugin.USE_PLUGIN_ASSETS);
-		if("true".equals(value))
-			isUsePluginAssets = true;
+	public void initialize(WebAppConfig pluginConfig) {
+		this.pluginConfig = pluginConfig;
 	}
 
 	//When using the Development Server, changes to this inner class will be recompiled automatically
@@ -81,9 +79,9 @@ public class ProdServerMeta implements WebAppMeta {
 				//if you want to remove hibernate, just remove it first from the build file and then remove
 				//all the compile error code(it will remove more than half of the jar size of the web app actually due
 				//to transitive dependencies)
-				new HibernatePlugin(new HibernateConfig(persistenceUnit)),
+				new HibernatePlugin(new HibernateConfig(pluginConfig.getCmdLineArguments())),
 				new JacksonPlugin(new JacksonConfig("/json/.*", JsonCatchAllFilter.class)),
-				new BackendPlugin(new BackendConfig(isUsePluginAssets)),
+				new BackendPlugin(new BackendConfig(pluginConfig.getCmdLineArguments())),
 				new PropertiesPlugin(new PropertiesConfig()),
 				new InstallSslCertPlugin(new InstallSslCertConfig("acme://letsencrypt.org/staging"))
 				);

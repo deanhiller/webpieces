@@ -1,7 +1,6 @@
 package org.webpieces.plugins.hibernate.app;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,6 +10,7 @@ import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.plugins.hibernate.app.ajax.AjaxHibernateCrudRoutes;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.plugins.Plugin;
+import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.webserver.EmptyStorage;
@@ -21,9 +21,11 @@ import com.google.inject.Module;
 
 public class HibernateAppMeta implements WebAppMeta {
 	public static final String PERSISTENCE_TEST_UNIT = "webpieces-persistence";
+	private WebAppConfig pluginConfig;
 
 	@Override
-	public void initialize(Map<String, String> props) {
+	public void initialize(WebAppConfig pluginConfig) {
+		this.pluginConfig = pluginConfig;
 	}
 	
     @Override
@@ -41,7 +43,7 @@ public class HibernateAppMeta implements WebAppMeta {
 	@Override
 	public List<Plugin> getPlugins() {
 		return Lists.<Plugin>newArrayList(
-				new HibernatePlugin(new HibernateConfig(PERSISTENCE_TEST_UNIT)));
+				new HibernatePlugin(new HibernateConfig(pluginConfig.getCmdLineArguments())));
 	}
 
 	private class AppModule implements Module {

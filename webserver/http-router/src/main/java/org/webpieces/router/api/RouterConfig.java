@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,13 +42,11 @@ public class RouterConfig {
 	//compression type to put in cachedCompressedDirectory
 	private String startupCompression = "gzip";
 
-	private Map<String, String> webAppMetaProperties;
+	private Map<String, Object> webAppMetaProperties = new HashMap<>();
 
 	private File workingDirectory;
 
 	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
-
-	private boolean enableSeperateBackendRouter;
 
 	private PortConfigLookup portLookup;
 
@@ -137,11 +136,11 @@ public class RouterConfig {
 		this.tokenCheckOn = tokenCheckOff;
 		return this;
 	}
-	public RouterConfig setWebAppMetaProperties(Map<String, String> webAppMetaProperties) {
+	public RouterConfig setWebAppMetaProperties(Map<String, Object> webAppMetaProperties) {
 		this.webAppMetaProperties = webAppMetaProperties;
 		return this;
 	}
-	public Map<String, String> getWebAppMetaProperties() {
+	public Map<String, Object> getWebAppMetaProperties() {
 		return webAppMetaProperties;
 	}
 
@@ -158,15 +157,6 @@ public class RouterConfig {
 		return needsStorage;
 	}
 
-	public RouterConfig setEnableSeperateBackendRouter(boolean addBackendRoutesOverPort) {
-		this.enableSeperateBackendRouter = addBackendRoutesOverPort;
-		return this;
-	}
-
-	public boolean isEnableSeperateBackendRouter() {
-		return enableSeperateBackendRouter;
-	}
-
 	public RouterConfig setNeedsStorage(List<NeedsSimpleStorage> needsStorage2) {
 		this.needsStorage = needsStorage2;
 		return this;
@@ -180,5 +170,5 @@ public class RouterConfig {
 	public PortConfigLookup getPortLookup() {
 		return portLookup;
 	}
-	
+
 }

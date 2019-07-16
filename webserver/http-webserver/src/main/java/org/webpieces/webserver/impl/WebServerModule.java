@@ -1,10 +1,12 @@
 package org.webpieces.webserver.impl;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.function.Supplier;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -19,6 +21,7 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
+import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.util.time.Time;
 import org.webpieces.util.time.TimeImpl;
@@ -34,10 +37,25 @@ import com.webpieces.http2engine.api.client.InjectionConfig;
 
 public class WebServerModule implements Module {
 
+	public static final String HTTP_PORT_KEY = "http.port";
+	public static final String HTTPS_PORT_KEY = "https.port";
+	
+	//3 pieces consume this key to make it work :( and all 3 pieces do NOT depend on each other so
+	//this key is copied in 3 locations
+	public static final String BACKEND_PORT_KEY = "backend.port";
+	
 	private WebServerConfig config;
+	private Supplier<InetSocketAddress> httpAddress;
+	private Supplier<InetSocketAddress> httpsAddress;
+	private Supplier<InetSocketAddress> backendAddress;
 
-	public WebServerModule(WebServerConfig config) {
+	public WebServerModule(WebServerConfig config, Arguments args) {
 		this.config = config;
+		
+		//this is too late, have to do in the Guice modules
+		httpAddress = args.consumeOptionalInet(HTTP_PORT_KEY, ":8080", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
+		httpsAddress = args.consumeOptionalInet(HTTPS_PORT_KEY, ":8443", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
+		backendAddress = args.consumeOptionalInet(BACKEND_PORT_KEY, null, "Http(s) host&port for backend.  syntax: {host}:{port} or just :{port}.  Also, null means put the pages on the https/http ports");
 	}
 	
 	@Override
@@ -55,7 +73,11 @@ public class WebServerModule implements Module {
 		binder.bind(Time.class).to(TimeImpl.class).asEagerSingleton();
 		
 		//what the webserver writes to
-		binder.bind(WebServerPortInformation.class).toInstance(config.getWebServerPortInfo()); 
+		binder.bind(WebServerPortInformation.class).toInstance(config.getWebServerPortInfo());
+
+		//in webpieces modules, you can't read until a certain phase :( :( so we can't read them here
+		//like we can in app modules and in plugins!!
+		binder.bind(PortConfiguration.class).toInstance(new PortConfiguration(httpAddress, httpsAddress, backendAddress));
 	}
 
 	@Provides

@@ -1,5 +1,6 @@
 package org.webpieces.util.cmdline2;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.function.Supplier;
 
 public class ArgumentsImpl implements Arguments {
 
+	private boolean calledAlready = false;
 	private Map<String, ValueHolder> arguments;
 	private Set<String> notConsumed = new HashSet<String>(); 
 	private List<Throwable> errors = new ArrayList<>();
@@ -32,6 +34,10 @@ public class ArgumentsImpl implements Arguments {
 	
 	@Override
 	public void checkConsumedCorrectly() {
+		if(calledAlready)
+			throw new IllegalStateException("You only need to call this once");
+		calledAlready = true;
+			
 		isConsumedAllArguments.set(true);
 	
 		//now check for 'extra' args that were not defined by the program to force cleanup
@@ -191,4 +197,27 @@ public class ArgumentsImpl implements Arguments {
 		return fullHelp;
 	}
 
+	@Override
+	public Supplier<InetSocketAddress> consumeOptionalInet(String argumentKey, String defaultValue, String help) {
+		return consumeOptional(argumentKey, defaultValue, help, (s) -> convertInet(s));
+	}
+
+	private InetSocketAddress convertInet(String value) {
+		if(value == null)
+			return null;
+		else if("".equals(value)) //if command line passes "http.port=", the value will be "" to turn off the port
+			return null;
+		
+		int index = value.indexOf(":");
+		if(index < 0)
+			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port'");
+		String host = value.substring(0, index);
+		String portStr = value.substring(index+1);
+		try {
+			int port = Integer.parseInt(portStr);
+			return new InetSocketAddress(host, port);
+		} catch(NumberFormatException e) {
+			throw new IllegalArgumentException("Invalid format.  The port piece of '{host}:{port}' or ':port' must be an integer");
+		}
+	}
 }

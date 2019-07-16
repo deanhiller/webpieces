@@ -20,7 +20,8 @@ import org.openqa.selenium.interactions.Actions;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
-import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
 
@@ -38,7 +39,7 @@ public class TestLesson5WithSelenium {
 	
 	private static WebDriver driver;
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
-	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
+	private Arguments args = new CommandLineParser().parse("-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest");
 
 	//see below comments in AppOverrideModule
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //or your favorite mock library
@@ -57,7 +58,7 @@ public class TestLesson5WithSelenium {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test and NOT drop tables but clear and re-populate
 		Server webserver = new Server(
-				new OverridesForTestRealServer(), new AppOverridesModule(), new ServerConfig(pUnit, JavaCache.getCacheLocation()));
+				new OverridesForTestRealServer(), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()));
 		webserver.start();
 		httpPort = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 		httpsPort = webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort();

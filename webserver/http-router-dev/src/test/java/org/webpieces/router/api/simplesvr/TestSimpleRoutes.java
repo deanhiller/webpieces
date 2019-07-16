@@ -27,6 +27,8 @@ import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.dto.RedirectResponse;
+import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
@@ -51,6 +53,7 @@ public class TestSimpleRoutes {
 		
 		TestModule module = new TestModule();
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
+		Arguments args = new CommandLineParser().parse();
 		RouterConfig config = new RouterConfig(baseWorkingDir)
 										.setMetaFile(f)
 										.setWebappOverrides(module)
@@ -58,14 +61,19 @@ public class TestSimpleRoutes {
 										.setPortLookupConfig(new EmptyPortConfigLookup());
 		
 		RouterService prodSvc = RouterSvcFactory.create(config);
+		prodSvc.configure(args);
+		args.checkConsumedCorrectly();
 
 		//for dev must be null
 		config.setWebappOverrides(null);
 		
 		String filePath = System.getProperty("user.dir");
 		File myCodePath = new File(filePath + "/src/test/java");
-		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), CompileConfig.getTmpDir());		
+		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), CompileConfig.getTmpDir());
+		Arguments args2 = new CommandLineParser().parse();
 		RouterService devSvc = DevRouterFactory.create(config, compileConfig);
+		devSvc.configure(args2);
+		args2.checkConsumedCorrectly();
 		
 		return Arrays.asList(new Object[][] {
 	         { prodSvc, module },

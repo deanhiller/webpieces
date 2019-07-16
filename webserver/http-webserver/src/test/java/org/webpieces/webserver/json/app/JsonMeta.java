@@ -1,11 +1,11 @@
 package org.webpieces.webserver.json.app;
 
 import java.util.List;
-import java.util.Map;
 
 import org.webpieces.plugins.json.JacksonConfig;
 import org.webpieces.plugins.json.JacksonPlugin;
 import org.webpieces.router.api.plugins.Plugin;
+import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.webserver.EmptyModule;
@@ -15,7 +15,7 @@ import com.google.inject.Module;
 
 public class JsonMeta implements WebAppMeta {
 	@Override
-	public void initialize(Map<String, String> props) {
+	public void initialize(WebAppConfig pluginConfig) {
 	}
 	@Override
     public List<Module> getGuiceModules() {

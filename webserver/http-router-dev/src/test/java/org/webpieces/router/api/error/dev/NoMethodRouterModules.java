@@ -1,10 +1,10 @@
 package org.webpieces.router.api.error.dev;
 
 import java.util.List;
-import java.util.Map;
 
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.plugins.Plugin;
+import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.router.api.simplesvr.EmptyStorage;
@@ -16,7 +16,7 @@ import com.google.inject.Module;
 public class NoMethodRouterModules implements WebAppMeta {
 
 	@Override
-	public void initialize(Map<String, String> props) {
+	public void initialize(WebAppConfig pluginConfig) {
 	}
 	
 	public List<Module> getGuiceModules() {

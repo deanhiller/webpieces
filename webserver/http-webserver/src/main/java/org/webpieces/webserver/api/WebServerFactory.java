@@ -4,6 +4,8 @@ import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templating.api.TemplateConfig;
+import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.webserver.impl.WebServerImpl;
 import org.webpieces.webserver.impl.WebServerModule;
 
 import com.google.inject.Guice;
@@ -15,23 +17,26 @@ public abstract class WebServerFactory {
 
     protected WebServerFactory() {}
 
-	public static WebServer create(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig) {
+	public static WebServer create(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig, Arguments args) {
 		if(!routerConfig.getMetaFile().exists())
 			throw new RuntimeException("file not found="+routerConfig.getMetaFile());
 		
-		Module allModules = getModules(config, routerConfig, templateConfig);
+		Module allModules = getModules(config, routerConfig, templateConfig, args);
 
 		Module platformOverrides = config.getPlatformOverrides();
 		if(platformOverrides != null)
 			allModules = Modules.override(allModules).with(platformOverrides);
 
 		Injector injector = Guice.createInjector(allModules);
-		return injector.getInstance(WebServer.class);
+		WebServerImpl serverImpl = injector.getInstance(WebServerImpl.class);
+		serverImpl.configureSync(args); //configure must be called as after configured, Arguments.checkConsumedCorrectly must
+		  						//be called before start is called on the webserver
+		return serverImpl;
 	}
 
-	private static Module getModules(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig) {
+	private static Module getModules(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig, Arguments args) {
 		return Modules.combine(
-			new WebServerModule(config),
+			new WebServerModule(config, args),
 			new ProdRouterModule(routerConfig),
 			new ProdTemplateModule(templateConfig)
 		);

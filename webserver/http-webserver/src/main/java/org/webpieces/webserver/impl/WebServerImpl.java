@@ -26,6 +26,7 @@ import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.templating.api.ProdTemplateModule;
+import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.net.URLEncoder;
@@ -36,24 +37,45 @@ import org.webpieces.webserver.api.WebServerConfig;
 public class WebServerImpl implements WebServer {
 
 	private static final Logger log = LoggerFactory.getLogger(WebServerImpl.class);
-	
-	@Inject
-	private WebServerConfig config;
-	
-	@Inject
-	private HttpFrontendManager serverMgr;
-	@Inject
-	private RequestReceiver serverListener;
-	@Inject
-	private RouterService routingService;
-	@Inject
-	private WebServerPortInformation portConfig;
-	
+		
+	private final WebServerConfig config;
+	private final HttpFrontendManager serverMgr;
+	private final RequestReceiver serverListener;
+	private final RouterService routingService;
+	private final WebServerPortInformation portConfig;
+	private final PortConfiguration portAddresses;
+
 	private HttpServer httpServer;
 	private HttpServer httpsServer;
-
 	private HttpServer backendServer;
 
+	private boolean isConfigured = false;
+
+	@Inject
+	public WebServerImpl(
+			WebServerConfig config,
+			HttpFrontendManager serverMgr,
+			RequestReceiver serverListener,
+			RouterService routingService,
+			WebServerPortInformation portConfig,
+			PortConfiguration portAddresses
+	) {
+		this.config = config;
+		this.serverMgr = serverMgr;
+		this.serverListener = serverListener;
+		this.routingService = routingService;
+		this.portConfig = portConfig;
+		this.portAddresses = portAddresses;
+	}
+	
+	public void configureSync(Arguments arguments) {
+		if(isConfigured)
+			throw new IllegalStateException("Can't call configure twice");
+		routingService.configure(arguments);
+		
+		isConfigured = true;
+	}
+	
 	@Override
 	public void startSync() {
 		CompletableFuture<Void> future = startAsync();
@@ -69,6 +91,9 @@ public class WebServerImpl implements WebServer {
 	
 	@Override
 	public CompletableFuture<Void> startAsync() {
+		if(!isConfigured)
+			throw new IllegalStateException("You must call configure first");
+		
 		log.info("starting server");
 		routingService.start();
 
@@ -77,14 +102,16 @@ public class WebServerImpl implements WebServer {
 
 		//START http server if wanted...
 		HttpSvrInstanceConfig httpConfig = config.getHttpConfig();
-		CompletableFuture<Void> fut1 = startServer(httpConfig, "http", (config, listener, factory) -> {
+		InetSocketAddress http = portAddresses.getHttpAddr().get();
+		CompletableFuture<Void> fut1 = startServer(http, httpConfig, "http", (config, listener, factory) -> {
 			httpServer = serverMgr.createHttpServer(config, listener);
 			return httpServer.start();
 		});
 
 		//START https server if wanted...
 		HttpSvrInstanceConfig httpsConfig = config.getHttpsConfig();
-		CompletableFuture<Void> fut2 = startServer(httpsConfig, "https", (config, listener, factory) -> {
+		InetSocketAddress https = portAddresses.getHttpsAddr().get();
+		CompletableFuture<Void> fut2 = startServer(https, httpsConfig, "https", (config, listener, factory) -> {
 			httpsServer = serverMgr.createHttpsServer(config, listener, factory);
 			return httpsServer.start();
 		});
@@ -94,7 +121,8 @@ public class WebServerImpl implements WebServer {
 		String type = "https";
 		if(backendConfig.getSslEngineFactory() == null)
 			type = "http";
-		CompletableFuture<Void> fut3 = startServer(backendConfig, "backend("+type+")", (config, listener, factory) -> {
+		InetSocketAddress backend = portAddresses.getBackendAddr().get();
+		CompletableFuture<Void> fut3 = startServer(backend, backendConfig, "backend("+type+")", (config, listener, factory) -> {
 			backendServer = serverMgr.createBackendHttpsServer(config, listener, factory);
 			return backendServer.start();
 		});
@@ -113,19 +141,19 @@ public class WebServerImpl implements WebServer {
 	}
 	
 	private CompletableFuture<Void> startServer(
+			InetSocketAddress bindAddress,
 			HttpSvrInstanceConfig instanceConfig, 
 			String serverName, 
 			TriConsumer<HttpSvrConfig, StreamListener, SSLEngineFactory> function
 	) {
 		CompletableFuture<Void> fut3;
-		if(instanceConfig.getListenAddress() != null) {
+		if(bindAddress != null) {
 			String type = "https";
 			if(instanceConfig.getSslEngineFactory() == null)
 				type = "http";
 			
-			log.info("Creating and starting the "+serverName+" over port="+instanceConfig.getListenAddress()+" AND using '"+type+"'");
+			log.info("Creating and starting the "+serverName+" over port="+bindAddress+" AND using '"+type+"'");
 
-			InetSocketAddress bindAddress = instanceConfig.getListenAddress().get();
 			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(serverName, bindAddress, 10000);
 			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = instanceConfig.getFunctionToConfigureServerSocket();
 			

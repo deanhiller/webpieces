@@ -97,9 +97,9 @@ if(project.hasProperty('projVersion')) {
    if(!System.getProperty("java.version").startsWith("1.8"))
       throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
 
-   project.version = '1.9.'+project.projVersion
+   project.version = '2.0.'+project.projVersion
 } else {
-   project.version = '1.9-developer'
+   project.version = '2.0-developer'
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
