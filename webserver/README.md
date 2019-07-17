@@ -1,19 +1,7 @@
 # webpieces
 
-phase 1: Server.java will call svr = WebServerFactory.create
-           //args from phase 1 created!!! (module creation creates args)
-           //unlike webapp modules, args canNOT be used in the module @Provides methods or configure method
-phase 2: Server.java will call svr.configure() calls routerService.configure()
-           //everything but running startup beans is done
-phase 3: Server.java arguments.check done here
-phase 4: Server.java will call svr.start() which calls routerSvc.start
-           //startup beans run, so injector.getInstance is run so modules may read properties
-phase 5: svr.start() also starts reading properties next from phase 1
-
 * test at home localhost with 8080/8443, then at home with 80/443 then with service proxy firewall port 80 only with x-forwarded-proto
 * TEST theory.  If request has host header with port 80(or no port), redirect to port 80/443.  If host header has port 443 (or no port), redirect to port 80/443.  If host header has the port we bound too(we can compare easily), then redirect to http/https port! ALSO, must run test when https port is using x-forwarded-proto header since redirect will be what?  oh, port 80/443 still, duh!  definitely need tests..hmm
-
-
 
 
 * release a version AND have generated projects use the sslcert.WebSSLFactory to have 1 less class in that package
@@ -59,6 +47,17 @@ bump this bug https://bugreport.java.com/bugreport/submit_start.do
 https://jira.qos.ch/browse/LOGBACK-1474 - GEventEvaluator
   blocked on https://lists.apache.org/thread.html/17c553e64b1afb674e2f10f978e366b2b7662319a0c991aa46551241@%3Cusers.groovy.apache.org%3E
 https://jira.qos.ch/browse/LOGBACK-1473 - %caller not working for lambdas
+
+//create the documentation on...
+phase 1: Server.java will call svr = WebServerFactory.create
+           //args from phase 1 created!!! (module creation creates args)
+           //unlike webapp modules, args canNOT be used in the module @Provides methods or configure method
+phase 2: Server.java will call svr.configure() calls routerService.configure()
+           //everything but running startup beans is done
+phase 3: Server.java arguments.check done here
+phase 4: Server.java will call svr.start() which calls routerSvc.start
+           //startup beans run, so injector.getInstance is run so modules may read properties
+phase 5: svr.start() also starts reading properties next from phase 1
 
 #### TODO:
 * @documentation, need threading section
