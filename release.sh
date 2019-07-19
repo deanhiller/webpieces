@@ -48,7 +48,7 @@ else
   exit $test_result
 fi 
 
-git tag v1.9.$@
+git tag v2.0.$@
 
 end=`date +%s`
 runtime=$((end-start))

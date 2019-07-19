@@ -130,6 +130,8 @@ public class RouteLoader {
 		try {
 			Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
 			
+			//This is the critical configuration for Arguments.java where each module/plugin is constructed
+			//and their constructors can define command line arguments
 			theModule = createTHEModule(routerModule, routingHolder);
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
