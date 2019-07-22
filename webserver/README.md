@@ -1,21 +1,11 @@
 # webpieces
 
 * test at home localhost with 8080/8443, then at home with 80/443 then with service proxy firewall port 80 only with x-forwarded-proto
-* TEST theory.  If request has host header with port 80(or no port), redirect to port 80/443.  If host header has port 443 (or no port), redirect to port 80/443.  If host header has the port we bound too(we can compare easily), then redirect to http/https port! ALSO, must run test when https port is using x-forwarded-proto header since redirect will be what?  oh, port 80/443 still, duh!  definitely need tests..hmm
-
-
-* release a version AND have generated projects use the sslcert.WebSSLFactory to have 1 less class in that package
-* start integration of cmdline2 into the webserver more fully.....figure out difference between cmdline AND static properties passed in
+* TEST all redirects(http/https/backend with twitter and home and port 80/443).  If request has host header with port 80(or no port), redirect to port 80/443.  If host header has port 443 (or no port), redirect to port 80/443.  If host header has the port we bound too(we can compare easily), then redirect to http/https port! ALSO, must run test when https port is using x-forwarded-proto header since redirect will be what?  oh, port 80/443 still, duh!  definitely need tests..hmm
 
 * tweak twitter project to return admin page since they close the socket early causing a AsyncWriteException since they don't wait for the whole http response(so annoying when clients do that)
 
 * (6/27)TEST WINDOWS NOW...should be fixed with ... fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
-
-* need a scan of required arguments to begin with!!
-add better parsing of flags after the Map so that arguments can be documented from plugins????  How to discover and print out help cleanly??
-1. optional args with default(default can be null)
-2. required args
-3. extra args that clearly are NOT part of this program should fail and not start the server to keep command line args clean
 
 WEBPIECESxPACKAGE.TestLesson4BasicStart > testBasicProdStartup FAILED
     java.lang.IllegalStateException: Previously existing file is missing=/var/folders/fk/2v2j6fhj4yb681vxdj1l2h740000gp/T/webpieces/WEBPIECESxAPPNAMECache/precompressedFiles/assets/primesTheme/index.html.gz Your file cache was corrupted.  You will need to delete the whole cache directory

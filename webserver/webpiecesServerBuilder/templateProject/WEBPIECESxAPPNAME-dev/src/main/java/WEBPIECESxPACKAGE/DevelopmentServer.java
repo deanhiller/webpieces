@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
+import org.webpieces.plugins.sslcert.WebSSLFactory;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -12,7 +13,6 @@ import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
@@ -76,9 +76,9 @@ public class DevelopmentServer {
 		
 		String[] args;
 		if(usePortZero)
-			args = Lists.newArrayList("-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest").toArray(new String[0]);
+			args = new String[] {"-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest"};
 		else
-			args = Lists.newArrayList("-hibernate.persistenceunit=hibernatefortest").toArray(new String[0]);
+			args = new String[] {"-hibernate.persistenceunit=hibernatefortest"};
 		
 		ServerConfig config = new ServerConfig(sslFactory);
 

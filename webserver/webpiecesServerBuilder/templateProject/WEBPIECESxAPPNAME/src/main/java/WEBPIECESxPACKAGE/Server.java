@@ -6,11 +6,10 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.List;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.plugins.sslcert.WebSSLFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline2.Arguments;
@@ -32,7 +31,7 @@ import com.google.inject.util.Modules;
 import WEBPIECESxPACKAGE.base.tags.TagLookupOverride;
 
 /**
- * Changes to any class in this package (or any classes that classes in this 
+ * Changes to any class in this 'package' (or any classes that classes in this 
  * package reference) WILL require a restart when you are running the DevelopmentServer.  
  * This class should try to remain pretty thin and you should avoid linking any 
  * classes in this package to classes outside this package(This is only true if 
@@ -60,6 +59,8 @@ public class Server {
 			log.info("Starting Production Server under java version="+version);
 
 			//A cheat for more permanent arguments that don't change per environment(production, staging, devel)
+			//or modify this to use unique prod/staging/devel databases for each environment and pass in
+			//on the command line
 			String[] newArgs = addArgs(args, "-hibernate.persistenceunit=production");
 
 			ServerConfig svrConfig = parseAndConfigure();
@@ -74,14 +75,6 @@ public class Server {
 			log.error("Failed to startup.  exiting jvm", e);
 			System.exit(1); // should not be needed BUT some 3rd party libraries start non-daemon threads :(
 		}
-	}
-
-	private static String[] addArgs(String[] originalArgs, String ... additionalArgs) {
-		ArrayList<String> listArgs = Lists.newArrayList(originalArgs);
-		for(String arg : additionalArgs) {
-			listArgs.add(arg);
-		}
-		return listArgs.toArray(new String[0]);
 	}
 
 	private WebServer webServer;
@@ -269,6 +262,14 @@ public class Server {
 		config.setBackendSvrConfig(new HttpSvrInstanceConfig(factory, (s) -> configure(s)));
 		
 		return config;
+	}
+	
+	private static String[] addArgs(String[] originalArgs, String ... additionalArgs) {
+		ArrayList<String> listArgs = Lists.newArrayList(originalArgs);
+		for(String arg : additionalArgs) {
+			listArgs.add(arg);
+		}
+		return listArgs.toArray(new String[0]);
 	}
 	
 	public void start() {

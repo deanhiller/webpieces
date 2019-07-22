@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.plugins.sslcert.WebSSLFactory;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
