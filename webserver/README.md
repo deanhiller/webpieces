@@ -1,7 +1,5 @@
 # webpieces
 
-implement parallel=true for the NON-release portion of the build!!!
-
 I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post
 
 * test at home localhost with 8080/8443, then at home with 80/443 then with service proxy firewall port 80 only with x-forwarded-proto
