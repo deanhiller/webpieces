@@ -377,8 +377,11 @@ subprojects {
       }
    }
 
-   signing {
-      sign publishing.publications.mavenJava
+
+   if(project.properties.sonatypeUsername && project.properties.sonatypePassword) {
+      signing {
+         sign publishing.publications.mavenJava
+      }
    }
    //we only want to upload if the build passed first..ie. tests, etc.
 /*   uploadArchives.dependsOn('build')
