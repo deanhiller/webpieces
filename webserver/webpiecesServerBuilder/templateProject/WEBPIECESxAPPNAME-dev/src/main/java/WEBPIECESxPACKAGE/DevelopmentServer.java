@@ -40,7 +40,7 @@ public class DevelopmentServer {
 				DevelopmentServer.class.wait();
 			}
 		} catch(Throwable e) {
-			log.error("Failed to startup.  exiting jvm", e);
+			log.error("Failed to startup.  exiting jvm. msg="+e.getMessage(), e);
 			System.exit(1); // should not be needed BUT some 3rd party libraries start non-daemon threads :(
 		}
 	}

@@ -127,7 +127,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 		try {
 			channel.bind(srvrAddr);
 		} catch(BindException e) {
-			BindException ee = new BindException("bind exception on addr="+srvrAddr);
+			BindException ee = new BindException("bind exception on addr="+srvrAddr+"  There is most likely ANOTHER server bound to that port.  Perhaps you are running this same server already?");
 			ee.initCause(e);
 			throw ee;
 		}
