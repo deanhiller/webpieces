@@ -1,5 +1,13 @@
 # webpieces
 
+implement parallel=true for the NON-release portion of the build!!!
+
+**** move .gnupg and gradle.properties out so we can run like normal user to make sure stuff works!!!
+   * do this for webpieces release
+   * do this for webpiecesexample builds as well? or not?
+
+I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post
+
 * test at home localhost with 8080/8443, then at home with 80/443 then with service proxy firewall port 80 only with x-forwarded-proto
 * TEST all redirects(http/https/backend with twitter and home and port 80/443).  If request has host header with port 80(or no port), redirect to port 80/443.  If host header has port 443 (or no port), redirect to port 80/443.  If host header has the port we bound too(we can compare easily), then redirect to http/https port! ALSO, must run test when https port is using x-forwarded-proto header since redirect will be what?  oh, port 80/443 still, duh!  definitely need tests..hmm
 

@@ -65,26 +65,22 @@ One thing to note in the video is I was caught off guard by a minor bug(that is 
 NOTE: last tested running eclipse on jdk-11.0.3.jdk Eclipse 2019-06 Version: 2019-06 (4.12.0) Build id: 20190614-1200
 BIG NOTE: I was having huge troubles with Eclipse 2019-03 but it could have been my environment and I could not figure out what was wrong, so try 2019-06 if you have issues
 
-1. (if not installed already) install eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
-   * Click Help menu -> Eclipse Marketplace...
-   * Type in 'Gradle' in the Find text box
-   * Click install on Buildship Gradle Integration 2.0
-2. import project into eclipse using gradle
+1. import project into eclipse using gradle
    * Click File menu -> Import...
    * Expand Gradle folder
    * Choose Existing Gradle Project and click Next
    * Click Next
    * Click Finish
-3. eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to do a few more steps here
+2. eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to do a few more steps here
    * Open eclipse preferences
    * Expand 'Java' and click 'Compiler' 
    * select a checkbox near the bottom that says 'Store information about method parameters'
-4. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
-5. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
-6. In a browser go to http://localhost:8080
-7. refactor your code like crazy and hit the website again(no restart needed)
-8. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
-9. For Documentation go to http://localhost:8080/@documentation and you can access the references and tutorials
+3. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
+4. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
+5. In a browser go to http://localhost:8080
+6. refactor your code like crazy and hit the website again(no restart needed)
+7. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
+8. For Documentation go to http://localhost:8080/@documentation and you can access the references and tutorials
 
 ### Intellij Setup
 
