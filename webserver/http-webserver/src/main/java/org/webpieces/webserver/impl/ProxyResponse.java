@@ -195,6 +195,7 @@ public class ProxyResponse implements ResponseStreamer {
 		}
 		
 		//NOTE: These are ALL String templates, so default the mimeType to text/plain
+		//The real mime type is looked up based on extension so htm or html results in text/html
 		if(extension == null) {
 			extension = "txt";
 		}
