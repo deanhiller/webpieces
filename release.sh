@@ -32,9 +32,11 @@ echo "##################################"
 echo "next release to maven repositories"
 echo "##################################"
 
+#This one is breaking the release/upload to nexus :( such that it creates
+#multiple repos which is too bad as it is REALLY fast
 #MUST turn parallel builds off for release or it fails!!!
 #We skip tests since those are done in runAllTesting.sh AND that script ALSO test legacy compatibility and building a fake project from the new release AND starting the server
-./gradlew --stacktrace -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false -PprojVersion=$@ clean release -x test
+./gradlew --stacktrace -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false -PprojVersion=$@ release -x test --scan
 test_result=$?
 if [ $test_result -eq 0 ]
 then
