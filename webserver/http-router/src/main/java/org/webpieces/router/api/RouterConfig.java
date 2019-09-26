@@ -48,8 +48,6 @@ public class RouterConfig {
 
 	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
 
-	private PortConfigLookup portLookup;
-
 	public RouterConfig(File workingDirectory) {
 		if(!workingDirectory.isAbsolute())
 			throw new IllegalArgumentException("baseDirectory must be absolute and can typically be FileFactory.getBaseDirectory()");
@@ -160,15 +158,6 @@ public class RouterConfig {
 	public RouterConfig setNeedsStorage(List<NeedsSimpleStorage> needsStorage2) {
 		this.needsStorage = needsStorage2;
 		return this;
-	}
-
-	public RouterConfig setPortLookupConfig(PortConfigLookup portLookup) {
-		this.portLookup = portLookup;
-		return this;
-	}
-
-	public PortConfigLookup getPortLookup() {
-		return portLookup;
 	}
 
 }

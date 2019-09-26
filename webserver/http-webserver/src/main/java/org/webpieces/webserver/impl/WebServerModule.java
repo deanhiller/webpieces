@@ -44,13 +44,15 @@ public class WebServerModule implements Module {
 	//this key is copied in 3 locations
 	public static final String BACKEND_PORT_KEY = "backend.port";
 	
-	private WebServerConfig config;
-	private Supplier<InetSocketAddress> httpAddress;
-	private Supplier<InetSocketAddress> httpsAddress;
-	private Supplier<InetSocketAddress> backendAddress;
+	private final WebServerConfig config;
+	private final Supplier<InetSocketAddress> httpAddress;
+	private final Supplier<InetSocketAddress> httpsAddress;
+	private final Supplier<InetSocketAddress> backendAddress;
+	private final WebServerPortInformation portLookup;
 
-	public WebServerModule(WebServerConfig config, Arguments args) {
+	public WebServerModule(WebServerConfig config, WebServerPortInformation portLookup, Arguments args) {
 		this.config = config;
+		this.portLookup = portLookup;
 		
 		//this is too late, have to do in the Guice modules
 		httpAddress = args.consumeOptionalInet(HTTP_PORT_KEY, ":8080", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
@@ -73,7 +75,7 @@ public class WebServerModule implements Module {
 		binder.bind(Time.class).to(TimeImpl.class).asEagerSingleton();
 		
 		//what the webserver writes to
-		binder.bind(WebServerPortInformation.class).toInstance(config.getWebServerPortInfo());
+		binder.bind(WebServerPortInformation.class).toInstance(portLookup);
 
 		//in webpieces modules, you can't read until a certain phase :( :( so we can't read them here
 		//like we can in app modules and in plugins!!

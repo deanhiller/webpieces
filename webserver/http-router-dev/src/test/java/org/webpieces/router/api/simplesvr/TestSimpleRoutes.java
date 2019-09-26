@@ -16,7 +16,6 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.devrouter.api.DevRouterFactory;
-import org.webpieces.router.api.EmptyPortConfigLookup;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterSvcFactory;
@@ -57,8 +56,7 @@ public class TestSimpleRoutes {
 		RouterConfig config = new RouterConfig(baseWorkingDir)
 										.setMetaFile(f)
 										.setWebappOverrides(module)
-										.setSecretKey(SecretKeyInfo.generateForTest())
-										.setPortLookupConfig(new EmptyPortConfigLookup());
+										.setSecretKey(SecretKeyInfo.generateForTest());
 		
 		RouterService prodSvc = RouterSvcFactory.create(config);
 		prodSvc.configure(args);

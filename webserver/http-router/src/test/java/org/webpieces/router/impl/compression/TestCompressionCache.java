@@ -45,10 +45,10 @@ public class TestCompressionCache {
 		File stagingDir = FileFactory.newBaseFile("output/staging");
 		FileUtils.deleteDirectory(stagingDir);
 		
-		RouterConfig config = new RouterConfig(FileFactory.getBaseWorkingDir()).setPortLookupConfig(new EmptyPortConfigLookup());
+		RouterConfig config = new RouterConfig(FileFactory.getBaseWorkingDir());
 		config.setSecretKey(SecretKeyInfo.generateForTest());
 		config.setCachedCompressedDirectory(cacheDir);
-		Module allMods = Modules.override(new ProdRouterModule(config)).with(new TestModule());
+		Module allMods = Modules.override(new ProdRouterModule(config, new EmptyPortConfigLookup())).with(new TestModule());
 		Injector injector = Guice.createInjector(allMods);
 		cache = injector.getInstance(CompressionCacheSetup.class);
 	}

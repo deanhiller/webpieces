@@ -22,7 +22,6 @@ import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
-import org.webpieces.webserver.impl.PortConfigLookupImpl;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
@@ -96,8 +95,6 @@ public class Server {
 
 		File baseWorkingDir = modifyUserDirForManyEnvironments(filePath);
 
-		PortConfigLookupImpl portLookup = new PortConfigLookupImpl();
-		
 		//This override is only needed if you want to add your own Html Tags to re-use
 		//you can delete this code if you are not adding your own webpieces html tags
 		//We graciously added #{mytag}# #{id}# and #{myfield}# as examples that you can
@@ -122,15 +119,13 @@ public class Server {
 											.setSecretKey(new SecretKeyInfo(fetchKey(), "HmacSHA1"))
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
 											.setTokenCheckOn(svrConfig.isTokenCheckOn())
-											.setNeedsStorage(svrConfig.getNeedsStorage())
-											.setPortLookupConfig(portLookup);
+											.setNeedsStorage(svrConfig.getNeedsStorage());
 
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
 										.setHttpConfig(svrConfig.getHttpConfig())
 										.setHttpsConfig(svrConfig.getHttpsConfig())
 										.setBackendSvrConfig(svrConfig.getBackendSvrConfig())
-										.setWebServerPortInfo(portLookup)
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
 										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
 
@@ -222,7 +217,7 @@ public class Server {
 			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			if(isRunningServerMainMethod) {
 				log.info("You appear to be running Server.java from Eclipse");
-				return throwException();
+				throw new NoRunningServerMainInIDEException(); 
 			} else {	
 				log.info("You appear to be running test from Intellij, Eclipse or Gradle(main subproject)");
 				return FileFactory.newFile(filePath, "src/dist");
@@ -234,7 +229,7 @@ public class Server {
 			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			if(isRunningServerMainMethod) {
 				log.info("You appear to be running Server.java from Intellij");
-				return throwException();
+				throw new NoRunningServerMainInIDEException(); 
 			} else {
 				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java from Intellij");
 				return FileFactory.newFile(filePath, "WEBPIECESxAPPNAME/src/dist");
@@ -248,7 +243,7 @@ public class Server {
 			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			if(isRunningServerMainMethod) {
 				log.info("You appear to be running WEBPIECESxPACKAGE.Server.java from webpieces in Intellij");
-				return throwException();
+				throw new NoRunningServerMainInIDEException(); 
 			} else {
 				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java in webpieces project from Intellij");
 				return FileFactory.newFile(filePath, "webserver/webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME/src/dist");
@@ -258,11 +253,16 @@ public class Server {
 		throw new IllegalStateException("bug, we must have missed an environment="+name+" full path="+filePath);
 	}
 
-	private File throwException() {
-		throw new RuntimeException("Please do 1 of the following:\n"
-				+ "1. run DevelopmentServer.java or ProdServerForIDE.java instead of Server.java from IDE OR\n"
-				+ "2. remove this exception and set a JDBC driver up OR\n"
-				+ "3. run ./gradle assembleDist and run the full blown prod server which is temporarily setup with H2 in-memory and will work");
+	private class NoRunningServerMainInIDEException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+
+		public NoRunningServerMainInIDEException() {
+			super("Please do one of the following:\n"
+					+ "1. run DevelopmentServer.java or ProdServerForIDE.java instead of Server.java from IDE OR\n"
+					+ "2. run ./gradle assembleDist and run the full blown prod server which is temporarily setup with H2 in-memory and will work\n"
+					+ "NOTE: Running Server.java NEVER will work in the IDE as it needs pre-compiled *.html -> *.class files which only happen in gradle.\n"
+					+ "The ProdServerForIDE compiles html files for you as does the DevelopmentServer(DevelopmentServer also hot compiles *.java files as you change them");
+		}
 	}
 
 	/**

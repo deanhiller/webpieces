@@ -23,8 +23,7 @@ public class RouterSvcFactory {
     		Arguments arguments = new CommandLineParser().parse();
     		RouterConfig config = new RouterConfig(baseWorkingDir)
     									.setMetaFile(routersFile)
-    									.setSecretKey(SecretKeyInfo.generateForTest())
-    									.setPortLookupConfig(new EmptyPortConfigLookup());
+    									.setSecretKey(SecretKeyInfo.generateForTest());
     		RouterService svc = create(config);
     		svc.configure(arguments);
     		arguments.checkConsumedCorrectly();
@@ -32,13 +31,13 @@ public class RouterSvcFactory {
     }
     
 	public static RouterService create(RouterConfig config) {
-		Injector injector = Guice.createInjector(new ProdRouterModule(config));
+		Injector injector = Guice.createInjector(new ProdRouterModule(config, new EmptyPortConfigLookup()));
 		RouterService svc = injector.getInstance(RouterService.class);
 		return svc;	
 	}
 
 	public static List<Module> getModules(RouterConfig config) {
-		List<Module> modules = Lists.newArrayList(new ProdRouterModule(config));
+		List<Module> modules = Lists.newArrayList(new ProdRouterModule(config, new EmptyPortConfigLookup()));
 		return modules;
 	}
 }

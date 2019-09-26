@@ -20,7 +20,6 @@ import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
-import org.webpieces.webserver.impl.PortConfigLookupImpl;
 
 import com.google.inject.Module;
 
@@ -76,14 +75,11 @@ public class PrivateWebserverForTest {
 		
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 
-		PortConfigLookupImpl portLookup = new PortConfigLookupImpl();
-		
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
 				.setPlatformOverrides(testConfig.getPlatformOverrides())
 				.setHttpConfig(httpConfig)
-				.setHttpsConfig(httpsConfig)
-				.setWebServerPortInfo(portLookup);
+				.setHttpsConfig(httpsConfig);
 		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
 											.setMetaFile(testConfig.getMetaFile() )
 											.setWebappOverrides(testConfig.getAppOverrides())
@@ -91,8 +87,7 @@ public class PrivateWebserverForTest {
 											.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
 											.setCachedCompressedDirectory(cacheDir)
 											.setSecretKey(SecretKeyInfo.generateForTest())
-											.setTokenCheckOn(testConfig.isUseTokenCheck())
-											.setPortLookupConfig(portLookup);
+											.setTokenCheckOn(testConfig.isUseTokenCheck());
 		TemplateConfig templateConfig = new TemplateConfig();
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig, arguments);

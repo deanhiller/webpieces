@@ -13,7 +13,6 @@ import org.webpieces.router.impl.services.RouteInfoForHtml;
 public class EHtmlRouter extends AbstractDynamicRouterImpl {
 	
 	private final RouteInvoker invoker;
-	private final MatchInfo matchInfo;
 	//private final RouteId routeId;
 	private final boolean isCheckSecureToken;
 	
@@ -24,7 +23,6 @@ public class EHtmlRouter extends AbstractDynamicRouterImpl {
 	public EHtmlRouter(RouteInvoker invoker, MatchInfo matchInfo, boolean checkToken) {
 		super(matchInfo);
 		this.invoker = invoker;
-		this.matchInfo = matchInfo;
 		this.isCheckSecureToken = checkToken;
 	}
 

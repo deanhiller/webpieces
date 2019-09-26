@@ -5,6 +5,7 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.webserver.impl.PortConfigLookupImpl;
 import org.webpieces.webserver.impl.WebServerImpl;
 import org.webpieces.webserver.impl.WebServerModule;
 
@@ -35,9 +36,15 @@ public abstract class WebServerFactory {
 	}
 
 	private static Module getModules(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig, Arguments args) {
+
+		//Special wiring needed between webserver and router due to order of start.  See
+		//PortConfigLookupImpl javadoc for more info
+		PortConfigLookupImpl portLookup = new PortConfigLookupImpl();
+		
+		
 		return Modules.combine(
-			new WebServerModule(config, args),
-			new ProdRouterModule(routerConfig),
+			new WebServerModule(config, portLookup, args),
+			new ProdRouterModule(routerConfig, portLookup),
 			new ProdTemplateModule(templateConfig)
 		);
 	}

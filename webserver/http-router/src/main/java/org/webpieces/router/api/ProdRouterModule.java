@@ -18,12 +18,14 @@ import com.google.inject.matcher.Matchers;
 
 public class ProdRouterModule implements Module {
 
-	private RouterConfig config;
+	private final RouterConfig config;
+	private final PortConfigLookup portLookup;
 
-	public ProdRouterModule(RouterConfig config) {
+	public ProdRouterModule(RouterConfig config, PortConfigLookup portLookup) {
 		this.config = config;
-		if(config.getPortLookup() == null)
-			throw new IllegalArgumentException("RouterConfig.getPortLookup cannot be null and was");
+		this.portLookup = portLookup;
+		if(portLookup == null)
+			throw new IllegalArgumentException("portLookup cannot be null and was");
 	}
 	
 	@Override
@@ -43,7 +45,7 @@ public class ProdRouterModule implements Module {
 		binder.bind(ManagedBeanMeta.class).toInstance(beanMeta);
 		binder.bindListener(Matchers.any(), new GuiceWebpiecesListener(beanMeta));
 		
-		binder.bind(PortConfigLookup.class).toInstance(config.getPortLookup());
+		binder.bind(PortConfigLookup.class).toInstance(portLookup);
 	}
 	
 }
