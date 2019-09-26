@@ -80,7 +80,7 @@ public class DevelopmentServer {
 		else
 			args = new String[] {"-hibernate.persistenceunit=hibernatefortest"};
 		
-		ServerConfig config = new ServerConfig(sslFactory);
+		ServerConfig config = new ServerConfig(sslFactory, false);
 
 		//READ the documentation in HttpSvrInstanceConfig for more about these settings
 //		HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8444), sslFactory);

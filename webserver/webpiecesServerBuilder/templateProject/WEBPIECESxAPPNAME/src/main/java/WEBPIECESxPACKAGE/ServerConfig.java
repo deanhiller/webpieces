@@ -79,19 +79,22 @@ public class ServerConfig {
 	 */
 	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
 
-	public ServerConfig(SSLEngineFactory sslFactory, File compressionCache) {
+	private final boolean isRunningServerMainMethod;
+
+	public ServerConfig(SSLEngineFactory sslFactory, File compressionCache, boolean isServerMainMethod) {
 		this.compressionCacheDir = compressionCache;
+		this.isRunningServerMainMethod = isServerMainMethod;
 	}
 	
 	public ServerConfig(File compressionCache) {
 		//For tests, we need to bind to port 0, then lookup the port after that...
-		this(new WebSSLFactory(), compressionCache);
+		this(new WebSSLFactory(), compressionCache, false);
 		tokenCheckOn = false;
 	}
 
 	//8080, 8443
-	public ServerConfig(SSLEngineFactory factory) {
-		this(factory, FileFactory.newBaseFile("webpiecesCache/precompressedFiles"));
+	public ServerConfig(SSLEngineFactory factory, boolean isServerMainMethod) {
+		this(factory, FileFactory.newBaseFile("webpiecesCache/precompressedFiles"), isServerMainMethod);
 	}
 	
 	public VirtualFile getMetaFile() {
@@ -165,5 +168,9 @@ public class ServerConfig {
 
 	public List<NeedsSimpleStorage> getNeedsStorage() {
 		return needsStorage;
+	}
+
+	public boolean isRunningServerMainMethod() {
+		return isRunningServerMainMethod;
 	}
 }

@@ -63,21 +63,23 @@ public class Server {
 			//on the command line
 			String[] newArgs = addArgs(args, "-hibernate.persistenceunit=production");
 
-			ServerConfig svrConfig = parseAndConfigure();
+			ServerConfig svrConfig = createServerConfig();
 			Server server = new Server(null, null, svrConfig, newArgs);
 			server.start();
 
 			synchronized (Server.class) {
 				//wait forever so server doesn't shut down..
 				Server.class.wait();
-			}
+			}		
 		} catch(Throwable e) {
 			log.error("Failed to startup.  exiting jvm", e);
 			System.exit(1); // should not be needed BUT some 3rd party libraries start non-daemon threads :(
 		}
 	}
 
-	private WebServer webServer;
+	private final WebServer webServer;
+
+	private final boolean isRunningServerMainMethod;
 
 	public Server(
 		Module platformOverrides, 
@@ -85,6 +87,7 @@ public class Server {
 		ServerConfig svrConfig, 
 		String ... args
 	) {
+		isRunningServerMainMethod = svrConfig.isRunningServerMainMethod();
 		//read here and checked for correctness on last line of server construction
 		Arguments arguments = new CommandLineParser().parse(args);
 
@@ -205,7 +208,7 @@ public class Server {
 			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
-			log.info("You appear to be running test from Intellij, Eclipse or Gradle(xxxx-dev subproject), or the main app from eclipse");
+			log.info("You appear to be running test from Intellij, Eclipse or Gradle(xxxx-dev subproject), or the DevelopmentServer.java/ProdServerForIDE.java from eclipse");
 			File parent = filePath.getParentFile();
 			return FileFactory.newFile(parent, "WEBPIECESxAPPNAME/src/dist");
 		} else if("WEBPIECESxAPPNAME".equals(name)) {
@@ -217,15 +220,25 @@ public class Server {
 			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
-			log.info("You appear to be running test from Intellij, Eclipse or Gradle(main subproject), or the main app from eclipse");
-			return FileFactory.newFile(filePath, "src/dist");
+			if(isRunningServerMainMethod) {
+				log.info("You appear to be running Server.java from Eclipse");
+				return throwException();
+			} else {	
+				log.info("You appear to be running test from Intellij, Eclipse or Gradle(main subproject)");
+				return FileFactory.newFile(filePath, "src/dist");
+			}
 		} else if(locatorFile1.exists()) {
 			//DAMNIT Intellij...FIX THIS STUFF!!!
 			//For ->
 			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
-			log.info("You appear to be running a main app from Intellij..but unclear from which subproject");
-			return FileFactory.newFile(filePath, "WEBPIECESxAPPNAME/src/dist");
+			if(isRunningServerMainMethod) {
+				log.info("You appear to be running Server.java from Intellij");
+				return throwException();
+			} else {
+				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java from Intellij");
+				return FileFactory.newFile(filePath, "WEBPIECESxAPPNAME/src/dist");
+			}
 		} else if(locatorFile2.exists()) {
 			//DAMNIT Intellij...FIX THIS STUFF!!!
 			//
@@ -233,11 +246,23 @@ public class Server {
 			//
 			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
-			log.info("Running DevServer in Intellij, making property modifications(damn intellij..fix that)");
-			return FileFactory.newFile(filePath, "webserver/webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME/src/dist");
+			if(isRunningServerMainMethod) {
+				log.info("You appear to be running WEBPIECESxPACKAGE.Server.java from webpieces in Intellij");
+				return throwException();
+			} else {
+				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java in webpieces project from Intellij");
+				return FileFactory.newFile(filePath, "webserver/webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME/src/dist");
+			}
 		}
 
 		throw new IllegalStateException("bug, we must have missed an environment="+name+" full path="+filePath);
+	}
+
+	private File throwException() {
+		throw new RuntimeException("Please do 1 of the following:\n"
+				+ "1. run DevelopmentServer.java or ProdServerForIDE.java instead of Server.java from IDE OR\n"
+				+ "2. remove this exception and set a JDBC driver up OR\n"
+				+ "3. run ./gradle assembleDist and run the full blown prod server which is temporarily setup with H2 in-memory and will work");
 	}
 
 	/**
@@ -251,11 +276,11 @@ public class Server {
 		//channel.socket().setReceiveBufferSize(size);
 	}
 
-	private static ServerConfig parseAndConfigure() {
+	private static ServerConfig createServerConfig() {
 
 		WebSSLFactory factory = new WebSSLFactory();
 
-		ServerConfig config = new ServerConfig(factory);
+		ServerConfig config = new ServerConfig(factory, true);
 		config.addNeedsStorage(factory);
 		config.setHttpConfig(new HttpSvrInstanceConfig(null, (s) -> configure(s)));
 		config.setHttpsConfig(new HttpSvrInstanceConfig(factory, (s) -> configure(s)));		

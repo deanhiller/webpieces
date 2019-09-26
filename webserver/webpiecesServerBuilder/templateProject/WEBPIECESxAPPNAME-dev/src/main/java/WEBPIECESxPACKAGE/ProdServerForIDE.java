@@ -66,7 +66,7 @@ public class ProdServerForIDE {
 		Module platformOverrides = new DevTemplateModule(templateConfig);
 		
 		WebSSLFactory sslFactory = new WebSSLFactory();
-		ServerConfig config = new ServerConfig(sslFactory);
+		ServerConfig config = new ServerConfig(sslFactory, false);
 		
 		//It is very important to turn off caching or developers will get very confused when they
 		//change stuff and they don't see changes in the website

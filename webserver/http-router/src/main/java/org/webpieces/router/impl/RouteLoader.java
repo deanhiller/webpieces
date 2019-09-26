@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.exceptions.InjectionCreationException;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.plugins.Plugin;
@@ -240,7 +241,7 @@ public class RouteLoader {
 			//inside the hibernate plugin
 			//I think we can reproduce by calling this earlier...
 			//String pu = persistenceUnit.get();
-			throw new RuntimeException("Exception", e.getCause());
+			throw new InjectionCreationException("Exception", e.getCause());
 		}
 	}
 
