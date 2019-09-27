@@ -19,8 +19,8 @@ import org.webpieces.router.impl.params.ParamMeta;
 import org.webpieces.router.impl.params.ParamNode;
 import org.webpieces.router.impl.params.ParamTreeNode;
 import org.webpieces.router.impl.params.ValueNode;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HibernateLookup implements EntityLookup {
 

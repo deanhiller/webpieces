@@ -3,14 +3,15 @@ package org.webpieces.frontend2.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Layer1ServerListener implements AsyncDataListener {
 	private static final Logger log = LoggerFactory.getLogger(Layer1ServerListener.class);
@@ -104,7 +105,8 @@ public class Layer1ServerListener implements AsyncDataListener {
 
 	@Override
 	public void connectionOpened(TCPChannel channel, boolean isReadyForWrites) {
-		log.debug(() -> channel+" socket opened");
+		if(log.isDebugEnabled())
+			log.debug(channel+" socket opened");
 		//when a channel is SSL, we can tell right away IF ALPN is installed
 		//boolean isHttp2 = channel.getAlpnDetails().isHttp2();
 

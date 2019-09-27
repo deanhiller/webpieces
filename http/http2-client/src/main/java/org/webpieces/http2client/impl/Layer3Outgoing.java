@@ -3,11 +3,12 @@ package org.webpieces.http2client.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
@@ -24,7 +25,8 @@ public class Layer3Outgoing implements ClientEngineListener {
 
 	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer data) {
-		log.trace(() -> channel+"writing out data to socket size="+data.remaining());
+		if(log.isTraceEnabled())
+			log.trace(channel+"writing out data to socket size="+data.remaining());
 		return channel.write(data)
 						.thenApply(c -> null);
 	}

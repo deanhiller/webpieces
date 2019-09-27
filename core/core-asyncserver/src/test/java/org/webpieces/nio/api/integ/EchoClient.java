@@ -7,8 +7,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.webpieces.nio.api.throughput.BytesRecorder;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EchoClient {
 

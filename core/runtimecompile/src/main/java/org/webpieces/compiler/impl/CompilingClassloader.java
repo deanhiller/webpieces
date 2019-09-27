@@ -17,11 +17,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Compile classes that need compiling to load them
@@ -147,7 +148,8 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         }
         byte[] bc = byteCodeCache.getBytecode(name, applicationClass.javaSource);
 
-        log.trace(()->"Loading class for "+name);
+        if(log.isTraceEnabled())
+			log.trace("Loading class for "+name);
 
         if (bc != null) {
         	applicationClass.javaByteCode = bc;
@@ -156,7 +158,8 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
             
             if(log.isDebugEnabled()) {
             	long time = System.currentTimeMillis() - start;
-            	log.trace(()->time+"ms to load class "+name+" from cache");
+            	if(log.isTraceEnabled())
+					log.trace(time+"ms to load class "+name+" from cache");
             }
 
             return applicationClass.javaClass;
@@ -180,7 +183,8 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
 
         if(log.isTraceEnabled()) {
         	long time = System.currentTimeMillis() - start;
-        	log.trace(()->time+"ms to load class "+name);
+        	if(log.isTraceEnabled())
+				log.trace(time+"ms to load class "+name);
         }
 
         return applicationClass.javaClass;

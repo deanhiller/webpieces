@@ -13,8 +13,8 @@ import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.filters.ExceptionUtil;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DScopedRouter {
 	private static final Logger log = LoggerFactory.getLogger(DScopedRouter.class);

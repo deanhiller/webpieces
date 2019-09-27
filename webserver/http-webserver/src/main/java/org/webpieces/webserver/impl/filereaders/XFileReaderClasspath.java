@@ -1,11 +1,12 @@
 package org.webpieces.webserver.impl.filereaders;
 
 import java.io.InputStream;
+import java.util.function.Supplier;
 
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.webserver.impl.RequestInfo;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
@@ -25,7 +26,8 @@ public class XFileReaderClasspath extends XFileReader {
 			String fileName, VirtualFile fullFilePath, RequestInfo info, String extension,
 			ResponseEncodingTuple tuple) {
 
-		log.debug(() -> "Opening class path file "+fullFilePath);
+		if(log.isDebugEnabled())
+			log.debug("Opening class path file "+fullFilePath);
 		InputStream inputStream = fullFilePath.openInputStream();
 
 		return new ChunkClassPathReader(inputStream, fullFilePath);

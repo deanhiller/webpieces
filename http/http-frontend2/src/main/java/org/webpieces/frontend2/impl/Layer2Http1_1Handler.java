@@ -20,8 +20,8 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.util.acking.AckAggregator;
 import org.webpieces.util.acking.ByteAckTracker;
 import org.webpieces.util.locking.PermitQueue;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;

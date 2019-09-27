@@ -16,8 +16,8 @@ import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.throughput.AsyncConfig;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.http2engine.api.client.Http2Config;
 

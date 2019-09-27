@@ -12,7 +12,7 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
-import org.webpieces.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 

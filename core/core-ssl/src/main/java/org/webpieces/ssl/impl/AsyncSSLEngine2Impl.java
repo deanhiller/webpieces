@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
@@ -18,8 +19,8 @@ import org.webpieces.ssl.api.AsyncSSLEngineException;
 import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.ssl.api.SslListener;
 import org.webpieces.util.acking.ByteAckTracker;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 
@@ -58,7 +59,8 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		SSLEngine sslEngine = mem.getEngine();
 		
-		log.trace(()->mem+"start handshake");
+		if(log.isTraceEnabled())
+			log.trace(mem+"start handshake");
 		try {
 			sslEngine.beginHandshake();
 		} catch (SSLException e) {
@@ -105,13 +107,15 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			//unwrap any previously incoming data...
 			if(cached != null) {
 				mem.setCachedEncryptedData(null); //wipe out the data we are now procesing
-				log.trace(()->mem+"[AfterRunnable][socketToEngine] refeeding myself pos="+cached.position()+" lim="+cached.limit());
+				if(log.isTraceEnabled())
+					log.trace(mem+"[AfterRunnable][socketToEngine] refeeding myself pos="+cached.position()+" lim="+cached.limit());
 				//here the 'cached' was already recorded when fed in...(There is a test for this)
 				return feedEncryptedPacketImpl(cached, CompletableFuture.completedFuture(null));
 			}
 			return CompletableFuture.completedFuture(null);
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
-			log.trace(()->mem+"[Runnable]continuing handshake");
+			if(log.isTraceEnabled())
+				log.trace(mem+"[Runnable]continuing handshake");
 			return sendHandshakeMessage();
 		} else {
 			throw new UnsupportedOperationException("need to support state="+hsStatus);
@@ -128,7 +132,8 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	
 	private CompletableFuture<Void> sendHandshakeMessageImpl() throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
-		log.trace(()->mem+"sending handshake message");
+		if(log.isTraceEnabled())
+			log.trace(mem+"sending handshake message");
 		//HELPER.eraseBuffer(empty);
 
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
@@ -148,8 +153,9 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 				
 				final Status lastStatus2 = lastStatus;
 				final HandshakeStatus hsStatus2 = hsStatus;
-				log.trace(()->mem+"write packet pos="+engineToSocketData.position()+" lim="+
-							engineToSocketData.limit()+" status="+lastStatus2+" hs="+hsStatus2);
+				if(log.isTraceEnabled())
+				log.trace(mem+"write packet pos="+engineToSocketData.position()+" lim="+
+											engineToSocketData.limit()+" status="+lastStatus2+" hs="+hsStatus2);
 				if(lastStatus == Status.BUFFER_OVERFLOW || lastStatus == Status.BUFFER_UNDERFLOW)
 					throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
 				
@@ -167,7 +173,8 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			throw new RuntimeException(mem+"BUG, need to implement more here status="+hsStatus);			
 
 		final HandshakeStatus hsStatus2 = hsStatus;
-		log.trace(()->mem+"status="+hsStatus2+" isConn="+mem.getConnectionState());
+		if(log.isTraceEnabled())
+			log.trace(mem+"status="+hsStatus2+" isConn="+mem.getConnectionState());
 		if(hsStatus == HandshakeStatus.FINISHED) {
 			fireLinkEstablished();
 		}
@@ -280,25 +287,29 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	}
 
 	private void logTrace1(ByteBuffer encryptedInData, HandshakeStatus hsStatus) {
-		log.trace(()->mem+"[sockToEngine] going to unwrap pos="+encryptedInData.position()+
-					" lim="+encryptedInData.limit()+" hsStatus="+hsStatus+" cached="+mem.getCachedToProcess());
+		if(log.isTraceEnabled())
+		log.trace(mem+"[sockToEngine] going to unwrap pos="+encryptedInData.position()+
+							" lim="+encryptedInData.limit()+" hsStatus="+hsStatus+" cached="+mem.getCachedToProcess());
 	}
 
 	private void logTrace(ByteBuffer encryptedData, Status status, HandshakeStatus hsStatus) {
-		log.trace(()->mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
+		if(log.isTraceEnabled())
+			log.trace(mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
 	}
 
 	private void logAndCheck(ByteBuffer encryptedData, SSLEngineResult result, ByteBuffer outBuffer, Status status, HandshakeStatus hsStatus, int i) {
 		final ByteBuffer data = encryptedData;
 
-		log.trace(()->mem+"[sockToEngine] unwrap done pos="+data.position()+" lim="+
-					data.limit()+" status="+status+" hs="+hsStatus);
+		if(log.isTraceEnabled())
+		log.trace(mem+"[sockToEngine] unwrap done pos="+data.position()+" lim="+
+							data.limit()+" status="+status+" hs="+hsStatus);
 		if(i > 1000) {
 			throw new RuntimeException(this+"Bug, stuck in loop, encryptedData="+encryptedData+" outBuffer="+outBuffer+
 					" hsStatus="+hsStatus+" status="+status);
 		} else if(status == Status.BUFFER_UNDERFLOW) {
 			final ByteBuffer data1 = encryptedData;
-			log.trace(()->"buffer underflow. data="+data1.remaining());
+			if(log.isTraceEnabled())
+				log.trace("buffer underflow. data="+data1.remaining());
 		}
 	}
 
@@ -377,7 +388,8 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			throw new IllegalArgumentException("your buffer has no readable data");
 		
 		SSLEngine sslEngine = mem.getEngine();
-		log.trace(()->mem+"feedPlainPacket [in-buffer] pos="+buffer.position()+" lim="+buffer.limit());
+		if(log.isTraceEnabled())
+			log.trace(mem+"feedPlainPacket [in-buffer] pos="+buffer.position()+" lim="+buffer.limit());
 		
 		CompletableFuture<Void> future = encryptionTracker.addBytesToTrack(buffer.remaining());
 		
@@ -394,8 +406,9 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 					throw new RuntimeException("Bug, status="+status+" instead of OK.  hsStatus="+
 							hsStatus+" Something went wrong and we could not encrypt the data");
 	
-				log.trace(()->mem+"SSLListener.packetEncrypted pos="+engineToSocketData.position()+
-							" lim="+engineToSocketData.limit()+" hsStatus="+hsStatus+" status="+status);
+				if(log.isTraceEnabled())
+				log.trace(mem+"SSLListener.packetEncrypted pos="+engineToSocketData.position()+
+											" lim="+engineToSocketData.limit()+" hsStatus="+hsStatus+" status="+status);
 				
 				engineToSocketData.flip();
 				listener.packetEncrypted(engineToSocketData).handle( (v, t) -> {

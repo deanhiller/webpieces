@@ -5,8 +5,8 @@ import java.util.List;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.routers.EStaticRouter;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DevCompressionCacheSetup implements CompressionCacheSetup {
 

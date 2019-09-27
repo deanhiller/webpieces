@@ -13,8 +13,8 @@ import javax.persistence.Persistence;
 
 import org.hibernate.cfg.AvailableSettings;
 import org.webpieces.router.api.extensions.EntityLookup;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;

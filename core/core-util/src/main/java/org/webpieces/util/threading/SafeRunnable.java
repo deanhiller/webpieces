@@ -1,7 +1,7 @@
 package org.webpieces.util.threading;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class SafeRunnable implements Runnable {
 

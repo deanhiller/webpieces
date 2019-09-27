@@ -4,7 +4,7 @@ import java.net.BindException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
-import org.webpieces.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 

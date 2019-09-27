@@ -19,8 +19,8 @@ import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.router.impl.routers.EStaticRouter;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.util.security.Security;
 
 public class ProdCompressionCacheSetup implements CompressionCacheSetup {

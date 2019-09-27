@@ -4,12 +4,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
@@ -106,7 +107,8 @@ public class Level7MarshalAndPing {
 	}
 
 	public CompletableFuture<Void> sendFrameToSocket(Http2Msg msg) {
-		log.debug(() -> key+"sending frame down to socket(from client)=\n"+msg);
+		if(log.isDebugEnabled())
+			log.debug(key+"sending frame down to socket(from client)=\n"+msg);
 		DataWrapper data = parser.marshal(marshalState, msg);
 		ByteBuffer buffer = ByteBuffer.wrap(data.createByteArray());
 		return sendToSocket(buffer);

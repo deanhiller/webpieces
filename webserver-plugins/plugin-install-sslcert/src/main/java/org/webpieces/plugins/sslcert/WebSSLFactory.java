@@ -29,8 +29,8 @@ import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.plugins.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.router.api.extensions.SimpleStorage;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 	

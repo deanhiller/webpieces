@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import org.webpieces.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.deprecated.ChannelManagerOld;

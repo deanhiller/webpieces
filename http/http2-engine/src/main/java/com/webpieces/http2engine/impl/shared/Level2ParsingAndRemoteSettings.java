@@ -2,12 +2,13 @@ package com.webpieces.http2engine.impl.shared;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.util.acking.AckAggregator;
 import org.webpieces.util.acking.ByteAckTracker;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.UnmarshalState;
@@ -148,7 +149,8 @@ public abstract class Level2ParsingAndRemoteSettings {
 	
 	public CompletableFuture<Void> processImpl(Http2Msg msg) {
 		if(log.isDebugEnabled())
-			log.debug(() -> logId+"frame from socket="+msg);
+			if(log.isDebugEnabled())
+				log.debug(logId+"frame from socket="+msg);
 		
 		if(msg instanceof DataFrame) {
 			return syncro.sendDataToApp((DataFrame) msg);

@@ -10,6 +10,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.util.Calendar;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
@@ -25,8 +26,8 @@ import org.webpieces.nio.impl.cm.basic.ChannelState;
 import org.webpieces.nio.impl.cm.basic.IdObject;
 import org.webpieces.nio.impl.cm.basic.KeyProcessor;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
@@ -61,7 +62,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 		CompletableFuture<Channel> promise = new CompletableFuture<>();
 		
 		try {
-			apiLog.trace(()->this+"Basic.connect called-addr="+addr);
+			if(apiLog.isTraceEnabled())
+				apiLog.trace(this+"Basic.connect called-addr="+addr);
 			
 			channel.connect(addr);
 			
@@ -74,7 +76,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
     
     public synchronized void disconnect() {
-		apiLog.trace(()->this+"Basic.disconnect called");
+		if(apiLog.isTraceEnabled())
+			apiLog.trace(this+"Basic.disconnect called");
 		
 		try {
 			channelState = ChannelState.CLOSED;

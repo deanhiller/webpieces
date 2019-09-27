@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.ctx.api.AcceptMediaType;
 import org.webpieces.ctx.api.HttpMethod;
@@ -19,8 +20,8 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.router.api.exceptions.BadCookieException;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.webserver.impl.body.BodyParser;
 import org.webpieces.webserver.impl.body.BodyParsers;
 
@@ -178,7 +179,8 @@ public class RequestStreamWriter implements StreamWriter {
 		if(routerRequest.relativePath.contains("?"))
 			throw new UnsupportedOperationException("not supported yet");
 
-		log.debug(() -> "received request="+requestHeaders+" routerRequest="+routerRequest);
+		if(log.isDebugEnabled())
+			log.debug("received request="+requestHeaders+" routerRequest="+routerRequest);
 
 		ProxyResponse streamer = facade.createProxyResponse();
 		try {

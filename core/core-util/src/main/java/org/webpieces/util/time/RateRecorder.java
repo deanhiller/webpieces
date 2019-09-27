@@ -2,8 +2,8 @@ package org.webpieces.util.time;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Records approximately every period but not exactly as it is more interested in printing the rate

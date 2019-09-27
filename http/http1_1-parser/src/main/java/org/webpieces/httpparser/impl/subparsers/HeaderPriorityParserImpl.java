@@ -15,8 +15,8 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.subparsers.AcceptType;
 import org.webpieces.httpparser.api.subparsers.HeaderItem;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 	

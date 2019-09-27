@@ -3,6 +3,7 @@ package org.webpieces.frontend2.impl;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
@@ -19,8 +20,8 @@ import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.util.locking.PermitQueue;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -207,7 +208,8 @@ public class Http1_1StreamImpl implements ResponseStream {
 			
 			remove(data);	
 
-			log.debug(() -> socket+" done sending response");
+			if(log.isDebugEnabled())
+				log.debug(socket+" done sending response");
 			future = future.thenCompose(w -> {
 				return write(new HttpLastChunk());
 			}).thenApply(v -> {

@@ -27,8 +27,8 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.util.acking.AckAggregator;
 import org.webpieces.util.acking.ByteAckTracker;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpSocketImpl implements HttpSocket {
 

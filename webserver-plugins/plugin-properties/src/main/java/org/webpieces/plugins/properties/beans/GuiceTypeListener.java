@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.webpieces.plugins.properties.PropertiesConfig;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.TypeEncounter;

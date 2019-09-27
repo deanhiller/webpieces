@@ -7,8 +7,8 @@ import java.nio.channels.CompletionHandler;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChunkFileSystemReader implements ChunkReader {
 

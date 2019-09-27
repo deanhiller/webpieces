@@ -12,8 +12,8 @@ import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.filters.ExceptionUtil;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
 public class CRouter extends DScopedRouter {
@@ -48,7 +48,7 @@ public class CRouter extends DScopedRouter {
 				log.error("There is three parts to this error message... request, route found, and the exception "
 						+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"
 						+ctx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", t);
-				SupressedExceptionLog.log(t);
+				SupressedExceptionLog.log(log, t);
 				
 				if(ExceptionWrap.isChannelClosed(t))
 					return CompletableFuture.<Void>completedFuture(null);

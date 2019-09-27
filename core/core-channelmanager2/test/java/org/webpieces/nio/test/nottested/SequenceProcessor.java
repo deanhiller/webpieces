@@ -29,7 +29,7 @@ package org.webpieces.nio.test.nottested;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
-import org.webpieces.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.CorruptPacketException;

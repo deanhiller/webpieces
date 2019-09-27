@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ClassFile;
@@ -23,8 +24,8 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CompilerWrapper {
 
@@ -244,7 +245,8 @@ public class CompilerWrapper {
                     clazzName.append(compoundName[j]);
                 }
 
-                log.trace(()->"Received Success eclipse Compiled result for=" + clazzName);
+                if(log.isTraceEnabled())
+					log.trace("Received Success eclipse Compiled result for=" + clazzName);
 
                 String name = clazzName.toString();
                 VirtualFile file = fileLookup.getJava(name);

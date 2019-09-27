@@ -3,8 +3,8 @@ package com.webpieces.http2engine.impl.shared;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.util.time.Time;
 
 import com.webpieces.hpack.api.dto.Http2Headers;

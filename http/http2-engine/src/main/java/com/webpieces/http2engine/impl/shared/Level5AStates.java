@@ -10,6 +10,7 @@ import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_RST;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.NoTransitionListener;
@@ -18,8 +19,8 @@ import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.StateMachineFactory;
 import org.webpieces.util.locking.AsyncLock;
 import org.webpieces.util.locking.PermitQueue;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
@@ -110,7 +111,8 @@ public class Level5AStates {
 		if(isReleased && stream.isHasPermit()) {
 			maxConcurrentQueue.releasePermit();
 			int val = releasedCnt.incrementAndGet();
-			log.trace(() -> "release permit(cause="+cause+").  size="+maxConcurrentQueue.availablePermits()+" releasedCnt="+val+" stream="+stream.getStreamId());
+			if(log.isTraceEnabled())
+				log.trace("release permit(cause="+cause+").  size="+maxConcurrentQueue.availablePermits()+" releasedCnt="+val+" stream="+stream.getStreamId());
 		}
 	}
 	
@@ -131,7 +133,8 @@ public class Level5AStates {
 		State old = currentState.getCurrentState();
 		
 		State result = stateMachine.fireEvent(currentState, event);
-		log.trace(() -> logId+"done firing evt="+event+" "+old+" -> "+result);
+		if(log.isTraceEnabled())
+			log.trace(logId+"done firing evt="+event+" "+old+" -> "+result);
 	}
 	
 	public boolean isInClosedState(Stream stream) {
@@ -151,7 +154,8 @@ public class Level5AStates {
 		if(!isClosed)
 			return false; //do nothing
 		
-		log.trace(() -> logId+"stream closed="+stream.getStreamId());
+		if(log.isTraceEnabled())
+			log.trace(logId+"stream closed="+stream.getStreamId());
 		
 //		if(!keepDelayedState) {
 			Stream removedStream = streamState.remove(stream, cause);

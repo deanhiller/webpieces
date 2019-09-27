@@ -3,8 +3,8 @@ package org.webpieces.nio.impl.cm.basic;
 import java.util.EventListener;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class ChannelRegistrationListener implements EventListener {

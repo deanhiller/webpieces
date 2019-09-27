@@ -9,6 +9,7 @@ import java.nio.channels.SelectionKey;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
@@ -16,8 +17,8 @@ import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public final class KeyProcessor {
@@ -46,8 +47,9 @@ public final class KeyProcessor {
 
 				final SelectionKey current = key;
 				final RegisterableChannel finalChannel = channel;
-				log.trace(() -> finalChannel+" ops="+OpType.opType(current.readyOps())
-							+" acc="+current.isAcceptable()+" read="+current.isReadable()+" write"+current.isWritable());
+				if(log.isTraceEnabled())
+				log.trace(finalChannel+" ops="+OpType.opType(current.readyOps())
+											+" acc="+current.isAcceptable()+" read="+current.isReadable()+" write"+current.isWritable());
 				processKey(key, struct);
 				
 			} catch(IOException e) {
@@ -62,7 +64,8 @@ public final class KeyProcessor {
 				//TODO: get rid of this if...else statement by fixing
 				//CancelledKeyException on linux so the tests don't fail
 				RegisterableChannel fChannel = channel;
-				log.trace(() -> fChannel+"Processing of key failed, but continuing channel manager loop", e);
+				if(log.isTraceEnabled())
+					log.trace(fChannel+"Processing of key failed, but continuing channel manager loop", e);
 			} catch(Throwable e) {
 				log.error(channel+"Processing of key failed, but continuing channel manager loop", e);
 				try {
@@ -82,7 +85,8 @@ public final class KeyProcessor {
 	}
 	
 	private void processKey(SelectionKey key, ChannelInfo info) throws IOException, InterruptedException {
-		log.trace(() -> key.attachment()+"proccessing");
+		if(log.isTraceEnabled())
+			log.trace(key.attachment()+"proccessing");
 
 		//This is code to try to avoid the CancelledKeyExceptions as it makes the chances tighter
 		if(!selector.isChannelOpen(key) || !key.isValid())
@@ -111,14 +115,16 @@ public final class KeyProcessor {
 	//on the outside of this thing.  The signature is the same thing every time
 	// and we pass key and the Channel.  We can cast to the proper one.
 	private void acceptSocket(SelectionKey key, ChannelInfo info) throws IOException {
-		log.trace(() -> info.getChannel()+"Incoming Connection="+key);
+		if(log.isTraceEnabled())
+			log.trace(info.getChannel()+"Incoming Connection="+key);
 		
 		BasTCPServerChannel channel = (BasTCPServerChannel)info.getChannel();
 		channel.accept(channel.getChannelCount());
 	}
 	
 	private void connect(SelectionKey key, ChannelInfo info) throws IOException {
-		log.trace(() -> info.getChannel()+"finishing connect process");
+		if(log.isTraceEnabled())
+			log.trace(info.getChannel()+"finishing connect process");
 		
 		CompletableFuture<Channel> callback = info.getConnectCallback();
 		BasTCPChannel channel = (BasTCPChannel)info.getChannel();
@@ -139,7 +145,8 @@ public final class KeyProcessor {
 	}
 
 	private void read(SelectionKey key, ChannelInfo info) throws IOException {
-		log.trace(() -> info.getChannel()+"reading data");
+		if(log.isTraceEnabled())
+			log.trace(info.getChannel()+"reading data");
 		
 		DataListener in = info.getDataHandler();
 		BasChannelImpl channel = (BasChannelImpl)info.getChannel();
@@ -160,8 +167,9 @@ public final class KeyProcessor {
 		} catch(PortUnreachableException e) {
             //this is a normal occurence when some writes out udp to a port that is not
             //listening for udp!!!  log as finer and fire to client to deal with it.
-			log.trace(() -> "Client sent data to a host or port that is not listening " +
-                    "to udp, or udp can't get through to that machine", e);
+			if(log.isTraceEnabled())
+				log.trace("Client sent data to a host or port that is not listening " +
+			                    "to udp, or udp can't get through to that machine", e);
 			in.failure(channel, null, e);
         } catch(NotYetConnectedException e) {
             //this happens in udp when I disconnect after someone had already been streaming me
@@ -231,7 +239,8 @@ public final class KeyProcessor {
 			(msg.contains("An existing connection was forcibly closed")
 				|| msg.contains("Connection reset by peer")
 				|| msg.contains("An established connection was aborted by the software in your host machine"))) {
-		        log.trace(() -> "Exception 2", e);
+		        if(log.isTraceEnabled())
+					log.trace("Exception 2", e);
 		        processBytes(key, info, chunk, -1);
 		} else {
 			log.error("IO Exception unexpected", e);
@@ -255,11 +264,13 @@ public final class KeyProcessor {
         b.flip();
         
 		if(bytes < 0) {
-			apiLog.trace(()->channel+"far end closed, cancel key, close socket");
+			if(apiLog.isTraceEnabled())
+				apiLog.trace(channel+"far end closed, cancel key, close socket");
 			channel.serverClosed();
 			in.farEndClosed(channel);
 		} else if(bytes > 0) {
-			apiLog.trace(()->channel+"READ bytes="+bytes);
+			if(apiLog.isTraceEnabled())
+				apiLog.trace(channel+"READ bytes="+bytes);
 			fireIncomingRead(key, bytes, in, channel, b);
 		}
     }
@@ -308,11 +319,13 @@ public final class KeyProcessor {
     }
     
 	private void write(SelectionKey key, ChannelInfo info) throws IOException, InterruptedException {
-		log.trace(()->info.getChannel()+"writing data");
+		if(log.isTraceEnabled())
+			log.trace(info.getChannel()+"writing data");
 		
 		BasChannelImpl channel = (BasChannelImpl)info.getChannel();		
 		
-		log.trace(()->channel+"notifying channel of write");
+		if(log.isTraceEnabled())
+			log.trace(channel+"notifying channel of write");
 
         channel.writeAll();  
 	}

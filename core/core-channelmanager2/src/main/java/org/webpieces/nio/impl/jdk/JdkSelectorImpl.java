@@ -6,6 +6,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
@@ -15,8 +16,8 @@ import org.webpieces.nio.api.jdk.JdkServerSocketChannel;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
 import org.webpieces.nio.api.jdk.Keys;
 import org.webpieces.nio.api.jdk.SelectorListener;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
@@ -125,7 +126,8 @@ public class JdkSelectorImpl implements JdkSelect
                 running = true;
                 
                 runLoop();
-                log.trace(()->"shutting down the PollingThread");
+                if(log.isTraceEnabled())
+					log.trace("shutting down the PollingThread");
                 selector.close();
                 selector = null;
                 thread = null;                

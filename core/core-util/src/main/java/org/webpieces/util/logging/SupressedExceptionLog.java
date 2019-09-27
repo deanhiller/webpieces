@@ -3,10 +3,10 @@ package org.webpieces.util.logging;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+
 public class SupressedExceptionLog {
 
-	private static final Logger log = LoggerFactory.getLogger(SupressedExceptionLog.class);
-	
 	/**
 	 * logback does not yet log the suppressed exceptions that occured after the main failure
 	 * which can be useful so tracing recovery through the system.
@@ -15,7 +15,7 @@ public class SupressedExceptionLog {
 	 * 
 	 * @param exc
 	 */
-	public static void log(Throwable exc) {
+	public static void log(Logger log, Throwable exc) {
 		List<Throwable> reverseOrder = new ArrayList<>();
 		while(exc != null) {
 			reverseOrder.add(0, exc);
@@ -24,11 +24,11 @@ public class SupressedExceptionLog {
 		
 		for(Throwable t : reverseOrder) {
 			Throwable[] suppressed = t.getSuppressed();
-			logSuppressed(suppressed);
+			logSuppressed(log, suppressed);
 		}
 	}
 
-	private static void logSuppressed(Throwable[] suppressed) {
+	private static void logSuppressed(Logger log, Throwable[] suppressed) {
 		for(Throwable s: suppressed) {
 			log.info("SUPPRESSED exception(meaning it's secondary after a main failure", s);
 		}

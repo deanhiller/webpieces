@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
-import org.webpieces.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 

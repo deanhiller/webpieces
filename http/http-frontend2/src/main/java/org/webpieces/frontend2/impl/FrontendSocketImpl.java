@@ -10,8 +10,8 @@ import org.webpieces.httpparser.api.Memento;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.locking.PermitQueue;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.http2engine.api.error.FarEndClosedConnection;
 import com.webpieces.http2engine.api.error.ShutdownStream;

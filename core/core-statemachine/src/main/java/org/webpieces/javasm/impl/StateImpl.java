@@ -2,12 +2,13 @@ package org.webpieces.javasm.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.webpieces.javasm.api.NoTransitionListener;
 import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachineFactory;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StateImpl implements State
 {
@@ -56,7 +57,8 @@ public class StateImpl implements State
     {
         TransitionImpl transition = evtToTransition.get(evt);
         if(transition == null) {
-        	log.debug(() -> smState+"No Transition: "+getName()+" -> <no transition found>, event="+evt);
+        	if(log.isDebugEnabled())
+				log.debug(smState+"No Transition: "+getName()+" -> <no transition found>, event="+evt);
         	if(noTransitionListener != null)
         		noTransitionListener.noTransitionFromEvent(smState.getCurrentState(), evt);
             return;
@@ -64,7 +66,8 @@ public class StateImpl implements State
 
         State nextState = transition.getEndState();
         if(log.isDebugEnabled())
-        	log.debug(() -> smState+"Transition: "+getName()+" -> "+nextState+", event="+evt);
+			if(log.isDebugEnabled())
+				log.debug(smState+"Transition: "+getName()+" -> "+nextState+", event="+evt);
 
         try {
             smState.setCurrentState(nextState);

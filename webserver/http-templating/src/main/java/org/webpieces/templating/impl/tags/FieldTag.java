@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,8 +18,8 @@ import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.impl.GroovyTemplateSuperclass;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import groovy.lang.Closure;
 
@@ -132,7 +133,8 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
             } catch (Exception e) {
                 // if there is a problem reading the field we dont set any
                 // value
-            	log.trace(() -> "exception", e);
+            	if(log.isTraceEnabled())
+					log.trace("exception", e);
             }
         } else {
         	//for method parameters not fields in the bean like above

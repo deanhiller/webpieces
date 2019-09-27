@@ -1,9 +1,10 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class CloseRunnable {
@@ -19,7 +20,8 @@ public class CloseRunnable {
 
 	public boolean runDelayedAction() {
 
-        log.trace(()->channel+"Closing channel.");
+        if(log.isTraceEnabled())
+			log.trace(channel+"Closing channel.");
         
 		try {
 			channel.closeImpl();

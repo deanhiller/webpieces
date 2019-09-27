@@ -2,14 +2,15 @@ package org.webpieces.http2client.impl;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
@@ -38,7 +39,8 @@ public class Layer1Incoming implements DataListener {
 
 	@Override
 	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
-		log.debug(() -> channel+"incoming data. size="+b.remaining());
+		if(log.isDebugEnabled())
+			log.debug(channel+"incoming data. size="+b.remaining());
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		//log.info("data="+data.createStringFrom(0, data.getReadableSize(), StandardCharsets.UTF_8));
 		return layer2.parse(data);

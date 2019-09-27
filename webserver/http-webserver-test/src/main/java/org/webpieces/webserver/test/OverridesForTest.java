@@ -13,8 +13,8 @@ import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.util.threading.DirectExecutorService;
 import org.webpieces.util.time.Time;
 

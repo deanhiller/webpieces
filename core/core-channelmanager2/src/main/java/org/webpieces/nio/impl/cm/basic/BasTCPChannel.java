@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
@@ -19,8 +20,8 @@ import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
@@ -139,10 +140,12 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private CompletableFuture<Channel> connectImpl2(SocketAddress addr) throws IOException, InterruptedException {
 		CompletableFuture<Channel> future = new CompletableFuture<>();
 
-		apiLog.trace(()->this+"Basic.connect-addr="+addr);
+		if(apiLog.isTraceEnabled())
+			apiLog.trace(this+"Basic.connect-addr="+addr);
 		try {
 			boolean connected = channel.connect(addr);
-			log.trace(()->this+"connected status="+connected);
+			if(log.isTraceEnabled())
+				log.trace(this+"connected status="+connected);
 	
 			setConnectingTo(addr);
 			if(connected) {

@@ -3,6 +3,7 @@ package org.webpieces.webserver.impl.filereaders;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -14,8 +15,8 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ChannelCloser;
 import org.webpieces.webserver.impl.RequestInfo;
@@ -68,7 +69,8 @@ public abstract class XFileReader {
 		
 		CompletableFuture<Void> future;
 		try {
-			log.debug(()->"sending chunked file via async read="+reader);
+			if(log.isDebugEnabled())
+				log.debug("sending chunked file via async read="+reader);
 			future = info.getResponseSender().sendResponse(response)
 					.thenCompose(s -> readLoop(s, info.getPool(), reader, 0));
 		} catch(Throwable e) {
@@ -127,7 +129,8 @@ public abstract class XFileReader {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 
 		int len = data.getReadableSize();
-		log.trace(() ->"SENDING data to="+writer+" len="+len+" isEnd="+isEos+" content="+data.createStringFromUtf8(0, len));
+		if(log.isTraceEnabled())
+			log.trace("SENDING data to="+writer+" len="+len+" isEnd="+isEos+" content="+data.createStringFromUtf8(0, len));
 
 		DataFrame frame = new DataFrame();
 		frame.setEndOfStream(isEos);

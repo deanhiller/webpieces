@@ -4,8 +4,8 @@ import java.sql.SQLException;
 
 import org.h2.tools.Server;
 import org.webpieces.plugins.backend.spi.BackendGuiDescriptor;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;

@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -28,8 +29,8 @@ import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.tags.BootstrapModalTag;
 import org.webpieces.util.filters.ExceptionUtil;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Request;
@@ -88,7 +89,8 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	@Override
 	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
-		log.debug(() -> "Sending redirect response. req="+request);
+		if(log.isDebugEnabled())
+			log.debug("Sending redirect response. req="+request);
 		Http2Response response = createRedirect(httpResponse);
 		
 		log.info("sending REDIRECT response responseSender="+ stream);
@@ -142,8 +144,9 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public CompletableFuture<Void> sendRenderHtml(RenderResponse resp) {
-		log.info(() -> "Sending render html response. req="+request+" controller="
-				+resp.view.getControllerName()+"."+resp.view.getMethodName());
+		if(log.isInfoEnabled())
+		log.info("Sending render html response. req="+request+" controller="
+						+resp.view.getControllerName()+"."+resp.view.getMethodName());
 		View view = resp.view;
 		String packageStr = view.getPackageName();
 		//For this type of View, the template is the name of the method..
@@ -219,7 +222,8 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	@Override
 	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
-		log.debug(() -> "Sending render static html response. req="+request);
+		if(log.isDebugEnabled())
+			log.debug("Sending render static html response. req="+request);
 		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, stream);
 		return ExceptionUtil.wrapException(
 			() -> reader.sendRenderStatic(requestInfo, renderStatic), 
@@ -249,7 +253,8 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, true);
 		
-		log.debug(()->"content about to be sent back="+content);
+		if(log.isDebugEnabled())
+			log.debug("content about to be sent back="+content);
 		
 		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
 		byte[] bytes = content.getBytes(encoding);
@@ -338,7 +343,8 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
-		log.debug(() -> "Sending failure html response. req="+request);
+		if(log.isDebugEnabled())
+			log.debug("Sending failure html response. req="+request);
 
 		//TODO: IF instance of HttpException with a KnownStatusCode, we should actually send that status code
 		//TODO: we should actually just render our own internalServerError.html page with styling and we could do that.

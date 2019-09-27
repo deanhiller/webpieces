@@ -1,6 +1,7 @@
 package com.webpieces.http2engine.impl.client;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -8,8 +9,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.locking.PermitQueue;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.ResponseHandler;
@@ -57,7 +58,8 @@ public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements S
 		//This gets tricky, BUT must use the maxConcurrent permit queue first, THEN the serializer permit queue
 		return maxConcurrentQueue.runRequest( () -> {
 			int val = acquiredCnt.incrementAndGet();
-			log.trace(() -> "got permit(cause="+headers+").  size="+maxConcurrentQueue.availablePermits()+" acquired="+val);
+			if(log.isTraceEnabled())
+				log.trace("got permit(cause="+headers+").  size="+maxConcurrentQueue.availablePermits()+" acquired="+val);
 			
 			return streamInit.createStreamAndSend(headers, responseListener);
 		});

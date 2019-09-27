@@ -21,8 +21,8 @@ import org.webpieces.router.impl.routers.DNotFoundRouter;
 import org.webpieces.router.impl.routers.DScopedRouter;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBuilder {
 

@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
@@ -32,8 +33,8 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatus;
 import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.HttpVersion;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpParserImpl implements HttpParser {
 
@@ -217,7 +218,8 @@ public class HttpParserImpl implements HttpParser {
 	}
 	
 	private MementoImpl parse(MementoImpl memento, DataWrapper moreData) {
-		log.trace(()->"Trying to parse message");
+		if(log.isTraceEnabled())
+			log.trace("Trying to parse message");
 //		if(log.isDebugEnabled()) {
 //			byte[] someData = moreData.createByteArray();
 //			String readable = conversion.convertToReadableForm(someData);

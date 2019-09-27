@@ -1,7 +1,7 @@
 package org.webpieces.router.impl.mgmt;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.spi.InjectionListener;
 

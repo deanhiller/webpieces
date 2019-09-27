@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This allows you to do an asynchronous synchronization block that does NOT block the thread and instead resolves the
@@ -53,7 +53,8 @@ public class AsyncLock {
 		
 		Supplier<CompletableFuture<RESP>> proxy = new Supplier<CompletableFuture<RESP>>() {
 			public CompletableFuture<RESP> get() {
-				log.trace(() -> "key:"+key+" start virtual single thread. ");
+				if(log.isTraceEnabled())
+					log.trace("key:"+key+" start virtual single thread. ");
 				try {
 					RESP resp = processor.get();
 					return CompletableFuture.completedFuture(resp);
@@ -65,7 +66,8 @@ public class AsyncLock {
 			}
 		};
 		
-		log.trace(() -> "key:"+key+" get virtual thread or wait");
+		if(log.isTraceEnabled())
+			log.trace("key:"+key+" get virtual thread or wait");
 		return queue.runRequest(proxy)
 				.handle((v, e) -> {
 					return release(v, e, key);
@@ -74,7 +76,8 @@ public class AsyncLock {
 	}
 
 	private <RESP> CompletableFuture<RESP> release(RESP v, Throwable e, String key) {
-		log.trace(() -> "key:"+key+" end virtual single thread");
+		if(log.isTraceEnabled())
+			log.trace("key:"+key+" end virtual single thread");
 		//immediately release when future is complete
 		queue.releasePermit();
 

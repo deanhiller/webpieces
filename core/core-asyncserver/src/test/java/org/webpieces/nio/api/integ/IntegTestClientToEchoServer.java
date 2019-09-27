@@ -17,8 +17,8 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.throughput.BytesRecorder;
 import org.webpieces.nio.api.throughput.ClientDataListener;
 import org.webpieces.nio.api.throughput.IntegTestLocalhostThroughput;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 public class IntegTestClientToEchoServer {

@@ -2,8 +2,8 @@ package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.ConnectionClosedException;

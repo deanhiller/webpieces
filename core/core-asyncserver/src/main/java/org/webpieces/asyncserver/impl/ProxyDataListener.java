@@ -2,14 +2,15 @@ package org.webpieces.asyncserver.impl;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProxyDataListener implements DataListener {
 
@@ -32,7 +33,8 @@ public class ProxyDataListener implements DataListener {
 	@Override
 	public void farEndClosed(Channel channel) {
 		log.info("async server far end closed");
-		log.debug(() -> channel+"far end closed");
+		if(log.isDebugEnabled())
+			log.debug(channel+"far end closed");
 		connectedChannels.removeChannel((TCPChannel) channel);
 		TCPChannel proxy = lookupExistingOrCreateNew(channel);
 		dataListener.farEndClosed(proxy);
@@ -69,7 +71,8 @@ public class ProxyDataListener implements DataListener {
 	}
 
 	public void connectionOpened(Channel channel, boolean isReadyForWrites) {
-		log.debug(() -> "connection opened");
+		if(log.isDebugEnabled())
+			log.debug("connection opened");
 		TCPChannel proxy = lookupExistingOrCreateNew(channel);
 		dataListener.connectionOpened(proxy, isReadyForWrites);
 	}

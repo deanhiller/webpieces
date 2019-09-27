@@ -18,8 +18,8 @@ import org.webpieces.templating.impl.tags.RenderTagArgsTag;
 import org.webpieces.templating.impl.tags.ScriptTag;
 import org.webpieces.templating.impl.tags.StyleSheetTag;
 import org.webpieces.templating.impl.tags.TemplateLoaderTag;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HtmlTagLookup {
 	private static final Logger log = LoggerFactory.getLogger(HtmlTagLookup.class);

@@ -4,8 +4,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Future Permit Queue that auto releases when another Future completes.  Unlike the more advanced
@@ -25,14 +25,17 @@ public class FuturePermitQueue {
 	public <RESP> CompletableFuture<RESP> runRequest(Supplier<CompletableFuture<RESP>> processor) {
 		Supplier<CompletableFuture<RESP>> proxy = new Supplier<CompletableFuture<RESP>>() {
 			public CompletableFuture<RESP> get() {
-				log.debug(() -> "key:"+key+" start virtual single thread. ");
+				if(log.isDebugEnabled())
+					log.debug("key:"+key+" start virtual single thread. ");
 				CompletableFuture<RESP> fut = processor.get();
-				log.debug(() -> "key:"+key+" halfway there.  future needs to be acked to finish work and release virtual thread");
+				if(log.isDebugEnabled())
+					log.debug("key:"+key+" halfway there.  future needs to be acked to finish work and release virtual thread");
 				return fut;
 			}
 		};
 		
-		log.debug(() -> "key:"+key+" get virtual thread or wait");
+		if(log.isDebugEnabled())
+			log.debug("key:"+key+" get virtual thread or wait");
 		return queue.runRequest(proxy)
 				.handle((v, e) -> {
 					return release(v, e);
@@ -41,7 +44,8 @@ public class FuturePermitQueue {
 	}
 
 	private <RESP> CompletableFuture<RESP> release(RESP v, Throwable e) {
-		log.debug(() -> "key:"+key+" end virtual single thread");
+		if(log.isDebugEnabled())
+			log.debug("key:"+key+" end virtual single thread");
 		//immediately release when future is complete
 		queue.releasePermit();
 

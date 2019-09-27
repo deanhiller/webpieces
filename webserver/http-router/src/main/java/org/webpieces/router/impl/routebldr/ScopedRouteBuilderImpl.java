@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,8 +44,8 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.filters.Service;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 
@@ -351,7 +352,8 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 			Pattern patternToMatch = info.getPatternToMatch();
 			Matcher matcher = patternToMatch.matcher(path);
 			if(matcher.matches()) {
-				log.debug(() -> "Adding filter="+info.getFilter()+" to path="+path);
+				if(log.isDebugEnabled())
+					log.debug("Adding filter="+info.getFilter()+" to path="+path);
 				matchingFilters.add(0, info);
 			}
 		}

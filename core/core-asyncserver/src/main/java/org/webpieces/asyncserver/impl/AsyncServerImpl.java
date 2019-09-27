@@ -8,8 +8,8 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AsyncServerImpl implements AsyncServer {
 

@@ -3,8 +3,8 @@ package org.webpieces.util.acking;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AckAggregator {
 
@@ -31,7 +31,8 @@ public class AckAggregator {
 			//This is very confusing and we seem to log at least one case already.
 			//we MAY lose visibility into other cases...ick...not sure..hard to see completely
 			log.error("Exception should have been logged above.  If not, enable trace logs");
-			log.trace(() -> "Exception", new RuntimeException(t));
+			if(log.isTraceEnabled())
+				log.trace("Exception", new RuntimeException(t));
 			future.complete(null);
 		}
 		

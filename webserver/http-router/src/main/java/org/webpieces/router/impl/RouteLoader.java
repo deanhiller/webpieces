@@ -36,8 +36,8 @@ import org.webpieces.router.impl.routers.AMasterRouter;
 import org.webpieces.router.impl.routers.BDomainRouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.CreationException;
 import com.google.inject.Guice;

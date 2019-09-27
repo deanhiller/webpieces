@@ -6,8 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IntegTestClientNotReadListener implements AsyncDataListener {
 	private static final Logger log = LoggerFactory.getLogger(IntegTestClientNotReadListener.class);

@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.util.locking.PermitQueue;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2engine.api.StreamHandle;

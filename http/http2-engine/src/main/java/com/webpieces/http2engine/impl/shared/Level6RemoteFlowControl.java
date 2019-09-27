@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.impl.DataTry;
@@ -53,7 +54,8 @@ public class Level6RemoteFlowControl {
 	}
 
 	public CompletableFuture<Void> sendPayloadToSocket(Stream stream, Http2Msg payload) {
-		log.debug(() -> "sending payload to socket="+payload);
+		if(log.isDebugEnabled())
+			log.debug("sending payload to socket="+payload);
 		return layer6NotifyListener.sendFrameToSocket(payload);
 	}
 	

@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -17,8 +18,8 @@ import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.impl.ctx.CookieScopeImpl;
 import org.webpieces.router.impl.ctx.SecureCookie;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.util.security.Security;
 
@@ -47,15 +48,18 @@ public class CookieTranslator implements CookieWebManaged {
 		
 		CookieScopeImpl data = (CookieScopeImpl) cookie1;
 		if(data.isNeedCreateSetCookie()) {
-			log.debug(()->"translating cookie="+cookie1.getName()+" to send to browser");
+			if(log.isDebugEnabled())
+				log.debug("translating cookie="+cookie1.getName()+" to send to browser");
 			RouterCookie cookie = translateScopeToCookie(data);
 			cookies.add(cookie);
 		} else if(data.isNeedCreateDeleteCookie()) {
-			log.debug(()->"creating delete cookie for "+cookie1.getName()+" to send to browser");
+			if(log.isDebugEnabled())
+				log.debug("creating delete cookie for "+cookie1.getName()+" to send to browser");
 			RouterCookie cookie = createDeleteCookie(data.getName());
 			cookies.add(cookie);
 		} else {
-			log.debug(()->"not sending any cookie to browser for cookie="+cookie1.getName());
+			if(log.isDebugEnabled())
+				log.debug("not sending any cookie to browser for cookie="+cookie1.getName());
 		}
 	}
 	

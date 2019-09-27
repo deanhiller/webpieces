@@ -21,8 +21,8 @@ import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.FlashAndRedirect;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class CrudTestController {

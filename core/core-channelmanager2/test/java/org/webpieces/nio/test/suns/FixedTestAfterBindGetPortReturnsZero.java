@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SocketChannel;
-import org.webpieces.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 

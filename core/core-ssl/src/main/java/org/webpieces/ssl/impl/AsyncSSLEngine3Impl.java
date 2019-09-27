@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
@@ -18,8 +19,8 @@ import org.webpieces.ssl.api.AsyncSSLEngineException;
 import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.ssl.api.SslListener;
 import org.webpieces.util.acking.ByteAckTracker;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private static final Logger log = LoggerFactory.getLogger(AsyncSSLEngine2Impl.class);
@@ -51,7 +52,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		SSLEngine sslEngine = mem.getEngine();
 		
-		log.trace(()->mem+"start handshake");
+		if(log.isTraceEnabled())
+			log.trace(mem+"start handshake");
 		try {
 			sslEngine.beginHandshake();
 		} catch (SSLException e) {
@@ -255,19 +257,22 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	}
 
 	private void logTrace1(ByteBuffer encryptedInData, HandshakeStatus hsStatus) {
-		log.trace(()->mem+"[sockToEngine] going to unwrap pos="+encryptedInData.position()+
-					" lim="+encryptedInData.limit()+" hsStatus="+hsStatus+" cached="+mem.getCachedToProcess());
+		if(log.isTraceEnabled())
+		log.trace(mem+"[sockToEngine] going to unwrap pos="+encryptedInData.position()+
+							" lim="+encryptedInData.limit()+" hsStatus="+hsStatus+" cached="+mem.getCachedToProcess());
 	}
 	
 	private void logTrace(ByteBuffer encryptedData, Status status, HandshakeStatus hsStatus) {
-		log.trace(()->mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
+		if(log.isTraceEnabled())
+			log.trace(mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
 	}
 	
 	private void logAndCheck(ByteBuffer encryptedData, SSLEngineResult result, ByteBuffer outBuffer, Status status, HandshakeStatus hsStatus) {
 		final ByteBuffer data = encryptedData;
 
-		log.trace(()->mem+"[sockToEngine] unwrap done pos="+data.position()+" lim="+
-					data.limit()+" status="+status+" hs="+hsStatus);
+		if(log.isTraceEnabled())
+		log.trace(mem+"[sockToEngine] unwrap done pos="+data.position()+" lim="+
+							data.limit()+" status="+status+" hs="+hsStatus);
 		
 		if(status == Status.BUFFER_UNDERFLOW) {
 			final ByteBuffer data1 = encryptedData;
@@ -298,7 +303,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	
 	private CompletableFuture<Void> sendHandshakeMessageImpl() throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
-		log.trace(()->mem+"sending handshake message");
+		if(log.isTraceEnabled())
+			log.trace(mem+"sending handshake message");
 		
 		ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
 			
@@ -320,8 +326,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			hsStatus = result.getHandshakeStatus();
 		}
 		
-		log.trace(()->mem+"write packet pos="+engineToSocketData.position()+" lim="+
-						engineToSocketData.limit()+" status="+lastStatus+" hs="+hsStatus);
+		if(log.isTraceEnabled())
+		log.trace(mem+"write packet pos="+engineToSocketData.position()+" lim="+
+								engineToSocketData.limit()+" status="+lastStatus+" hs="+hsStatus);
 			
 		if(lastStatus == Status.BUFFER_OVERFLOW || lastStatus == Status.BUFFER_UNDERFLOW)
 			throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
@@ -331,7 +338,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		try {
 			CompletableFuture<Void> sentMsgFuture;
 			if(readNoData) {
-				log.trace(() -> "ssl engine is farting. READ 0 data.  hsStatus="+hsStatus+" status="+lastStatus+" previous="+beforeWrapHandshakeStatus);
+				if(log.isTraceEnabled())
+					log.trace("ssl engine is farting. READ 0 data.  hsStatus="+hsStatus+" status="+lastStatus+" previous="+beforeWrapHandshakeStatus);
 				
 				//Ok, I updated this thread https://stackoverflow.com/questions/56707024/java-sslengine-says-need-wrap-call-wrap-and-still-need-wrap/56822673#56822673
 				//but basicaly, turning on -Djavax.net.debug=ssl:handshake:verbose:keymanager:trustmanager -Djava.security.debug=access:stack
@@ -392,7 +400,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			throw new IllegalArgumentException("your buffer has no readable data");
 		
 		SSLEngine sslEngine = mem.getEngine();
-		log.trace(()->mem+"feedPlainPacket [in-buffer] pos="+buffer.position()+" lim="+buffer.limit());
+		if(log.isTraceEnabled())
+			log.trace(mem+"feedPlainPacket [in-buffer] pos="+buffer.position()+" lim="+buffer.limit());
 		
 		CompletableFuture<Void> future = encryptionTracker.addBytesToTrack(buffer.remaining());
 		
@@ -413,8 +422,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				throw new RuntimeException("Bug, status="+status+" instead of OK.  hsStatus="+
 						hsStatus+" Something went wrong and we could not encrypt the data");
 
-			log.trace(()->mem+"SSLListener.packetEncrypted pos="+engineToSocketData.position()+
-						" lim="+engineToSocketData.limit()+" hsStatus="+hsStatus+" status="+status);
+			if(log.isTraceEnabled())
+			log.trace(mem+"SSLListener.packetEncrypted pos="+engineToSocketData.position()+
+									" lim="+engineToSocketData.limit()+" hsStatus="+hsStatus+" status="+status);
 			
 			engineToSocketData.flip();
 			listener.packetEncrypted(engineToSocketData).handle( (v, t) -> {
