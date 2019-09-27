@@ -23,9 +23,6 @@ public class ArgumentsImpl implements Arguments {
 	private AtomicBoolean isConsumedAllArguments = new AtomicBoolean(false);
 	private Map<String, ValueHolder> mustMatchDefaults = new HashMap<>();
 
-	public ArgumentsImpl(KeyValue ... args) {
-	}
-	
 	public ArgumentsImpl(Map<String, ValueHolder> args, List<Throwable> errors) {
 		this.errors = errors;
 		this.arguments = args;
@@ -59,7 +56,7 @@ public class ArgumentsImpl implements Arguments {
 	}
 
 	@Override
-	public <T> Supplier<T> consumeOptional(String argumentKey, String defaultValueString, String help,
+	public <T> Supplier<T> createOptionalArg(String argumentKey, String defaultValueString, String help,
 			Function<String, T> converter) {
 		notConsumed.remove(argumentKey);
 
@@ -129,7 +126,7 @@ public class ArgumentsImpl implements Arguments {
 	}
 
 	@Override
-	public <T> Supplier<T> consumeRequired(String argumentKey, String help, Function<String, T> converter) {
+	public <T> Supplier<T> createRequiredArg(String argumentKey, String help, Function<String, T> converter) {
 		notConsumed.remove(argumentKey);
 		
 		ValueHolder valueHolder = arguments.get(argumentKey);
@@ -155,7 +152,7 @@ public class ArgumentsImpl implements Arguments {
 	}
 
 	@Override
-	public Supplier<Boolean> consumeDoesExist(String argumentKey, String help) {
+	public Supplier<Boolean> createDoesExistArg(String argumentKey, String help) {
 		notConsumed.remove(argumentKey);
 		
 		ValueHolder valueHolder = arguments.get(argumentKey);
@@ -198,8 +195,8 @@ public class ArgumentsImpl implements Arguments {
 	}
 
 	@Override
-	public Supplier<InetSocketAddress> consumeOptionalInet(String argumentKey, String defaultValue, String help) {
-		return consumeOptional(argumentKey, defaultValue, help, (s) -> convertInet(s));
+	public Supplier<InetSocketAddress> createOptionalInetArg(String argumentKey, String defaultValue, String help) {
+		return createOptionalArg(argumentKey, defaultValue, help, (s) -> convertInet(s));
 	}
 
 	private InetSocketAddress convertInet(String value) {
@@ -215,9 +212,14 @@ public class ArgumentsImpl implements Arguments {
 		String portStr = value.substring(index+1);
 		try {
 			int port = Integer.parseInt(portStr);
+			
+			if("".equals(host.trim()))
+				return new InetSocketAddress(port);
+			
 			return new InetSocketAddress(host, port);
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException("Invalid format.  The port piece of '{host}:{port}' or ':port' must be an integer");
 		}
 	}
+
 }

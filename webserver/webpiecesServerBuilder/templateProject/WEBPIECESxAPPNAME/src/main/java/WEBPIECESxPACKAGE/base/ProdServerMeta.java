@@ -2,9 +2,7 @@ package WEBPIECESxPACKAGE.base;
 
 import java.util.List;
 
-import org.webpieces.plugins.backend.BackendConfig;
 import org.webpieces.plugins.backend.BackendPlugin;
-import org.webpieces.plugins.hibernate.HibernateConfig;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.plugins.json.JacksonConfig;
 import org.webpieces.plugins.json.JacksonPlugin;
@@ -79,9 +77,9 @@ public class ProdServerMeta implements WebAppMeta {
 				//if you want to remove hibernate, just remove it first from the build file and then remove
 				//all the compile error code(it will remove more than half of the jar size of the web app actually due
 				//to transitive dependencies)
-				new HibernatePlugin(new HibernateConfig(pluginConfig.getCmdLineArguments())),
+				new HibernatePlugin(pluginConfig.getCmdLineArguments()),
 				new JacksonPlugin(new JacksonConfig("/json/.*", JsonCatchAllFilter.class)),
-				new BackendPlugin(new BackendConfig(pluginConfig.getCmdLineArguments())),
+				new BackendPlugin(pluginConfig.getCmdLineArguments()),
 				new PropertiesPlugin(new PropertiesConfig()),
 				new InstallSslCertPlugin(new InstallSslCertConfig("acme://letsencrypt.org/staging"))
 				);

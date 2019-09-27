@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import org.webpieces.plugins.backend.login.BackendLoginRoutes;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
+import org.webpieces.util.cmdline2.Arguments;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
@@ -16,8 +17,12 @@ public class BackendPlugin implements Plugin {
 	private Supplier<Boolean> isUsePluginAssets;
 
 	public BackendPlugin(BackendConfig config) {
+		isUsePluginAssets = () -> config.isUsePluginAssets();
+	}
+	
+	public BackendPlugin(Arguments cmdLineArguments) {
 		super();
-		isUsePluginAssets = config.getArguments().consumeDoesExist(BACKEND_PORT_KEY, "IF backend host exists, backend plugin will turn on serving up necessary css/js/image files");
+		isUsePluginAssets = cmdLineArguments.createDoesExistArg(BACKEND_PORT_KEY, "IF backend host exists, backend plugin will turn on serving up necessary css/js/image files");
 	}
 	
 	@Override

@@ -1,23 +1,24 @@
 package org.webpieces.plugins.hsqldb;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class H2DbConfig {
 
-	private int port = 0;
+	private Supplier<Integer> port = () -> 0; //default to 0 if not set
 	private String pluginPath = "/@db";
 	private Function<String, String> convertDomain = null;
 
 	public H2DbConfig() {
 	}
 	
-	public H2DbConfig(int port, String urlPath) {
+	public H2DbConfig(Supplier<Integer> port, String urlPath) {
 		super();
 		this.port = port;
 		this.pluginPath = urlPath;
 	}
 
-	public int getPort() {
+	public Supplier<Integer> getPort() {
 		return port;
 	}
 

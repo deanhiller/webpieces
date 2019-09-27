@@ -30,26 +30,26 @@ public class FakeClient {
 		//your command line dynamically changes
 		
 		//consume once optional
-		key1 = parse.consumeOptional("key1", ":0", "This is key1", (s) -> convertInet(s));
+		key1 = parse.createOptionalArg("key1", ":0", "This is key1", (s) -> convertInet(s));
 		//consume once required
-		key2 = parse.consumeRequired("key2", "This is key2", (s) -> s);
+		key2 = parse.createRequiredArg("key2", "This is key2", (s) -> s);
 		//consume once check exist
-		key3 = parse.consumeDoesExist("key3", "This is key3");
+		key3 = parse.createDoesExistArg("key3", "This is key3");
 		
 		//consume twice optional
-		key4a = parse.consumeOptional("key4", "456", "This is key4", (s) -> convertInt(s));
-		key4b = parse.consumeOptional("key4", "456", "This is key4 second one", (s) -> convertInt(s));
+		key4a = parse.createOptionalArg("key4", "456", "This is key4", (s) -> convertInt(s));
+		key4b = parse.createOptionalArg("key4", "456", "This is key4 second one", (s) -> convertInt(s));
 		
 		//consume twice required
-		key5a = parse.consumeRequired("key5", "This is key5", (s) -> s);
-		key5b = parse.consumeRequired("key5", "This is key5 second one", (s) -> s);
+		key5a = parse.createRequiredArg("key5", "This is key5", (s) -> s);
+		key5b = parse.createRequiredArg("key5", "This is key5 second one", (s) -> s);
 
 		//consume optional and check boolean
-		key6a = parse.consumeOptional("key6", "789", "This is key6", (s) -> convertInt(s));
-		key6b = parse.consumeDoesExist("key6", "This is key6 check");
+		key6a = parse.createOptionalArg("key6", "789", "This is key6", (s) -> convertInt(s));
+		key6b = parse.createDoesExistArg("key6", "This is key6 check");
 		
 		//test for default null...
-		key7 = parse.consumeOptional("key7", null, "This is key7", (s) -> convertInet(s));
+		key7 = parse.createOptionalArg("key7", null, "This is key7", (s) -> convertInet(s));
 
 	}
 	

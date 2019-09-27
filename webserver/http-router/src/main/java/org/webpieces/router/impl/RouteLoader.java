@@ -93,7 +93,7 @@ public class RouteLoader {
 	public void configure(ClassForName loader, Arguments arguments) {
 		log.info("loading the master "+WebAppMeta.class.getSimpleName()+" class file");
 
-		backPortExists = arguments.consumeDoesExist(BACKEND_PORT_KEY, "If key exist(no matter the value), we use a backend route builder so backend routes are 'not' exposed on the http/https standard ports");
+		backPortExists = arguments.createDoesExistArg(BACKEND_PORT_KEY, "If key exist(no matter the value), we use a backend route builder so backend routes are 'not' exposed on the http/https standard ports");
 
 		VirtualFile fileWithMetaClassName = config.getMetaFile();
 		String moduleName;

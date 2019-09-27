@@ -100,8 +100,8 @@ public class CmdLineParser2Test {
 
 		//different default values not allowed.  both must default to same thing
 		//this is a weird case
-		parse.consumeOptional("key1", "123", "key1 help", (s) -> convertInt(s));
-		parse.consumeOptional("key1", "555", "help for different use of same key to give info on his need", (s) -> convertInt(s));
+		parse.createOptionalArg("key1", "123", "key1 help", (s) -> convertInt(s));
+		parse.createOptionalArg("key1", "555", "help for different use of same key to give info on his need", (s) -> convertInt(s));
 		
 		try {
 			parse.checkConsumedCorrectly();
@@ -132,7 +132,7 @@ public class CmdLineParser2Test {
 
 		//different default values not allowed.  both must default to same thing
 		//this is a weird case
-		parse.consumeOptional("key1", "123", "key1 help", (s) -> convertInt(s));
+		parse.createOptionalArg("key1", "123", "key1 help", (s) -> convertInt(s));
 		
 		try {
 			parse.checkConsumedCorrectly();
@@ -152,8 +152,8 @@ public class CmdLineParser2Test {
 
 		//different default values not allowed.  both must default to same thing
 		//this is a weird case
-		parse.consumeOptional("key1", "123", "key1 help", (s) -> convertInt(s));
-		parse.consumeRequired("key1", "key1 help from different plugin, and reasons are different", (s) -> convertInt(s));
+		parse.createOptionalArg("key1", "123", "key1 help", (s) -> convertInt(s));
+		parse.createRequiredArg("key1", "key1 help from different plugin, and reasons are different", (s) -> convertInt(s));
 		
 		try {
 			parse.checkConsumedCorrectly();
@@ -181,8 +181,8 @@ public class CmdLineParser2Test {
 
 		//different default values not allowed.  both must default to same thing
 		//this is a weird case
-		Supplier<Integer> val1 = parse.consumeOptional("key1", "123", "key1 help", (s) -> convertInt(s));
-		Supplier<Integer> val2 = parse.consumeRequired("key1", "key1 help", (s) -> convertInt(s));
+		Supplier<Integer> val1 = parse.createOptionalArg("key1", "123", "key1 help", (s) -> convertInt(s));
+		Supplier<Integer> val2 = parse.createRequiredArg("key1", "key1 help", (s) -> convertInt(s));
 		
 		parse.checkConsumedCorrectly();
 		
@@ -198,8 +198,8 @@ public class CmdLineParser2Test {
 
 		//different default values not allowed.  both must default to same thing
 		//this is a weird case
-		parse.consumeOptional("key1", "123", "key1 help", (s) -> convertInt(s));
-		parse.consumeRequired("key2", "key2 help", (s) -> convertInt(s));
+		parse.createOptionalArg("key1", "123", "key1 help", (s) -> convertInt(s));
+		parse.createRequiredArg("key2", "key2 help", (s) -> convertInt(s));
 		
 		try {
 			parse.checkConsumedCorrectly();
@@ -218,8 +218,8 @@ public class CmdLineParser2Test {
 
 		Arguments parse = new CommandLineParser().parse(args);
 
-		parse.consumeOptional("key1", "invalid", "key1 help", (s) -> convertInt(s));
-		parse.consumeRequired("key3", "Some key3", (s) -> s);
+		parse.createOptionalArg("key1", "invalid", "key1 help", (s) -> convertInt(s));
+		parse.createRequiredArg("key3", "Some key3", (s) -> s);
 
 		try {
 			parse.checkConsumedCorrectly();

@@ -43,7 +43,7 @@ public class HibernateAppMeta implements WebAppMeta {
 	@Override
 	public List<Plugin> getPlugins() {
 		return Lists.<Plugin>newArrayList(
-				new HibernatePlugin(new HibernateConfig(pluginConfig.getCmdLineArguments())));
+				new HibernatePlugin(pluginConfig.getCmdLineArguments()));
 	}
 
 	private class AppModule implements Module {

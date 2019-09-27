@@ -31,7 +31,7 @@ public class BackendMeta implements WebAppMeta {
 	@Override
 	public List<Plugin> getPlugins() {
 		return Lists.newArrayList(
-			new BackendPlugin(new BackendConfig(pluginConfig.getCmdLineArguments()))
+			new BackendPlugin(pluginConfig.getCmdLineArguments())
 		);
 	}
 }

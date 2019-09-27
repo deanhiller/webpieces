@@ -55,9 +55,9 @@ public class WebServerModule implements Module {
 		this.portLookup = portLookup;
 		
 		//this is too late, have to do in the Guice modules
-		httpAddress = args.consumeOptionalInet(HTTP_PORT_KEY, ":8080", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
-		httpsAddress = args.consumeOptionalInet(HTTPS_PORT_KEY, ":8443", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
-		backendAddress = args.consumeOptionalInet(BACKEND_PORT_KEY, null, "Http(s) host&port for backend.  syntax: {host}:{port} or just :{port}.  Also, null means put the pages on the https/http ports");
+		httpAddress = args.createOptionalInetArg(HTTP_PORT_KEY, ":8080", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
+		httpsAddress = args.createOptionalInetArg(HTTPS_PORT_KEY, ":8443", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
+		backendAddress = args.createOptionalInetArg(BACKEND_PORT_KEY, null, "Http(s) host&port for backend.  syntax: {host}:{port} or just :{port}.  Also, null means put the pages on the https/http ports");
 	}
 	
 	@Override

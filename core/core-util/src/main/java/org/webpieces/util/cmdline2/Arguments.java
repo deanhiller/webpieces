@@ -8,19 +8,35 @@ public interface Arguments {
 
 	//IF multiple things read the same key, we will print out multiple help arguments
 	
-	<T> Supplier<T> consumeOptional(String argumentKey, String defaultValue, String help, Function<String, T> converter);
-	<T> Supplier<T> consumeRequired(String argumentKey, String help, Function<String, T> converter);
+	/** 
+	 * @param <T> The type the argument will be converted to
+	 * @param argumentKey The cmdLine key as in db.port=0 (db.port is the key)
+	 * @param defaultValue Default value if argumentKey is not found on command line
+	 * @param help The help to show the user when missing arguments (or too many arguments)
+	 * @param converter Converts the cmd line String into the correct type or fails with the Help message to the user
+	 * @return a function that will be called later to get the cmd line argument
+	 */
+	<T> Supplier<T> createOptionalArg(String argumentKey, String defaultValue, String help, Function<String, T> converter);
+
+	/** 
+	 * @param <T> The type the argument will be converted to
+	 * @param argumentKey The cmdLine key as in db.port=0 (db.port is the key)
+	 * @param help The help to show the user when missing arguments (or too many arguments)
+	 * @param converter Converts the cmd line String into the correct type or fails with the Help message to the user
+	 * @return a function that will be called later to get the cmd line argument
+	 */
+	<T> Supplier<T> createRequiredArg(String argumentKey, String help, Function<String, T> converter);
 
 	/**
 	 * Special case convience method converting :{port} or {host}:{port} to InetSocketAddress
 	 */
-	Supplier<InetSocketAddress> consumeOptionalInet(String argumentKey, String defaultValue, String help);
+	Supplier<InetSocketAddress> createOptionalInetArg(String argumentKey, String defaultValue, String help);
 	
 	/**
 	 * See if an optional key exists or not.  
 	 */
-	Supplier<Boolean> consumeDoesExist(String key, String help);
-
+	Supplier<Boolean> createDoesExistArg(String key, String help);
+	
 	/**
 	 * After all the modules/routesFiles/plugins call the above methods, the main program then
 	 * can call this method to check that the command line had no errors and all arguments that
