@@ -2,14 +2,17 @@
 
 I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post
 
-* tweak twitter project to return admin page since they close the socket early causing a AsyncWriteException since they don't wait for the whole http response(so annoying when clients do that)
+finish up properties and their changes
+do a generate code GUI????
+
+* tweak twitter project to return admin page since they close the socket early causing a AsyncWriteException since they don't wait for the whole http response(so annoying when clients do that)??
+REVISIT if still exist:see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
 
 * (6/27)TEST WINDOWS NOW...should be fixed with ... fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
 WEBPIECESxPACKAGE.TestLesson4BasicStart > testBasicProdStartup FAILED
     java.lang.IllegalStateException: Previously existing file is missing=/var/folders/fk/2v2j6fhj4yb681vxdj1l2h740000gp/T/webpieces/WEBPIECESxAPPNAMECache/precompressedFiles/assets/primesTheme/index.html.gz Your file cache was corrupted.  You will need to delete the whole cache directory
 
-REVISIT if still exist:see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
 
 * Documentation on EACH html field
   * basic select with enum

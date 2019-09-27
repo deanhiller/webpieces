@@ -71,6 +71,10 @@ subprojects {
    //annotations
    [compileJava, compileTestJava]*.options.collect {options ->
      options.compilerArgs.add '-parameters'
+
+     //For windows only, IF you type chinese characters or other into a java file for
+     //testing, it will FAIL UNLESS you have this so I sneak this in for you
+     options.encoding = 'UTF-8'
    }
 
    project.ext.fixedLibDir = file('lib')
