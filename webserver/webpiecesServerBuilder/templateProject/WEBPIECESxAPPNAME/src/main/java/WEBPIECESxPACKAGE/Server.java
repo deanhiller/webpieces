@@ -86,6 +86,9 @@ public class Server {
 		ServerConfig svrConfig, 
 		String ... args
 	) {
+		//ALWAYS install a catch all on all threads
+		Thread.setDefaultUncaughtExceptionHandler(new WebpiecesExceptionHandler());
+		
 		isRunningServerMainMethod = svrConfig.isRunningServerMainMethod();
 		//read here and checked for correctness on last line of server construction
 		Arguments arguments = new CommandLineParser().parse(args);

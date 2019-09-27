@@ -2,7 +2,6 @@
 
 I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post
 
-finish up properties and their changes
 do a generate code GUI????
 
 * tweak twitter project to return admin page since they close the socket early causing a AsyncWriteException since they don't wait for the whole http response(so annoying when clients do that)??

@@ -1,5 +1,7 @@
 package org.webpieces.router.impl;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
@@ -16,11 +18,13 @@ public class EmptyPluginModule implements Module {
 	private RoutingHolder routingHolder;
 	private ManagedBeanMeta managedMeta;
 	private ObjectTranslator objectTranslator;
+	private ScheduledExecutorService scheduler;
 
-	public EmptyPluginModule(RoutingHolder routingHolder, ManagedBeanMeta managedMeta, ObjectTranslator objectTranslator) {
+	public EmptyPluginModule(RoutingHolder routingHolder, ManagedBeanMeta managedMeta, ObjectTranslator objectTranslator, ScheduledExecutorService scheduler) {
 		this.routingHolder = routingHolder;
 		this.managedMeta = managedMeta;
 		this.objectTranslator = objectTranslator;
+		this.scheduler = scheduler;
 	}
 
 	@Override
@@ -45,6 +49,6 @@ public class EmptyPluginModule implements Module {
 		//This is the lookup class for all those ObjectStringConverter that get installed in the above Multibinder
 		//including if you put an object into a cookie as well, so it gets written as a String
 		binder.bind(ObjectTranslator.class).toInstance(objectTranslator);
-		
+		binder.bind(ScheduledExecutorService.class).toInstance(scheduler);
 	}
 }

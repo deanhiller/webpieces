@@ -25,7 +25,10 @@ public class SimpleStorageImpl implements SimpleStorage {
 		EntityManager mgr = factory.createEntityManager();
 		mgr.getTransaction().begin();
 
-		mgr.persist(new SimpleStorageDbo(key, subKey, value));
+		SimpleStorageDbo bean = SimpleStorageDbo.find(mgr, key, subKey);
+		if(bean == null)
+			bean = new SimpleStorageDbo(key, subKey, value);
+		mgr.merge(bean);
 		
 		mgr.flush();
 		mgr.getTransaction().commit();
@@ -39,9 +42,17 @@ public class SimpleStorageImpl implements SimpleStorage {
 		EntityManager mgr = factory.createEntityManager();
 		mgr.getTransaction().begin();
 
-		properties.forEach((mapKey, value) ->
-			mgr.persist(new SimpleStorageDbo(key, mapKey, value))
-		);
+		for(Map.Entry<String, String> entry : properties.entrySet()) {
+			//should fix this to query once instead of once for each property on the bean
+			SimpleStorageDbo bean = SimpleStorageDbo.find(mgr, key, entry.getKey());
+			if(bean == null) {
+				bean = new SimpleStorageDbo(key, entry.getKey(), entry.getValue());
+			} else {
+				bean.setValue(entry.getValue());
+			}
+			
+			mgr.merge(bean);
+		}
 		
 		mgr.flush();
 		mgr.getTransaction().commit();

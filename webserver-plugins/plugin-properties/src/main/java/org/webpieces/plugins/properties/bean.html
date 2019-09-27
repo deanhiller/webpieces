@@ -33,6 +33,9 @@
 		*{
         #{field property.name, label:property.name}#<input id="${property.name}$" type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
 		}*
+		#{field 'thisServerOnly', label: 'This Server Only:'}#
+    		<input type="checkbox" name="${field.name}$" value="true" ${field.checked}$>
+  		#{/field}#
 		
    </div>
     <div class="modal-footer">

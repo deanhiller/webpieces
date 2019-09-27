@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -36,6 +39,7 @@ import org.webpieces.router.impl.routers.AMasterRouter;
 import org.webpieces.router.impl.routers.BDomainRouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.threading.SafeRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,7 +211,17 @@ public class RouteLoader {
 		if(guiceModules == null)
 			guiceModules = new ArrayList<>();
 		
-		guiceModules.add(new EmptyPluginModule(routingHolder, beanMeta, objectTranslator));
+		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				//always name the threads & prevent thread death
+				Thread t = new Thread(new SafeRunnable(r), "webpieces-scheduling");
+				t.setDaemon(true);
+				return t;
+			}
+		});
+				
+		guiceModules.add(new EmptyPluginModule(routingHolder, beanMeta, objectTranslator, scheduler));
 		
 		Module module = Modules.combine(guiceModules);
 		

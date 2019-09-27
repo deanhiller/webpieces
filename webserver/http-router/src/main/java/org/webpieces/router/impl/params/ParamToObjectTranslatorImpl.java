@@ -247,6 +247,12 @@ public class ParamToObjectTranslatorImpl {
 		if(fieldMeta instanceof ParamMeta) {
 			//for params only not fields as with fields, we just don't set the field and skip it...before we call a method,
 			//we MUST have a value to set
+			if(Boolean.TYPE == paramTypeToCreate && valuesToUse == null) {
+				//very special case
+				//This is a cheat for checkboxes since null represents false on a boolean primitive
+				//This does cause others that have a boolean param to be false if nothing is set
+				return false;
+			}
 			checkForBadNullToPrimitiveConversion(req, valuesToUse, fieldMeta, method);
 		}
 		

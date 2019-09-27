@@ -156,7 +156,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         field.put("valueOrFlash", preferFirst(valAsStr, flashValue));
 
     	//Special field only for checkboxes with value 'checked' or value null
-        if(val != null) {
+        if(val != null && "true".equals(val)) {
         	field.put("checked", "checked");
         } else {
         	field.put("checked", "");

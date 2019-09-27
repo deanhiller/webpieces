@@ -1,8 +1,13 @@
 package org.webpieces.plugins.properties;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -12,13 +17,14 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.plugins.backend.menu.MenuCreator;
 import org.webpieces.plugins.properties.beans.BeanMeta;
 import org.webpieces.plugins.properties.beans.BeanMetaData;
+import org.webpieces.plugins.properties.beans.KeyUtil;
 import org.webpieces.plugins.properties.beans.PropertyInfo;
+import org.webpieces.plugins.properties.beans.PropertyInvoker;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.SimpleStorage;
-import org.webpieces.router.impl.params.ObjectTranslator;
 
 import com.google.common.collect.Lists;
 
@@ -29,7 +35,7 @@ public class PropertiesController {
 	private BeanMetaData beanMetaData;
 	private SimpleStorage storage;
 	private PropertiesConfig config;
-	private ObjectTranslator objectTranslator;
+	private PropertyInvoker invoker;
 
 	@Inject
 	public PropertiesController(
@@ -37,14 +43,13 @@ public class PropertiesController {
 			BeanMetaData beanMetaData, 
 			SimpleStorage storage, 
 			PropertiesConfig config,
-			ObjectTranslator objectTranslator
-			
+			PropertyInvoker invoker
 	) {
 		this.menuCreator = menuCreator;
 		this.beanMetaData = beanMetaData;
 		this.storage = storage;
 		this.config = config;
-		this.objectTranslator = objectTranslator;
+		this.invoker = invoker;
 	}
 
 	public Render main() {
@@ -60,13 +65,13 @@ public class PropertiesController {
 		ArrayList<Object> params = Lists.newArrayList("menu", menuCreator.getMenu(),
 				"beanMeta", meta,
 				"category", category,
-				"name", name);
+				"name", name,
+				"thisServerOnly", false);
 
 		List<PropertyInfo> properties = meta.getProperties();
 		for(PropertyInfo p : properties) {
 			params.add(p.getName());
-			Object value = getValue(p);
-			String valueStr = objectTranslator.getConverterFor(value).objectToString(value);
+			String valueStr = invoker.readPropertyAsString(p);
 			params.add(valueStr);
 		}
 		
@@ -74,20 +79,7 @@ public class PropertiesController {
 		return Actions.renderThis(paramsArray);
 	}
 
-	private Object getValue(PropertyInfo p) {
-		Method method = p.getGetter();
-		try {
-			return method.invoke(p.getInjectee());
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public Redirect postBean(String category, String name) {
+	public Redirect postBean(String category, String name, boolean thisServerOnly) throws InterruptedException, ExecutionException {
 		Map<String, List<String>> multiPartFields = Current.getContext().getRequest().multiPartFields;
 		
 		BeanMeta meta = beanMetaData.getBeanMeta(category, name);
@@ -102,15 +94,12 @@ public class PropertiesController {
 			if(info.isReadOnly())
 				continue;
 			
-			Class<?> returnType = info.getGetter().getReturnType();
-			ObjectStringConverter<?> converter = objectTranslator.getConverter(returnType);
-			if(converter == null) {
-				//since we checked before when loading, there should be a converter, or code was changed and we have new bug
-				throw new RuntimeException("Odd, this shouldn't be possible, bug.  return type="+returnType.getName());
-			}
-
 			List<String> valueList = multiPartFields.get(info.getName());
 			String valueAsString = valueList.get(0);
+
+			Class<?> returnType = info.getGetter().getReturnType();
+			ObjectStringConverter<?> converter = invoker.fetchConverter(info);
+
 			try {
 				Object objectValue = converter.stringToObject(valueAsString);
 				values.add(new ValueInfo(info, objectValue, valueAsString));
@@ -140,14 +129,20 @@ public class PropertiesController {
 		for(ValueInfo value : values) {
 			updateProperty(value.getInfo(), value.getValue());
 
-			String key = category+":"+name+":"+value.getInfo().getName();
+			String key = KeyUtil.formKey(category, name, value.getInfo().getName());
 			propertiesToSaveToDatabase.put(key, value.getValueAsString());
 		}
 
-		storage.save("PLUGIN_PROPERTIES_KEY", propertiesToSaveToDatabase);
-		
-		Current.flash().setMessage("Modified Bean '"+name+".class' and persisted to Database");
-		Current.flash().keep();
+		if(thisServerOnly) {
+			Current.flash().setMessage("Modified Bean '"+name+".class' ONLY on this server in-memory.  (Changes not applied to database for restarts)");
+			Current.flash().keep();
+		} else {
+			CompletableFuture<Void> future = storage.save(KeyUtil.PLUGIN_PROPERTIES_KEY, propertiesToSaveToDatabase);
+			future.get(); //synchronously wait in case it fails so user is told it failed to save to database
+			
+			Current.flash().setMessage("Modified Bean '"+name+".class' and persisted to Database");
+			Current.flash().keep();
+		}
 		
 		return Actions.redirect(PropertiesRouteId.MAIN_PROPERTIES);
 	}

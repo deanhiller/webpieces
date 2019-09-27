@@ -1,5 +1,7 @@
 package org.webpieces.plugins.properties;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.webpieces.plugins.backend.spi.BackendGuiDescriptor;
 import org.webpieces.plugins.properties.beans.BeanMetaData;
 import org.webpieces.plugins.properties.beans.GuiceTypeListener;
@@ -45,8 +47,9 @@ public class PropertiesModule implements Module {
 	    Provider<ObjectTranslator> translatorProvider = binder.getProvider(ObjectTranslator.class);
 	    Provider<SimpleStorage> storageProvider = binder.getProvider(SimpleStorage.class);
 	    Provider<ManagedBeanMeta> webpiecesBeanProvider = binder.getProvider(ManagedBeanMeta.class);
+	    Provider<ScheduledExecutorService> schedulerProvider = binder.getProvider(ScheduledExecutorService.class);
 	    
-	    BeanMetaData proxy = new BeanMetaData(config, translatorProvider, storageProvider, webpiecesBeanProvider);
+	    BeanMetaData proxy = new BeanMetaData(config, translatorProvider, storageProvider, webpiecesBeanProvider, schedulerProvider);
 	    //this binding is for the controller....
 	    binder.bind(BeanMetaData.class).toInstance(proxy);
 	    //this binding is to plugin to webpieces so the start() method is called 

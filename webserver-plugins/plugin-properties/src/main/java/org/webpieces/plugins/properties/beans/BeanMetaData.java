@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -25,7 +27,7 @@ import org.webpieces.router.impl.params.ObjectTranslator;
  */
 @Singleton
 public class BeanMetaData implements Startable {
-
+	
 	//This is loaded during Guice construction and used AFTER all Guice is constructed within
 	//a Guice context
 	private List<CachedBean> cachedBeans = new ArrayList<>();
@@ -34,6 +36,7 @@ public class BeanMetaData implements Startable {
 	private Provider<ObjectTranslator> objectTranslatorProvider;
 	private Provider<SimpleStorage> simpleStorageProvider;
 	private Provider<ManagedBeanMeta> webpiecesBeanMetaProvider;
+	private Provider<ScheduledExecutorService> schedulerProvider;
 	
 	private Map<String, Map<String, BeanMeta>> meta = new HashMap<>();
 	private List<SingleCategory> categories;
@@ -43,12 +46,14 @@ public class BeanMetaData implements Startable {
 			PropertiesConfig config, 
 			Provider<ObjectTranslator> objectTranslator, 
 			Provider<SimpleStorage> simpleStorageProvider,
-			Provider<ManagedBeanMeta> webpiecesBeanMeta
+			Provider<ManagedBeanMeta> webpiecesBeanMeta, 
+			Provider<ScheduledExecutorService> schedulerProvider
 	) {
 		this.config = config;
 		this.objectTranslatorProvider = objectTranslator;
 		this.simpleStorageProvider = simpleStorageProvider;
 		this.webpiecesBeanMetaProvider = webpiecesBeanMeta;
+		this.schedulerProvider = schedulerProvider;
 	}
 
 	//NOTE: This is executed while GUICE is setting up so we are not in GUICE at this point
@@ -70,14 +75,16 @@ public class BeanMetaData implements Startable {
 			loadBean(objectTranslator, bean.getInjectee(), bean.getInterfaze());
 		}
 		
-		loadFromDbAndSetProperties(storage);
+		loadFromDbAndSetProperties(storage, new PropertyInvoker(objectTranslator));
 	}
 	
-	private void loadFromDbAndSetProperties(SimpleStorage storage) {
+	private void loadFromDbAndSetProperties(SimpleStorage storage, PropertyInvoker propertyInvoker) {
+		ApplyDatabaseProperties runnable = new ApplyDatabaseProperties(meta, storage, propertyInvoker);
 		//On startup, kick off the Runnable that re-applies any changes in the database
+		runnable.run();  //we don't catch exceptions as we want to stop startup if we can't apply all settings to match the cluster
 		
-		//On startup, we need to set all properties.
-		
+		//Now, re-read every so often but if we fail to read, we just keep running
+		schedulerProvider.get().scheduleWithFixedDelay(runnable, 1, 1, TimeUnit.MINUTES);
 	}
 
 	public void loadBean(ObjectTranslator objectTranslator, Object injectee, Class<?> interfaze) {
