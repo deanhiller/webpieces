@@ -2,6 +2,7 @@
 
 I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post
 
+add a bunch of beans now that properties file stuff is working
 do a generate code GUI????
 
 * tweak twitter project to return admin page since they close the socket early causing a AsyncWriteException since they don't wait for the whole http response(so annoying when clients do that)??
@@ -12,6 +13,8 @@ REVISIT if still exist:see exceptions.log as well as POST /quitquitquit and imme
 WEBPIECESxPACKAGE.TestLesson4BasicStart > testBasicProdStartup FAILED
     java.lang.IllegalStateException: Previously existing file is missing=/var/folders/fk/2v2j6fhj4yb681vxdj1l2h740000gp/T/webpieces/WEBPIECESxAPPNAMECache/precompressedFiles/assets/primesTheme/index.html.gz Your file cache was corrupted.  You will need to delete the whole cache directory
 
+attack this issue
+https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/3
 
 * Documentation on EACH html field
   * basic select with enum
