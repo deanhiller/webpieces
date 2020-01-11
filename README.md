@@ -5,7 +5,7 @@
 Codecov.io / jacoco has two bugs (so we are actually way higher than this number) documented at bottom of this page
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
-This 23 minute video barely scratches the surface but demonstrates
+The BELOW 23 minute video barely scratches the surface but demonstrates
 * Download zip and create first project
 * run test suite
 * start up the production server
@@ -24,8 +24,8 @@ This 23 minute video barely scratches the surface but demonstrates
 * development server only in-memory database GUI at http://localhost:8080/@db
 * development server only in-memory documentation at http://localhost:8080/@documentation
 
-#### BIG NOTE: There is 1 location in the video I had to restart the server ONLY because there are setting in intelij I forgot to setup
-[Webpieces YouTube QuickStart](https://youtu.be/4FtdAX_wKD0)
+#### BIG NOTE: There is 1 location in the video I had to restart the server ONLY because there are settings in intelij I forgot to setup
+## [Webpieces YouTube QuickStart](https://youtu.be/4FtdAX_wKD0)
 
 One thing to note in the video is I was caught off guard by a minor bug(that is easily worked around) and had to restart the DevelopmentServer as for some reason, the hibernate rescan of entities and table creations did not work.  We may have that fixed by the time you watch the video(hopefully)
 
