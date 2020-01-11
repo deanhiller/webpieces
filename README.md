@@ -160,7 +160,7 @@ This project is essentially pieces that can be used to build any http related so
 
 #### Downsides
 
-May have to Deal with Dean
+May have to Deal with me ;)
 
 #### Some HTTP/2 features
  * better pipelining of requests fixing head of line blocking problem
