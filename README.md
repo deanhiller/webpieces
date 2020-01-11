@@ -5,8 +5,6 @@
 Codecov.io / jacoco has two bugs, one related to aggregation reporting (so we are actually higher than this number)
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
-WARNING: Because I was running in Twitter DC, the build files build on jdk8 (old, ick) and I need to slightly modify the gradle build files to deal with the major jdk9 component change still.  That is coming soon.
-
 The BELOW 23 minute video barely scratches the surface but demonstrates
 * Download zip and create first project
 * run test suite
@@ -60,6 +58,7 @@ One thing to note in the video is I was caught off guard by a minor bug(that is 
 8. ./bin/{project} to start the production webserver
 9. In a browser go to http://localhost:8080
 10. To view the documentation, you need to start the development server in eclipse setup or intellij setup below
+
 
 ### Eclipse Setup
 
