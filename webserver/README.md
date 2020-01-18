@@ -1,5 +1,7 @@
 # webpieces
 
+FIX notFound page to use the template.  It's ugly in production AND in development when showing how production is displayed!!!
+
 I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post
 
 add a bunch of beans now that properties file stuff is working
