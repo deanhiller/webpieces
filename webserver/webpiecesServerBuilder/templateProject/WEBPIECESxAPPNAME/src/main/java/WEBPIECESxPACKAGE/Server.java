@@ -1,7 +1,9 @@
 package WEBPIECESxPACKAGE;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -86,6 +88,21 @@ public class Server {
 		ServerConfig svrConfig, 
 		String ... args
 	) {
+		
+		try {
+			//https://stackoverflow.com/questions/33289695/inetaddress-getlocalhost-slow-to-run-30-seconds/33289897#33289897
+			log.info("Checking timing on geetLocalHost (seems very bad on many MAC computers and then it looks like webpieces startup is slow(and we like a fast startup");
+			long start = System.currentTimeMillis();
+			InetAddress.getLocalHost();
+			long totalTimeSeconds = (System.currentTimeMillis() - start) / 1000;
+			if(totalTimeSeconds > 3)
+				throw new IllegalStateException("Your computer configuration is messed up.  getLocalHost "
+						+ "is taking longer than 3 seconds.  FIX THIS NOW!!!  You can typically edit your hosts file to do so");
+			
+		} catch (UnknownHostException e) {
+			throw new RuntimeException(e);
+		}
+		
 		//ALWAYS install a catch all on all threads
 		Thread.setDefaultUncaughtExceptionHandler(new WebpiecesExceptionHandler());
 		

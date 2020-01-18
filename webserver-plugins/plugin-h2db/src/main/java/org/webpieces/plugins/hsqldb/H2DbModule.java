@@ -42,9 +42,10 @@ public class H2DbModule extends AbstractModule {
 				args = new String[] { "-webPort", port1+"", "-webAllowOthers"};					
 			}
 			
-			log.info("trying to start H2 webserver GUI interface to serve up as a webpage(for development servers)");
+			log.info("Creating H2 webserver for html GUI interface to serve up as a webpage(for development servers)");
 			// start the TCP Server
 			Server server = Server.createWebServer(args);
+			log.info("Starting H2 webserver");
 			server.start();
 			
 			int port = server.getPort();
@@ -57,7 +58,7 @@ public class H2DbModule extends AbstractModule {
 			}
 			
 			return;
-		} catch(SQLException e) {
+		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

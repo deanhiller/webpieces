@@ -71,7 +71,7 @@ ext {
        'jetty-hpack':     'org.eclipse.jetty.http2:http2-hpack:9.4.0.M1',
        'hibernate':       'org.hibernate:hibernate-core:5.3.2.Final',
        'log4jdbc':        'com.googlecode.log4jdbc:log4jdbc:1.2',
-       'h2db':            'com.h2database:h2:1.4.192',
+       'h2db':            'com.h2database:h2:1.4.200',
 
        'acme-sslcerts':   'org.shredzone.acme4j:acme4j-client:2.1',
        'acme-utils':      'org.shredzone.acme4j:acme4j-utils:2.1',
