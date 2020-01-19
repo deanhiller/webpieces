@@ -1,6 +1,8 @@
 # webpieces
 
 FIX notFound page to use the template.  It's ugly in production AND in development when showing how production is displayed!!!
+Think about testing compiling and scaling on LARGE application(and how to test??).  can we separate out slivers so DEV environment
+stays fast no matter what!!!!
 
 I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post
 

@@ -379,6 +379,9 @@ subprojects {
 
 
    if(project.properties.sonatypeUsername && project.properties.sonatypePassword) {
+      if (!project.hasProperty("signing.keyId")) {
+         throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
+      }
       signing {
          sign publishing.publications.mavenJava
       }
@@ -427,7 +430,7 @@ task publish {
 closeRepository.dependsOn('publish')
 promoteRepository.dependsOn('closeRepository')
 promoteRepository.doFirst {
-  println("sleeping after close repo and before promote or promote fails")
+  println("sleeping 4 minutes after close repo and before promote or promote fails sometimes")
   Thread.sleep(80000)
   println("done sleeping go promote repo now");
 }
