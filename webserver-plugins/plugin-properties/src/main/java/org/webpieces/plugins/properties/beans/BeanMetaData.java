@@ -84,7 +84,7 @@ public class BeanMetaData implements Startable {
 		runnable.run();  //we don't catch exceptions as we want to stop startup if we can't apply all settings to match the cluster
 		
 		//Now, re-read every so often but if we fail to read, we just keep running
-		schedulerProvider.get().scheduleWithFixedDelay(runnable, 1, 1, TimeUnit.MINUTES);
+		schedulerProvider.get().scheduleWithFixedDelay(runnable, 3, 1, TimeUnit.MINUTES);
 	}
 
 	public void loadBean(ObjectTranslator objectTranslator, Object injectee, Class<?> interfaze) {

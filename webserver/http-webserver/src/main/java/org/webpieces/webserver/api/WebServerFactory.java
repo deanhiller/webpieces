@@ -1,5 +1,10 @@
 package org.webpieces.webserver.api;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.ProdTemplateModule;
@@ -16,11 +21,31 @@ import com.google.inject.util.Modules;
 
 public abstract class WebServerFactory {
 
+	private static final Logger log = LoggerFactory.getLogger(WebServerFactory.class);
+
     protected WebServerFactory() {}
 
 	public static WebServer create(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig, Arguments args) {
 		if(!routerConfig.getMetaFile().exists())
 			throw new RuntimeException("file not found="+routerConfig.getMetaFile());
+
+		try {
+			//logback called getLocalhost(resulting in 5 seconds)
+			//H2 called getLocalHost like 3 times(resulting in 15 more seconds)
+			//overall, it really screwed the startup time!!
+			//https://stackoverflow.com/questions/33289695/inetaddress-getlocalhost-slow-to-run-30-seconds/33289897#33289897
+			log.info("Checking timing on getLocalHost (seems very bad on many MAC computers) which makes webpieces startup look slow(and we like a fast startup");
+			long start = System.currentTimeMillis();
+			InetAddress.getLocalHost();
+			long totalTimeSeconds = (System.currentTimeMillis() - start) / 1000;
+			if(totalTimeSeconds > 3)
+				throw new IllegalStateException("Your computer configuration is messed up.  getLocalHost "
+						+ "is taking longer\nthan 3 seconds.  FIX THIS NOW!!!  You can typically edit your hosts file\n"
+						+ "to do so.  See https://stackoverflow.com/questions/33289695/inetaddress-getlocalhost-slow-to-run-30-seconds/33289897#33289897 for more info");
+			
+		} catch (UnknownHostException e) {
+			throw new RuntimeException(e);
+		}
 		
 		Module allModules = getModules(config, routerConfig, templateConfig, args);
 
