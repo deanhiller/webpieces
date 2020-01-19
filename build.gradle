@@ -382,6 +382,8 @@ subprojects {
       if (!project.hasProperty("signing.keyId")) {
          throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
       }
+      //To upload to nexus, your key must be uploaded to https://keys.openpgp.org/ as well.
+      //generating new key is found in documentation on gradle signing plugin
       signing {
          sign publishing.publications.mavenJava
       }
