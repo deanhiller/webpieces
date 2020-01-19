@@ -6,8 +6,8 @@
     Your app's webpage was not found for this reason: ${error}$
     
     <ul>
-        <li><a href="">Existing Routes in your WebApp</a></li>
-        <li><a href="">What your webpage looks like in Production</a></li>
+        <li><a href="#routes">Existing Routes in your WebApp</a></li>
+        <li><a href="#production">What your webpage looks like in Production</a></li>
     </ul>
 
     <h3>Domain Specific Routes</h3>
@@ -23,7 +23,7 @@
         #{/else}#
         </ul>
     
-    <h3>Non Domain Routes</h3>
+    <h3 id="routes">Non Domain Routes</h3>
     Webpieces divides url paths up into scopes for speed.  It looks up scope in a Map first and then loops over each route
     in that scopes list doing a Pattern match (so it's good to use scopes to keep code organized and LESS pattern matching).
     Static routes are not shown yet below but we always match on them last since they will be cached.  Not that you would
@@ -41,6 +41,6 @@
     <br/>
     <br/>
     Your app in production will look like what is in this iframe(ie. this is your production 404 page or login page if redirected due to security filter!)<br/>
-    <iframe src="${url}$" width="100%" height="100%"></iframe>
+    <iframe id="production" src="${url}$" width="100%" height="100%"></iframe>
   </body>
 </html>

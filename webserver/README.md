@@ -1,16 +1,13 @@
 # webpieces
 
-FIX notFound page to use the template.  It's ugly in production AND in development when showing how production is displayed!!!
+add a bunch of beans now that properties file stuff is working
+
 Think about testing compiling and scaling on LARGE application(and how to test??).  can we separate out slivers so DEV environment
 stays fast no matter what!!!!
 
-I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post
+I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post.  ie. back button stops working I think when we encounter a post bug(ick)
 
-add a bunch of beans now that properties file stuff is working
 do a generate code GUI????
-
-* tweak twitter project to return admin page since they close the socket early causing a AsyncWriteException since they don't wait for the whole http response(so annoying when clients do that)??
-REVISIT if still exist:see exceptions.log as well as POST /quitquitquit and immediately close socket ends in internal error though it was in process of sending notfound
 
 * (6/27)TEST WINDOWS NOW...should be fixed with ... fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
