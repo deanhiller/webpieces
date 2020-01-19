@@ -13,6 +13,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
 import org.webpieces.httpclient11.api.HttpFullRequest;
@@ -24,8 +26,6 @@ import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
@@ -162,7 +162,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		//platform should convert request into a development not found page which has an iframe
 		//of the original page with a query param to tell platform to display original 
 		//page requested 
-		response.assertContains("<iframe src=\"/notFound?webpiecesShowPage=true");
+		response.assertContains("<iframe id=\"production\" src=\"/notFound?webpiecesShowPage=true");
 	}
 	
 	@Test
