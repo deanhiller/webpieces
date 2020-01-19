@@ -81,7 +81,7 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("You encountered a 5xx in your server");
+		response.assertContains("You encountered a Bug in our web software");
 	}
 	
 	/**
@@ -117,7 +117,7 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("You encountered a 5xx in your server");
+		response.assertContains("You encountered a Bug in our web software");
 	}
 
 	private class AppOverridesModule implements Module {
