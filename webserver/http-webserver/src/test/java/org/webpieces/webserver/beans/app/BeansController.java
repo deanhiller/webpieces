@@ -22,12 +22,17 @@ import org.webpieces.webserver.tags.app.Account;
 @Singleton
 public class BeansController {
 	
+	private final SomeLib lib1;
+	private final SomeOtherLib lib;
+	private final Executor executor;
+
 	@Inject
-	private SomeLib lib1;
-	@Inject
-	private SomeOtherLib lib;
-	@Inject
-	private Executor executor;
+	public BeansController(SomeLib lib1, SomeOtherLib lib, Executor executor) {
+		super();
+		this.lib1 = lib1;
+		this.lib = lib;
+		this.executor = executor;
+	}
 
 	public Action urlEncoding(String user) {
 		return Actions.renderThis("user", user, "html", "<a href=\"\">Text\"</a>");

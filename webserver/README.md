@@ -1,5 +1,7 @@
 # webpieces
 
+signing is happening TWICE, so fix that issue as well
+
 add a bunch of beans now that properties file stuff is working
 
 Think about testing compiling and scaling on LARGE application(and how to test??).  can we separate out slivers so DEV environment

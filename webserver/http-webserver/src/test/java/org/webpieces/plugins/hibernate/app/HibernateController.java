@@ -18,9 +18,14 @@ public class HibernateController {
 	
 	private static final Logger log = LoggerFactory.getLogger(HibernateAsyncController.class);
 
-	@Inject
-	private ServiceToFail svc;
+	private final ServiceToFail svc;
 	
+	@Inject
+	public HibernateController(ServiceToFail svc) {
+		super();
+		this.svc = svc;
+	}
+
 	/**
 	 * BIG NOTE: This is NOT the way you should use hibernate but is a base case for us to 
 	 * just test out hibernate without filters and added complexity

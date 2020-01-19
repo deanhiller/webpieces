@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.templatingdev.api.GroovyGen;
 import org.webpieces.templatingdev.impl.tags.ElseGen;
@@ -11,13 +12,19 @@ import org.webpieces.templatingdev.impl.tags.ElseIfGen;
 import org.webpieces.templatingdev.impl.tags.IfGen;
 import org.webpieces.templatingdev.impl.tags.ListGen;
 
+@Singleton
 public class GenLookup {
 
-	private Map<String, GroovyGen> generators = new HashMap<>();
+	private final Map<String, GroovyGen> generators = new HashMap<>();
 	
+	private final ListGen listGen;
+
 	@Inject
-	private ListGen listGen;
-	
+	public GenLookup(ListGen listGen) {
+		super();
+		this.listGen = listGen;
+	}
+
 	protected void init() {
 		put(new IfGen());
 		put(new ElseIfGen());

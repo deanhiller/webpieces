@@ -18,9 +18,14 @@ import org.webpieces.router.impl.routers.DScopedRouter;
 @Singleton
 public class NotFoundController {
 
-	@Inject
-	private RoutingHolder routingHolder;
+	private final RoutingHolder routingHolder;
 	
+	@Inject
+	public NotFoundController(RoutingHolder routingHolder) {
+		super();
+		this.routingHolder = routingHolder;
+	}
+
 	public Action notFound() {
 		RouterRequest request = Current.request();
 		String error = request.getSingleMultipart("webpiecesError");

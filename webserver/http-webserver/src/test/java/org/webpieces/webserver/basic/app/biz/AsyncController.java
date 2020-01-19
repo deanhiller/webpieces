@@ -14,11 +14,16 @@ import org.webpieces.webserver.async.app.AsyncRouteId;
 @Singleton
 public class AsyncController {
 
-	@Inject
-	private SomeOtherLib notFoundLib;
-	@Inject
-	private SomeLib errorLib;
+	private final SomeOtherLib notFoundLib;
+	private final SomeLib errorLib;
 	
+	@Inject
+	public AsyncController(SomeOtherLib notFoundLib, SomeLib errorLib) {
+		super();
+		this.notFoundLib = notFoundLib;
+		this.errorLib = errorLib;
+	}
+
 	public CompletableFuture<Action> someMethod() {
 		return notFoundLib.someBusinessLogic().thenApply(s -> Actions.redirect(AsyncRouteId.SOME_ROUTE));
 	}

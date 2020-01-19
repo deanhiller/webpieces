@@ -33,14 +33,14 @@ import org.gradle.internal.Cast;
 public class TemplateCompilerPlugin implements Plugin<Project> {
 	
     private final ObjectFactory objectFactory;
-    private final ModuleRegistry moduleRegistry;
+    //private final ModuleRegistry moduleRegistry;
     
     private Project project;
     
     @Inject
     public TemplateCompilerPlugin(ObjectFactory objectFactory, ModuleRegistry moduleRegistry) {
 		this.objectFactory = objectFactory;
-		this.moduleRegistry = moduleRegistry;
+		//this.moduleRegistry = moduleRegistry;
     }
     
     @Override

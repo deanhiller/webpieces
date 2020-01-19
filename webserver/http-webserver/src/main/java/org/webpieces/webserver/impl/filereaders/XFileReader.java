@@ -3,10 +3,9 @@ package org.webpieces.webserver.impl.filereaders;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
-import javax.inject.Inject;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
@@ -15,8 +14,6 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.util.file.VirtualFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ChannelCloser;
 import org.webpieces.webserver.impl.RequestInfo;
@@ -35,13 +32,17 @@ public abstract class XFileReader {
 	private static final Logger log = LoggerFactory.getLogger(XFileReader.class);
 	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
-	@Inject
-	private ResponseCreator responseCreator;
-	@Inject
-	private WebServerConfig config;
-	@Inject
-	private ChannelCloser channelCloser;
+	private final ResponseCreator responseCreator;
+	private final WebServerConfig config;
+	private final ChannelCloser channelCloser;
 	
+	public XFileReader(ResponseCreator responseCreator, WebServerConfig config, ChannelCloser channelCloser) {
+		super();
+		this.responseCreator = responseCreator;
+		this.config = config;
+		this.channelCloser = channelCloser;
+	}
+
 	public CompletableFuture<Void> runFileRead(RequestInfo info, RenderStaticResponse renderStatic) throws IOException {
 		VirtualFile fullFilePath = renderStatic.getFilePath();
 

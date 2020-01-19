@@ -9,8 +9,13 @@ import org.webpieces.router.api.actions.Actions;
 @Singleton
 public class DevController {
 
+	private final NewInterface library;
+	
 	@Inject
-	private NewInterface library;
+	public DevController(NewInterface library) {
+		super();
+		this.library = library;
+	}
 	
 	public Action home() {
 		String user = library.fetchName();

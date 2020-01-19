@@ -16,7 +16,6 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.tasks.compile.CompilerForkUtils;
-import org.gradle.api.logging.LogLevel;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Nested;
@@ -97,7 +96,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 		System.out.println("custom tags="+options.getCustomTags());
 		config.setCustomTagsFromPlugin(options.getCustomTags());
     	
-        LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
+        //LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
         
         File destinationDir = getDestinationDir();
         System.out.println("destDir="+destinationDir);

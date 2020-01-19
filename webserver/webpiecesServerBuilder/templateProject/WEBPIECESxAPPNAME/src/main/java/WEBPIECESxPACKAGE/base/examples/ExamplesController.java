@@ -16,17 +16,21 @@ import WEBPIECESxPACKAGE.base.mgmt.SomeBean;
 @Singleton
 public class ExamplesController {
 
-	@Inject
-	private RemoteService service;
-	@Inject
-	private SomeLibrary someLib;
+	private final RemoteService service;
+	private final SomeLibrary someLib;
 	
 	//This is injected to demonstrate the properties plugin so you can modify properties via a web page and changes are stored in database
 	//so changes will survive a restart.
-	@Inject
-	private SomeBean managed;
+	private final SomeBean managed;
 
-	
+	@Inject
+	public ExamplesController(RemoteService service, SomeLibrary someLib, SomeBean managed) {
+		super();
+		this.service = service;
+		this.someLib = someLib;
+		this.managed = managed;
+	}
+
 	public Action index() {
 		//this is so the test can throw an exception from some random library that is mocked
 		someLib.doSomething(5); 

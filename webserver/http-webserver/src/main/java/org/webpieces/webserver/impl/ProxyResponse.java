@@ -7,10 +7,11 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.api.ResponseStream;
@@ -29,8 +30,6 @@ import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.tags.BootstrapModalTag;
 import org.webpieces.util.filters.ExceptionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Request;
@@ -43,22 +42,17 @@ import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 import groovy.lang.MissingPropertyException;
 
+//MUST NOT BE @Singleton!!! since this is created per request
 public class ProxyResponse implements ResponseStreamer {
 
 	private static final Logger log = LoggerFactory.getLogger(ProxyResponse.class);
 	
-	@Inject
-	private TemplateService templatingService;
-	@Inject
-	private StaticFileReader reader;
-	@Inject
-	private CompressionLookup compressionLookup;
-	@Inject
-	private ResponseCreator responseCreator;
-	@Inject
-	private ChannelCloser channelCloser;
-	@Inject
-	private BufferPool pool;
+	private final TemplateService templatingService;
+	private final StaticFileReader reader;
+	private final CompressionLookup compressionLookup;
+	private final ResponseCreator responseCreator;
+	private final ChannelCloser channelCloser;
+	private final BufferPool pool;
 	
 	private ResponseOverrideSender stream;
 	//private HttpRequest request;
@@ -67,6 +61,24 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private int maxBodySize;
 	private Object responseSent = null;
+
+	@Inject
+	public ProxyResponse(
+		TemplateService templatingService, 
+		StaticFileReader reader,
+		CompressionLookup compressionLookup, 
+		ResponseCreator responseCreator, 
+		ChannelCloser channelCloser,
+		BufferPool pool
+	) {
+		super();
+		this.templatingService = templatingService;
+		this.reader = reader;
+		this.compressionLookup = compressionLookup;
+		this.responseCreator = responseCreator;
+		this.channelCloser = channelCloser;
+		this.pool = pool;
+	}
 
 	public void init(RouterRequest req, Http2Request requestHeaders, ResponseStream responseSender, int maxBodySize) {
 		this.routerRequest = req;

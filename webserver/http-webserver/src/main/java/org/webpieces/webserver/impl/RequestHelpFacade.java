@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferCreationPool;
@@ -15,28 +16,34 @@ import org.webpieces.util.urlparse.UrlEncodedParser;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.body.BodyParsers;
 
+@Singleton
 public class RequestHelpFacade implements StreamsWebManaged {
 
-	
-	@Inject
-	private RouterService routingService;
-	@Inject
-	private WebServerConfig config;
-	@Inject
-	private UrlEncodedParser urlEncodedParser;
-	@Inject
-	private BodyParsers bodyParsers;
+	private final RouterService routingService;
+	private final WebServerConfig config;
+	private final UrlEncodedParser urlEncodedParser;
+	private final BodyParsers bodyParsers;
 	
 	//I don't use javax.inject.Provider much as reflection creation is a tad slower but screw it......(it's fast enough)..AND
 	//it keeps the code a bit more simple.  We could fix this later
-	@Inject
-	private Provider<ProxyResponse> responseProvider;
+	private final Provider<ProxyResponse> responseProvider;
 	
 	//The max size of body for dynamic pages for Full responses and chunked responses.  This
 	//is used to determine send chunks instead of full response as well since it won't fit
 	//in full response sometimes
 	private int maxBodySize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
-	
+
+	@Inject
+	public RequestHelpFacade(RouterService routingService, WebServerConfig config, UrlEncodedParser urlEncodedParser,
+			BodyParsers bodyParsers, Provider<ProxyResponse> responseProvider) {
+		super();
+		this.routingService = routingService;
+		this.config = config;
+		this.urlEncodedParser = urlEncodedParser;
+		this.bodyParsers = bodyParsers;
+		this.responseProvider = responseProvider;
+	}
+
 	public void urlEncodeParse(String postfix, RouterRequest routerRequest) {
 		urlEncodedParser.parse(postfix, (k, v) -> addToMap(k,v,routerRequest.queryParams));
 	}

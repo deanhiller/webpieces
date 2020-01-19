@@ -16,10 +16,15 @@ public class MeetingController {
 
 	private boolean isWantRedirect = false;
 	
+	private final SomeUtil util;
+	private final SomeService service;
+	
 	@Inject
-	private SomeUtil util;
-	@Inject
-	private SomeService service;
+	public MeetingController(SomeUtil util, SomeService service) {
+		super();
+		this.util = util;
+		this.service = service;
+	}
 	
 	public Render notFound() {
 		return Actions.renderThis();

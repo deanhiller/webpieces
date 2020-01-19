@@ -13,11 +13,17 @@ import org.webpieces.webserver.impl.filereaders.XFileReaderFileSystem;
 @Singleton
 public class StaticFileReader {
 
-	@Inject
-	private XFileReaderFileSystem fileSystemReader;
-	@Inject
-	private XFileReaderClasspath classPathFileReader;
+	private final XFileReaderFileSystem fileSystemReader;
+	private final XFileReaderClasspath classPathFileReader;
 	
+	@Inject
+	public StaticFileReader(XFileReaderFileSystem fileSystemReader, XFileReaderClasspath classPathFileReader) {
+		super();
+		this.fileSystemReader = fileSystemReader;
+		this.classPathFileReader = classPathFileReader;
+	}
+
+
 	public CompletableFuture<Void> sendRenderStatic(RequestInfo info, RenderStaticResponse renderStatic) {
 		try {
 			if(renderStatic.isOnClassPath())

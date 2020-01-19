@@ -13,11 +13,16 @@ import org.webpieces.webserver.basic.app.BasicRouteId;
 @Singleton
 public class BasicController {
 
-	@Inject
-	private SomeOtherLib notFoundLib;
-	@Inject
-	private SomeLib errorLib;
+	private final SomeOtherLib notFoundLib;
+	private final SomeLib errorLib;
 	
+	@Inject
+	public BasicController(SomeOtherLib notFoundLib, SomeLib errorLib) {
+		super();
+		this.notFoundLib = notFoundLib;
+		this.errorLib = errorLib;
+	}
+
 	public Action someMethod() {
 		notFoundLib.someBusinessLogic();
 		return Actions.redirect(BasicRouteId.RENDER_PAGE);

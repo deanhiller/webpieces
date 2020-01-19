@@ -27,6 +27,7 @@ import com.webpieces.hpack.api.subparsers.ResponseCookie;
 import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+
 @Singleton
 public class ResponseCreator {
 
@@ -34,11 +35,16 @@ public class ResponseCreator {
 	private static final HeaderPriorityParser httpSubParser = HpackParserFactory.createHeaderParser();
 	private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, dd MMM Y HH:mm:ss");
 
-	@Inject
-	private CookieTranslator cookieTranslator;
-	@Inject
-	private MimeTypes mimeTypes;
+	private final CookieTranslator cookieTranslator;
+	private final MimeTypes mimeTypes;
 	
+	@Inject
+	public ResponseCreator(CookieTranslator cookieTranslator, MimeTypes mimeTypes) {
+		super();
+		this.cookieTranslator = cookieTranslator;
+		this.mimeTypes = mimeTypes;
+	}
+
 	public ResponseEncodingTuple createResponse(Http2Request request, StatusCode statusCode,
 			String extension, String defaultMime, boolean isDynamicPartOfWebsite) {
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);

@@ -23,7 +23,10 @@ import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.webserver.api.WebServerConfig;
+import org.webpieces.webserver.impl.ChannelCloser;
 import org.webpieces.webserver.impl.RequestInfo;
+import org.webpieces.webserver.impl.ResponseCreator;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -36,17 +39,25 @@ public class XFileReaderFileSystem extends XFileReader {
 	//the router api to access some stuff it shouldn't right now because I was 
 	//lazy (and should really use verify design to prevent things like that).  router also uses the same state this
 	//class needs
-	@Inject
-	protected RouterConfig routerConfig;
+	protected final RouterConfig routerConfig;
+	private final CompressionLookup compressionLookup;
+	private final ExecutorService fileExecutor;
+	private final Set<OpenOption> options = new HashSet<>();
 	
 	@Inject
-	private CompressionLookup compressionLookup;
-	@Inject
-	@Named(HttpFrontendFactory.FILE_READ_EXECUTOR)
-	private ExecutorService fileExecutor;
-	private Set<OpenOption> options = new HashSet<>();
-	
-	public XFileReaderFileSystem() {
+	public XFileReaderFileSystem(
+		ResponseCreator responseCreator, 
+		WebServerConfig config, 
+		ChannelCloser channelCloser,
+		RouterConfig routerConfig, 
+		CompressionLookup compressionLookup, 
+		@Named(HttpFrontendFactory.FILE_READ_EXECUTOR) ExecutorService fileExecutor
+	) {
+		super(responseCreator, config, channelCloser);
+		this.routerConfig = routerConfig;
+		this.compressionLookup = compressionLookup;
+		this.fileExecutor = fileExecutor;
+
 	    options.add(StandardOpenOption.READ);
 	}
 	
