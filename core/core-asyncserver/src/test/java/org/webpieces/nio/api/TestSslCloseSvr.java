@@ -23,8 +23,6 @@ import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.mocks.MockAsyncListener;
@@ -40,7 +38,7 @@ import org.webpieces.util.threading.DirectExecutor;
 
 public class TestSslCloseSvr {
 
-	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	//private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private MockAsyncListener listener = new MockAsyncListener();
 	private MockSvrChannel mockSvrChannel = new MockSvrChannel();

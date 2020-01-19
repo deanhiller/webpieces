@@ -261,14 +261,6 @@ subprojects {
       }
    }
 
-//TODO: I think this is a remnant of gradle 4.x and with 5.x, this is already declared in publishing.publications below.
-//test removal later
-   artifacts {
-        archives jar
-        archives javadocJar
-        archives sourcesJar
-   }
-
    //This is really only needed for devrouter, embeddablewebserver, http-client, and embeddablehttpproxy
    //I wonder if we can list out those few projects and this task to each one and the assemble.dependsOn as well
    //let's at least copy all jars to a single directory to use in creating an application...
@@ -385,6 +377,11 @@ subprojects {
       //To upload to nexus, your key must be uploaded to https://keys.openpgp.org/ as well.
       //generating new key is found in documentation on gradle signing plugin
       signing {
+         //let's only sign if releasing to sonatype repo as we have to
+         //BUT even if we remove the signing section, we still end up generating *.md5 and *.sha1 so apparently things
+         //are still being signed.  This signing section only seems to make the *.asc get generated. Then on top of that,
+         //the *asc file is then hashed generating *.asc.md5 and *.asc.sha1 which is annoying. 
+         required { gradle.taskGraph.hasTask("promoteRepository") }
          sign publishing.publications.mavenJava
       }
    }

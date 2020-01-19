@@ -2,13 +2,11 @@ package org.webpieces.javasm.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
-import org.webpieces.javasm.api.NoTransitionListener;
-import org.webpieces.javasm.api.State;
-import org.webpieces.javasm.api.StateMachineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.javasm.api.NoTransitionListener;
+import org.webpieces.javasm.api.State;
 
 public class StateImpl implements State
 {

@@ -2,15 +2,14 @@ package org.webpieces.asyncserver.impl;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ProxyDataListener implements DataListener {
 
