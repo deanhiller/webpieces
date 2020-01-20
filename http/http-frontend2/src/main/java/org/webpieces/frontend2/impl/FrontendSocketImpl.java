@@ -2,6 +2,8 @@ package org.webpieces.frontend2.impl;
 
 import java.net.InetSocketAddress;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.frontend2.api.StreamListener;
@@ -10,8 +12,6 @@ import org.webpieces.httpparser.api.Memento;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.locking.PermitQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.webpieces.http2engine.api.error.FarEndClosedConnection;
 import com.webpieces.http2engine.api.error.ShutdownStream;

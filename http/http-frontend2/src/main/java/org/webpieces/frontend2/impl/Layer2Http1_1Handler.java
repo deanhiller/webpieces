@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -20,8 +22,6 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.util.acking.AckAggregator;
 import org.webpieces.util.acking.ByteAckTracker;
 import org.webpieces.util.locking.PermitQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;

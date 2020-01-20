@@ -1,6 +1,5 @@
 package org.webpieces.httpfrontend2.api;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -10,30 +9,23 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.frontend2.api.FrontendMgrConfig;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.HttpStream;
+import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.StreamListener;
-import org.webpieces.httpfrontend2.api.http1.Requests;
 import org.webpieces.httpfrontend2.api.http2.Http2Requests;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.KnownHttpMethod;
-import org.webpieces.nio.api.BackpressureConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.Http2Method;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
@@ -64,8 +56,8 @@ class ServerFactory {
     }
 
     private static class OurListener implements StreamListener, StreamWriter {
-        private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-        private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
+//        private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+//        private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
 
 		@Override
 		public 	HttpStream openStream() {
@@ -122,24 +114,24 @@ class ServerFactory {
 		}
     }
 
-    private static class AppStreamWriter implements StreamWriter {
-
-
-		private ResponseStream stream;
-		private StreamWriter writer;
-
-		public AppStreamWriter(ResponseStream stream, StreamWriter writer) {
-			this.stream = stream;
-			this.writer = writer;
-		}
-
-		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
-			log.info(stream+"echoing back piece of data");
-			return writer.processPiece(data);
-		}
-    	
-    }
+//    private static class AppStreamWriter implements StreamWriter {
+//
+//
+//		private ResponseStream stream;
+//		private StreamWriter writer;
+//
+//		public AppStreamWriter(ResponseStream stream, StreamWriter writer) {
+//			this.stream = stream;
+//			this.writer = writer;
+//		}
+//
+//		@Override
+//		public CompletableFuture<Void> processPiece(StreamMsg data) {
+//			log.info(stream+"echoing back piece of data");
+//			return writer.processPiece(data);
+//		}
+//    	
+//    }
     
     private static class CachedResponseWriter implements StreamWriter {
 

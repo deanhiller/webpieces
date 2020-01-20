@@ -11,7 +11,6 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.impl.FrontEndServerManagerImpl;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
-import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
