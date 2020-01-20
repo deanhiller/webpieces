@@ -343,11 +343,11 @@ subprojects {
                 name = project.name
                 description = "testing this out"
                 //'Someone forgot to fill this in.  See http://stackoverflow.com/questions/38272550/how-to-fail-the-gradle-build-if-subproject-is-missing-a-property'
-                url = 'https://github.com/${github_org}/${project_name}'
+                url = "https://github.com/${github_org}/${project_name}"
                 licenses {
                     license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
                     }
                 }
                 developers {
