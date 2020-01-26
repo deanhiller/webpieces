@@ -101,7 +101,8 @@ public class CrudUserController {
 			Em.get().persist(role);
 		}
 
-		Em.get().merge(entity);
+		//WTF...this now can save an entity that did not exist before...fun times.
+		Em.get().persist(entity);
         Em.get().flush();
         
 		return Actions.redirect(CrudUserRouteId.LIST_USERS);
