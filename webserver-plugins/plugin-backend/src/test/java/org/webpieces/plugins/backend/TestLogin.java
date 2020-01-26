@@ -49,7 +49,6 @@ public class TestLogin extends AbstractWebpiecesTest {
 		@Override
 		public void configure(Binder binder) {
 			binder.bind(BackendLogin.class).toInstance(mockLogin);
-			//binder.bind(SimpleStorage.class).toInstance(mockStorage);
 		}
 	}
 	

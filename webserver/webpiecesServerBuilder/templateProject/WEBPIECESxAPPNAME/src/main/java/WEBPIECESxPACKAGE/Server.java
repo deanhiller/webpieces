@@ -93,8 +93,6 @@ public class Server {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
 		}
 		
-		
-		
 		//ALWAYS install a catch all on all threads
 		Thread.setDefaultUncaughtExceptionHandler(new WebpiecesExceptionHandler());
 		
@@ -107,8 +105,6 @@ public class Server {
 
 		File baseWorkingDir = modifyUserDirForManyEnvironments(filePath);
 
-
-		
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing

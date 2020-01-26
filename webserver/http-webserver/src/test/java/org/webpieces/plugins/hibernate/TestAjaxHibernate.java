@@ -35,7 +35,7 @@ import org.webpieces.webserver.test.http11.Requests;
 
 public class TestAjaxHibernate extends AbstractWebpiecesTest {
 
-	
+
 	private HttpSocket http11Socket;
 	
 	@Before

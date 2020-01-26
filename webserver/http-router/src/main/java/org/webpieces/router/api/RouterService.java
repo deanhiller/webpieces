@@ -8,6 +8,8 @@ import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.util.cmdline2.Arguments;
 
+import com.google.inject.Injector;
+
 public interface RouterService {
 
 	/**
@@ -20,7 +22,7 @@ public interface RouterService {
 	 */
 	void configure(Arguments arguments);
 	
-	void start();
+	Injector start();
 
 	void stop();
 

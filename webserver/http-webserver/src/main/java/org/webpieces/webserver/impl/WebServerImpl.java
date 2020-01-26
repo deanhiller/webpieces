@@ -24,6 +24,7 @@ import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.nio.api.SSLConfiguration;
+import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterService;
@@ -34,6 +35,8 @@ import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.net.URLEncoder;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
+
+import com.google.inject.Injector;
 
 @Singleton
 public class WebServerImpl implements WebServer {
@@ -46,7 +49,6 @@ public class WebServerImpl implements WebServer {
 	private final RouterService routingService;
 	private final WebServerPortInformation portConfig;
 	private final PortConfiguration portAddresses;
-	private final SSLConfiguration sslConfiguration;
 
 	private HttpServer httpServer;
 	private HttpServer httpsServer;
@@ -61,8 +63,7 @@ public class WebServerImpl implements WebServer {
 			RequestReceiver serverListener,
 			RouterService routingService,
 			WebServerPortInformation portConfig,
-			PortConfiguration portAddresses,
-			SSLConfiguration sslConfiguration
+			PortConfiguration portAddresses
 	) {
 		this.config = config;
 		this.serverMgr = serverMgr;
@@ -70,7 +71,6 @@ public class WebServerImpl implements WebServer {
 		this.routingService = routingService;
 		this.portConfig = portConfig;
 		this.portAddresses = portAddresses;
-		this.sslConfiguration = sslConfiguration;
 	}
 	
 	public void configureSync(Arguments arguments) {
@@ -128,8 +128,8 @@ public class WebServerImpl implements WebServer {
 			throw new IllegalStateException("You must call configure first");
 		
 		log.info("starting server");
-		routingService.start();
-
+		Injector injector = routingService.start();
+		
 		//validate html route id's and params on startup if 'org.webpieces.routeId.txt' exists
 		validateRouteIdsFromHtmlFiles();
 
@@ -156,6 +156,10 @@ public class WebServerImpl implements WebServer {
 		InetSocketAddress httpsAddress = portAddresses.getHttpsAddr().get();
 		CompletableFuture<Void> fut2;
 		if(httpsAddress != null) {
+			//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
+			//enable the backend or https ports
+			SSLConfiguration sslConfiguration = injector.getInstance(SSLConfiguration.class);
+
 			String type2 = "https";
 			if(sslConfiguration.getHttpsSslEngineFactory() == null)
 				type2 = "http";
@@ -165,7 +169,8 @@ public class WebServerImpl implements WebServer {
 			HttpSvrConfig httpSvrConfig = new HttpSvrConfig("https", httpsAddress, 10000);
 			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
 			
-			httpsServer = serverMgr.createHttpsServer(httpSvrConfig, serverListener, sslConfiguration.getHttpsSslEngineFactory());
+			SSLEngineFactory factory = (SSLEngineFactory) sslConfiguration.getHttpsSslEngineFactory();
+			httpsServer = serverMgr.createHttpsServer(httpSvrConfig, serverListener, factory);
 			fut2 = httpsServer.start();
 		
 		} else {
@@ -176,24 +181,31 @@ public class WebServerImpl implements WebServer {
 		
 		
 		//START backend if wanted (if not, pages are served over https server...if you don't want a backend, remove the plugins)
-		String type = "https";
-		if(sslConfiguration.getBackendSslEngineFactory() == null)
-			type = "http";
+
 		InetSocketAddress backendAddress = portAddresses.getBackendAddr().get();
-		String serverName = "backend("+type+")";
 		CompletableFuture<Void> fut33;
 		if(backendAddress != null) {
+			//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
+			//enable the backend or https ports
+			SSLConfiguration sslConfiguration = injector.getInstance(SSLConfiguration.class);
+
+			String type = "https";
+			if(sslConfiguration.getBackendSslEngineFactory() == null)
+				type = "http";
+			String serverName = "backend("+type+")";
+			
 			log.info("Creating and starting the "+serverName+" over port="+backendAddress+" AND using '"+type+"'");
 		
 			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(serverName, backendAddress, 10000);
 			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
 			
-			backendServer = serverMgr.createBackendHttpsServer(httpSvrConfig, serverListener, sslConfiguration.getBackendSslEngineFactory());
+			SSLEngineFactory factory = (SSLEngineFactory) sslConfiguration.getBackendSslEngineFactory();
+			backendServer = serverMgr.createBackendHttpsServer(httpSvrConfig, serverListener, factory);
 			fut33 = backendServer.start();
 		
 		} else {
 			fut33 = CompletableFuture.completedFuture(null);
-			log.info("Serving the "+serverName+" is disabled since there was no address specified");
+			log.info("Serving the backend over it's own port is disabled since there was no address specified");
 		}
 		CompletableFuture<Void> fut3 = fut33;
 		

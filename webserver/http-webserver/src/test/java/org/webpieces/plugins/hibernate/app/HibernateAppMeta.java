@@ -5,6 +5,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.webpieces.nio.api.SSLConfiguration;
+import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.plugins.hibernate.HibernateConfig;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.plugins.hibernate.app.ajax.AjaxHibernateCrudRoutes;
@@ -14,10 +16,12 @@ import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.webserver.EmptyStorage;
+import org.webpieces.webserver.SSLEngineFactoryWebServerTesting;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.name.Names;
 
 public class HibernateAppMeta implements WebAppMeta {
 	public static final String PERSISTENCE_TEST_UNIT = "webpieces-persistence";
@@ -53,6 +57,9 @@ public class HibernateAppMeta implements WebAppMeta {
 			binder.bind(Executor.class).toInstance(executor);
 			
 			binder.bind(SimpleStorage.class).toInstance(new EmptyStorage());
+			
+			binder.bind(SSLEngineFactory.class).to(SSLEngineFactoryWebServerTesting.class);
+			binder.bind(SSLEngineFactory.class).annotatedWith(Names.named(SSLConfiguration.BACKEND_SSL)).to(SSLEngineFactoryWebServerTesting.class);
 		}
 	}
 }

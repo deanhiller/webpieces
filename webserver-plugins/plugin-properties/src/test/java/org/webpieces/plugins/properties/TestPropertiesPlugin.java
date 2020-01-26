@@ -4,7 +4,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpFullRequest;

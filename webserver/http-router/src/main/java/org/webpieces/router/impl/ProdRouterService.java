@@ -12,6 +12,9 @@ import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.AMasterRouter;
 import org.webpieces.util.cmdline2.Arguments;
+
+import com.google.inject.Injector;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +48,12 @@ public class ProdRouterService extends AbstractRouterService {
 	
 	//add Route HOOK callback so translate RouteId -> route and route->controller.method to call
 	@Override
-	public void start() {
+	public Injector start() {
 		log.info("Starting PROD server with NO compiling classloader");
 		
-		routeLoader.load(injector -> runStartupHooks(injector));
+		Injector inj = routeLoader.load(injector -> runStartupHooks(injector));
 		started = true;
+		return inj;
 	}
 
 	@Override

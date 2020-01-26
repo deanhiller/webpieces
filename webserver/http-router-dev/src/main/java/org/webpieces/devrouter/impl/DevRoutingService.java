@@ -58,10 +58,11 @@ public class DevRoutingService extends AbstractRouterService {
 	}
 	
 	@Override
-	public void start() {
+	public Injector start() {
 		log.info("Starting DEVELOPMENT server with CompilingClassLoader and HotSwap");
-		loadOrReload(injector -> runStartupHooks(injector)); 
+		Injector inj = loadOrReload(injector -> runStartupHooks(injector)); 
 		started = true;
+		return inj;
 	}
 
 	@Override
@@ -93,8 +94,8 @@ public class DevRoutingService extends AbstractRouterService {
 
 		log.info("text file changed so need to reload RouterModules.java implementation");
 
-		routeLoader.configure(classLoader, arguments);
-		routerModule = routeLoader.load(NO_OP);
+		routerModule = routeLoader.configure(classLoader, arguments);
+		routeLoader.load(NO_OP);
 		lastFileTimestamp = metaTextFile.lastModified();
 		return true;
 	}
@@ -112,9 +113,9 @@ public class DevRoutingService extends AbstractRouterService {
 		loadOrReload(NO_OP);
 	}
 
-	private void loadOrReload(Consumer<Injector> startupHook) {
-		routeLoader.configure(classLoader, arguments);
-		routerModule = routeLoader.load(startupHook);
+	private Injector loadOrReload(Consumer<Injector> startupHook) {
+		routerModule = routeLoader.configure(classLoader, arguments);
+		return routeLoader.load(startupHook);
 	}
 
 }

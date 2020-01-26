@@ -94,7 +94,7 @@ public class RouteLoader {
 		this.redirectFormation = portLookup;
 	}
 	
-	public void configure(ClassForName loader, Arguments arguments) {
+	public WebAppMeta configure(ClassForName loader, Arguments arguments) {
 		log.info("loading the master "+WebAppMeta.class.getSimpleName()+" class file");
 
 		backPortExists = arguments.createDoesExistArg(BACKEND_PORT_KEY, "If key exist(no matter the value), we use a backend route builder so backend routes are 'not' exposed on the http/https standard ports");
@@ -140,14 +140,16 @@ public class RouteLoader {
 			theModule = createTHEModule(routerModule, routingHolder);
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
-		}	
+		}
+		
+		return routerModule;
 	}
 	
 	/**
 	 * Injector.getInstance should only be used here and NOT in the configure method above!!! or it
 	 * can cause issue with the Arguments help and learning arguments before using any of them
 	 */
-	public WebAppMeta load(Consumer<Injector> startupFunction) {
+	public Injector load(Consumer<Injector> startupFunction) {
 		//TODO: Move this into a Development class so it's not in production so people are 100% sure it's not used in production
 		//In development mode, the ClassLoader here will be the CompilingClassLoader so stuff it into the thread context
 		//just in case plugins will need it(most won't, hibernate will).  In production, this is really a no-op and does
@@ -160,7 +162,7 @@ public class RouteLoader {
 			Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
 
 			Injector injector = createInjector(theModule);
-
+			
 			CompletableFuture<Void> storageLoadComplete = setupSimpleStorage(injector);
 			
 			pluginSetup.wireInPluginPoints(injector);
@@ -180,7 +182,7 @@ public class RouteLoader {
 			//default JDBC is synchronous
 			storageLoadComplete.get(3, TimeUnit.SECONDS);
 			
-			return routerModule;
+			return injector;
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		} catch (ExecutionException e) {
@@ -194,7 +196,6 @@ public class RouteLoader {
 
 	private CompletableFuture<Void> setupSimpleStorage(Injector injector) {
 		SimpleStorage storage = injector.getInstance(SimpleStorage.class);
-		
 		
 		List<CompletableFuture<?>> futures = new ArrayList<>();
 		List<NeedsSimpleStorage> needsStorage = config.getNeedsStorage();
@@ -242,21 +243,8 @@ public class RouteLoader {
 	}
 	
 	public Injector createInjector(Module module) {
-		try {
-			Injector injector = Guice.createInjector(module);
-			return injector;
-//Leaving the code and comment in PLUS, I think this happend as the classloader was not wrapping the correct stuff
-//at the time for some reason.  specifically, in the configure method above, we didn't set the classloader
-//but I am not completely 100% sure there.  we know we ran into a guice bug.  It doesn't hurt to unwrap it anyways
-		} catch(CreationException e) {
-			//Ironically, in trying to log this, another exception is thrown from google code so
-			//they obviously have some sort of bug, so we instead throw the original exception
-			//specifically, this came from consuming an argument before the arguments.check was called
-			//inside the hibernate plugin
-			//I think we can reproduce by calling this earlier...
-			//String pu = persistenceUnit.get();
-			throw new InjectionCreationException("Exception", e.getCause());
-		}
+		Injector injector = Guice.createInjector(module);
+		return injector;
 	}
 
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
