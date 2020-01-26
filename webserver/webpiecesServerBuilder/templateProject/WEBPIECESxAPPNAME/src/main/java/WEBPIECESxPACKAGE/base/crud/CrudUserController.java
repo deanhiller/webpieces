@@ -32,7 +32,11 @@ public class CrudUserController {
 	private static Logger log = LoggerFactory.getLogger(CrudUserController.class);
 	
 	public Action userList() {
-		throw new RuntimeException("testing");
+		EntityManager mgr = Em.get();
+		Query query = mgr.createNamedQuery("findAllUsers");
+		@SuppressWarnings("unchecked")
+		List<UserDbo> users = query.getResultList();
+		return Actions.renderThis("users", users);
 	}
 	
 	public Action userAddEdit(Integer id) {
