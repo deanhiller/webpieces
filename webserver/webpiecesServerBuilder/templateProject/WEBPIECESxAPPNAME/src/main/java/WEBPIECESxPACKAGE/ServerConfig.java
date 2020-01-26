@@ -5,13 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.webpieces.nio.api.SSLEngineFactory;
-import org.webpieces.plugins.sslcert.WebSSLFactory;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 
 public class ServerConfig {
 
@@ -56,21 +53,6 @@ public class ServerConfig {
 	private boolean tokenCheckOn = true;
 	
 	/**
-	 * Configuration for the Http Server.  See the HttpSvrInstanceConfig class documentation for more info.
-	 */
-	private HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(null, (s) -> {});
-	
-	/**
-	 * Configuration for the Https Server.  See the HttpSvrInstanceConfig class documentation for more info.
-	 */
-	private HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(new WebSSLFactory(), (s) -> {});
-	
-	/**
-	 * Configuration for the Backend Http or Https Server.  See the HttpSvrInstanceConfig class documentation for more info.
-	 */
-	private HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig();
-
-	/**
 	 * Because Guice creation happens 'after' you create some classes that need access to the SimpleStorage
 	 * mechanism, you can provide those classes here and we will inject the Storage after it has been created.
 	 * 
@@ -81,20 +63,20 @@ public class ServerConfig {
 
 	private final boolean isRunningServerMainMethod;
 
-	public ServerConfig(SSLEngineFactory sslFactory, File compressionCache, boolean isServerMainMethod) {
+	public ServerConfig(File compressionCache, boolean isServerMainMethod) {
 		this.compressionCacheDir = compressionCache;
 		this.isRunningServerMainMethod = isServerMainMethod;
 	}
 	
 	public ServerConfig(File compressionCache) {
 		//For tests, we need to bind to port 0, then lookup the port after that...
-		this(new WebSSLFactory(), compressionCache, false);
+		this(compressionCache, false);
 		tokenCheckOn = false;
 	}
 
 	//8080, 8443
-	public ServerConfig(SSLEngineFactory factory, boolean isServerMainMethod) {
-		this(factory, FileFactory.newBaseFile("webpiecesCache/precompressedFiles"), isServerMainMethod);
+	public ServerConfig(boolean isServerMainMethod) {
+		this(FileFactory.newBaseFile("webpiecesCache/precompressedFiles"), isServerMainMethod);
 	}
 	
 	public VirtualFile getMetaFile() {
@@ -131,33 +113,6 @@ public class ServerConfig {
 	}
 	public ServerConfig setTokenCheckOn(boolean tokenCheckOff) {
 		this.tokenCheckOn = tokenCheckOff;
-		return this;
-	}
-
-	public HttpSvrInstanceConfig getHttpConfig() {
-		return httpConfig;
-	}
-
-	public ServerConfig setHttpConfig(HttpSvrInstanceConfig httpConfig) {
-		this.httpConfig = httpConfig;
-		return this;
-	}
-
-	public HttpSvrInstanceConfig getHttpsConfig() {
-		return httpsConfig;
-	}
-
-	public ServerConfig setHttpsConfig(HttpSvrInstanceConfig httpsConfig) {
-		this.httpsConfig = httpsConfig;
-		return this;
-	}
-
-	public HttpSvrInstanceConfig getBackendSvrConfig() {
-		return backendSvrConfig;
-	}
-
-	public ServerConfig setBackendSvrConfig(HttpSvrInstanceConfig backendSvrConfig) {
-		this.backendSvrConfig = backendSvrConfig;
 		return this;
 	}
 

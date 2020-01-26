@@ -1,26 +1,20 @@
 package WEBPIECESxPACKAGE;
 
 import java.io.File;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.plugins.sslcert.WebSSLFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
-import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
@@ -88,6 +82,18 @@ public class Server {
 		ServerConfig svrConfig, 
 		String ... args
 	) {
+
+		//This override is only needed if you want to add your own Html Tags to re-use
+		//you can delete this code if you are not adding your own webpieces html tags
+		//We graciously added #{mytag}# #{id}# and #{myfield}# as examples that you can
+		//tweak so we add that binding here.  This is one example of swapping in pieces
+		//of webpieces (pardon the pun)
+		Module allOverrides = new TagLookupOverride();
+		if(platformOverrides != null) {
+			allOverrides = Modules.combine(platformOverrides, allOverrides);
+		}
+		
+		
 		
 		//ALWAYS install a catch all on all threads
 		Thread.setDefaultUncaughtExceptionHandler(new WebpiecesExceptionHandler());
@@ -101,15 +107,7 @@ public class Server {
 
 		File baseWorkingDir = modifyUserDirForManyEnvironments(filePath);
 
-		//This override is only needed if you want to add your own Html Tags to re-use
-		//you can delete this code if you are not adding your own webpieces html tags
-		//We graciously added #{mytag}# #{id}# and #{myfield}# as examples that you can
-		//tweak so we add that binding here.  This is one example of swapping in pieces
-		//of webpieces (pardon the pun)
-		Module allOverrides = new TagLookupOverride();
-		if(platformOverrides != null) {
-			allOverrides = Modules.combine(platformOverrides, allOverrides);
-		}
+
 		
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
@@ -129,9 +127,6 @@ public class Server {
 
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
-										.setHttpConfig(svrConfig.getHttpConfig())
-										.setHttpsConfig(svrConfig.getHttpsConfig())
-										.setBackendSvrConfig(svrConfig.getBackendSvrConfig())
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
 										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
 
@@ -271,27 +266,8 @@ public class Server {
 		}
 	}
 
-	/**
-	 * This is a bit clunky BUT if jdk authors add methods that you can configure, we do not have
-	 * to change our platform every time so you can easily set the new properties rather than waiting for
-	 * us to release a new version 
-	 */
-	public static void configure(ServerSocketChannel channel) throws SocketException {
-		channel.socket().setReuseAddress(true);
-		//channel.socket().setSoTimeout(timeout);
-		//channel.socket().setReceiveBufferSize(size);
-	}
-
 	private static ServerConfig createServerConfig() {
-
-		WebSSLFactory factory = new WebSSLFactory();
-
-		ServerConfig config = new ServerConfig(factory, true);
-		config.addNeedsStorage(factory);
-		config.setHttpConfig(new HttpSvrInstanceConfig(null, (s) -> configure(s)));
-		config.setHttpsConfig(new HttpSvrInstanceConfig(factory, (s) -> configure(s)));		
-		config.setBackendSvrConfig(new HttpSvrInstanceConfig(factory, (s) -> configure(s)));
-		
+		ServerConfig config = new ServerConfig(true);
 		return config;
 	}
 	

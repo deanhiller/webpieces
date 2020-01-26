@@ -1,11 +1,11 @@
 package org.webpieces.webserver;
 
 import java.io.File;
-import java.net.SocketException;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
@@ -13,10 +13,7 @@ import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
-import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
@@ -70,16 +67,12 @@ public class PrivateWebserverForTest {
 		log.info("property user.dir="+filePath);
 		
 		SSLEngineFactoryWebServerTesting sslFactory = new SSLEngineFactoryWebServerTesting();
-		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(null, (s) -> configure(s));
-		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(sslFactory, (s) -> configure(s));
 		
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
-				.setPlatformOverrides(testConfig.getPlatformOverrides())
-				.setHttpConfig(httpConfig)
-				.setHttpsConfig(httpsConfig);
+				.setPlatformOverrides(testConfig.getPlatformOverrides());
 		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
 											.setMetaFile(testConfig.getMetaFile() )
 											.setWebappOverrides(testConfig.getAppOverrides())
@@ -95,12 +88,6 @@ public class PrivateWebserverForTest {
 		arguments.checkConsumedCorrectly();
 	}
 
-	public void configure(ServerSocketChannel channel) throws SocketException {
-		channel.socket().setReuseAddress(true);
-		//channel.socket().setSoTimeout(timeout);
-		//channel.socket().setReceiveBufferSize(size);
-	}
-	
 	public void start() {
 		webServer.startSync();
 	}

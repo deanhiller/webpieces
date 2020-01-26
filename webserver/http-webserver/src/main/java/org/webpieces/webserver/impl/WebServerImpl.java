@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.net.URL;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,11 +18,12 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.HttpSvrConfig;
-import org.webpieces.frontend2.api.StreamListener;
-import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.nio.api.SSLConfiguration;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterService;
@@ -28,10 +31,7 @@ import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.util.cmdline2.Arguments;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.net.URLEncoder;
-import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 
@@ -46,6 +46,7 @@ public class WebServerImpl implements WebServer {
 	private final RouterService routingService;
 	private final WebServerPortInformation portConfig;
 	private final PortConfiguration portAddresses;
+	private final SSLConfiguration sslConfiguration;
 
 	private HttpServer httpServer;
 	private HttpServer httpsServer;
@@ -60,7 +61,8 @@ public class WebServerImpl implements WebServer {
 			RequestReceiver serverListener,
 			RouterService routingService,
 			WebServerPortInformation portConfig,
-			PortConfiguration portAddresses
+			PortConfiguration portAddresses,
+			SSLConfiguration sslConfiguration
 	) {
 		this.config = config;
 		this.serverMgr = serverMgr;
@@ -68,6 +70,7 @@ public class WebServerImpl implements WebServer {
 		this.routingService = routingService;
 		this.portConfig = portConfig;
 		this.portAddresses = portAddresses;
+		this.sslConfiguration = sslConfiguration;
 	}
 	
 	public void configureSync(Arguments arguments) {
@@ -91,6 +94,34 @@ public class WebServerImpl implements WebServer {
 		}
 	}
 	
+	/**
+	 * EVERY server has a few modes.  The only exception is the http server will not let you set the sslEngineFactory
+	 * or it will throw an exception since it doesn't do SSL.
+	 * 
+	 * Mode 1: listenAddress=null sslEngineFactory=null - server disabled
+	 * Mode 2: listenAddress=null sslEngineFactory=YourSSLEngineFactory - server disabled
+	 * Mode 3: listenAddress={some port} sslEngineFactory=null - server will be started and will serve http.  This means
+	 *         for the https server, it WILL serve http and your firewall can hit port 443 without the need of the
+	 *         x-forwarded-proto.  The backend server will also serve http in this mode over it's port
+	 * Mode 4: listenAddress={some port} sslEngineFactory=YourSSLEngineFactory - server will be started and will serve
+	 *         https.  If you try this on the http server, it will throw an exception.
+	 *         
+	 * Some notes though.  You can terminate SSL at the firewall, and route to your http port for https as long as
+	 * you set the x-forwarded-proto to https.  This way, https pages are served through your http port BUT only for
+	 * those requests that terminated ssl on your firewall.  (not a good idea though if you are transferring credit
+	 * card information so I typically don't do that).
+	 * 
+	 * The backend server is a bit special.  If you disable it by not having the listenAddress set, those pages will
+	 * be served over the https server.  If you disable both https and http, the only way you can access https and
+	 * backend pages is by setting the x-forwarded-proto to https.
+	 * 
+	 * Because webpieces allows you to load certificates from a database, we like the idea of just terminating SSL 
+	 * on the webpieces server itself.  All servers in your cluster can load the one certificate in the database
+	 * and you can change the certificate in the database to get all servers to update.
+	 * 
+	 * @author dhiller
+	 *
+	 */
 	@Override
 	public CompletableFuture<Void> startAsync() {
 		if(!isConfigured)
@@ -103,31 +134,68 @@ public class WebServerImpl implements WebServer {
 		validateRouteIdsFromHtmlFiles();
 
 		//START http server if wanted...
-		HttpSvrInstanceConfig httpConfig = config.getHttpConfig();
-		InetSocketAddress http = portAddresses.getHttpAddr().get();
-		CompletableFuture<Void> fut1 = startServer(http, httpConfig, "http", (config, listener, factory) -> {
-			httpServer = serverMgr.createHttpServer(config, listener);
-			return httpServer.start();
-		});
+		InetSocketAddress httpAddress = portAddresses.getHttpAddr().get();
+		CompletableFuture<Void> fut1;
+		if(httpAddress != null) {
+			log.info("Creating and starting the "+"http"+" over port="+httpAddress);
+		
+			HttpSvrConfig httpSvrConfig = new HttpSvrConfig("http", httpAddress, 10000);
+			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
+			
+			httpServer = serverMgr.createHttpServer(httpSvrConfig, serverListener);
+			fut1 = httpServer.start();
+		
+		} else {
+			fut1 = CompletableFuture.completedFuture(null);
+			log.info("Serving the "+"http"+" is disabled since there was no address specified");
+		}
+		
+		
 
 		//START https server if wanted...
-		HttpSvrInstanceConfig httpsConfig = config.getHttpsConfig();
-		InetSocketAddress https = portAddresses.getHttpsAddr().get();
-		CompletableFuture<Void> fut2 = startServer(https, httpsConfig, "https", (config, listener, factory) -> {
-			httpsServer = serverMgr.createHttpsServer(config, listener, factory);
-			return httpsServer.start();
-		});
+		InetSocketAddress httpsAddress = portAddresses.getHttpsAddr().get();
+		CompletableFuture<Void> fut2;
+		if(httpsAddress != null) {
+			String type2 = "https";
+			if(sslConfiguration.getHttpsSslEngineFactory() == null)
+				type2 = "http";
+			
+			log.info("Creating and starting https over port="+httpsAddress+" AND using '"+type2+"'");
+		
+			HttpSvrConfig httpSvrConfig = new HttpSvrConfig("https", httpsAddress, 10000);
+			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
+			
+			httpsServer = serverMgr.createHttpsServer(httpSvrConfig, serverListener, sslConfiguration.getHttpsSslEngineFactory());
+			fut2 = httpsServer.start();
+		
+		} else {
+			fut2 = CompletableFuture.completedFuture(null);
+			log.info("Serving the "+"https"+" is disabled since there was no address specified");
+		}
 
+		
+		
 		//START backend if wanted (if not, pages are served over https server...if you don't want a backend, remove the plugins)
-		HttpSvrInstanceConfig backendConfig = config.getBackendSvrConfig();
 		String type = "https";
-		if(backendConfig.getSslEngineFactory() == null)
+		if(sslConfiguration.getBackendSslEngineFactory() == null)
 			type = "http";
-		InetSocketAddress backend = portAddresses.getBackendAddr().get();
-		CompletableFuture<Void> fut3 = startServer(backend, backendConfig, "backend("+type+")", (config, listener, factory) -> {
-			backendServer = serverMgr.createBackendHttpsServer(config, listener, factory);
-			return backendServer.start();
-		});
+		InetSocketAddress backendAddress = portAddresses.getBackendAddr().get();
+		String serverName = "backend("+type+")";
+		CompletableFuture<Void> fut33;
+		if(backendAddress != null) {
+			log.info("Creating and starting the "+serverName+" over port="+backendAddress+" AND using '"+type+"'");
+		
+			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(serverName, backendAddress, 10000);
+			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
+			
+			backendServer = serverMgr.createBackendHttpsServer(httpSvrConfig, serverListener, sslConfiguration.getBackendSslEngineFactory());
+			fut33 = backendServer.start();
+		
+		} else {
+			fut33 = CompletableFuture.completedFuture(null);
+			log.info("Serving the "+serverName+" is disabled since there was no address specified");
+		}
+		CompletableFuture<Void> fut3 = fut33;
 		
 		return CompletableFuture.allOf(fut1, fut2, fut3).thenApply((v) -> {
 			int httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();
@@ -137,37 +205,19 @@ public class WebServerImpl implements WebServer {
 			return null;
 		});
 	}
-
-	private interface TriConsumer<T, X, Y> {
-		public CompletableFuture<Void> apply(T t, X x, Y y);
-	}
 	
-	private CompletableFuture<Void> startServer(
-			InetSocketAddress bindAddress,
-			HttpSvrInstanceConfig instanceConfig, 
-			String serverName, 
-			TriConsumer<HttpSvrConfig, StreamListener, SSLEngineFactory> function
-	) {
-		CompletableFuture<Void> fut3;
-		if(bindAddress != null) {
-			String type = "https";
-			if(instanceConfig.getSslEngineFactory() == null)
-				type = "http";
-			
-			log.info("Creating and starting the "+serverName+" over port="+bindAddress+" AND using '"+type+"'");
-
-			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(serverName, bindAddress, 10000);
-			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = instanceConfig.getFunctionToConfigureServerSocket();
-			
-			fut3 = function.apply(httpSvrConfig, serverListener, instanceConfig.getSslEngineFactory());
-
-		} else {
-			fut3 = CompletableFuture.completedFuture(null);
-			log.info("Serving the "+serverName+" is disabled since there was no address specified");
-		}
-		return fut3;
+	/**
+	 * This is a bit clunky BUT if jdk authors add methods that you can configure, we do not have
+	 * to change our platform every time so you can easily set the new properties rather than waiting for
+	 * us to release a new version 
+	 */
+	public static void configure(ServerSocketChannel channel) throws SocketException {
+		channel.socket().setReuseAddress(true);
+		//channel.socket().setSoTimeout(timeout);
+		//channel.socket().setReceiveBufferSize(size);
 	}
 
+	
 	private void validateRouteIdsFromHtmlFiles() {
 		try {
 			validateRouteIdsFromHtmlFilesImpl();

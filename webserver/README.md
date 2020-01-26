@@ -1,8 +1,9 @@
 # webpieces
 
-signing is happening TWICE, so fix that issue as well
+find gradle link to hashing of files twice and put here as well and bump the thread as well....oh, create standard project first!! is it our project?  and then pair it down a bit.
+hashing of files is happening TWICE, so fix that issue as well
 
-add a bunch of beans now that properties file stuff is working
+add a bunch of beans now that properties file stuff is working?
 
 Think about testing compiling and scaling on LARGE application(and how to test??).  can we separate out slivers so DEV environment
 stays fast no matter what!!!!
@@ -18,6 +19,7 @@ WEBPIECESxPACKAGE.TestLesson4BasicStart > testBasicProdStartup FAILED
 
 attack this issue
 https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/3
+
 
 * Documentation on EACH html field
   * basic select with enum

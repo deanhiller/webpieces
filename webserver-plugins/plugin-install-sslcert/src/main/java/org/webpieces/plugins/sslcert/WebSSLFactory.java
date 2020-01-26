@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import javax.inject.Inject;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -45,7 +46,8 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 	private KeyPair accountKeyPair;
 	private X509Certificate[] certChain;
 	
-	public WebSSLFactory() {
+	@Inject
+	public WebSSLFactory(SimpleStorage storage) {
 		//since this bites a lot of people, let's read in the keystor early
 		try(InputStream keySt = WebSSLFactory.class.getResourceAsStream(serverKeystore)) {
 			if(keySt == null)

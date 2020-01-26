@@ -1,9 +1,12 @@
 package org.webpieces.plugins.sslcert;
 
+import org.webpieces.nio.api.SSLConfiguration;
+import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.plugins.backend.spi.BackendGuiDescriptor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
 
 public class InstallSslCertModule extends AbstractModule {
 
@@ -26,6 +29,17 @@ public class InstallSslCertModule extends AbstractModule {
 	    backendBinder.addBinding().to(InstallSslCertGuiDescriptor.class);
 	    
 	    binder().bind(InstallSslCertConfig.class).toInstance(config);
+	    
+	    PortType type = config.getHttpsPortType();
+	    PortType backEndType = config.getBackendType();
+	    
+	    if(type == PortType.HTTPS)
+	    	 binder().bind(SSLEngineFactory.class).to(WebSSLFactory.class);
+	    	
+	    if(backEndType == PortType.HTTPS)
+	    	 binder().bind(SSLEngineFactory.class).annotatedWith(Names.named(SSLConfiguration.BACKEND_SSL)).to(WebSSLFactory.class);
+	    
+	    
 	}
 
 }

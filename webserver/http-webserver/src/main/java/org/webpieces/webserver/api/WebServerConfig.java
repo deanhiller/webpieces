@@ -41,10 +41,6 @@ public class WebServerConfig {
 	
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
 
-	private HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig();
-	private HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig();
-	private HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig();
-
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
 	}
@@ -123,35 +119,6 @@ public class WebServerConfig {
 	
 	public WebServerConfig setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
 		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
-		return this;
-	}
-
-	public HttpSvrInstanceConfig getBackendSvrConfig() {
-		return backendSvrConfig;
-	}
-
-	public WebServerConfig setBackendSvrConfig(HttpSvrInstanceConfig backendSvrConfig) {
-		this.backendSvrConfig = backendSvrConfig;
-		return this;
-	}
-
-	public HttpSvrInstanceConfig getHttpConfig() {
-		return httpConfig;
-	}
-
-	public WebServerConfig setHttpConfig(HttpSvrInstanceConfig httpConfig) {
-		if(httpConfig.getSslEngineFactory() != null)
-			throw new IllegalArgumentException("Http Server cannot be configurd with SSL.  SSLEngineFactory must be null but was="+httpConfig.getSslEngineFactory());
-		this.httpConfig = httpConfig;
-		return this;
-	}
-
-	public HttpSvrInstanceConfig getHttpsConfig() {
-		return httpsConfig;
-	}
-
-	public WebServerConfig setHttpsConfig(HttpSvrInstanceConfig httpsConfig) {
-		this.httpsConfig = httpsConfig;
 		return this;
 	}
 

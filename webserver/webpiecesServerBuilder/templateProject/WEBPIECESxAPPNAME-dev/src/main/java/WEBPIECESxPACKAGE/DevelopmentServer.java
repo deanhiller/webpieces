@@ -3,15 +3,14 @@ package WEBPIECESxPACKAGE;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
-import org.webpieces.plugins.sslcert.WebSSLFactory;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -72,15 +71,13 @@ public class DevelopmentServer {
 										new DevRouterModule(devConfig),
 										new DevTemplateModule(templateConfig));
 		
-		WebSSLFactory sslFactory = new WebSSLFactory();
-		
 		String[] args;
 		if(usePortZero)
 			args = new String[] {"-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest"};
 		else
 			args = new String[] {"-hibernate.persistenceunit=hibernatefortest"};
 		
-		ServerConfig config = new ServerConfig(sslFactory, false);
+		ServerConfig config = new ServerConfig(false);
 
 		//READ the documentation in HttpSvrInstanceConfig for more about these settings
 //		HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8444), sslFactory);

@@ -6,6 +6,8 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
@@ -14,10 +16,7 @@ import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
-import org.webpieces.webserver.api.HttpSvrInstanceConfig;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
@@ -57,8 +56,6 @@ public class WebserverForTest {
 			metaFile = new VirtualFileClasspath("basicMeta.txt", WebserverForTest.class.getClassLoader());
 
 		SSLEngineFactoryWebServerTesting sslFactory = new SSLEngineFactoryWebServerTesting();
-		HttpSvrInstanceConfig httpConfig = new HttpSvrInstanceConfig(null, (s) -> {});
-		HttpSvrInstanceConfig httpsConfig = new HttpSvrInstanceConfig(sslFactory, (s) -> {});
 		
 		Module platformOverrides = testConfig.getPlatformOverrides();
 		
@@ -66,9 +63,7 @@ public class WebserverForTest {
 
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
-				.setPlatformOverrides(platformOverrides)
-				.setHttpConfig(httpConfig)
-				.setHttpsConfig(httpsConfig);
+				.setPlatformOverrides(platformOverrides);
 		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
 											.setMetaFile(metaFile )
 											.setWebappOverrides(testConfig.getAppOverrides())
