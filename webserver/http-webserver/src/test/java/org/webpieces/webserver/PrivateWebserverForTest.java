@@ -66,8 +66,6 @@ public class PrivateWebserverForTest {
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
 		
-		SSLEngineFactoryWebServerTesting sslFactory = new SSLEngineFactoryWebServerTesting();
-		
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 
 		//3 pieces to the webserver so a configuration for each piece

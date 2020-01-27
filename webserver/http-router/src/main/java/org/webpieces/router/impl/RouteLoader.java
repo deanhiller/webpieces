@@ -4,23 +4,18 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.exceptions.InjectionCreationException;
-import org.webpieces.router.api.extensions.NeedsSimpleStorage;
-import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppConfig;
@@ -40,10 +35,7 @@ import org.webpieces.router.impl.routers.BDomainRouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.threading.SafeRunnable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -163,7 +155,7 @@ public class RouteLoader {
 
 			Injector injector = createInjector(theModule);
 			
-			CompletableFuture<Void> storageLoadComplete = setupSimpleStorage(injector);
+			//CompletableFuture<Void> storageLoadComplete = setupSimpleStorage(injector);
 			
 			pluginSetup.wireInPluginPoints(injector);
 			
@@ -180,32 +172,32 @@ public class RouteLoader {
 			//YES, I could nit and make this async BUT KISS can be better sometimes and our startup is quit fast right
 			//now so let's not pre-optimize.  Also, the default implementation is synchronous anyways right now since
 			//default JDBC is synchronous
-			storageLoadComplete.get(3, TimeUnit.SECONDS);
+			//storageLoadComplete.get(3, TimeUnit.SECONDS);
 			
 			return injector;
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
-		} catch (TimeoutException e) {
-			throw new RuntimeException(e);
+//		} catch (InterruptedException e) {
+//			throw new RuntimeException(e);
+//		} catch (ExecutionException e) {
+//			throw new RuntimeException(e);
+//		} catch (TimeoutException e) {
+//			throw new RuntimeException(e);
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
 	}
 
-	private CompletableFuture<Void> setupSimpleStorage(Injector injector) {
-		SimpleStorage storage = injector.getInstance(SimpleStorage.class);
-		
-		List<CompletableFuture<?>> futures = new ArrayList<>();
-		List<NeedsSimpleStorage> needsStorage = config.getNeedsStorage();
-		for(NeedsSimpleStorage bean : needsStorage) {
-			CompletableFuture<Void> future = bean.init(storage);
-			futures.add(future);
-		}
-		
-		return CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]));
-	}
+//	private CompletableFuture<Void> setupSimpleStorage(Injector injector) {
+//		SimpleStorage storage = injector.getInstance(SimpleStorage.class);
+//		
+//		List<CompletableFuture<?>> futures = new ArrayList<>();
+//		List<NeedsSimpleStorage> needsStorage = config.getNeedsStorage();
+//		for(NeedsSimpleStorage bean : needsStorage) {
+//			CompletableFuture<Void> future = bean.init(storage);
+//			futures.add(future);
+//		}
+//		
+//		return CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]));
+//	}
 
 	public Module createTHEModule(WebAppMeta routerModule, RoutingHolder routingHolder) {
 		List<Module> guiceModules = routerModule.getGuiceModules();

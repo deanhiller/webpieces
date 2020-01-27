@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
+import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.Asserts;
 
 public class TestLesson4BasicStart {

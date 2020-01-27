@@ -55,8 +55,6 @@ public class WebserverForTest {
 		if(testConfig.getMetaFile() == null)
 			metaFile = new VirtualFileClasspath("basicMeta.txt", WebserverForTest.class.getClassLoader());
 
-		SSLEngineFactoryWebServerTesting sslFactory = new SSLEngineFactoryWebServerTesting();
-		
 		Module platformOverrides = testConfig.getPlatformOverrides();
 		
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();

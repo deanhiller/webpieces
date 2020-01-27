@@ -11,6 +11,8 @@ import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
+import org.webpieces.webserver.api.IDESupport;
+import org.webpieces.webserver.api.ServerConfig;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -48,14 +50,15 @@ public class DevelopmentServer {
 
 	public DevelopmentServer(boolean usePortZero) {
 		
-        VirtualFileImpl directory = ProdServerForIDE.modifyForIDE();
+		String name = "WEBPIECESxAPPNAME";
+		VirtualFileImpl directory = IDESupport.modifyForIDE(name);
         
 		//list all source paths here(DYNAMIC html files and java) as you add them(or just create for loop)
 		//These are the list of directories that we detect java file changes under.  static source files(html, css, etc) do
         //not need to be recompiled each change so don't need to be listed here.
 		List<VirtualFile> srcPaths = new ArrayList<>();
-		srcPaths.add(directory.child("WEBPIECESxAPPNAME/src/main/java"));
-		srcPaths.add(directory.child("WEBPIECESxAPPNAME-dev/src/main/java"));
+		srcPaths.add(directory.child(name+"/src/main/java"));
+		srcPaths.add(directory.child(name+"-dev/src/main/java"));
 		
 		VirtualFile metaFile = directory.child("WEBPIECESxAPPNAME/src/main/resources/appmetadev.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
@@ -99,4 +102,5 @@ public class DevelopmentServer {
 	public void stop() {
 		server.stop();
 	}
+
 }

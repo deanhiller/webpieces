@@ -3,12 +3,9 @@ package org.webpieces.router.api;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.SecretKeyInfo;
@@ -45,8 +42,6 @@ public class RouterConfig {
 	private Map<String, Object> webAppMetaProperties = new HashMap<>();
 
 	private File workingDirectory;
-
-	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
 
 	public RouterConfig(File workingDirectory) {
 		if(!workingDirectory.isAbsolute())
@@ -144,20 +139,6 @@ public class RouterConfig {
 
 	public File getWorkingDirectory() {
 		return workingDirectory;
-	}
-
-	public RouterConfig addNeedsStorage(NeedsSimpleStorage needsStorage) {
-		this.needsStorage.add(needsStorage);
-		return this;
-	}
-
-	public List<NeedsSimpleStorage> getNeedsStorage() {
-		return needsStorage;
-	}
-
-	public RouterConfig setNeedsStorage(List<NeedsSimpleStorage> needsStorage2) {
-		this.needsStorage = needsStorage2;
-		return this;
 	}
 
 }

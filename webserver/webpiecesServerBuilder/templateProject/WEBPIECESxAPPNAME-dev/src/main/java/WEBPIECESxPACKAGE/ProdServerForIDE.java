@@ -8,8 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.file.VirtualFileImpl;
+import org.webpieces.webserver.api.IDESupport;
+import org.webpieces.webserver.api.ServerConfig;
 
 import com.google.inject.Module;
 
@@ -46,14 +47,15 @@ public class ProdServerForIDE {
 
 	public ProdServerForIDE(boolean usePortZero) {
 		
-		VirtualFileImpl directory = modifyForIDE();
+		String name = "WEBPIECESxAPPNAME";
+		VirtualFileImpl directory = IDESupport.modifyForIDE(name);
         
 		//list all source paths here(DYNAMIC html files and java) as you add them(or just create for loop)
 		//These are the list of directories that we detect java file changes under.  static source files(html, css, etc) do
         //not need to be recompiled each change so don't need to be listed here.
 		List<VirtualFile> srcPaths = new ArrayList<>();
-		srcPaths.add(directory.child("WEBPIECESxAPPNAME/src/main/java"));
-		srcPaths.add(directory.child("WEBPIECESxAPPNAME-dev/src/main/java"));
+		srcPaths.add(directory.child(name+"/src/main/java"));
+		srcPaths.add(directory.child(name+"-dev/src/main/java"));
 		
 //		VirtualFile metaFile = new VirtualFileImpl(directory + "/WEBPIECESxAPPNAME/src/main/resources/appmetadev.txt");
 //		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
@@ -74,30 +76,10 @@ public class ProdServerForIDE {
 		server = new Server(platformOverrides, null, config, "-hibernate.persistenceunit=hibernatefortest");
 	}
 	
-	public static VirtualFileImpl modifyForIDE() {
-		String filePath1 = System.getProperty("user.dir");
-		log.info("running from dir="+filePath1);
-		
-		String directory = filePath1;
-        //intellij and eclipse use different user directories... :( :(
-        if(filePath1.contains("WEBPIECESxAPPNAME-dev")) {
-            //eclipse starts in WEBPIECESxAPPNAME-dev so move one directory back
-			//THIS works in BOTH webpieces/..../template and in the code generated for webapp projects
-            directory = directory+"/..";
-        } else if(filePath1.endsWith("webpieces")) {
-        	//intellij is more annoying since it runs in webpieces for the template project we use to generate
-			//AND THEN runs in the webapp directory which is way different path than the template directory
-			directory = directory+"/webserver/webpiecesServerBuilder/templateProject";
-		}
-        
-		return VirtualFileFactory.newAbsoluteFile(directory);
-	}
+
 	
 	public void start() throws InterruptedException {
 		server.start();		
 	}
 
-	public void stop() {
-		server.stop();
-	}
 }

@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package org.webpieces.webserver.api;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class ServerConfig {
 	 * while the DevelopmentServer uses appmetadev.txt such that it can load a few more
 	 * plugins.
 	 */
-	private VirtualFile metaFile= new VirtualFileClasspath("appmeta.txt", Server.class.getClassLoader());
+	private VirtualFile metaFile= new VirtualFileClasspath("appmeta.txt", WebpiecesServer.class.getClassLoader());
 	
 	/**
 	 * This is not used in production so we default it to false, but a special test that we
@@ -52,15 +52,6 @@ public class ServerConfig {
 	 */
 	private boolean tokenCheckOn = true;
 	
-	/**
-	 * Because Guice creation happens 'after' you create some classes that need access to the SimpleStorage
-	 * mechanism, you can provide those classes here and we will inject the Storage after it has been created.
-	 * 
-	 * Specifically, SimpleStorage is created when you start the server which is after you created a few objects
-	 * like WebSSLFactory that may want access to that storage.
-	 */
-	private List<NeedsSimpleStorage> needsStorage = new ArrayList<NeedsSimpleStorage>();
-
 	private final boolean isRunningServerMainMethod;
 
 	public ServerConfig(File compressionCache, boolean isServerMainMethod) {
@@ -114,15 +105,6 @@ public class ServerConfig {
 	public ServerConfig setTokenCheckOn(boolean tokenCheckOff) {
 		this.tokenCheckOn = tokenCheckOff;
 		return this;
-	}
-
-	public ServerConfig addNeedsStorage(NeedsSimpleStorage needsStorage) {
-		this.needsStorage.add(needsStorage);
-		return this;
-	}
-
-	public List<NeedsSimpleStorage> getNeedsStorage() {
-		return needsStorage;
 	}
 
 	public boolean isRunningServerMainMethod() {

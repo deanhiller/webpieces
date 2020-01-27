@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package org.webpieces.webserver.api;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
