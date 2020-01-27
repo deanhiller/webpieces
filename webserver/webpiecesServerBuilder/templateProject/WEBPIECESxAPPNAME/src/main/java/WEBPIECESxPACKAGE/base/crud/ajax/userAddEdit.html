@@ -14,6 +14,9 @@
         
         #{id 'entity.id'/}#
         
+        *{ This next line is a special case for AJAX so _showPopup is put in flash to survive login or form errors so the popup will display after a POST }*
+        <input type="hidden" name="_showEditPopup" value="true"/>
+        
         #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'entity.lastName', label:'Last Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#

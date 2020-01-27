@@ -42,7 +42,7 @@ public class AjaxCrudUserController {
 					"entity", new UserDbo(),
 					"password", null);
 		}
-		
+
 		UserDbo user = Em.get().find(UserDbo.class, id);
 		return Actions.renderThis(
 				"entity", user,
@@ -70,9 +70,15 @@ public class AjaxCrudUserController {
 		if(Current.validation().hasErrors()) {
 			log.info("page has errors");
 			Current.flash().setError("Errors in form below");
-			Current.flash().setShowEditPopup(true); //ensures we show the edit popup for listUsers on redisplay
 			return Actions.redirectFlashAllSecure(AJAX_LIST_USERS, Current.getContext(), "password");
 		}
+		
+		//In an AJAX form, we post a special _showEditPopup in the form parameters.  We need to clear this out
+		//so the page does not load the popup.  Above, if there are errors, we use that flag to popup a window.
+		//This also helps ajax forms and their data survive logging in(ie. user types data in and is redirected to
+		//a login page.  After he logs in, he comes back to his ajax window with the data still there...yeah!!!)
+		//we need to reset this so we don't show the edit popup
+		Current.flash().setShowEditPopup(false);
 		
 		Current.flash().setMessage("User successfully saved");
 		Current.flash().keep();
