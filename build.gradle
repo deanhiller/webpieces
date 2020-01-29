@@ -21,7 +21,7 @@ buildscript {
 
         //We use an older version of our own html compiler to pre-build html tags for clients
         //of webpieces...
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.140'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:2.0.7'
     }
 }
 
