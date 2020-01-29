@@ -18,11 +18,11 @@ import org.gradle.api.internal.tasks.DefaultSourceSetOutput;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
-import org.gradle.api.plugins.internal.SourceSetUtil;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.internal.Cast;
+import org.gradle.api.plugins.internal.JvmPluginsHelper;
 
 /**
  * Based off GroovyBasePlugin.java 
@@ -113,7 +113,7 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
             final Provider<TemplateCompilerTask> compileTask = project.getTasks().register(sourceSet.getCompileTaskName("templates"), TemplateCompilerTask.class, new Action<TemplateCompilerTask>() {
                 @Override
                 public void execute(TemplateCompilerTask compile) {
-                    SourceSetUtil.configureForSourceSet(sourceSet, groovySourceSet.getTemplateDirSet(), compile, compile.getOptions(), project);
+                	JvmPluginsHelper.configureForSourceSet(sourceSet, groovySourceSet.getTemplateDirSet(), compile, compile.getOptions(), project);
                     compile.dependsOn(sourceSet.getCompileJavaTaskName());
                     compile.setDescription("Compiles the " + sourceSet.getName() + " Groovy source.");
                     compile.setSource(groovySourceSet.getTemplateDirSet());

@@ -7,6 +7,9 @@ cd $DIR
 #RUN test first by building fake release THEN building fake project THEN building the fake project to make sure it works
 ./gradlew :webserver:gradle-plugin-htmlcompiler:publishAllPublicationsToMyTempRepository -P=true -x javadoc
 
+#You can publish just the gradle plugin if needed BUT need to comment out the http-template from using this plugin if it's broken during an upgrade
+#./gradlew :webserver:gradle-plugin-htmlcompiler:publishMavenJavaPublicationToSonatypeRepository -PprojVersion=2.0.9.1 -P=true -x javadoc
+
 test_result=$?
 if [ $test_result -eq 0 ]
 then

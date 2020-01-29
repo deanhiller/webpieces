@@ -6,10 +6,10 @@ buildscript {
         //Comment out to suck in dependencies from local repo
         //sometimes you want to build the gradle plugin and then feed into your current project
         //and this allows you to build the local one then use it
-        //maven {
-        //    name = 'myTemp'
-        //    url = "file:/tmp/myRepo/"
-        //}
+        maven {
+            name = 'myTemp'
+            url = "file:/tmp/myRepo/"
+        }
     }
 
     dependencies {
@@ -21,7 +21,7 @@ buildscript {
 
         //We use an older version of our own html compiler to pre-build html tags for clients
         //of webpieces...
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:2.0.7'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:2.0-developer'
     }
 }
 
@@ -113,7 +113,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 }
 
 allprojects {
-   apply plugin: 'jacoco' //code coverage
+   //apply plugin: 'jacoco' //code coverage
 
    buildDir = file('output')
 
@@ -121,9 +121,9 @@ allprojects {
       jcenter()
    }
 
-   jacoco {
-      toolVersion = '0.8.3'
-   }
+   //jacoco {
+   //   toolVersion = '0.8.5'
+   //}
 }
 
 subprojects {
@@ -231,7 +231,7 @@ subprojects {
                    )
       }
    }
-
+/*
     jacocoTestReport {
         additionalSourceDirs = files(sourceSets.main.allSource.srcDirs)
         sourceDirectories = files(sourceSets.main.allSource.srcDirs)
@@ -245,6 +245,7 @@ subprojects {
 
     jacocoTestReport.dependsOn test
     check.dependsOn jacocoTestReport
+*/
 
    task sourcesJar(type: Jar) {
       classifier = 'sources'
@@ -446,6 +447,7 @@ if(project.hasProperty('projVersion')) {
    task release(dependsOn: [':webserver:build', ':publishMavenJavaPublicationToMyTempRepository'])
 }
 
+/*
 //NOTE: The task name MUST BE this (even though I wanted it to be codeCoverage) because codecov.io looks for files
 //which are based off this name
 task jacocoTestReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
@@ -468,10 +470,11 @@ task jacocoTestReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
         })
     }
 }
+*/
 
 //we don't do java plugin on top level on purpose as it is not a java
 //project BUT we need build and clean to work inline with the java projects
-task build(dependsOn: ':jacocoTestReport')
+//task build(dependsOn: ':jacocoTestReport')
 
 task clean() {
    doLast {
