@@ -14,4 +14,4 @@ repositories {
     mavenLocal()
 }
 
-description='Gradle plugin to compile html files to java Class files for production use'
+publishing.publications.mavenJava.pom.description='Gradle plugin to compile html files to java Class files for production use'

@@ -3,4 +3,4 @@ dependencies {
     compile project(':core:core-util')
 }
 
-description='A runtimecompiler library backed by eclipse compiler such that programs can just call lib.getClass(Class z) and z will be compiled if source has changed(and the dependencies as well)'
+publishing.publications.mavenJava.pom.description='A runtimecompiler library backed by eclipse compiler such that programs can just call lib.getClass(Class z) and z will be compiled if source has changed(and the dependencies as well)'
