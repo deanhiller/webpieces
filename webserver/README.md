@@ -4,6 +4,9 @@ why is {project}-all/{project}/webpiecesCache being created.  this is ugly.  is 
 
 MODIFY the gradle.wrapper files to be in sync when I modify versions to modify ALL THREE instead
 
+REWORK http-templating-dev AND gradle-plugin-html-compiler to BOTH depend on html-compiler so that a release of gradle plugin ONLY needs to release
+those two jars.  Rewrite a release script so we can release in emergencies locally and work around the issue.
+
 find gradle link to hashing of files twice and put here as well and bump the thread as well....oh, create standard project first!! is it our project?  and then pair it down a bit.
 hashing of files is happening TWICE, so fix that issue as well
 
