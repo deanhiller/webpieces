@@ -2,7 +2,6 @@
 
 MODIFY the gradle.wrapper files to be in sync when I modify versions to modify ALL THREE instead
 
-test
 find gradle link to hashing of files twice and put here as well and bump the thread as well....oh, create standard project first!! is it our project?  and then pair it down a bit.
 hashing of files is happening TWICE, so fix that issue as well
 
