@@ -1,5 +1,7 @@
 # webpieces
 
+why is {project}-all/{project}/webpiecesCache being created.  this is ugly.  is it when I boot server from unzipped distribution.  I did not start the webserver.  OR is it generated from the example project on accident?
+
 MODIFY the gradle.wrapper files to be in sync when I modify versions to modify ALL THREE instead
 
 find gradle link to hashing of files twice and put here as well and bump the thread as well....oh, create standard project first!! is it our project?  and then pair it down a bit.
