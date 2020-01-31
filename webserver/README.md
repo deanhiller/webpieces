@@ -1,9 +1,6 @@
 # webpieces
 
 1. deploy to nexus not working...switch gradle plugin?
-2. fix intellij
-3. why is {project}-all/{project}/webpiecesCache being created.  this is ugly.  is it when I boot server from unzipped distribution.  I did not start the webserver.  OR is it generated from the example project on accident?
-4. MODIFY the gradle.wrapper files to be in sync when I modify versions to modify ALL THREE instead
 5. fix jacoco plugin to work again
 6. REWORK http-templating-dev AND gradle-plugin-html-compiler to BOTH depend on html-compiler so that a release of gradle plugin ONLY needs to release
 those two jars.  Rewrite a release script so we can release in emergencies locally and work around the issue.
