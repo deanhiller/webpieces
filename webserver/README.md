@@ -1,23 +1,23 @@
 # webpieces
 
-why is {project}-all/{project}/webpiecesCache being created.  this is ugly.  is it when I boot server from unzipped distribution.  I did not start the webserver.  OR is it generated from the example project on accident?
-
-MODIFY the gradle.wrapper files to be in sync when I modify versions to modify ALL THREE instead
-
-REWORK http-templating-dev AND gradle-plugin-html-compiler to BOTH depend on html-compiler so that a release of gradle plugin ONLY needs to release
+1. deploy to nexus not working...switch gradle plugin?
+2. fix intellij
+3. why is {project}-all/{project}/webpiecesCache being created.  this is ugly.  is it when I boot server from unzipped distribution.  I did not start the webserver.  OR is it generated from the example project on accident?
+4. MODIFY the gradle.wrapper files to be in sync when I modify versions to modify ALL THREE instead
+5. fix jacoco plugin to work again
+6. REWORK http-templating-dev AND gradle-plugin-html-compiler to BOTH depend on html-compiler so that a release of gradle plugin ONLY needs to release
 those two jars.  Rewrite a release script so we can release in emergencies locally and work around the issue.
+7. create a code generate GUI
 
 find gradle link to hashing of files twice and put here as well and bump the thread as well....oh, create standard project first!! is it our project?  and then pair it down a bit.
 hashing of files is happening TWICE, so fix that issue as well
 
 add a bunch of beans now that properties file stuff is working?
 
-Think about testing compiling and scaling on LARGE application(and how to test??).  can we separate out slivers so DEV environment
+Think about testing compiling and scaling on LARGE(many many classes) application(and how to test??).  can we separate out slivers so DEV environment
 stays fast no matter what!!!!
 
 I still REALLY don't like 5xx on posts as the url then stays on the post url so a redirect would be best on 5xx on post.  ie. back button stops working I think when we encounter a post bug(ick)
-
-do a generate code GUI????
 
 * (6/27)TEST WINDOWS NOW...should be fixed with ... fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
