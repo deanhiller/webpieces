@@ -79,7 +79,7 @@ if(project.properties.githubToken) {
 }
 
 githubRelease {
-   dependsOn ':webserver:build', ':promoteRepository'
+   dependsOn ':webserver:build', ':bintrayUpload'
    doFirst {
       println("releasing to github="+github.assets)
    }
