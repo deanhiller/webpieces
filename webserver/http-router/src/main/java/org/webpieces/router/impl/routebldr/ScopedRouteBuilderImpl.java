@@ -267,7 +267,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		
 		ScopedRouteBuilderImpl r = pathToBuilder.get(path);
 		if(r == null) {
-			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getDomain(), routerInfo.getPath()+fullPath), holder, resettingLogic);
+			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getDomain(), routerInfo.getPath()+path), holder, resettingLogic);
 			pathToBuilder.put(path, r);
 		}
 		
