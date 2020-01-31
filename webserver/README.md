@@ -8,11 +8,10 @@
 6. REWORK http-templating-dev AND gradle-plugin-html-compiler to BOTH depend on html-compiler so that a release of gradle plugin ONLY needs to release
 those two jars.  Rewrite a release script so we can release in emergencies locally and work around the issue.
 7. create a code generate GUI
+8. rewrite a nexus gradle plugin(new git repo using webpieces httpclient)
+9. create gradle standard project(very very simple one) and publish locally and check the double hash...if double hashed, find link on post of hashing files twice and put here as well...create new thread topic though.
 
-find gradle link to hashing of files twice and put here as well and bump the thread as well....oh, create standard project first!! is it our project?  and then pair it down a bit.
-hashing of files is happening TWICE, so fix that issue as well
-
-add a bunch of beans now that properties file stuff is working?
+add a bunch of beans now that properties file stuff is working? (concentrate on exposing channelmanager properties?)
 
 Think about testing compiling and scaling on LARGE(many many classes) application(and how to test??).  can we separate out slivers so DEV environment
 stays fast no matter what!!!!
