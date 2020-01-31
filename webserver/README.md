@@ -7,6 +7,8 @@ those two jars.  Rewrite a release script so we can release in emergencies local
 7. create a code generate GUI
 8. rewrite a nexus gradle plugin(new git repo using webpieces httpclient)
 9. create gradle standard project(very very simple one) and publish locally and check the double hash...if double hashed, find link on post of hashing files twice and put here as well...create new thread topic though.
+* status on https://discuss.gradle.org/t/intellij-gradle-build-vs-cmdline-build/34761 and https://intellij-support.jetbrains.com/hc/en-us/requests/2474304
+* Do we need to file chrome ticket OR do we have cache settings wrong?  on internet outage post, user data is blown away.  we need to figure this out
 
 add a bunch of beans now that properties file stuff is working? (concentrate on exposing channelmanager properties?)
 
@@ -23,6 +25,11 @@ WEBPIECESxPACKAGE.TestLesson4BasicStart > testBasicProdStartup FAILED
 attack this issue
 https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/3
 
+* TESTING new html components
+  * test fill in, logout other tab, go back, save form, login, land back on page WITH data still there
+  * do above test BUT messup the password on purpose, then login with correct pw and see if data still there
+  * test internet outage on save button!! (may need to file a chrome bug)
+  * test internet VERY VERY slow (can simulate nic slowness with linux)
 
 * Documentation on EACH html field
   * basic select with enum
