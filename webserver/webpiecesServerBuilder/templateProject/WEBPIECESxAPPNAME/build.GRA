@@ -1,6 +1,11 @@
 buildscript {
     repositories {
+       jcenter()
        mavenCentral()
+       maven {
+          url "https://dl.bintray.com/deanhiller/maven"
+       }
+
        //For testing and to be removed...
        maven {
          url uri('/tmp/myRepo/')
