@@ -1,7 +1,5 @@
 # webpieces
 
-* REWORK http-templating-dev AND gradle-plugin-html-compiler to BOTH depend on html-compiler so that a release of gradle plugin ONLY needs to release
-those two jars.  Rewrite a release script so we can release in emergencies locally and work around the issue.
 * create a code generate GUI
 * Do we need to file chrome ticket OR do we have cache settings wrong?  on internet outage post, user data is blown away.  we need to figure this out
 * status on https://discuss.gradle.org/t/intellij-gradle-build-vs-cmdline-build/34761 and https://intellij-support.jetbrains.com/hc/en-us/requests/2474304
