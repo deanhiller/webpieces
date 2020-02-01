@@ -1,12 +1,12 @@
 # webpieces
 
-* find print tree
 * REWORK http-templating-dev AND gradle-plugin-html-compiler to BOTH depend on html-compiler so that a release of gradle plugin ONLY needs to release
 those two jars.  Rewrite a release script so we can release in emergencies locally and work around the issue.
 * create a code generate GUI
 * Do we need to file chrome ticket OR do we have cache settings wrong?  on internet outage post, user data is blown away.  we need to figure this out
 * status on https://discuss.gradle.org/t/intellij-gradle-build-vs-cmdline-build/34761 and https://intellij-support.jetbrains.com/hc/en-us/requests/2474304
 * jacoco posts upgrade to bounty...
+   * https://discuss.gradle.org/t/merge-jacoco-coverage-reports-for-multiproject-setups/12100/14
    * https://stackoverflow.com/questions/60017758/gradle-5-3-to-5-6-upgrade-and-jacoco-breaks-because-dofirst-and-findall-no-longe
    * https://discuss.gradle.org/t/gradle-upgrade-to-5-6-broke-since-new-gradle-is-claiming-old-dirs-to-be-subprojects/34764
    * https://gist.github.com/aalmiray/e6f54aa4b3803be0bcac
