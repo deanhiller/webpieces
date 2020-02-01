@@ -5,6 +5,10 @@ buildscript {
         maven {
            url "https://dl.bintray.com/deanhiller/maven"
         }
+        //This is PURELY for the task-tree plugin only...
+        maven {
+           url "https://plugins.gradle.org/m2/"
+        }
 
         //Comment out to suck in dependencies from local repo
         //sometimes you want to build the gradle plugin and then feed into your current project
@@ -19,6 +23,7 @@ buildscript {
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
         classpath 'gradle.plugin.co.riiid:gradle-github-plugin:0.4.2'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
+        classpath "gradle.plugin.com.dorongold.plugins:task-tree:1.5"
 
         //we created a pull request on this but until then, use our customer forked one
         //classpath fileTree(dir: 'gradle/deanslib', includes: ['gradle-nexus-staging-plugin-0.5.4-SNAPSHOT.jar'])
@@ -35,7 +40,7 @@ plugins {
     //google "gradle build scan" or https://github.com/gradle/gradle-build-scan-quickstart
     // essentially, ./gradlew build -Dscan
     id 'com.gradle.build-scan' version '2.2.1'
-    //id 'com.dorongold.task-tree' version '1.2.2' //This prints out a task tree dependency (pretty print)
+    id "com.dorongold.task-tree" version "1.5" //This prints out a task tree (pretty print)
 }
 
 //This is only used in the master project to close a repo and promote with nexus..(and the plugin only allows top level usage)
