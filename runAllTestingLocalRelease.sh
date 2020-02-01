@@ -1,5 +1,7 @@
 #!/bin/bash
 
+start=`date +%s`
+
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 cd $DIR
@@ -171,16 +173,20 @@ fi
 #Test out a curl request to localhost to make sure basic webpage is working
 curl -kL https://localhost:8443/@backend/secure/sslsetup > downloadedhtml.txt
 
+end=`date +%s`
+runtime=$((end-start))
+
 if grep -q "BACKEND Login" downloadedhtml.txt; then
   kill -9 $server_pid
   echo "##################################"
   echo "2222 Server is located at `pwd`"
-  echo "Server Download Page Successful!!"
+  echo "Server Download Page Successful!! Build took $runtime seconds"
   echo "##################################"
 else
   echo "##################################"
   echo "2222 Server Startup Failed to be done in $SLEEP_TIME seconds"
   echo "Failed Download https page.  Server is located at `pwd`"
+  echo "Build took $runtime seconds"
   echo "##################################"
   kill -9 $server_pid
   exit 99
