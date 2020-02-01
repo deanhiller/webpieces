@@ -2,7 +2,12 @@ apply plugin: 'application'
 apply plugin: 'java'
 
 repositories {
+   jcenter()
    mavenCentral()
+   maven {
+      url "https://dl.bintray.com/deanhiller/maven"
+   }
+
    //For testing locally...
    maven {
      url uri('/tmp/myRepo/')
