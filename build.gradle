@@ -395,7 +395,11 @@ subprojects {
    //we only want to upload if the build passed first..ie. tests, etc.
 /*   uploadArchives.dependsOn('build')
       */
-   
+  
+   if (!project.hasProperty("projVersion")) {
+     ext.bintrayUsername = "nousername"
+     ext.bintrayApiKey = "nokey"
+   } 
 
 
    //if(project.hasProperty('projVersion')) {
