@@ -487,25 +487,13 @@ if(project.hasProperty('projVersion')) {
    task release(dependsOn: [':webserver:build', ':publishMavenJavaPublicationToMyTempRepository'])
 }
 
-task jacocoMergedReport(type: JacocoReport) {
-  dependsOn = subprojects.test
-  additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
-  sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
-  classDirectories.setFrom files(subprojects.sourceSets.main.output)
-  executionData.setFrom project.fileTree(dir: '.', include: "**/$buildDir/jacoco/test.exec")
-  reports {
-    xml.enabled false
-    csv.enabled false
-    html.enabled true
-  }
-  onlyIf {
-    true
-  }
-  doLast {
-     something = project.fileTree(dir: '.', include: "**/$buildDir/jacoco/test.exec")
-     System.out.println("filetree=$something")
-  }
-}
+task jacocoMerge(type: JacocoMerge) {
+   dependsOn = subprojects.jacocoTestReport
+   def jacocoProjects = subprojects.findAll { it.pluginManager.hasPlugin('jacoco') } 
+   jacocoProjects.each { subproject ->
+      executionData subproject.tasks.withType(Test)
+   } 
+} 
 
 //we don't do java plugin on top level on purpose as it is not a java
 //project BUT we need build and clean to work inline with the java projects
