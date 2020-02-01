@@ -1,14 +1,12 @@
 # webpieces
 
-1. deploy to nexus not working...switch gradle plugin?
+5. fix jacoco plugin to work again https://discuss.gradle.org/t/gradle-upgrade-to-5-6-broke-since-new-gradle-is-claiming-old-dirs-to-be-subprojects/34764
 6. REWORK http-templating-dev AND gradle-plugin-html-compiler to BOTH depend on html-compiler so that a release of gradle plugin ONLY needs to release
 those two jars.  Rewrite a release script so we can release in emergencies locally and work around the issue.
 7. create a code generate GUI
-8. rewrite a nexus gradle plugin(new git repo using webpieces httpclient)
-9. create gradle standard project(very very simple one) and publish locally and check the double hash...if double hashed, find link on post of hashing files twice and put here as well...create new thread topic though.
 * status on https://discuss.gradle.org/t/intellij-gradle-build-vs-cmdline-build/34761 and https://intellij-support.jetbrains.com/hc/en-us/requests/2474304
 * Do we need to file chrome ticket OR do we have cache settings wrong?  on internet outage post, user data is blown away.  we need to figure this out
-5. fix jacoco plugin to work again https://discuss.gradle.org/t/gradle-upgrade-to-5-6-broke-since-new-gradle-is-claiming-old-dirs-to-be-subprojects/34764
+* fix using personal bintray repository deanhiller/maven into using maven central
 
 add a bunch of beans now that properties file stuff is working? (concentrate on exposing channelmanager properties?)
 
