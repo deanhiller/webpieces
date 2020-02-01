@@ -9,6 +9,9 @@ buildscript {
     }
 }
 
+plugins {
+   id "com.dorongold.task-tree" version "1.5" //This prints out a task tree (pretty print)
+}
 
 //NOTE: There is a picture on https://docs.gradle.org/current/userguide/java_plugin.html as to the default gradle targets for the java
 //and here we modify that picture a little so that jar depends on compileHtml so that compiled html files end up in the production jar
@@ -54,10 +57,6 @@ ext {
        //'guava':           'com.google.guava:guava:19.0',
        //'apache-commons-io': 'org.apache.commons:commons-io:1.3.2'
     ]  
-}
-
-plugins {
-   id "com.dorongold.task-tree" version "1.5" //This prints out a task tree (pretty print)
 }
 
 allprojects {
