@@ -2,26 +2,31 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
+        maven {
+           url "https://dl.bintray.com/deanhiller/maven"
+        }
 
         //Comment out to suck in dependencies from local repo
         //sometimes you want to build the gradle plugin and then feed into your current project
         //and this allows you to build the local one then use it
-        maven {
-            name = 'myTemp'
-            url = "file:/tmp/myRepo/"
-        }
+        //maven {
+        //    name = 'myTemp'
+        //    url = "file:/tmp/myRepo/"
+        //}
     }
 
     dependencies {
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
         classpath 'gradle.plugin.co.riiid:gradle-github-plugin:0.4.2'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
+
         //we created a pull request on this but until then, use our customer forked one
-        classpath fileTree(dir: 'gradle/deanslib', includes: ['gradle-nexus-staging-plugin-0.5.4-SNAPSHOT.jar'])
+        //classpath fileTree(dir: 'gradle/deanslib', includes: ['gradle-nexus-staging-plugin-0.5.4-SNAPSHOT.jar'])
         //classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
 
         //We use an older version of our own html compiler to pre-build html tags for clients
         //of webpieces...
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:2.0-developer'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:2.0.17'
     }
 }
 
@@ -34,7 +39,7 @@ plugins {
 }
 
 //This is only used in the master project to close a repo and promote with nexus..(and the plugin only allows top level usage)
-apply plugin: 'io.codearte.nexus-staging'
+//apply plugin: 'io.codearte.nexus-staging'
 
 ext {
     // Project constants
@@ -133,6 +138,7 @@ subprojects {
    apply plugin: 'idea'
    apply plugin: 'signing'
    apply plugin: 'maven-publish'
+   apply plugin: 'com.jfrog.bintray'
 
    def currentJvm = org.gradle.internal.jvm.Jvm.current()
    println currentJvm
@@ -339,6 +345,7 @@ subprojects {
       publications {
          mavenJava(MavenPublication) {
             from components.java
+            groupId group
             pom {
                 name = project.name
                 description = "Not filled in for this project"
@@ -381,24 +388,53 @@ subprojects {
          //BUT even if we remove the signing section, we still end up generating *.md5 and *.sha1 so apparently things
          //are still being signed.  This signing section only seems to make the *.asc get generated. Then on top of that,
          //the *asc file is then hashed generating *.asc.md5 and *.asc.sha1 which is annoying. 
-         required { gradle.taskGraph.hasTask("promoteRepository") }
          sign publishing.publications.mavenJava
       }
    }
    //we only want to upload if the build passed first..ie. tests, etc.
 /*   uploadArchives.dependsOn('build')
       */
-   
+  
+   if (!project.hasProperty("projVersion")) {
+     ext.bintrayUsername = "nousername"
+     ext.bintrayApiKey = "nokey"
+   } 
 
-}
 
-if(project.hasProperty('projVersion')) {
+   //if(project.hasProperty('projVersion')) {
+      bintray {
+         user = bintrayUsername
+         key = bintrayApiKey
+         publications = ['mavenJava'] 
+         pkg {
+             repo = 'maven'
+             name = project.name
+             licenses = ['Apache-2.0']
+             vcsUrl = "https://github.com/${github_org}/${project_name}"
+             publicDownloadNumbers = true
+             version {
+                name = project.version
+                desc = publishing.publications.mavenJava.pom.description
+                vcsTag = project.version
+                attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
+            }
+         }
+      }
+
+      bintrayUpload {
+        dependsOn 'build', 'javadocJar', 'sourcesJar', 'generatePomFileForMavenJavaPublication'
+      }
+
+/*
     nexusStaging {  
         packageGroup = 'org.webpieces'
         stagingProfileId = '683f50db65952'
         username = sonatypeUsername
         password = sonatypePassword
     }
+*/
+   //}
+
 }
 
 task deleteJavaCache {
@@ -426,13 +462,13 @@ task publish {
    }
 }
 
-closeRepository.dependsOn('publish')
-promoteRepository.dependsOn('closeRepository')
-promoteRepository.doFirst {
-  println("sleeping 4 minutes after close repo and before promote or promote fails sometimes")
-  Thread.sleep(80000)
-  println("done sleeping go promote repo now");
-}
+//closeRepository.dependsOn('publish')
+//promoteRepository.dependsOn('closeRepository')
+//promoteRepository.doFirst {
+//  println("sleeping 4 minutes after close repo and before promote or promote fails sometimes")
+//  Thread.sleep(80000)
+//  println("done sleeping go promote repo now");
+//}
 
 task printTasks {
     doLast {

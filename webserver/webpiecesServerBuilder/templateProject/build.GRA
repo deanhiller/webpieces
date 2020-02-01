@@ -51,7 +51,16 @@ allprojects {
    buildDir = file('output')
 
    repositories {
-      jcenter()
+       jcenter()
+       mavenCentral()
+       maven {
+          url "https://dl.bintray.com/deanhiller/maven"
+       }
+
+       //For testing locally
+       maven {
+         url uri('/tmp/myRepo/')
+       }
    }
 
    jacoco {
@@ -85,13 +94,6 @@ subprojects {
        configFile = rootProject.file('config/checkstyle.xml')
    }
 
-   repositories {
-       mavenCentral()
-       //For testing locally
-       maven {
-         url uri('/tmp/myRepo/')
-       }
-   }
    dependencies {
        testCompile deps['junit']
 
