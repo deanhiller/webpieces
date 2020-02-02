@@ -69,7 +69,7 @@ public class Http2ToHttp1_1 {
 			throw new IllegalArgumentException("The header :status is required to send the response");
 
 		//Do a queue instead with last few frames that can be enabled
-		log.info("response="+response);
+		log.debug("response="+response);
 		
 		return response;
 	}

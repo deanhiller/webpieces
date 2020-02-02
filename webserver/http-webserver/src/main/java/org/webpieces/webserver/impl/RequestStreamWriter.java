@@ -107,7 +107,7 @@ public class RequestStreamWriter implements StreamWriter {
 	CompletableFuture<Void> handleCompleteRequest() {
 		for(Http2Header h : requestHeaders.getHeaders()) {
 			if (!headersSupported.contains(h.getKnownName()))
-				log.error("This webserver has not thought about supporting header="
+				log.debug("This webserver has not thought about supporting header="
 						+ h.getName() + " quite yet.  value=" + h.getValue() + " Please let us know and we can quickly add support");
 		}
 

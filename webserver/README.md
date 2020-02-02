@@ -1,6 +1,5 @@
 # webpieces
 
-* re-organize template project to be inline with what we want overall
 * create a code generate GUI
 * Do we need to file chrome ticket OR do we have cache settings wrong?  on internet outage post, user data is blown away.  we need to figure this out
 * status on https://discuss.gradle.org/t/intellij-gradle-build-vs-cmdline-build/34761 and https://intellij-support.jetbrains.com/hc/en-us/requests/2474304
