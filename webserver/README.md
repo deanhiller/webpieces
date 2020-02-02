@@ -11,7 +11,8 @@
 * fix using personal bintray repository deanhiller/maven into using maven central https://stackoverflow.com/questions/60012519/bintray-creating-directories-claims-to-upload-artificats-but-its-blank
 * be able to publish gradle compile html plugin AND it's dependencies https://stackoverflow.com/questions/60017878/how-to-publishing-one-subproject-and-its-dependencies-only
 * implement proper evaluation of code coverage found here https://discuss.gradle.org/t/jacoco-plugin-with-multi-project-builds/22219
-
+* copy/paste clipboard https://github.com/zeroclipboard/zeroclipboard
+* https://css-tricks.com/native-browser-copy-clipboard/
 
 add a bunch of beans now that properties file stuff is working? (concentrate on exposing channelmanager properties?)
 

@@ -14,6 +14,7 @@ import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
+import org.webpieces.router.impl.services.RouteInfoForContent;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 
 public class ProdRouteInvoker extends AbstractRouteInvoker {
@@ -49,6 +50,9 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	
 	@Override
 	public CompletableFuture<Void> invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		RouteInfoForContent content = (RouteInfoForContent) data;
+		if(content.getBodyContentBinder() == null)
+			throw new IllegalArgumentException("bodyContentBinder is required for these routes yet it is null here.  bug");
 		ResponseProcessorContent processor = new ResponseProcessorContent(invokeInfo.getRequestCtx(), invokeInfo.getResponseCb());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
 	}
