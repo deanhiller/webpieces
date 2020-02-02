@@ -49,7 +49,7 @@ public enum EducationEnum {
 		return guiLabel;
 	}
 
-	@Converter
+	@Converter(autoApply = true)
 	public static class EducationConverter implements AttributeConverter<EducationEnum, Character>  {
 
 	    public Character convertToDatabaseColumn( EducationEnum value ) {

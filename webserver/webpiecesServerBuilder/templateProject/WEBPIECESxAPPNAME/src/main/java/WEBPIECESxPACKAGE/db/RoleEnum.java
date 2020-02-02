@@ -51,7 +51,7 @@ public enum RoleEnum {
 		return guiLabel;
 	}
 
-	@Converter
+	@Converter(autoApply = true)
 	public static class RoleEnumConverter implements AttributeConverter<RoleEnum, Character>  {
 
 	    public Character convertToDatabaseColumn( RoleEnum value ) {
