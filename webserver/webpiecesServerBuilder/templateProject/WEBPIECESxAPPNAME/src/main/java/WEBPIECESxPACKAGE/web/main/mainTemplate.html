@@ -51,7 +51,9 @@
 						<ul class="dropdown-menu">
 							<li><a href="@[LIST_USERS]@">&{'CRUD Example', 'crud'}&</a></li>
 			            	<li><a href="@[AJAX_LIST_USERS]@">&{ 'Ajax CRUD Example', 'ajax'}&</a></li>
-			            	<li><a href="@[TEMPLATES]@">&{ 'Tags', 'tags'}&</a></li>
+			            	
+			            	*{ We could use @[TEMPLATES]@ here BUT tests do not have the plugin so would fail}*
+			            	<li><a href="http://localhost:8080/@documentation/templates">&{ 'Tags', 'tags'}&</a></li>
 			        	</ul>
 			        </li>
 			        #{/if}#
