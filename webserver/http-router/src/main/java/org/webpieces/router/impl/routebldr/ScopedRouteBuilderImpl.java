@@ -78,7 +78,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		EContentRouter router = new EContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
-		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), container.getBinder());
+		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic());
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getLoadedController(), svc);
 		
 		newDynamicRoutes.add(routerAndInfo);

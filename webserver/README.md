@@ -13,6 +13,7 @@
 * implement proper evaluation of code coverage found here https://discuss.gradle.org/t/jacoco-plugin-with-multi-project-builds/22219
 * copy/paste clipboard https://github.com/zeroclipboard/zeroclipboard
 * https://css-tricks.com/native-browser-copy-clipboard/
+* Add test case for json being fed into Development Server in webpieces only since we broke that on accident with the BodyContentBinder
 
 add a bunch of beans now that properties file stuff is working? (concentrate on exposing channelmanager properties?)
 

@@ -18,10 +18,8 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 
 	private final ParamToObjectTranslatorImpl translator;
 	private final ServiceInvoker invoker;
-	private final BodyContentBinder binder;
-	
-	public SvcProxyForContent(SvcProxyLogic svcProxyLogic,  BodyContentBinder binder) {
-		this.binder = binder;
+
+	public SvcProxyForContent(SvcProxyLogic svcProxyLogic) {
 		this.translator = svcProxyLogic.getTranslator();
 		this.invoker = svcProxyLogic.getServiceInvoker();
 	}
@@ -46,7 +44,7 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		
 		Object retVal = invoker.invokeController(meta.getLoadedController2(), argsResult.toArray());
 		
-		if(binder != null)
+		if(info.getBodyContentBinder() != null)
 			return unwrapResult(m, retVal, info.getBodyContentBinder());
 
 		return invoker.coerceReturnValue(retVal);
