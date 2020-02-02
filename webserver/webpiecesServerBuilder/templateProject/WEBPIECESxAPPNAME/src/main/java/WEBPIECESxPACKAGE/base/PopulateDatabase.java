@@ -9,10 +9,10 @@ import javax.persistence.EntityTransaction;
 
 import org.webpieces.router.api.extensions.Startable;
 
-import WEBPIECESxPACKAGE.base.libs.EducationEnum;
-import WEBPIECESxPACKAGE.base.libs.RoleEnum;
-import WEBPIECESxPACKAGE.base.libs.UserDbo;
-import WEBPIECESxPACKAGE.base.libs.UserRole;
+import WEBPIECESxPACKAGE.db.EducationEnum;
+import WEBPIECESxPACKAGE.db.RoleEnum;
+import WEBPIECESxPACKAGE.db.UserDbo;
+import WEBPIECESxPACKAGE.db.UserRole;
 
 public class PopulateDatabase implements Startable {
 

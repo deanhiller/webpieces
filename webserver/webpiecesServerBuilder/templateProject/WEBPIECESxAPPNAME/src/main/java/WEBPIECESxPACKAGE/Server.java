@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-import WEBPIECESxPACKAGE.base.tags.TagLookupOverride;
+import WEBPIECESxPACKAGE.web.tags.TagLookupOverride;
 
 /**
  * Changes to any class in this 'package' (or any classes that classes in this 

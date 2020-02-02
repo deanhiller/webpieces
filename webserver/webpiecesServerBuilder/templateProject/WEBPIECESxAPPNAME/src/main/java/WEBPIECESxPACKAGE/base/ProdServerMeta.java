@@ -2,6 +2,7 @@ package WEBPIECESxPACKAGE.base;
 
 import java.util.List;
 
+import WEBPIECESxPACKAGE.web.main.AppRoutes;
 import org.webpieces.plugins.backend.BackendPlugin;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.plugins.json.JacksonConfig;
@@ -20,11 +21,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.base.crud.CrudRoutes;
-import WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudRoutes;
-import WEBPIECESxPACKAGE.base.crud.login.LoginRoutes;
-import WEBPIECESxPACKAGE.base.json.JsonCatchAllFilter;
-import WEBPIECESxPACKAGE.base.json.JsonRoutes;
+import WEBPIECESxPACKAGE.web.crud.CrudRoutes;
+import WEBPIECESxPACKAGE.web.crudajax.AjaxCrudRoutes;
+import WEBPIECESxPACKAGE.web.login.LoginRoutes;
+import WEBPIECESxPACKAGE.json.JsonCatchAllFilter;
+import WEBPIECESxPACKAGE.json.JsonRoutes;
 
 //This is where the list of Guice Modules go as well as the list of RouterModules which is the
 //core of anything you want to plugin to your web app.  To make re-usable components, you create
@@ -60,7 +61,7 @@ public class ProdServerMeta implements WebAppMeta {
     public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
 				new AppRoutes(),
-				new LoginRoutes("/WEBPIECESxPACKAGE/base/crud/login/AppLoginController", "/secure/.*", "password"),
+				new LoginRoutes("/WEBPIECESxPACKAGE/web/login/AppLoginController", "/secure/.*", "password"),
 				new CrudRoutes(),
 				new AjaxCrudRoutes(),
 				new JsonRoutes()

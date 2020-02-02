@@ -23,8 +23,8 @@ import org.webpieces.webserver.test.ResponseWrapper;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.base.libs.RemoteService;
-import WEBPIECESxPACKAGE.base.libs.SomeLibrary;
+import WEBPIECESxPACKAGE.service.RemoteService;
+import WEBPIECESxPACKAGE.service.SomeLibrary;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
 

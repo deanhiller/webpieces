@@ -24,6 +24,7 @@ echo "##################################"
 echo "next copy over legacy project to upgrade it(auto-upgrade)"
 echo "##################################"
 
+rm -rf ../webpiecesexample-all/*
 cp -r webserver/output/webpiecesexample-all/* ../webpiecesexample-all
 #Remove the cache directory that ends up there
 rm -rf ../webpiecesexample-all/webpiecesexample/webpiecesCache/

@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 
-import WEBPIECESxPACKAGE.base.libs.SomeLibrary;
+import WEBPIECESxPACKAGE.service.SomeLibrary;
 
 public class MockSomeLibrary extends MockSuperclass implements SomeLibrary {
 

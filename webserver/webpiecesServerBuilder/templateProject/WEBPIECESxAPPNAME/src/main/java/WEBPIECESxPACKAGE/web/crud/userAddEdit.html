@@ -1,0 +1,52 @@
+#{extends '../main/mainTemplate.html'/}#
+#{set title:'Add/Edit'/}#
+#{set tab:'userlist'/}#
+
+#{form action:@[POST_USER_FORM]@, class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}#
+   <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+         <h4 id="myModalLabel"> User </h4>
+    </div>
+    <div class="modal-body" style="max-height: 600px">
+        #{if _flash.error}#
+        <div class="row-fluid">
+            <div class="offset3 span6 alert alert-error">
+                <h4>Oops....</h4>
+                ${_flash.error}$
+            </div>
+        </div>
+        #{/if}#
+    	
+    	*{optional in case this is the add operation and so this is used in case of edits only }*
+    	<input type="hidden" name="entity.id" value="${entity?.id}$"/>
+        
+        *{Generally, we only use field, but for purposes of demonstration, we use the myfield tag as an example of a custom 'field' tag you own in your project}*
+        #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+        #{myfield 'entity.lastName', label:'Last Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/myfield}#
+        #{myfield 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/myfield}#
+        #{field 'password', label:'Password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge">#{/field}#
+        
+        #{field 'entity.fun', label: 'Is Fun:'}#<input type="checkbox" name="${field.name}$" value="true" ${field.checked}$>#{/field}#
+        
+        #{field 'entity.levelOfEducation', label:'School Level'}#
+			<select size="1" name="${field.name}$" class="input-xlarge">
+				#{list items:levels, as:'level'}#
+					#{option value:level, selected:field.flashOrValue}#${level.guiLabel}$#{/option}#
+				#{/list}#
+			</select>
+		#{/field}#
+
+		#{field 'selectedRoles', label:'Role'}#
+			<select size="7" name="${field.name}$" class="input-xlarge" multiple>
+				#{list items:roles, as:'role'}#
+					#{option value:role, multiselected:field.flashOrValue}#${role.guiLabel}$#{/option}#
+				#{/list}#
+			</select>
+		#{/field}#
+
+   </div>
+    <div class="modal-footer">
+        <input type="submit" name="submit" value="&{'Save', 'link.save'}&" class="btn btn-primary" />
+        <a href="@[LIST_USERS]@" class="btn">&{'Cancel', 'link.cancel'}&</a>
+    </div>
+#{/form}#

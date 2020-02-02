@@ -31,7 +31,7 @@ import org.webpieces.webserver.test.ResponseWrapper;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.base.libs.RemoteService;
+import WEBPIECESxPACKAGE.service.RemoteService;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 
 /**
