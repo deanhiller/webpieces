@@ -39,10 +39,15 @@ public class MainController {
 		return Actions.renderThis(); 
 	}
 
+	public Action mySyncMethod() {
+		return Actions.renderThis("value", 21);
+	}
+	
 	public CompletableFuture<Action> myAsyncMethod() {
 		CompletableFuture<Integer> remoteValue = service.fetchRemoteValue("dean", 21);
 		return remoteValue.thenApply(s -> convertToAction(s));
 	}
+	
 	//called from method above
 	private Action convertToAction(int value) {
 		return Actions.renderThis("value", value);

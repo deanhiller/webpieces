@@ -75,7 +75,7 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testSynchronousController() {
-		HttpFullRequest req = createRequest("/");
+		HttpFullRequest req = createRequest("/sync");
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
@@ -117,7 +117,7 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testChunkedCompression() {
-		HttpFullRequest req = createRequest("/");
+		HttpFullRequest req = createRequest("/sync");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
