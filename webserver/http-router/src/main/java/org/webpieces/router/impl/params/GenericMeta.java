@@ -25,4 +25,8 @@ public class GenericMeta<T> implements Meta {
 		throw new UnsupportedOperationException("If this happens, let us know.  I don't think this case is possible");
 	}
 
+	@Override
+	public String toString() {
+		return "GenericMeta("+type2.getName()+")";
+	}
 }

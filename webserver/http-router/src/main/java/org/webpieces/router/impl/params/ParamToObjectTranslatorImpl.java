@@ -146,7 +146,10 @@ public class ParamToObjectTranslatorImpl {
 		} else if(fieldClass.isArray()) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
 		} else if(fieldClass.isEnum()) {
-			throw new UnsupportedOperationException("You need to install a "+ObjectStringConverter.class.getSimpleName()+" for this enum "+fieldMeta);
+			throw new UnsupportedOperationException("You need to install a "+ObjectStringConverter.class.getSimpleName()+" for this enum "+fieldClass+" meta class="+fieldMeta.getFieldClass()+". This\n" +
+					"can be done like so in one of your guice modules....\n" +
+					"\t\tMultibinder<ObjectStringConverter> conversionBinder = Multibinder.newSetBinder(binder, ObjectStringConverter.class);\n" +
+					"\t\tconversionBinder.addBinding().to({YOUR_ENUM}.WebConverter.class);");
 		} else if(List.class.isAssignableFrom(fieldClass)) {
 			if(valuesToUse == null)
 				return new ArrayList<>();
