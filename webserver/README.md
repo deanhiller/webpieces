@@ -14,6 +14,7 @@
 * implement proper evaluation of code coverage found here https://discuss.gradle.org/t/jacoco-plugin-with-multi-project-builds/22219
 * copy/paste clipboard https://github.com/zeroclipboard/zeroclipboard
 * https://css-tricks.com/native-browser-copy-clipboard/
+* Add test for CRUD add and add test for CRUD edit to make sure hibernate is always working 100% regarding persist or merge method so we don't get burned on upgrades
 * Add test case for json being fed into Development Server in webpieces only since we broke that on accident with the BodyContentBinder
 * Add test case, run ./gradlew assembleDist on webpieces, THEN, modify an html file, modify again and make sure the modificaiton/addition shows up on webpage.  We ran into a situation on upgrade where we have to clean our project each time!!!
 

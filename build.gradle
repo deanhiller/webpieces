@@ -79,7 +79,7 @@ ext {
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
        'twitter-hpack':   'com.twitter:hpack:v1.0.1',
        'jetty-hpack':     'org.eclipse.jetty.http2:http2-hpack:9.4.0.M1',
-       'hibernate':       'org.hibernate:hibernate-core:5.3.2.Final',
+       'hibernate':       'org.hibernate:hibernate-core:5.4.10.Final',
        'log4jdbc':        'com.googlecode.log4jdbc:log4jdbc:1.2',
        'h2db':            'com.h2database:h2:1.4.200',
 
