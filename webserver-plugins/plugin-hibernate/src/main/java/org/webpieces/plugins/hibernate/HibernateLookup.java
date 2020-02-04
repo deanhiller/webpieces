@@ -6,6 +6,7 @@ import java.util.function.Function;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
@@ -37,7 +38,7 @@ public class HibernateLookup implements EntityLookup {
 		EntityManager entityManager = Em.get();
 		try {
 			ManagedType<T> managedType = entityManager.getMetamodel().managedType(paramTypeToCreate);
-			EntityTypeImpl<T> entityType = (EntityTypeImpl<T>) managedType;
+			IdentifiableType<T> entityType = (IdentifiableType<T>) managedType;
 			if(!entityType.hasSingleIdAttribute()) {
 				log.warn("You generally should be using beans with hibernate ids since this is a hibernate class");
 				return false; //if no single id attribute, let the default creator create the bean
@@ -61,7 +62,7 @@ public class HibernateLookup implements EntityLookup {
 		EntityManager entityManager = Em.get();
 		Metamodel metamodel = entityManager.getMetamodel();
 		ManagedType<T> managedType = metamodel.managedType(paramTypeToCreate);
-		EntityTypeImpl<T> entityType = (EntityTypeImpl<T>) managedType;
+		IdentifiableType<T> entityType = (IdentifiableType<T>) managedType;
 		Class<?> idClazz = entityType.getIdType().getJavaType();
 		SingularAttribute<? super T, ?> idAttribute = entityType.getId(idClazz);
 		String name = idAttribute.getName();
