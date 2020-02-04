@@ -209,6 +209,8 @@ public class TemplateCompilerTask extends AbstractCompile {
 			//I think we have been flip flopping but not sure what caused each issue yet.
 			//I think this if exists, skip this piece should fix the flipflopping
 			if(target.exists()) {
+				//If you run ./gradle compileTemplates twice, the files will pre-exist already so we need to delete
+				//the file before we create and write to it.
 				System.out.println("found file.  deleting first to rewrite="+target);
 				if(!target.delete())
 					throw new IllegalStateException("Could not delete file="+target+"  Cannot continue");
