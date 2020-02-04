@@ -208,9 +208,12 @@ public class TemplateCompilerTask extends AbstractCompile {
 			//I just used 'new File' so converted this back to the original createFile
 			//I think we have been flip flopping but not sure what caused each issue yet.
 			//I think this if exists, skip this piece should fix the flipflopping
-			if(target.exists())
-				return;
-			
+			if(target.exists()) {
+				System.out.println("found file.  deleting first to rewrite="+target);
+				if(!target.delete())
+					throw new IllegalStateException("Could not delete file="+target+"  Cannot continue");
+			}
+
 			createFile(target);
 			System.out.println("file write to="+target);
 			
