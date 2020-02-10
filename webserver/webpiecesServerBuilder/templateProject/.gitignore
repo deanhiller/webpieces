@@ -9,6 +9,10 @@
 #This is only here as the gradle build plugin is ignore the eclipse defaultOutput
 **/bin
 
+# In starting ProdServerForIDE, it creates webpiecesCache in a not so good location so ignore from git in case this happens
+# ALSO, the location is different if you are in Intellij vs. eclipse as it doesn't use the BASE directory we use
+**/webpiecesCache
+
 #gradle output files
 **/output
 /.gradle/

@@ -18,7 +18,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name="SIMPLE_STORAGE", 
-	   uniqueConstraints=@UniqueConstraint(columnNames={"pluginKey", "mapKey"})
+	   uniqueConstraints=@UniqueConstraint(name="twoKeysConstraint", columnNames={"pluginKey", "mapKey"})
 )
 @NamedQueries({
 	@NamedQuery(name = "findProperties", query = "select u from SimpleStorageDbo as u where u.pluginKey = :key"),
@@ -31,10 +31,10 @@ public class SimpleStorageDbo {
 	@GeneratedValue(strategy=GenerationType.SEQUENCE,generator="simplestorage_id_gen")
 	private Long id;
 	
-	@Column(length = 255)
+	@Column(length = 255, nullable=false)
 	private String pluginKey;
 	
-	@Column(length = 255)
+	@Column(length = 255, nullable=false)
 	private String mapKey;
 
 	@Column(length = 2000)
