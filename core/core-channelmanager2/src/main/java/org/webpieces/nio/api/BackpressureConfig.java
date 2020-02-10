@@ -7,6 +7,8 @@ public class BackpressureConfig {
 	 * remote end that is talking to you.  
 	 * 
 	 * setting this to null turns backpressure off and will just slam you with data non-stop as it comes in
+	 * 
+	 * Generally, it's bad to have a client backpressure a server and only the server will backpressure the clients
 	 */
 	private Integer maxBytes = 8_192*8;
 	
