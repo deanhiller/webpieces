@@ -32,6 +32,8 @@ public class Http2Request extends Http2Headers {
 		return getSingleHeaderValue(Http2HeaderName.METHOD);
 	}
 
+	public String getScheme() { return getSingleHeaderValue(Http2HeaderName.SCHEME); }
+
 	public String getAuthority() {
 		return getSingleHeaderValue(Http2HeaderName.AUTHORITY);
 	}
