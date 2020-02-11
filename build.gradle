@@ -123,7 +123,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 }
 
 allprojects {
-   //apply plugin: 'jacoco' //code coverage
+   apply plugin: 'jacoco' //code coverage
 
    buildDir = file('output')
 
@@ -131,9 +131,9 @@ allprojects {
       jcenter()
    }
 
-   //jacoco {
-   //   toolVersion = '0.8.5'
-   //}
+   jacoco {
+      toolVersion = '0.8.5'
+   }
 }
 
 subprojects {
@@ -242,21 +242,21 @@ subprojects {
                    )
       }
    }
-/*
-    jacocoTestReport {
-        additionalSourceDirs = files(sourceSets.main.allSource.srcDirs)
-        sourceDirectories = files(sourceSets.main.allSource.srcDirs)
-        classDirectories =  files(sourceSets.main.output)
-        reports {
-            html.enabled = true
-            xml.enabled = true
-            csv.enabled = false
-        }
-    }
 
-    jacocoTestReport.dependsOn test
-    check.dependsOn jacocoTestReport
-*/
+   jacocoTestReport {
+      additionalSourceDirs = files(sourceSets.main.allSource.srcDirs)
+      sourceDirectories = files(sourceSets.main.allSource.srcDirs)
+      classDirectories =  files(sourceSets.main.output)
+      executionData.from = fileTree(buildDir).include("/jacoco/*.exec")
+      reports {
+          html.enabled = true
+          xml.enabled = true
+          csv.enabled = false
+      }
+   }
+
+   jacocoTestReport.dependsOn test
+   check.dependsOn jacocoTestReport
 
    task sourcesJar(type: Jar) {
       classifier = 'sources'
@@ -397,6 +397,7 @@ subprojects {
          sign publishing.publications.mavenJava
       }
    }
+
    //we only want to upload if the build passed first..ie. tests, etc.
 /*   uploadArchives.dependsOn('build')
       */
@@ -488,15 +489,14 @@ if(project.hasProperty('projVersion')) {
    task release(dependsOn: [':webserver:build', ':publishMavenJavaPublicationToMyTempRepository'])
 }
 
-/*
 //NOTE: The task name MUST BE this (even though I wanted it to be codeCoverage) because codecov.io looks for files
 //which are based off this name
-task jacocoTestReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     dependsOn = subprojects.test
     additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
     sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
     classDirectories =  files(subprojects.sourceSets.main.output)
-    executionData = files(subprojects.jacocoTestReport.executionData)
+    executionData = files(subprojects.jacocoTestReport.executionData).filter { f -> f.exists() }
     reports {
         html.enabled = true
         xml.enabled = true
@@ -505,17 +505,11 @@ task jacocoTestReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     onlyIf = {
         true
     }
-    doFirst {
-        executionData = files(executionData.findAll {
-            it.exists()
-        })
-    }
 }
-*/
 
 //we don't do java plugin on top level on purpose as it is not a java
 //project BUT we need build and clean to work inline with the java projects
-//task build(dependsOn: ':jacocoTestReport')
+task build(dependsOn: ':jacocoRootReport')
 
 task clean() {
    doLast {
