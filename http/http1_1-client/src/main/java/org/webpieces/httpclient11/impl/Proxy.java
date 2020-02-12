@@ -17,6 +17,8 @@ public class Proxy implements ChannelProxy {
 
 	@Override
 	public CompletableFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
+		if(addr == null)
+			throw new IllegalArgumentException("addr cannot be null");
 		return channel.connect(addr, dataListener);
 	}
 

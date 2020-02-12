@@ -1,5 +1,7 @@
 # webpieces
 
+* sending in json to /json/notfound sends back html??? ick, how to get it to send json every time instead of the html not found page
+* Need webpieces DevServer test for modifying default argument.  It turns out, arguments are not cleared on restart and something weird goes on.
 * starting ProdServerIDE creates webpiecesCache in the wrong directory...modify that to be better location like output/** BUT for BOTH IDE's
 * create a code generate GUI
 * Do we need to file chrome ticket OR do we have cache settings wrong?  on internet outage post, user data is blown away.  we need to figure this out

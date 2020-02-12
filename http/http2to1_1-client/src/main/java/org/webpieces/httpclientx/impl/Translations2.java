@@ -1,5 +1,6 @@
 package org.webpieces.httpclientx.impl;
 
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import org.webpieces.data.api.DataWrapper;
@@ -47,18 +48,18 @@ public class Translations2 {
 	}
 
 	public static FullResponse translate(HttpFullResponse r) {
-		FullResponse http2Response = new FullResponse();
-
+		Http2Response headers = new Http2Response();
 		HttpResponse http1Response = r.getResponse();
 		for(Header http1Header : http1Response.getHeaders()) {
-			http2Response.getHeaders().addHeader(new Http2Header(http1Header.getName(), http1Header.getValue()));
+			headers.addHeader(new Http2Header(http1Header.getName(), http1Header.getValue()));
 		}
 
 		HttpResponseStatus status = http1Response.getStatusLine().getStatus();
-		http2Response.getHeaders().addHeader(new Http2Header(Http2HeaderName.STATUS, ""+status.getKnownStatus().getCode()));
+		headers.addHeader(new Http2Header(Http2HeaderName.STATUS, ""+status.getKnownStatus().getCode()));
 
 		DataWrapper data = r.getData();
-		http2Response.setPayload(data);
+
+		FullResponse http2Response = new FullResponse(headers, data, null);
 
 		return http2Response;
 	}
