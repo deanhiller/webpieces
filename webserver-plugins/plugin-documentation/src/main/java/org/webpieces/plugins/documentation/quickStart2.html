@@ -7,6 +7,8 @@
 
 <h1>Dynamic Hello World</h1>
 
+<p>Last updated: Feb 12, 2020</p>
+
 <h2>Dynamic Route</h2>
 
 <p>Next, let's add DYNAMIC_HELLO_WORLD as a new RouteId to MyMainRouteId like so </p>
@@ -14,7 +16,7 @@
 <pre>
 <code>package org.webpieces.helloworld.myapp;
 
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routes.Routes;
 
 public enum MyMainRouteId implements RouteId {
 	HELLO_WORLD, DYNAMIC_HELLO_WORLD
@@ -29,13 +31,17 @@ to look like so</p>
 <code>package org.webpieces.helloworld.myapp;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.AbstractRoutes;
+import org.webpieces.router.api.routes.RouteId;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
 
-public class MyMainRoutes extends AbstractRoutes {
+public class MyMainRoutes implements Routes {
 	@Override
 	protected void configure() {
-		addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
-		addRoute(HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
+		RouteBuilder b = bldr.getAllDomainsRouteBuilder();
+
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
 
 	}
 }</code>
@@ -51,8 +57,8 @@ require the id to be an int.  The resulting Controller file is then</p>
 
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
 
 @Singleton
 public class MyMainController {

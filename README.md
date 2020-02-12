@@ -48,7 +48,7 @@ One thing to note in the video is I was caught off guard by a minor bug(that is 
 
 #### 9 Steps to try the webserver (and view official documentation)
 
-1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
+1. Download the release "webpiecesServerBuilder-<version>.zip" (https://github.com/deanhiller/webpieces/releases), unzip
 2. run ./createProject.sh
 3. cd {projectDir}-all
 4. ./gradlew build # runs all the tests and verify everything is working. 

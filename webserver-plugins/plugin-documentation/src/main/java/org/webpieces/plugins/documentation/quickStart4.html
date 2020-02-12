@@ -7,6 +7,8 @@
 
 <h2>HTML CRUD</h2>
 
+<p>Last updated: Feb 12, 2020</p>
+
 <p>It's always best to start with basic html and keep things simple to start with when learning so this is the pure html, no javascript 
 version of list all my Accounts, create an account, edit an account, and delete an account.  The basic CRUD flow is so
 common, it deserves it's own example.  If you want the advanced AJAX version, skip to the next page</p>
@@ -15,7 +17,7 @@ common, it deserves it's own example.  If you want the advanced AJAX version, sk
 <pre>
 <code>package org.webpieces.helloworld.myapp;
 
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routes.RouteId;
 
 public enum AccountRouteId implements RouteId {
 	//list
@@ -49,21 +51,23 @@ like so:</p>
 <code>package org.webpieces.helloworld.myapp;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.AbstractRoutes;
-import org.webpieces.router.api.routing.CrudRouteIds;
+import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.api.routes.CrudRouteIds;
 
-public class MyMainRoutes extends AbstractRoutes {
+public class MyMainRoutes implements Routes {
 	@Override
 	protected void configure() {
-		addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
-		addRoute(HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
+		RouteBuilder b = bldr.getAllDomainsRouteBuilder();
+
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
 
 		//route to render the page of creating a new user
-		addRoute(HttpMethod.GET ,   "/car/new",         "MyMainController.carAddEdit", MyMainRouteId.GET_CREATE_CAR_PAGE);
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/car/new",         "MyMainController.carAddEdit", MyMainRouteId.GET_CREATE_CAR_PAGE);
 		//route to render the page of editing an existing user
-		addRoute(HttpMethod.GET ,   "/car/edit/{name}", "MyMainController.carAddEdit", MyMainRouteId.GET_EDIT_CAR_PAGE);
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/car/edit/{name}", "MyMainController.carAddEdit", MyMainRouteId.GET_EDIT_CAR_PAGE);
 		//route to save a new or existing user
-		addRoute(HttpMethod.POST,   "/car/post",        "MyMainController.postSaveCar", MyMainRouteId.POST_CAR);
+		b.addRoute(Port.BOTH, HttpMethod.POST,   "/car/post",        "MyMainController.postSaveCar", MyMainRouteId.POST_CAR);
 
 		CrudRouteIds routeIds = new CrudRouteIds(
 				AccountRouteId.LIST_ACCOUNTS, AccountRouteId.GET_ADD_ACCOUNT_FORM,
@@ -79,12 +83,12 @@ public class MyMainRoutes extends AbstractRoutes {
 adds all these routes for you but more importantly keeps your urls consistent for CRUD operations:</p>
 
 <ol>
-    <li>addRoute(GET ,   "/account/list",        "CrudAccountController.accountList", listRoute);</li>
-    <li>addRoute(GET ,   "/account/new",         "CrudAccountController.accountAddEdit", addRoute);</li>
-    <li>addRoute(GET ,   "/account/edit/{id}",   "CrudAccountController.accountAddEdit", editRoute);</li>
-    <li>addRoute(POST,   "/account/post",        "CrudAccountController.postSaveAccount", saveRoute);</li>
-    <li>addRoute(GET,    "/account/confirmdelete/{id}", "CrudAccountController.confirmDeleteAccount", confirmDelete);</li>
-    <li>addRoute(POST,   "/account/delete/{id}", "CrudAccountController.postDeleteAccount", deleteRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/account/list",        "CrudAccountController.accountList", listRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/account/new",         "CrudAccountController.accountAddEdit", addRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/account/edit/{id}",   "CrudAccountController.accountAddEdit", editRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.POST,   "/account/post",        "CrudAccountController.postSaveAccount", saveRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.GET,    "/account/confirmdelete/{id}", "CrudAccountController.confirmDeleteAccount", confirmDelete);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.POST,   "/account/delete/{id}", "CrudAccountController.postDeleteAccount", deleteRoute);</li>
 </ol>
 
 <p>Notice, that it names the url /account/*** and the methods accountList and accountAddEdit and all post methods
@@ -203,7 +207,7 @@ or go to https://localhost:8443/helloworld</p>
 <p>Congratulations on your first webpieces page, next we will make our html a bit more dynamic</p>
 
 <pre>
-<code>*[#{extends '../base/main.html'/}#
+<code>*[#{extends '../mainTemplate.html'/}#
 #{set title:'Awesome CRUD'/}#
 #{set tab:'none'/}#
 
@@ -285,7 +289,7 @@ account is found, we render the same create form with all the fields filled in w
 The html for this create or edit page is as follows:</p>
 
 <pre>
-<code>*[#{extends '../base/main.html'/}#
+<code>*[#{extends '../mainTemplate.html'/}#
 #{set title:'Add/Edit'/}#
 #{set tab:'none'/}#
 
@@ -299,7 +303,7 @@ The html for this create or edit page is as follows:</p>
     	<input type="hidden" name="entity.id" value="${entity?.id}$"/>
 
         #{field 'entity.name', label:'Account Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
-        #{field 'entity.contactsand Name', label:"Contact''s Name"}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+        #{field 'entity.contactsName', label:"Contact''s Name"}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'entity.priority', label:'Priority'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
 
    </div>
@@ -378,12 +382,12 @@ response to the GET request.  In this case, we need to redirect to the add accou
 since this post call could be from either editing or creating an account.
 </p>
 
-<p>As noted in your first hibernate entity(previous tutorial), calling Em.get().flush() is critical are no persist/delete/merge(update)
+<p>As noted in your first hibernate entity(previous tutorial), calling Em.get().flush() is critical as no persist/delete/merge(update)
 will modify the database.  This is a special 'very' nice feature of hibernate such that you can modify tons of entities
 and delay the decision of persisting them all or not until later</p>
 
-<p>If there were no errors in validation however, we set a global message that is rendered in main.html so no
-matter what page we land on, as long as that page extends main.html "Account successfully saved" will be rendered
+<p>If there were no errors in validation however, we set a global message that is rendered in mainTemplate.html so no
+matter what page we land on, as long as that page extends mainTemplate.html "Account successfully saved" will be rendered
 again using flash scope Current.flash().setMessage("Account successfully saved");  Flash scope is not always saved, so
 	we need to tell webpieces to keep the flash scope for after the redirect by calling Current.flash().keep();  Finally,
 	we redirect back to the list accounts page where your new account should show up.
@@ -421,7 +425,7 @@ already just edit your account and save it just fine.</p>
 <p>Pretty simple in that we just lookup the entity and pass it to the html template which is also simple:</p>
 
 <pre>
-<code>*[#{extends '../base/main.html'/}#
+<code>*[#{extends '../mainTemplate.html'/}#
 #{set title:'Confirm Delete'/}#
 #{set tab:'none'/}#
 
