@@ -28,5 +28,9 @@ public class HttpFullResponse {
 	public void setData(DataWrapper data) {
 		this.data = data;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "HttpFullResponse[response="+response+" body size="+data.getReadableSize()+"]";
+	}
 }

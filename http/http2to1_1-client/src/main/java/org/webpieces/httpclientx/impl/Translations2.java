@@ -3,6 +3,8 @@ package org.webpieces.httpclientx.impl;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
@@ -13,6 +15,8 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.*;
 
 public class Translations2 {
+
+	private static final Logger log = LoggerFactory.getLogger(Translations2.class);
 
 	public static HttpFullRequest translate(FullRequest request) {
 		//String scheme = request.getHeaders().getScheme();
@@ -55,6 +59,7 @@ public class Translations2 {
 		}
 
 		HttpResponseStatus status = http1Response.getStatusLine().getStatus();
+
 		headers.addHeader(new Http2Header(Http2HeaderName.STATUS, ""+status.getCode()));
 
 		DataWrapper data = r.getData();

@@ -24,4 +24,9 @@ public class FullRequest extends Http2Message {
 	public void setHeaders(Http2Request headers) {
 		this.headers = headers;
 	}
+
+	@Override
+	public String toString() {
+		return "FullRequest[headers="+headers+" body size="+payload.getReadableSize()+" trailers="+trailingHeaders;
+	}
 }

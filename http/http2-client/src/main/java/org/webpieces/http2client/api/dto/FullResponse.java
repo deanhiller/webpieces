@@ -24,4 +24,9 @@ public class FullResponse extends Http2Message {
 	public void setHeaders(Http2Response headers) {
 		this.headers = headers;
 	}
+
+	@Override
+	public String toString() {
+		return "FullResponse[headers="+headers+" body size="+payload.getReadableSize()+" trailers="+trailingHeaders;
+	}
 }
