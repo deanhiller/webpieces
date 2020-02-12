@@ -55,7 +55,7 @@ public class Translations2 {
 		}
 
 		HttpResponseStatus status = http1Response.getStatusLine().getStatus();
-		headers.addHeader(new Http2Header(Http2HeaderName.STATUS, ""+status.getKnownStatus().getCode()));
+		headers.addHeader(new Http2Header(Http2HeaderName.STATUS, ""+status.getCode()));
 
 		DataWrapper data = r.getData();
 
