@@ -55,7 +55,7 @@ public abstract class BasChannelImpl
 
 	private boolean isRemoteEndInitiateClose;
 	private int unackedBytes;
-	private int maxUnackedBytes;
+	private Integer maxUnackedBytes;
 	private Integer readingThreshold;
 
 	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config) {
@@ -395,7 +395,7 @@ public abstract class BasChannelImpl
 		return false;
 	}
 
-	public int getMaxUnacked() {
+	public Integer getMaxUnacked() {
 		return maxUnackedBytes;
 	}
 	

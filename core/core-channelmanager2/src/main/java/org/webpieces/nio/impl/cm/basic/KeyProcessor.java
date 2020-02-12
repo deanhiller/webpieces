@@ -278,11 +278,13 @@ public final class KeyProcessor {
 	private void fireIncomingRead(SelectionKey key, int bytes, DataListener in, BasChannelImpl channel, ByteBuffer b) {
 		CompletableFuture<Void> future = in.incomingData(channel, b);
 		boolean unregister = false;
-		int unackedByteCnt;
+		int unackedByteCnt = 0;
 		synchronized(channel) {
-			unackedByteCnt = channel.addUnackedByteCount(bytes);
-			if(channel.isOverMaxUnacked()) {
-				unregister = true;
+			if(channel.getMaxUnacked() != null) {
+				unackedByteCnt = channel.addUnackedByteCount(bytes);
+				if(channel.isOverMaxUnacked()) {
+					unregister = true;
+				}
 			}
 		}
 

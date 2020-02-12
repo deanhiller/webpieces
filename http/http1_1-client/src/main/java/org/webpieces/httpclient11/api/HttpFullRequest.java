@@ -27,6 +27,9 @@ public class HttpFullRequest {
 	public void addHeader(Header header) {
 		request.addHeader(header);
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "HttpFullRequest[response="+request+" body size="+data.getReadableSize()+"]";
+	}
 }

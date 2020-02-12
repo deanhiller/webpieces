@@ -11,7 +11,6 @@ import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.hibernate.metamodel.model.domain.internal.EntityTypeImpl;
 import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.params.Meta;

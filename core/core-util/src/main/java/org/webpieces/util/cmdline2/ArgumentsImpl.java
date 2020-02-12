@@ -117,7 +117,7 @@ public class ArgumentsImpl implements Arguments {
 		try { 
 			return converter.apply(value);
 		} catch(IllegalArgumentException e) {
-			errors.add(new IllegalArgumentException("Invalid value for key="+key+": "+e.getMessage(), e));
+			errors.add(new IllegalArgumentException("Invalid value for key="+key+ " (value="+value+"): "+e.getMessage(), e));
 			return null;
 		} catch(Throwable e) {
 			errors.add(new RuntimeException("Bug, Converter for key="+key+". Whoever created the converter really screwed up and did not throw IllegalArgumentException and instead ran into this bug.  They should fix it", e));

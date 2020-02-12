@@ -3,4 +3,4 @@ RUN mkdir -p ./webpieces
 COPY . ./webpieces/
 COPY config/logback.cloudrun.xml ./webpieces/config/logback.xml
 WORKDIR "/webpieces"
-ENTRYPOINT ["./bin/WEBPIECESxAPPNAME"]
+ENTRYPOINT ./bin/WEBPIECESxAPPNAME -http.port=:$PORT -hibernate.persistenceunit=production

@@ -1,5 +1,7 @@
 # webpieces
 
+* sending in json to /json/notfound sends back html??? ick, how to get it to send json every time instead of the html not found page
+* Need webpieces DevServer test for modifying default argument.  It turns out, arguments are not cleared on restart and something weird goes on.
 * starting ProdServerIDE creates webpiecesCache in the wrong directory...modify that to be better location like output/** BUT for BOTH IDE's
 * create a code generate GUI
 * Do we need to file chrome ticket OR do we have cache settings wrong?  on internet outage post, user data is blown away.  we need to figure this out
@@ -17,6 +19,7 @@
 * Add test for CRUD add and add test for CRUD edit to make sure hibernate is always working 100% regarding persist or merge method so we don't get burned on upgrades
 * Add test case for json being fed into Development Server in webpieces only since we broke that on accident with the BodyContentBinder
 * Add test case, run ./gradlew assembleDist on webpieces, THEN, modify an html file, modify again and make sure the modificaiton/addition shows up on webpage.  We ran into a situation on upgrade where we have to clean our project each time!!!
+* 2 webpiecesCache locations are NOT based on the base directory modification and probably should be.  all dirs should base themselves on modified where to run 'I think'
 
 add a bunch of beans now that properties file stuff is working? (concentrate on exposing channelmanager properties?)
 

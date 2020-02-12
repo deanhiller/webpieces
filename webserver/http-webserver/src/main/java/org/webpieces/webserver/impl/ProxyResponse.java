@@ -157,7 +157,7 @@ public class ProxyResponse implements ResponseStreamer {
 	@Override
 	public CompletableFuture<Void> sendRenderHtml(RenderResponse resp) {
 		if(log.isInfoEnabled())
-		log.info("Sending render html response. req="+request+" controller="
+		log.info("About to send render html response for request="+request+" controller="
 						+resp.view.getControllerName()+"."+resp.view.getMethodName());
 		View view = resp.view;
 		String packageStr = view.getPackageName();
