@@ -9,6 +9,8 @@
 
 <h2>Introduction</h2>
 
+<p>Last updated: Feb 12, 2020</p>
+
 <p>A very simple tutorial, that will just help you to learn the Webpieces library 
 with the famous ‘Hello World’ example.</p>
 
@@ -102,7 +104,7 @@ myhelloworold-all/myhelloworld create a package org.webpieces.helloworld.myapp
 <pre>
 <code>package org.webpieces.helloworld.myapp;
 
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routes.RouteId;
 
 public enum MyMainRouteId implements RouteId {
     HELLO_WORLD
@@ -118,12 +120,17 @@ RouteModule called MyMainRoutes with a single route to our new webpage</p>
 <code>package org.webpieces.helloworld.myapp;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.AbstractRoutes;
+import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
 
-public class MyMainRoutes extends AbstractRoutes {
+public class MyMainRoutes implements Routes {
+
     @Override
     protected void configure() {
-        addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
+        RouteBuilder b = bldr.getAllDomainsRouteBuilder();
+
+        b.addRoute(Port.BOTH, HttpMethod.GET, "/helloworld", "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
     }
 }</code>
 </pre>
@@ -144,8 +151,8 @@ Now that we defined a route and a Controller and method to invoke, we should cre
 <code>package org.webpieces.helloworld.myapp;
 
 import javax.inject.Singleton;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
 
 @Singleton
 public class MyMainController {

@@ -7,10 +7,12 @@
 
 <h2>Your first Hibernate entity</h2>
 
+<p>Last updated: Feb 12, 2020</p>
+
 <p>Ideally however in a dynamic web application, we would like to let people persist data for a later time and
 modify that data.  A Hibernate plugin is installed by default for rapid prototyping though you can remove the
 hibernate plugin from the build files if you desire and use something else.  In the meantime, welcome to
-our first hibernate entity bean</p>
+our first hibernate entity bean. Create a class "Cardbo.java" under the "db" package.</p>
 
 <pre>
 <code>package org.webpieces.helloworld.myapp;
@@ -114,20 +116,22 @@ public enum MyMainRouteId implements RouteId {
 <code>package org.webpieces.helloworld.myapp;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.AbstractRoutes;
+import org.webpieces.router.api.routes.Routes;
 
-public class MyMainRoutes extends AbstractRoutes {
+public class MyMainRoutes implements Routes {
 	@Override
 	protected void configure() {
-		addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
-		addRoute(HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
+		RouteBuilder b = bldr.getAllDomainsRouteBuilder();
+
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
 
 		//route to render the page of creating a new user
-		addRoute(HttpMethod.GET ,   "/car/new",         "MyMainController.carAddEdit", MyMainRouteId.GET_CREATE_CAR_PAGE);
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/car/new",         "MyMainController.carAddEdit", MyMainRouteId.GET_CREATE_CAR_PAGE);
 		//route to render the page of editing an existing user
-		addRoute(HttpMethod.GET ,   "/car/edit/{name}", "MyMainController.carAddEdit", MyMainRouteId.GET_EDIT_CAR_PAGE);
+		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/car/edit/{name}", "MyMainController.carAddEdit", MyMainRouteId.GET_EDIT_CAR_PAGE);
 		//route to save a new or existing user
-		addRoute(HttpMethod.POST,   "/car/post",        "MyMainController.postSaveCar", MyMainRouteId.POST_CAR);
+		b.addRoute(Port.BOTH, HttpMethod.POST,   "/car/post",        "MyMainController.postSaveCar", MyMainRouteId.POST_CAR);
 
 	}
 }</code>
