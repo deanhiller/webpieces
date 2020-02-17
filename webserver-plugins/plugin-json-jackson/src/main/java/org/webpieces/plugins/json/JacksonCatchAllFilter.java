@@ -12,6 +12,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
+import org.webpieces.router.api.exceptions.AuthenticationException;
+import org.webpieces.router.api.exceptions.AuthorizationException;
 import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -42,10 +44,14 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		this.pattern = config.getFilterPattern();
 	}
 
-	private Action translateFailure(Action action, Throwable t) {
+	protected Action translateFailure(Action action, Throwable t) {
 		if(t != null) {
 			if(t instanceof ClientDataError) {
-				return translate((ClientDataError)t);
+				return translate((ClientDataError) t);
+			} else if(t instanceof AuthorizationException) {
+				return translate((AuthorizationException)t);
+			} else if(t instanceof AuthenticationException) {
+				return translate((AuthenticationException) t);
 			} else if (t instanceof NotFoundException) {
 				return createNotFound();
 			}
@@ -57,17 +63,31 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		}
 	}
 
-	private RenderContent translateError(Throwable t) {
+	protected Action translate(AuthorizationException t) {
 		byte[] content = translateServerError(t);
-		return new RenderContent(content, KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR.getCode(), KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR.getReason(), MIME_TYPE);
+		KnownStatusCode status = KnownStatusCode.HTTP_401_UNAUTHORIZED;
+		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
 
-	private RenderContent translate(ClientDataError t) {
+	protected Action translate(AuthenticationException t) {
+		byte[] content = translateServerError(t);
+		KnownStatusCode status = KnownStatusCode.HTTP_403_FORBIDDEN;
+		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
+	}
+
+	protected RenderContent translateError(Throwable t) {
+		byte[] content = translateServerError(t);
+		KnownStatusCode status = KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR;
+		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
+	}
+
+	protected RenderContent translate(ClientDataError t) {
 		byte[] content = translateClientError(t);
-		return new RenderContent(content, KnownStatusCode.HTTP_400_BADREQUEST.getCode(), KnownStatusCode.HTTP_400_BADREQUEST.getReason(), MIME_TYPE);
+		KnownStatusCode status = KnownStatusCode.HTTP_400_BADREQUEST;
+		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
 
-	private CompletableFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
+	protected CompletableFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
 		Matcher matcher = pattern.matcher(meta.getCtx().getRequest().relativePath);
 		if(!matcher.matches())
 			return nextFilter.invoke(meta);
@@ -77,7 +97,7 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 				);
 	}
 
-	private Action createNotFound() {
+	protected Action createNotFound() {
 		byte[] content = createNotFoundJsonResponse();		
 		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND.getCode(), KnownStatusCode.HTTP_404_NOTFOUND.getReason(), MIME_TYPE);
 	}
