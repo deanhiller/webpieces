@@ -56,7 +56,7 @@ public class TransactionFilter extends RouteFilter<Void> {
 			//Controller's must create their own transaction IF they want to interact with database asynchonously
 			//we have to commit or rollback right when done as we don't want to remote calls during a transaction
 			//except those to the database
-			throw rollback(em, e);
+			throw rollback(em, e);;
 		} finally {
 			Em.set(null);
 		}
