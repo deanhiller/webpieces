@@ -22,8 +22,8 @@ public class Http2ClientProxy implements Http2Client {
 	}
 
 	@Override
-	public Http2Socket createHttpsSocket(SSLEngine factory) {
-		HttpSocket socket1_1 = client1_1.createHttpSocket();
+	public Http2Socket createHttpsSocket(SSLEngine engine) {
+		HttpSocket socket1_1 = client1_1.createHttpsSocket(engine);
 		return new Http2SocketImpl(socket1_1);
 	}
 

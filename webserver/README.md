@@ -20,6 +20,7 @@
 * Add test case for json being fed into Development Server in webpieces only since we broke that on accident with the BodyContentBinder
 * Add test case, run ./gradlew assembleDist on webpieces, THEN, modify an html file, modify again and make sure the modificaiton/addition shows up on webpage.  We ran into a situation on upgrade where we have to clean our project each time!!!
 * 2 webpiecesCache locations are NOT based on the base directory modification and probably should be.  all dirs should base themselves on modified where to run 'I think'
+* need a timeout on TransactionFilter hibernate so we don't leave transactions open!!!
 
 add a bunch of beans now that properties file stuff is working? (concentrate on exposing channelmanager properties?)
 
