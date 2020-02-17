@@ -40,43 +40,38 @@ public class TransactionFilter extends RouteFilter<Void> {
 		
 		EntityManager em = factory.createEntityManager();
 		Em.set(em);
-		EntityTransaction tx = em.getTransaction();
+
 		try {
+			EntityTransaction tx = em.getTransaction();
 			tx.begin();
 			log.info("Transaction beginning");
-
-			CompletableFuture<Action> retVal = nextFilter.invoke(meta);
-
-			//Controller's must create their own transaction IF they want to interact with database asynchonously
-			//we have to commit or rollback right when done as we don't want to remote calls during a transaction
-			//except those to the database
-			commit(em);
-			return retVal;
-		} catch (Exception e) {
-			//Controller's must create their own transaction IF they want to interact with database asynchonously
-			//we have to commit or rollback right when done as we don't want to remote calls during a transaction
-			//except those to the database
-			throw rollback(em, e);;
+			
+			return nextFilter.invoke(meta).handle((action, ex) -> commitOrRollback(em, action, ex));
 		} finally {
 			Em.set(null);
 		}
 	}
 
-	private RuntimeException rollback(EntityManager em, Throwable t) {
+	private Action commitOrRollback(EntityManager em, Action action, Throwable t) throws HttpException {
 		EntityTransaction tx = em.getTransaction();
-
-		log.info("Transaction being rolled back");
-		rollbackTx(t, tx);
-		closeEm(t, em);
-		if(t instanceof HttpException)
-			return (HttpException)t; //the platform needs the original HttpException to translate to an http code
-		else
-			return new RuntimeException(t);
+		
+		if(t != null) {
+			log.info("Transaction being rolled back");
+			rollbackTx(t, tx);
+			closeEm(t, em);
+			if(t instanceof HttpException)
+				throw (HttpException)t; //the platform needs the original HttpException to translate to an http code
+			else
+				throw new RuntimeException(t);
+		}
+		
+		log.info("Transaction being committed");
+		commit(tx, em);
+		
+		return action;
 	}
 	
-	private void commit(EntityManager em) {
-		EntityTransaction tx = em.getTransaction();
-		log.info("Transaction being committed");
+	private void commit(EntityTransaction tx, EntityManager em) {
 		try {
 			state = 3;
 			tx.commit();
