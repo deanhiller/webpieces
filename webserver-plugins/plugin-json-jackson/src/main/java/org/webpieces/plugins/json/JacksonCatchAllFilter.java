@@ -109,27 +109,24 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 	}
 
 	protected byte[] translateAuthenticationError(AuthenticationException t) {
-		String escapeJson = StringEscapeUtils.escapeJson(t.getMessage());
 		JsonError error = new JsonError();
-		error.setError("403 Forbidden: "+escapeJson);
+		error.setError("403 Forbidden: "+t.getMessage());
 		error.setCode(403);
 
 		return translateJson(mapper, error);
 	}
 
 	protected byte[] translateAuthorizationError(AuthorizationException t) {
-		String escapeJson = StringEscapeUtils.escapeJson(t.getMessage());
 		JsonError error = new JsonError();
-		error.setError("401 Not Authorized : "+escapeJson);
+		error.setError("401 Not Authorized : "+t.getMessage());
 		error.setCode(401);
 
 		return translateJson(mapper, error);
 	}
 
 	protected byte[] translateClientError(ClientDataError t) {
-		String escapeJson = StringEscapeUtils.escapeJson(t.getMessage());
 		JsonError error = new JsonError();
-		error.setError("400 bad request: "+escapeJson);
+		error.setError("400 bad request: "+t.getMessage());
 		error.setCode(400);
 
 		return translateJson(mapper, error);

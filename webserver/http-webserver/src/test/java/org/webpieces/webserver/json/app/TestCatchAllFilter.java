@@ -19,9 +19,8 @@ public class TestCatchAllFilter extends JacksonCatchAllFilter {
 
 	@Override
 	protected byte[] translateClientError(ClientDataError t) {
-		String escapeJson = StringEscapeUtils.escapeJson(t.getMessage());
 		JsonError error = new JsonError();
-		error.setError(escapeJson);
+		error.setError(t.getMessage());
 		error.setCode(0);
 		return translateJson(mapper, error);
 	}
