@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -27,9 +28,14 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	private static final Logger log = LoggerFactory.getLogger(JacksonCatchAllFilter.class);
 	public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
+	private final ObjectMapper mapper;
+
 	private Boolean isNotFoundFilter;
 	private Pattern pattern;
 
+	public JacksonCatchAllFilter(ObjectMapper mapper) {
+		this.mapper = mapper;
+	}
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 		if(isNotFoundFilter)
@@ -64,13 +70,13 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 	}
 
 	protected Action translate(AuthorizationException t) {
-		byte[] content = translateServerError(t);
+		byte[] content = translateAuthorizationError(t);
 		KnownStatusCode status = KnownStatusCode.HTTP_401_UNAUTHORIZED;
 		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
 
 	protected Action translate(AuthenticationException t) {
-		byte[] content = translateServerError(t);
+		byte[] content = translateAuthenticationError(t);
 		KnownStatusCode status = KnownStatusCode.HTTP_403_FORBIDDEN;
 		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
@@ -102,15 +108,46 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND.getCode(), KnownStatusCode.HTTP_404_NOTFOUND.getReason(), MIME_TYPE);
 	}
 
-	protected abstract byte[] translateServerError(Throwable t);
+	protected byte[] translateAuthenticationError(AuthenticationException t) {
+		String escapeJson = StringEscapeUtils.escapeJson(t.getMessage());
+		JsonError error = new JsonError();
+		error.setError("403 Forbidden: "+escapeJson);
+		error.setCode(403);
 
-	protected abstract byte[] translateClientError(ClientDataError t);
+		return translateJson(mapper, error);
+	}
 
-	/**
-	 * If you really want, return null and the filter will return the 404 html instead of
-	 * json if you really want
-	 */
-	protected abstract byte[] createNotFoundJsonResponse();
+	protected byte[] translateAuthorizationError(AuthorizationException t) {
+		String escapeJson = StringEscapeUtils.escapeJson(t.getMessage());
+		JsonError error = new JsonError();
+		error.setError("401 Not Authorized : "+escapeJson);
+		error.setCode(401);
+
+		return translateJson(mapper, error);
+	}
+
+	protected byte[] translateClientError(ClientDataError t) {
+		String escapeJson = StringEscapeUtils.escapeJson(t.getMessage());
+		JsonError error = new JsonError();
+		error.setError("400 bad request: "+escapeJson);
+		error.setCode(400);
+
+		return translateJson(mapper, error);
+	}
+
+	protected byte[] createNotFoundJsonResponse() {
+		JsonError error = new JsonError();
+		error.setError("404 This url does not exist.  try another url");
+		error.setCode(404);
+		return translateJson(mapper, error);
+	}
+
+	protected byte[] translateServerError(Throwable t) {
+		JsonError error = new JsonError();
+		error.setError("Server ran into a bug, please report");
+		error.setCode(500);
+		return translateJson(mapper, error);
+	}
 	
 	protected byte[] translateJson(ObjectMapper mapper, Object error) {
 		try {
