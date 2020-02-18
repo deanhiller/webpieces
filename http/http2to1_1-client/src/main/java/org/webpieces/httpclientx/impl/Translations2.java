@@ -42,7 +42,8 @@ public class Translations2 {
 
 		//translate all other headers here as well...
 		for(Http2Header header : request.getHeaders().getHeaders()) {
-			httpReq.addHeader(new Header(header.getName(), header.getValue()));
+			if(!header.getName().startsWith(":")) //All standard headers go elsewhere except HOST which we do below
+				httpReq.addHeader(new Header(header.getName(), header.getValue()));
 		}
 
 		httpReq.addHeader(new Header(KnownHeaderName.HOST, authority));
