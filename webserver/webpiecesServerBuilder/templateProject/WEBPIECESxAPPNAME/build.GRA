@@ -103,6 +103,8 @@ jar {
 mainClassName = "WEBPIECESxPACKAGE.Server"
 applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
 
+assembleDist.dependsOn 'build'
+
 //Here, we must modify the start scripts to set cd to user.dir correctly as setting user.dir does NOT work
 //as new File("relative") ignores user.dir and uses something else.  We do this such that user.dir IS
 //the app directory AND new File("relative") will work as well (found issue on mac running from different

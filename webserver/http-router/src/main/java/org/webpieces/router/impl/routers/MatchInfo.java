@@ -1,21 +1,12 @@
 package org.webpieces.router.impl.routers;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.UrlPath;
-import org.webpieces.router.impl.model.MatchResult2;
-import org.webpieces.router.impl.routebldr.RegExResult;
-import org.webpieces.router.impl.routebldr.RegExUtil;
 
 public class MatchInfo {
 

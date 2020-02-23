@@ -179,6 +179,9 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		RouterRequest request = ctx.getRequest();
 		
 		boolean isHttpsOnly = routeMeta.getMatchInfo().getExposedPorts() == Port.HTTPS;
+		//1. if route is 'not' https only (ie. BOTH), return url path as we can just use the relative urlPath and
+		// stay on whatever the request is using in our redirect
+		//2. OR if request is https, we can also just use the relative path since it will stay in https
 		if(!isHttpsOnly || request.isHttps)
 			return urlPath;
 		
