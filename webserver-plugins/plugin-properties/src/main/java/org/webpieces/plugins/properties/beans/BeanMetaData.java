@@ -23,7 +23,7 @@ import org.webpieces.router.impl.params.ObjectTranslator;
 
 /**
  * A proxy to get around the weird circular dependency order so the guice created controller can listen
- * to all beans that are created with XXXXWebpiecesManaged interface(or however the user configures it)
+ * to all beans that are created with XXXXManaged interface(or however the user configures it)
  */
 @Singleton
 public class BeanMetaData implements Startable {
