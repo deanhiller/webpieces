@@ -90,14 +90,14 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	public String fetchUrl(String routeId, Map<?, ?> args, String srcLocation) {
     	srcLocation = modifySourceLocation2(srcLocation);
 		try {
-			Map<String, String> urlParams = new HashMap<>();
+			Map<String, Object> urlParams = new HashMap<>();
 			for(Map.Entry<?, ?> entry : args.entrySet()) {
 				String key = entry.getKey().toString();
 				Object value = entry.getValue();
 				if(value == null)
 					throw new IllegalArgumentException("Cannot use null param in a url for param name="+key);
 				//urlencoding happens for each value in the router...
-				urlParams.put(key, value.toString());
+				urlParams.put(key, value);
 			}
 
 			return urlLookup.fetchUrl(routeId, urlParams);

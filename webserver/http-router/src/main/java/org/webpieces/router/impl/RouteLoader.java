@@ -244,7 +244,7 @@ public class RouteLoader {
 	public void loadAllRoutes(WebAppMeta rm, Injector injector, RoutingHolder routingHolder) {
 		log.info("adding routes");
 		
-		reverseRoutes = new ReverseRoutes(config, redirectFormation);
+		reverseRoutes = new ReverseRoutes(config, redirectFormation, objectTranslator);
 		ResettingLogic resettingLogic = new ResettingLogic(reverseRoutes, injector);
 		Boolean enableSeparateBackend = backPortExists.get();
 		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic, enableSeparateBackend);
@@ -302,7 +302,7 @@ public class RouteLoader {
 		return compressionCacheSetup.relativeUrlToHash(urlPath);
 	}
 
-	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
+	public String convertToUrl(String routeId, Map<String, Object> args, boolean isValidating) {
 		return reverseRoutes.convertToUrl(routeId, args, isValidating);
 	}
 

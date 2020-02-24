@@ -20,7 +20,7 @@ public class RouterLookupProxy implements RouterLookup {
 	}
 	
 	@Override
-	public String fetchUrl(String routeId, Map<String, String> args) {
+	public String fetchUrl(String routeId, Map<String, Object> args) {
 		return router.convertToUrl(routeId, args, false );
 	}
 

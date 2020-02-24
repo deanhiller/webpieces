@@ -92,7 +92,7 @@ public abstract class AbstractRouterService implements RouterService {
 	protected abstract CompletableFuture<Void> incomingRequestImpl(RequestContext req, ResponseStreamer responseCb);
 	
 	@Override
-	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
+	public String convertToUrl(String routeId, Map<String, Object> args, boolean isValidating) {
 		return routeLoader.convertToUrl(routeId, args, isValidating);
 	}
 	

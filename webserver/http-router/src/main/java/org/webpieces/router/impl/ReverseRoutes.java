@@ -16,9 +16,11 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.plugins.ReverseRouteLookup;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
+import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.EHtmlRouter;
 
@@ -39,8 +41,15 @@ public class ReverseRoutes implements ReverseRouteLookup {
 
 	private RedirectFormation redirectFormation;
 
-	public ReverseRoutes(RouterConfig config, RedirectFormation redirectFormation) {
+	private ObjectTranslator translator;
+
+	public ReverseRoutes(
+		RouterConfig config, 
+		RedirectFormation redirectFormation,
+		ObjectTranslator translator
+	) {
 		this.redirectFormation = redirectFormation;
+		this.translator = translator;
 		this.urlEncoding = config.getUrlEncoding();		
 	}
 
@@ -149,15 +158,17 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		return "ReverseRoutes [routeIdToRoute=" + routeIdToRoute + "]";
 	}
 
-	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {		
+	public String convertToUrl(String routeId, Map<String, Object> args, boolean isValidating) {		
 		EHtmlRouter routeMeta = get(routeId);
 		String urlPath = routeMeta.getFullPath();
 		List<String> pathParamNames = routeMeta.getMatchInfo().getPathParamNames();
 		for(String param : pathParamNames) {
-			String val = args.get(param);
+			Object objVal = args.get(param);
+			ObjectStringConverter<Object> objTranslator = translator.getConverterFor(objVal);
+			String val = objTranslator.objectToString(objVal);
 			if(val == null) {
 				String strArgs = "";
-				for(Entry<String, String> entry : args.entrySet()) {
+				for(Entry<String, Object> entry : args.entrySet()) {
 					boolean equals = entry.getKey().equals(param);
 					strArgs = " ARG:'"+entry.getKey()+"'='"+entry.getValue()+"'   equals="+equals+"\n";
 				}

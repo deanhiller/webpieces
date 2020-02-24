@@ -1,5 +1,6 @@
 # webpieces
 
+* test converters for all cases listed in ObjectTranslator.java!!
 * add method to reverse a URL from the controller using the Action Enum
 * Make it so AFTER you hit the route, '*Managed', works and ends up in the webpage AFTER GET request is made to that url that uses the property
 * GET request with no url params nor query params BUT controller method DOES have params results in NotFound which is just weird!!! throw a 500 bug instead and put info in exception

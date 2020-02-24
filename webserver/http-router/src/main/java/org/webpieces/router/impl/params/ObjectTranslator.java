@@ -15,6 +15,15 @@ import org.webpieces.router.api.extensions.ObjectStringConverter;
  * platform OR if it doesn't, that is a bug(I don't think we missed any locations).  This includes rendering in 
  * templates, path parames, etc. etc.
  * 
+ * Some examples are
+ * 1. If you put into any cookie an object, it translates that to a string via converters and you get it back with get(key, XXXXX.class) and it converts it back to object
+ * 2. On a GET, you may have url path params OR url query params.  ie. /url/{id} (path param) or /url?id=value and those are converted using these converters from string to object
+ * 3. On a POST, you may have url path params OR url query params OR form post fields(multi-part) and all those are converted string to object via these converters if possible
+ * 4. When created a redirect url from ROUTE_ID, key=Object1, key2=Object2, we convert all those objects to strings which are converted back on step 2/3 above
+ * 5. When creating a url in a webpage, the groovy may be @[ROUTE_ID, key:object1, key2:object2] and object to string is used so on 2 and 3, we convert them back to objects
+ * 5. The hibernate plugin puts an id in a <input type="hidden" in the webpage.  To do this, it converts object to string.  Then on post, it converst that string back to object through these converters
+ * 6. The property bean plugin if you expose set/getSomething(Bean b), it exposes Strings to input fields in the webpage and converts between getters/setters
+ *
  * @author dhiller
  *
  */

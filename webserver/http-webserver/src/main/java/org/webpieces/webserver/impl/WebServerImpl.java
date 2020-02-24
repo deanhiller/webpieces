@@ -312,7 +312,7 @@ public class WebServerImpl implements WebServer {
 		String routeId = URLEncoder.decode(split2[0], StandardCharsets.UTF_8);
 		String args = URLEncoder.decode(split2[1], StandardCharsets.UTF_8);
 		
-		Map<String, String> argsWithFakeValues = new HashMap<>();
+		Map<String, Object> argsWithFakeValues = new HashMap<>();
 		if(!"".equals(args.trim())) {
 			String[] argArray = args.split(",");
 			for(String arg : argArray) {
