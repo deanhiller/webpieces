@@ -3,8 +3,9 @@ package org.webpieces.router.impl.routers;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
@@ -13,8 +14,6 @@ import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.filters.ExceptionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DScopedRouter {
 	private static final Logger log = LoggerFactory.getLogger(DScopedRouter.class);
