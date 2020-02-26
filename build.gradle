@@ -61,7 +61,7 @@ ext {
 
        //We literally ONLY bring this in for one method call into PropertyUtils so we should clone that code
        //instead of bringing in an entire jar perhaps...?
-       'commons-beans':   'commons-beanutils:commons-beanutils:1.9.2',
+       'commons-beans':   'commons-beanutils:commons-beanutils:1.9.4',
 
        'javax-inject':    'javax.inject:javax.inject:1',
        'jaxb':            'javax.xml.bind:jaxb-api:2.3.0',
