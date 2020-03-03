@@ -1,6 +1,7 @@
 package org.webpieces.router.impl;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -15,14 +16,19 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.controller.actions.HttpPort;
+import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.plugins.ReverseRouteLookup;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
+import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.params.ObjectTranslator;
+import org.webpieces.router.impl.routeinvoker.PortAndIsSecure;
 import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.EHtmlRouter;
+import org.webpieces.router.impl.routers.MatchInfo;
 
 public class ReverseRoutes implements ReverseRouteLookup {
 
@@ -42,15 +48,18 @@ public class ReverseRoutes implements ReverseRouteLookup {
 	private RedirectFormation redirectFormation;
 
 	private ObjectTranslator translator;
+	private ObjectToParamTranslator reverseTranslator;
 
 	public ReverseRoutes(
 		RouterConfig config, 
 		RedirectFormation redirectFormation,
-		ObjectTranslator translator
+		ObjectTranslator translator,
+		ObjectToParamTranslator reverseTranslator
 	) {
 		this.redirectFormation = redirectFormation;
 		this.translator = translator;
-		this.urlEncoding = config.getUrlEncoding();		
+		this.urlEncoding = config.getUrlEncoding();
+		this.reverseTranslator = reverseTranslator;
 	}
 
 	public void addRoute(RouteId routeId, EHtmlRouter meta) {
@@ -158,8 +167,45 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		return "ReverseRoutes [routeIdToRoute=" + routeIdToRoute + "]";
 	}
 
-	public String convertToUrl(String routeId, Map<String, Object> args, boolean isValidating) {		
+	//for redirects
+	public UrlInfo routeToUrl(RouteId routeId, Method method, Map<String, Object> args, RouterRequest request, HttpPort requestedPort) {
 		EHtmlRouter routeMeta = get(routeId);
+		if(routeMeta == null)
+			throw new IllegalReturnValueException("Route="+routeId+" returned from method='"+method+"' was not added in the RouterModules");
+				
+		MatchInfo matchInfo = routeMeta.getMatchInfo();
+
+		if(!matchInfo.matchesMethod(HttpMethod.GET))
+			throw new IllegalReturnValueException("method='"+method+"' is trying to redirect to routeid="+routeId+" but that route is not a GET method route and must be");
+
+		Map<String, String> keysToValues = reverseTranslator.formMap(method, matchInfo.getPathParamNames(), args);
+
+		Set<String> keySet = keysToValues.keySet();
+		List<String> argNames = matchInfo.getPathParamNames();
+		if(keySet.size() != argNames.size()) {
+			throw new IllegalReturnValueException("Method='"+method+"' returns a Redirect action with wrong number of arguments.  args="+keySet.size()+" when it should be size="+argNames.size());
+		}
+
+		String path = matchInfo.getFullPath();
+		
+		for(String name : argNames) {
+			String value = keysToValues.get(name);
+			if(value == null) 
+				throw new IllegalArgumentException("Method='"+method+"' returns a Redirect that is missing argument key="+name+" to form the url on the redirect");
+			path = path.replace("{"+name+"}", value);
+		}
+
+		PortAndIsSecure info = redirectFormation.calculateInfo(matchInfo, requestedPort, request);
+		boolean isSecure = info.isSecure();
+		int port = info.getPort();
+		
+		return new UrlInfo(isSecure, port, path);
+	}
+	
+	//for in the page
+	public String routeToUrl(String routeId, Map<String, Object> args, boolean isValidating) {		
+		EHtmlRouter routeMeta = get(routeId);
+		
 		String urlPath = routeMeta.getFullPath();
 		List<String> pathParamNames = routeMeta.getMatchInfo().getPathParamNames();
 		for(String param : pathParamNames) {

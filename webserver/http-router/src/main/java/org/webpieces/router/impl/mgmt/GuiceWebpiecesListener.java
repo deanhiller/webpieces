@@ -2,7 +2,6 @@ package org.webpieces.router.impl.mgmt;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

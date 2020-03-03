@@ -17,7 +17,6 @@ import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
-import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.FilterInfo;
 import org.webpieces.router.impl.routers.DynamicInfo;
@@ -29,20 +28,14 @@ import org.webpieces.util.filters.Service;
 
 public abstract class AbstractRouteInvoker implements RouteInvoker {
 
-	protected final ObjectToParamTranslator reverseTranslator;
 	protected final ControllerLoader controllerFinder;
 	
 	protected ReverseRoutes reverseRoutes;
-	protected RedirectFormation redirectFormation;
 
 	public AbstractRouteInvoker(
-			ObjectToParamTranslator reverseTranslator, 
-			ControllerLoader controllerFinder,
-			RedirectFormation redirectFormation
+			ControllerLoader controllerFinder
 	) {
-		this.reverseTranslator = reverseTranslator;
 		this.controllerFinder = controllerFinder;
-		this.redirectFormation = redirectFormation;
 	}
 
 	@Override
@@ -124,8 +117,8 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
-				invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, 
-				loadedController, invokeInfo.getResponseCb(), redirectFormation);
+				invokeInfo.getRequestCtx(), reverseRoutes, 
+				loadedController, invokeInfo.getResponseCb());
 		return invokeAny(invokeInfo, loadedController, service, data, processor);
 	}
 	

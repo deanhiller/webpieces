@@ -26,6 +26,7 @@ import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouteModuleInfo;
+import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routebldr.CurrentPackage;
 import org.webpieces.router.impl.routebldr.DomainRouteBuilderImpl;
@@ -63,6 +64,7 @@ public class RouteLoader {
 	private WebAppMeta routerModule;
 	private RoutingHolder routingHolder;
 	private Module theModule;
+	private ObjectToParamTranslator reverseTranslator;
 
 
 	@Inject
@@ -74,7 +76,8 @@ public class RouteLoader {
 		ManagedBeanMeta beanMeta,
 		ObjectTranslator objectTranslator,
 		RouteBuilderLogic routeBuilderLogic,
-		RedirectFormation portLookup
+		RedirectFormation portLookup,
+		ObjectToParamTranslator reverseTranslator
 	) {
 		this.config = config;
 		this.masterRouter = masterRouter;
@@ -84,6 +87,7 @@ public class RouteLoader {
 		this.objectTranslator = objectTranslator;
 		this.routeBuilderLogic = routeBuilderLogic;
 		this.redirectFormation = portLookup;
+		this.reverseTranslator = reverseTranslator;
 	}
 	
 	public WebAppMeta configure(ClassForName loader, Arguments arguments) {
@@ -244,7 +248,7 @@ public class RouteLoader {
 	public void loadAllRoutes(WebAppMeta rm, Injector injector, RoutingHolder routingHolder) {
 		log.info("adding routes");
 		
-		reverseRoutes = new ReverseRoutes(config, redirectFormation, objectTranslator);
+		reverseRoutes = new ReverseRoutes(config, redirectFormation, objectTranslator, reverseTranslator);
 		ResettingLogic resettingLogic = new ResettingLogic(reverseRoutes, injector);
 		Boolean enableSeparateBackend = backPortExists.get();
 		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic, enableSeparateBackend);
@@ -303,7 +307,7 @@ public class RouteLoader {
 	}
 
 	public String convertToUrl(String routeId, Map<String, Object> args, boolean isValidating) {
-		return reverseRoutes.convertToUrl(routeId, args, isValidating);
+		return reverseRoutes.routeToUrl(routeId, args, isValidating);
 	}
 
 }
