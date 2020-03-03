@@ -168,7 +168,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 	}
 
 	//for redirects
-	public UrlInfo routeToUrl(RouteId routeId, Method method, Map<String, Object> args, RouterRequest request, HttpPort requestedPort) {
+	public UrlInfo routeToUrl(RouteId routeId, Method method, Map<String, Object> args, RequestContext ctx, HttpPort requestedPort) {
 		EHtmlRouter routeMeta = get(routeId);
 		if(routeMeta == null)
 			throw new IllegalReturnValueException("Route="+routeId+" returned from method='"+method+"' was not added in the RouterModules");
@@ -195,7 +195,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 			path = path.replace("{"+name+"}", value);
 		}
 
-		PortAndIsSecure info = redirectFormation.calculateInfo(matchInfo, requestedPort, request);
+		PortAndIsSecure info = redirectFormation.calculateInfo(matchInfo, requestedPort, ctx.getRequest());
 		boolean isSecure = info.isSecure();
 		int port = info.getPort();
 		

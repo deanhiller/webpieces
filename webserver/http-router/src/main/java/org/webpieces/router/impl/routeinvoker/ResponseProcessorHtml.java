@@ -83,7 +83,7 @@ public class ResponseProcessorHtml implements Processor {
 		RouterRequest request = ctx.getRequest();
 		Method method = loadedController.getControllerMethod();
 		
-		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, request, requestedPort);
+		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, ctx, requestedPort);
 		boolean isSecure = urlInfo.isSecure();
 		int port = urlInfo.getPort();
 		String path = urlInfo.getPath();

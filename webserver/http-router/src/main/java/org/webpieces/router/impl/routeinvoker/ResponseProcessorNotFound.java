@@ -75,11 +75,10 @@ public class ResponseProcessorNotFound implements Processor {
 	}
 	
 	private CompletableFuture<Void> createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
-		HttpPort requestedPort = null;
 		RouterRequest request = ctx.getRequest();
 		Method method = loadedController.getControllerMethod();
 		
-		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, request, requestedPort);
+		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, ctx, null);
 		boolean isSecure = urlInfo.isSecure();
 		int port = urlInfo.getPort();
 		String path = urlInfo.getPath();
