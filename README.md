@@ -92,10 +92,12 @@ NOTE: last tested on Intellij 2019.1
    * Select your folder {yourapp}-all and click ok
    * Choose 'Import project from external model' and choose gradle and click next
    * Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
-2. Modify compiling with parameters option(Intellij does not suck this setting in from gradle :( )
+2. Modify some build settings and compiling with parameters option(Intellij does not suck this setting in from gradle :( )
    * Open Preferences, expand "Build, Execution, and Deployment", 
    * expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
    * Click Ok to close dialogue
+   * Expand 'Build Tools' (also under 'Build, Execution, and Deployment')
+   * Click on 'Gradle' and change the two settings under 'Build and run' to IntelliJ (rather than Gradle by default)
    * Click Build menu and click Rebuild Project
 3. Modify TWO auto-recompile settings documented here https://stackoverflow.com/questions/12744303/intellij-idea-java-classes-not-auto-compiling-on-save
 4. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
