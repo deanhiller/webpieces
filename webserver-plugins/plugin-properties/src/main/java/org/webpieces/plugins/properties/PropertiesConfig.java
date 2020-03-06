@@ -2,7 +2,7 @@ package org.webpieces.plugins.properties;
 
 public class PropertiesConfig {
 
-	private String interfaceSuffixMatch = "WebpiecesManaged";
+	private String interfaceSuffixMatch = "Managed";
 	private String categoryMethod = "getCategory";
 	private int pollIntervalSeconds = 60;
 	

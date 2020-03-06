@@ -24,7 +24,11 @@ public class JacksonLookup implements BodyContentBinder {
 
 	@Override
 	public <T> boolean isManaged(Class<T> entityClass, Class<? extends Annotation> paramAnnotation) {
-		if(paramAnnotation == Jackson.class || JsonNode.class.isAssignableFrom(entityClass))
+		boolean isJnode = false;
+		if(entityClass != null) //if this is null, next line will NullPointer instead of return false
+			isJnode = JsonNode.class.isAssignableFrom(entityClass);
+
+		if(paramAnnotation == Jackson.class || isJnode)
 			return true;
 		return false;
 	}

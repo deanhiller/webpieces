@@ -11,10 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
@@ -44,8 +45,6 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.filters.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 

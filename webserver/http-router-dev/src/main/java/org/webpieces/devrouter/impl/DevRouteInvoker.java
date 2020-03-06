@@ -5,11 +5,12 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -18,12 +19,10 @@ import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteModuleInfo;
-import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
-import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
@@ -33,8 +32,6 @@ import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.router.impl.services.ServiceInvoker;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DevRouteInvoker extends ProdRouteInvoker {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
@@ -43,13 +40,10 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 
 	@Inject
 	public DevRouteInvoker(
-			ObjectToParamTranslator reverseTranslator, 
-			RouterConfig config, 
 			ControllerLoader loader, 
-			ServiceInvoker invoker, 
-			RedirectFormation redirectFormation
+			ServiceInvoker invoker 
 	) {
-		super(reverseTranslator, loader, redirectFormation);
+		super(loader);
 		this.serviceInvoker = invoker;
 	}
 	

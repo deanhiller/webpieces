@@ -23,6 +23,12 @@ public class BasicController {
 		this.errorLib = errorLib;
 	}
 
+	public Render reverseRoute() {
+		int id = 5;
+		String url = "";
+		return Actions.renderThis("url", url);
+	}
+
 	public Action someMethod() {
 		notFoundLib.someBusinessLogic();
 		return Actions.redirect(BasicRouteId.RENDER_PAGE);

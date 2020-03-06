@@ -6,10 +6,11 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
@@ -18,8 +19,6 @@ import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.impl.ctx.CookieScopeImpl;
 import org.webpieces.router.impl.ctx.SecureCookie;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.util.security.Security;
 

@@ -1,10 +1,8 @@
 package org.webpieces.router.impl.compression;
 
-import java.util.function.Supplier;
-
-import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 
 public class CompressionDecider {
 	private static final Logger log = LoggerFactory.getLogger(CompressionDecider.class);

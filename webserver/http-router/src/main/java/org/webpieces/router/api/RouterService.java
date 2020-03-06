@@ -36,7 +36,7 @@ public interface RouterService {
 	 * On top of that, isValidating is for a special test case that makes sure all route ids in all templates actually
 	 * exist so we don't deploy with broken links.
 	 */
-	String convertToUrl(String routeId, Map<String, String> notUrlEncodedArgs, boolean isValidating);
+	String convertToUrl(String routeId, Map<String, Object> notUrlEncodedArgs, boolean isValidating);
 	
 	FileMeta relativeUrlToHash(String urlPath);
 

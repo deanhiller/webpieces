@@ -40,7 +40,7 @@ public class TestLesson5WithSelenium {
 	
 	private static WebDriver driver;
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
-	private Arguments args = new CommandLineParser().parse("-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest");
+	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest" };
 
 	//see below comments in AppOverrideModule
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //or your favorite mock library
@@ -59,7 +59,9 @@ public class TestLesson5WithSelenium {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test and NOT drop tables but clear and re-populate
 		Server webserver = new Server(
-				new OverridesForTestRealServer(), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()));
+				new OverridesForTestRealServer(), new AppOverridesModule(), 
+				new ServerConfig(JavaCache.getCacheLocation()), args);
+		
 		webserver.start();
 		httpPort = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 		httpsPort = webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort();

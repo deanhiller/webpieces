@@ -17,6 +17,7 @@ public enum KnownStatusCode {
 
 	HTTP_400_BADREQUEST(400, "Bad Request", HttpStatusType.ClientError),
 	HTTP_401_UNAUTHORIZED(401, "Unauthorized", HttpStatusType.ClientError),
+	HTTP_403_FORBIDDEN(403, "Forbidden", HttpStatusType.ClientError),
 	HTTP_404_NOTFOUND(404, "Not Found", HttpStatusType.ClientError),
 	
 	HTTP_408_REQUEST_TIMEOUT(408, "Request Timeout", HttpStatusType.ClientError),
@@ -28,8 +29,8 @@ public enum KnownStatusCode {
 	
 	//TODO: Fill the rest in..
 	;
-	
-	private static Map<Integer, KnownStatusCode> codeToKnownStatus = new HashMap<>();
+
+    private static Map<Integer, KnownStatusCode> codeToKnownStatus = new HashMap<>();
 	
 	static {
 		for(KnownStatusCode status : KnownStatusCode.values()) {

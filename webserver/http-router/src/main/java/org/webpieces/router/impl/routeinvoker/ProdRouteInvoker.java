@@ -5,13 +5,9 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.PortConfigLookup;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
-import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
@@ -21,11 +17,9 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 
 	@Inject
 	public ProdRouteInvoker(
-		ObjectToParamTranslator reverseTranslator,
-		ControllerLoader controllerFinder,
-		RedirectFormation redirectFormation
+		ControllerLoader controllerFinder
 	) {
-		super(reverseTranslator, controllerFinder, redirectFormation);
+		super(controllerFinder);
 	}
 	
 	@Override
@@ -43,8 +37,8 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	@Override
 	public CompletableFuture<Void> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
-				invokeInfo.getRequestCtx(), reverseRoutes, reverseTranslator, 
-				dynamicInfo.getLoadedController(), invokeInfo.getResponseCb(), redirectFormation);
+				invokeInfo.getRequestCtx(), reverseRoutes, 
+				dynamicInfo.getLoadedController(), invokeInfo.getResponseCb());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
 	}
 	

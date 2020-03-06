@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Simple converter from -key=value -key2='value2 something' to a Map<String, String>
+ * Advanced converter allowing startup to define params so when you add GuiceModules, params are defined and THEN allowing 
+ * consumption of those params in a second stage
  * 
  * @author dhiller
  *

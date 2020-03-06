@@ -25,7 +25,7 @@ public class StubModule implements Module {
 	
 	private static class NullRouterLookup implements RouterLookup {
 		@Override
-		public String fetchUrl(String routeId, Map<String, String> args) {
+		public String fetchUrl(String routeId, Map<String, Object> args) {
 			return null;
 		}
 
