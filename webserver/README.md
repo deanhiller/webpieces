@@ -1,5 +1,6 @@
 # webpieces
 
+* on building up and up the Routers, we SHOULD use guice on startup since we don't need to be EXTREMELY fast on startup AND I could have more easily fixed a bug....I think the tradeoff is there
 * test converters for all cases listed in ObjectTranslator.java!!
 * test all reverse a URL paths...from redirect as well as from a page
 * add method to reverse a URL from the controller using the Action Enum

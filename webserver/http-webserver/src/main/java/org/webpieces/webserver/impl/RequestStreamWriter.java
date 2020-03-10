@@ -75,7 +75,7 @@ public class RequestStreamWriter implements StreamWriter {
 	private ResponseStream stream;
 	private Http2Request requestHeaders;
 
-	private CompletableFuture<Void> outstandingRequest;
+	private volatile CompletableFuture<Void> outstandingRequest = CompletableFuture.completedFuture(null); //prevent nullPointers
 	private DataWrapper data = dataGen.emptyWrapper();
 	private boolean cancelled;
 
@@ -87,17 +87,22 @@ public class RequestStreamWriter implements StreamWriter {
 	
 	@Override
 	public CompletableFuture<Void> processPiece(StreamMsg frame) {
+		
 		if(cancelled)
 			return CompletableFuture.completedFuture(null);
 		else if(frame instanceof DataFrame) {
 			DataFrame dataFrame = (DataFrame) frame;
 			data = dataGen.chainDataWrappers(data, dataFrame.getData());
-			if(frame.isEndOfStream())
-				outstandingRequest = handleCompleteRequest();
+			if(frame.isEndOfStream()) {
+				CompletableFuture<Void> outstandingReq = handleCompleteRequest();
+				setOutstandingRequest(outstandingReq);
+			}
 			return CompletableFuture.completedFuture(null);
 		} else if(frame instanceof Http2Headers) {
-			if(frame.isEndOfStream())
-				outstandingRequest = handleCompleteRequest();			
+			if(frame.isEndOfStream()) {
+				CompletableFuture<Void> outstandingReq = handleCompleteRequest();
+				setOutstandingRequest(outstandingReq);
+			}
 			return CompletableFuture.completedFuture(null);
 		}
 		
@@ -308,7 +313,7 @@ public class RequestStreamWriter implements StreamWriter {
 
 	public void cancelOutstandingRequest() {
 		cancelled = true;
-		if(outstandingRequest != null)
+		if(outstandingRequest != null) //should no longer ever be null
 			outstandingRequest.cancel(true);
 	}
 
