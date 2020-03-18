@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.webpieces.nio.api.channels.Channel;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import org.webpieces.util.metrics.MetricStrategy;
 
@@ -14,10 +15,19 @@ public class ConnectedChannels {
 
 	private ConcurrentHashMap<Channel, Boolean> connectedChannels = new ConcurrentHashMap<>();
 	private volatile boolean closed;
+	private Counter addedCounter;
+	private Counter removedCounter;
 	
 	public ConnectedChannels(String id) {
-		String metricName = MetricStrategy.formName(id + "/connections");
+		String metricName = MetricStrategy.formName(id + "/connections/count");
 		Metrics.gauge(metricName, connectedChannels, (c) -> c.size());
+		
+		String metricName1 = MetricStrategy.formName(id + "/connections/added");		
+		addedCounter = Metrics.counter(metricName1);
+		
+		String metricName2 = MetricStrategy.formName(id + "/connections/removed");
+		removedCounter = Metrics.counter(metricName2);
+
 	}
 
 	public boolean addChannel(Channel channel) {
@@ -26,6 +36,7 @@ public class ConnectedChannels {
 			return false;
 		}
 		
+		addedCounter.increment();
 		this.connectedChannels.put(channel, true);
 		return true;
 	}
@@ -34,6 +45,7 @@ public class ConnectedChannels {
 		if(closed) {
 			return; //don't allow any threads to modify as closeChannels will be doing it
 		}
+		removedCounter.increment();
 		this.connectedChannels.remove(channel);
 	}
 
