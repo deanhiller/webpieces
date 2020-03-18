@@ -24,7 +24,7 @@ public class ThreadChannel implements Channel {
 	
 	@Override
 	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
-		DataListener threaded = new ThreadDataListener(listener, sessionExecutor);
+		DataListener threaded = new ThreadDataListener(this, listener, sessionExecutor);
 		CompletableFuture<Void> future = tcpChannel.connect(addr, threaded);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads

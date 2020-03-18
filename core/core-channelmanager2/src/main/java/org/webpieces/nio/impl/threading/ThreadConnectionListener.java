@@ -29,7 +29,7 @@ public class ThreadConnectionListener implements ConnectionListener {
 				CompletableFuture<DataListener> dataListener = connectionListener.connected(proxy, isReadyForWrites);
 				//transfer the listener to the future to be used
 				dataListener
-					.thenAccept(listener -> translate(future, listener))
+					.thenAccept(listener -> translate(proxy, future, listener))
 					.exceptionally(e -> {
 						future.completeExceptionally(e);
 						return null;
@@ -39,8 +39,8 @@ public class ThreadConnectionListener implements ConnectionListener {
 		return future;
 	}
 
-	private void translate(CompletableFuture<DataListener> future, DataListener listener) {
-		DataListener wrappedDataListener = new ThreadDataListener(listener, executor);
+	private void translate(ThreadTCPChannel proxy, CompletableFuture<DataListener> future, DataListener listener) {
+		DataListener wrappedDataListener = new ThreadDataListener(proxy, listener, executor);
 		future.complete(wrappedDataListener);
 	}
 	

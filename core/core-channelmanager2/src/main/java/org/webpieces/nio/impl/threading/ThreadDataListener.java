@@ -15,8 +15,11 @@ public class ThreadDataListener implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(ThreadDataListener.class);
 	private DataListener dataListener;
 	private SessionExecutor executor;
+	//this must be sent in case people compare objects since this is what is sent through the 'connected' method.
+	private ThreadChannel proxy;
 
-	public ThreadDataListener(DataListener dataListener, SessionExecutor executor) {
+	public ThreadDataListener(ThreadChannel proxy, DataListener dataListener, SessionExecutor executor) {
+		this.proxy = proxy;
 		this.dataListener = dataListener;
 		this.executor = executor;
 	}
@@ -24,30 +27,30 @@ public class ThreadDataListener implements DataListener {
 	@Override
 	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
-		executor.execute(channel, new DataListeneRunanble(dataListener, channel, b, future));
+		executor.execute(proxy, new DataListeneRunanble(dataListener, proxy, b, future));
 		
 		return future;
 	}
 
 	private static class DataListeneRunanble implements Runnable {
 		private DataListener dataListener;
-		private Channel channel;
+		private ThreadChannel proxy;
 		private ByteBuffer buffer;
 		private CompletableFuture<Void> future;
 
-		public DataListeneRunanble(DataListener dataListener, Channel channel, ByteBuffer b,
+		public DataListeneRunanble(DataListener dataListener, ThreadChannel proxyChannel, ByteBuffer b,
 				CompletableFuture<Void> future) {
 					this.dataListener = dataListener;
-					this.channel = channel;
+					this.proxy = proxyChannel;
 					this.buffer = b;
 					this.future = future;
 		}
 
 		@Override
 		public void run() {
-			MDC.put("socket", ""+channel);
+			MDC.put("socket", ""+proxy);
 			try {
-				CompletableFuture<Void> fut = dataListener.incomingData(channel, buffer);
+				CompletableFuture<Void> fut = dataListener.incomingData(proxy, buffer);
 				fut.handle((v, t) -> {
 					if(t == null)
 						future.complete(null);
@@ -67,12 +70,12 @@ public class ThreadDataListener implements DataListener {
 	
 	@Override
 	public void farEndClosed(Channel channel) {
-		executor.execute(channel, new Runnable() {
+		executor.execute(proxy, new Runnable() {
 			@Override
 			public void run() {
-				MDC.put("socket", ""+channel);
+				MDC.put("socket", ""+proxy);
 				try {
-					dataListener.farEndClosed(channel);
+					dataListener.farEndClosed(proxy);
 				} catch(RuntimeException e) {
 					throw e;
 				} finally {
@@ -84,12 +87,12 @@ public class ThreadDataListener implements DataListener {
 
 	@Override
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
-		executor.execute(channel, new Runnable() {
+		executor.execute(proxy, new Runnable() {
 			@Override
 			public void run() {
-				MDC.put("socket", ""+channel);
+				MDC.put("socket", ""+proxy);
 				try {
-					dataListener.failure(channel, data, e);
+					dataListener.failure(proxy, data, e);
 				} catch(RuntimeException e) {
 					throw e;
 				} finally {
