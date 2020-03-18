@@ -11,8 +11,10 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 public class AsyncServerManagerImpl implements AsyncServerManager {
 
 	private ChannelManager channelManager;
+	private String svrId;
 
-	public AsyncServerManagerImpl(ChannelManager channelManager) {
+	public AsyncServerManagerImpl(String id, ChannelManager channelManager) {
+		this.svrId = id;
 		this.channelManager = channelManager;
 	}
 
@@ -24,12 +26,13 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 	
 	private AsyncServer createTcpServerImpl(AsyncConfig config,
 			AsyncDataListener listener, SSLEngineFactory sslFactory) {
-		String id = config.id;
-		ConnectedChannels connectedChannels = new ConnectedChannels();
-		if(id == null)
+		if(config.id == null)
 			throw new IllegalArgumentException("config.id must not be null");
+		
+		String id = svrId+"."+config.id;
+		ConnectedChannels connectedChannels = new ConnectedChannels(id);
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
-		DefaultConnectionListener connectionListener = new DefaultConnectionListener(connectedChannels, proxyListener); 
+		DefaultConnectionListener connectionListener = new DefaultConnectionListener(id, connectedChannels, proxyListener); 
 
 		TCPServerChannel serverChannel;
 		if(sslFactory != null) {

@@ -7,11 +7,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.webpieces.nio.api.channels.Channel;
 
+import io.micrometer.core.instrument.Metrics;
+import org.webpieces.util.metrics.MetricStrategy;
+
 public class ConnectedChannels {
 
 	private ConcurrentHashMap<Channel, Boolean> connectedChannels = new ConcurrentHashMap<>();
 	private volatile boolean closed;
 	
+	public ConnectedChannels(String id) {
+		String metricName = MetricStrategy.formName(id + "/connections");
+		Metrics.gauge(metricName, connectedChannels, (c) -> c.size());
+	}
+
 	public boolean addChannel(Channel channel) {
 		if(closed) {
 			channel.close();

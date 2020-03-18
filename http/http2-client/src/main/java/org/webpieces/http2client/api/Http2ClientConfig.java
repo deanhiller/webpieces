@@ -6,11 +6,17 @@ import org.webpieces.nio.api.BackpressureConfig;
 
 public class Http2ClientConfig {
 
-	
+	private String id = "http2Client";
 	private int numThreads = 20;
 	private Http2Config http2Config;
 	private BackpressureConfig backpressureConfig;
 	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
 	public Http2Config getHttp2Config() {
 		return http2Config;
 	}

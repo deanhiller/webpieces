@@ -1,6 +1,5 @@
 
 dependencies {
-    compile deps['metrics']
     compile project(':core:core-util'), project(':core:core-datawrapper'), project(':core:core-ssl')
 	
 	testCompile project(':core:core-mock')

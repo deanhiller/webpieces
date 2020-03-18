@@ -36,7 +36,7 @@ public class TestSvrReading {
 		config.setStartReadingThreshold(2);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), config, exec);
 
-		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer("testSvr", mgr);
 		
 		listener = new MockAsyncListener();
 

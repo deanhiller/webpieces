@@ -63,7 +63,7 @@ public class TestSslBasicSvr {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
 
-		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer("testSvr", mgr);
 		server = svrMgr.createTcpServer(new AsyncConfig(), listener, sslFactory);
 		
 		CompletableFuture<Void> future = server.start(new InetSocketAddress(8443));

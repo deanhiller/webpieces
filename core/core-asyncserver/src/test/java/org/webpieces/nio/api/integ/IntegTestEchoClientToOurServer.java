@@ -39,7 +39,7 @@ public class IntegTestEchoClientToOurServer {
 		BufferPool pool = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("server", pool, new BackpressureConfig(), executor);
-		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer("testSvr", mgr);
 		AsyncServer server = serverMgr.createTcpServer(new AsyncConfig("tcpServer"), null);
 		server.start(new InetSocketAddress(8080));
 

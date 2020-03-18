@@ -1,4 +1,5 @@
 dependencies {
+    compile deps['micrometer']
 }
 
 publishing.publications.mavenJava.pom.description='A simple utilitiy library with special executor but rather small amount of code in here'

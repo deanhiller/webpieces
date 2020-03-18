@@ -118,7 +118,7 @@ public class TestSslCloseSvr {
 		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
-		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer("testSvr", mgr);
 		AsyncServer server1 = svrMgr.createTcpServer(new AsyncConfig(), listener, sslFactory);
 		return server1;
 	}
