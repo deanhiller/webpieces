@@ -1,23 +1,17 @@
 package org.webpieces.webserver.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.Properties;
 
 public class TestClass {
     public static String readVersion() {
-        try {
-            String filePath = new File("").getAbsolutePath();
-            BufferedReader reader = new BufferedReader(new FileReader(filePath+"/webserver/http-webserver/output/resources/version.properties"));
-            String line = reader.readLine();
-            String seg[] = line.split("=");
-            String version = seg[seg.length-1];
-            return version;
+        Properties properties = new Properties();
+        try (InputStream stream = ResponseCreator.class.getResourceAsStream("/version.properties")) {
+            properties.load(stream);
+            return properties.getProperty("version");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return "null";
     }
 
     public static void main(String args[]) {

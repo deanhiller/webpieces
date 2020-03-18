@@ -65,7 +65,7 @@
     <!-- logger name="com.alvazan.orm.layer9z.spi.db.cassandra.CassandraSession" level="TRACE"/ -->
   
     <root>
-        <level value="TRACE" />
+        <level value="INFO" />
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="STDERR"/>
     </root>

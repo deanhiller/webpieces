@@ -52,8 +52,8 @@ public class ResponseCreator {
 	}
 
 	public String readVersion() {
-		final Properties properties = new Properties();
-		try (final InputStream stream = this.getClass().getResourceAsStream("version.properties")) {
+		Properties properties = new Properties();
+		try (InputStream stream = this.getClass().getResourceAsStream("/version.properties")) {
 			properties.load(stream);
 			return properties.getProperty("version");
 		} catch (IOException e) {
