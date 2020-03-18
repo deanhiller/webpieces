@@ -117,6 +117,30 @@ public class RequestStreamWriter implements StreamWriter {
 		}
 
 		RouterRequest routerRequest = new RouterRequest();
+		fillInRouterRequest(routerRequest);
+		
+		if(log.isDebugEnabled())
+			log.debug("received request="+requestHeaders+" routerRequest="+routerRequest);
+
+		ProxyResponse streamer = null;
+		try {
+			streamer = facade.createProxyResponse();
+			streamer.init(routerRequest, requestHeaders, stream, facade.getMaxBodySize());
+		} catch(Throwable e) {
+			log.error("FATAL, cannot respond since could not create proxy response", e);
+			return CompletableFuture.completedFuture(null);
+		}
+		
+		try {
+			return facade.incomingCompleteRequest(routerRequest, streamer);
+		} catch (BadCookieException e) {
+			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
+			streamer.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
+			return CompletableFuture.completedFuture(null);
+		}
+	}
+
+	private void fillInRouterRequest(RouterRequest routerRequest) {
 		routerRequest.orginalRequest = requestHeaders;
 		
 		fillInHttpsValue(routerRequest);
@@ -182,20 +206,6 @@ public class RequestStreamWriter implements StreamWriter {
 		routerRequest.isSendAheadNextResponses = false;
 		if(routerRequest.relativePath.contains("?"))
 			throw new UnsupportedOperationException("not supported yet");
-
-		if(log.isDebugEnabled())
-			log.debug("received request="+requestHeaders+" routerRequest="+routerRequest);
-
-		ProxyResponse streamer = facade.createProxyResponse();
-		try {
-			streamer.init(routerRequest, requestHeaders, stream, facade.getMaxBodySize());
-
-			return facade.incomingCompleteRequest(routerRequest, streamer);
-		} catch (BadCookieException e) {
-			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
-			streamer.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
-			return CompletableFuture.completedFuture(null);
-		}
 	}
 
 	private void fillInHttpsValue(RouterRequest routerRequest) {

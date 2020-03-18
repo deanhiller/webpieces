@@ -15,7 +15,7 @@
 	    </filter-->
     
 		<encoder>
-			<pattern>%date{ISO8601} [%thread] %caller{1..2} %-4level: %message%n</pattern>
+			<pattern>%date{ISO8601} [%thread] %caller{1} %-4level: %message%n</pattern>
 		</encoder>
 	</appender>
 
@@ -25,7 +25,7 @@
     	</filter>
     
 		<encoder>
-			<pattern>%date{ISO8601} [%thread] %caller{1..2} %-4level: %message%n</pattern>
+			<pattern>%date{ISO8601} [%thread] %caller{1} %-4level: %message%n</pattern>
 		</encoder>
 		<target>System.err</target>
 	</appender>
