@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
-	private static final Logger log = LoggerFactory.getLogger(AsyncSSLEngine2Impl.class);
+	private static final Logger log = LoggerFactory.getLogger(AsyncSSLEngine3Impl.class);
 	
 	private BufferPool pool;
 	private SslMementoImpl mem;
@@ -276,7 +276,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		
 		if(status == Status.BUFFER_UNDERFLOW) {
 			final ByteBuffer data1 = encryptedData;
-			log.warn("buffer underflow. data="+data1.remaining());
+			log.warn(mem+"buffer underflow async3. data="+data1.remaining()
+					+"\n[sockToEngine] unwrap done pos="+data.position()+" lim="+
+					data.limit()+" status="+status+" hs="+hsStatus);
 		}
 	}
 
