@@ -1,7 +1,11 @@
 package org.webpieces.webserver.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -37,12 +41,24 @@ public class ResponseCreator {
 
 	private final CookieTranslator cookieTranslator;
 	private final MimeTypes mimeTypes;
-	
+	private final String version;
+
 	@Inject
 	public ResponseCreator(CookieTranslator cookieTranslator, MimeTypes mimeTypes) {
 		super();
+		version = "webpieces/"+readVersion();
 		this.cookieTranslator = cookieTranslator;
 		this.mimeTypes = mimeTypes;
+	}
+
+	public String readVersion() {
+		final Properties properties = new Properties();
+		try (final InputStream stream = this.getClass().getResourceAsStream("version.properties")) {
+			properties.load(stream);
+			return properties.getProperty("version");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public ResponseEncodingTuple createResponse(Http2Request request, StatusCode statusCode,
@@ -95,6 +111,10 @@ public class ResponseCreator {
 		
 		DateTime now = DateTime.now().toDateTime(DateTimeZone.UTC);
 		String dateStr = formatter.print(now)+" GMT";
+
+
+		Http2Header versionHeader = new Http2Header(Http2HeaderName.SERVER, version);
+		response.addHeader(versionHeader);
 
 		//in general, nearly all these headers are desired..
 		Http2Header date = new Http2Header(Http2HeaderName.DATE, dateStr);

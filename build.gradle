@@ -284,6 +284,7 @@ subprojects {
        into toStagingDir
    }
 
+//   processResources.dependsOn(":webserver:http-webserver:writeVersion")
    assemble.dependsOn('syncJars')
 
    test.dependsOn (":deleteJavaCache")

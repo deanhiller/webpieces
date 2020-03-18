@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 apply plugin: 'jacoco' //code coverage
 apply plugin: 'idea'
 
@@ -54,8 +56,19 @@ dependencies {
     testCompile project(':webserver-plugins:plugin-hibernate')
     testCompile deps['h2db']
     testCompile project(':webserver-plugins:plugin-json-jackson')
-	
+
     testCompile deps['selenium']
+}
+//write to properties file to easily get build properties like version
+//task writeVersion(type: WriteProperties) {
+//    property "version", project.version
+//    outputFile = file(new File(buildDir, "resources/version.properties"))
+//}
+
+processResources {
+    with copySpec {
+        filter(ReplaceTokens, tokens: ['version-to-be-replaced':'version=someValue'])
+    }
 }
 
 publishing.publications.mavenJava.pom.description='The full webpieces server AS A library'
