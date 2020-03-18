@@ -309,7 +309,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		} else if(status == Status.BUFFER_UNDERFLOW) {
 			final ByteBuffer data1 = encryptedData;
 			if(log.isTraceEnabled())
-				log.trace("buffer underflow. data="+data1.remaining());
+				log.trace("buffer underflow trace. data="+data1.remaining());
 		}
 	}
 

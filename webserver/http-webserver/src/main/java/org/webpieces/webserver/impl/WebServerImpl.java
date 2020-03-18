@@ -192,7 +192,7 @@ public class WebServerImpl implements WebServer {
 			String type = "https";
 			if(sslConfiguration.getBackendSslEngineFactory() == null)
 				type = "http";
-			String serverName = "backend("+type+")";
+			String serverName = "backend."+type;
 			
 			log.info("Creating and starting the "+serverName+" over port="+backendAddress+" AND using '"+type+"'");
 		

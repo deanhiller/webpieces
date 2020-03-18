@@ -17,6 +17,10 @@ import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +33,11 @@ public final class KeyProcessor {
 	private static boolean logBufferNextRead = false;
 	private JdkSelect selector;
 	private BufferPool pool;
+
+	private Counter connectionClosed = Metrics.counter("webpieces/connectionsTemp/closed");
+	private Counter connectionOpen = Metrics.counter("webpieces/connectionsTemp/opened");
+	private Counter connectionErrors = Metrics.counter("webpieces/connectionsTemp/errors");
+	private Counter specialConnectionErrors = Metrics.counter("webpieces/connectionsTemp/errors");
 
 	public KeyProcessor(JdkSelect selector, BufferPool pool) {
 		this.selector = selector;
@@ -53,6 +62,8 @@ public final class KeyProcessor {
 				processKey(key, struct);
 				
 			} catch(IOException e) {
+				connectionErrors.increment();
+				
 				log.error(channel+"Processing of key failed, closing channel", e);
 				try {
 					if(key != null) 
@@ -61,12 +72,16 @@ public final class KeyProcessor {
 					log.error(channel+"Close of channel failed", ee);
 				}
 			} catch(CancelledKeyException e) {
+				connectionErrors.increment();
+				
 				//TODO: get rid of this if...else statement by fixing
 				//CancelledKeyException on linux so the tests don't fail
 				RegisterableChannel fChannel = channel;
 				if(log.isTraceEnabled())
 					log.trace(fChannel+"Processing of key failed, but continuing channel manager loop", e);
 			} catch(Throwable e) {
+				connectionErrors.increment();
+				
 				log.error(channel+"Processing of key failed, but continuing channel manager loop", e);
 				try {
 					key.cancel();
@@ -136,9 +151,13 @@ public final class KeyProcessor {
 			int interests = key.interestOps();
 			key.interestOps(interests & (~SelectionKey.OP_CONNECT));
 		
+			connectionOpen.increment();
+			
 			channel.finishConnect();
 			callback.complete(channel);
 		} catch(Exception e) {
+			connectionErrors.increment();
+			
             log.error(key.attachment()+"Could not open connection", e);
             callback.completeExceptionally(e);
 		}
@@ -165,6 +184,8 @@ public final class KeyProcessor {
             processBytes(key, info, chunk, bytes);
             
 		} catch(PortUnreachableException e) {
+			connectionErrors.increment();
+			
             //this is a normal occurence when some writes out udp to a port that is not
             //listening for udp!!!  log as finer and fire to client to deal with it.
 			if(log.isTraceEnabled())
@@ -172,6 +193,8 @@ public final class KeyProcessor {
 			                    "to udp, or udp can't get through to that machine", e);
 			in.failure(channel, null, e);
         } catch(NotYetConnectedException e) {
+        	connectionErrors.increment();
+        	
             //this happens in udp when I disconnect after someone had already been streaming me
             //data.  It is supposed to stop listening but selector keeps firing.
             log.error("Can't read until UDPChannel is connected", e);
@@ -219,10 +242,16 @@ public final class KeyProcessor {
             //throw an IOException: "An existing connection was forcibly closed by the remote host"
             //we also close UDPChannels as well on IOException.  Not sure if this is good or not.
 			
+			specialConnectionErrors.increment();
+			
 			process(key, in, info, chunk, e);
 		} catch(NioException e) {
+			connectionErrors.increment();
+			
 			Throwable cause = e.getCause();
 			if(cause instanceof IOException) {
+				specialConnectionErrors.increment();
+
 				IOException ioExc = (IOException) cause;
 				process(key, in, info, chunk, ioExc);
 			} else
@@ -267,6 +296,11 @@ public final class KeyProcessor {
 			if(apiLog.isTraceEnabled())
 				apiLog.trace(channel+"far end closed, cancel key, close socket");
 			channel.serverClosed();
+			
+			
+			//tempory for visibility(needs to be based on chanmgr id and socket id
+			connectionClosed.increment();
+			
 			in.farEndClosed(channel);
 		} else if(bytes > 0) {
 			if(apiLog.isTraceEnabled())

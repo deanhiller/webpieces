@@ -48,7 +48,7 @@ public class IntegTestLocalhostThroughput {
 		config.setMaxBytes(16_384*10);
 		config.setStartReadingThreshold(512);
 		ChannelManager mgr = createChanMgr("server", executor, pool, config);
-		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer("testSvr", mgr);
 		AsyncServer server = serverMgr.createTcpServer(new AsyncConfig("tcpServer"), new AsyncServerDataListener(recorder, pool));
 		server.start(new InetSocketAddress(8080));
 		

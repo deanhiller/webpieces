@@ -48,7 +48,7 @@ public class TestBasicSslClientServer {
 		pool = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool, new BackpressureConfig());
-		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer("testSvr", mgr);
 		
 		SSLEngineFactoryForTest f = new SSLEngineFactoryForTest();
 		InetSocketAddress addr = new InetSocketAddress("localhost", 0);

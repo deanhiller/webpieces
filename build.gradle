@@ -75,7 +75,6 @@ ext {
        'guava':           'com.google.guava:guava:19.0',
        'eclipse-compiler':'org.eclipse.jdt.core.compiler:ecj:4.5.1',
        'apache-commons-io': 'commons-io:commons-io:2.4',
-       'metrics':         'io.dropwizard.metrics:metrics-core:3.1.0',
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
        'twitter-hpack':   'com.twitter:hpack:v1.0.1',
        'jetty-hpack':     'org.eclipse.jetty.http2:http2-hpack:9.4.0.M1',
@@ -88,8 +87,9 @@ ext {
 
        //look into removing and using a copied single file as we only use one thing
        'commons-lang':    'org.apache.commons:commons-lang3:3.5',
-       'jackson':         'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
+       'jackson':         'org.codehaus.jackson:jackson-mapper-asl:1.9.13',
 	   
+	   'micrometer':      'io.micrometer:micrometer-core:1.4.0-SNAPSHOT'
     ]
 
 }
@@ -177,8 +177,10 @@ subprojects {
    }
 
    repositories {
+       maven { url 'https://repo.spring.io/libs-snapshot' }
        mavenCentral()
    }
+   
    dependencies {
        testCompile deps['junit']
        //for logging in tests

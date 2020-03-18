@@ -10,6 +10,8 @@ import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 
+import org.webpieces.util.metrics.MetricStrategy;
+
 public class AsyncServerMgrFactory {
 
 	private static AtomicInteger counter = new AtomicInteger(0);
@@ -20,13 +22,14 @@ public class AsyncServerMgrFactory {
 	
 	public static AsyncServerManager createAsyncServer(String id, BufferPool pool, BackpressureConfig config) {
 		ExecutorService executor = Executors.newFixedThreadPool(10);
+		MetricStrategy.monitorExecutor(executor, id);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr(id, pool, config, executor);
-		return createAsyncServer(mgr);
+		return createAsyncServer(id, mgr);
 	}
 	
-	public static AsyncServerManager createAsyncServer(ChannelManager channelManager) {
-		return new AsyncServerManagerImpl(channelManager);
+	public static AsyncServerManager createAsyncServer(String id, ChannelManager channelManager) {
+		return new AsyncServerManagerImpl(id, channelManager);
 	}
 	
 }

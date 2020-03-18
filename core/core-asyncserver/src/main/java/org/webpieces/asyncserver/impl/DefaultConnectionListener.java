@@ -7,8 +7,13 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.util.metrics.MetricStrategy;
 
 public class DefaultConnectionListener implements ConnectionListener {
 
@@ -16,15 +21,19 @@ public class DefaultConnectionListener implements ConnectionListener {
 	private ConnectedChannels connectedChannels;
 	private ByteBuffer overloadResponse;
 	private ProxyDataListener listener;
+	private Counter overloadCounter;
 
-	public DefaultConnectionListener(ConnectedChannels channels, ProxyDataListener listener) {
+	public DefaultConnectionListener(String id, ConnectedChannels channels, ProxyDataListener listener) {
 		this.connectedChannels = channels;
 		this.listener = listener;
+		String metricName = MetricStrategy.formName(id+"/overloadCount");
+		overloadCounter = Metrics.counter(metricName);
 	}
 
 	@Override
 	public CompletableFuture<DataListener> connected(Channel tcpChannel, boolean isReadyForWrites) {
 		if(overloadResponse != null) {
+			overloadCounter.increment();
 			//This is annoying.....
 			//1. we canNOT do synchronous write as it could block forever (if hacker simulates full nic)
 			//2. we can do async but it may never fire data was written so firing close after write is complete may not close forever(leak connection)

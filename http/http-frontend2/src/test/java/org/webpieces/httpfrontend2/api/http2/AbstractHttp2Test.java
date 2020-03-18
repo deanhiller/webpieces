@@ -58,7 +58,7 @@ public class AbstractHttp2Test {
 		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
 
 		HttpSvrConfig frontendConfig = new HttpSvrConfig("http", new InetSocketAddress("me", 8080));
-		HttpFrontendManager manager = HttpFrontendFactory.createFrontEnd(mockChanMgr, mockTimer, injConfig);
+		HttpFrontendManager manager = HttpFrontendFactory.createFrontEnd("testSvr", mockChanMgr, mockTimer, injConfig);
 		HttpServer httpServer = manager.createHttpServer(frontendConfig, mockListener);
 		httpServer.start();
         

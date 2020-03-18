@@ -1,26 +1,28 @@
 package org.webpieces.http2client.api;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
-import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.data.api.BufferPool;
-import org.webpieces.http2client.impl.Http2ClientImpl;
-import org.webpieces.nio.api.ChannelManager;
-import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.util.threading.NamedThreadFactory;
-import org.webpieces.util.time.TimeImpl;
-
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
+import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.BufferPool;
+import org.webpieces.http2client.impl.Http2ClientImpl;
+import org.webpieces.nio.api.ChannelManager;
+import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.util.metrics.MetricStrategy;
+import org.webpieces.util.threading.NamedThreadFactory;
+import org.webpieces.util.time.TimeImpl;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public abstract class Http2ClientFactory {
 
 	public static Http2Client createHttpClient(Http2ClientConfig config) {
 		Executor executor = Executors.newFixedThreadPool(config.getNumThreads(), new NamedThreadFactory("httpclient"));
+		MetricStrategy.monitorExecutor(executor, config.getId());
+
 		BufferCreationPool pool = new BufferCreationPool();
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
 		
