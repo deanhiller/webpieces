@@ -26,7 +26,7 @@ class ApplyDatabaseProperties implements Runnable {
 	@Override
 	public void run() {
 		try {
-			log.info("Starting to apply properties from database to beans.  read Database first");
+			log.debug("Starting to apply properties from database to beans.  read Database first");
 
 			CompletableFuture<Map<String, String>> dbRead = storage.read(KeyUtil.PLUGIN_PROPERTIES_KEY);
 
