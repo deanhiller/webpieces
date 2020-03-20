@@ -73,4 +73,9 @@ public class MockChannelManager implements ChannelManager {
 	public ConnectionListener getBackendConnection() {
 		return backendConnectionListener;
 	}
+
+	@Override
+	public String getName() {
+		return "mockChanMgr2";
+	}
 }

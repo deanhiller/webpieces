@@ -66,4 +66,10 @@ public class MockChannelMgr extends MockSuperclass implements ChannelManager {
 		
 	}
 
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

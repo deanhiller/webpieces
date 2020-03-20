@@ -10,8 +10,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.Channel;
@@ -20,8 +21,6 @@ import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 
@@ -35,7 +34,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	protected org.webpieces.nio.api.jdk.JdkSocketChannel channel;
 		    
 	public BasTCPChannel(
-			IdObject id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
+			String id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
 	) {
 		super(id, selMgr, router, pool, config);
 		this.channelState = ChannelState.NOT_STARTED;
@@ -57,7 +56,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 * @param executor 
 	 */
 	public BasTCPChannel(
-			IdObject id, JdkSocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
+			String id, JdkSocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
 	) {
 		super(id, selMgr, router, pool, config);
 		if(newChan.isBlocking())

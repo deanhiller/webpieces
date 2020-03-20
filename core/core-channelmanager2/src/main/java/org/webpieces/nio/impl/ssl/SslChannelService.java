@@ -72,4 +72,9 @@ public class SslChannelService implements ChannelManager {
 		mgr.stop();
 	}
 
+	@Override
+	public String getName() {
+		return mgr.getName();
+	}
+
 }

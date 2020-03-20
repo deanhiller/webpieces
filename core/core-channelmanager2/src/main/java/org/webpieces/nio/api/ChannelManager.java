@@ -64,5 +64,7 @@ public interface ChannelManager {
 	public DatagramChannel createDatagramChannel(String id, int bufferSize, DatagramListener listener);
     
 	public void stop();
+	
+	public String getName();
 
 }

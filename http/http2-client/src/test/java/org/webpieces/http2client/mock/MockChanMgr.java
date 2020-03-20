@@ -66,4 +66,9 @@ public class MockChanMgr extends MockSuperclass implements ChannelManager {
 		
 	}
 
+	@Override
+	public String getName() {
+		return "mockChanMgr1";
+	}
+
 }

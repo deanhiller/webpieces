@@ -24,7 +24,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public abstract class HttpFrontendFactory {
 	
-	public static final String HTTP2_ENGINE_THREAD_POOL = "http2EngineThreadPool";
 	public static final String FILE_READ_EXECUTOR = "fileReadExecutor";
 	
 	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrMgr, BufferPool pool, Http2Config http2Config) {
@@ -54,7 +53,7 @@ public abstract class HttpFrontendFactory {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, config.getBackpressureConfig(), executor);
 
-		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(id, chanMgr);
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
 		
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
@@ -65,16 +64,16 @@ public abstract class HttpFrontendFactory {
 		return new FrontEndServerManagerImpl(svrMgr, timer, svrEngineFactory, httpParser);
 	}
 	
-	public static HttpFrontendManager createFrontEnd(String id, 
+	public static HttpFrontendManager createFrontEnd(
 			ChannelManager chanMgr, ScheduledExecutorService timer, InjectionConfig injConfig) {
         BufferCreationPool pool = new BufferCreationPool();
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
-		return createFrontEnd(id, chanMgr, timer, injConfig, httpParser);
+		return createFrontEnd(chanMgr, timer, injConfig, httpParser);
 	}
 	
-	public static HttpFrontendManager createFrontEnd(String id, 
+	public static HttpFrontendManager createFrontEnd(
 			ChannelManager chanMgr, ScheduledExecutorService timer, InjectionConfig injConfig, HttpParser parsing) {
-		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(id, chanMgr);
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
 		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory(injConfig );
 		return new FrontEndServerManagerImpl(svrMgr, timer, svrEngineFactory, parsing);
 	}

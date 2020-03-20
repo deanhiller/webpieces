@@ -55,14 +55,6 @@ public class ThreadChannel implements Channel {
 	public String getChannelId() {
 		return tcpChannel.getChannelId();
 	}
-	
-	public void setName(String string) {
-		tcpChannel.setName(string);
-	}
-
-	public String getName() {
-		return tcpChannel.getName();
-	}
 
 	public CompletableFuture<Void> bind(SocketAddress addr) {
 		return tcpChannel.bind(addr);

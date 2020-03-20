@@ -19,8 +19,6 @@ import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -29,7 +27,6 @@ import org.webpieces.nio.api.mocks.MockClientSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSslDataListener;
 import org.webpieces.ssl.api.AsyncSSLFactory;
-import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.ssl.api.SSLParser;
 import org.webpieces.ssl.api.dto.SslAction;
 import org.webpieces.ssl.api.dto.SslActionEnum;
@@ -37,7 +34,6 @@ import org.webpieces.util.threading.DirectExecutor;
 
 public class TestSslCloseClient {
 
-	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private MockSslDataListener mockClientDataListener = new MockSslDataListener();
 	
 	private MockClientSideJdkChannel mockChannel = new MockClientSideJdkChannel();

@@ -48,7 +48,7 @@ public class TestBasicSslClientServer {
 		pool = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool, new BackpressureConfig());
-		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer("testSvr", mgr);
+		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer(mgr);
 		
 		SSLEngineFactoryForTest f = new SSLEngineFactoryForTest();
 		InetSocketAddress addr = new InetSocketAddress("localhost", 0);
@@ -69,7 +69,8 @@ public class TestBasicSslClientServer {
 		}
 		
 		for(int i = 0; i < values.size(); i++) {
-			Assert.assertEquals(new Integer(i), values.get(i));
+			Integer expected = i;
+			Assert.assertEquals(expected, values.get(i));
 		}
 	}
 	

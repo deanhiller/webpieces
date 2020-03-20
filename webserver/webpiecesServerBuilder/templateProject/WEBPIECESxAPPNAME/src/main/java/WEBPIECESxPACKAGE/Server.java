@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -48,6 +49,8 @@ public class Server {
 			//or modify this to use unique prod/staging/devel databases for each environment and pass in
 			//on the command line
 			String[] newArgs = addArgs(args, "-hibernate.persistenceunit=production");
+			
+			String instanceId = RandomInstanceId.generate();
 
 			ServerConfig svrConfig = createServerConfig();
 			Server server = new Server(null, null, svrConfig, newArgs);

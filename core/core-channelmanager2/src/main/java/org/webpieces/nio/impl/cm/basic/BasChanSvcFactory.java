@@ -24,14 +24,14 @@ public class BasChanSvcFactory extends ChannelManagerFactory {
 	}
 
 	@Override
-	public ChannelManager createSingleThreadedChanMgr(String threadName, BufferPool pool, BackpressureConfig config) {
-		BasChannelService mgr = new BasChannelService(threadName, select, pool, config);
+	public ChannelManager createSingleThreadedChanMgr(String name, BufferPool pool, BackpressureConfig config) {
+		BasChannelService mgr = new BasChannelService(name, select, pool, config);
 		return new SslChannelService(mgr, pool);
 	}
 
 	@Override
-	public ChannelManager createMultiThreadedChanMgr(String threadName, BufferPool pool, BackpressureConfig config, Executor executor) {
-		ChannelManager mgr = createSingleThreadedChanMgr(threadName, pool, config);
+	public ChannelManager createMultiThreadedChanMgr(String name, BufferPool pool, BackpressureConfig config, Executor executor) {
+		ChannelManager mgr = createSingleThreadedChanMgr(name, pool, config);
 		ThreadedChannelService mgr2 = new ThreadedChannelService(mgr, executor);
 		return new SslChannelService(mgr2, pool);
 	}

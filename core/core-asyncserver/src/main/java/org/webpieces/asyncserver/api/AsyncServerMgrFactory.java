@@ -25,11 +25,11 @@ public class AsyncServerMgrFactory {
 		MetricStrategy.monitorExecutor(executor, id);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr(id, pool, config, executor);
-		return createAsyncServer(id, mgr);
+		return createAsyncServer(mgr);
 	}
 	
-	public static AsyncServerManager createAsyncServer(String id, ChannelManager channelManager) {
-		return new AsyncServerManagerImpl(id, channelManager);
+	public static AsyncServerManager createAsyncServer(ChannelManager channelManager) {
+		return new AsyncServerManagerImpl(channelManager);
 	}
 	
 }

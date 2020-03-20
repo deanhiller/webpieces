@@ -11,10 +11,8 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 public class AsyncServerManagerImpl implements AsyncServerManager {
 
 	private ChannelManager channelManager;
-	private String svrId;
 
-	public AsyncServerManagerImpl(String id, ChannelManager channelManager) {
-		this.svrId = id;
+	public AsyncServerManagerImpl(ChannelManager channelManager) {
 		this.channelManager = channelManager;
 	}
 
@@ -29,16 +27,16 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 		if(config.id == null)
 			throw new IllegalArgumentException("config.id must not be null");
 		
-		String id = svrId+"."+config.id;
+		String id = channelManager.getName()+"."+config.id;
 		ConnectedChannels connectedChannels = new ConnectedChannels(id);
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
 		DefaultConnectionListener connectionListener = new DefaultConnectionListener(id, connectedChannels, proxyListener); 
 
 		TCPServerChannel serverChannel;
 		if(sslFactory != null) {
-			serverChannel = channelManager.createTCPServerChannel(id, connectionListener, sslFactory);
+			serverChannel = channelManager.createTCPServerChannel(config.id, connectionListener, sslFactory);
 		} else {
-			serverChannel = channelManager.createTCPServerChannel(id, connectionListener);
+			serverChannel = channelManager.createTCPServerChannel(config.id, connectionListener);
 		}
 
 		//MUST be called before bind...
@@ -52,5 +50,10 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 	@Override
 	public AsyncServer createTcpServer(AsyncConfig config, AsyncDataListener listener) {
 		return createTcpServerImpl(config, listener, null);
+	}
+
+	@Override
+	public String getName() {
+		return channelManager.getName();
 	}
 }

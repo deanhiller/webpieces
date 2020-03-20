@@ -2,7 +2,6 @@ package org.webpieces.nio.impl.cm.basic;
 
 import java.io.IOException;
 import java.net.BindException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -10,8 +9,9 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -22,8 +22,6 @@ import org.webpieces.nio.api.handlers.ConsumerFunc;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 
@@ -40,7 +38,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	private KeyProcessor router;
 	private BackpressureConfig config;
 	
-	public BasTCPServerChannel(IdObject id, JdkSelect c, SelectorManager2 selMgr, KeyProcessor router,
+	public BasTCPServerChannel(String id, JdkSelect c, SelectorManager2 selMgr, KeyProcessor router,
 			ConnectionListener listener, BufferPool pool, BackpressureConfig config) {
 		super(id, selMgr);
 		this.router = router;
@@ -75,8 +73,8 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			newChan.configureBlocking(false);
             
             SocketAddress remoteAddress = newChan.getRemoteAddress();
-			IdObject obj = new IdObject(getIdObject(), newSocketNum);
-			BasTCPChannel tcpChan = new BasTCPChannel(obj, newChan, remoteAddress, selMgr, router, pool, config);
+			String serverSocketId = id+"."+newSocketNum;
+			BasTCPChannel tcpChan = new BasTCPChannel(serverSocketId, newChan, remoteAddress, selMgr, router, pool, config);
 			if(log.isTraceEnabled())
 				log.trace(tcpChan+"Accepted new incoming connection");
 			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);

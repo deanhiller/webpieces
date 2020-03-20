@@ -97,19 +97,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	}
 
 	@Override
-	public void setName(String string) {
-		
-		
-	}
-
-	@Override
 	public String getChannelId() {
-		
-		return null;
-	}
-
-	@Override
-	public String getName() {
 		
 		return null;
 	}

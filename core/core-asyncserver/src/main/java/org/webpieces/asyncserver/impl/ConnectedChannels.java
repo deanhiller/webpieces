@@ -5,17 +5,14 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.util.metrics.MetricStrategy;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import org.webpieces.util.metrics.MetricStrategy;
 
 public class ConnectedChannels {
 
-	private static final Logger log = LoggerFactory.getLogger(ConnectedChannels.class);
 	private ConcurrentHashMap<Channel, Boolean> connectedChannels = new ConcurrentHashMap<>();
 	private volatile boolean closed;
 	private Counter addedCounter;

@@ -12,44 +12,24 @@ import org.webpieces.nio.api.channels.RegisterableChannel;
  */
 abstract class RegisterableChannelImpl implements RegisterableChannel {
 
-	protected IdObject id;
+	protected String id;
 	protected SelectorManager2 selMgr;
 	private SelectionKey key;
 
-	public RegisterableChannelImpl(IdObject id, SelectorManager2 selMgr) {
+	public RegisterableChannelImpl(String id, SelectorManager2 selMgr) {
 		if(id == null)
 			throw new IllegalArgumentException("id cannot be null");		
 		this.id = id;
 		this.selMgr = selMgr;
 	}
 	
-    /**
-     * @see org.webpieces.nio.api.channels.RegisterableChannel#setName(java.lang.String)
-     */
-    public void setName(String name)
-    {
-        id.setName(name);
-    }
-
-    /**
-     * @see org.webpieces.nio.api.channels.RegisterableChannel#getName()
-     */
-    public String getName()
-    {
-        return id.getName();
-    }
-    
 	@Override
 	public String getChannelId() {
-		return id.getChannelId();
-	}
-	
-	public IdObject getIdObject() {
 		return id;
 	}
 	
 	public String toString() {
-		return id.toString();
+		return id;
 	}
 	
 	//public abstract SelectableChannel getRealChannel();

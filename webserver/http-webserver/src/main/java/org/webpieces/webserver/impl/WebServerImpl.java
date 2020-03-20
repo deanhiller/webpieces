@@ -214,9 +214,9 @@ public class WebServerImpl implements WebServer {
 			int httpsPort = -1;
 
 			if(httpServer != null) //happens if port disabled
-				getUnderlyingHttpChannel().getLocalAddress().getPort();
+				httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();
 			if(httpsServer != null) //happens if port disabled
-				getUnderlyingHttpsChannel().getLocalAddress().getPort();
+				httpsPort = getUnderlyingHttpsChannel().getLocalAddress().getPort();
 			
 			portConfig.setPortConfig(new PortConfig(httpPort, httpsPort));
 			log.info("All servers started");	

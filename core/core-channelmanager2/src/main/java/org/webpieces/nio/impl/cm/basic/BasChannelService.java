@@ -29,14 +29,16 @@ class BasChannelService implements ChannelManager {
 	private BufferPool pool;
 	private KeyProcessor processor;
 	private BackpressureConfig config;
+	private String name;
 
-	BasChannelService(String threadName, JdkSelect apis, BufferPool pool, BackpressureConfig config) {
+	BasChannelService(String name, JdkSelect apis, BufferPool pool, BackpressureConfig config) {
+		this.name = name;
 		if(config == null)
 			throw new IllegalArgumentException("config must be supplied");
 		this.pool = pool;
 		this.config = config;
 		processor = new KeyProcessor(apis, pool);
-		selMgr = new SelectorManager2(apis, processor, threadName);
+		selMgr = new SelectorManager2(apis, processor, name);
         this.selector = apis;
         start();
 	}
@@ -46,8 +48,8 @@ class BasChannelService implements ChannelManager {
         preconditionChecks(id);
         if(listener == null)
         	throw new IllegalArgumentException("connectionListener cannot be null");
-        IdObject obj = new IdObject(id);
-        return new BasTCPServerChannel(obj, selector, selMgr, processor, listener, pool, config);
+        String fullId = name+"."+id;
+        return new BasTCPServerChannel(fullId, selector, selMgr, processor, listener, pool, config);
 	}
 	
 	@Override
@@ -65,8 +67,8 @@ class BasChannelService implements ChannelManager {
 	@Override
     public TCPChannel createTCPChannel(String id) {
         preconditionChecks(id);
-        IdObject obj = new IdObject(id);      
-        return new BasTCPChannel(obj, selector, selMgr, processor, pool, config);
+        String fullId = name+"."+id;
+        return new BasTCPChannel(fullId, selector, selMgr, processor, pool, config);
 	}
 
 	@Override
@@ -77,15 +79,16 @@ class BasChannelService implements ChannelManager {
 	@Override
     public UDPChannel createUDPChannel(String id) {
         preconditionChecks(id);
-        IdObject obj = new IdObject(id);
-        return new UDPChannelImpl(obj, selector, selMgr, processor, pool, config);
+        String fullId = name+"."+id;
+        return new UDPChannelImpl(fullId, selector, selMgr, processor, pool, config);
     }
     
 	@Override
 	public DatagramChannel createDatagramChannel(String id, int bufferSize, DatagramListener dataListener) {
         if(dataListener == null)
         	throw new IllegalArgumentException("dataListener cannot be null");
-        return new DatagramChannelImpl(id, bufferSize, dataListener);
+        String fullId = name+"."+id;
+        return new DatagramChannelImpl(fullId, bufferSize, dataListener);
     }
     
 	public void start() {
@@ -99,6 +102,16 @@ class BasChannelService implements ChannelManager {
 	public void stop() {
 		started = false;
 		selMgr.stop();
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 	
 }

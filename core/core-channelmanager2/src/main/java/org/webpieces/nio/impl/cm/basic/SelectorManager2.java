@@ -31,16 +31,15 @@ import java.nio.channels.SelectionKey;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.api.jdk.Keys;
 import org.webpieces.nio.api.jdk.SelectorListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public class SelectorManager2 implements SelectorListener {

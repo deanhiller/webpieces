@@ -44,20 +44,8 @@ public interface RegisterableChannel {
 	 * @param b
 	 */
 	void setReuseAddress(boolean b);	
-	
-    /**
-     * The name of the channel shows up in the management GUI if there is one such that an admin
-     * can kill clients based on the name.  Username is a great thing to use for the name of a channel
-     * so the admin can kill clients based on the username.  He can also monitor usage as well
-     * 
-     * The name is also used in the logs so if something goes wrong, you know which channel it was.
-     * @param string
-     */
-    public void setName(String string);
-    
+
 	public String getChannelId();
-	
-    public String getName();
     
 	/**
 	 * @param addr

@@ -3,12 +3,11 @@ package org.webpieces.http2client.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
-import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.nio.api.channels.TCPChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.nio.api.channels.TCPChannel;
 
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2engine.api.error.ShutdownConnection;

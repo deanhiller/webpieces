@@ -23,14 +23,6 @@ public abstract class SslChannel implements Channel {
 	public String getChannelId() {
 		return channel.getChannelId();
 	}
-	
-	public void setName(String string) {
-		channel.setName(string);
-	}
-
-	public String getName() {
-		return channel.getName();
-	}
 
 	public CompletableFuture<Void> bind(SocketAddress addr) {
 		return channel.bind(addr);

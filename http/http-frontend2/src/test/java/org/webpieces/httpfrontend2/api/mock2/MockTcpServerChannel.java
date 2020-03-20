@@ -16,17 +16,7 @@ public class MockTcpServerChannel implements TCPServerChannel {
 	}
 
 	@Override
-	public void setName(String string) {
-		
-	}
-
-	@Override
 	public String getChannelId() {
-		return null;
-	}
-
-	@Override
-	public String getName() {
 		return null;
 	}
 

@@ -13,6 +13,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.SSLEngineFactoryWithHost;
@@ -24,8 +26,6 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLFactory;
 import org.webpieces.ssl.api.SslListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SslTCPChannel extends SslChannel implements TCPChannel {
 

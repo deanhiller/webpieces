@@ -69,4 +69,9 @@ public class MockChanMgr extends MockSuperclass implements ChannelManager {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
 	}
 
+	@Override
+	public String getName() {
+		return "mockChanMgr";
+	}
+
 }

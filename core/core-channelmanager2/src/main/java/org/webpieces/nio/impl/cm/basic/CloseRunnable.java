@@ -1,7 +1,6 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

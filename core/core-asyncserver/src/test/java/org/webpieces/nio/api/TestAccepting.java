@@ -29,7 +29,7 @@ public class TestAccepting {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
 
-		svrMgr = AsyncServerMgrFactory.createAsyncServer("testSvr", mgr);
+		svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
 	}
 
 	@Test

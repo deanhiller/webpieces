@@ -81,7 +81,7 @@ public class WebServerModule implements Module {
 	@Singleton
 	@Named(HttpFrontendFactory.FILE_READ_EXECUTOR)
 	public ExecutorService provideExecutor() {
-		String id = "fileReadCallbacks";
+		String id = "fileReadPool";
 		ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory(id));
 		MetricStrategy.monitorExecutor(executor, id);
 		return executor;
@@ -95,23 +95,13 @@ public class WebServerModule implements Module {
 	
 	@Provides
 	@Singleton
-	@Named(HttpFrontendFactory.HTTP2_ENGINE_THREAD_POOL)
-	public Executor providesEngineThreadPool(WebServerConfig config) {
-		String id = "http2Engine";
-		ExecutorService executor = Executors.newFixedThreadPool(config.getHttp2EngineThreadCount(), new NamedThreadFactory(id));
-		MetricStrategy.monitorExecutor(executor, id);
-		return executor;
-	}
-	
-	@Provides
-	@Singleton
 	public ChannelManager providesChanMgr(WebServerConfig config, BufferPool pool) {
-		String id = "webpiecesThreadPool";
+		String id = "webpiecesPool";
 		Executor executor = Executors.newFixedThreadPool(config.getNumFrontendServerThreads(), new NamedThreadFactory(id));
 		MetricStrategy.monitorExecutor(executor, id);
 
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager chanMgr = factory.createMultiThreadedChanMgr("selectorThread", pool, config.getBackpressureConfig(), executor);
+		ChannelManager chanMgr = factory.createMultiThreadedChanMgr("webpiecesSvrChanMgr", pool, config.getBackpressureConfig(), executor);
 		
 		return chanMgr;
 	}
@@ -121,7 +111,6 @@ public class WebServerModule implements Module {
 	public HttpFrontendManager providesAsyncServerMgr(
 			ChannelManager chanMgr, 
 			ScheduledExecutorService timer, 
-			@Named(HttpFrontendFactory.HTTP2_ENGINE_THREAD_POOL) Executor executor1, 
 			BufferPool pool,
 			Time time, 
 			WebServerConfig config) {
@@ -130,7 +119,7 @@ public class WebServerModule implements Module {
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		InjectionConfig injConfig = new InjectionConfig(http2Parser, time, config.getHttp2Config());
 
-		return HttpFrontendFactory.createFrontEnd("webpiecesFE", chanMgr, timer, injConfig, httpParser);
+		return HttpFrontendFactory.createFrontEnd(chanMgr, timer, injConfig, httpParser);
 	}
 	
 }

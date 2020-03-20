@@ -10,8 +10,9 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.util.Calendar;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.Channel;
@@ -23,11 +24,8 @@ import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
 import org.webpieces.nio.impl.cm.basic.ChannelInfo;
 import org.webpieces.nio.impl.cm.basic.ChannelState;
-import org.webpieces.nio.impl.cm.basic.IdObject;
 import org.webpieces.nio.impl.cm.basic.KeyProcessor;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
@@ -38,7 +36,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
     private Calendar expires;
     
 	public UDPChannelImpl(
-			IdObject id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
+			String id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
 	) {
 		super(id, selMgr, router, pool, config);
 		try {

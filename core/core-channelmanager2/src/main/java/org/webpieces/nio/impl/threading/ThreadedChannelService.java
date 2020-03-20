@@ -65,4 +65,9 @@ public class ThreadedChannelService implements ChannelManager {
 		throw new UnsupportedOperationException("SSL not supported at this level.");
 	}
 
+	@Override
+	public String getName() {
+		return mgr.getName();
+	}
+
 }

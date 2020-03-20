@@ -9,13 +9,9 @@ import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MockTcpChannel implements TCPChannel {
 
-	private static final Logger log = LoggerFactory.getLogger(MockTcpChannel.class);
-	
 	private ChannelSession session = new ChannelSessionImpl();
 
 	private DataListener dataListener;
@@ -61,17 +57,7 @@ public class MockTcpChannel implements TCPChannel {
 	}
 
 	@Override
-	public void setName(String string) {
-	}
-
-	@Override
 	public String getChannelId() {
-		return null;
-	}
-
-	@Override
-	public String getName() {
-		
 		return null;
 	}
 

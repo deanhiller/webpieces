@@ -1,20 +1,19 @@
 package org.webpieces.webserver.test;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.threading.DirectExecutorService;
 import org.webpieces.util.time.Time;
 
@@ -62,13 +61,6 @@ public class OverridesForTest implements Module {
 	@Singleton
 	@Named(HttpFrontendFactory.FILE_READ_EXECUTOR)
 	public ExecutorService provideExecutor() {
-		return new DirectExecutorService();
-	}
-	
-	@Provides
-	@Singleton
-	@Named(HttpFrontendFactory.HTTP2_ENGINE_THREAD_POOL)
-	public Executor providesEngineThreadPool() {
 		return new DirectExecutorService();
 	}
 	

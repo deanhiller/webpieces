@@ -9,8 +9,9 @@ import java.nio.channels.SelectionKey;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -20,9 +21,6 @@ import org.webpieces.nio.api.jdk.JdkSelect;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public final class KeyProcessor {

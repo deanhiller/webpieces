@@ -11,8 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.Channel;
@@ -22,8 +23,6 @@ import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Dean Hiller
@@ -58,7 +57,7 @@ public abstract class BasChannelImpl
 	private Integer maxUnackedBytes;
 	private Integer readingThreshold;
 
-	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config) {
+	public BasChannelImpl(String id, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config) {
 		super(id, selMgr);
 		this.pool = pool;
 		this.isRecording = false;

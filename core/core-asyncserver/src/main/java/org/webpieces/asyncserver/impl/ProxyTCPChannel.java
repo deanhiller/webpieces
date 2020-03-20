@@ -46,10 +46,6 @@ public class ProxyTCPChannel implements TCPChannel {
 		channel.setKeepAlive(b);
 	}
 
-	public void setName(String string) {
-		channel.setName(string);
-	}
-
 	public InetSocketAddress getRemoteAddress() {
 		return channel.getRemoteAddress();
 	}
@@ -62,10 +58,6 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.getChannelId();
 	}
 	
-	public String getName() {
-		return channel.getName();
-	}
-
 	public CompletableFuture<Void> bind(SocketAddress addr) {
 		return channel.bind(addr);
 	}
