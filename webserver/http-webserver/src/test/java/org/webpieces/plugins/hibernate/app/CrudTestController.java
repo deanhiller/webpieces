@@ -1,16 +1,7 @@
 package org.webpieces.plugins.hibernate.app;
 
-import static org.webpieces.plugins.hibernate.app.HibernateRouteId.ADD_USER_PAGE;
-import static org.webpieces.plugins.hibernate.app.HibernateRouteId.EDIT_USER_PAGE;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Singleton;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
@@ -21,8 +12,16 @@ import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.FlashAndRedirect;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.inject.Singleton;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.ADD_USER_PAGE;
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.EDIT_USER_PAGE;
 
 @Singleton
 public class CrudTestController {

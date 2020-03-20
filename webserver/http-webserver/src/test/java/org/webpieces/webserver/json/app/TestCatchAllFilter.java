@@ -1,11 +1,10 @@
 package org.webpieces.webserver.json.app;
 
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.webpieces.plugins.json.JacksonCatchAllFilter;
 import org.webpieces.router.api.exceptions.ClientDataError;
+
+import javax.inject.Inject;
 
 public class TestCatchAllFilter extends JacksonCatchAllFilter {
 

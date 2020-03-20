@@ -35,6 +35,8 @@ import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class IntegSingleRequest {
 
 	private static final Logger log = LoggerFactory.getLogger(IntegSingleRequest.class);
@@ -83,7 +85,7 @@ public class IntegSingleRequest {
 		HpackParser hpackParser = HpackParserFactory.createParser(pool2, false);
 
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, new BackpressureConfig(), executor2);
 		
 		InjectionConfig injConfig = new InjectionConfig(hpackParser);

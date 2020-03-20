@@ -6,6 +6,8 @@ import java.util.concurrent.TimeoutException;
 import org.webpieces.frontend2.api.Protocol;
 import org.webpieces.nio.api.BackpressureConfig;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class SingleSocketThroughput {
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
@@ -27,7 +29,7 @@ public class SingleSocketThroughput {
 		config.setHttp2ClientMaxConcurrentRequests(200);
 		config.setNumSockets(1);
 		
-		ThroughputEngine example = new ThroughputEngine(config);
+		ThroughputEngine example = new ThroughputEngine(config, Metrics.globalRegistry);
 		
 		//BIG NOTE: It is not fair to set multiThreaded=true BECAUSE in that case you would need
 		//many many sockets because the threadpool causes context switching BUT keeps the one socket

@@ -1,9 +1,8 @@
 package org.webpieces.webserver;
 
+import com.google.inject.Module;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
-
-import com.google.inject.Module;
 
 public class PrivateTestConfig {
 

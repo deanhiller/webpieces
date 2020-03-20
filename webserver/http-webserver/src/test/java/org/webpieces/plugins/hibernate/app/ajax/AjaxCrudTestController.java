@@ -1,13 +1,7 @@
 package org.webpieces.plugins.hibernate.app.ajax;
 
-import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_LIST_USERS;
-
-import java.util.List;
-
-import javax.inject.Singleton;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
@@ -15,8 +9,13 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.inject.Singleton;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.List;
+
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_LIST_USERS;
 
 @Singleton
 public class AjaxCrudTestController {

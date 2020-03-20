@@ -1,11 +1,11 @@
 package org.webpieces.plugins.hibernate.app;
 
-import java.util.List;
-import java.util.function.Supplier;
-
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 public class ServiceToFailMock extends MockSuperclass implements ServiceToFail {
 

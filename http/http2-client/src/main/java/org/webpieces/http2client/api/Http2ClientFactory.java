@@ -1,10 +1,8 @@
 package org.webpieces.http2client.api;
 
-import com.webpieces.hpack.api.HpackParser;
-import com.webpieces.hpack.api.HpackParserFactory;
-import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
-import com.webpieces.http2engine.api.client.Http2Config;
-import com.webpieces.http2engine.api.client.InjectionConfig;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.impl.Http2ClientImpl;
@@ -14,19 +12,24 @@ import org.webpieces.util.metrics.MetricStrategy;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.util.time.TimeImpl;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.HpackParserFactory;
+import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
+import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.api.client.InjectionConfig;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 public abstract class Http2ClientFactory {
 
-	public static Http2Client createHttpClient(Http2ClientConfig config) {
+	public static Http2Client createHttpClient(Http2ClientConfig config, MeterRegistry metrics) {
 		Executor executor = Executors.newFixedThreadPool(config.getNumThreads(), new NamedThreadFactory("httpclient"));
 		MetricStrategy.monitorExecutor(executor, config.getId());
 
 		BufferCreationPool pool = new BufferCreationPool();
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
 		
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, config.getBackpressureConfig(), executor);
 
 		InjectionConfig injConfig = new InjectionConfig(hpackParser, new TimeImpl(), config.getHttp2Config());

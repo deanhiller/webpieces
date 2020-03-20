@@ -22,6 +22,9 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
+
+import io.micrometer.core.instrument.Metrics;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +49,7 @@ public class TestBasicSslClientServer {
 	@Test
 	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException {
 		pool = new BufferCreationPool();
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool, new BackpressureConfig());
 		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer(mgr);
 		

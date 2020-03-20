@@ -1,10 +1,7 @@
 package org.webpieces.plugins.hibernate;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeoutException;
+import com.google.inject.Binder;
+import com.google.inject.Module;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,22 +17,21 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.mock.lib.MockExecutor;
-import org.webpieces.nio.api.SSLConfiguration;
-import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.plugins.hibernate.app.ServiceToFail;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.PrivateTestConfig;
 import org.webpieces.webserver.PrivateWebserverForTest;
-import org.webpieces.webserver.SSLEngineFactoryWebServerTesting;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-import com.google.inject.name.Names;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 
 public class TestAsyncHibernate extends AbstractWebpiecesTest {
 

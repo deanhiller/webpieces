@@ -17,12 +17,16 @@ import org.webpieces.throughput.server.ServerAsync;
 import org.webpieces.throughput.server.ServerHttp1_1Sync;
 import org.webpieces.throughput.server.ServerHttp2Sync;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class ThroughputEngine {
 
 	private AsyncConfig config;
+	private MeterRegistry metrics;
 
-	public ThroughputEngine(AsyncConfig config) {
+	public ThroughputEngine(AsyncConfig config, MeterRegistry metrics) {
 		this.config = config;
+		this.metrics = metrics;
 	}
 
 	protected void start(Mode clientConfig, Mode svrConfig, Protocol protocol) throws InterruptedException, ExecutionException, TimeoutException {
@@ -30,7 +34,7 @@ public class ThroughputEngine {
 		if(svrConfig == Mode.ASYNCHRONOUS) {
 			//The asynchronous server supports BOTH protocols and automatically ends up doing
 			//the protocol of the client...
-			ServerAsync svr = new ServerAsync(config);
+			ServerAsync svr = new ServerAsync(config, metrics);
 			future = svr.start();
 		} else if(protocol == Protocol.HTTP11){
 			ServerHttp1_1Sync svr = new ServerHttp1_1Sync();
@@ -52,9 +56,9 @@ public class ThroughputEngine {
 	private Void runClient(InetSocketAddress svrAddress, AsyncConfig config, Mode clientConfig, Protocol protocol) {
 		Clients creator;
 		if(protocol == Protocol.HTTP11)
-			creator = new Http11Clients(config);
+			creator = new Http11Clients(config, metrics);
 		else
-			creator = new Http2Clients(config);
+			creator = new Http2Clients(config, metrics);
 		
 		if(clientConfig == Mode.ASYNCHRONOUS) {
 			runAsyncClient(svrAddress, protocol, creator);

@@ -4,7 +4,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -45,11 +44,11 @@ public class Server {
 			String version = System.getProperty("java.version");
 			log.info("Starting Production Server under java version="+version);
 
-			//A cheat for more permanent arguments that don't change per environment(production, staging, devel)
-			//or modify this to use unique prod/staging/devel databases for each environment and pass in
-			//on the command line
+			//We typically move this to the command line so staging can have
+			//-hibernate.persistenceunit=stagingdb instead but to help people startup, we add the arg
 			String[] newArgs = addArgs(args, "-hibernate.persistenceunit=production");
 			
+			//You could pass in an instance id but in google cloud run, you have to generate it
 			String instanceId = RandomInstanceId.generate();
 
 			ServerConfig svrConfig = createServerConfig();

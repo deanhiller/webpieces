@@ -1,9 +1,7 @@
 package org.webpieces.webserver.beans;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeoutException;
+import com.google.inject.Binder;
+import com.google.inject.Module;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,8 +24,10 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 
 public class TestBeans extends AbstractWebpiecesTest {
 	

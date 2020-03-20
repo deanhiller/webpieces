@@ -1,13 +1,12 @@
 package org.webpieces.webserver.filters.app;
 
-import java.util.concurrent.CompletableFuture;
-
-import javax.inject.Inject;
-
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.util.filters.Service;
+
+import javax.inject.Inject;
+import java.util.concurrent.CompletableFuture;
 
 public class StatefulFilter extends RouteFilter<Integer> {
 

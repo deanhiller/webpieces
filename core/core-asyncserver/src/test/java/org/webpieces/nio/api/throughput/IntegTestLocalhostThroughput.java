@@ -21,6 +21,8 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.threading.NamedThreadFactory;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class IntegTestLocalhostThroughput {
 
 	//private static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostThroughput.class);
@@ -69,7 +71,7 @@ public class IntegTestLocalhostThroughput {
 	}
 
 	private ChannelManager createChanMgr(String id, Executor executor, BufferPool pool, BackpressureConfig config) {
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
 		//This is more reasonable to compare with as introducing a threadpool is something that happens on all systems and slows things
 		//down A TON due to context switching until you add back parsing, SSL handshaking and business logic at which point it becomes
 		//more negligible.  (ie. just switching to createMultiThreaded here can tank throughput in half BUT that will not happen in 

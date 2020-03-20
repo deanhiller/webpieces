@@ -19,6 +19,9 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
+
+import io.micrometer.core.instrument.Metrics;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +48,12 @@ public class IntegTestClientNotRead {
 	
 	public void testSoTimeoutOnSocket() throws InterruptedException {
 		BufferCreationPool pool = new BufferCreationPool();
-		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer("server", pool, new BackpressureConfig());
+		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer("server", pool, new BackpressureConfig(), Metrics.globalRegistry);
 		AsyncServer server = serverMgr.createTcpServer(new AsyncConfig("tcpServer"), new IntegTestClientNotReadListener());
 		server.start(new InetSocketAddress(8080));
 		
 		BufferCreationPool pool2 = new BufferCreationPool();
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("client", pool2, new BackpressureConfig());
 		TCPChannel channel = mgr.createTCPChannel("clientChan");
 

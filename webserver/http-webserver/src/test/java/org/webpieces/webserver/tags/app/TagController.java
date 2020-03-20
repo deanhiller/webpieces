@@ -1,13 +1,12 @@
 package org.webpieces.webserver.tags.app;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Singleton;
-
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
+
+import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public class TagController {

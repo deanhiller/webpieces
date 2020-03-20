@@ -1,13 +1,13 @@
 package org.webpieces.webserver.basic;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class BasicStartWithNoHttps extends AbstractWebpiecesTest {
 

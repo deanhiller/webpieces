@@ -1,15 +1,11 @@
 package org.webpieces.webserver.scopes.app;
 
-import javax.inject.Singleton;
-
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Session;
-import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.controller.actions.Actions;
-import org.webpieces.router.api.controller.actions.FlashAndRedirect;
-import org.webpieces.router.api.controller.actions.Redirect;
-import org.webpieces.router.api.controller.actions.Render;
+import org.webpieces.router.api.controller.actions.*;
 import org.webpieces.webserver.basic.app.biz.UserDto;
+
+import javax.inject.Singleton;
 
 @Singleton
 public class ScopesController {

@@ -12,6 +12,8 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 
 import org.webpieces.util.metrics.MetricStrategy;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class AsyncServerMgrFactory {
 
 	private static AtomicInteger counter = new AtomicInteger(0);
@@ -20,10 +22,10 @@ public class AsyncServerMgrFactory {
 		return counter.getAndIncrement();
 	}
 	
-	public static AsyncServerManager createAsyncServer(String id, BufferPool pool, BackpressureConfig config) {
+	public static AsyncServerManager createAsyncServer(String id, BufferPool pool, BackpressureConfig config, MeterRegistry metrics) {
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 		MetricStrategy.monitorExecutor(executor, id);
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr(id, pool, config, executor);
 		return createAsyncServer(mgr);
 	}

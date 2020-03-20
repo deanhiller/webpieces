@@ -6,6 +6,9 @@ import com.google.inject.Provides;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2engine.api.client.InjectionConfig;
+
+import io.micrometer.core.instrument.Metrics;
+
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
@@ -100,7 +103,37 @@ public class WebServerModule implements Module {
 		Executor executor = Executors.newFixedThreadPool(config.getNumFrontendServerThreads(), new NamedThreadFactory(id));
 		MetricStrategy.monitorExecutor(executor, id);
 
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr("webpiecesSvrChanMgr", pool, config.getBackpressureConfig(), executor);
 		
 		return chanMgr;

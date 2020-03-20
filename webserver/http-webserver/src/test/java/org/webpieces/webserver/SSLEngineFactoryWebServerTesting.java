@@ -1,13 +1,12 @@
 package org.webpieces.webserver;
 
-import java.io.InputStream;
-import java.security.KeyStore;
+import org.webpieces.nio.api.SSLEngineFactory;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-
-import org.webpieces.nio.api.SSLEngineFactory;
+import java.io.InputStream;
+import java.security.KeyStore;
 
 public class SSLEngineFactoryWebServerTesting implements SSLEngineFactory {
 

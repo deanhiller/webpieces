@@ -20,6 +20,8 @@ import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSvrChannel;
 import org.webpieces.util.threading.DirectExecutor;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class TestSvrReading {
 
 	private MockSvrSideJdkChannel mockChannel = new MockSvrSideJdkChannel(); 
@@ -29,7 +31,7 @@ public class TestSvrReading {
 
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
 		DirectExecutor exec = new DirectExecutor();
 		BackpressureConfig config = new BackpressureConfig();
 		config.setMaxBytes(6);

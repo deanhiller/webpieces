@@ -8,6 +8,9 @@ import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.impl.cm.basic.BasChanSvcFactory;
 import org.webpieces.nio.impl.jdk.JdkSelectorImpl;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+
 
 /**
  * @author Dean Hiller
@@ -18,14 +21,14 @@ public abstract class ChannelManagerFactory {
 	 * All Keys(and some values) to put in the map variable can be found 
 	 * as the constants in ChannelManaagerFactory
 	 */
-	public static ChannelManagerFactory createFactory() {
+	public static ChannelManagerFactory createFactory(MeterRegistry metrics) {
         SelectorProvider provider = SelectorProvider.provider();
         JdkSelectorImpl selector = new JdkSelectorImpl(provider);
-		return createFactory(selector);
+		return createFactory(selector, metrics);
 	}
 	
-	public static ChannelManagerFactory createFactory(JdkSelect apis) {
-		return new BasChanSvcFactory(apis);
+	public static ChannelManagerFactory createFactory(JdkSelect apis, MeterRegistry metrics) {
+		return new BasChanSvcFactory(apis, metrics);
 	}
 	
 	/**

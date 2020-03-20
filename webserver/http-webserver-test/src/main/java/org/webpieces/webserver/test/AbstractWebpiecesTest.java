@@ -18,12 +18,30 @@ import org.webpieces.webserver.test.http11.DirectHttp11Client;
 
 import com.google.inject.Module;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class AbstractWebpiecesTest {
 
 	protected MockChannelManager mgr = new MockChannelManager();
 	protected MockTime time = new MockTime(true);
 	protected MockTimer mockTimer = new MockTimer();
 
+	public HttpSocket connectHttpLocal() {
+		try {
+			return connectHttp(false, null);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public HttpSocket connectHttpsLocal() {
+		try {
+			return connectHttps(false, null, null);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public HttpSocket connectHttp(boolean isRemote, InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
 		HttpSocket socket = getClient(isRemote).createHttpSocket();
 		CompletableFuture<Void> connect = socket.connect(addr);
@@ -45,8 +63,9 @@ public class AbstractWebpiecesTest {
 	}
 
 	protected HttpClient getClient(boolean isRemote) {
+		//IF metrics is supplied, we create the http client
 		if(isRemote) {
-			HttpClient client = HttpClientFactory.createHttpClient("testClient", 5, new BackpressureConfig());
+			HttpClient client = HttpClientFactory.createHttpClient("testClient", 5, new BackpressureConfig(), Metrics.globalRegistry);
 			return client;
 		}
 		

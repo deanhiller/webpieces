@@ -16,6 +16,8 @@ import org.webpieces.nio.api.mocks.MockDataListener;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.util.threading.DirectExecutor;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class TestReading {
 
 	private ChannelManager mgr;
@@ -26,7 +28,7 @@ public class TestReading {
 
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
 		DirectExecutor exec = new DirectExecutor();
 		BackpressureConfig config = new BackpressureConfig();
 		config.setMaxBytes(6);

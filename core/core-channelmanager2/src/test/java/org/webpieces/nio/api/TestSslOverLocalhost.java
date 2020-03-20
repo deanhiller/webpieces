@@ -18,6 +18,8 @@ import org.webpieces.nio.api.mocks.MockConnectionListener;
 import org.webpieces.nio.api.mocks.MockMulithreadedSslDataListener;
 import org.webpieces.util.threading.NamedThreadFactory;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class TestSslOverLocalhost {
 
 	private MockMulithreadedSslDataListener mockSvrDataListener = new MockMulithreadedSslDataListener();
@@ -60,7 +62,7 @@ public class TestSslOverLocalhost {
 
 	private ChannelManager createSvrChanMgr(String name) {
 		ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory(name));
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
 		ChannelManager svrMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new BufferCreationPool(), new BackpressureConfig(), executor);
 		return svrMgr;
 	}

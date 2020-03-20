@@ -1,16 +1,16 @@
 package org.webpieces.webserver.https.app;
 
-import static org.webpieces.ctx.api.HttpMethod.GET;
-import static org.webpieces.ctx.api.HttpMethod.POST;
-import static org.webpieces.router.api.routes.Port.BOTH;
-import static org.webpieces.router.api.routes.Port.HTTPS;
-
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.FilterPortType;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.webserver.api.login.LoginFilter;
 import org.webpieces.webserver.api.login.LoginInfo;
+
+import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.ctx.api.HttpMethod.POST;
+import static org.webpieces.router.api.routes.Port.BOTH;
+import static org.webpieces.router.api.routes.Port.HTTPS;
 
 public class HttpsRoutes implements Routes {
 

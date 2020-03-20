@@ -18,6 +18,8 @@ import org.webpieces.nio.api.mocks.MockDataListener;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.util.threading.DirectExecutor;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class TestConnecting {
 
 	private ChannelManager mgr;
@@ -26,7 +28,7 @@ public class TestConnecting {
 
 	@Before
 	public void setup() {
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
 		DirectExecutor exec = new DirectExecutor();
 		mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), exec);
 	}

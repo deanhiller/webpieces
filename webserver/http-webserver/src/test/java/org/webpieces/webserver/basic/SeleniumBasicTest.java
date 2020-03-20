@@ -1,18 +1,13 @@
 package org.webpieces.webserver.basic;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import com.google.inject.Binder;
+import com.google.inject.Module;
+import org.junit.*;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
-
-import com.google.inject.Binder;
-import com.google.inject.Module;
 
 public class SeleniumBasicTest {
 	

@@ -30,6 +30,8 @@ import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.Http2Method;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
+import io.micrometer.core.instrument.Metrics;
+
 class ServerFactory {
 	private static final Logger log = LoggerFactory.getLogger(ServerFactory.class);
     static final String MAIN_RESPONSE = "Here's the file";
@@ -39,7 +41,7 @@ class ServerFactory {
         BufferCreationPool pool = new BufferCreationPool();
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
         FrontendMgrConfig config = new FrontendMgrConfig();
-        HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", timer, pool, config);
+        HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", timer, pool, config, Metrics.globalRegistry);
         HttpSvrConfig svrConfig = new HttpSvrConfig("id2");
         HttpServer server = frontEndMgr.createHttpServer(svrConfig, new OurListener());
         CompletableFuture<Void> fut = server.start();

@@ -9,6 +9,7 @@ public class TagLookupOverride implements Module {
 
 	@Override
 	public void configure(Binder binder) {
+		//NOTE: This is how you install your own Tags into webpieces
 		binder.bind(HtmlTagLookup.class).to(MyHtmlTagLookup.class).asEagerSingleton();;
 	}
 

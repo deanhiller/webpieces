@@ -1,9 +1,6 @@
 package org.webpieces.webserver.filters;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import com.google.inject.AbstractModule;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,7 +19,10 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import com.google.inject.AbstractModule;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class TestFilters extends AbstractWebpiecesTest {
 	

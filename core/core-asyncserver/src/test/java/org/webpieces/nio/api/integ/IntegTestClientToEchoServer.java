@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class IntegTestClientToEchoServer {
 
 	static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostThroughput.class);
@@ -76,7 +78,7 @@ public class IntegTestClientToEchoServer {
 	}
 	
 	private TCPChannel createClientChannel(BufferPool pool2, Executor executor) {
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, new BackpressureConfig(), executor);
 		TCPChannel channel = mgr.createTCPChannel("clientChan");
 		return channel;

@@ -5,6 +5,9 @@ import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
+
+import io.micrometer.core.instrument.MeterRegistry;
+
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
@@ -42,15 +45,16 @@ public abstract class HttpFrontendFactory {
 	 * 
 	 * @param id Use for logging and also file recording names
 	 * use the SessionExecutorImpl found in webpieces
+	 * @param metrics 
 	 * 
 	 * @return
 	 */
 	public static HttpFrontendManager createFrontEnd(
-			String id, ScheduledExecutorService timer, BufferPool pool, FrontendMgrConfig config) {
+			String id, ScheduledExecutorService timer, BufferPool pool, FrontendMgrConfig config, MeterRegistry metrics) {
 		Executor executor = Executors.newFixedThreadPool(config.getThreadPoolSize(), new NamedThreadFactory(id));
 		MetricStrategy.monitorExecutor(executor, id);
 
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, config.getBackpressureConfig(), executor);
 
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);

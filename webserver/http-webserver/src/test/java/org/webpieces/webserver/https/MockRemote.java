@@ -1,9 +1,9 @@
 package org.webpieces.webserver.https;
 
+import org.webpieces.webserver.filters.app.Remote;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.webpieces.webserver.filters.app.Remote;
 
 public class MockRemote implements Remote {
 

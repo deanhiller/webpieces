@@ -1,12 +1,11 @@
 package org.webpieces.plugins.hibernate.app.dbo;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.webpieces.router.api.extensions.ObjectStringConverter;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-
-import org.webpieces.router.api.extensions.ObjectStringConverter;
+import java.util.HashMap;
+import java.util.Map;
 
 public enum Role {
 	BADASS('b', "Badass"), 

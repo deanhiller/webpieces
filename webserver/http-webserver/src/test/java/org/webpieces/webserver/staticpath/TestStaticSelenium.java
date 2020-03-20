@@ -1,10 +1,6 @@
 package org.webpieces.webserver.staticpath;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.webpieces.util.file.VirtualFileClasspath;

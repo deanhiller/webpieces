@@ -21,13 +21,17 @@ import org.slf4j.LoggerFactory;
 
 import com.webpieces.http2engine.api.client.Http2Config;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class ServerAsync {
 	private static final Logger log = LoggerFactory.getLogger(ServerAsync.class);
 	private AsyncConfig config;
 	private Http2Config http2Config;
+	private MeterRegistry metrics;
 
-	public ServerAsync(AsyncConfig config) {
+	public ServerAsync(AsyncConfig config, MeterRegistry metrics) {
 		this.config = config;
+		this.metrics = metrics;
 		http2Config = new Http2Config();
 		long max = config.getClientMaxConcurrentRequests();
 		http2Config.getLocalSettings().setMaxConcurrentStreams(max);
@@ -49,7 +53,7 @@ public class ServerAsync {
 		log.info("Creating single threaded server");
 		BufferCreationPool pool = new BufferCreationPool();
 		
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("svrCmLoop", pool, config.getBackpressureConfig());
 
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
@@ -71,7 +75,7 @@ public class ServerAsync {
 		log.info("Creating multithreaded server. threads="+frontendConfig.getThreadPoolSize());
 
 		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd(
-				"deansvr", timer, new BufferCreationPool(), frontendConfig);
+				"deansvr", timer, new BufferCreationPool(), frontendConfig, metrics);
 		
 		return mgr.createHttpServer(new HttpSvrConfig("asyncsvr"), new EchoListener());
 	}

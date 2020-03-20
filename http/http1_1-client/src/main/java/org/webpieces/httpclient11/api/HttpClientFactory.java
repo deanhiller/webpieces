@@ -10,18 +10,20 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.metrics.MetricStrategy;
 import org.webpieces.util.threading.NamedThreadFactory;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public abstract class HttpClientFactory {
 
-	public static HttpClient createHttpClient(String id, int numThreads, BackpressureConfig backPressureConfig) {
+	public static HttpClient createHttpClient(String id, int numThreads, BackpressureConfig backPressureConfig, MeterRegistry metrics) {
 		Executor executor = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory("httpclient"));
 		MetricStrategy.monitorExecutor(executor, id);
 
 		BufferCreationPool pool = new BufferCreationPool();
 		HttpParser parser = HttpParserFactory.createParser(pool);
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, backPressureConfig, executor);
 		
 		return createHttpClient(id, mgr, parser);		

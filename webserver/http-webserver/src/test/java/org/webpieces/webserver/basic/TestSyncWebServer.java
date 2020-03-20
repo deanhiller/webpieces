@@ -1,10 +1,5 @@
 package org.webpieces.webserver.basic;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,14 +16,23 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 
 public class TestSyncWebServer extends AbstractWebpiecesTest {
 
 	
 	private HttpSocket http11Socket;
+	private SimpleMeterRegistry meterRegistry;
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
+		meterRegistry = new SimpleMeterRegistry();
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), null, false, null);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());		

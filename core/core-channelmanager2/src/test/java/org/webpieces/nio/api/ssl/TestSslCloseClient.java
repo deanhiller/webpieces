@@ -32,6 +32,8 @@ import org.webpieces.ssl.api.dto.SslAction;
 import org.webpieces.ssl.api.dto.SslActionEnum;
 import org.webpieces.util.threading.DirectExecutor;
 
+import io.micrometer.core.instrument.Metrics;
+
 public class TestSslCloseClient {
 
 	private MockSslDataListener mockClientDataListener = new MockSslDataListener();
@@ -185,7 +187,7 @@ public class TestSslCloseClient {
 	}
 
 	public static TCPChannel createClientChannel(String name, MockJdk mockJdk) throws GeneralSecurityException, IOException {
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
 
 		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();

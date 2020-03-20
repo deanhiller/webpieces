@@ -10,13 +10,17 @@ import org.webpieces.throughput.AsyncConfig;
 
 import com.webpieces.http2engine.api.client.Http2Config;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class Http2Clients implements Clients {
 
 	private AsyncConfig config;
 	private Http2Config http2Config;
+	private MeterRegistry metrics;
 
-	public Http2Clients(AsyncConfig config) {
+	public Http2Clients(AsyncConfig config, MeterRegistry metrics) {
 		this.config = config;
+		this.metrics = metrics;
 		http2Config = new Http2Config();
 		http2Config.setInitialRemoteMaxConcurrent(config.getClientMaxConcurrentRequests());
 	}
@@ -28,7 +32,7 @@ public class Http2Clients implements Clients {
 		
 		//single threaded version...
 		BufferCreationPool pool = new BufferCreationPool();
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, config.getBackpressureConfig());
 		return Http2ClientFactory.createHttpClient(http2Config, chanMgr, pool);
 	}
@@ -39,7 +43,7 @@ public class Http2Clients implements Clients {
 		clientConfig.setHttp2Config(http2Config);
 		clientConfig.setNumThreads(config.getClientThreadCount());
 
-		return Http2ClientFactory.createHttpClient(clientConfig);
+		return Http2ClientFactory.createHttpClient(clientConfig, metrics);
 	}
 
 	@Override

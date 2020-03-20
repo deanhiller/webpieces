@@ -7,22 +7,26 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.throughput.AsyncConfig;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class Http11Clients implements Clients {
 
 	private AsyncConfig config;
+	private MeterRegistry metrics;
 
-	public Http11Clients(AsyncConfig config) {
+	public Http11Clients(AsyncConfig config, MeterRegistry metrics) {
 		this.config = config;
+		this.metrics = metrics;
 	}
 
 	@Override
 	public Http2Client createClient() {
 		if(config.getClientThreadCount() != null)
-			return Http2to1_1ClientFactory.createHttpClient("onlyClient", config.getClientThreadCount(), config.getBackpressureConfig());
+			return Http2to1_1ClientFactory.createHttpClient("onlyClient", config.getClientThreadCount(), config.getBackpressureConfig(), metrics);
 			
 		//single threaded version...
 		BufferCreationPool pool = new BufferCreationPool();
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, config.getBackpressureConfig());
 		
 		Http2Client client = Http2to1_1ClientFactory.createHttpClient("onlyClient", chanMgr, pool);

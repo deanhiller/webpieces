@@ -1,9 +1,9 @@
 package org.webpieces.webserver.basic.app.biz;
 
+import org.webpieces.webserver.tags.app.Account;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.webpieces.webserver.tags.app.Account;
 
 public class UserDto {
 
