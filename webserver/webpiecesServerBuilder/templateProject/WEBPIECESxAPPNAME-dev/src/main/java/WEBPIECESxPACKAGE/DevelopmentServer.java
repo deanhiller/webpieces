@@ -17,6 +17,8 @@ import org.webpieces.webserver.api.ServerConfig;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class DevelopmentServer {
 
 	private static final Logger log = LoggerFactory.getLogger(Server.class);
@@ -92,7 +94,8 @@ public class DevelopmentServer {
 		config.setStaticFileCacheTimeSeconds(null);
 		config.setMetaFile(metaFile);
 		
-		server = new Server(platformOverrides, null, config, args);
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+		server = new Server(metrics, platformOverrides, null, config, args);
 	}
 	
 	public void start() throws InterruptedException {

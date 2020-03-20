@@ -1,6 +1,9 @@
 package org.webpieces.webserver;
 
-import com.google.inject.Module;
+import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -15,9 +18,7 @@ import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
 
-import java.io.File;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import com.google.inject.Module;
 
 public class PrivateWebserverForTest {
 	
@@ -35,7 +36,10 @@ public class PrivateWebserverForTest {
 	}
 
 	private WebServer webServer;
-
+	
+	/**
+	 * @deprecated Use methods that PASS in ... args instead!!!! and remove this one
+	 */
 	@Deprecated
 	public PrivateWebserverForTest(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile) {
 		String[] arguments;

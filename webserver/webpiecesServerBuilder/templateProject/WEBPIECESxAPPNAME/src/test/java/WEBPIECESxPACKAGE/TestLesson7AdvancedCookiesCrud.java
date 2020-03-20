@@ -27,6 +27,8 @@ import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.WebBrowserSimulator;
 import org.webpieces.webserver.test.http11.Requests;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 /**
  * These are working examples of tests that sometimes are better done with the BasicSeleniumTest example but are here for completeness
  * so you can test the way you would like to test
@@ -51,10 +53,11 @@ public class TestLesson7AdvancedCookiesCrud extends AbstractWebpiecesTest {
 		//clear in-memory database
 		jdbc.dropAllTablesFromDatabase();
 		
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(false), null, new ServerConfig(JavaCache.getCacheLocation()), args);
+		Server webserver = new Server(metrics, getOverrides(false), null, new ServerConfig(JavaCache.getCacheLocation()), args);
 		webserver.start();
 		HttpSocket https11Socket = connectHttps(false, null, webserver.getUnderlyingHttpChannel().getLocalAddress());
 		webBrowser = new WebBrowserSimulator(https11Socket);

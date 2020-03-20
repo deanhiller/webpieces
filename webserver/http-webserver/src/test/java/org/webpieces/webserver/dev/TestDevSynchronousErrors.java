@@ -4,6 +4,8 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -57,6 +59,7 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		
 		TemplateCompileConfig templateConfig = new TemplateCompileConfig(false);
 
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		Module platformOverrides = Modules.combine(
 				new OverridesForTest(mgr, time, mockTimer, templateConfig),
 				new ForTestingStaticDevelopmentModeModule());

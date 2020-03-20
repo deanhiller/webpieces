@@ -17,7 +17,9 @@ import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSvrChannel;
 import org.webpieces.util.threading.DirectExecutor;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 
 public class TestAccepting {
 
@@ -28,10 +30,11 @@ public class TestAccepting {
 
 	@Before
 	public void setup() {
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
+		MeterRegistry meters = Metrics.globalRegistry;
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
 
-		svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 	}
 
 	@Test

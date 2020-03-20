@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
@@ -31,12 +33,12 @@ import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 @RunWith(Parameterized.class)
 public class TestSimpleRoutes {
@@ -58,7 +60,8 @@ public class TestSimpleRoutes {
 										.setWebappOverrides(module)
 										.setSecretKey(SecretKeyInfo.generateForTest());
 		
-		RouterService prodSvc = RouterSvcFactory.create(config);
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+		RouterService prodSvc = RouterSvcFactory.create(metrics, config);
 		prodSvc.configure(args);
 		args.checkConsumedCorrectly();
 
@@ -69,7 +72,8 @@ public class TestSimpleRoutes {
 		File myCodePath = new File(filePath + "/src/test/java");
 		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), CompileConfig.getTmpDir());
 		Arguments args2 = new CommandLineParser().parse();
-		RouterService devSvc = DevRouterFactory.create(config, compileConfig);
+		SimpleMeterRegistry metrics2 = new SimpleMeterRegistry();
+		RouterService devSvc = DevRouterFactory.create(metrics2, config, compileConfig);
 		devSvc.configure(args2);
 		args2.checkConsumedCorrectly();
 		

@@ -31,6 +31,8 @@ import org.webpieces.util.security.SecretKeyInfo;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 @RunWith(Parameterized.class)
 public class TestProdRouter {
 	
@@ -51,7 +53,9 @@ public class TestProdRouter {
 										.setMetaFile(f)
 										.setWebappOverrides(module)
 										.setSecretKey(SecretKeyInfo.generateForTest());
-		RouterService prodSvc = RouterSvcFactory.create(config);
+
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+		RouterService prodSvc = RouterSvcFactory.create(metrics, config);
 		prodSvc.configure(args);
 		args.checkConsumedCorrectly();
 		

@@ -28,6 +28,9 @@ import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,16 +148,17 @@ public class ErrorCommonTest {
 	
 	public static RouterService createServer(boolean isProdTest, String moduleFileContents) {
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		
 		if(isProdTest)
-			return RouterSvcFactory.create(f);
+			return RouterSvcFactory.create(metrics, f);
 		
 		//otherwise create the development server
 		String filePath = System.getProperty("user.dir");
 		File myCodePath = new File(filePath + "/src/test/java");
 		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), CompileConfig.getTmpDir());		
 		log.info("bytecode dir="+compileConfig.getByteCodeCacheDir());
-		RouterService server = DevRouterFactory.create(f, compileConfig);
+		RouterService server = DevRouterFactory.create(metrics, f, compileConfig);
 		return server;
 	}
 }

@@ -1,20 +1,13 @@
 package org.webpieces.webserver.impl.filereaders;
 
 import java.io.InputStream;
-import java.nio.file.StandardOpenOption;
-import java.util.concurrent.ExecutorService;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
-import org.webpieces.frontend2.api.HttpFrontendFactory;
-import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.impl.compression.CompressionLookup;
-import org.webpieces.router.impl.dto.RenderStaticResponse;
-import org.webpieces.util.file.VirtualFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.router.impl.dto.RenderStaticResponse;
+import org.webpieces.util.file.VirtualFile;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ChannelCloser;
 import org.webpieces.webserver.impl.RequestInfo;

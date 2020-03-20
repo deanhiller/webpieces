@@ -25,6 +25,7 @@ import com.google.inject.Module;
 
 import WEBPIECESxPACKAGE.service.RemoteService;
 import WEBPIECESxPACKAGE.service.SomeLibrary;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
 
@@ -49,6 +50,7 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest" };
 	private HttpSocket http11Socket;
+	private SimpleMeterRegistry metrics;
 	
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
@@ -57,12 +59,12 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 		//clear in-memory database
 		jdbc.dropAllTablesFromDatabase();
 		
+		metrics = new SimpleMeterRegistry();
 		boolean isRemote = false;
-
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(isRemote), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()), args);
+		Server webserver = new Server(metrics, getOverrides(isRemote), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()), args);
 		webserver.start();
 		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

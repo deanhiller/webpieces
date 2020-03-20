@@ -17,24 +17,25 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class DevRouterFactory {
     protected DevRouterFactory() {}
 
-    public static RouterService create(VirtualFile routersFile, CompileConfig compileConfig) {
+    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile, CompileConfig compileConfig) {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		Arguments arguments = new CommandLineParser().parse();
 		RouterConfig config = new RouterConfig(baseWorkingDir)
 									.setMetaFile(routersFile)
 									.setSecretKey(SecretKeyInfo.generateForTest());
-    	RouterService svc = create(config, compileConfig);
+    	RouterService svc = create(metrics, config, compileConfig);
     	svc.configure(arguments);
     	arguments.checkConsumedCorrectly();
     	return svc;
     }
     
-	public static RouterService create(RouterConfig config, CompileConfig compileConfig) {
-		
-		Module devModules = Modules.override(RouterSvcFactory.getModules(config)).with(new DevRouterModule(compileConfig));
+	public static RouterService create(MeterRegistry metrics, RouterConfig config, CompileConfig compileConfig) {
+		Module devModules = Modules.override(RouterSvcFactory.getModules(metrics, config)).with(new DevRouterModule(compileConfig));
 		
 		Injector injector = Guice.createInjector(devModules);
 		RouterService svc = injector.getInstance(RouterService.class);

@@ -7,6 +7,9 @@ import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.webserver.basic.app.BasicRouteId;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -15,12 +18,15 @@ public class BasicController {
 
 	private final SomeOtherLib notFoundLib;
 	private final SomeLib errorLib;
+	private Counter counter;
 	
 	@Inject
-	public BasicController(SomeOtherLib notFoundLib, SomeLib errorLib) {
+	public BasicController(MeterRegistry metrics, SomeOtherLib notFoundLib, SomeLib errorLib) {
 		super();
 		this.notFoundLib = notFoundLib;
 		this.errorLib = errorLib;
+		
+		counter = metrics.counter("basicCounter");
 	}
 
 	public Render reverseRoute() {
@@ -54,6 +60,7 @@ public class BasicController {
 	}
 	
 	public Action myMethod() {
+		counter.increment();
 		//renderThis assumes the view is the <methodName>.html file so in this case
 		//myMethod.html which must be in the same directory as the Controller
 		return Actions.renderThis("hhhh", 86);

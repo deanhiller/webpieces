@@ -1,5 +1,8 @@
 dependencies {
-    compile deps['micrometer']
+    //PLEASE do NOT bring anything in here.  this is core-util and is used by many so if someone brings this in,
+    //we don't want to carry baggage into the client project
+    //ie. you add some apache lib and only org.webpieces.util.time uses it
+    //well, MANY clients are NOT using that package and now they have to drag along extra baggage....instead, create another util or something
 }
 
 publishing.publications.mavenJava.pom.description='A simple utilitiy library with special executor but rather small amount of code in here'

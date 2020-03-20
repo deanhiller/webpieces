@@ -1,8 +1,8 @@
 package org.webpieces.http2client.api;
 
-import com.webpieces.http2engine.api.client.Http2Config;
-
 import org.webpieces.nio.api.BackpressureConfig;
+
+import com.webpieces.http2engine.api.client.Http2Config;
 
 public class Http2ClientConfig {
 

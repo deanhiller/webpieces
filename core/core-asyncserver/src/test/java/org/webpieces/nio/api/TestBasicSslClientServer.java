@@ -23,7 +23,9 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +51,10 @@ public class TestBasicSslClientServer {
 	@Test
 	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException {
 		pool = new BufferCreationPool();
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
+		MeterRegistry meters = Metrics.globalRegistry;
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(meters);
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool, new BackpressureConfig());
-		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 		
 		SSLEngineFactoryForTest f = new SSLEngineFactoryForTest();
 		InetSocketAddress addr = new InetSocketAddress("localhost", 0);

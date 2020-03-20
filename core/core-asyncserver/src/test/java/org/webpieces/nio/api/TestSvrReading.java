@@ -20,6 +20,7 @@ import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSvrChannel;
 import org.webpieces.util.threading.DirectExecutor;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 
 public class TestSvrReading {
@@ -31,14 +32,16 @@ public class TestSvrReading {
 
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
+		MeterRegistry meters = Metrics.globalRegistry;
+
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
 		DirectExecutor exec = new DirectExecutor();
 		BackpressureConfig config = new BackpressureConfig();
 		config.setMaxBytes(6);
 		config.setStartReadingThreshold(2);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), config, exec);
 
-		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 		
 		listener = new MockAsyncListener();
 

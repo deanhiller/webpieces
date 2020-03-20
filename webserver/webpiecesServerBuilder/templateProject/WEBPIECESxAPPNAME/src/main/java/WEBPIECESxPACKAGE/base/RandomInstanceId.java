@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package WEBPIECESxPACKAGE.base;
 
 import org.apache.commons.lang3.RandomStringUtils;
 

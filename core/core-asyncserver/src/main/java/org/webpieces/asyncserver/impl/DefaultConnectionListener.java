@@ -13,7 +13,6 @@ import io.micrometer.core.instrument.Metrics;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.util.metrics.MetricStrategy;
 
 public class DefaultConnectionListener implements ConnectionListener {
 
@@ -26,7 +25,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 	public DefaultConnectionListener(String id, ConnectedChannels channels, ProxyDataListener listener) {
 		this.connectedChannels = channels;
 		this.listener = listener;
-		String metricName = MetricStrategy.formName(id+"/overloadCount");
+		String metricName = id+"/overloadCount";
 		overloadCounter = Metrics.counter(metricName);
 	}
 

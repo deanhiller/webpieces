@@ -40,6 +40,9 @@ import com.google.inject.Module;
 import WEBPIECESxPACKAGE.json.SearchRequest;
 import WEBPIECESxPACKAGE.json.SearchResponse;
 import WEBPIECESxPACKAGE.service.RemoteService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.search.RequiredSearch;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 
 /**
@@ -57,6 +60,7 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest" };
 	private HttpSocket http11Socket;
 	private ObjectMapper mapper = new ObjectMapper();
+	private SimpleMeterRegistry metrics;
 	
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
@@ -64,12 +68,14 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 		//This line is not really needed but ensures you do not run a test without param names compiled in(which will fail).
 		Asserts.assertWasCompiledWithParamNames("test");
 		
+		metrics = new SimpleMeterRegistry();
 		boolean isRemote = false; //you could parameterize the test and run remote or local
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(
-			getOverrides(isRemote), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()), args
+		Server webserver = new Server(metrics, 
+			getOverrides(isRemote), new AppOverridesModule(), 
+			new ServerConfig(JavaCache.getCacheLocation()), args
 		);
 		webserver.start();
 		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
@@ -86,6 +92,11 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 		SearchResponse resp = search(req);
 
 		Assert.assertEquals("match1", resp.getMatches().get(0));
+		
+		//check metrics are wired correctly here as well
+		RequiredSearch result = metrics.get("testCounter");
+		Counter counter = result.counter();
+		Assert.assertEquals(1.0, counter.count(), 0.1);
 	}
 	
 	private SearchResponse search(SearchRequest searchReq) {

@@ -9,10 +9,12 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.EmptyPortConfigLookup;
 import org.webpieces.router.api.PortConfigLookup;
-import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.routers.EStaticRouter;
@@ -20,8 +22,6 @@ import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.inject.Binder;
@@ -29,6 +29,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestCompressionCache {
 
@@ -48,7 +50,10 @@ public class TestCompressionCache {
 		RouterConfig config = new RouterConfig(FileFactory.getBaseWorkingDir());
 		config.setSecretKey(SecretKeyInfo.generateForTest());
 		config.setCachedCompressedDirectory(cacheDir);
-		Module allMods = Modules.override(new ProdRouterModule(config, new EmptyPortConfigLookup())).with(new TestModule());
+
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+		List<Module> modules = RouterSvcFactory.getModules(metrics, config);
+		Module allMods = Modules.override(modules).with(new TestModule());
 		Injector injector = Guice.createInjector(allMods);
 		cache = injector.getInstance(CompressionCacheSetup.class);
 	}

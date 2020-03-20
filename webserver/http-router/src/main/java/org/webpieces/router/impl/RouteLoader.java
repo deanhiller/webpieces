@@ -42,6 +42,8 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 @Singleton
 public class RouteLoader {
 	private static final Logger log = LoggerFactory.getLogger(RouteLoader.class);
@@ -65,7 +67,7 @@ public class RouteLoader {
 	private RoutingHolder routingHolder;
 	private Module theModule;
 	private ObjectToParamTranslator reverseTranslator;
-
+	private MeterRegistry metrics;
 
 	@Inject
 	public RouteLoader(
@@ -77,7 +79,8 @@ public class RouteLoader {
 		ObjectTranslator objectTranslator,
 		RouteBuilderLogic routeBuilderLogic,
 		RedirectFormation portLookup,
-		ObjectToParamTranslator reverseTranslator
+		ObjectToParamTranslator reverseTranslator,
+		MeterRegistry metrics
 	) {
 		this.config = config;
 		this.masterRouter = masterRouter;
@@ -88,6 +91,7 @@ public class RouteLoader {
 		this.routeBuilderLogic = routeBuilderLogic;
 		this.redirectFormation = portLookup;
 		this.reverseTranslator = reverseTranslator;
+		this.metrics = metrics;
 	}
 	
 	public WebAppMeta configure(ClassForName loader, Arguments arguments) {
@@ -218,7 +222,7 @@ public class RouteLoader {
 			}
 		});
 				
-		guiceModules.add(new EmptyPluginModule(routingHolder, beanMeta, objectTranslator, scheduler));
+		guiceModules.add(new WebpiecesToAppBindingModule(routingHolder, beanMeta, objectTranslator, scheduler, metrics));
 		
 		Module module = Modules.combine(guiceModules);
 		

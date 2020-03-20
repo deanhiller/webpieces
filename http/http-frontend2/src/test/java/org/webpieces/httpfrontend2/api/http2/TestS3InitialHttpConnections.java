@@ -31,6 +31,8 @@ import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
+import io.micrometer.core.instrument.Metrics;
+
 /**
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#starting
@@ -59,7 +61,7 @@ public class TestS3InitialHttpConnections {
 		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
 
 		HttpSvrConfig frontendConfig = new HttpSvrConfig("http", new InetSocketAddress("me", 8080));
-		HttpFrontendManager manager = HttpFrontendFactory.createFrontEnd(mockChanMgr, mockTimer, injConfig);
+		HttpFrontendManager manager = HttpFrontendFactory.createFrontEnd(mockChanMgr, mockTimer, injConfig, Metrics.globalRegistry);
 		HttpServer httpServer = manager.createHttpServer(frontendConfig, mockListener);
 		httpServer.start();
         

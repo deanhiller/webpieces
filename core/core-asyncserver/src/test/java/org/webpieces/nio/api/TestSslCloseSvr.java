@@ -36,6 +36,7 @@ import org.webpieces.ssl.api.dto.SslAction;
 import org.webpieces.ssl.api.dto.SslActionEnum;
 import org.webpieces.util.threading.DirectExecutor;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 
 public class TestSslCloseSvr {
@@ -117,10 +118,11 @@ public class TestSslCloseSvr {
 	}
 
 	private AsyncServer createServer() {
+		MeterRegistry meters = Metrics.globalRegistry;
 		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
-		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 		AsyncServer server1 = svrMgr.createTcpServer(new AsyncConfig(), listener, sslFactory);
 		return server1;
 	}

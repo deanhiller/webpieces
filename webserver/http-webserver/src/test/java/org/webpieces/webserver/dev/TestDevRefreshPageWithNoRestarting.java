@@ -3,6 +3,8 @@ package org.webpieces.webserver.dev;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -74,6 +76,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		//java source files encoding...
 		CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getTmpDir());
 		
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
 										new OverridesForTest(mgr, time, mockTimer, templateConfig));

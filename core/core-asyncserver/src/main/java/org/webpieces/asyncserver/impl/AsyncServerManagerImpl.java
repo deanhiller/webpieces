@@ -8,12 +8,16 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class AsyncServerManagerImpl implements AsyncServerManager {
 
 	private ChannelManager channelManager;
+	private MeterRegistry metrics;
 
-	public AsyncServerManagerImpl(ChannelManager channelManager) {
+	public AsyncServerManagerImpl(ChannelManager channelManager, MeterRegistry metrics) {
 		this.channelManager = channelManager;
+		this.metrics = metrics;
 	}
 
 	@Override
@@ -28,7 +32,7 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 			throw new IllegalArgumentException("config.id must not be null");
 		
 		String id = channelManager.getName()+"."+config.id;
-		ConnectedChannels connectedChannels = new ConnectedChannels(id);
+		ConnectedChannels connectedChannels = new ConnectedChannels(id, metrics);
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
 		DefaultConnectionListener connectionListener = new DefaultConnectionListener(id, connectedChannels, proxyListener); 
 

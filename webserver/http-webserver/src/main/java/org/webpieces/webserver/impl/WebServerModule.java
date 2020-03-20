@@ -1,13 +1,15 @@
 package org.webpieces.webserver.impl;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.webpieces.hpack.api.HpackParser;
-import com.webpieces.hpack.api.HpackParserFactory;
-import com.webpieces.http2engine.api.client.InjectionConfig;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.function.Supplier;
 
-import io.micrometer.core.instrument.Metrics;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
@@ -20,18 +22,23 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.cmdline2.Arguments;
-import org.webpieces.util.metrics.MetricStrategy;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.util.time.Time;
 import org.webpieces.util.time.TimeImpl;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.net.InetSocketAddress;
-import java.util.concurrent.*;
-import java.util.function.Supplier;
+import com.google.inject.Binder;
+import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.HpackParserFactory;
+import com.webpieces.http2engine.api.client.InjectionConfig;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class WebServerModule implements Module {
 
@@ -60,6 +67,11 @@ public class WebServerModule implements Module {
 	
 	@Override
 	public void configure(Binder binder) {
+		//install a default for metrics...
+		CompositeMeterRegistry metrics = new CompositeMeterRegistry();
+		metrics.add(new SimpleMeterRegistry());
+		binder.bind(MeterRegistry.class).toInstance(metrics);
+		
 		binder.bind(WebServer.class).to(WebServerImpl.class);
 
 		binder.bind(WebServerConfig.class).toInstance(config);
@@ -83,10 +95,10 @@ public class WebServerModule implements Module {
 	@Provides
 	@Singleton
 	@Named(HttpFrontendFactory.FILE_READ_EXECUTOR)
-	public ExecutorService provideExecutor() {
+	public ExecutorService provideExecutor(MeterRegistry metrics) {
 		String id = "fileReadPool";
 		ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory(id));
-		MetricStrategy.monitorExecutor(executor, id);
+		ExecutorServiceMetrics.monitor(metrics, executor, id);
 		return executor;
 	}
 	
@@ -98,42 +110,12 @@ public class WebServerModule implements Module {
 	
 	@Provides
 	@Singleton
-	public ChannelManager providesChanMgr(WebServerConfig config, BufferPool pool) {
+	public ChannelManager providesChanMgr(WebServerConfig config, BufferPool pool, MeterRegistry metrics) {
 		String id = "webpiecesPool";
 		Executor executor = Executors.newFixedThreadPool(config.getNumFrontendServerThreads(), new NamedThreadFactory(id));
-		MetricStrategy.monitorExecutor(executor, id);
-
+		ExecutorServiceMetrics.monitor(metrics, executor, id);		
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr("webpiecesSvrChanMgr", pool, config.getBackpressureConfig(), executor);
 		
 		return chanMgr;
@@ -146,13 +128,15 @@ public class WebServerModule implements Module {
 			ScheduledExecutorService timer, 
 			BufferPool pool,
 			Time time, 
-			WebServerConfig config) {
+			WebServerConfig config,
+			MeterRegistry metrics
+	) {
 		
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		InjectionConfig injConfig = new InjectionConfig(http2Parser, time, config.getHttp2Config());
 
-		return HttpFrontendFactory.createFrontEnd(chanMgr, timer, injConfig, httpParser);
+		return HttpFrontendFactory.createFrontEnd(chanMgr, timer, injConfig, httpParser, metrics);
 	}
 	
 }

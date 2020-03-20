@@ -14,6 +14,8 @@ import org.webpieces.webserver.api.ServerConfig;
 
 import com.google.inject.Module;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 /**
  * Uses the production Router but the dev template compiler so you 'could' step through prod router code
  * to see if something is going on
@@ -73,7 +75,8 @@ public class ProdServerForIDE {
 		config.setStaticFileCacheTimeSeconds(null);
 		//config.setMetaFile(metaFile);
 		
-		server = new Server(platformOverrides, null, config, "-hibernate.persistenceunit=hibernatefortest");
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+		server = new Server(metrics, platformOverrides, null, config, "-hibernate.persistenceunit=hibernatefortest");
 	}
 	
 

@@ -10,9 +10,8 @@ import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 
-import org.webpieces.util.metrics.MetricStrategy;
-
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 public class AsyncServerMgrFactory {
 
@@ -24,14 +23,14 @@ public class AsyncServerMgrFactory {
 	
 	public static AsyncServerManager createAsyncServer(String id, BufferPool pool, BackpressureConfig config, MeterRegistry metrics) {
 		ExecutorService executor = Executors.newFixedThreadPool(10);
-		MetricStrategy.monitorExecutor(executor, id);
+		ExecutorServiceMetrics.monitor(metrics, executor, id);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr(id, pool, config, executor);
-		return createAsyncServer(mgr);
+		return createAsyncServer(mgr, metrics);
 	}
 	
-	public static AsyncServerManager createAsyncServer(ChannelManager channelManager) {
-		return new AsyncServerManagerImpl(channelManager);
+	public static AsyncServerManager createAsyncServer(ChannelManager channelManager, MeterRegistry metrics) {
+		return new AsyncServerManagerImpl(channelManager, metrics);
 	}
 	
 }

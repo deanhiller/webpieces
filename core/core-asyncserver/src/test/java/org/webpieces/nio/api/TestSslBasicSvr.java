@@ -38,6 +38,7 @@ import org.webpieces.ssl.api.dto.SslAction;
 import org.webpieces.ssl.api.dto.SslActionEnum;
 import org.webpieces.util.threading.DirectExecutor;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 
 public class TestSslBasicSvr {
@@ -62,10 +63,11 @@ public class TestSslBasicSvr {
 
 		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
 
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
+		MeterRegistry meters = Metrics.globalRegistry;
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
 
-		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 		server = svrMgr.createTcpServer(new AsyncConfig(), listener, sslFactory);
 		
 		CompletableFuture<Void> future = server.start(new InetSocketAddress(8443));

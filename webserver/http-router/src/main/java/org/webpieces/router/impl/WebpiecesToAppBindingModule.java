@@ -13,18 +13,28 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
-public class EmptyPluginModule implements Module {
+import io.micrometer.core.instrument.MeterRegistry;
+
+public class WebpiecesToAppBindingModule implements Module {
 
 	private RoutingHolder routingHolder;
 	private ManagedBeanMeta managedMeta;
 	private ObjectTranslator objectTranslator;
 	private ScheduledExecutorService scheduler;
+	private MeterRegistry metrics;
 
-	public EmptyPluginModule(RoutingHolder routingHolder, ManagedBeanMeta managedMeta, ObjectTranslator objectTranslator, ScheduledExecutorService scheduler) {
+	public WebpiecesToAppBindingModule(
+			RoutingHolder routingHolder, 
+			ManagedBeanMeta managedMeta, 
+			ObjectTranslator objectTranslator, 
+			ScheduledExecutorService scheduler, 
+			MeterRegistry metrics
+	) {
 		this.routingHolder = routingHolder;
 		this.managedMeta = managedMeta;
 		this.objectTranslator = objectTranslator;
 		this.scheduler = scheduler;
+		this.metrics = metrics;
 	}
 
 	@Override
@@ -50,5 +60,7 @@ public class EmptyPluginModule implements Module {
 		//including if you put an object into a cookie as well, so it gets written as a String
 		binder.bind(ObjectTranslator.class).toInstance(objectTranslator);
 		binder.bind(ScheduledExecutorService.class).toInstance(scheduler);
+		
+		binder.bind(MeterRegistry.class).toInstance(metrics);
 	}
 }

@@ -1,5 +1,10 @@
 package org.webpieces.webserver.basic;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,24 +21,25 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import com.google.inject.util.Modules;
+import com.google.inject.Module;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.search.RequiredSearch;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 
 public class TestSyncWebServer extends AbstractWebpiecesTest {
 
-	
 	private HttpSocket http11Socket;
 	private SimpleMeterRegistry meterRegistry;
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		meterRegistry = new SimpleMeterRegistry();
-		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), null, false, null);
+		
+		Module platformOverrides = Modules.combine(getOverrides(false), new MetricModule(meterRegistry));
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(platformOverrides, null, false, null);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());		
 	}
@@ -50,6 +56,11 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 		response.assertContentType("text/html; charset=utf-8");
 		List<Header> headers = response.getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.CONTENT_TYPE);
 		Assert.assertEquals(1, headers.size());
+		
+		//check metrics are wired correctly here as well
+		RequiredSearch result = meterRegistry.get("basicCounter");
+		Counter counter = result.counter();
+		Assert.assertEquals(1.0, counter.count(), 0.1);
 	}
 
 	@Test

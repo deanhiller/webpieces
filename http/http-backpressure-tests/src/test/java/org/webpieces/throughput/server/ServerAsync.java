@@ -56,7 +56,7 @@ public class ServerAsync {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("svrCmLoop", pool, config.getBackpressureConfig());
 
-		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr, metrics);
 
 
 		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd(svrMgr, pool, http2Config);
