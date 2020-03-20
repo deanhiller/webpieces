@@ -341,11 +341,15 @@ public class WebServerImpl implements WebServer {
 
 	@Override
 	public TCPServerChannel getUnderlyingHttpChannel() {
+		if(httpServer == null)
+			return null;
 		return httpServer.getUnderlyingChannel();
 	}
 	
 	@Override
 	public TCPServerChannel getUnderlyingHttpsChannel() {
+		if(httpsServer == null)
+			return null;
 		return httpsServer.getUnderlyingChannel();
 	}
 
