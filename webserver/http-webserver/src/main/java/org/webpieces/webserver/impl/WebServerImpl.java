@@ -210,8 +210,14 @@ public class WebServerImpl implements WebServer {
 		CompletableFuture<Void> fut3 = fut33;
 		
 		return CompletableFuture.allOf(fut1, fut2, fut3).thenApply((v) -> {
-			int httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();
-			int httpsPort = getUnderlyingHttpsChannel().getLocalAddress().getPort();
+			int httpPort = -1;
+			int httpsPort = -1;
+
+			if(httpServer != null) //happens if port disabled
+				getUnderlyingHttpChannel().getLocalAddress().getPort();
+			if(httpsServer != null) //happens if port disabled
+				getUnderlyingHttpsChannel().getLocalAddress().getPort();
+			
 			portConfig.setPortConfig(new PortConfig(httpPort, httpsPort));
 			log.info("All servers started");	
 			return null;

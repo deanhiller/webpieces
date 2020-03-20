@@ -12,7 +12,7 @@ public class InetConverter {
 		
 		int index = value.indexOf(":");
 		if(index < 0)
-			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port'");
+			throw new IllegalArgumentException("Invalid format.  Format must be '{host}:{port}' or ':port' or '' (empty string for null)");
 		String host = value.substring(0, index);
 		String portStr = value.substring(index+1);
 		try {
