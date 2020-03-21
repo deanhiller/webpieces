@@ -14,6 +14,8 @@ import org.webpieces.httpclient.api.mocks.MockChannel;
 import org.webpieces.httpclient.api.mocks.MockChannelMgr;
 import org.webpieces.httpclientx.api.Http2to1_1ClientFactory;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class TestConnecting {
 
 	private MockChannelMgr mockChannelMgr = new MockChannelMgr();
@@ -23,7 +25,7 @@ public class TestConnecting {
 	@Before
 	public void setup() {
 		BufferPool pool = new BufferCreationPool();
-		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient2", mockChannelMgr, pool);
+		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient2", mockChannelMgr, new SimpleMeterRegistry(), pool);
 	}
 
 	@Test

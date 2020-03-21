@@ -8,6 +8,7 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.throughput.AsyncConfig;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class Http11Clients implements Clients {
 
@@ -29,7 +30,7 @@ public class Http11Clients implements Clients {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, config.getBackpressureConfig());
 		
-		Http2Client client = Http2to1_1ClientFactory.createHttpClient("onlyClient", chanMgr, pool);
+		Http2Client client = Http2to1_1ClientFactory.createHttpClient("onlyClient", chanMgr, new SimpleMeterRegistry(), pool);
 		return client;
 	}
 	

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.webpieces.http2engine.api.client.Http2Config;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class ServerAsync {
 	private static final Logger log = LoggerFactory.getLogger(ServerAsync.class);
@@ -58,8 +59,7 @@ public class ServerAsync {
 
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr, metrics);
 
-
-		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd(svrMgr, pool, http2Config);
+		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd(svrMgr, pool, http2Config, new SimpleMeterRegistry());
 		return mgr.createHttpServer(new HttpSvrConfig("asyncsvr"), new EchoListener());
 	}
 	

@@ -26,12 +26,14 @@ import org.webpieces.util.time.RateRecorder;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class Http11SynchronousClient implements SynchronousClient {
 	private static final Logger log = LoggerFactory.getLogger(Http11SynchronousClient.class);
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-	private HttpStatefulParser parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
+	private HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 
 	@Override
 	public void start(InetSocketAddress svrAddress) {

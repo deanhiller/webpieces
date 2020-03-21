@@ -23,6 +23,8 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class TestWriteReads {
 
 	private MockChannelMgr mockChannelMgr = new MockChannelMgr();
@@ -33,7 +35,7 @@ public class TestWriteReads {
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		BufferPool pool = new BufferCreationPool();
-		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient4", mockChannelMgr, pool);
+		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient4", mockChannelMgr, new SimpleMeterRegistry(), pool);
 		
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
 		socket = httpClient.createHttpSocket();

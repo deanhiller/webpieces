@@ -29,6 +29,8 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 
 public class TestHttp11Backpressure extends AbstractHttp1Test {
 
@@ -145,7 +147,7 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 		
 		HttpLastChunk lastChunk = new HttpLastChunk();
 		
-		HttpStatefulParser parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
+		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 
 		ByteBuffer buf1 = parser.marshalToByteBuffer(req);
 		ByteBuffer buf2 = parser.marshalToByteBuffer(chunk);

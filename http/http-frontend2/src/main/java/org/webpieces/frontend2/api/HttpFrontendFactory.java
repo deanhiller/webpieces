@@ -29,10 +29,10 @@ public abstract class HttpFrontendFactory {
 	
 	public static final String FILE_READ_EXECUTOR = "fileReadExecutor";
 	
-	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrMgr, BufferPool pool, Http2Config http2Config) {
+	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrMgr, BufferPool pool, Http2Config http2Config, MeterRegistry metrics) {
 		ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 	
-		HttpParser httpParser = HttpParserFactory.createParser(pool);
+		HttpParser httpParser = HttpParserFactory.createParser(svrMgr.getName(), metrics, pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		
 		InjectionConfig injConfig = new InjectionConfig(http2Parser, new TimeImpl(), http2Config);
@@ -59,7 +59,7 @@ public abstract class HttpFrontendFactory {
 
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr, metrics);
 		
-		HttpParser httpParser = HttpParserFactory.createParser(pool);
+		HttpParser httpParser = HttpParserFactory.createParser(id, metrics, pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		
 		InjectionConfig injConfig = new InjectionConfig(http2Parser, new TimeImpl(), config.getHttp2Config());
@@ -71,7 +71,7 @@ public abstract class HttpFrontendFactory {
 	public static HttpFrontendManager createFrontEnd(
 			ChannelManager chanMgr, ScheduledExecutorService timer, InjectionConfig injConfig, MeterRegistry metrics) {
         BufferCreationPool pool = new BufferCreationPool(chanMgr.getName()+".bufpoolmain", metrics);
-		HttpParser httpParser = HttpParserFactory.createParser(pool);
+		HttpParser httpParser = HttpParserFactory.createParser(chanMgr.getName(), metrics, pool);
 		return createFrontEnd(chanMgr, timer, injConfig, httpParser, metrics);
 	}
 	

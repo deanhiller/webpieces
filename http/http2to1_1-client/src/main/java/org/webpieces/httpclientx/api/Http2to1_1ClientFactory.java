@@ -19,8 +19,8 @@ public abstract class Http2to1_1ClientFactory {
 		return new Http2ClientProxy(client1_1);
 	}
 
-	public static Http2Client createHttpClient(String id, ChannelManager mgr, BufferPool pool) {
-		HttpParser parser = HttpParserFactory.createParser(pool);
+	public static Http2Client createHttpClient(String id, ChannelManager mgr, MeterRegistry metrics, BufferPool pool) {
+		HttpParser parser = HttpParserFactory.createParser(id, metrics, pool);
 		HttpClient client1_1 = HttpClientFactory.createHttpClient(id, mgr, parser);
 		return new Http2ClientProxy(client1_1);
 	}

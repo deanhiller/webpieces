@@ -2,6 +2,7 @@ package org.webpieces.httpparser.impl;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,9 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.HttpVersion;
 
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class HttpParserImpl implements HttpParser {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
@@ -44,10 +48,36 @@ public class HttpParserImpl implements HttpParser {
 	
 	private ConvertAscii conversion = new ConvertAscii();
 	private BufferPool pool;
+	private DistributionSummary outPayloadSize;
+	private DistributionSummary inPayloadSize;
+	private DistributionSummary bytesParsedDist;
 
-	
-	public HttpParserImpl(BufferPool pool) {
+	public HttpParserImpl(String id, MeterRegistry metrics, BufferPool pool) {
 		this.pool = pool;
+		
+		outPayloadSize = DistributionSummary
+			    .builder(id+".http1.payloadout.size")
+			    .distributionStatisticBufferLength(100)
+				.distributionStatisticExpiry(Duration.ofMinutes(10))
+			    .publishPercentiles(0.50, 0.99, 1)
+			    .baseUnit("bytes") // optional (1)
+			    .register(metrics);
+
+		bytesParsedDist = DistributionSummary
+			    .builder(id+".http1.payloadin.size")
+			    .distributionStatisticBufferLength(100)
+				.distributionStatisticExpiry(Duration.ofMinutes(10))
+			    .publishPercentiles(0.50, 0.99, 1)
+			    .baseUnit("bytes") // optional (1)
+			    .register(metrics);
+		
+		inPayloadSize = DistributionSummary
+			    .builder(id+".http1.payloadin.size")
+			    .distributionStatisticBufferLength(100)
+				.distributionStatisticExpiry(Duration.ofMinutes(10))
+			    .publishPercentiles(0.50, 0.99, 1)
+			    .baseUnit("bytes") // optional (1)
+			    .register(metrics);
 	}
 	
 	@Override
@@ -59,6 +89,8 @@ public class HttpParserImpl implements HttpParser {
 	public ByteBuffer marshalToByteBuffer(MarshalState state, HttpPayload request) {
 		//modify later to go from String straight to ByteBuffer instead...
 		byte[] data = marshalToBytes(state, request);
+		outPayloadSize.record(data.length);
+		
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		return buffer;
 	}
@@ -211,6 +243,8 @@ public class HttpParserImpl implements HttpParser {
 		memento = parse(memento, moreData);
 		int bytesParsed = totalData - memento.getLeftOverData().getReadableSize();
 		
+		bytesParsedDist.record(bytesParsed);
+		
 		memento.setNumBytesJustParsed(bytesParsed);
 		
 		return memento;
@@ -273,7 +307,10 @@ public class HttpParserImpl implements HttpParser {
 		}
 		
 		List<? extends DataWrapper> split = dataGen.split(data, readSize);
-		HttpData httpData = new HttpData(split.get(0), isEos);
+		
+		DataWrapper someData = split.get(0);
+		inPayloadSize.record(someData.getReadableSize());
+		HttpData httpData = new HttpData(someData, isEos);
 		
 		memento.setLeftOverData(split.get(1));
 		
@@ -474,6 +511,8 @@ public class HttpParserImpl implements HttpParser {
 					throw new IllegalStateException("The chunk did not end with \\r\\n .  The format is invalid");
 			}
 			
+			inPayloadSize.record(data.getReadableSize());
+			
 			message.setBody(data);
 			memento.setLeftOverData(split.get(1));
 			memento.setNumBytesLeftToReadOnChunk(0);
@@ -488,8 +527,9 @@ public class HttpParserImpl implements HttpParser {
 	private HttpMessage parseHttpMessage(MementoImpl memento, DataWrapper toBeParsed, List<Integer> markedPositions) {
 		List<String> lines = new ArrayList<>();
 		
+		int size = toBeParsed.getReadableSize();
 		//Add the last line..
-		markedPositions.add(toBeParsed.getReadableSize());
+		markedPositions.add(size);
 		int offset = 0;
 		for(Integer mark : markedPositions) {
 			int len = mark - offset;
@@ -499,6 +539,7 @@ public class HttpParserImpl implements HttpParser {
 		}
 		markedPositions.clear();
 
+		inPayloadSize.record(size);
 		//buffer processed...release to be re-used now..
 		toBeParsed.releaseUnderlyingBuffers(pool);
 		

@@ -14,9 +14,11 @@ import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class TestRequestBody {
 
-	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
+	private HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 	private MarshalState state = parser.prepareToMarshal();
 
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();

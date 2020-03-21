@@ -19,6 +19,9 @@ import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.throughput.RequestCreator;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +54,7 @@ public class ServerHttp1_1Sync {
     private static class ServerRunnable implements Runnable {
     	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-		private HttpStatefulParser parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
+		private HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 		private ServerSocket server;
 
 		public ServerRunnable(ServerSocket server) {

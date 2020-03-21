@@ -30,6 +30,8 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -46,7 +48,7 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 
 	public MockHttp1Channel() {
 		BufferPool pool = new BufferCreationPool();
-		parser = HttpParserFactory.createParser(pool);
+		parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), pool);
 		memento = parser.prepareToParse();
 		marshalState = parser.prepareToMarshal();
 	}

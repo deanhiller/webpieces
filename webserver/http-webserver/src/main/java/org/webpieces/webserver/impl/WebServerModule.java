@@ -132,7 +132,7 @@ public class WebServerModule implements Module {
 			MeterRegistry metrics
 	) {
 		
-		HttpParser httpParser = HttpParserFactory.createParser(pool);
+		HttpParser httpParser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		InjectionConfig injConfig = new InjectionConfig(http2Parser, time, config.getHttp2Config());
 

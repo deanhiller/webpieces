@@ -35,6 +35,8 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class TestHttp1Backpressure {
 
 	private MockChannelMgr mockChannelMgr = new MockChannelMgr();
@@ -45,7 +47,7 @@ public class TestHttp1Backpressure {
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		BufferPool pool = new BufferCreationPool();
-		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient3", mockChannelMgr, pool);
+		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient3", mockChannelMgr, new SimpleMeterRegistry(), pool);
 		
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
 		socket = httpClient.createHttpSocket();
@@ -110,7 +112,7 @@ public class TestHttp1Backpressure {
 	}
 
 	private List<ByteBuffer> create3BuffersWithTwoMessags(Http2Response response1, HttpData response2) {
-		HttpStatefulParser parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
+		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 
 		HttpResponse resp1 = Http2ToHttp1_1.translateResponse(response1);
 		
@@ -195,7 +197,7 @@ public class TestHttp1Backpressure {
 	}
 	
 	private List<ByteBuffer> create4BuffersWith3Messags(Http2Response response1, HttpChunk response2, HttpLastChunk lastChunk) {
-		HttpStatefulParser parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
+		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 
 		HttpResponse resp1 = Http2ToHttp1_1.translateResponse(response1);
 		

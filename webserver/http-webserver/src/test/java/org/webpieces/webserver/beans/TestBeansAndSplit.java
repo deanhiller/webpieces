@@ -2,6 +2,9 @@ package org.webpieces.webserver.beans;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -92,7 +95,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 		);
 
 		DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-		HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
+		HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 		MarshalState state = parser.prepareToMarshal();
 		ByteBuffer buffer = parser.marshalToByteBuffer(state, req.getRequest());
 		DataWrapper d1 = dataGen.wrapByteBuffer(buffer);
@@ -116,7 +119,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 		Assert.assertEquals(56, user.getAccounts().get(2).getAddresses().get(0).getNumber());
 	}
 	
-	private HttpStatefulParser parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
+	private HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 	
 	private ResponseWrapper create() {
 		List<HttpPayload> payloads = parser.parse(dataReceived);

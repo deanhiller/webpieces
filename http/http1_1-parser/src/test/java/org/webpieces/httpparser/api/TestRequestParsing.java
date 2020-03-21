@@ -17,9 +17,11 @@ import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.impl.ConvertAscii;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class TestRequestParsing {
 	
-	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
+	private HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 	private MarshalState state = parser.prepareToMarshal();
 
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();

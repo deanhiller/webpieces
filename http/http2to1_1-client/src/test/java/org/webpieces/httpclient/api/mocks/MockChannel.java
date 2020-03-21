@@ -26,6 +26,8 @@ import org.webpieces.nio.api.handlers.DataListener;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class MockChannel extends MockSuperclass implements TCPChannel {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpStatefulParser parser;
@@ -36,7 +38,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	}
 
 	public MockChannel() {
-		parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
+		parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 	}
 	
 	@SuppressWarnings("unchecked")

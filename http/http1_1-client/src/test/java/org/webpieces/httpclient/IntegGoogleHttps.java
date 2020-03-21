@@ -31,6 +31,7 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class IntegGoogleHttps {
 
@@ -87,7 +88,7 @@ public class IntegGoogleHttps {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, new BackpressureConfig(), executor2);
 		
-		HttpParser parser = HttpParserFactory.createParser(pool2);
+		HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), pool2);
 		
 		HttpClient client = HttpClientFactory.createHttpClient("myClient", mgr, parser);
 		return client;

@@ -22,9 +22,11 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.recording.api.Playback;
 import org.webpieces.recording.api.RecordingPlaybackFactory;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class TestGooglePlayback {
 
-	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
+	private HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	@Test

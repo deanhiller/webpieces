@@ -12,6 +12,8 @@ import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.webserver.test.MockChannelManager;
 import org.webpieces.webserver.test.MockTcpChannel;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 /**
  * An Http1.1 Client that sits directly on top of the webserver such that you can step into the webserver
  * from the test case to understand the full stack including your application and the platform
@@ -22,7 +24,7 @@ import org.webpieces.webserver.test.MockTcpChannel;
 public class DirectHttp11Client implements HttpClient {
 
 	private MockChannelManager mgr;
-	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
+	private HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 
 	public DirectHttp11Client(MockChannelManager mgr) {
 		this.mgr = mgr;
