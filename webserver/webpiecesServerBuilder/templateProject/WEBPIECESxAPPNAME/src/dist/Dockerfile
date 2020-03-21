@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM adoptopenjdk/openjdk11:jre-11.0.6_10-alpine
 RUN mkdir -p ./webpieces
 COPY . ./webpieces/
 COPY config/logback.cloudrun.xml ./webpieces/config/logback.xml
