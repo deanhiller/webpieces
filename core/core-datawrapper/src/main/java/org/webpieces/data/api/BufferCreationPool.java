@@ -7,6 +7,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 /**
  * Feel free to completely override this class but basically as ChannelManager feeds
  * you ByteBuffers, they are 100% ALWAYS created from this pool.  You can then release
@@ -34,18 +38,42 @@ public class BufferCreationPool implements BufferPool, BufferWebManaged {
 	private boolean isDirect;
 	private int bufferSize;
 	private int poolSize;
+	private Counter checkoutCounter;
+	private Counter checkinCounter;
 	
+	/**
+	 * @deprecated Use new BufferCreationPool("", new SimpleMeterRegistry()) instead
+	 */
+	@Deprecated
 	public BufferCreationPool() {
-		this(false, DEFAULT_MAX_BUFFER_SIZE, 4000);
+		this("", new SimpleMeterRegistry());
 	}
 	
+	public BufferCreationPool(String id, MeterRegistry metrics) {
+		this(id, metrics, false, DEFAULT_MAX_BUFFER_SIZE, 4000);
+	}
+
+	/**
+	 * @deprecated Use the constructor we call instad of this one
+	 */
+	@Deprecated
 	public BufferCreationPool(boolean isDirect, int bufferSize, int poolSize) {
+		this("", new SimpleMeterRegistry(), isDirect, bufferSize, poolSize);
+	}
+
+	public BufferCreationPool(String id, MeterRegistry metrics, boolean isDirect, int bufferSize, int poolSize) {
 		this.isDirect = isDirect;
 		this.bufferSize = bufferSize;
 		this.poolSize = poolSize;
+		
+		metrics.gauge(id+".freePackets", freePackets, (f) -> f.size());
+		checkoutCounter = metrics.counter(id+".checkout");
+		checkinCounter = metrics.counter(id+".checkout");
 	}
 	
 	public ByteBuffer nextBuffer(int minSize) {
+		checkoutCounter.increment();
+		
 		if(bufferSize < minSize) {
 			log.error("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+bufferSize+".  You should reconfigure this ");
 			return createBuffer(minSize);
@@ -85,7 +113,11 @@ public class BufferCreationPool implements BufferPool, BufferWebManaged {
 			throw new IllegalArgumentException("You need to consume all data from your buffer (or "
 					+ "call buffer.position(buffer.limit)) to simulate consuming it though this is ill advised as you"
 					+ "should be reading all your data from your buffer before releasing it");
-		} if(counter.incrementAndGet() > poolSize)
+		} 
+
+		checkinCounter.increment();
+
+		if(counter.incrementAndGet() > poolSize)
 			return; //we discard more than N buffers as we don't want to take up too much memory
 		else if(buffer.capacity() < bufferSize) {
 			return; //discard buffers that are released and are smaller

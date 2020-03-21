@@ -34,6 +34,7 @@ import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class AbstractHttp2Test {
 	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -57,7 +58,8 @@ public class AbstractHttp2Test {
 
         Http2Config config = new Http2Config();
         config.setLocalSettings(localSettings);
-		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
+        SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+		InjectionConfig injConfig = new InjectionConfig(mockTime, config, metrics);
 
 		HttpSvrConfig frontendConfig = new HttpSvrConfig("http", new InetSocketAddress("me", 8080));
 		HttpFrontendManager manager = HttpFrontendFactory.createFrontEnd(mockChanMgr, mockTimer, injConfig, Metrics.globalRegistry);

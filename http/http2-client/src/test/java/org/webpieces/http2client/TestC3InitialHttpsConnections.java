@@ -27,6 +27,8 @@ import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 /**
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#starting
@@ -46,7 +48,8 @@ public class TestC3InitialHttpsConnections {
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         config.setLocalSettings(localSettings);
-		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
+        SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+		InjectionConfig injConfig = new InjectionConfig(mockTime, config, metrics);
         Http2Client client = Http2ClientFactory.createHttpClient("test2Client", mockChanMgr, injConfig);
         
         mockChanMgr.addSSLChannelToReturn(mockChannel);

@@ -1,2 +1,5 @@
+dependencies {
+    compile deps['micrometer']
+}
 
 publishing.publications.mavenJava.pom.description='DataWrapper makes it easy to chain ByteBuffers together without copying them such that they just look like one entity avoiding constantly copying the data'

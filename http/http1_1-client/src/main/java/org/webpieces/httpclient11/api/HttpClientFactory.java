@@ -21,7 +21,7 @@ public abstract class HttpClientFactory {
 		Executor executor = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory("httpclient"));
 		ExecutorServiceMetrics.monitor(metrics, executor, id);
 
-		BufferCreationPool pool = new BufferCreationPool();
+		BufferCreationPool pool = new BufferCreationPool(id+".bufferpool", metrics);
 		HttpParser parser = HttpParserFactory.createParser(pool);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, backPressureConfig, executor);

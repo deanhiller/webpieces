@@ -7,6 +7,8 @@ import org.webpieces.util.time.TimeImpl;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class InjectionConfig {
 
 	private HpackParser lowLevelParser;
@@ -24,9 +26,9 @@ public class InjectionConfig {
 		this(lowLevelParser, new TimeImpl(), new Http2Config());
 	}
 	
-	public InjectionConfig(Time time, Http2Config config) {
+	public InjectionConfig(Time time, Http2Config config, MeterRegistry metrics) {
 		this(
-			HpackParserFactory.createParser(new BufferCreationPool(), false),
+			HpackParserFactory.createParser(new BufferCreationPool(config.getId()+".bufpool", metrics), false),
 			time,
 			config
 		);

@@ -26,7 +26,7 @@ public abstract class Http2ClientFactory {
 		Executor executor = Executors.newFixedThreadPool(config.getNumThreads(), new NamedThreadFactory("httpclient"));
 		ExecutorServiceMetrics.monitor(metrics, executor, config.getId());
 
-		BufferCreationPool pool = new BufferCreationPool();
+		BufferCreationPool pool = new BufferCreationPool(config.getId()+".bufferpool", metrics);
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);

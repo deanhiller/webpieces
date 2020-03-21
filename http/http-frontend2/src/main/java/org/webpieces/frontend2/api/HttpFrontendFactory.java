@@ -70,7 +70,7 @@ public abstract class HttpFrontendFactory {
 	
 	public static HttpFrontendManager createFrontEnd(
 			ChannelManager chanMgr, ScheduledExecutorService timer, InjectionConfig injConfig, MeterRegistry metrics) {
-        BufferCreationPool pool = new BufferCreationPool();
+        BufferCreationPool pool = new BufferCreationPool(chanMgr.getName()+".bufpoolmain", metrics);
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
 		return createFrontEnd(chanMgr, timer, injConfig, httpParser, metrics);
 	}
