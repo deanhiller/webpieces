@@ -35,14 +35,16 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private AtomicBoolean fireClosed = new AtomicBoolean(false);
 	private AtomicBoolean fireConnected = new AtomicBoolean(false);
 	
-	private ByteAckTracker encryptionTracker = new ByteAckTracker();
-	private ByteAckTracker decryptionTracker = new ByteAckTracker();
+	private ByteAckTracker encryptionTracker; 
+	private ByteAckTracker decryptionTracker;
 
 	private SSLMetrics metrics;
 	
 	public AsyncSSLEngine3Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener, SSLMetrics metrics) {
 		if(listener == null)
 			throw new IllegalArgumentException("listener cannot be null");
+		encryptionTracker = new ByteAckTracker(metrics.getEncryptionAckMetrics());
+		decryptionTracker = new ByteAckTracker(metrics.getDecryptionAckMetrics());
 		this.metrics = metrics;
 		this.pool = pool;
 		this.listener = listener;

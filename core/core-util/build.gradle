@@ -3,6 +3,10 @@ dependencies {
     //we don't want to carry baggage into the client project
     //ie. you add some apache lib and only org.webpieces.util.time uses it
     //well, MANY clients are NOT using that package and now they have to drag along extra baggage....instead, create another util or something
+    
+    //crap but everyone is using this anyways or at least should be just like logging
+    compile deps['micrometer']
+    
 }
 
 publishing.publications.mavenJava.pom.description='A simple utilitiy library with special executor but rather small amount of code in here'

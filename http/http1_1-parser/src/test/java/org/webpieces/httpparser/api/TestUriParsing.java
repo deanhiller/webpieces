@@ -14,7 +14,8 @@ public class TestUriParsing {
 		UrlInfo urlInfo = uri.getUriBreakdown();
 		Assert.assertEquals("http", urlInfo.getPrefix());
 		Assert.assertEquals("www.google.com", urlInfo.getHost());
-		Assert.assertEquals(new Integer(8080), urlInfo.getPort());
+		Integer val = 8080;
+		Assert.assertEquals(val, urlInfo.getPort());
 		Assert.assertEquals("/there/is/cool?at=this&some=that", urlInfo.getFullPath());
 	}
 	@Test

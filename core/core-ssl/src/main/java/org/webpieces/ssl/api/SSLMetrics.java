@@ -2,6 +2,8 @@ package org.webpieces.ssl.api;
 
 import java.time.Duration;
 
+import org.webpieces.util.acking.AckMetrics;
+
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -12,6 +14,8 @@ public class SSLMetrics {
 	private DistributionSummary toSocket;
 	private DistributionSummary fromClient;
 	private DistributionSummary toClient;
+	private AckMetrics decryptionAckMetrics;
+	private AckMetrics encryptionAckMetrics;
 
 	public SSLMetrics(MeterRegistry metrics) {
 		fromSocket = DistributionSummary
@@ -45,7 +49,9 @@ public class SSLMetrics {
 			    .publishPercentiles(0.5, 0.99, 1)
 			    .baseUnit("bytes") // optional (1)
 			    .register(metrics);
-		
+
+		decryptionAckMetrics = new AckMetrics(metrics, "ssl.decryption");
+		encryptionAckMetrics = new AckMetrics(metrics, "ssl.encryption");
 	}
 	
 	public void recordEncryptedBytesFromSocket(int remaining) {
@@ -62,6 +68,14 @@ public class SSLMetrics {
 
 	public void recordPlainBytesFromClient(int remaining) {
 		fromClient.record(remaining);
+	}
+
+	public AckMetrics getEncryptionAckMetrics() {
+		return encryptionAckMetrics;
+	}
+
+	public AckMetrics getDecryptionAckMetrics() {
+		return decryptionAckMetrics;
 	}
 
 }

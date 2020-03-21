@@ -1,6 +1,5 @@
 dependencies {
     compile deps['guice']
-    compile deps['micrometer'] //because both template engine and router need metrics
     
     compile project(':core:core-util')
 	compile project(':core:core-datawrapper')

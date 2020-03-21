@@ -1,5 +1,4 @@
 dependencies {
-    compile deps['micrometer']
     compile project(':core:core-datawrapper')
     compile project(':core:core-util')
 	

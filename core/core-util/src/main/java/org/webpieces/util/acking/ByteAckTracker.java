@@ -10,8 +10,19 @@ public class ByteAckTracker {
 
 	public ConcurrentLinkedQueue<Record> records = new ConcurrentLinkedQueue<>();
 	private AtomicInteger numberBytesToAck = new AtomicInteger(0);
+	private AckMetrics metrics;
+
+	public ByteAckTracker() {
+	}
+	
+	public ByteAckTracker(AckMetrics metrics) {
+		this.metrics = metrics;
+	}
 	
 	public CompletableFuture<Void> addBytesToTrack(int incomingBytes) {
+		if(metrics != null)
+			metrics.incrementTrackedBytes(incomingBytes);
+		
 		CompletableFuture<Void> byteFuture = new CompletableFuture<Void>();
 		records.add(new Record(incomingBytes, byteFuture));
 		
@@ -37,6 +48,9 @@ public class ByteAckTracker {
 		if(numBytes == 0)
 			return null; //mine as well short circuit
 
+		if(metrics != null)
+			metrics.incrementAckedBytes(numBytes);
+		
 		numberBytesToAck.addAndGet(numBytes);
 		
 		while(true) {

@@ -21,8 +21,8 @@ public class HeaderItem<T> implements Comparable<HeaderItem<T>> {
 
 	@Override
 	public int compareTo(HeaderItem<T> o) {
-		Double left = new Double(this.priority);
-		Double right = new Double(o.priority);
+		Double left = this.priority;
+		Double right = o.priority;
 		return right.compareTo(left);
 	}
 }
