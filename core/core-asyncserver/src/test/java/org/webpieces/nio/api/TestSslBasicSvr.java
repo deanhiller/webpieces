@@ -33,6 +33,7 @@ import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSvrChannel;
 import org.webpieces.nio.api.mocks.MockSvrSideJdkChannel;
 import org.webpieces.ssl.api.AsyncSSLFactory;
+import org.webpieces.ssl.api.SSLMetrics;
 import org.webpieces.ssl.api.SSLParser;
 import org.webpieces.ssl.api.dto.SslAction;
 import org.webpieces.ssl.api.dto.SslActionEnum;
@@ -79,7 +80,8 @@ public class TestSslBasicSvr {
 		
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();
-		clientSslParser = AsyncSSLFactory.create("svr", clientSsl, pool);
+		SSLMetrics sslMetrics = new SSLMetrics(meters);
+		clientSslParser = AsyncSSLFactory.create("svr", clientSsl, pool, sslMetrics);
 
 		SslAction result = clientSslParser.beginHandshake();
 		

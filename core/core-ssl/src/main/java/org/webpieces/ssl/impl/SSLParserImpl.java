@@ -12,6 +12,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.ssl.api.AsyncSSLEngine;
+import org.webpieces.ssl.api.SSLMetrics;
 import org.webpieces.ssl.api.SSLParser;
 import org.webpieces.ssl.api.SslListener;
 import org.webpieces.ssl.api.dto.SslAction;
@@ -27,8 +28,8 @@ public class SSLParserImpl implements SSLParser {
 	private boolean isClosed;
 	private boolean isClientInitiatedClosed;
 	
-	public SSLParserImpl(String logId, SSLEngine sslEngine, BufferPool pool) {
-		engine = new AsyncSSLEngine3Impl(logId, sslEngine, pool, new OurListener());
+	public SSLParserImpl(String logId, SSLEngine sslEngine, BufferPool pool, SSLMetrics metrics) {
+		engine = new AsyncSSLEngine3Impl(logId, sslEngine, pool, new OurListener(), metrics);
 	}
 
 	private class OurListener implements SslListener {

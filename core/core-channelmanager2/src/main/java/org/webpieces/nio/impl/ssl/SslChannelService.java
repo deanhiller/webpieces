@@ -15,16 +15,21 @@ import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DatagramListener;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLFactory;
+import org.webpieces.ssl.api.SSLMetrics;
 import org.webpieces.ssl.api.SslListener;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 public class SslChannelService implements ChannelManager {
 
 	private ChannelManager mgr;
 	private BufferPool pool;
+	private SSLMetrics sslMetrics;
 
-	public SslChannelService(ChannelManager mgr, BufferPool pool) {
+	public SslChannelService(ChannelManager mgr, BufferPool pool, MeterRegistry metrics) {
 		this.mgr = mgr;
 		this.pool = pool;
+		this.sslMetrics = new SSLMetrics(metrics);
 	}
 
 	@Override
@@ -36,7 +41,7 @@ public class SslChannelService implements ChannelManager {
 	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory) {
 		if(factory == null || connectionListener == null || id == null)
 			throw new IllegalArgumentException("no arguments can be null");
-		ConnectionListener wrapperConnectionListener = new SslConnectionListener(connectionListener, pool, factory);
+		ConnectionListener wrapperConnectionListener = new SslConnectionListener(connectionListener, pool, factory, sslMetrics);
 		//because no methods return futures in this type of class, we do not need to proxy him....
 		return mgr.createTCPServerChannel(id, wrapperConnectionListener);
 	}
@@ -50,10 +55,10 @@ public class SslChannelService implements ChannelManager {
 	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
 		if(engine == null || id == null)
 			throw new IllegalArgumentException("no arguments can be null");
-		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.create(id, engine, pool, l);
+		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.create(id, engine, pool, l, sslMetrics);
 		
 		TCPChannel channel = mgr.createTCPChannel(id);
-		SslTCPChannel sslChannel = new SslTCPChannel(function, channel);
+		SslTCPChannel sslChannel = new SslTCPChannel(function, channel, sslMetrics);
 		return sslChannel;
 	}
 

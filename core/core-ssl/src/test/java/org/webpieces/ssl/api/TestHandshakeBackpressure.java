@@ -20,6 +20,8 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.ssl.api.MockSslListener.BufferedFuture;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class TestHandshakeBackpressure {
 
 	private AsyncSSLEngine clientEngine;
@@ -33,12 +35,13 @@ public class TestHandshakeBackpressure {
 		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
 		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
 
+		SSLMetrics metrics = new SSLMetrics(new SimpleMeterRegistry());
 		MockSSLEngineFactory sslEngineFactory = new MockSSLEngineFactory();	
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine client = sslEngineFactory.createEngineForSocket();
 		SSLEngine svr = sslEngineFactory.createEngineForServerSocket();
-		clientEngine = AsyncSSLFactory.create("client", client, pool, clientListener);
-		svrEngine = AsyncSSLFactory.create("svr", svr, pool, svrListener);
+		clientEngine = AsyncSSLFactory.create("client", client, pool, clientListener, metrics);
+		svrEngine = AsyncSSLFactory.create("svr", svr, pool, svrListener, metrics);
 		
 		Assert.assertEquals(ConnectionState.NOT_STARTED, clientEngine.getConnectionState());
 		Assert.assertEquals(ConnectionState.NOT_STARTED, svrEngine.getConnectionState());

@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +21,8 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
 
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
 
 
 public final class KeyProcessor {
@@ -32,14 +34,40 @@ public final class KeyProcessor {
 	private JdkSelect selector;
 	private BufferPool pool;
 
-	private Counter connectionClosed = Metrics.counter("webpieces/connectionsTemp/closed");
-	private Counter connectionOpen = Metrics.counter("webpieces/connectionsTemp/opened");
-	private Counter connectionErrors = Metrics.counter("webpieces/connectionsTemp/errors");
-	private Counter specialConnectionErrors = Metrics.counter("webpieces/connectionsTemp/errors");
+	private Counter connectionClosed;
+	private Counter connectionOpen;
+	private Counter connectionErrors;
+	private Counter specialConnectionErrors;
+	private DistributionSummary payloadSize;
+	private Counter unregisteredSocket;
+	private Counter registeredSocket;
+	private DistributionSummary backupSize;
 
-	public KeyProcessor(JdkSelect selector, BufferPool pool) {
+	public KeyProcessor(JdkSelect selector, BufferPool pool, MeterRegistry metrics) {
 		this.selector = selector;
 		this.pool = pool;
+		connectionClosed = metrics.counter("connections.closed");
+		connectionOpen = metrics.counter("connections.opened");
+		connectionErrors = metrics.counter("connections.errors");
+		specialConnectionErrors = metrics.counter("connections.errors2");
+		unregisteredSocket = metrics.counter("connections.unregistered");
+		registeredSocket = metrics.counter("connections.registered");
+
+		payloadSize = DistributionSummary
+			    .builder("bytes.read.size")
+			    .distributionStatisticBufferLength(100)
+				.distributionStatisticExpiry(Duration.ofMinutes(10))
+			    .publishPercentiles(0.50, 0.99, 1)
+			    .baseUnit("bytes") // optional (1)
+			    .register(metrics);
+		
+		backupSize = DistributionSummary
+			    .builder("bytes.read.size")
+			    .distributionStatisticBufferLength(100)
+				.distributionStatisticExpiry(Duration.ofMinutes(10))
+			    .publishPercentiles(0.50, 0.99, 1)
+			    .baseUnit("bytes") // optional (1)
+			    .register(metrics);	
 	}
 	
 	public void processKeys(Set<SelectionKey> keySet) {
@@ -293,11 +321,10 @@ public final class KeyProcessor {
 		if(bytes < 0) {
 			if(apiLog.isTraceEnabled())
 				apiLog.trace(channel+"far end closed, cancel key, close socket");
-			channel.serverClosed();
-			
-			
-			//tempory for visibility(needs to be based on chanmgr id and socket id
+
 			connectionClosed.increment();
+
+			channel.serverClosed();
 			
 			in.farEndClosed(channel);
 		} else if(bytes > 0) {
@@ -308,12 +335,16 @@ public final class KeyProcessor {
     }
 
 	private void fireIncomingRead(SelectionKey key, int bytes, DataListener in, BasChannelImpl channel, ByteBuffer b) {
+		payloadSize.record(bytes);
+		
 		CompletableFuture<Void> future = in.incomingData(channel, b);
 		boolean unregister = false;
 		int unackedByteCnt = 0;
 		synchronized(channel) {
 			if(channel.getMaxUnacked() != null) {
-				unackedByteCnt = channel.addUnackedByteCount(bytes);
+				unackedByteCnt = channel.addUnackedByteCount(bytes);				
+				backupSize.record(unackedByteCnt);
+				
 				if(channel.isOverMaxUnacked()) {
 					unregister = true;
 				}
@@ -321,6 +352,7 @@ public final class KeyProcessor {
 		}
 
 		if(unregister) {
+			unregisteredSocket.increment();
 			log.warn(channel+"Overloaded channel.  unregistering until YOU catch up you slowass(lol). num="+unackedByteCnt+" max="+channel.getMaxUnacked());
 			unregisterSelectableChannel(channel, SelectionKey.OP_READ);
 		}
@@ -330,12 +362,14 @@ public final class KeyProcessor {
 			int unackedCnt;
 			synchronized(channel) {
 				unackedCnt = channel.addUnackedByteCount(-bytes);
+				backupSize.record(unackedCnt);
 				if(!isReading(key) && channel.isUnderThreshold()) {
 					register = true;
 				}
 			}
 			
 			if(register) {
+				registeredSocket.increment();
 				log.warn(channel+"BOOM. you caught back up, reregistering for reads now. unackedCnt="+unackedCnt+" readThreshold="+channel.getReadThreshold());
 				channel.registerForReads();
 			}

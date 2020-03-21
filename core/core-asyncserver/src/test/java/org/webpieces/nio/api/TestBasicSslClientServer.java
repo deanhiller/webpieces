@@ -13,6 +13,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.asyncserver.api.AsyncServer;
@@ -25,10 +27,6 @@ import org.webpieces.nio.api.handlers.DataListener;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TestBasicSslClientServer {
 

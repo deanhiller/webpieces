@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
@@ -13,14 +12,15 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLEngineException;
 import org.webpieces.ssl.api.ConnectionState;
+import org.webpieces.ssl.api.SSLMetrics;
 import org.webpieces.ssl.api.SslListener;
 import org.webpieces.util.acking.ByteAckTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private static final Logger log = LoggerFactory.getLogger(AsyncSSLEngine3Impl.class);
@@ -37,10 +37,13 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	
 	private ByteAckTracker encryptionTracker = new ByteAckTracker();
 	private ByteAckTracker decryptionTracker = new ByteAckTracker();
+
+	private SSLMetrics metrics;
 	
-	public AsyncSSLEngine3Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener) {
+	public AsyncSSLEngine3Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener, SSLMetrics metrics) {
 		if(listener == null)
 			throw new IllegalArgumentException("listener cannot be null");
+		this.metrics = metrics;
 		this.pool = pool;
 		this.listener = listener;
 		ByteBuffer cachedOutBuffer = pool.nextBuffer(engine.getSession().getApplicationBufferSize());
@@ -68,6 +71,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 	@Override
 	public CompletableFuture<Void> feedEncryptedPacket(ByteBuffer encryptedInData) {
+		metrics.recordEncryptedBytesFromSocket(encryptedInData.remaining());
 		CompletableFuture<Void> future = decryptionTracker.addBytesToTrack(encryptedInData.remaining());
 
 		ByteBuffer cached = mem.getCachedToProcess();
@@ -185,12 +189,13 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				fireClose();
 		}
 
-		logAndCheck(encryptedData, result, cachedOutBuffer, status, hsStatus);
+		logAndCheck(remainBeforeDecrypt, encryptedData, result, cachedOutBuffer, status, hsStatus);
 		logTrace(encryptedData, status, hsStatus);
 
 		int totalBytesToAck = remainBeforeDecrypt - encryptedData.remaining();
 		if(cachedOutBuffer.position() != 0) {
 			cachedOutBuffer.flip();
+			metrics.recordPlainBytesToClient(cachedOutBuffer.remaining());
 			listener.packetUnencrypted(cachedOutBuffer).handle((v, t) -> {
 				if(t != null)
 					log.error("Exception in ssl listener", t);
@@ -267,7 +272,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			log.trace(mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
 	}
 	
-	private void logAndCheck(ByteBuffer encryptedData, SSLEngineResult result, ByteBuffer outBuffer, Status status, HandshakeStatus hsStatus) {
+	private void logAndCheck(int remainBeforeDecrypt, ByteBuffer encryptedData, SSLEngineResult result, ByteBuffer outBuffer, Status status, HandshakeStatus hsStatus) {
 		final ByteBuffer data = encryptedData;
 
 		if(log.isTraceEnabled())
@@ -276,9 +281,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		
 		if(status == Status.BUFFER_UNDERFLOW) {
 			final ByteBuffer data1 = encryptedData;
-			log.warn(mem+"buffer underflow async3. data="+data1.remaining()
+			log.warn(mem+"buffer underflow async3. data="+data1.remaining()+" beforeDecrypt="+remainBeforeDecrypt
 					+"\n[sockToEngine] unwrap done pos="+data.position()+" lim="+
-					data.limit()+" status="+status+" hs="+hsStatus);
+					data.limit()+" status="+status+" hs="+hsStatus+" outBuf="+outBuffer.position()+" outRem="+outBuffer.remaining());
 		}
 	}
 
@@ -355,6 +360,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				sslEngineIsFarting = true;
 				sentMsgFuture = CompletableFuture.completedFuture(null);
 			} else
+				metrics.recordEncryptedToSocket(engineToSocketData.remaining());
 				sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
 
 			if (lastStatus == Status.CLOSED && !clientInitiated) {
@@ -389,6 +395,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	@Override
 	public CompletableFuture<Void> feedPlainPacket(ByteBuffer buffer) {
 		try {
+			metrics.recordPlainBytesFromClient(buffer.remaining());
 			return feedPlainPacketImpl(buffer);
 		} catch (SSLException e) {
 			throw new AsyncSSLEngineException(e);
@@ -429,6 +436,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 									" lim="+engineToSocketData.limit()+" hsStatus="+hsStatus+" status="+status);
 			
 			engineToSocketData.flip();
+			metrics.recordEncryptedToSocket(engineToSocketData.remaining());
 			listener.packetEncrypted(engineToSocketData).handle( (v, t) -> {
 				if(t != null)
 					log.error("Exception from ssl listener", t);

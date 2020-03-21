@@ -32,6 +32,7 @@ public class TestLesson4BasicStart {
 		jdbc.dropAllTablesFromDatabase();
 		
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
 		Server server = new Server(metrics, null, null, new ServerConfig(JavaCache.getCacheLocation()), args);
 		//In this case, we bind a port
@@ -45,8 +46,7 @@ public class TestLesson4BasicStart {
 		//ALSO, it is completely reasonable to create a brand new instance(ie. avoid statics and avoid
 		// non-guice singletons).  A guice singleton is only a singleton within the scope of a server
 		//while a java singleton....well, pretty much sucks.  Google "Singletons are evil".
-		SimpleMeterRegistry metrics2 = new SimpleMeterRegistry();
-		Server server2 = new Server(metrics2, null, null, new ServerConfig(JavaCache.getCacheLocation()), args);
+		Server server2 = new Server(metrics, null, null, new ServerConfig(JavaCache.getCacheLocation()), args);
 		//In this case, we bind a port
 		server2.start();
 		System.out.println("bound port="+server.getUnderlyingHttpChannel().getLocalAddress());

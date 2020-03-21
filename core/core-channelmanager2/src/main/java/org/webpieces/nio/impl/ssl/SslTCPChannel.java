@@ -25,6 +25,7 @@ import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLFactory;
+import org.webpieces.ssl.api.SSLMetrics;
 import org.webpieces.ssl.api.SslListener;
 
 public class SslTCPChannel extends SslChannel implements TCPChannel {
@@ -34,23 +35,25 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private SslTryCatchListener clientDataListener;
 	private final TCPChannel realChannel;
 	
-	private SocketDataListener socketDataListener = new SocketDataListener();
+	private SocketDataListener socketDataListener;
 	private CompletableFuture<Void> closeFuture = new CompletableFuture<>();
 	private OurSslListener sslListener;
 	private SSLEngineFactory sslFactory;
 	private BufferPool pool;
 	private ClientHelloParser parser;
 	
-	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, TCPChannel realChannel) {
+	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, TCPChannel realChannel, SSLMetrics metrics) {
 		super(realChannel);
 		this.sslListener = new OurSslListener();
+		this.socketDataListener = new SocketDataListener(metrics);
 		sslEngine = function.apply(sslListener );
 		this.realChannel = realChannel;
 	}
 
-	public SslTCPChannel(BufferPool pool, TCPChannel realChannel2, ConnectionListener connectionListener, SSLEngineFactory sslFactory) {
+	public SslTCPChannel(BufferPool pool, TCPChannel realChannel2, ConnectionListener connectionListener, SSLEngineFactory sslFactory, SSLMetrics metrics) {
 		super(realChannel2);
 		this.pool = pool;
+		this.socketDataListener = new SocketDataListener(metrics);
 		parser = new ClientHelloParser(pool);
 		this.realChannel = realChannel2;
 		this.sslListener = new OurSslListener(connectionListener);
@@ -164,6 +167,12 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	
 	private class SocketDataListener implements DataListener {
 		
+		private SSLMetrics sslMetrics;
+
+		public SocketDataListener(SSLMetrics sslMetrics) {
+			this.sslMetrics = sslMetrics;
+		}
+		
 		@Override
 		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			if(sslEngine == null) {
@@ -200,11 +209,11 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 				
 				String host = sniServerNames.get(0);
 				SSLEngine engine = sslFactoryWithHost.createSslEngine(host);
-				sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
+				sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener, sslMetrics);
 				return result.getBuffer(); // return the full accumulated packet(which may just be the buffer passed in above)
 			} else {
 				SSLEngine engine = sslFactory.createSslEngine();
-				sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
+				sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener, sslMetrics);
 				return b;
 			}
 		}

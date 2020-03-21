@@ -31,6 +31,7 @@ import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSvrChannel;
 import org.webpieces.nio.api.mocks.MockSvrSideJdkChannel;
 import org.webpieces.ssl.api.AsyncSSLFactory;
+import org.webpieces.ssl.api.SSLMetrics;
 import org.webpieces.ssl.api.SSLParser;
 import org.webpieces.ssl.api.dto.SslAction;
 import org.webpieces.ssl.api.dto.SslActionEnum;
@@ -38,6 +39,7 @@ import org.webpieces.util.threading.DirectExecutor;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestSslCloseSvr {
 
@@ -113,7 +115,8 @@ public class TestSslCloseSvr {
 		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();
-		SSLParser clientSslParser1 = AsyncSSLFactory.create("svr", clientSsl, pool);
+		SSLMetrics sslMetrics = new SSLMetrics(new SimpleMeterRegistry());
+		SSLParser clientSslParser1 = AsyncSSLFactory.create("svr", clientSsl, pool, sslMetrics);
 		return clientSslParser1;
 	}
 

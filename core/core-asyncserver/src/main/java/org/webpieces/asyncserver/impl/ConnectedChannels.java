@@ -9,7 +9,6 @@ import org.webpieces.nio.api.channels.Channel;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Metrics;
 
 public class ConnectedChannels {
 

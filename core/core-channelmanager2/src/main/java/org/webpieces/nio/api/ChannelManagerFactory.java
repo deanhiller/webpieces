@@ -9,7 +9,6 @@ import org.webpieces.nio.impl.cm.basic.BasChanSvcFactory;
 import org.webpieces.nio.impl.jdk.JdkSelectorImpl;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Metrics;
 
 
 /**

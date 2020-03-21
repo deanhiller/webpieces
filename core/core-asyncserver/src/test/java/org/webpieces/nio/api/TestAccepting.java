@@ -12,14 +12,13 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.mocks.MockAsyncListener;
-import org.webpieces.nio.api.mocks.MockSvrSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSvrChannel;
+import org.webpieces.nio.api.mocks.MockSvrSideJdkChannel;
 import org.webpieces.util.threading.DirectExecutor;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 
 public class TestAccepting {
 
