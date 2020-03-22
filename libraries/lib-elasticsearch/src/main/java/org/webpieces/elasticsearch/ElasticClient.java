@@ -58,17 +58,9 @@ public class ElasticClient {
 
     public CompletableFuture<Response> loadDocument(String index, long id, Object document) {
         Map<String, String> params = Collections.emptyMap();
-        String jsonString = null;
-        try {
-            jsonString = objectMapper.writeValueAsString(document);
-        } catch (IOException e) {
-            throw new RuntimeException("failed to write document: "+id+" as String", e);
-        }
-        HttpEntity entity = new NStringEntity(jsonString, ContentType.APPLICATION_JSON);
-
         //url format is /{index}/{type}/{documentId}
         //type goes away in future releases as well so don't put different types in the same index!!!(use new index)
-        return performRequest("PUT", "/"+index+"/doc/"+id, params, entity);    
+        return performRequest("PUT", "/"+index+"/doc/"+id, params, document);    
     }
 
     public CompletableFuture<Response> createAlias(String indexName, String alias) {
@@ -84,15 +76,7 @@ public class ElasticClient {
         AtomicActionList list = new AtomicActionList();
 		list.setActions(actions);
         
-        String jsonString = null;
-        try {
-            jsonString = objectMapper.writeValueAsString(list);
-        } catch (IOException e) {
-            throw new RuntimeException("failed to translate to json for alias: "+alias, e);
-        }
-        HttpEntity entity = new NStringEntity(jsonString, ContentType.APPLICATION_JSON);		
-		
-    	return performRequest("POST", "/_aliases", params, entity);
+    	return performRequest("POST", "/_aliases", params, list);
     }
     
 	public CompletableFuture<Response> getAliases(String index) {
@@ -118,15 +102,7 @@ public class ElasticClient {
         AtomicActionList list = new AtomicActionList();
 		list.setActions(actions);
         
-        String jsonString = null;
-        try {
-            jsonString = objectMapper.writeValueAsString(list);
-        } catch (IOException e) {
-            throw new RuntimeException("failed to translate to json for alias: "+alias, e);
-        }
-        HttpEntity entity = new NStringEntity(jsonString, ContentType.APPLICATION_JSON);		
-		
-    	return performRequest("POST", "/_aliases", params, entity);
+    	return performRequest("POST", "/_aliases", params, list);
     }
     
     public CompletableFuture<Response> deleteIndex(String name) {
@@ -136,19 +112,22 @@ public class ElasticClient {
     
 	public CompletableFuture<Response> createIndex(String name, ElasticIndex index) {
         Map<String, String> params = Collections.emptyMap();
-        String jsonString = null;
-        try {
-            jsonString = objectMapper.writeValueAsString(index);
-        } catch (IOException e) {
-            throw new RuntimeException("failed to translate to json: "+name+" as String", e);
-        }
-        HttpEntity entity = new NStringEntity(jsonString, ContentType.APPLICATION_JSON);
-
-		return performRequest("PUT", "/"+name, params, entity);
+		return performRequest("PUT", "/"+name, params, index);
 	}
 	
 	public CompletableFuture<Response> performRequest(
-			String method, String endpoint, Map<String, String> params, HttpEntity entity, Header... headers) {
+			String method, String endpoint, Map<String, String> params, Object jsonObj, Header... headers) {
+		HttpEntity entity = null;
+		if(jsonObj != null) {
+	        String jsonString = null;
+	        try {
+	            jsonString = objectMapper.writeValueAsString(jsonObj);
+	        } catch (IOException e) {
+	            throw new RuntimeException("failed to translate to json object to string: "+jsonObj, e);
+	        }
+	        entity = new NStringEntity(jsonString, ContentType.APPLICATION_JSON);			
+		}
+		
 		CompletableFuture<Response> future = new CompletableFuture<Response>();
 		ResponseListener responseListener = new ToFutureListener(future); 
 		client.performRequestAsync(method, endpoint, params, entity, responseListener, headers);

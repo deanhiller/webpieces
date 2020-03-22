@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class Mappings {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private SingleType _doc;
+	private SingleType doc;
 
-	public SingleType get_doc() {
-		return _doc;
+	public SingleType getDoc() {
+		return doc;
 	}
 
-	public void set_doc(SingleType _doc) {
-		this._doc = _doc;
+	public void setDoc(SingleType doc) {
+		this.doc = doc;
 	}
 	
 	

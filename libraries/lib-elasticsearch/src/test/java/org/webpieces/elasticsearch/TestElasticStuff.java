@@ -3,14 +3,10 @@ package org.webpieces.elasticsearch;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.elasticsearch.client.Response;
 import org.junit.Test;
-import org.webpieces.elasticsearch.mapping.BooleanMapping;
 import org.webpieces.elasticsearch.mapping.DateMapping;
 import org.webpieces.elasticsearch.mapping.ElasticIndex;
 import org.webpieces.elasticsearch.mapping.Mappings;
@@ -45,7 +41,7 @@ public class TestElasticStuff {
         doc.setProperties(properties);
 
         Mappings mappings = new Mappings();
-		mappings.set_doc(doc);
+		mappings.setDoc(doc);
         
         ElasticIndex index = new ElasticIndex();
 		index.setMappings(mappings);
