@@ -1,8 +1,9 @@
 package org.webpieces.webserver.json.app;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.webpieces.plugins.json.JacksonCatchAllFilter;
 import org.webpieces.router.api.exceptions.ClientDataError;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.inject.Inject;
 

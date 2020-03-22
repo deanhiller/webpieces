@@ -5,13 +5,14 @@ import java.lang.annotation.Annotation;
 
 import javax.inject.Inject;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.extensions.BodyContentBinder;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JacksonLookup implements BodyContentBinder {
 

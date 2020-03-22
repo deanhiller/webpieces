@@ -1280,8 +1280,8 @@ color: #0dc0c0;
     }    
  
     .navbar-default.menu-top{
-        background-color: #000 !important;
-    border-bottom: 0px solid #eee;
+        background-color: #fff !important;
+    border-bottom: 1px solid #eee;
         text-align: center;
     width:100%;
     }  

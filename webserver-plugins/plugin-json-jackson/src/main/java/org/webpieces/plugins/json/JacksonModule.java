@@ -1,8 +1,8 @@
 package org.webpieces.plugins.json;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 

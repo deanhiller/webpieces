@@ -6,9 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
@@ -20,6 +17,11 @@ import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.util.filters.Service;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

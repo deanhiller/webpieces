@@ -1,0 +1,8 @@
+dependencies {
+    compile deps['micrometer']
+    compile deps['elastic-search']
+    compile deps['jackson']
+    
+}
+
+publishing.publications.mavenJava.pom.description='A simple wrapper on elastic search high level client to create indexes'
