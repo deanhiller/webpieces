@@ -3,7 +3,7 @@ package org.webpieces.elasticsearch.mapping;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NestedMapping implements PropertyMapping {
+public class ObjectMapping implements PropertyMapping {
 
     private Map<String, PropertyMapping> properties = new HashMap<String, PropertyMapping>();
 

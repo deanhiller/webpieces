@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.webpieces.elasticsearch.mapping.DateMapping;
 import org.webpieces.elasticsearch.mapping.ElasticIndex;
 import org.webpieces.elasticsearch.mapping.Mappings;
-import org.webpieces.elasticsearch.mapping.NestedMapping;
+import org.webpieces.elasticsearch.mapping.ObjectMapping;
 import org.webpieces.elasticsearch.mapping.PropertyMapping;
 import org.webpieces.elasticsearch.mapping.SingleType;
 import org.webpieces.elasticsearch.mapping.TextMapping;
@@ -28,7 +28,7 @@ public class TestElasticStuff {
 		Map<String, PropertyMapping> dataSourceProps = new HashMap<String, PropertyMapping>();
 		dataSourceProps.put("name", name);
 		
-		NestedMapping dataSource = new NestedMapping();
+		ObjectMapping dataSource = new ObjectMapping();
 		dataSource.setProperties(dataSourceProps);
 		
 		
