@@ -95,7 +95,7 @@ public class DevRoutingService extends AbstractRouterService {
 		log.info("text file changed so need to reload RouterModules.java implementation");
 
 		routerModule = routeLoader.configure(classLoader, arguments);
-		routeLoader.load(NO_OP);
+		routeLoader.load(injector -> runStartupHooks(injector));
 		lastFileTimestamp = metaTextFile.lastModified();
 		return true;
 	}
@@ -110,7 +110,7 @@ public class DevRoutingService extends AbstractRouterService {
 			return;
 		
 		log.info("classloader change so we need to reload all router classes");
-		loadOrReload(NO_OP);
+		loadOrReload(injector -> runStartupHooks(injector));
 	}
 
 	private Injector loadOrReload(Consumer<Injector> startupHook) {

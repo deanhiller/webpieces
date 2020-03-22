@@ -102,6 +102,8 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	@Override
 	public void addRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId,
 			boolean checkToken) {
+		if(!controllerMethod.contains("."))
+			throw new IllegalArgumentException("controllerMethod='"+controllerMethod+" does not contain a '.' which is required separating class name and method");
 		UrlPath p = new UrlPath(routerInfo, path);
 
 		boolean isPostOnly = method == HttpMethod.POST;
