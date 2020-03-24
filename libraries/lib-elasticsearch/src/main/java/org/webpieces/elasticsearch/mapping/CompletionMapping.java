@@ -2,6 +2,8 @@ package org.webpieces.elasticsearch.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.List;
+
 public class CompletionMapping implements PropertyMapping {
 
 	private String type = "completion";
@@ -15,7 +17,9 @@ public class CompletionMapping implements PropertyMapping {
 	private Boolean preserve_position_increments;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Integer max_input_length;
-	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private List<Context> contexts;
+
 	public String getAnalyzer() {
 		return analyzer;
 	}
@@ -52,6 +56,13 @@ public class CompletionMapping implements PropertyMapping {
 	public void setType(String type) {
 		this.type = type;
 	}
-	
-	
+
+
+	public List<Context> getContexts() {
+		return contexts;
+	}
+
+	public void setContexts(List<Context> contexts) {
+		this.contexts = contexts;
+	}
 }

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import javax.inject.Singleton;
 
@@ -118,8 +119,8 @@ public class ElasticClient {
 	public CompletableFuture<Response> performRequest(
 			String method, String endpoint, Map<String, String> params, Object jsonObj, Header... headers) {
 		HttpEntity entity = null;
+        String jsonString = null;
 		if(jsonObj != null) {
-	        String jsonString = null;
 	        try {
 	            jsonString = objectMapper.writeValueAsString(jsonObj);
 	        } catch (IOException e) {
@@ -128,10 +129,19 @@ public class ElasticClient {
 	        entity = new NStringEntity(jsonString, ContentType.APPLICATION_JSON);			
 		}
 		
+		String jsonStr = jsonString;
 		CompletableFuture<Response> future = new CompletableFuture<Response>();
 		ResponseListener responseListener = new ToFutureListener(future); 
 		client.performRequestAsync(method, endpoint, params, entity, responseListener, headers);
-		return future;
+		
+		return future.handle( (r, e) -> {
+			if(e != null) {
+				CompletableFuture<Response> f = new CompletableFuture<Response>();
+				f.completeExceptionally(new RuntimeException("json failed to be processed by elastic search="+jsonStr));
+				return f;
+			}
+			return CompletableFuture.completedFuture(r);
+		}).thenCompose(Function.identity());
 	}
 	
 	private static class ToFutureListener implements ResponseListener {
