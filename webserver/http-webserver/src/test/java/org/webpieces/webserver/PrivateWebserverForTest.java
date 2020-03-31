@@ -23,7 +23,7 @@ import com.google.inject.Module;
 public class PrivateWebserverForTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(PrivateWebserverForTest.class);
-	private File cacheDir =  new File(System.getProperty("java.io.tmpdir")+"/webpiecesCache/webserverForTest");
+	private File cacheDir = FileFactory.newCacheLocation("webpieces/PrivateWebserverForTest/compression");
 	public static final Charset CHAR_SET_TO_USE = StandardCharsets.UTF_8;
 
 	public static void main(String[] args) throws InterruptedException {

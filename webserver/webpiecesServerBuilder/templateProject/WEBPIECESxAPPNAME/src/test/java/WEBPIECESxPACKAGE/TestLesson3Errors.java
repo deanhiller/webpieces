@@ -23,11 +23,11 @@ import org.webpieces.webserver.test.ResponseWrapper;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
+import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
+import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
 import WEBPIECESxPACKAGE.service.RemoteService;
 import WEBPIECESxPACKAGE.service.SomeLibrary;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
-import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
 
 /**
  * Error/Failure testing is something that tends to get missed but it can be pretty important to make sure you render a nice message

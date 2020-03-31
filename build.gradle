@@ -291,7 +291,6 @@ subprojects {
 //   processResources.dependsOn(":webserver:http-webserver:writeVersion")
    assemble.dependsOn('syncJars')
 
-   test.dependsOn (":deleteJavaCache")
    test {
       //Tests fail with wifi OFF and ipv6....force ipv4 for now
       systemProperty "java.net.preferIPv4Stack", true
@@ -447,16 +446,6 @@ subprojects {
 */
    //}
 
-}
-
-task deleteJavaCache {
-    doLast {
-        System.out.println("DELETE java caches here to prevent intermitten build failures from java deleting files")
-        def cacheDir =  new File(System.getProperty("java.io.tmpdir")+"/webpiecesCache");
-        def deleted = cacheDir.deleteDir();
-        if(!deleted)        
-          throw new IllegalStateException("Directory="+cacheDir+" not deleted");
-    }
 }
 
 //WE should not need this target... (it does this by default but we can't seem to depend on it...wait until we are on 5.3)

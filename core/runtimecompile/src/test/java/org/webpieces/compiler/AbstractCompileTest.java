@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractCompileTest {
 
 	protected static final Logger log = LoggerFactory.getLogger(AbstractCompileTest.class);
-	private static final File tmpDirectory = FileFactory.newTmpFile("webpiecesCache/compiler");
+	private final File tmpDirectory = FileFactory.newCacheLocation("AbstractCompileTest/"+getClass().getSimpleName());
 	
 	private File javaFileCacheDir = FileFactory.newFile(tmpDirectory, "cachedJavaFiles");
 	protected static final File myCodePath = FileFactory.newBaseFile("src/test/java");

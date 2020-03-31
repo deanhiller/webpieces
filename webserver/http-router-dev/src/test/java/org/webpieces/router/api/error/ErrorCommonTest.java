@@ -21,11 +21,13 @@ import org.webpieces.router.api.error.dev.CommonRoutesModules;
 import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
+import org.webpieces.router.api.simplesvr.TestSimpleRoutes;
 import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 
@@ -156,7 +158,8 @@ public class ErrorCommonTest {
 		//otherwise create the development server
 		String filePath = System.getProperty("user.dir");
 		File myCodePath = new File(filePath + "/src/test/java");
-		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), CompileConfig.getTmpDir());		
+		VirtualFile cacheLocation = new VirtualFileImpl(FileFactory.newCacheLocation("webpieces/"+ErrorCommonTest.class.getSimpleName()+"/bytecode"));
+		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), cacheLocation);		
 		log.info("bytecode dir="+compileConfig.getByteCodeCacheDir());
 		RouterService server = DevRouterFactory.create(metrics, f, compileConfig);
 		return server;

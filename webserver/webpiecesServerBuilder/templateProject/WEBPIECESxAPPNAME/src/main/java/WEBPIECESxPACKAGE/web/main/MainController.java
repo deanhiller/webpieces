@@ -9,9 +9,9 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Render;
 
+import WEBPIECESxPACKAGE.mgmt.SomeBean;
 import WEBPIECESxPACKAGE.service.RemoteService;
 import WEBPIECESxPACKAGE.service.SomeLibrary;
-import WEBPIECESxPACKAGE.mgmt.SomeBean;
 
 @Singleton
 public class MainController {

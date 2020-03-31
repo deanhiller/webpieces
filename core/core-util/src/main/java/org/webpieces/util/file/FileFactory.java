@@ -14,6 +14,11 @@ public class FileFactory {
 		return new File(property);
 	}
 	
+	public static File getUserHomeDir() {
+		String property = System.getProperty("user.home");
+		return new File(property);
+	}
+	
 	public static File getTmpDirectory() {
 		String tmpPath = System.getProperty("java.io.tmpdir");
 		return new File(tmpPath);
@@ -42,6 +47,13 @@ public class FileFactory {
 		return new File(workingDir, correctPathForThisOs );
 	}
 
+	public static File newCacheLocation(String relativePath) {
+		File home = getUserHomeDir();
+		File webpieces = new File(home, ".webpieces");
+		String osPath = convertToOsPath(relativePath);
+		return new File(webpieces, osPath);
+	}
+	
 	public static File newTmpFile(String relativePath) {
 		File tmpDirectory = getTmpDirectory();
 		String correctPathForThisOs = convertToOsPath(relativePath);

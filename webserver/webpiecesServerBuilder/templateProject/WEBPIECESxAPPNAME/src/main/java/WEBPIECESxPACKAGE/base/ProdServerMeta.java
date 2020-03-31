@@ -2,7 +2,8 @@ package WEBPIECESxPACKAGE.base;
 
 import java.util.List;
 
-import WEBPIECESxPACKAGE.web.main.AppRoutes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.plugins.backend.BackendPlugin;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.plugins.json.JacksonConfig;
@@ -15,17 +16,16 @@ import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
+import WEBPIECESxPACKAGE.json.JsonCatchAllFilter;
+import WEBPIECESxPACKAGE.json.JsonRoutes;
 import WEBPIECESxPACKAGE.web.crud.CrudRoutes;
 import WEBPIECESxPACKAGE.web.crudajax.AjaxCrudRoutes;
 import WEBPIECESxPACKAGE.web.login.LoginRoutes;
-import WEBPIECESxPACKAGE.json.JsonCatchAllFilter;
-import WEBPIECESxPACKAGE.json.JsonRoutes;
+import WEBPIECESxPACKAGE.web.main.AppRoutes;
 
 //This is where the list of Guice Modules go as well as the list of RouterModules which is the
 //core of anything you want to plugin to your web app.  To make re-usable components, you create

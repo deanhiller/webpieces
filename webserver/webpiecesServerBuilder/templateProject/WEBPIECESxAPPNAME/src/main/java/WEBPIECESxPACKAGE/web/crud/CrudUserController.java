@@ -10,6 +10,8 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.plugins.hibernate.UseQuery;
@@ -18,8 +20,6 @@ import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.FlashAndRedirect;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import WEBPIECESxPACKAGE.db.EducationEnum;
 import WEBPIECESxPACKAGE.db.RoleEnum;

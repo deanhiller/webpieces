@@ -38,7 +38,7 @@ public class TestCompressionCache {
 	
 	private CompressionCacheSetup cache;
 	private TestFileUtilProxy proxy = new TestFileUtilProxy();
-	private File cacheDir = FileFactory.newTmpFile("webpieces/cacheForTesting"); 
+	private File cacheDir = FileFactory.newCacheLocation("webpieces/TestCompressionCache/compression"); 
 
 	@Before
 	public void setUp() throws IOException {

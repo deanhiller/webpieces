@@ -1,9 +1,12 @@
 package org.webpieces.webserver.dev;
 
-import com.google.inject.Module;
-import com.google.inject.util.Modules;
-
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -23,17 +26,19 @@ import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileFactory;
+import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.webserver.PrivateWebserverForTest;
-import org.webpieces.webserver.test.*;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
+import org.webpieces.webserver.test.Asserts;
+import org.webpieces.webserver.test.OverridesForTest;
+import org.webpieces.webserver.test.ResponseExtract;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import com.google.inject.Module;
+import com.google.inject.util.Modules;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 
@@ -60,7 +65,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		
 		//cache existing code for use by teardown...
 
-		stashedExistingCodeDir = FileFactory.newTmpFile("webpieces/testDevServer/app");
+		stashedExistingCodeDir = FileFactory.newCacheLocation("webpieces/"+getClass().getSimpleName());
 		FileUtils.copyDirectory(existingCodeLoc, stashedExistingCodeDir);
 		
 		//list all source paths here as you add them(or just create for loop)
@@ -73,8 +78,9 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		
 		//html and json template file encoding...
 		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths);
+		VirtualFile cacheLocation = new VirtualFileImpl(FileFactory.newCacheLocation("webpieces/"+getClass().getSimpleName()+"/bytecode"));
 		//java source files encoding...
-		CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getTmpDir());
+		CompileConfig devConfig = new CompileConfig(srcPaths, cacheLocation);
 		
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		Module platformOverrides = Modules.combine(

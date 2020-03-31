@@ -1,8 +1,8 @@
 package WEBPIECESxPACKAGE.web.main;
 
 import static WEBPIECESxPACKAGE.web.main.AppRouteId.ASYNC_ROUTE;
-import static WEBPIECESxPACKAGE.web.main.AppRouteId.SYNC_ROUTE;
 import static WEBPIECESxPACKAGE.web.main.AppRouteId.MAIN_ROUTE;
+import static WEBPIECESxPACKAGE.web.main.AppRouteId.SYNC_ROUTE;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.router.api.routes.Port.BOTH;
 

@@ -70,7 +70,8 @@ public class TestSimpleRoutes {
 		
 		String filePath = System.getProperty("user.dir");
 		File myCodePath = new File(filePath + "/src/test/java");
-		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), CompileConfig.getTmpDir());
+		VirtualFile cacheLocation = new VirtualFileImpl(FileFactory.newCacheLocation("webpieces/"+TestSimpleRoutes.class.getSimpleName()+"/bytecode"));
+		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), cacheLocation);
 		Arguments args2 = new CommandLineParser().parse();
 		SimpleMeterRegistry metrics2 = new SimpleMeterRegistry();
 		RouterService devSvc = DevRouterFactory.create(metrics2, config, compileConfig);

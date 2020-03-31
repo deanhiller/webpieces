@@ -44,8 +44,8 @@ public class CompileConfig {
 				));
 	}
 	
-	public static VirtualFile getTmpDir() {
-		File cacheDir = FileFactory.newTmpFile("webpiecesCache/bytecodeCache");
+	public static VirtualFile getHomeCacheDir(String relativePath) {
+		File cacheDir = FileFactory.newCacheLocation(relativePath);
 		return new VirtualFileImpl(cacheDir);
 	}
 
