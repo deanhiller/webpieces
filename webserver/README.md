@@ -1,6 +1,5 @@
 # webpieces
 
-* ./gradlew assembleDist passes if DevServer doesn't compile....iiiiiiick....it should do it all
 * DAMNIT, hit this again....AND left server running over night 12 hours basically
   * com.orderlyhealth.search.TestLesson4BasicStart > testBasicProdStartup FAILED
     java.lang.IllegalStateException: Previously existing file is missing=/var/folders/76/4yw_0lwd4wj9x1b9xm055y6h0000gn/T/webpieces/searchportalCache/precompressedFiles/assets/primesTheme/index.html.gz Your file cache was corrupted.  You will need to delete the whole cache directory
