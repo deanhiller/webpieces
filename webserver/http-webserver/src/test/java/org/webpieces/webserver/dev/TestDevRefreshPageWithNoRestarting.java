@@ -65,7 +65,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		
 		//cache existing code for use by teardown...
 
-		stashedExistingCodeDir = FileFactory.newCacheLocation("webpieces/"+getClass().getSimpleName());
+		stashedExistingCodeDir = FileFactory.newCacheLocation("webpieces/"+getClass().getSimpleName()+"/javaFiles");
 		FileUtils.copyDirectory(existingCodeLoc, stashedExistingCodeDir);
 		
 		//list all source paths here as you add them(or just create for loop)
