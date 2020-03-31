@@ -70,7 +70,7 @@ public class DevelopmentServer {
 														.setFileEncoding(Server.ALL_FILE_ENCODINGS);
 		
 		//java source files encoding...
-		CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getHomeCacheDir(name+"/devserver-bytecode"))
+		CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getHomeCacheDir("WEBPIECESxAPPNAMECache/devserver-bytecode"))
 										.setFileEncoding(Server.ALL_FILE_ENCODINGS);
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
