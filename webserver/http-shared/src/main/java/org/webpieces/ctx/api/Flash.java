@@ -5,6 +5,12 @@ public interface Flash extends FlashScope {
 
     String getMessage();
 
+    /**
+     * For messages like "User successfully saved" on any next page OR for errors like
+     * "Errors in form below" for non-ajax popup add/edits
+     * 
+     * @param msg
+     */
     void setMessage(String msg);
 
     /**
@@ -14,6 +20,11 @@ public interface Flash extends FlashScope {
      */
     String getError();
 
+    /**
+     * Mainly for ajax popups to keep error message separate from a master template that has 
+     *     _flash.message at the top of the page
+     * @return
+     */
     void setError(String msg);
     
 	void setShowEditPopup(boolean b);

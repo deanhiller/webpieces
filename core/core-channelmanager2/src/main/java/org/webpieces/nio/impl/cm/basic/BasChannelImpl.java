@@ -132,7 +132,7 @@ public abstract class BasChannelImpl
 			//to pass before throwing as by then, the client has been notified and they really should have shut
 			//the fuck up
 			if(isRemoteEndInitiateClose)
-				throw new NioClosedChannelException(this+"Client cannot write after the remote end closed the socket");
+				throw new NioClosedChannelException(this+" Client cannot write after the remote end closed the socket");
 			else
 				throw new NioClosedChannelException(this+"Your Application cannot write after YOUR Application closed the socket");
 		} else if(channelState != ChannelState.CONNECTED) {

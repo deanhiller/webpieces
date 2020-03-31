@@ -1,0 +1,90 @@
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+    branches:
+      only:
+        - /submit_.*/
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
+    steps:
+      - checkout
+      - run: git merge master
+
+      - restore_cache:
+          key: v1-gradle-wrapper-{{ checksum "customerportal-all/gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_cache:
+          key: v1-gradle-cache-{{ checksum "customerportal-all/build.gradle" }}
+
+      - run: echo "A first hello to branch $CIRCLE_BRANCH"
+      - run: 
+          name: Build Customer portal
+          command: |
+            cd customerportal-all
+            ./gradlew assembleDist
+
+      - run: 
+          name: Build Admin portal
+          command: |
+            cd authservice-all
+            ./gradlew assembleDist
+
+      - run: 
+          name: Build Audit API
+          command: |
+            cd dataapi-all
+            ./gradlew assembleDist
+
+      - run:
+          name: Build Search portal
+          command: |
+            cd searchportal-all
+            ./gradlew assembleDist
+
+      - save_cache:
+          paths:
+            - ~/.gradle/wrapper
+          key: v1-gradle-wrapper-{{ checksum "customerportal-all/gradle/wrapper/gradle-wrapper.properties" }}
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+          key: v1-gradle-cache-{{ checksum "customerportal-all/build.gradle" }}
+
+      - store_test_results:
+      # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+          path: customerportal-all/customerportal/output/test-results/test
+      - store_test_results:
+          path: dataapi-all/dataapi/output/test-results/test
+      - store_test_results:
+          path: authservice-all/authservice/output/test-results/test
+      - store_test_results:
+          path: searchportal-all/searchportal/output/test-results/test
+      - store_artifacts:
+          path: customerportal-all/customerportal/output/distributions
+      - store_artifacts:
+          path: dataapi-all/dataapi/output/distributions
+      - store_artifacts:
+          path: authservice-all/authservice/output/distributions
+      - store_artifacts:
+          path: searchportal-all/searchportal/output/distributions
+      - run: git checkout master
+      - run: git merge $CIRCLE_BRANCH
+      - run: git push
+      - run: git push origin --delete $CIRCLE_BRANCH

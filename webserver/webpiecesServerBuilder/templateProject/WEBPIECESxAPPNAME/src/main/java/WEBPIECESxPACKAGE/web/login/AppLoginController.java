@@ -23,7 +23,7 @@ public class AppLoginController extends AbstractLoginController {
 	@Override
 	protected boolean isValidLogin(String username, String password) {
 		if(!"dean".equals(username)) {
-			Current.flash().setError("No Soup for you!");
+			Current.flash().setMessage("No Soup for you!");
 			Current.validation().addError("username", "I lied, Username must be 'dean'");
 			return false;
 		}

@@ -10,11 +10,9 @@ import org.webpieces.nio.api.BackpressureConfig;
 import com.google.inject.Module;
 import com.webpieces.http2engine.api.client.Http2Config;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-
 public class WebServerConfig {
 
+	private String id = "webpiecesA";
 	//typically only true during a test, but could be done before production server runs as well though it will slow down startup time
 	private boolean validateRouteIdsOnStartup = false;
 	
@@ -41,9 +39,17 @@ public class WebServerConfig {
 	
 	private Http2Config http2Config = new Http2Config();
 	private BackpressureConfig backpressureConfig = new BackpressureConfig();
-	private MeterRegistry metrics = null;
 	
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
+
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;

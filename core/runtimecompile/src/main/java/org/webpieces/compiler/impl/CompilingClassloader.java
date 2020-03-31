@@ -293,7 +293,11 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         for (CompileClassMeta applicationClass : modifiedWithDependencies) {
             if (applicationClass.compile(compiler, this) == null) {
                 appClassMgr.classes.remove(applicationClass.name);
-                throw new IllegalStateException("In what case can this ever happen in?"); 
+                //We are looking for a reproducible scenario here so we can write a test!!!
+                //how is the compile call return null...
+                //I saw this once waiting overnight with the server running all night??  how did that cause this?
+           
+                throw new IllegalStateException("In what case can this ever happen in?(we need a reproducible case). In the meantime, restarting your Dev server fixes this."); 
             } else {
                 byteCodeCache.cacheBytecode(applicationClass.javaByteCode, applicationClass.name, applicationClass.javaSource);
                 //in rare case where outerclass is outside scope of compiling, but inner static class can be recompiled

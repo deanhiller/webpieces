@@ -1,5 +1,12 @@
 # webpieces
 
+* ./gradlew assembleDist passes if DevServer doesn't compile....iiiiiiick....it should do it all
+* DAMNIT, hit this again....AND left server running over night 12 hours basically
+  * com.orderlyhealth.search.TestLesson4BasicStart > testBasicProdStartup FAILED
+    java.lang.IllegalStateException: Previously existing file is missing=/var/folders/76/4yw_0lwd4wj9x1b9xm055y6h0000gn/T/webpieces/searchportalCache/precompressedFiles/assets/primesTheme/index.html.gz Your file cache was corrupted.  You will need to delete the whole cache directory
+  * 
+* ADD an optional RoutId for JSON CONTENT...this is needed for #{jsAction}# calls AND add a test as well for this to webpieces
+* Figure out In what case can this ever happen in?(we need a reproducible case). In the meantime, restarting your Dev server fixes this.
 * on building up and up the Routers, we SHOULD use guice on startup since we don't need to be EXTREMELY fast on startup AND I could have more easily fixed a bug....I think the tradeoff is there
 * test converters for all cases listed in ObjectTranslator.java!!
 * test all reverse a URL paths...from redirect as well as from a page

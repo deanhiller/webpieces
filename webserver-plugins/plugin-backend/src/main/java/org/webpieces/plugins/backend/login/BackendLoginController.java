@@ -39,7 +39,7 @@ public class BackendLoginController extends AbstractLoginController {
 		if(login.isLoginValid(username, password))
 			return true;
 		
-		Current.flash().setError("Invalid username/password combination");
+		Current.flash().setMessage("Invalid username/password combination");
 		return false;
 	}
 	
