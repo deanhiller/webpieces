@@ -1,10 +1,10 @@
 package org.webpieces.webserver.domains.app;
 
-import org.webpieces.router.api.routebldr.RouteBuilder;
-import org.webpieces.router.api.routes.BasicRoutes;
-
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.router.api.routes.Port.BOTH;
+
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routes.BasicRoutes;
 
 public class Domain1Routes implements BasicRoutes {
 

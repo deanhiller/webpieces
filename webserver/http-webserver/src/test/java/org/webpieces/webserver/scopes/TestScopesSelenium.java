@@ -1,6 +1,10 @@
 package org.webpieces.webserver.scopes;
 
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -9,6 +13,8 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestScopesSelenium {
 	
@@ -32,7 +38,7 @@ public class TestScopesSelenium {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("scopesMeta.txt", PrivateWebserverForTest.class.getClassLoader());
-		PrivateWebserverForTest webserver = new PrivateWebserverForTest(new OverridesForTestRealServer(), null, true, metaFile);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(new OverridesForTestRealServer(new SimpleMeterRegistry()), null, true, metaFile);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

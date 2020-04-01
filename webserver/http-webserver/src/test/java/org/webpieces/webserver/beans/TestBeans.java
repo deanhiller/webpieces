@@ -1,7 +1,9 @@
 package org.webpieces.webserver.beans;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,10 +26,10 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeoutException;
+import com.google.inject.Binder;
+import com.google.inject.Module;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestBeans extends AbstractWebpiecesTest {
 	
@@ -40,7 +42,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", PrivateWebserverForTest.class.getClassLoader());
-		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), new AppOverridesModule(), false, metaFile);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false, new SimpleMeterRegistry()), new AppOverridesModule(), false, metaFile);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

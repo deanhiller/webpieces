@@ -16,9 +16,6 @@ import com.google.inject.util.Modules;
 
 import WEBPIECESxPACKAGE.base.PlatformOverrides;
 import WEBPIECESxPACKAGE.base.RandomInstanceId;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
  * Changes to any class in this 'package' (or any classes that classes in this 
@@ -54,14 +51,9 @@ public class Server {
 			
 			//You could pass in an instance id but in google cloud run, you have to generate it
 			String instanceId = RandomInstanceId.generate();
-			
-			CompositeMeterRegistry metrics = new CompositeMeterRegistry();
-			metrics.add(new SimpleMeterRegistry());
-			//Add Amazon or google or other here.  This one is google's...
-			//metrics.add(StackdriverMeterRegistry.builder(stackdriverConfig).build());
 
 			ServerConfig svrConfig = createServerConfig();
-			Server server = new Server(metrics, null, null, svrConfig, newArgs);
+			Server server = new Server(new MetricsModule(instanceId), null, svrConfig, newArgs);
 			server.start();
 
 			synchronized (Server.class) {
@@ -77,7 +69,6 @@ public class Server {
 	private final WebpiecesServer webServer;
 
 	public Server(
-		MeterRegistry metrics,
 		Module platformOverrides, 
 		Module appOverrides, 
 		ServerConfig svrConfig, 
@@ -85,8 +76,7 @@ public class Server {
 	) {
 		String base64Key = "__SECRETKEYHERE__";  //This gets replaced with a unique key each generated project which you need to keep or replace with your own!!!
 
-
-		Module allOverrides = new PlatformOverrides(metrics);
+		Module allOverrides = new PlatformOverrides();
 		if(platformOverrides != null) {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
 		}

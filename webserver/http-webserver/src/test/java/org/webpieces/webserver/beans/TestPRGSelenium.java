@@ -1,8 +1,10 @@
 package org.webpieces.webserver.beans;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -11,6 +13,11 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
+
+import com.google.inject.Binder;
+import com.google.inject.Module;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestPRGSelenium {
 	
@@ -34,7 +41,7 @@ public class TestPRGSelenium {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", PrivateWebserverForTest.class.getClassLoader());
-		PrivateWebserverForTest webserver = new PrivateWebserverForTest(new OverridesForTestRealServer(), new AppOverridesModule(), true, metaFile);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(new OverridesForTestRealServer(new SimpleMeterRegistry()), new AppOverridesModule(), true, metaFile);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

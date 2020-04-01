@@ -1,11 +1,11 @@
 package org.webpieces.webserver.domains.app;
 
+import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.router.api.routes.Port.BOTH;
+
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.Routes;
-
-import static org.webpieces.ctx.api.HttpMethod.GET;
-import static org.webpieces.router.api.routes.Port.BOTH;
 
 public class Domain2Routes implements Routes {
 

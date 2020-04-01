@@ -8,7 +8,6 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.controller.actions.HttpPort;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.ReverseRoutes;
@@ -56,6 +55,7 @@ public class ResponseProcessorNotFound implements Processor {
         pageArgs.put("_context", ctx);
         pageArgs.put("_session", ctx.getSession());
         pageArgs.put("_flash", ctx.getFlash());
+        pageArgs.put("_appContext", ctx.getApplicationContext());
 
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.NOT_FOUND);

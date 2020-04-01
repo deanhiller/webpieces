@@ -13,6 +13,7 @@ import org.webpieces.webserver.api.IDESupport;
 import org.webpieces.webserver.api.ServerConfig;
 
 import com.google.inject.Module;
+import com.google.inject.util.Modules;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -76,7 +77,8 @@ public class ProdServerForIDE {
 		//config.setMetaFile(metaFile);
 		
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
-		server = new Server(metrics, platformOverrides, null, config, "-hibernate.persistenceunit=hibernatefortest");
+		Module all = Modules.combine(platformOverrides, new SimpleMeterModule(metrics));
+		server = new Server(all, null, config, "-hibernate.persistenceunit=hibernatefortest");
 	}
 	
 

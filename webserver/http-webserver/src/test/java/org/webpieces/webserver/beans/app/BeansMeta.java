@@ -1,9 +1,9 @@
 package org.webpieces.webserver.beans.app;
 
-import com.google.common.collect.Lists;
-import com.google.inject.AbstractModule;
-import com.google.inject.Module;
-import com.google.inject.name.Names;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import org.webpieces.nio.api.SSLConfiguration;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.router.api.extensions.SimpleStorage;
@@ -14,9 +14,10 @@ import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.webserver.EmptyStorage;
 import org.webpieces.webserver.SSLEngineFactoryWebServerTesting;
 
-import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import com.google.common.collect.Lists;
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
+import com.google.inject.name.Names;
 
 public class BeansMeta implements WebAppMeta {
 	@Override

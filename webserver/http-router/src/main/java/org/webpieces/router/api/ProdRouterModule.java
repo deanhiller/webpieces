@@ -1,5 +1,7 @@
 package org.webpieces.router.api;
 
+import org.webpieces.ctx.api.ApplicationContext;
+import org.webpieces.router.impl.ApplicationContextImpl;
 import org.webpieces.router.impl.ProdRouterService;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.compression.ProdCompressionCacheSetup;
@@ -46,6 +48,7 @@ public class ProdRouterModule implements Module {
 		binder.bindListener(Matchers.any(), new GuiceWebpiecesListener(beanMeta));
 		
 		binder.bind(PortConfigLookup.class).toInstance(portLookup);
+		binder.bind(ApplicationContext.class).toInstance(new ApplicationContextImpl());
 	}
 	
 }

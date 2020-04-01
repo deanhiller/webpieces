@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.hooks.ClassForName;
@@ -33,9 +34,10 @@ public class ProdRouterService extends AbstractRouterService {
 			CookieTranslator cookieTranslator, 
 			ObjectTranslator translator, 
 			ProdClassForName loader,
-			AMasterRouter router
+			AMasterRouter router,
+			ApplicationContext appContext
 	) {
-		super(routeLoader, cookieTranslator, translator);
+		super(appContext, routeLoader, cookieTranslator, translator);
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 		this.router = router;

@@ -1,9 +1,12 @@
 package org.webpieces.webserver.beans;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,9 +41,10 @@ import org.webpieces.webserver.test.MockTcpChannel;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.concurrent.*;
+import com.google.inject.Binder;
+import com.google.inject.Module;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestBeansAndSplit extends AbstractWebpiecesTest {
 	
@@ -57,7 +61,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", PrivateWebserverForTest.class.getClassLoader());
-		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), new AppOverridesModule(), false, metaFile);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false, new SimpleMeterRegistry()), new AppOverridesModule(), false, metaFile);
 		webserver.start();
 		
 		channel.setDataListener(new DataReceiver());

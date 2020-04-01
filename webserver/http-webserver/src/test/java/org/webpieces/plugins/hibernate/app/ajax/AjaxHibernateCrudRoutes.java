@@ -1,12 +1,17 @@
 package org.webpieces.plugins.hibernate.app.ajax;
 
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_ADD_USER_FORM;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_CONFIRM_DELETE_USER;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_EDIT_USER_FORM;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_LIST_USERS;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_POST_DELETE_USER;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_POST_USER_FORM;
+
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
 import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.ScopedRoutes;
-
-import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.*;
 
 public class AjaxHibernateCrudRoutes extends ScopedRoutes {
 

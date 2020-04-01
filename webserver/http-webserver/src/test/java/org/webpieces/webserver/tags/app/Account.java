@@ -1,9 +1,9 @@
 package org.webpieces.webserver.tags.app;
 
-import org.webpieces.webserver.basic.app.biz.Address;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.webpieces.webserver.basic.app.biz.Address;
 
 public class Account {
 

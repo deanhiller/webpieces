@@ -1,13 +1,20 @@
 package org.webpieces.webserver.basic;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
+
+import com.google.inject.Binder;
+import com.google.inject.Module;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class SeleniumBasicTest {
 	
@@ -36,7 +43,7 @@ public class SeleniumBasicTest {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run multi-threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		PrivateWebserverForTest webserver = new PrivateWebserverForTest(new OverridesForTestRealServer(), new AppOverridesModule(), true, null);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(new OverridesForTestRealServer(new SimpleMeterRegistry()), new AppOverridesModule(), true, null);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

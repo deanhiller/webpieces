@@ -1,10 +1,10 @@
 package org.webpieces.webserver.dev;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-import com.google.inject.util.Modules;
-
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,14 +23,18 @@ import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
-import org.webpieces.webserver.test.*;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
+import org.webpieces.webserver.test.Asserts;
+import org.webpieces.webserver.test.OverridesForTest;
+import org.webpieces.webserver.test.ResponseExtract;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import com.google.inject.Binder;
+import com.google.inject.Module;
+import com.google.inject.util.Modules;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
  * @author dhiller
@@ -61,7 +65,7 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		Module platformOverrides = Modules.combine(
-				new OverridesForTest(mgr, time, mockTimer, templateConfig),
+				new OverridesForTest(mgr, time, mockTimer, templateConfig, metrics),
 				new ForTestingStaticDevelopmentModeModule());
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your

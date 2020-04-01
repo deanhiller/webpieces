@@ -21,7 +21,6 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import com.google.inject.util.Modules;
 import com.google.inject.Module;
 
 import io.micrometer.core.instrument.Counter;
@@ -38,7 +37,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		meterRegistry = new SimpleMeterRegistry();
 		
-		Module platformOverrides = Modules.combine(getOverrides(false), new MetricModule(meterRegistry));
+		Module platformOverrides = getOverrides(false, meterRegistry);
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(platformOverrides, null, false, null);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());		

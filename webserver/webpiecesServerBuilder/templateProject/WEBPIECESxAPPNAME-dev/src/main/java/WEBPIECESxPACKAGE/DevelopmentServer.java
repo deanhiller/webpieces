@@ -95,7 +95,8 @@ public class DevelopmentServer {
 		config.setMetaFile(metaFile);
 		
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
-		server = new Server(metrics, platformOverrides, null, config, args);
+		Module all = Modules.combine(platformOverrides, new SimpleMeterModule(metrics));
+		server = new Server(all, null, config, args);
 	}
 	
 	public void start() throws InterruptedException {

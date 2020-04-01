@@ -1,5 +1,12 @@
 package org.webpieces.webserver.json;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,12 +28,7 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 @RunWith(Parameterized.class)
 public class TestJson extends AbstractWebpiecesTest {
@@ -54,7 +56,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("jsonMeta.txt", PrivateWebserverForTest.class.getClassLoader());
-		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(isRemote), null, true, metaFile);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(isRemote, new SimpleMeterRegistry()), null, true, metaFile);
 		webserver.start();
 		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

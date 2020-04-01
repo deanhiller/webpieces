@@ -5,7 +5,7 @@
         <meta charset="utf-8">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
+    
     <!-- Styles -->
     
     #{stylesheet href:'%[/assets/crud/css/bootstrap.css]%'/}#
@@ -23,8 +23,12 @@
     *{ <link href="%['/assets/crud/fonts.css']%" rel='stylesheet' type='text/css'> }*
 	
     #{stylesheet href:'%[/assets/crud/overrides.css]%'/}#
-	
+    	
 	#{script src:'%[/assets/crud/js/jquery/jquery-1.9.1.js]%'/}#
+
+	#{if _appContext.googleAnalyticsSnippet}#
+       ${escOff#_appContext.googleAnalyticsSnippet}$
+    #{/if}#
 
 </head>
 <body>

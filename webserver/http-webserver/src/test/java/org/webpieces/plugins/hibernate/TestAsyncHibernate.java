@@ -1,7 +1,10 @@
 package org.webpieces.plugins.hibernate;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,11 +30,10 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeoutException;
+import com.google.inject.Binder;
+import com.google.inject.Module;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestAsyncHibernate extends AbstractWebpiecesTest {
 
@@ -48,7 +50,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		mockExecutor.clear();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", PrivateWebserverForTest.class.getClassLoader());
 		PrivateTestConfig config = new PrivateTestConfig();
-		config.setPlatformOverrides(getOverrides(false));
+		config.setPlatformOverrides(getOverrides(false, new SimpleMeterRegistry()));
 		config.setAppOverrides(new TestOverrides());
 		config.setMetaFile(metaFile);
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(config);

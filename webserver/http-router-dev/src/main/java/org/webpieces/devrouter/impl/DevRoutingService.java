@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
+import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
@@ -41,9 +42,10 @@ public class DevRoutingService extends AbstractRouterService {
 			AMasterRouter router, 
 			DevClassForName loader, 
 			CookieTranslator cookieTranslator,
-			ObjectTranslator objTranslator
+			ObjectTranslator objTranslator,
+			ApplicationContext appContext
 	) {
-		super(routeConfig, cookieTranslator, objTranslator);
+		super(appContext, routeConfig, cookieTranslator, objTranslator);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.router = router;

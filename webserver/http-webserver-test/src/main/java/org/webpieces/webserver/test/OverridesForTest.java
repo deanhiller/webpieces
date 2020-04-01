@@ -21,6 +21,8 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 public class OverridesForTest implements Module {
 	
 	private static final Logger log = LoggerFactory.getLogger(OverridesForTest.class);
@@ -29,20 +31,23 @@ public class OverridesForTest implements Module {
 	private MockChannelManager mgr;
 	private MockTime time;
 	private MockTimer mockTimer;
+	private MeterRegistry metrics;
 	
-	public OverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer) {
-		this(mgr, time, mockTimer, new TemplateCompileConfig(isGradleRunning()));
+	public OverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer, MeterRegistry metrics) {
+		this(mgr, time, mockTimer, new TemplateCompileConfig(isGradleRunning()), metrics);
 	}
 	
-	public OverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer, TemplateCompileConfig config) {	
+	public OverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer, TemplateCompileConfig config, MeterRegistry metrics) {	
 		this.mgr = mgr;
 		this.time = time;
 		this.mockTimer = mockTimer;
 		templateConfig = config;
+		this.metrics = metrics;
 	}
 	
 	@Override
 	public void configure(Binder binder) {
+		binder.bind(MeterRegistry.class).toInstance(metrics);
 		binder.bind(ChannelManager.class).toInstance(mgr);
 		binder.bind(Time.class).toInstance(time);
 		binder.bind(ScheduledExecutorService.class).toInstance(mockTimer);

@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
@@ -38,12 +39,16 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 
 	private final ServiceInvoker serviceInvoker;
 
+	private ApplicationContext ctx;
+
 	@Inject
 	public DevRouteInvoker(
+			ApplicationContext ctx, 
 			ControllerLoader loader, 
 			ServiceInvoker invoker 
 	) {
 		super(loader);
+		this.ctx = ctx;
 		this.serviceInvoker = invoker;
 	}
 	
@@ -153,7 +158,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		newRequest.isHttps = req.isHttps;
 		newRequest.isBackendRequest = req.isBackendRequest;
 		
-		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest);
+		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);
 		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, responseCb);
 		return super.invokeNotFound(newInvokeInfo, newLoadedController, data);
 	}

@@ -26,6 +26,8 @@ import org.webpieces.webserver.test.http11.Requests;
 
 import com.google.inject.Binder;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class TestLogin extends AbstractWebpiecesTest {
 	
 	private MockBackendLogin mockLogin = new MockBackendLogin();
@@ -36,7 +38,7 @@ public class TestLogin extends AbstractWebpiecesTest {
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("backendMeta.txt", TestLogin.class.getClassLoader());
 		TestConfig config = new TestConfig();
-		config.setPlatformOverrides(getOverrides(false));
+		config.setPlatformOverrides(getOverrides(false, new SimpleMeterRegistry()));
 		config.setAppOverrides(new TestLoginModule());
 		config.setMetaFile(metaFile);
 		WebserverForTest webserver = new WebserverForTest(config);

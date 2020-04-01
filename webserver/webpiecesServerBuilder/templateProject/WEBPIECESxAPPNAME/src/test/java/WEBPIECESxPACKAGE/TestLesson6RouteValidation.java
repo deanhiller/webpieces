@@ -6,8 +6,6 @@ import org.junit.Test;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.Asserts;
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-
 public class TestLesson6RouteValidation {
 
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest"};
@@ -23,11 +21,10 @@ public class TestLesson6RouteValidation {
 		if(property == null || !"true".equals(property))
 			return; //don't run test except in gradle build
 		
-		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		ServerConfig serverConfig = new ServerConfig(JavaCache.getCacheLocation());
 		serverConfig.setValidateRouteIdsOnStartup(true);
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
-		Server server = new Server(metrics, null, null, serverConfig, args);
+		Server server = new Server(null, null, serverConfig, args);
 		
 		//Start server to force validation
 		server.start();

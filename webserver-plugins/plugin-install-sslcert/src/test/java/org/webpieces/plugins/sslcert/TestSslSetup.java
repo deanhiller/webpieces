@@ -33,6 +33,8 @@ import org.webpieces.webserver.test.http11.Requests;
 
 import com.google.inject.Binder;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 
 public class TestSslSetup extends AbstractWebpiecesTest {
 	
@@ -46,7 +48,7 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("sslMeta.txt", TestSslSetup.class.getClassLoader());
 		TestConfig config = new TestConfig();
-		config.setPlatformOverrides(getOverrides(false));
+		config.setPlatformOverrides(getOverrides(false, new SimpleMeterRegistry()));
 		config.setAppOverrides(new SslTestModule());
 		config.setMetaFile(metaFile);
 		WebserverForTest webserver = new WebserverForTest(config);

@@ -1,5 +1,12 @@
 package org.webpieces.plugins.hibernate.app;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.EntityManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.plugins.hibernate.Em;
@@ -7,12 +14,6 @@ import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.EntityManager;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 @Singleton
 public class HibernateAsyncController {

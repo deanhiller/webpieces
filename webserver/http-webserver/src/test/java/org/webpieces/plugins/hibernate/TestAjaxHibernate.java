@@ -1,5 +1,14 @@
 package org.webpieces.plugins.hibernate;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,13 +31,7 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 
 
@@ -45,7 +48,7 @@ public class TestAjaxHibernate extends AbstractWebpiecesTest {
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", PrivateWebserverForTest.class.getClassLoader());
 		PrivateTestConfig config = new PrivateTestConfig();
-		config.setPlatformOverrides(getOverrides(false));
+		config.setPlatformOverrides(getOverrides(false, new SimpleMeterRegistry()));
 		config.setAppOverrides(new TestModule());
 		config.setMetaFile(metaFile);
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(config);

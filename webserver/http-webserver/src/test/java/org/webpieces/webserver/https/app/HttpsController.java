@@ -1,11 +1,11 @@
 package org.webpieces.webserver.https.app;
 
+import javax.inject.Singleton;
+
 import org.webpieces.ctx.api.Current;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
-
-import javax.inject.Singleton;
 
 @Singleton
 public class HttpsController {

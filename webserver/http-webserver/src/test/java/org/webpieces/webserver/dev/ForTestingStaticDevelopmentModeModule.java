@@ -1,7 +1,5 @@
 package org.webpieces.webserver.dev;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
 import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.devrouter.impl.DevClassForName;
 import org.webpieces.devrouter.impl.DevLoader;
@@ -11,6 +9,9 @@ import org.webpieces.router.api.RouterService;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
+
+import com.google.inject.Binder;
+import com.google.inject.Module;
 
 public class ForTestingStaticDevelopmentModeModule implements Module {
 

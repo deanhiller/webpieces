@@ -18,7 +18,9 @@ import org.webpieces.webserver.test.http11.DirectHttp11Client;
 
 import com.google.inject.Module;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class AbstractWebpiecesTest {
 
@@ -56,10 +58,20 @@ public class AbstractWebpiecesTest {
 		return socket;
 	}
 
+	/**
+	 * @deprecated Pass use getOverrides(boolean, new SimpleMeterRegistry()) instead
+	 */
+	@Deprecated
 	protected Module getOverrides(boolean isFullServer) {
 		if(isFullServer)
-			return new OverridesForTestRealServer();
-		return new OverridesForTest(mgr, time, mockTimer);
+			return new OverridesForTestRealServer(new SimpleMeterRegistry());
+		return new OverridesForTest(mgr, time, mockTimer, new SimpleMeterRegistry());
+	}
+	
+	protected Module getOverrides(boolean isFullServer, MeterRegistry metrics) {
+		if(isFullServer)
+			return new OverridesForTestRealServer(metrics);
+		return new OverridesForTest(mgr, time, mockTimer, metrics);
 	}
 
 	protected HttpClient getClient(boolean isRemote) {

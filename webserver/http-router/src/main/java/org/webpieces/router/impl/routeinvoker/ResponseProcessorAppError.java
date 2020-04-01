@@ -39,6 +39,7 @@ public class ResponseProcessorAppError implements Processor {
         pageArgs.put("_context", ctx);
         pageArgs.put("_session", ctx.getSession());
         pageArgs.put("_flash", ctx.getFlash());
+        pageArgs.put("_appContext", ctx.getApplicationContext());
 
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.INTERNAL_SERVER_ERROR);

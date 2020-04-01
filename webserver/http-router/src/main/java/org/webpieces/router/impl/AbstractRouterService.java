@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
@@ -35,8 +36,10 @@ public abstract class AbstractRouterService implements RouterService {
 	private RouteLoader routeLoader;
 	private ObjectTranslator translator;
 	private CookieTranslator cookieTranslator;
+	private ApplicationContext ctx;
 	
-	public AbstractRouterService(RouteLoader routeLoader, CookieTranslator cookieTranslator, ObjectTranslator translator) {
+	public AbstractRouterService(ApplicationContext ctx, RouteLoader routeLoader, CookieTranslator cookieTranslator, ObjectTranslator translator) {
+		this.ctx = ctx;
 		this.routeLoader = routeLoader;
 		this.cookieTranslator = cookieTranslator;
 		this.translator = translator;
@@ -51,7 +54,7 @@ public abstract class AbstractRouterService implements RouterService {
 			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(translator));
 			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(translator));
 			Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(translator));
-			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest);
+			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest, ctx);
 			
 			return processRequest(requestCtx, responseCb);
 			

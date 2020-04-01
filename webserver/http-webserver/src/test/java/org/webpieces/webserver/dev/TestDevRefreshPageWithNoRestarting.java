@@ -85,7 +85,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
-										new OverridesForTest(mgr, time, mockTimer, templateConfig));
+										new OverridesForTest(mgr, time, mockTimer, templateConfig, metrics));
 		
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();

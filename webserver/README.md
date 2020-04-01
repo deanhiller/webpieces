@@ -1,5 +1,7 @@
 # webpieces
 
+* fix extra webpieces cache directory
+* simulate initial project creation and see if there is a git checkin issue...do this on a real repo
 * ADD an optional RoutId for JSON CONTENT...this is needed for #{jsAction}# calls AND add a test as well for this to webpieces
 * Figure out In what case can this ever happen in?(we need a reproducible case). In the meantime, restarting your Dev server fixes this.
 * on building up and up the Routers, we SHOULD use guice on startup since we don't need to be EXTREMELY fast on startup AND I could have more easily fixed a bug....I think the tradeoff is there

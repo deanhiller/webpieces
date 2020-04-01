@@ -1,10 +1,10 @@
 package org.webpieces.webserver;
 
-import org.webpieces.router.api.extensions.SimpleStorage;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import org.webpieces.router.api.extensions.SimpleStorage;
 
 public class EmptyStorage implements SimpleStorage {
 

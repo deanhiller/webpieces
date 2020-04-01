@@ -1,14 +1,19 @@
 package org.webpieces.plugins.hibernate.app;
 
+import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.ctx.api.HttpMethod.POST;
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.ADD_USER_PAGE;
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.CONFIRM_DELETE_USER;
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.DELETE_USER;
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.EDIT_USER_PAGE;
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.LIST_USERS;
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.SAVE_USER;
+import static org.webpieces.router.api.routes.Port.BOTH;
+
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Routes;
-
-import static org.webpieces.ctx.api.HttpMethod.GET;
-import static org.webpieces.ctx.api.HttpMethod.POST;
-import static org.webpieces.plugins.hibernate.app.HibernateRouteId.*;
-import static org.webpieces.router.api.routes.Port.BOTH;
 
 public class HibernateTestRoutes implements Routes {
 

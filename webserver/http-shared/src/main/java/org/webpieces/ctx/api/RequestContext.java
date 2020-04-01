@@ -21,11 +21,14 @@ public class RequestContext {
 	private Messages messages;
 	private List<OverwritePlatformResponse> callbacks = new ArrayList<>();
 
-	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request) {
+	private ApplicationContext applicationContext;
+
+	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request, ApplicationContext appContext) {
 		this.request = request;
 		this.validation = validation;
 		this.flash = flash;
 		this.session = session;
+		applicationContext = appContext;
 	}
 	
 	public RouterRequest getRequest() {
@@ -76,5 +79,11 @@ public class RequestContext {
 	public void setPathParams(Map<String, String> pathParams2) {
 		this.pathParams = pathParams2;
 	}
+
+	public ApplicationContext getApplicationContext() {
+		return applicationContext;
+	}
+
+
 
 }

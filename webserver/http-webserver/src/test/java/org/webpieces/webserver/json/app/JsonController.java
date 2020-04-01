@@ -1,10 +1,11 @@
 package org.webpieces.webserver.json.app;
 
-import org.webpieces.plugins.json.Jackson;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Singleton;
-import java.util.concurrent.CompletableFuture;
+
+import org.webpieces.plugins.json.Jackson;
+import org.webpieces.router.api.exceptions.NotFoundException;
 
 @Singleton
 public class JsonController {

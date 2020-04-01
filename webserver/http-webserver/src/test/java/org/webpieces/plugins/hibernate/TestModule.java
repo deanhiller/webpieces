@@ -1,13 +1,14 @@
 package org.webpieces.plugins.hibernate;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-import com.google.inject.multibindings.Multibinder;
 import org.webpieces.plugins.hibernate.app.ServiceToFail;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
 import org.webpieces.plugins.hibernate.app.dbo.Role;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
+
+import com.google.inject.Binder;
+import com.google.inject.Module;
+import com.google.inject.multibindings.Multibinder;
 
 class TestModule implements Module {
 	private ServiceToFailMock mock;

@@ -1,7 +1,8 @@
 package org.webpieces.webserver.tags;
 
-import com.google.inject.Module;
-import com.google.inject.util.Modules;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,9 +19,10 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import com.google.inject.Module;
+import com.google.inject.util.Modules;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 
@@ -30,7 +32,7 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		Module allOverrides = Modules.combine(getOverrides(false), new TagOverridesModule(TagOverrideLookupForTesting.class));
+		Module allOverrides = Modules.combine(getOverrides(false, new SimpleMeterRegistry()), new TagOverridesModule(TagOverrideLookupForTesting.class));
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("tagsMeta.txt", PrivateWebserverForTest.class.getClassLoader());
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(allOverrides, null, false, metaFile);
 		webserver.start();

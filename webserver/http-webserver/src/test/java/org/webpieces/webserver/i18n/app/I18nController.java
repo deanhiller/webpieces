@@ -1,9 +1,9 @@
 package org.webpieces.webserver.i18n.app;
 
+import javax.inject.Singleton;
+
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
-
-import javax.inject.Singleton;
 
 @Singleton
 public class I18nController {

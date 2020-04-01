@@ -60,8 +60,8 @@ public class TestLesson5WithSelenium {
 		metrics = new SimpleMeterRegistry();
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test and NOT drop tables but clear and re-populate
-		Server webserver = new Server(metrics, 
-				new OverridesForTestRealServer(), new AppOverridesModule(), 
+		Server webserver = new Server(
+				new OverridesForTestRealServer(metrics), new AppOverridesModule(), 
 				new ServerConfig(JavaCache.getCacheLocation()), args);
 		
 		webserver.start();

@@ -48,12 +48,12 @@ page at http://checkstyle.sourceforge.net/config.html -->
     <module name="OuterTypeNumber"/>
 
     <module name="ParameterNumber">
-      <property name="max" value="10"/>
+      <property name="max" value="14"/>
       <property name="tokens" value="METHOD_DEF"/>
     </module>
 
     <module name="ParameterNumber">
-      <property name="max" value="10"/>
+      <property name="max" value="14"/>
       <property name="tokens" value="CTOR_DEF"/>
     </module>
 

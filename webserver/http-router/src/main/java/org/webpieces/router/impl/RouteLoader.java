@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
@@ -68,6 +69,7 @@ public class RouteLoader {
 	private Module theModule;
 	private ObjectToParamTranslator reverseTranslator;
 	private MeterRegistry metrics;
+	private ApplicationContext appContext;
 
 	@Inject
 	public RouteLoader(
@@ -80,7 +82,8 @@ public class RouteLoader {
 		RouteBuilderLogic routeBuilderLogic,
 		RedirectFormation portLookup,
 		ObjectToParamTranslator reverseTranslator,
-		MeterRegistry metrics
+		MeterRegistry metrics,
+		ApplicationContext appContext
 	) {
 		this.config = config;
 		this.masterRouter = masterRouter;
@@ -92,6 +95,7 @@ public class RouteLoader {
 		this.redirectFormation = portLookup;
 		this.reverseTranslator = reverseTranslator;
 		this.metrics = metrics;
+		this.appContext = appContext;
 	}
 	
 	public WebAppMeta configure(ClassForName loader, Arguments arguments) {
@@ -222,7 +226,8 @@ public class RouteLoader {
 			}
 		});
 				
-		guiceModules.add(new WebpiecesToAppBindingModule(routingHolder, beanMeta, objectTranslator, scheduler, metrics));
+		guiceModules.add(new WebpiecesToAppBindingModule(
+				routingHolder, beanMeta, objectTranslator, scheduler, metrics, appContext));
 		
 		Module module = Modules.combine(guiceModules);
 		
