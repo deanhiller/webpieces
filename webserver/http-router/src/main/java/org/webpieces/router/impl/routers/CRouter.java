@@ -42,6 +42,9 @@ public class CRouter extends DScopedRouter {
 		return future.handle((r, t) -> {
 			if(t != null) {
 				if(ExceptionWrap.isChannelClosed(t)) {
+					//if the socket was closed before we responded, do not log a failure
+					if(log.isTraceEnabled())
+						log.trace("async exception due to socket being closed", t);
 					return CompletableFuture.<Void>completedFuture(null);
 				}
 				
