@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
@@ -12,8 +14,6 @@ import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.filters.ExceptionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
 public class CRouter extends DScopedRouter {
@@ -41,6 +41,10 @@ public class CRouter extends DScopedRouter {
 		
 		return future.handle((r, t) -> {
 			if(t != null) {
+				if(ExceptionWrap.isChannelClosed(t)) {
+					return CompletableFuture.<Void>completedFuture(null);
+				}
+				
 				String failedRoute = "<Unknown Route>";
 				if(t instanceof SpecificRouterInvokeException)
 					failedRoute = ((SpecificRouterInvokeException) t).getMatchInfo()+"";
@@ -50,8 +54,7 @@ public class CRouter extends DScopedRouter {
 						+ctx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", t);
 				SupressedExceptionLog.log(log, t);
 				
-				if(ExceptionWrap.isChannelClosed(t))
-					return CompletableFuture.<Void>completedFuture(null);
+
 				CompletableFuture<Void> retVal = invokeWebAppErrorController(t, ctx, responseCb, failedRoute);
 				return retVal;
 			}

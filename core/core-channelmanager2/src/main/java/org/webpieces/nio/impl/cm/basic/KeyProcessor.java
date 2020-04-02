@@ -42,6 +42,8 @@ public final class KeyProcessor {
 	private Counter unregisteredSocket;
 	private Counter registeredSocket;
 	private DistributionSummary backupSize;
+	private Counter readErrorType1Close;
+	private Counter readErrorType2Close;
 
 	public KeyProcessor(JdkSelect selector, BufferPool pool, MeterRegistry metrics) {
 		this.selector = selector;
@@ -52,6 +54,8 @@ public final class KeyProcessor {
 		specialConnectionErrors = metrics.counter("connections.errors2");
 		unregisteredSocket = metrics.counter("connections.unregistered");
 		registeredSocket = metrics.counter("connections.registered");
+		readErrorType1Close = metrics.counter("connections.readerror1");
+		readErrorType2Close = metrics.counter("connections.readerror2");
 
 		payloadSize = DistributionSummary
 			    .builder("bytes.read.size")
@@ -287,7 +291,7 @@ public final class KeyProcessor {
 
 	private void process(SelectionKey key, DataListener in, ChannelInfo info,
 			ByteBuffer chunk, IOException e) throws IOException {
-        Channel channel = (Channel)info.getChannel();
+        //Channel channel = (Channel)info.getChannel();
 
 		String msg = e.getMessage();
 		if(msg != null && 
@@ -296,10 +300,14 @@ public final class KeyProcessor {
 				|| msg.contains("An established connection was aborted by the software in your host machine"))) {
 		        if(log.isTraceEnabled())
 					log.trace("Exception 2", e);
+		        
+		        readErrorType1Close.increment();
 		        processBytes(key, info, chunk, -1);
 		} else {
-			log.error("IO Exception unexpected", e);
-			in.failure(channel, null, e);
+			//log.error("IO Exception unexpected", e);
+			//in.failure(channel, null, e);
+			readErrorType2Close.increment();
+			processBytes(key, info, chunk, -1);
 		}
 	}
 

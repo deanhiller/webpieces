@@ -34,6 +34,10 @@ public class Current {
 	public static Messages messages() {
 		return getContext().getMessages();
 	}
+	public static ApplicationContext applicationContext() {
+		return getContext().getApplicationContext();
+	}
+	
 	public static void addModifyResponse(OverwritePlatformResponse callback) {
 		getContext().addModifyResponse(callback);
 	}

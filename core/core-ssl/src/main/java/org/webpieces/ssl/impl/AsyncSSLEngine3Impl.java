@@ -138,7 +138,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		if(hsStatus == HandshakeStatus.NEED_TASK) {
 			return createRunnable();	
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
-			return sendHandshakeMessage();
+			return sendHandshakeMessage(engine);
 		}
 		
 		throw new UnsupportedOperationException("need to support state="+hsStatus);
@@ -302,15 +302,15 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		return CompletableFuture.completedFuture(null);
 	}
 	
-	private CompletableFuture<Void> sendHandshakeMessage() {
+	private CompletableFuture<Void> sendHandshakeMessage(SSLEngine engine) {
 		try {
-			return sendHandshakeMessageImpl();
+			return sendHandshakeMessageImpl(engine);
 		} catch (SSLException e) {
 			throw new AsyncSSLEngineException(e);
 		}
 	}
 	
-	private CompletableFuture<Void> sendHandshakeMessageImpl() throws SSLException {
+	private CompletableFuture<Void> sendHandshakeMessageImpl(SSLEngine engine) throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
 		if(log.isTraceEnabled())
 			log.trace(mem+"sending handshake message");
@@ -326,8 +326,10 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			//this is in the sync block, so we are synchronized with the engine state!!! and get the actual
 			//state before calling wrap so we know the engine can't be switching states on us in another thread.
 			beforeWrapHandshakeStatus = sslEngine.getHandshakeStatus();
+			HandshakeStatus otherStatus = engine.getHandshakeStatus();
 			if (beforeWrapHandshakeStatus != HandshakeStatus.NEED_WRAP)
-				throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus=" + beforeWrapHandshakeStatus);
+				throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus=" 
+							+ beforeWrapHandshakeStatus+" otherStat="+otherStatus+" eng1="+sslEngine+" eng2="+engine);
 
 			//KEEEEEP This very small.  wrap and then listener.packetEncrypted
 			SSLEngineResult result = sslEngine.wrap(SslMementoImpl.EMPTY, engineToSocketData);
