@@ -89,7 +89,7 @@ ext {
        'commons-lang':    'org.apache.commons:commons-lang3:3.5',
        'jackson':         'com.fasterxml.jackson.core:jackson-databind:2.10.3',
 	   
-       'micrometer':      'io.micrometer:micrometer-core:1.4.0-SNAPSHOT',
+       'micrometer':      'io.micrometer:micrometer-core:1.4.1',
        'elastic-search':  'org.elasticsearch.client:elasticsearch-rest-client:6.3.2'
 
     ]
@@ -179,7 +179,6 @@ subprojects {
    }
 
    repositories {
-       maven { url 'https://repo.spring.io/libs-snapshot' }
        mavenCentral()
    }
    

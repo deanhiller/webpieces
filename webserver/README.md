@@ -1,5 +1,6 @@
 # webpieces
 
+* turn hibernatefortest into 'inmemory'
 * Document prod/staging/local development environments and properties plugin
 * Document more examples on the examples page stuff
 * Document the ApplicationContext
