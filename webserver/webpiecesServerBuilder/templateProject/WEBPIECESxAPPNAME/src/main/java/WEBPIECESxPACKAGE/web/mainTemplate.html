@@ -26,9 +26,18 @@
     	
 	#{script src:'%[/assets/crud/js/jquery/jquery-1.9.1.js]%'/}#
 
-	#{if _appContext.googleAnalyticsSnippet}#
-       ${escOff#_appContext.googleAnalyticsSnippet}$
-    #{/if}#
+    #{if _appContext.googleAnalyticsCode}#
+        <!-- Global site tag (gtag.js) - Google Analytics for PROD -->
+        *{UA-162386815-1}*
+        <script async src="https://www.googletagmanager.com/gtag/js?id=${_appContext.googleAnalyticsCode}$"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', '${_appContext.googleAnalyticsCode}$');
+        </script>
+    #{/if}#    
 
 </head>
 <body>

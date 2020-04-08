@@ -15,6 +15,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
+import org.webpieces.router.impl.WebInjector;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.loader.ControllerLoader;
@@ -38,17 +39,16 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
 
 	private final ServiceInvoker serviceInvoker;
-
-	private ApplicationContext ctx;
+	private WebInjector webInjector;
 
 	@Inject
 	public DevRouteInvoker(
-			ApplicationContext ctx, 
+			WebInjector webInjector, 
 			ControllerLoader loader, 
 			ServiceInvoker invoker 
 	) {
 		super(loader);
-		this.ctx = ctx;
+		this.webInjector = webInjector;
 		this.serviceInvoker = invoker;
 	}
 	
@@ -158,6 +158,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		newRequest.isHttps = req.isHttps;
 		newRequest.isBackendRequest = req.isBackendRequest;
 		
+		ApplicationContext ctx = webInjector.getAppContext();
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);
 		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, responseCb);
 		return super.invokeNotFound(newInvokeInfo, newLoadedController, data);

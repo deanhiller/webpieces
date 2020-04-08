@@ -2,6 +2,7 @@ package WEBPIECESxPACKAGE.base;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.plugins.backend.login.BackendLogin;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.SimpleStorage;
@@ -11,6 +12,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
+import WEBPIECESxPACKAGE.GlobalAppContext;
 import WEBPIECESxPACKAGE.db.EducationEnum;
 import WEBPIECESxPACKAGE.db.RoleEnum;
 import WEBPIECESxPACKAGE.service.RemoteService;
@@ -51,6 +53,11 @@ public class GuiceModule implements Module {
 	    
 	    //Must bind a BackendLogin for the backend plugin(or remove the backend plugin)
 	    binder.bind(BackendLogin.class).to(BackendLoginImpl.class).asEagerSingleton();
+	    
+	    GlobalAppContext ctx = new GlobalAppContext();
+	    //MUST be bound to ApplicationContext to be available in webpages..
+		binder.bind(ApplicationContext.class).toInstance(ctx);
+		binder.bind(GlobalAppContext.class).toInstance(ctx);
 	}
 
 }

@@ -5,7 +5,8 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-import org.webpieces.ctx.api.ApplicationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
@@ -13,12 +14,11 @@ import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
 import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.RouteLoader;
+import org.webpieces.router.impl.WebInjector;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.AMasterRouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
@@ -43,9 +43,9 @@ public class DevRoutingService extends AbstractRouterService {
 			DevClassForName loader, 
 			CookieTranslator cookieTranslator,
 			ObjectTranslator objTranslator,
-			ApplicationContext appContext
+			WebInjector webInjector
 	) {
-		super(appContext, routeConfig, cookieTranslator, objTranslator);
+		super(webInjector, routeConfig, cookieTranslator, objTranslator);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.router = router;

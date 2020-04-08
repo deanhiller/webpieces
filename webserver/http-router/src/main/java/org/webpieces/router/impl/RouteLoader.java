@@ -38,7 +38,6 @@ import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.threading.SafeRunnable;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -69,7 +68,7 @@ public class RouteLoader {
 	private Module theModule;
 	private ObjectToParamTranslator reverseTranslator;
 	private MeterRegistry metrics;
-	private ApplicationContext appContext;
+	private WebInjector webInjector;
 
 	@Inject
 	public RouteLoader(
@@ -83,7 +82,7 @@ public class RouteLoader {
 		RedirectFormation portLookup,
 		ObjectToParamTranslator reverseTranslator,
 		MeterRegistry metrics,
-		ApplicationContext appContext
+		WebInjector webInjector
 	) {
 		this.config = config;
 		this.masterRouter = masterRouter;
@@ -95,7 +94,7 @@ public class RouteLoader {
 		this.redirectFormation = portLookup;
 		this.reverseTranslator = reverseTranslator;
 		this.metrics = metrics;
-		this.appContext = appContext;
+		this.webInjector = webInjector;
 	}
 	
 	public WebAppMeta configure(ClassForName loader, Arguments arguments) {
@@ -165,7 +164,7 @@ public class RouteLoader {
 		try {
 			Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
 
-			Injector injector = createInjector(theModule);
+			Injector injector = webInjector.createInjector(theModule);
 			
 			//CompletableFuture<Void> storageLoadComplete = setupSimpleStorage(injector);
 			
@@ -227,7 +226,7 @@ public class RouteLoader {
 		});
 				
 		guiceModules.add(new WebpiecesToAppBindingModule(
-				routingHolder, beanMeta, objectTranslator, scheduler, metrics, appContext));
+				routingHolder, beanMeta, objectTranslator, scheduler, metrics));
 		
 		Module module = Modules.combine(guiceModules);
 		
@@ -247,10 +246,7 @@ public class RouteLoader {
 		return module;
 	}
 	
-	public Injector createInjector(Module module) {
-		Injector injector = Guice.createInjector(module);
-		return injector;
-	}
+
 
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
 

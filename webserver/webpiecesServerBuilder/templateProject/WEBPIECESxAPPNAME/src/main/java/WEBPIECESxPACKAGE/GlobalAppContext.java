@@ -11,12 +11,12 @@ public class GlobalAppContext implements ApplicationContext, ApplicationCtxManag
 	private String googleAnalytics;
 
 	@Override
-	public String getGoogleAnalyticsSnippet() {
+	public String getGoogleAnalyticsCode() {
 		return googleAnalytics;
 	}
 
 	@Override
-	public void setGoogleAnalyticsSnippet(String s) {
+	public void setGoogleAnalyticsCode(String s) {
 		this.googleAnalytics = s;
 	}
 	

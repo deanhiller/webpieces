@@ -5,6 +5,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.nio.api.SSLConfiguration;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
@@ -14,6 +15,7 @@ import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
+import org.webpieces.router.impl.ApplicationContextImpl;
 import org.webpieces.webserver.EmptyStorage;
 import org.webpieces.webserver.SSLEngineFactoryWebServerTesting;
 
@@ -56,7 +58,8 @@ public class HibernateAppMeta implements WebAppMeta {
 			binder.bind(Executor.class).toInstance(executor);
 			
 			binder.bind(SimpleStorage.class).toInstance(new EmptyStorage());
-			
+			binder.bind(ApplicationContext.class).toInstance(new ApplicationContextImpl());
+
 			binder.bind(SSLEngineFactory.class).to(SSLEngineFactoryWebServerTesting.class);
 			binder.bind(SSLEngineFactory.class).annotatedWith(Names.named(SSLConfiguration.BACKEND_SSL)).to(SSLEngineFactoryWebServerTesting.class);
 		}

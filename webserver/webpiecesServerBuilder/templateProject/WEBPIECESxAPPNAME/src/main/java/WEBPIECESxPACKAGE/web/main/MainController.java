@@ -5,10 +5,13 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.ctx.api.ApplicationContext;
+import org.webpieces.ctx.api.Current;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Render;
 
+import WEBPIECESxPACKAGE.GlobalAppContext;
 import WEBPIECESxPACKAGE.mgmt.SomeBean;
 import WEBPIECESxPACKAGE.service.RemoteService;
 import WEBPIECESxPACKAGE.service.SomeLibrary;
@@ -22,13 +25,15 @@ public class MainController {
 	//This is injected to demonstrate the properties plugin so you can modify properties via a web page and changes are stored in database
 	//so changes will survive a restart.
 	private final SomeBean managed;
+	private GlobalAppContext injectedCtx;
 
 	@Inject
-	public MainController(RemoteService service, SomeLibrary someLib, SomeBean managed) {
+	public MainController(RemoteService service, SomeLibrary someLib, SomeBean managed, GlobalAppContext injectedCtx) {
 		super();
 		this.service = service;
 		this.someLib = someLib;
 		this.managed = managed;
+		this.injectedCtx = injectedCtx;
 	}
 
 	public Action index() {
@@ -40,6 +45,12 @@ public class MainController {
 	}
 
 	public Action mySyncMethod() {
+		
+		GlobalAppContext ctx = (GlobalAppContext) Current.applicationContext();
+		
+		if(ctx != injectedCtx)
+			throw new RuntimeException("We should fail here");
+		
 		return Actions.renderThis("value", 21);
 	}
 	

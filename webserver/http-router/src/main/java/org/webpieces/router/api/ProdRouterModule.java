@@ -48,7 +48,6 @@ public class ProdRouterModule implements Module {
 		binder.bindListener(Matchers.any(), new GuiceWebpiecesListener(beanMeta));
 		
 		binder.bind(PortConfigLookup.class).toInstance(portLookup);
-		binder.bind(ApplicationContext.class).toInstance(new ApplicationContextImpl());
 	}
 	
 }

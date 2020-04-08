@@ -36,10 +36,10 @@ public abstract class AbstractRouterService implements RouterService {
 	private RouteLoader routeLoader;
 	private ObjectTranslator translator;
 	private CookieTranslator cookieTranslator;
-	private ApplicationContext ctx;
+	private WebInjector webInjector;
 	
-	public AbstractRouterService(ApplicationContext ctx, RouteLoader routeLoader, CookieTranslator cookieTranslator, ObjectTranslator translator) {
-		this.ctx = ctx;
+	public AbstractRouterService(WebInjector webInjector, RouteLoader routeLoader, CookieTranslator cookieTranslator, ObjectTranslator translator) {
+		this.webInjector = webInjector;
 		this.routeLoader = routeLoader;
 		this.cookieTranslator = cookieTranslator;
 		this.translator = translator;
@@ -54,6 +54,7 @@ public abstract class AbstractRouterService implements RouterService {
 			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(translator));
 			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(translator));
 			Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(translator));
+			ApplicationContext ctx = webInjector.getAppContext(); 
 			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest, ctx);
 			
 			return processRequest(requestCtx, responseCb);

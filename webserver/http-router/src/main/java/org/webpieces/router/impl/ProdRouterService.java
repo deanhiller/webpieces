@@ -35,9 +35,9 @@ public class ProdRouterService extends AbstractRouterService {
 			ObjectTranslator translator, 
 			ProdClassForName loader,
 			AMasterRouter router,
-			ApplicationContext appContext
+			WebInjector webInjector
 	) {
-		super(appContext, routeLoader, cookieTranslator, translator);
+		super(webInjector, routeLoader, cookieTranslator, translator);
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 		this.router = router;

@@ -2,7 +2,6 @@ package org.webpieces.router.impl;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
@@ -23,22 +22,19 @@ public class WebpiecesToAppBindingModule implements Module {
 	private ObjectTranslator objectTranslator;
 	private ScheduledExecutorService scheduler;
 	private MeterRegistry metrics;
-	private ApplicationContext appContext;
 
 	public WebpiecesToAppBindingModule(
 			RoutingHolder routingHolder, 
 			ManagedBeanMeta managedMeta, 
 			ObjectTranslator objectTranslator, 
 			ScheduledExecutorService scheduler, 
-			MeterRegistry metrics,
-			ApplicationContext appContext
+			MeterRegistry metrics
 	) {
 		this.routingHolder = routingHolder;
 		this.managedMeta = managedMeta;
 		this.objectTranslator = objectTranslator;
 		this.scheduler = scheduler;
 		this.metrics = metrics;
-		this.appContext = appContext;
 	}
 
 	@Override
@@ -66,6 +62,5 @@ public class WebpiecesToAppBindingModule implements Module {
 		binder.bind(ScheduledExecutorService.class).toInstance(scheduler);
 		
 		binder.bind(MeterRegistry.class).toInstance(metrics);
-		binder.bind(ApplicationContext.class).toInstance(appContext);
 	}
 }

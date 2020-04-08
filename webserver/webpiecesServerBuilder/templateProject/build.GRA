@@ -68,7 +68,6 @@ allprojects {
    buildDir = file('output')
 
    repositories {
-       maven { url 'https://repo.spring.io/libs-snapshot' }
        jcenter()
        mavenCentral()
        maven {
