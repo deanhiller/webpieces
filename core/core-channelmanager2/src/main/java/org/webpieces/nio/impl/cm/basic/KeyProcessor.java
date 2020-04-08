@@ -45,20 +45,20 @@ public final class KeyProcessor {
 	private Counter readErrorType1Close;
 	private Counter readErrorType2Close;
 
-	public KeyProcessor(JdkSelect selector, BufferPool pool, MeterRegistry metrics) {
+	public KeyProcessor(String id, JdkSelect selector, BufferPool pool, MeterRegistry metrics) {
 		this.selector = selector;
 		this.pool = pool;
-		connectionClosed = metrics.counter("connections.closed");
-		connectionOpen = metrics.counter("connections.opened");
-		connectionErrors = metrics.counter("connections.errors");
-		specialConnectionErrors = metrics.counter("connections.errors2");
-		unregisteredSocket = metrics.counter("connections.unregistered");
-		registeredSocket = metrics.counter("connections.registered");
-		readErrorType1Close = metrics.counter("connections.readerror1");
-		readErrorType2Close = metrics.counter("connections.readerror2");
+		connectionClosed = metrics.counter(id+".connections.closed");
+		connectionOpen = metrics.counter(id+".connections.opened");
+		connectionErrors = metrics.counter(id+".connections.errors");
+		specialConnectionErrors = metrics.counter(id+".connections.errors2");
+		unregisteredSocket = metrics.counter(id+".connections.unregistered");
+		registeredSocket = metrics.counter(id+".connections.registered");
+		readErrorType1Close = metrics.counter(id+".connections.readerror1");
+		readErrorType2Close = metrics.counter(id+".connections.readerror2");
 
 		payloadSize = DistributionSummary
-			    .builder("bytes.read.size")
+			    .builder(id+".bytes.read.size")
 			    .distributionStatisticBufferLength(100)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.50, 0.99, 1)
@@ -66,7 +66,7 @@ public final class KeyProcessor {
 			    .register(metrics);
 		
 		backupSize = DistributionSummary
-			    .builder("bytes.read.size")
+			    .builder(id+".bytes.read.size")
 			    .distributionStatisticBufferLength(100)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.50, 0.99, 1)
@@ -312,10 +312,6 @@ public final class KeyProcessor {
 	}
 
     /**
-     * @param id
-     * @param b
-     * @param bytes
-     * @param mgr 
      * @throws IOException
      */
     private void processBytes(SelectionKey key, ChannelInfo info, ByteBuffer data, int bytes) throws IOException

@@ -17,9 +17,9 @@ public class SSLMetrics {
 	private AckMetrics decryptionAckMetrics;
 	private AckMetrics encryptionAckMetrics;
 
-	public SSLMetrics(MeterRegistry metrics) {
+	public SSLMetrics(String name, MeterRegistry metrics) {
 		fromSocket = DistributionSummary
-			    .builder("ssl.fromsocket.size")
+			    .builder(name+".ssl.fromsocket.size")
 			    .distributionStatisticBufferLength(100)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.5, 0.99, 1)
@@ -27,7 +27,7 @@ public class SSLMetrics {
 			    .register(metrics);
 
 		toSocket = DistributionSummary
-			    .builder("ssl.tosocket.size")
+			    .builder(name+".ssl.tosocket.size")
 			    .distributionStatisticBufferLength(100)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.5, 0.99, 1)
@@ -35,7 +35,7 @@ public class SSLMetrics {
 			    .register(metrics);
 		
 		fromClient = DistributionSummary
-			    .builder("ssl.fromclient.size")
+			    .builder(name+".ssl.fromclient.size")
 			    .distributionStatisticBufferLength(100)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.5, 0.99, 1)
@@ -43,17 +43,17 @@ public class SSLMetrics {
 			    .register(metrics);
 		
 		toClient = DistributionSummary
-			    .builder("ssl.toclient.size")
+			    .builder(name+".ssl.toclient.size")
 			    .distributionStatisticBufferLength(100)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.5, 0.99, 1)
 			    .baseUnit("bytes") // optional (1)
 			    .register(metrics);
 
-		decryptionAckMetrics = new AckMetrics(metrics, "ssl.decryption");
-		encryptionAckMetrics = new AckMetrics(metrics, "ssl.encryption");
+		decryptionAckMetrics = new AckMetrics(metrics, name+".ssl.decryption");
+		encryptionAckMetrics = new AckMetrics(metrics, name+".ssl.encryption");
 	}
-	
+
 	public void recordEncryptedBytesFromSocket(int remaining) {
 		fromSocket.record(remaining);
 	}

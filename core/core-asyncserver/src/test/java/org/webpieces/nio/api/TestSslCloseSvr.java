@@ -115,7 +115,7 @@ public class TestSslCloseSvr {
 		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();
-		SSLMetrics sslMetrics = new SSLMetrics(new SimpleMeterRegistry());
+		SSLMetrics sslMetrics = new SSLMetrics("", new SimpleMeterRegistry());
 		SSLParser clientSslParser1 = AsyncSSLFactory.create("svr", clientSsl, pool, sslMetrics);
 		return clientSslParser1;
 	}

@@ -29,7 +29,7 @@ public class SslChannelService implements ChannelManager {
 	public SslChannelService(ChannelManager mgr, BufferPool pool, MeterRegistry metrics) {
 		this.mgr = mgr;
 		this.pool = pool;
-		this.sslMetrics = new SSLMetrics(metrics);
+		this.sslMetrics = new SSLMetrics(mgr.getName(), metrics);
 	}
 
 	@Override

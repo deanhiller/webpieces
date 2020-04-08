@@ -80,7 +80,7 @@ public class TestSslBasicSvr {
 		
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();
-		SSLMetrics sslMetrics = new SSLMetrics(meters);
+		SSLMetrics sslMetrics = new SSLMetrics("", meters);
 		clientSslParser = AsyncSSLFactory.create("svr", clientSsl, pool, sslMetrics);
 
 		SslAction result = clientSslParser.beginHandshake();

@@ -202,7 +202,7 @@ public class TestSslCloseClient {
 		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine svrSsl = sslFactory.createEngineForServerSocket();
-		SSLMetrics metrics = new SSLMetrics(new SimpleMeterRegistry());
+		SSLMetrics metrics = new SSLMetrics("", new SimpleMeterRegistry());
 		return AsyncSSLFactory.create("svr", svrSsl, pool, metrics);
 	}
 }

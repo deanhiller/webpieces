@@ -34,7 +34,7 @@ public class TestSplitBackpressure {
 		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
 		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
 		
-		SSLMetrics metrics = new SSLMetrics(new SimpleMeterRegistry());
+		SSLMetrics metrics = new SSLMetrics("", new SimpleMeterRegistry());
 		MockSSLEngineFactory sslEngineFactory = new MockSSLEngineFactory();	
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine client = sslEngineFactory.createEngineForSocket();
