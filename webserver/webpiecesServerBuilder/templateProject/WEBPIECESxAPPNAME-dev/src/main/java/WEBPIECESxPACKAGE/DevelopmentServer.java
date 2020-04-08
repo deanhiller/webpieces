@@ -81,9 +81,10 @@ public class DevelopmentServer {
 		
 		String[] args;
 		if(usePortZero)
-			args = new String[] {"-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest"};
+			args = new String[] {"-http.port=:0", "-https.port=:0", 
+					"-hibernate.persistenceunit=WEBPIECESxPACKAGE.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true"};
 		else
-			args = new String[] {"-hibernate.persistenceunit=hibernatefortest"};
+			args = new String[] {"-hibernate.persistenceunit=WEBPIECESxPACKAGE.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true"};
 		
 		ServerConfig config = new ServerConfig(false);
 

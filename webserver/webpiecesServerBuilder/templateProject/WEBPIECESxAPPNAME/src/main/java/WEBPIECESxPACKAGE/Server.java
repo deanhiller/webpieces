@@ -3,6 +3,7 @@ package WEBPIECESxPACKAGE;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +48,8 @@ public class Server {
 
 			//We typically move this to the command line so staging can have
 			//-hibernate.persistenceunit=stagingdb instead but to help people startup, we add the arg
-			String[] newArgs = addArgs(args, "-hibernate.persistenceunit=production");
-			
+			String[] newArgs = addArgs(new String[] {"-hibernate.persistenceunit=WEBPIECESxPACKAGE.db.DbSettingsProd", "-hibernate.loadclassmeta=true"});
+
 			//You could pass in an instance id but in google cloud run, you have to generate it
 			String instanceId = RandomInstanceId.generate();
 
@@ -81,6 +82,8 @@ public class Server {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
 		}
 
+		
+		log.info("Constructing WebpiecesServer with args="+Arrays.asList(args));
 		webServer = new WebpiecesServer("WEBPIECESxAPPNAME", base64Key, allOverrides, appOverrides, svrConfig, args);
 	}
 

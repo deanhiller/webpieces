@@ -17,9 +17,12 @@ public class HibernatePlugin implements Plugin {
 	private static final Logger log = LoggerFactory.getLogger(HibernatePlugin.class);
 	
 	public static final String PERSISTENCE_UNIT_KEY = "hibernate.persistenceunit";
+	public static final String LOAD_CLASSMETA_KEY = "hibernate.loadclassmeta";
+
 	public static final String PERSISTENCE_TEST_UNIT = "hibernatefortest";
 
 	private Supplier<String> persistenceUnit;
+	private Supplier<Boolean> loadByClassFile;
 
 	public HibernatePlugin(HibernateConfig config) {
 		persistenceUnit = () -> config.getPersistenceUnit();
@@ -28,11 +31,16 @@ public class HibernatePlugin implements Plugin {
 	public HibernatePlugin(Arguments cmdLineArgs) {
 		log.info("classloader="+getClass().getClassLoader());
 		this.persistenceUnit = cmdLineArgs.createRequiredArg(PERSISTENCE_UNIT_KEY, "The named persistence unit from the list of them inside META-INF/persistence.xml", (s) -> s);
+		this.loadByClassFile = cmdLineArgs.createOptionalArg(LOAD_CLASSMETA_KEY, "false", "If you supply a *.class for 'hibernate.persistenceunit', set this flat to true", (s) -> convertBool(s));
+	}
+
+	public static Boolean convertBool(String s) {
+		return Boolean.valueOf(s);
 	}
 	
 	@Override
 	public List<Module> getGuiceModules() {
-		return Lists.newArrayList(new HibernateModule(persistenceUnit));
+		return Lists.newArrayList(new HibernateModule(persistenceUnit, loadByClassFile));
 	}
 
 	@Override

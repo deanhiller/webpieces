@@ -81,7 +81,7 @@ public class ProdServerForIDE {
 		config.setStaticFileCacheTimeSeconds(null);
 		//config.setMetaFile(metaFile);
 		
-		server = new Server(platformOverrides, null, config, "-hibernate.persistenceunit=hibernatefortest");
+		server = new Server(platformOverrides, null, config, "-hibernate.persistenceunit=WEBPIECESxPACKAGE.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true");
 	}
 	
 

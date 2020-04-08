@@ -32,7 +32,9 @@ sourceSets {
         compile project(':webserver-plugins:plugin-install-sslcert')
         compile project(':webserver-plugins:plugin-properties')
         compile deps['commons-lang'] //used in json escaping
-
+        //for connection pooling: https://mvnrepository.com/artifact/org.hibernate/hibernate-hikaricp
+        compile deps['hikari-cp']
+  
         testCompile project(':core:core-ddl')
         testCompile project(':core:core-mock')
         testCompile project(':webserver-plugins:plugin-h2db')

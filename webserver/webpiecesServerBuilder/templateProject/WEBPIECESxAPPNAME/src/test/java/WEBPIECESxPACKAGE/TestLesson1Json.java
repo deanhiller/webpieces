@@ -57,7 +57,8 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 	private final static Logger log = LoggerFactory.getLogger(TestLesson1Json.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
-	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=hibernatefortest" };
+	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=WEBPIECESxPACKAGE.db.DbSettingsInMemory", 
+			"-hibernate.loadclassmeta=true" };
 	private HttpSocket http11Socket;
 	private ObjectMapper mapper = new ObjectMapper();
 	private SimpleMeterRegistry metrics;
