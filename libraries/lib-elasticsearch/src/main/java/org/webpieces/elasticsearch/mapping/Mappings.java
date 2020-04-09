@@ -2,18 +2,18 @@ package org.webpieces.elasticsearch.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.Map;
+
 public class Mappings {
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private SingleType doc;
+	private Map<String, PropertyMapping> properties;
 
-	public SingleType getDoc() {
-		return doc;
+	public Map<String, PropertyMapping> getProperties() {
+		return properties;
 	}
 
-	public void setDoc(SingleType doc) {
-		this.doc = doc;
+	public void setProperties(Map<String, PropertyMapping> properties) {
+		this.properties = properties;
 	}
-	
 	
 }

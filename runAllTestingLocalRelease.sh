@@ -9,8 +9,6 @@ cd $DIR
 #RUN test first by building fake release THEN building fake project THEN building the fake project to make sure it works
 printf "\n*********Running ./gradlew --stacktrace clean build release -x javadoc *****\n"
 ./gradlew clean build release -x javadoc
-#./gradlew -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false build -PincludeH2Spec=true
-#./gradlew clean build release -x javadoc
 
 test_result=$?
 if [ $test_result -eq 0 ]

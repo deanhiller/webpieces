@@ -21,11 +21,11 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractCompileTest {
 
-	protected static final Logger log = LoggerFactory.getLogger(AbstractCompileTest.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(AbstractCompileTest.class);
 	private final File tmpDirectory = FileFactory.newCacheLocation("webpieces/AbstractCompileTest/"+getClass().getSimpleName());
 	
 	private File javaFileCacheDir = FileFactory.newFile(tmpDirectory, "cachedJavaFiles");
-	protected static final File myCodePath = FileFactory.newBaseFile("src/test/java");
+	protected static final File MY_CODE_PATH = FileFactory.newBaseFile("src/test/java");
 	private static final File myResourcePath = FileFactory.newBaseFile("src/test/changedJavaFiles");
 	protected CompileOnDemand compiler;
 	private boolean filesMoved;
@@ -33,8 +33,8 @@ public abstract class AbstractCompileTest {
 
 	@Before
 	public void setUp() {		
-		log.info("storing bytecode cache in="+byteCodeCacheDir.getAbsolutePath());
-		log.info("running tests from user.dir="+FileFactory.getBaseWorkingDir());
+		LOG.info("storing bytecode cache in="+byteCodeCacheDir.getAbsolutePath());
+		LOG.info("running tests from user.dir="+FileFactory.getBaseWorkingDir());
 		
 		// clear out the bytecode cache (maybe not every time?)
 		clearByteCodeCache(byteCodeCacheDir);
@@ -46,7 +46,7 @@ public abstract class AbstractCompileTest {
 
 	protected CompileConfig createCompileConfig() {
 		List<VirtualFile> arrayList = new ArrayList<>();
-		arrayList.add(new VirtualFileImpl(myCodePath));
+		arrayList.add(new VirtualFileImpl(MY_CODE_PATH));
 		CompileConfig config = new CompileConfig(arrayList, new VirtualFileImpl(byteCodeCacheDir));
 		return config;
 	}
@@ -103,7 +103,7 @@ public abstract class AbstractCompileTest {
 		String packageFilter = getPackageFilter();
 		String path = packageFilter.replace('.', File.separatorChar);
 
-		File existingDir = FileFactory.newFile(myCodePath, path);
+		File existingDir = FileFactory.newFile(MY_CODE_PATH, path);
 		copyFiles(testDir, existingDir);
 	}
 
@@ -118,7 +118,7 @@ public abstract class AbstractCompileTest {
 		String packageFilter = getPackageFilter();
 		String path = packageFilter.replace('.', File.separatorChar);
 
-		File existingDir = FileFactory.newFile(myCodePath, path);
+		File existingDir = FileFactory.newFile(MY_CODE_PATH, path);
 		copyFiles(existingDir, testDir);
 
 		File resourceDir = FileFactory.newFile(myResourcePath, path);

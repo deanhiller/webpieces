@@ -23,7 +23,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class Http1_1ToHttp2 {
+public class Http11ToHttp2 {
 	
 	public static Http2Msg translate(HttpPayload payload, boolean isHttps) {
 		if(payload instanceof HttpRequest)

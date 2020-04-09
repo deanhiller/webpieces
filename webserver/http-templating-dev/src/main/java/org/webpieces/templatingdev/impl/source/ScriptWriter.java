@@ -17,7 +17,7 @@ import org.webpieces.templatingdev.impl.tags.TagGen;
 public class ScriptWriter {
 
 	//Some compilers can't deal with long lines so let's max at 30k
-    protected static final int maxLineLength = 30000;
+    protected static final int MAX_LINE_LENGTH = 30000;
     
 	private Pattern pattern = Pattern.compile("\"");
 
@@ -92,7 +92,7 @@ public class ScriptWriter {
 
 	public void printPlain(TokenImpl token, ScriptOutputImpl sourceCode) {
 		String srcText = token.getValue();
-		if(srcText.length() < maxLineLength) {
+		if(srcText.length() < MAX_LINE_LENGTH) {
 			String text = addEscapesForGroovy(srcText);
 			sourceCode.println("      __out.print(\""+text+"\");", token);
 			return;
@@ -102,7 +102,7 @@ public class ScriptWriter {
 		//'/' character BUT someone would have to double the size so just throw in that one case to notify
 		//the user before groovy breaks(this should not happen, but who knows....fail fast)
 		while(srcText.length() > 0) {
-			int cutpoint = Math.min(srcText.length(), maxLineLength);
+			int cutpoint = Math.min(srcText.length(), MAX_LINE_LENGTH);
 			String prefix = srcText.substring(0, cutpoint);
 			srcText = srcText.substring(cutpoint);
 			String text = addEscapesForGroovy(prefix);

@@ -12,7 +12,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 public class HttpParserFactory {
 
-	public static final Charset iso8859_1 = Charset.forName("ISO-8859-1");
+	public static final Charset ISO8859_1 = Charset.forName("ISO-8859-1");
 	/**
 	 * 
 	 * @param pool Purely to release ByteBuffers back to the pool and be released

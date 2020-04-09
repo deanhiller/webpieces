@@ -21,7 +21,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class Requests {
-	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	protected static final DataWrapperGenerator DATA_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	public static HeaderSettings createSomeSettings() {
 		HeaderSettings settings = new HeaderSettings();
@@ -107,13 +107,13 @@ public class Requests {
 	public static FullRequest createHttp2Request() {
 		FullRequest req = new FullRequest();
 		req.setHeaders(createRequest());
-		req.setPayload(dataGen.wrapByteArray(new byte[] { 3, 4 }));
+		req.setPayload(DATA_GEN.wrapByteArray(new byte[] { 3, 4 }));
 		return req;
 	}
 
 	public static DataFrame createData(int streamId, boolean eos) {
 		DataFrame data = new DataFrame(streamId, eos);
-		DataWrapper wrapByteArray = dataGen.wrapByteArray(new byte[] {2, 3});
+		DataWrapper wrapByteArray = DATA_GEN.wrapByteArray(new byte[] {2, 3});
 		data.setData(wrapByteArray);
 		return data;
 	}
@@ -122,7 +122,7 @@ public class Requests {
 		DataFrame data = new DataFrame(streamId, eos);
 		String s = "hi there, this is a bit more data so that we can test a few things out";
 		byte[] bytes = s.getBytes();
-		DataWrapper wrapByteArray = dataGen.wrapByteArray(bytes);
+		DataWrapper wrapByteArray = DATA_GEN.wrapByteArray(bytes);
 		data.setData(wrapByteArray);
 		return data;
 	}

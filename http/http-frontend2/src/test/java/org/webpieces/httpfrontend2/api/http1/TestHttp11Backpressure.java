@@ -13,7 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.http2translations.api.Http1_1ToHttp2;
+import org.webpieces.http2translations.api.Http11ToHttp2;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.HttpStatefulParser;
@@ -86,7 +86,7 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 		PassedIn in1 = mockListener.getSingleRequest();
 		
 		HttpResponse resp1 = Requests.createResponse(1);
-		Http2Response headers1 = Http1_1ToHttp2.responseToHeaders(resp1);
+		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
 		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		

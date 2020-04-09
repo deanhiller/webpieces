@@ -42,10 +42,10 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
         if(priorityDetails != null) {
         	preludeDW = PriorityMarshaller.marshalPriorityDetails(bufferPool, priorityDetails, frame);
         } else {
-            preludeDW = dataGen.emptyWrapper();
+            preludeDW = DATA_GEN.emptyWrapper();
         }
 
-        DataWrapper unpadded = dataGen.chainDataWrappers(
+        DataWrapper unpadded = DATA_GEN.chainDataWrappers(
                 preludeDW,
                 castFrame.getHeaderFragment());
         
@@ -75,7 +75,7 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
 
         if(priorityDetails != null) {
         	//1 bit Exclusive flag, 31 bits stream dependency, and 8 bits weight = 5 bytes....
-            List<? extends DataWrapper> split = dataGen.split(paddingStripped, 5);
+            List<? extends DataWrapper> split = DATA_GEN.split(paddingStripped, 5);
             ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));
 
             int firstInt = preludeBytes.getInt();

@@ -31,7 +31,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#SETTINGS
  */
-public class TestC6_5SettingsFrameErrors {
+public class TestC6x5SettingsFrameErrors {
 
 	private MockChanMgr mockChanMgr = new MockChanMgr();;
 	private MockHttp2Channel mockChannel = new MockHttp2Channel();

@@ -12,7 +12,7 @@ import com.webpieces.http2parser.impl.FrameHeaderData;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
 
 public class AbstractFrameMarshaller {
-	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	protected static final DataWrapperGenerator DATA_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     protected BufferPool bufferPool;
 
@@ -40,8 +40,8 @@ public class AbstractFrameMarshaller {
         header.putInt(streamId);
         header.flip();
 
-        DataWrapper frameHeader = dataGen.wrapByteBuffer(header);
-        return dataGen.chainDataWrappers(frameHeader, payload);
+        DataWrapper frameHeader = DATA_GEN.wrapByteBuffer(header);
+        return DATA_GEN.chainDataWrappers(frameHeader, payload);
     }
 
 	public void unmarshalFrame(Http2MementoImpl state, Http2Frame frame) {

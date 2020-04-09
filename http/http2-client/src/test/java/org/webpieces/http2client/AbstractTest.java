@@ -32,7 +32,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class AbstractTest {
-	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	protected static final DataWrapperGenerator DATA_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	protected MockChanMgr mockChanMgr = new MockChanMgr();
 	protected MockHttp2Channel mockChannel = new MockHttp2Channel();

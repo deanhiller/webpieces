@@ -32,7 +32,7 @@ public class ObjectTranslator {
 
 	protected Map<Class<?>, ObjectStringConverter<?>> classToConverter = new HashMap<>();
 	protected Map<Class<?>, ObjectStringConverter<?>> appConverters;
-	protected ObjectStringConverter<Object> SIMPLE_CONVERTER = new SimpleConverter();
+	protected static final ObjectStringConverter<Object> SIMPLE_CONVERTER = new SimpleConverter();
 	
 	public ObjectTranslator() {
 		add(Boolean.class, s -> s == null ? null : Boolean.parseBoolean(s), s -> s == null ? null : s.toString());

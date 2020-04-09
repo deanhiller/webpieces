@@ -14,7 +14,7 @@ import org.webpieces.throughput.client.Http11Clients;
 import org.webpieces.throughput.client.Http2Clients;
 import org.webpieces.throughput.client.SynchronousClient;
 import org.webpieces.throughput.server.ServerAsync;
-import org.webpieces.throughput.server.ServerHttp1_1Sync;
+import org.webpieces.throughput.server.ServerHttp11Sync;
 import org.webpieces.throughput.server.ServerHttp2Sync;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -37,7 +37,7 @@ public class ThroughputEngine {
 			ServerAsync svr = new ServerAsync(config, metrics);
 			future = svr.start();
 		} else if(protocol == Protocol.HTTP11){
-			ServerHttp1_1Sync svr = new ServerHttp1_1Sync();
+			ServerHttp11Sync svr = new ServerHttp11Sync();
 			future = svr.start();
 		} else {
 			ServerHttp2Sync svr = new ServerHttp2Sync();

@@ -8,7 +8,7 @@ import org.webpieces.router.impl.params.ObjectTranslator;
 public class SessionImpl extends CookieScopeImpl implements Session, SecureCookie {
 
 	public static final String SECURE_TOKEN_KEY = "__ST";
-	public static String COOKIE_NAME = CookieScopeImpl.COOKIE_NAME_PREFIX+"Session";
+	public static final String COOKIE_NAME = CookieScopeImpl.COOKIE_NAME_PREFIX+"Session";
 	
 	public SessionImpl(ObjectTranslator primitiveTranslator) {
 		super(primitiveTranslator);

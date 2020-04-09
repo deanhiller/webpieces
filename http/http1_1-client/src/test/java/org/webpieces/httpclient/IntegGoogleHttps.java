@@ -114,7 +114,7 @@ public class IntegGoogleHttps {
 			@Override
 			public CompletableFuture<Void> incomingData(HttpData chunk) {
 				DataWrapper wrapper = chunk.getBody();
-				String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
+				String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.ISO8859_1);
 				log.info("result=(lastChunk="+chunk.isEndOfData()+"\n"+result+"/////");
 				return CompletableFuture.completedFuture(null);
 			}

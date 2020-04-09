@@ -25,8 +25,8 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServerHttp1_1Sync {
-	private static final Logger log = LoggerFactory.getLogger(ServerHttp1_1Sync.class);
+public class ServerHttp11Sync {
+	private static final Logger log = LoggerFactory.getLogger(ServerHttp11Sync.class);
 
 	public CompletableFuture<InetSocketAddress> start() {
 		try {

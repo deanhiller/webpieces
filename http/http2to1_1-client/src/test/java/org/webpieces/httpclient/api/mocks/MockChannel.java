@@ -10,8 +10,8 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.http2translations.api.Http1_1ToHttp2;
-import org.webpieces.http2translations.api.Http2ToHttp1_1;
+import org.webpieces.http2translations.api.Http11ToHttp2;
+import org.webpieces.http2translations.api.Http2ToHttp11;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpPayload;
@@ -58,7 +58,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 		if(parsedData.size() != 1)
 			throw new IllegalArgumentException("The impl should be writing out full single payloads each write call");
 		HttpPayload payload = parsedData.get(0);
-		Http2Msg http2 = Http1_1ToHttp2.translate(payload, false);
+		Http2Msg http2 = Http11ToHttp2.translate(payload, false);
 		return (CompletableFuture<Void>) super.calledMethod(Method.WRITE, http2);
 	}
 
@@ -169,7 +169,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	}
 
 	public CompletableFuture<Void> writeResponse(Http2Response response1) {
-		HttpResponse response = Http2ToHttp1_1.translateResponse(response1);
+		HttpResponse response = Http2ToHttp11.translateResponse(response1);
 		ByteBuffer buffer = parser.marshalToByteBuffer(response);
 		return listener.incomingData(this, buffer);
 	}

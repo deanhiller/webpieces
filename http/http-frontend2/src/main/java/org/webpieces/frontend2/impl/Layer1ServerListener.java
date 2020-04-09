@@ -16,19 +16,19 @@ public class Layer1ServerListener implements AsyncDataListener {
 	private static final Logger log = LoggerFactory.getLogger(Layer1ServerListener.class);
 
 	private static final String FRONTEND_SOCKET = "__frontendSocket";
-	private Layer2Http1_1Handler http1_1Handler;
+	private Layer2Http11Handler http11Handler;
 	private Layer2Http2Handler http2Handler;
 
 	private ServerSocketInfo svrSocketInfo;
 	//private MsgRateRecorder recorder = new MsgRateRecorder(10, "bytes/second");
 
 	public Layer1ServerListener(
-			Layer2Http1_1Handler http1_1Listener, 
+			Layer2Http11Handler http11Listener, 
 			Layer2Http2Handler http2Listener,
 			boolean isHttps, 
 			boolean isBackendRequest
 	) {
-		this.http1_1Handler = http1_1Listener;
+		this.http11Handler = http11Listener;
 		this.http2Handler = http2Listener;
 		svrSocketInfo = new ServerSocketInfo(isHttps, isBackendRequest);
 	}
@@ -41,7 +41,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 		case HTTP2:
 			return http2Handler.incomingData(socket, b);
 		case HTTP1_1:
-			return http1_1Handler.incomingData(socket, b);
+			return http11Handler.incomingData(socket, b);
 		case UNKNOWN:
 			initialData(b, socket);
 			return CompletableFuture.completedFuture(null);
@@ -54,7 +54,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 		
 		InitiationResult initialData;
 		try {
-			initialData = http1_1Handler.initialData(socket, b);
+			initialData = http11Handler.initialData(socket, b);
 		} catch(ParseException e) {
 			log.info("Parse exception on initial connection", e);
 			socket.close("reason not needed");
@@ -87,7 +87,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 			http2Handler.farEndClosed(socket);
 			break;
 		case HTTP1_1:
-			http1_1Handler.farEndClosed(socket);
+			http11Handler.farEndClosed(socket);
 			break;
 		case UNKNOWN:
 			//timeoutHandler.connectionClosedBeforeRequest(socket);
@@ -112,7 +112,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 		FrontendSocketImpl socket = new FrontendSocketImpl(channel, ProtocolType.UNKNOWN, svrSocketInfo);
 		channel.getSession().put(FRONTEND_SOCKET, socket);
 
-		http1_1Handler.socketOpened(socket, isReadyForWrites);
+		http11Handler.socketOpened(socket, isReadyForWrites);
 	}
 
 	FrontendSocketImpl getSocket(Channel channel) {

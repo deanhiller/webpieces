@@ -2,7 +2,7 @@ package org.webpieces.httpclientx.impl;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.http2translations.api.Http1_1ToHttp2;
+import org.webpieces.http2translations.api.Http11ToHttp2;
 import org.webpieces.httpclient11.api.DataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpparser.api.dto.HttpData;
@@ -30,7 +30,7 @@ public class ResponseListener implements HttpResponseListener {
 
 	@Override
 	public CompletableFuture<DataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
-		Http2Response r = Http1_1ToHttp2.responseToHeaders(resp);
+		Http2Response r = Http11ToHttp2.responseToHeaders(resp);
 		return responseListener.process(r).thenApply(w -> new DataWriterImpl(w));
 	}
 
@@ -42,7 +42,7 @@ public class ResponseListener implements HttpResponseListener {
 
 		@Override
 		public CompletableFuture<Void> incomingData(HttpData chunk) {
-			DataFrame data = Http1_1ToHttp2.translateData(chunk);
+			DataFrame data = Http11ToHttp2.translateData(chunk);
 			return writer.processPiece(data);
 		}
 	}

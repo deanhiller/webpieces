@@ -1,6 +1,7 @@
 package org.webpieces.elasticsearch.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DateMapping implements PropertyMapping {
 
@@ -10,11 +11,14 @@ public class DateMapping implements PropertyMapping {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String locale;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Boolean ignore_malformed;
+	@JsonProperty("ignore_malformed")
+	private Boolean ignoreMalformed;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Boolean doc_values;
+	@JsonProperty("doc_values")
+	private Boolean docValues;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String null_value;
+	@JsonProperty("null_value")
+	private String nullValue;
 	
 	public String getType() {
 		return type;
@@ -40,24 +44,24 @@ public class DateMapping implements PropertyMapping {
 		this.locale = locale;
 	}
 
-	public Boolean getIgnore_malformed() {
-		return ignore_malformed;
+	public Boolean getIgnoreMalformed() {
+		return ignoreMalformed;
 	}
 
-	public void setIgnore_malformed(Boolean ignore_malformed) {
-		this.ignore_malformed = ignore_malformed;
+	public void setIgnoreMalformed(Boolean ignoreMalformed) {
+		this.ignoreMalformed = ignoreMalformed;
 	}
-	public String getNull_value() {
-		return null_value;
+	public String getNullValue() {
+		return nullValue;
 	}
-	public void setNull_value(String null_value) {
-		this.null_value = null_value;
+	public void setNullValue(String nullValue) {
+		this.nullValue = nullValue;
 	}
-	public Boolean getDoc_values() {
-		return doc_values;
+	public Boolean getDocValues() {
+		return docValues;
 	}
-	public void setDoc_values(Boolean doc_values) {
-		this.doc_values = doc_values;
+	public void setDocValues(Boolean docValues) {
+		this.docValues = docValues;
 	}
 	
 }

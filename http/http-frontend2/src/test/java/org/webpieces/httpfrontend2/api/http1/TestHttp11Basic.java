@@ -10,8 +10,8 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.http2translations.api.Http1_1ToHttp2;
-import org.webpieces.http2translations.api.Http2ToHttp1_1;
+import org.webpieces.http2translations.api.Http11ToHttp2;
+import org.webpieces.http2translations.api.Http2ToHttp11;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -51,12 +51,12 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 
 		mockChannel.sendToSvr(req);		
 		PassedIn in1 = mockListener.getSingleRequest();
-		HttpRequest req1 = Http2ToHttp1_1.translateRequest(in1.request);
+		HttpRequest req1 = Http2ToHttp11.translateRequest(in1.request);
 		Assert.assertEquals(req, req1);
 		
 		HttpResponse resp = Requests.createResponse();
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
-		Http2Response headers = Http1_1ToHttp2.responseToHeaders(resp);
+		Http2Response headers = Http11ToHttp2.responseToHeaders(resp);
 		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers);
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, respToClient);
@@ -88,7 +88,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 
 		mockChannel.sendToSvr(req);		
 		PassedIn in1 = mockListener.getSingleRequest();
-		HttpRequest req1 = Http2ToHttp1_1.translateRequest(in1.request);
+		HttpRequest req1 = Http2ToHttp11.translateRequest(in1.request);
 		Assert.assertEquals(req, req1);
 
 		HttpChunk chunk = new HttpChunk();
@@ -121,7 +121,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		mockChannel.sendToSvr(req);
 		mockChannel.sendToSvr(body);
 		PassedIn in1 = mockListener.getSingleRequest();
-		HttpRequest req1 = Http2ToHttp1_1.translateRequest(in1.request);
+		HttpRequest req1 = Http2ToHttp11.translateRequest(in1.request);
 		Assert.assertEquals(req, req1);
 
 		DataFrame frame = (DataFrame) mockStreamWriter.getSingleFrame();
@@ -130,7 +130,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		Assert.assertTrue(frame.isEndOfStream());
 		
 		HttpResponse resp = Requests.createNobodyResponse();
-		Http2Response http2Resp = Http1_1ToHttp2.responseToHeaders(resp);
+		Http2Response http2Resp = Http11ToHttp2.responseToHeaders(resp);
 		CompletableFuture<StreamWriter> fut = in1.stream.sendResponse(http2Resp);
 		fut.get(2, TimeUnit.SECONDS);
 		
@@ -154,7 +154,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
 
-		Http2Response headers1 = Http1_1ToHttp2.responseToHeaders(resp1);
+		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
 		in1.stream.sendResponse(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
@@ -163,7 +163,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		PassedIn in2 = mockListener.getSingleRequest();
 		HttpResponse resp2 = Requests.createResponse(2);
 		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
-		Http2Response headers2 = Http1_1ToHttp2.responseToHeaders(resp2);
+		Http2Response headers2 = Http11ToHttp2.responseToHeaders(resp2);
 		in2.stream.sendResponse(headers2);
 		
 		HttpPayload payload2 = mockChannel.getFrameAndClear();		
@@ -198,7 +198,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		//send back request2's response first!!!! BUT verify it does not go to client per http11 pipelining rules
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
-		Http2Response headers1 = Http1_1ToHttp2.responseToHeaders(resp1);
+		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
 		in1.stream.sendResponse(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
@@ -208,7 +208,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		PassedIn in2 = mockListener.getSingleRequest();
 		HttpResponse resp2 = Requests.createResponse(2);
 		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
-		Http2Response headers2 = Http1_1ToHttp2.responseToHeaders(resp2);
+		Http2Response headers2 = Http11ToHttp2.responseToHeaders(resp2);
 		in2.stream.sendResponse(headers2);
 		
 		HttpPayload payload2 = mockChannel.getFrameAndClear();		
@@ -246,7 +246,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
-		Http2Response headers1 = Http1_1ToHttp2.responseToHeaders(resp1);
+		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
 		in1.stream.sendResponse(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
@@ -258,7 +258,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		PassedIn in2 = mockListener.getSingleRequest();
 		HttpResponse resp2 = Requests.createResponse(2);
 		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
-		Http2Response headers2 = Http1_1ToHttp2.responseToHeaders(resp2);
+		Http2Response headers2 = Http11ToHttp2.responseToHeaders(resp2);
 		in2.stream.sendResponse(headers2);
 		
 		HttpPayload payload2 = mockChannel.getFrameAndClear();		
@@ -279,7 +279,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "10"));
-		Http2Response headers1 = Http1_1ToHttp2.responseToHeaders(resp1);
+		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
 		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
@@ -291,7 +291,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		byte[] buf = new byte[10];
 		DataWrapper dataWrapper = dataGen.wrapByteArray(buf);
 		HttpData data1 = new HttpData(dataWrapper, true);
-		DataFrame data = (DataFrame) Http1_1ToHttp2.translateData(data1);
+		DataFrame data = (DataFrame) Http11ToHttp2.translateData(data1);
 		writer.processPiece(data);
 		
 		fut1.get(2, TimeUnit.SECONDS);
@@ -302,7 +302,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		PassedIn in2 = mockListener.getSingleRequest();
 		HttpResponse resp2 = Requests.createResponse(2);
 		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
-		Http2Response headers2 = Http1_1ToHttp2.responseToHeaders(resp2);
+		Http2Response headers2 = Http11ToHttp2.responseToHeaders(resp2);
 		in2.stream.sendResponse(headers2);
 		
 		HttpPayload payload2 = mockChannel.getFrameAndClear();		

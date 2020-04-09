@@ -16,8 +16,8 @@ public class DataFrame extends AbstractHttp2Frame implements StreamMsg {
     private boolean endOfStream = true; /* 0x1 */
     //private boolean padded = false;    /* 0x8 */
     /* payload */
-    private DataWrapper data = dataGen.emptyWrapper();
-    private DataWrapper padding = dataGen.emptyWrapper();
+    private DataWrapper data = DATA_GEN.emptyWrapper();
+    private DataWrapper padding = DATA_GEN.emptyWrapper();
 
     public DataFrame() {}
     

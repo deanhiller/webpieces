@@ -25,7 +25,7 @@ import io.micrometer.core.instrument.Metrics;
 
 public class IntegTestClientToEchoServer {
 
-	static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostThroughput.class);
+	private static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostThroughput.class);
 	
 	private BytesRecorder recorder = new BytesRecorder();
 	

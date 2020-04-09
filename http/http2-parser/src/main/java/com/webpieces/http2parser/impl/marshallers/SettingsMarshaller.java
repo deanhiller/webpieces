@@ -47,9 +47,9 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 			if(castFrame.getSettings() != null && castFrame.getSettings().size() > 0)
 	    		throw new IllegalArgumentException("Ack SettingsFrame can not have setting in it");
 
-			dataPayload = dataGen.emptyWrapper();
+			dataPayload = DATA_GEN.emptyWrapper();
 		} else if(castFrame.getSettings().size() == 0) {
-			dataPayload = dataGen.emptyWrapper();
+			dataPayload = DATA_GEN.emptyWrapper();
 		} else {
 			List<Http2Setting> settings = castFrame.getSettings();
 			dataPayload = marshalOut(settings);
@@ -173,7 +173,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		}
 		payload.flip();
 
-		dataPayload = dataGen.wrapByteBuffer(payload);
+		dataPayload = DATA_GEN.wrapByteBuffer(payload);
 		return dataPayload;
 	}
 }

@@ -2,7 +2,7 @@ package org.webpieces.throughput.client;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.http2client.api.Http2Client;
-import org.webpieces.httpclientx.api.Http2to1_1ClientFactory;
+import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.throughput.AsyncConfig;
@@ -23,14 +23,14 @@ public class Http11Clients implements Clients {
 	@Override
 	public Http2Client createClient() {
 		if(config.getClientThreadCount() != null)
-			return Http2to1_1ClientFactory.createHttpClient("onlyClient", config.getClientThreadCount(), config.getBackpressureConfig(), metrics);
+			return Http2to11ClientFactory.createHttpClient("onlyClient", config.getClientThreadCount(), config.getBackpressureConfig(), metrics);
 			
 		//single threaded version...
 		BufferCreationPool pool = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, config.getBackpressureConfig());
 		
-		Http2Client client = Http2to1_1ClientFactory.createHttpClient("onlyClient", chanMgr, new SimpleMeterRegistry(), pool);
+		Http2Client client = Http2to11ClientFactory.createHttpClient("onlyClient", chanMgr, new SimpleMeterRegistry(), pool);
 		return client;
 	}
 	

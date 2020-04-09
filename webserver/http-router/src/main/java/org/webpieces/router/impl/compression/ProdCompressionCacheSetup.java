@@ -147,7 +147,9 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		//There is a test for this...
 		String previousHash = properties.getProperty(urlPath); 
 		if(lastModified > lastModifiedSrc && previousHash != null) {
-			log.info("timestamp later than src so skipping writing to="+destination);
+			if(log.isDebugEnabled())
+				log.debug("timestamp later than src so skipping writing to="+destination);
+			
 			pathToFileMeta.put(urlPath, new FileMeta(previousHash));
 			return false; //no need to check anything as destination was written after this source file
 		}

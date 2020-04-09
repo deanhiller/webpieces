@@ -16,12 +16,12 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2translations.api.Http2ToHttp1_1;
+import org.webpieces.http2translations.api.Http2ToHttp11;
 import org.webpieces.httpclient.api.mocks.MockChannel;
 import org.webpieces.httpclient.api.mocks.MockChannelMgr;
 import org.webpieces.httpclient.api.mocks.MockResponseListener;
 import org.webpieces.httpclient.api.mocks.MockStreamWriter;
-import org.webpieces.httpclientx.api.Http2to1_1ClientFactory;
+import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpChunk;
@@ -47,7 +47,7 @@ public class TestHttp1Backpressure {
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		BufferPool pool = new BufferCreationPool();
-		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient3", mockChannelMgr, new SimpleMeterRegistry(), pool);
+		httpClient = Http2to11ClientFactory.createHttpClient("myClient3", mockChannelMgr, new SimpleMeterRegistry(), pool);
 		
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
 		socket = httpClient.createHttpSocket();
@@ -114,7 +114,7 @@ public class TestHttp1Backpressure {
 	private List<ByteBuffer> create3BuffersWithTwoMessags(Http2Response response1, HttpData response2) {
 		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 
-		HttpResponse resp1 = Http2ToHttp1_1.translateResponse(response1);
+		HttpResponse resp1 = Http2ToHttp11.translateResponse(response1);
 		
 		ByteBuffer buf1 = parser.marshalToByteBuffer(resp1);
 		ByteBuffer buf2 = parser.marshalToByteBuffer(response2);
@@ -199,7 +199,7 @@ public class TestHttp1Backpressure {
 	private List<ByteBuffer> create4BuffersWith3Messags(Http2Response response1, HttpChunk response2, HttpLastChunk lastChunk) {
 		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
 
-		HttpResponse resp1 = Http2ToHttp1_1.translateResponse(response1);
+		HttpResponse resp1 = Http2ToHttp11.translateResponse(response1);
 		
 		ByteBuffer buf1 = parser.marshalToByteBuffer(resp1);
 		ByteBuffer buf2 = parser.marshalToByteBuffer(response2);

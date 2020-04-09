@@ -25,7 +25,7 @@ import org.webpieces.util.security.Security;
 public class CookieTranslator implements CookieWebManaged {
 
 	private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
-	private static String VERSION = "1";
+	private static final String VERSION = "1";
 	//private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
 	private RouterConfig config;
 	private Security security;

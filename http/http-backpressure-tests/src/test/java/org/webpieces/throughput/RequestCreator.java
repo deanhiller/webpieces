@@ -1,6 +1,6 @@
 package org.webpieces.throughput;
 
-import org.webpieces.http2translations.api.Http2ToHttp1_1;
+import org.webpieces.http2translations.api.Http2ToHttp11;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -24,7 +24,7 @@ public class RequestCreator {
 
 	public static HttpRequest createHttp1_1Request() {
 		Http2Request request = createHttp2Request();
-		HttpRequest http1Request = Http2ToHttp1_1.translateRequest(request);
+		HttpRequest http1Request = Http2ToHttp11.translateRequest(request);
 		return http1Request;
 	}
 
@@ -39,7 +39,7 @@ public class RequestCreator {
 
 	public static HttpResponse createHttp1_1Response() {
 		Http2Response resp = createHttp2Response(0);
-		return Http2ToHttp1_1.translateResponse(resp);
+		return Http2ToHttp11.translateResponse(resp);
 	}
 
 }

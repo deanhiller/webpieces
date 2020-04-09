@@ -54,7 +54,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
 		byte[] buf = new byte[localSettings.getMaxFrameSize()+4];
-		dataFrame.setData(dataGen.wrapByteArray(buf));
+		dataFrame.setData(DATA_GEN.wrapByteArray(buf));
 		mockChannel.write(dataFrame); //endOfStream=false
 
 		//remote receives goAway
@@ -90,7 +90,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
 		byte[] buf = new byte[localSettings.getMaxFrameSize()];
-		dataFrame.setData(dataGen.wrapByteArray(buf));
+		dataFrame.setData(DATA_GEN.wrapByteArray(buf));
 		mockChannel.write(dataFrame); //endOfStream=false
 
 		DataFrame fr = (DataFrame) mockStreamWriter.getSingleFrame();

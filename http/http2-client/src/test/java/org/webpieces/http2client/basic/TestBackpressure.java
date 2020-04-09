@@ -97,7 +97,7 @@ public class TestBackpressure extends AbstractTest {
 		DataWrapper buf3 = parser.marshal(response3);
 		
 		//one big wrapper that we can slice up..
-		DataWrapper all = dataGen.chainDataWrappers(buf1, buf2, buf3);
+		DataWrapper all = DATA_GEN.chainDataWrappers(buf1, buf2, buf3);
 		
 		byte[] part1 = all.readBytesAt(0, 10);
 		byte[] part2 = all.readBytesAt(10, buf1.getReadableSize());

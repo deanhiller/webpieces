@@ -41,8 +41,8 @@ public class PushPromiseMarshaller extends AbstractFrameMarshaller implements Fr
         prelude.flip();
 
         DataWrapper headersDW = castFrame.getHeaderFragment();
-        DataWrapper finalDW = dataGen.chainDataWrappers(
-                dataGen.wrapByteBuffer(prelude),
+        DataWrapper finalDW = DATA_GEN.chainDataWrappers(
+                DATA_GEN.wrapByteBuffer(prelude),
                 headersDW);
         
         DataWrapper payload = PaddingUtil.padDataIfNeeded(finalDW, castFrame.getPadding());
@@ -63,7 +63,7 @@ public class PushPromiseMarshaller extends AbstractFrameMarshaller implements Fr
         frame.setEndHeaders((flags & 0x4) == 0x4);
         boolean isPadded = (flags & 0x8) == 0x8;
 
-        List<? extends DataWrapper> split = dataGen.split(framePayloadData, 4);
+        List<? extends DataWrapper> split = DATA_GEN.split(framePayloadData, 4);
         ByteBuffer prelude = bufferPool.createWithDataWrapper(split.get(0));
 
         

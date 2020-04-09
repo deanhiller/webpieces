@@ -21,13 +21,13 @@ public class RemoveFileTest extends AbstractCompileTest {
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void testAddingFileAndModifyingControllerToUseIt() {
-		log.info("loading class RemoveFileController");
+		LOG.info("loading class RemoveFileController");
 		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
 		//instead just tediously form the String ourselves...
 		String controller = getPackageFilter()+".RemoveFileController";
 		Class c = compiler.loadClass(controller);
 
-		log.info("loaded");
+		LOG.info("loaded");
 		int retVal = invokeMethodReturnInt(c, "someMethod");
 		
 		Assert.assertEquals(66, retVal);
@@ -47,7 +47,7 @@ public class RemoveFileTest extends AbstractCompileTest {
 		String packageFilter = getPackageFilter();
 		String path = packageFilter.replace('.', '/');
 
-		File existingDir = FileFactory.newFile(myCodePath, path);
+		File existingDir = FileFactory.newFile(MY_CODE_PATH, path);
 		
 		File javaFile = FileFactory.newFile(existingDir, "ClassToBeRemoved.java");
 		//javaFile must exist for test to be run...

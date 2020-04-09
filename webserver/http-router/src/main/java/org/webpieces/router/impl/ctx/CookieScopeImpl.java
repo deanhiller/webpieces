@@ -10,7 +10,7 @@ import org.webpieces.router.impl.params.ObjectTranslator;
 
 public abstract class CookieScopeImpl implements CookieScope {
 
-	public static String COOKIE_NAME_PREFIX = "web";
+	public final static String COOKIE_NAME_PREFIX = "web";
 	
 	protected boolean previouslyExisted = false;
 	protected boolean hasModifiedData = false;

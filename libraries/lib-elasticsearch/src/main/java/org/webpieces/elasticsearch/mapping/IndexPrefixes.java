@@ -1,21 +1,25 @@
 package org.webpieces.elasticsearch.mapping;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class IndexPrefixes {
 
-	private int min_chars;
-	private int max_chars;
+	@JsonProperty("min_chars")
+	private int minChars;
+	@JsonProperty("max_chars")
+	private int maxChars;
 	
-	public int getMin_chars() {
-		return min_chars;
+	public int getMinChars() {
+		return minChars;
 	}
-	public void setMin_chars(int min_chars) {
-		this.min_chars = min_chars;
+	public void setMinChars(int minChars) {
+		this.minChars = minChars;
 	}
-	public int getMax_chars() {
-		return max_chars;
+	public int getMaxChars() {
+		return maxChars;
 	}
-	public void setMax_chars(int max_chars) {
-		this.max_chars = max_chars;
+	public void setMaxChars(int maxChars) {
+		this.maxChars = maxChars;
 	}
 	
 }

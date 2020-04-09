@@ -1,6 +1,7 @@
 package org.webpieces.elasticsearch.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -10,13 +11,17 @@ public class CompletionMapping implements PropertyMapping {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String analyzer;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String search_analyzer;
+	@JsonProperty("search_analyzer")
+	private String searchAnalyzer;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Boolean preserve_separators;
+	@JsonProperty("preserve_separators")
+	private Boolean preserveSeparators;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Boolean preserve_position_increments;
+	@JsonProperty("preserve_position_increments")
+	private Boolean preservePositionIncrements;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Integer max_input_length;
+	@JsonProperty("max_input_length")
+	private Integer maxInputLength;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private List<Context> contexts;
 
@@ -26,29 +31,29 @@ public class CompletionMapping implements PropertyMapping {
 	public void setAnalyzer(String analyzer) {
 		this.analyzer = analyzer;
 	}
-	public String getSearch_analyzer() {
-		return search_analyzer;
+	public String getSearchAnalyzer() {
+		return searchAnalyzer;
 	}
-	public void setSearch_analyzer(String search_analyzer) {
-		this.search_analyzer = search_analyzer;
+	public void setSearchAnalyzer(String searchAnalyzer) {
+		this.searchAnalyzer = searchAnalyzer;
 	}
-	public Boolean getPreserve_separators() {
-		return preserve_separators;
+	public Boolean getPreserveSeparators() {
+		return preserveSeparators;
 	}
-	public void setPreserve_separators(Boolean preserve_separators) {
-		this.preserve_separators = preserve_separators;
+	public void setPreserveSeparators(Boolean preserveSeparators) {
+		this.preserveSeparators = preserveSeparators;
 	}
-	public Boolean getPreserve_position_increments() {
-		return preserve_position_increments;
+	public Boolean getPreservePositionIncrements() {
+		return preservePositionIncrements;
 	}
-	public void setPreserve_position_increments(Boolean preserve_position_increments) {
-		this.preserve_position_increments = preserve_position_increments;
+	public void setPreservePositionIncrements(Boolean preservePositionIncrements) {
+		this.preservePositionIncrements = preservePositionIncrements;
 	}
-	public Integer getMax_input_length() {
-		return max_input_length;
+	public Integer getMaxInputLength() {
+		return maxInputLength;
 	}
-	public void setMax_input_length(Integer max_input_length) {
-		this.max_input_length = max_input_length;
+	public void setMaxInputLength(Integer maxInputLength) {
+		this.maxInputLength = maxInputLength;
 	}
 	public String getType() {
 		return type;

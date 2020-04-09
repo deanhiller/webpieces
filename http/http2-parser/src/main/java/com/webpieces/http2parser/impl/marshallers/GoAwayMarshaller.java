@@ -37,12 +37,12 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
         UnsignedData.putUnsignedInt(prelude, castFrame.getErrorCode());
         prelude.flip();
 
-        DataWrapper debug = dataGen.emptyWrapper();
+        DataWrapper debug = DATA_GEN.emptyWrapper();
         if(castFrame.getDebugData() != null)
         	debug = castFrame.getDebugData();
         
-        DataWrapper payload = dataGen.chainDataWrappers(
-                dataGen.wrapByteBuffer(prelude),
+        DataWrapper payload = DATA_GEN.chainDataWrappers(
+                DATA_GEN.wrapByteBuffer(prelude),
                 debug
         );		
 		return super.marshalFrame(frame, (byte)0, payload);
@@ -57,7 +57,7 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
             throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, streamId, 
             		"goaway frame had stream id="+streamId);
         
-        List<? extends DataWrapper> split = dataGen.split(framePayloadData, 8);
+        List<? extends DataWrapper> split = DATA_GEN.split(framePayloadData, 8);
         ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));
 
         long lastStreamId = UnsignedData.getUnsignedInt(preludeBytes);

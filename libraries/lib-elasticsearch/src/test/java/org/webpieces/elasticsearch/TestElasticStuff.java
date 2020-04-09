@@ -12,7 +12,6 @@ import org.webpieces.elasticsearch.mapping.ElasticIndex;
 import org.webpieces.elasticsearch.mapping.Mappings;
 import org.webpieces.elasticsearch.mapping.ObjectMapping;
 import org.webpieces.elasticsearch.mapping.PropertyMapping;
-import org.webpieces.elasticsearch.mapping.SingleType;
 import org.webpieces.elasticsearch.mapping.TextMapping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,11 +36,8 @@ public class TestElasticStuff {
         properties.put("dbCreatedAt", new DateMapping());
         properties.put("dbUpdatedAt", new DateMapping());
 
-        SingleType doc = new SingleType();
-        doc.setProperties(properties);
-
         Mappings mappings = new Mappings();
-		mappings.setDoc(doc);
+        mappings.setProperties(properties);
         
         ElasticIndex index = new ElasticIndex();
 		index.setMappings(mappings);

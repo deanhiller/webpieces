@@ -12,7 +12,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamListener;
-import org.webpieces.http2translations.api.Http1_1ToHttp2;
+import org.webpieces.http2translations.api.Http11ToHttp2;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
@@ -28,15 +28,15 @@ import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class Layer2Http1_1Handler {
-	private static final Logger log = LoggerFactory.getLogger(Layer2Http1_1Handler.class);
+public class Layer2Http11Handler {
+	private static final Logger log = LoggerFactory.getLogger(Layer2Http11Handler.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser httpParser;
 	private StreamListener httpListener;
 	private AtomicInteger counter = new AtomicInteger(1);
 	private ByteAckTracker tracker2 = new ByteAckTracker();
 
-	public Layer2Http1_1Handler(HttpParser httpParser, StreamListener httpListener) {
+	public Layer2Http11Handler(HttpParser httpParser, StreamListener httpListener) {
 		this.httpParser = httpParser;
 		this.httpListener = httpListener;
 	}
@@ -47,7 +47,7 @@ public class Layer2Http1_1Handler {
 	
 	public InitiationResult initialDataImpl(FrontendSocketImpl socket, ByteBuffer buf) {
 		
-		Memento state = socket.getHttp1_1ParseState();
+		Memento state = socket.getHttp11ParseState();
 		int newDataSize = buf.remaining();
 		state = parse(socket, buf);
 		int numBytesRead = state.getNumBytesJustParsed();
@@ -90,7 +90,7 @@ public class Layer2Http1_1Handler {
 	}
 
 	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
-		Memento state = socket.getHttp1_1ParseState();
+		Memento state = socket.getHttp11ParseState();
 		int newDataSize = buf.remaining();
 		state = parse(socket, buf);
 		
@@ -106,7 +106,7 @@ public class Layer2Http1_1Handler {
 		
 		CompletableFuture<Void> future2 = tracker2.addBytesToTrack(newDataSize);
 		
-		Memento state = socket.getHttp1_1ParseState();
+		Memento state = socket.getHttp11ParseState();
 		List<HttpPayload> parsed = state.getParsedMessages();
 		
 		AckAggregator aggregator = new AckAggregator(parsed.size(), numBytesRead, tracker2);
@@ -123,13 +123,13 @@ public class Layer2Http1_1Handler {
 
 	private Memento parse(FrontendSocketImpl socket, ByteBuffer buf) {
 		DataWrapper moreData = dataGen.wrapByteBuffer(buf);
-		Memento state = socket.getHttp1_1ParseState();
+		Memento state = socket.getHttp11ParseState();
 		state = httpParser.parse(state, moreData);
 		return state;
 	}
 	
 	private CompletableFuture<Void> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
-		Http2Msg msg = Http1_1ToHttp2.translate(payload, socket.isForServingHttpsPages());
+		Http2Msg msg = Http11ToHttp2.translate(payload, socket.isForServingHttpsPages());
 
 		if(payload instanceof HttpRequest) {
 			return processInitialPieceOfRequest(socket, (HttpRequest) payload, (Http2Request)msg);
@@ -144,7 +144,7 @@ public class Layer2Http1_1Handler {
 		PermitQueue permitQueue = socket.getPermitQueue();
 		return permitQueue.runRequest(() -> {
 			
-			Http1_1StreamImpl stream = socket.getCurrentStream();
+			Http11StreamImpl stream = socket.getCurrentStream();
 			StreamWriter requestWriter = stream.getRequestWriter();
 			if(msg.isEndOfStream())
 				stream.setSentFullRequest(true);
@@ -168,7 +168,7 @@ public class Layer2Http1_1Handler {
 		
 		PermitQueue permitQueue = socket.getPermitQueue();
 		return permitQueue.runRequest(() -> {
-			Http1_1StreamImpl currentStream = new Http1_1StreamImpl(id, socket, httpParser, permitQueue, http1Req, headers);
+			Http11StreamImpl currentStream = new Http11StreamImpl(id, socket, httpParser, permitQueue, http1Req, headers);
 
 			HttpStream streamHandle = httpListener.openStream();
 			currentStream.setStreamHandle(streamHandle);

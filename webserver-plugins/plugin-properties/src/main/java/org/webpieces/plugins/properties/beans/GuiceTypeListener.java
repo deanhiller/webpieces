@@ -27,7 +27,8 @@ public class GuiceTypeListener implements TypeListener {
 		Class<?> clazz = typeLiteral.getRawType();
 		Class<?>[] interfaces = clazz.getInterfaces();
 		List<Class<?>> interfazes = Arrays.asList(interfaces);
-		log.info("class="+clazz+" interfaces="+interfazes);
+		if(log.isDebugEnabled())
+			log.debug("class="+clazz+" interfaces="+interfazes);
 		for(Class<?> interfaze : interfaces) {
 			if(interfaze.getSimpleName().endsWith(config.getInterfaceSuffixMatch())) {
 				log.info("FOUND a managed bean="+clazz);

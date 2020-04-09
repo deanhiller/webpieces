@@ -9,22 +9,22 @@ import org.webpieces.httpclient11.api.HttpSocket;
 
 public class Http2ClientProxy implements Http2Client {
 
-	private HttpClient client1_1;
+	private HttpClient client11;
 
-	public Http2ClientProxy(HttpClient client1_1) {
-		this.client1_1 = client1_1;
+	public Http2ClientProxy(HttpClient client11) {
+		this.client11 = client11;
 	}
 
 	@Override
 	public Http2Socket createHttpSocket() {
-		HttpSocket socket1_1 = client1_1.createHttpSocket();
-		return new Http2SocketImpl(socket1_1);
+		HttpSocket socket11 = client11.createHttpSocket();
+		return new Http2SocketImpl(socket11);
 	}
 
 	@Override
 	public Http2Socket createHttpsSocket(SSLEngine engine) {
-		HttpSocket socket1_1 = client1_1.createHttpsSocket(engine);
-		return new Http2SocketImpl(socket1_1);
+		HttpSocket socket11 = client11.createHttpsSocket(engine);
+		return new Http2SocketImpl(socket11);
 	}
 
 }

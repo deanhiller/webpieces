@@ -17,11 +17,11 @@ public class ChildModifyTest extends AbstractCompileTest {
 		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
 		//instead just tediously form the String ourselves...
 		String controller = getPackageFilter()+".GrandfatherController";
-		log.info("loading class "+controller);
+		LOG.info("loading class "+controller);
 		
 		Class c = compiler.loadClass(controller);
 
-		log.info("loaded");
+		LOG.info("loaded");
 		int retVal = invokeMethodReturnInt(c, "someMethod");
 		
 		Assert.assertEquals(88, retVal);

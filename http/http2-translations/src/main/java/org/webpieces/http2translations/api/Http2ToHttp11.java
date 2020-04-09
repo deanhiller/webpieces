@@ -24,9 +24,9 @@ import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
-public class Http2ToHttp1_1 {
+public class Http2ToHttp11 {
 
-	private static final Logger log = LoggerFactory.getLogger(Http2ToHttp1_1.class);
+	private static final Logger log = LoggerFactory.getLogger(Http2ToHttp11.class);
 	
 	private static Set<String> headersToSkip = new HashSet<>(); 
 	static {

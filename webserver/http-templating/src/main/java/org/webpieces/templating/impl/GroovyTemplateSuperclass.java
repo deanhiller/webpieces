@@ -21,7 +21,7 @@ import groovy.lang.Script;
 
 public abstract class GroovyTemplateSuperclass extends Script {
 
-	public static String OUT_PROPERTY_NAME = "__out";
+	public static final String OUT_PROPERTY_NAME = "__out";
 	public static final EscapeHTMLFormatter ESCAPE_HTML_FORMATTER = new EscapeHTMLFormatter();
 
 	private EscapeCharactersFormatter formatter;

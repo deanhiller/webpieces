@@ -34,7 +34,7 @@ import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#SETTINGS
  */
-public class TestC5_1StreamStates extends AbstractTest {
+public class TestC5x1StreamStates extends AbstractTest {
 	
 	/**
 	 * Receiving any frame other than HEADERS or PRIORITY on a stream in this state

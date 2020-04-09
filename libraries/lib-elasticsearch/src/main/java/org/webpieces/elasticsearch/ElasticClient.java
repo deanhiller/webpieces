@@ -14,10 +14,9 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.nio.entity.NStringEntity;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.ResponseListener;
-import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.elasticsearch.actions.Action;
@@ -43,10 +42,8 @@ public class ElasticClient {
      * tests (ie. every line in guice Module.configure is hit for tests even if you swap it out in a test so to avoid that,
      * we do not create this in guice)
      */
-    public void connect(String ipAddress, String transport) {
-        client = RestClient.builder(
-                new HttpHost(ipAddress, 9200, transport),
-                new HttpHost(ipAddress, 9201, transport)).build();
+    public void connect(String ipAddress, int port) {
+        client = RestClient.builder(new HttpHost(ipAddress, port, "https")).build();
     }
 
     public void close() {
@@ -61,10 +58,10 @@ public class ElasticClient {
         Map<String, String> params = Collections.emptyMap();
         //url format is /{index}/{type}/{documentId}
         //type goes away in future releases as well so don't put different types in the same index!!!(use new index)
-        return performRequest("PUT", "/"+index+"/doc/"+id, params, document);    
+        return performRequest("PUT", "/"+index+"/_doc/"+id, params, document);
     }
 
-    public CompletableFuture<Response> createAlias(String indexName, String alias) {
+    public CompletableFuture<Response> createAlias(String alias, String indexName) {
         Map<String, String> params = Collections.emptyMap();
         
         AliasChange addAlias = new AliasChange();
@@ -131,13 +128,26 @@ public class ElasticClient {
 		
 		String jsonStr = jsonString;
 		CompletableFuture<Response> future = new CompletableFuture<Response>();
-		ResponseListener responseListener = new ToFutureListener(future); 
-		client.performRequestAsync(method, endpoint, params, entity, responseListener, headers);
+		ResponseListener responseListener = new ToFutureListener(future);
+
+		RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
+		Header[] allHeaders = new Header[headers.length + 1];
+		for(Header header: headers) {
+			builder.addHeader(header.getName(), header.getValue());
+        }
+		builder.addHeader("Authorization", "ApiKey V0xKeEdIRUIyMGdKdjF0QlZoWmc6X0NvaU9seGZSZHFxd283SjIyYXhvdw==");
+
+		Request requst = new Request(method, endpoint);
+		requst.setEntity(entity);
+		requst.setOptions(builder);
+		requst.addParameters(params);
+
+		client.performRequestAsync(requst, responseListener);
 		
 		return future.handle( (r, e) -> {
 			if(e != null) {
 				CompletableFuture<Response> f = new CompletableFuture<Response>();
-				f.completeExceptionally(new RuntimeException("json failed to be processed by elastic search="+jsonStr));
+				f.completeExceptionally(new RuntimeException("json failed to be processed by elastic search="+jsonStr, e));
 				return f;
 			}
 			return CompletableFuture.completedFuture(r);

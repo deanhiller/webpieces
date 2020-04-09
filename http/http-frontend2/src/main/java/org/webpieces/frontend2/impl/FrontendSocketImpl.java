@@ -23,16 +23,16 @@ public class FrontendSocketImpl implements FrontendSocket {
 	
 	private TCPChannel channel;
 	private ProtocolType protocol;
-	private Memento http1_1ParseState;
+	private Memento http11ParseState;
 	private Http2ServerEngine http2Engine;
 	private boolean isClosed;
 	private ServerSocketInfo svrSocketInfo;
 
-	private MarshalState http1_1MarshalState;
+	private MarshalState http11MarshalState;
 
 	private PermitQueue permitQueue = new PermitQueue(1);
 
-	private Http1_1StreamImpl currentStream;
+	private Http11StreamImpl currentStream;
 
 	public FrontendSocketImpl(TCPChannel channel, ProtocolType protocol, ServerSocketInfo svrSocketInfo) {
 		this.channel = channel;
@@ -56,15 +56,15 @@ public class FrontendSocketImpl implements FrontendSocket {
 	}
 	
 	public void setHttp1_1ParseState(Memento parseState, MarshalState marshalState) {
-		this.http1_1ParseState = parseState;
-		this.http1_1MarshalState = marshalState;
+		this.http11ParseState = parseState;
+		this.http11MarshalState = marshalState;
 	}
 
-	public Memento getHttp1_1ParseState() {
-		return http1_1ParseState;
+	public Memento getHttp11ParseState() {
+		return http11ParseState;
 	}
-	public MarshalState getHttp1_1MarshalState() {
-		return http1_1MarshalState;
+	public MarshalState getHttp11MarshalState() {
+		return http11MarshalState;
 	}
 
 	public void setProtocol(ProtocolType protocol) {
@@ -93,7 +93,7 @@ public class FrontendSocketImpl implements FrontendSocket {
 	}
 
 	private void cancelAllStreams(StreamListener httpListener, FarEndClosedConnection f) {
-		Http1_1StreamImpl stream = getCurrentStream();
+		Http11StreamImpl stream = getCurrentStream();
 		if(stream == null)
 			return;
 		
@@ -140,11 +140,11 @@ public class FrontendSocketImpl implements FrontendSocket {
 		return permitQueue;
 	}
 
-	public void setCurrentStream(Http1_1StreamImpl currentStream) {
+	public void setCurrentStream(Http11StreamImpl currentStream) {
 		this.currentStream = currentStream;
 	}
 
-	public Http1_1StreamImpl getCurrentStream() {
+	public Http11StreamImpl getCurrentStream() {
 		return currentStream;
 	}
 

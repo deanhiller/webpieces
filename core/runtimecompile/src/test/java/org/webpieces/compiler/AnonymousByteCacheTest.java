@@ -48,18 +48,18 @@ public class AnonymousByteCacheTest extends AbstractCompileTest {
 		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
 		//instead just tediously form the String ourselves...
 		String controller = getPackageFilter()+".AnonymousController";
-		log.info("loading class "+controller);
+		LOG.info("loading class "+controller);
 		Class c = compiler.loadClass(controller);
 
 		Assert.assertTrue(byteCodeControllerFile.exists());
 		//The enum is not compiled yet...it is on-demand compiled later...
 		Assert.assertFalse(byteCodeEnumFile.exists());		
 		
-		log.info("loaded");
+		LOG.info("loaded");
 		Callable<ForTestRouteId> callable = (Callable<ForTestRouteId>) invokeMethod(c, "getRunnable");
 		ForTestRouteId value = callable.call();
 		
-		log.info("test route id="+value);
+		LOG.info("test route id="+value);
 		
 		CompileConfig config = createCompileConfig();
 		//now create a new compileOnDemand which will use the bytecode cache...

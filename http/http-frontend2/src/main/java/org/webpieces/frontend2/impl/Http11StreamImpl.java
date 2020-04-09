@@ -10,7 +10,7 @@ import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.StreamSession;
-import org.webpieces.http2translations.api.Http2ToHttp1_1;
+import org.webpieces.http2translations.api.Http2ToHttp11;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -32,8 +32,8 @@ import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
-public class Http1_1StreamImpl implements ResponseStream {
-	private static final Logger log = LoggerFactory.getLogger(Http1_1StreamImpl.class);
+public class Http11StreamImpl implements ResponseStream {
+	private static final Logger log = LoggerFactory.getLogger(Http11StreamImpl.class);
 	//private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private FrontendSocketImpl socket;
@@ -55,7 +55,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 
 	private HttpRequest http1Req;
 
-	public Http1_1StreamImpl(
+	public Http11StreamImpl(
 			int streamId, 
 			FrontendSocketImpl socket, 
 			HttpParser http11Parser, 
@@ -74,7 +74,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 	@Override
 	public CompletableFuture<StreamWriter> sendResponse(Http2Response headers) {
 		closeCheck();
-		HttpResponse response = Http2ToHttp1_1.translateResponse(headers);
+		HttpResponse response = Http2ToHttp11.translateResponse(headers);
 		
 		if(headers.isEndOfStream()) {
 			validateHeader(response);
@@ -221,7 +221,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 	}
 
 	private void remove(Http2Msg data) {
-		Http1_1StreamImpl current = socket.getCurrentStream();
+		Http11StreamImpl current = socket.getCurrentStream();
 		if(!sentFullRequest)
 			throw new IllegalStateException("Client Application cannot send endof stream message until the full request is sent(only in http1.1)");
 		else if(endingFrame.get() != null)
@@ -237,7 +237,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 	}
 	
 	private CompletableFuture<Void> write(HttpPayload payload) {
-		ByteBuffer buf = http11Parser.marshalToByteBuffer(socket.getHttp1_1MarshalState(), payload);
+		ByteBuffer buf = http11Parser.marshalToByteBuffer(socket.getHttp11MarshalState(), payload);
 		return socket.getChannel().write(buf);
 	}
 	

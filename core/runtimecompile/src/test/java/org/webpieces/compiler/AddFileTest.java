@@ -31,13 +31,13 @@ public class AddFileTest extends AbstractCompileTest {
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void testAddingFileAndModifyingControllerToUseIt() {
-		log.info("loading class AddFileController");
+		LOG.info("loading class AddFileController");
 		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
 		//instead just tediously form the String ourselves...
 		String controller = getPackageFilter()+".AddFileController";
 		Class c = compiler.loadClass(controller);
 
-		log.info("loaded");
+		LOG.info("loaded");
 		int retVal = invokeMethodReturnInt(c, "someMethod");
 		
 		Assert.assertEquals(1, retVal);
@@ -57,7 +57,7 @@ public class AddFileTest extends AbstractCompileTest {
 
 		String newPathForWindowsTesting = path.replace("/", "\\");
 		
-		File existingDir = FileFactory.newFile(myCodePath, newPathForWindowsTesting);
+		File existingDir = FileFactory.newFile(MY_CODE_PATH, newPathForWindowsTesting);
 		
 		File javaFile = FileFactory.newFile(existingDir, "MyAddedClass.java");
 		//javaFile must exist for test to be run...

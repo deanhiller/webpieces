@@ -1,14 +1,17 @@
 package org.webpieces.elasticsearch.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BooleanMapping extends AbstractMapping implements PropertyMapping {
 
 	private String type = "boolean";
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private Boolean doc_values;
+	@JsonProperty("doc_values")
+	private Boolean docValues;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String null_value;
+	@JsonProperty("null_value")
+	private String nullValue;
 	
 	public String getType() {
 		return type;
@@ -17,16 +20,16 @@ public class BooleanMapping extends AbstractMapping implements PropertyMapping {
 	public void setType(String type) {
 		this.type = type;
 	}
-	public String getNull_value() {
-		return null_value;
+	public String getNullValue() {
+		return nullValue;
 	}
-	public void setNull_value(String null_value) {
-		this.null_value = null_value;
+	public void setNullValue(String nullValue) {
+		this.nullValue = nullValue;
 	}
-	public Boolean getDoc_values() {
-		return doc_values;
+	public Boolean getDocValues() {
+		return docValues;
 	}
-	public void setDoc_values(Boolean doc_values) {
-		this.doc_values = doc_values;
+	public void setDocValues(Boolean docValues) {
+		this.docValues = docValues;
 	}
 }

@@ -13,7 +13,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.http2translations.api.Http1_1ToHttp2;
+import org.webpieces.http2translations.api.Http11ToHttp2;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpPayload;
@@ -72,7 +72,7 @@ public class Http11SynchronousClient implements SynchronousClient {
             //simulate going all the way to http2 like the other test does as well
             for(HttpPayload p : messages) {
             	HttpResponse resp = (HttpResponse) p;
-            	Http2Msg translate = Http1_1ToHttp2.responseToHeaders(resp);
+            	Http2Msg translate = Http11ToHttp2.responseToHeaders(resp);
             	translate.getMessageType();
             	recorder.increment();
             }

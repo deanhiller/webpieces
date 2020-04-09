@@ -16,7 +16,7 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.httpclient.api.mocks.MockChannel;
 import org.webpieces.httpclient.api.mocks.MockChannelMgr;
 import org.webpieces.httpclient.api.mocks.MockResponseListener;
-import org.webpieces.httpclientx.api.Http2to1_1ClientFactory;
+import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -35,7 +35,7 @@ public class TestWriteReads {
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		BufferPool pool = new BufferCreationPool();
-		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient4", mockChannelMgr, new SimpleMeterRegistry(), pool);
+		httpClient = Http2to11ClientFactory.createHttpClient("myClient4", mockChannelMgr, new SimpleMeterRegistry(), pool);
 		
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
 		socket = httpClient.createHttpSocket();

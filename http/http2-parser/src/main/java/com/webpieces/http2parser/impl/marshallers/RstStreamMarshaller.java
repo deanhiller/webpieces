@@ -28,7 +28,7 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 		UnsignedData.putUnsignedInt(payload, castFrame.getErrorCode());
 		payload.flip();
 
-		DataWrapper dataPayload = dataGen.wrapByteBuffer(payload);
+		DataWrapper dataPayload = DATA_GEN.wrapByteBuffer(payload);
 		return super.marshalFrame(frame, (byte) 0, dataPayload);
 	}
 

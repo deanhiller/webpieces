@@ -1,6 +1,7 @@
 package org.webpieces.elasticsearch.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TextMapping extends AbstractMapping implements PropertyMapping {
 
@@ -8,27 +9,34 @@ public class TextMapping extends AbstractMapping implements PropertyMapping {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String analyzer;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String eager_global_ordinals;
+	@JsonProperty("eager_global_ordinals")
+	private String eagerGlobalOrdinals;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String fielddata;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String fielddata_frequency_filter;
+	@JsonProperty("fielddata_frequency_filter")
+	private String fielddataFrequencyFilter;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String fields;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String index_options;
+	@JsonProperty("index_options")
+	private String indexOptions;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private IndexPrefixes index_prefixes;
+	@JsonProperty("index_prefixes")
+	private IndexPrefixes indexPrefixes;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String norms;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String position_increment_gap;
+	@JsonProperty("position_increment_gap")
+	private String positionIncrementGap;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String search_analyzer;
+	@JsonProperty("search_analyzer")
+	private String searchAnalyzer;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String similarity;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String term_vector;
+	@JsonProperty("term_vector")
+	private String termVector;
 	
 	public String getType() {
 		return type;
@@ -42,11 +50,11 @@ public class TextMapping extends AbstractMapping implements PropertyMapping {
 	public void setAnalyzer(String analyzer) {
 		this.analyzer = analyzer;
 	}
-	public String getEager_global_ordinals() {
-		return eager_global_ordinals;
+	public String getEagerGlobalOrdinals() {
+		return eagerGlobalOrdinals;
 	}
-	public void setEager_global_ordinals(String eager_global_ordinals) {
-		this.eager_global_ordinals = eager_global_ordinals;
+	public void setEagerGlobalOrdinals(String eagerGlobalOrdinals) {
+		this.eagerGlobalOrdinals = eagerGlobalOrdinals;
 	}
 	public String getFielddata() {
 		return fielddata;
@@ -54,11 +62,11 @@ public class TextMapping extends AbstractMapping implements PropertyMapping {
 	public void setFielddata(String fielddata) {
 		this.fielddata = fielddata;
 	}
-	public String getFielddata_frequency_filter() {
-		return fielddata_frequency_filter;
+	public String getFielddataFrequencyFilter() {
+		return fielddataFrequencyFilter;
 	}
-	public void setFielddata_frequency_filter(String fielddata_frequency_filter) {
-		this.fielddata_frequency_filter = fielddata_frequency_filter;
+	public void setFielddataFrequencyFilter(String fielddataFrequencyFilter) {
+		this.fielddataFrequencyFilter = fielddataFrequencyFilter;
 	}
 	public String getFields() {
 		return fields;
@@ -66,11 +74,11 @@ public class TextMapping extends AbstractMapping implements PropertyMapping {
 	public void setFields(String fields) {
 		this.fields = fields;
 	}
-	public String getIndex_options() {
-		return index_options;
+	public String getIndexOptions() {
+		return indexOptions;
 	}
-	public void setIndex_options(String index_options) {
-		this.index_options = index_options;
+	public void setIndexOptions(String indexOptions) {
+		this.indexOptions = indexOptions;
 	}
 	public String getNorms() {
 		return norms;
@@ -78,17 +86,17 @@ public class TextMapping extends AbstractMapping implements PropertyMapping {
 	public void setNorms(String norms) {
 		this.norms = norms;
 	}
-	public String getPosition_increment_gap() {
-		return position_increment_gap;
+	public String getPositionIncrementGap() {
+		return positionIncrementGap;
 	}
-	public void setPosition_increment_gap(String position_increment_gap) {
-		this.position_increment_gap = position_increment_gap;
+	public void setPositionIncrementGap(String positionIncrementGap) {
+		this.positionIncrementGap = positionIncrementGap;
 	}
-	public String getSearch_analyzer() {
-		return search_analyzer;
+	public String getSearchAnalyzer() {
+		return searchAnalyzer;
 	}
-	public void setSearch_analyzer(String search_analyzer) {
-		this.search_analyzer = search_analyzer;
+	public void setSearchAnalyzer(String searchAnalyzer) {
+		this.searchAnalyzer = searchAnalyzer;
 	}
 	public String getSimilarity() {
 		return similarity;
@@ -96,17 +104,17 @@ public class TextMapping extends AbstractMapping implements PropertyMapping {
 	public void setSimilarity(String similarity) {
 		this.similarity = similarity;
 	}
-	public String getTerm_vector() {
-		return term_vector;
+	public String getTermVector() {
+		return termVector;
 	}
-	public void setTerm_vector(String term_vector) {
-		this.term_vector = term_vector;
+	public void setTermVector(String termVector) {
+		this.termVector = termVector;
 	}
-	public IndexPrefixes getIndex_prefixes() {
-		return index_prefixes;
+	public IndexPrefixes getIndexPrefixes() {
+		return indexPrefixes;
 	}
-	public void setIndex_prefixes(IndexPrefixes index_prefixes) {
-		this.index_prefixes = index_prefixes;
+	public void setIndexPrefixes(IndexPrefixes indexPrefixes) {
+		this.indexPrefixes = indexPrefixes;
 	}
 	
 }

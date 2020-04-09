@@ -91,7 +91,7 @@ ext {
        'jackson':         'com.fasterxml.jackson.core:jackson-databind:2.10.3',
 	   
        'micrometer':      'io.micrometer:micrometer-core:1.4.1',
-       'elastic-search':  'org.elasticsearch.client:elasticsearch-rest-client:6.3.2',
+       'elastic-search': 'org.elasticsearch.client:elasticsearch-rest-client:7.6.1',
 
        'hikari-cp':       'org.hibernate:hibernate-hikaricp:5.4.10.Final'
     ]

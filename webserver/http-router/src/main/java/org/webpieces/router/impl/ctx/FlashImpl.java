@@ -9,7 +9,7 @@ import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.router.impl.params.ObjectTranslator;
 
 public class FlashImpl extends FlashScopeImpl implements FlashSub {
-	public static String COOKIE_NAME = CookieScopeImpl.COOKIE_NAME_PREFIX+"Flash";
+	public final static String COOKIE_NAME = CookieScopeImpl.COOKIE_NAME_PREFIX+"Flash";
 
 	public FlashImpl(ObjectTranslator objectTranslator) {
 		super(objectTranslator);

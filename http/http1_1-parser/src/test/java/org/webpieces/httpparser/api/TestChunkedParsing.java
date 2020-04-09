@@ -198,7 +198,7 @@ public class TestChunkedParsing {
 		Assert.assertEquals("0;this=that\r\ncustomer: value\r\n\r\n", lastPayload);
 		
 		byte[] lastBytes = unwrap(parser.marshalToByteBuffer(state, lastChunk));
-		String lastPayloadFromBytes = new String(lastBytes, HttpParserFactory.iso8859_1);
+		String lastPayloadFromBytes = new String(lastBytes, HttpParserFactory.ISO8859_1);
 		
 		Assert.assertEquals("0;this=that\r\ncustomer: value\r\n\r\n", lastPayloadFromBytes);
 	}

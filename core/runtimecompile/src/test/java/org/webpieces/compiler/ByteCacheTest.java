@@ -41,7 +41,7 @@ public class ByteCacheTest extends AbstractCompileTest {
 		Assert.assertFalse(byteCodeControllerFile.exists());
 		Assert.assertFalse(byteCodeEnumFile.exists());
 		
-		log.info("loading class AddFileController");
+		LOG.info("loading class AddFileController");
 		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
 		//instead just tediously form the String ourselves...
 		String controller = getPackageFilter()+".ByteCacheController";
@@ -50,7 +50,7 @@ public class ByteCacheTest extends AbstractCompileTest {
 		Assert.assertTrue(byteCodeControllerFile.exists());
 		Assert.assertFalse(byteCodeEnumFile.exists());		
 		
-		log.info("loaded");
+		LOG.info("loaded");
 		invokeMethod(c, "createUserForm");
 		
 		Assert.assertTrue(byteCodeControllerFile.exists());

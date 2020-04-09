@@ -1,6 +1,5 @@
 # webpieces
 
-* turn hibernatefortest into 'inmemory'
 * Document prod/staging/local development environments and properties plugin
 * Document more examples on the examples page stuff
 * Document the ApplicationContext
@@ -152,7 +151,6 @@ THIS TEST CASE NEEDS to change in TestDevSynchronousErrors to “A controller fo
 
 TEST PRG for internal error on POST….what is the behavior.
 
-* implement https://vladmihalcea.com/how-to-bootstrap-hibernate-without-the-persistence-xml-file/ to get rid of hacks on gradle AND it's just better to control it
 * tie together BufferPool max size, http1.1 max size, http2 max local size, channelmanager backpressure (size*10 (and for ssl*1.2))
 * tests, tests, tests
   * test backpressure on upload file http1.1

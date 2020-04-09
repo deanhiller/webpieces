@@ -26,7 +26,7 @@ public class WindowUpdateMarshaller extends AbstractFrameMarshaller implements F
 		ByteBuffer payload = bufferPool.nextBuffer(4).putInt(castFrame.getWindowSizeIncrement());
 		payload.flip();
 
-		DataWrapper dataPayload = dataGen.wrapByteBuffer(payload);
+		DataWrapper dataPayload = DATA_GEN.wrapByteBuffer(payload);
 		return super.marshalFrame(frame, (byte) 0, dataPayload);
 	}
 

@@ -30,7 +30,7 @@ public class PingMarshaller extends AbstractFrameMarshaller implements FrameMars
         payload.putLong(ping.getOpaqueData());
         payload.flip();		
 		
-        DataWrapper dataPayload = dataGen.wrapByteBuffer(payload);
+        DataWrapper dataPayload = DATA_GEN.wrapByteBuffer(payload);
         
         byte value = 0x0;
         if (ping.isPingResponse()) value |= 0x1;

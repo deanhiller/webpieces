@@ -48,7 +48,7 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
         
         payload.put((byte) (priorityDetails.getWeight() & 0xFF));
         payload.flip();
-        DataWrapper dataPayload = dataGen.wrapByteBuffer(payload);
+        DataWrapper dataPayload = DATA_GEN.wrapByteBuffer(payload);
 
 		return dataPayload;
 	}

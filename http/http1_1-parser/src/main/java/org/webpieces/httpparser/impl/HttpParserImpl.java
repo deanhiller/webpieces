@@ -42,7 +42,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class HttpParserImpl implements HttpParser {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
-	private static final Charset iso8859_1 = HttpParserFactory.iso8859_1;
+	private static final Charset iso8859_1 = HttpParserFactory.ISO8859_1;
 	private static final String TRAILER_STR = "\r\n";
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
