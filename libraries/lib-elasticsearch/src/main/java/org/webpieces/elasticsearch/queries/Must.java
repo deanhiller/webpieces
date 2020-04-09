@@ -5,26 +5,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
 
-public class Query {
-
+public class Must {
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Map<String, String> term;
+    @JsonProperty("match_all")
+    private Map<String, String> matchAll;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Match match;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Bool bool;
+    private Map<String, String> term;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Map<String, String> wildcard;
+    private Query query;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("query_string")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private QueryString queryString;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Nested nested;
+    private Bool bool;
+
+    public Map<String, String> getMatchAll() {
+        return matchAll;
+    }
+
+    public void setMatchAll(Map<String, String> matchAll) {
+        this.matchAll = matchAll;
+    }
 
     public Match getMatch() {
         return match;
@@ -34,26 +42,20 @@ public class Query {
         this.match = match;
     }
 
+    public Query getQuery() {
+        return query;
+    }
+
+    public void setQuery(Query query) {
+        this.query = query;
+    }
+
     public Map<String, String> getTerm() {
         return term;
     }
 
-    public void setTerm(Map<String, String> term) {this.term = term;}
-
-    public Bool getBool() {
-        return bool;
-    }
-
-    public void setBool(Bool bool) {
-        this.bool = bool;
-    }
-
-    public Map<String, String> getWildcard() {
-        return wildcard;
-    }
-
-    public void setWildcard(Map<String, String> wildcard) {
-        this.wildcard = wildcard;
+    public void setTerm(Map<String, String> term) {
+        this.term = term;
     }
 
     public QueryString getQueryString() {
@@ -64,11 +66,11 @@ public class Query {
         this.queryString = queryString;
     }
 
-    public Nested getNested() {
-        return nested;
+    public Bool getBool() {
+        return bool;
     }
 
-    public void setNested(Nested nested) {
-        this.nested = nested;
+    public void setBool(Bool bool) {
+        this.bool = bool;
     }
 }

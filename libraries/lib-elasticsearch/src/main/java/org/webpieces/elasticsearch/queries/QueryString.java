@@ -2,17 +2,17 @@ package org.webpieces.elasticsearch.queries;
 
 import java.util.List;
 
-public class Match {
-    private String message;
+public class QueryString {
+    private String query;
 
     private List<String> fields;
 
-    public String getMessage() {
-        return message;
+    public String getQuery() {
+        return query;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setQuery(String query) {
+        this.query = query;
     }
 
     public List<String> getFields() {
