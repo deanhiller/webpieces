@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package webpiecesxxxxxpackage;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -43,7 +43,7 @@ public class TestLesson7AdvancedCookiesCrud extends AbstractWebpiecesTest {
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 
 	private WebBrowserSimulator webBrowser;
-	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=WEBPIECESxPACKAGE.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
+	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {

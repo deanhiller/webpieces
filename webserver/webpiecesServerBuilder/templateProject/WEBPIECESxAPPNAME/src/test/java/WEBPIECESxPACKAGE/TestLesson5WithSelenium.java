@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package webpiecesxxxxxpackage;
 
 import java.awt.AWTException;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class TestLesson5WithSelenium {
 	
 	private static WebDriver driver;
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
-	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=WEBPIECESxPACKAGE.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true"};
+	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true"};
 
 	//see below comments in AppOverrideModule
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //or your favorite mock library

@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package webpiecesxxxxxpackage;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -23,10 +23,10 @@ import org.webpieces.webserver.test.ResponseWrapper;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
-import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
-import WEBPIECESxPACKAGE.service.RemoteService;
-import WEBPIECESxPACKAGE.service.SomeLibrary;
+import webpiecesxxxxxpackage.mock.MockRemoteSystem;
+import webpiecesxxxxxpackage.mock.MockSomeLibrary;
+import webpiecesxxxxxpackage.service.RemoteService;
+import webpiecesxxxxxpackage.service.SomeLibrary;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
@@ -48,7 +48,7 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	private MockSomeLibrary mockLibrary = new MockSomeLibrary();
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
-	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=WEBPIECESxPACKAGE.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
+	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 	private HttpSocket http11Socket;
 	private SimpleMeterRegistry metrics;
 	

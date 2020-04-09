@@ -32,7 +32,7 @@ import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class AbstractHttp1Test {
-	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	protected static final DataWrapperGenerator DATA_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	protected MockChanMgr mockChanMgr = new MockChanMgr();
 	protected MockHttp1Channel mockChannel = new MockHttp1Channel();

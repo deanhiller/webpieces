@@ -1,11 +1,11 @@
-package WEBPIECESxPACKAGE.mock;
+package webpiecesxxxxxpackage.mock;
 
 import java.util.function.Supplier;
 
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 
-import WEBPIECESxPACKAGE.service.SomeLibrary;
+import webpiecesxxxxxpackage.service.SomeLibrary;
 
 public class MockSomeLibrary extends MockSuperclass implements SomeLibrary {
 

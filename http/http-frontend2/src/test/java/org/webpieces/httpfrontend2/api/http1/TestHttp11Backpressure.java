@@ -142,7 +142,7 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 
 		HttpChunk chunk = new HttpChunk();
 		String bodyStr = "hi here and there";
-		DataWrapper data = dataGen.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
+		DataWrapper data = DATA_GEN.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
 		chunk.setBody(data);		
 		
 		HttpLastChunk lastChunk = new HttpLastChunk();

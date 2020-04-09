@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package webpiecesxxxxxpackage;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -37,10 +37,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.json.SearchRequest;
-import WEBPIECESxPACKAGE.json.SearchResponse;
-import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
-import WEBPIECESxPACKAGE.service.RemoteService;
+import webpiecesxxxxxpackage.json.SearchRequest;
+import webpiecesxxxxxpackage.json.SearchResponse;
+import webpiecesxxxxxpackage.mock.MockRemoteSystem;
+import webpiecesxxxxxpackage.service.RemoteService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.search.RequiredSearch;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -57,7 +57,7 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 	private final static Logger log = LoggerFactory.getLogger(TestLesson1Json.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
-	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=WEBPIECESxPACKAGE.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
+	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 	private HttpSocket http11Socket;
 	private ObjectMapper mapper = new ObjectMapper();
 	private SimpleMeterRegistry metrics;

@@ -66,7 +66,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		DataFrame dataFrame = new DataFrame();
 		dataFrame.setEndOfStream(true);
 		String bodyStr = "hi here and there";
-		DataWrapper data = dataGen.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
+		DataWrapper data = DATA_GEN.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
 		dataFrame.setData(data);
 		writer.processPiece(dataFrame);
 		
@@ -93,7 +93,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 
 		HttpChunk chunk = new HttpChunk();
 		String bodyStr = "hi here and there";
-		DataWrapper data = dataGen.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
+		DataWrapper data = DATA_GEN.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
 		chunk.setBody(data);
 		mockChannel.sendToSvr(chunk);
 		
@@ -113,7 +113,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 	@Test
 	public void testUploadWithBody() throws InterruptedException, ExecutionException, TimeoutException {
 		String bodyStr = "hi there, how are you";
-		DataWrapper dataWrapper = dataGen.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
+		DataWrapper dataWrapper = DATA_GEN.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 		HttpData body = new HttpData(dataWrapper, true);
 		req.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, ""+dataWrapper.getReadableSize()));
@@ -181,12 +181,12 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		PassedIn in1 = mockListener.getSingleRequest();
 
 		byte[] buf = new byte[10];
-		DataWrapper dataWrapper = dataGen.wrapByteArray(buf);
+		DataWrapper dataWrapper = DATA_GEN.wrapByteArray(buf);
 		HttpData data1 = new HttpData(dataWrapper, false);
 		mockChannel.sendToSvr(data1);
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
 		
-		DataWrapper dataWrapper2 = dataGen.wrapByteArray(buf);
+		DataWrapper dataWrapper2 = DATA_GEN.wrapByteArray(buf);
 		HttpData data2 = new HttpData(dataWrapper2, true);
 		mockChannel.sendToSvr(data2);
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
@@ -229,13 +229,13 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		Assert.assertFalse(fut.isDone());
 
 		byte[] buf = new byte[10];
-		DataWrapper dataWrapper = dataGen.wrapByteArray(buf);
+		DataWrapper dataWrapper = DATA_GEN.wrapByteArray(buf);
 		HttpData data1 = new HttpData(dataWrapper, false);
 		CompletableFuture<Void> fut2 = mockChannel.sendToSvrAsync(data1);
 		Assert.assertFalse(fut.isDone());
 		Assert.assertFalse(fut2.isDone());
 
-		DataWrapper dataWrapper2 = dataGen.wrapByteArray(buf);
+		DataWrapper dataWrapper2 = DATA_GEN.wrapByteArray(buf);
 		HttpData data2 = new HttpData(dataWrapper2, true);
 		CompletableFuture<Void> fut3 = mockChannel.sendToSvrAsync(data2);
 
@@ -289,7 +289,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
 
 		byte[] buf = new byte[10];
-		DataWrapper dataWrapper = dataGen.wrapByteArray(buf);
+		DataWrapper dataWrapper = DATA_GEN.wrapByteArray(buf);
 		HttpData data1 = new HttpData(dataWrapper, true);
 		DataFrame data = (DataFrame) Http11ToHttp2.translateData(data1);
 		writer.processPiece(data);

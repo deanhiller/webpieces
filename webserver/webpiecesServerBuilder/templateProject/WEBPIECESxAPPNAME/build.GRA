@@ -99,11 +99,11 @@ dependencies {
 jar {
     manifest.attributes(
             "Class-Path": configurations.runtime.files.collect { it.name }.join(' '),
-            "Main-Class": 'WEBPIECESxPACKAGE.Server'
+            "Main-Class": 'webpiecesxxxxxpackage.Server'
     )
 }
 
-mainClassName = "WEBPIECESxPACKAGE.Server"
+mainClassName = "webpiecesxxxxxpackage.Server"
 applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
 
 build.dependsOn 'assembleDist'

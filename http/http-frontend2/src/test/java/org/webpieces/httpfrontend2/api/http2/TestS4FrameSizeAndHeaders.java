@@ -58,7 +58,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		//send data that goes with request
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
 		byte[] buf = new byte[localSettings.getMaxFrameSize()+4];
-		dataFrame.setData(dataGen.wrapByteArray(buf));
+		dataFrame.setData(DATA_GEN.wrapByteArray(buf));
 		mockChannel.send(dataFrame); //endOfStream=false
 
 		//remote receives goAway

@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package webpiecesxxxxxpackage;
 
 import java.io.File;
 

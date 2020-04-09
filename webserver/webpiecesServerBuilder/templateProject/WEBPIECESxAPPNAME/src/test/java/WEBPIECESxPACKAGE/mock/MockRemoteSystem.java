@@ -1,11 +1,11 @@
-package WEBPIECESxPACKAGE.mock;
+package webpiecesxxxxxpackage.mock;
 
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 
-import WEBPIECESxPACKAGE.service.RemoteService;
+import webpiecesxxxxxpackage.service.RemoteService;
 
 public class MockRemoteSystem extends MockSuperclass implements RemoteService {
 

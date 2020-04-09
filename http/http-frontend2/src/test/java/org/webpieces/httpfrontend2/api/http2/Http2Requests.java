@@ -16,7 +16,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class Http2Requests {
-	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	protected static final DataWrapperGenerator DATA_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	public static HeaderSettings createSomeSettings() {
 		HeaderSettings settings = new HeaderSettings();
@@ -64,13 +64,13 @@ public class Http2Requests {
 
 	public static DataFrame createData1(int streamId, boolean eos) {
 		DataFrame data = new DataFrame(streamId, eos);
-		data.setData(dataGen.wrapByteArray(new byte[] { 3, 4, 4 }));
+		data.setData(DATA_GEN.wrapByteArray(new byte[] { 3, 4, 4 }));
 		return data;
 	}
 
 	public static DataFrame createData2(int streamId, boolean eos) {
 		DataFrame data = new DataFrame(streamId, eos);
-		data.setData(dataGen.wrapByteArray(new byte[] { 3 }));
+		data.setData(DATA_GEN.wrapByteArray(new byte[] { 3 }));
 		return data;
 	}
 	
