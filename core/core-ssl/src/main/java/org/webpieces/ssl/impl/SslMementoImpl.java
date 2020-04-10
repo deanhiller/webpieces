@@ -36,8 +36,8 @@ public class SslMementoImpl {
 		return connectionState.get();
 	}
 	
-	public void compareSet(ConnectionState expected, ConnectionState state) {
-		this.connectionState.compareAndSet(expected, state);
+	public boolean compareSet(ConnectionState expected, ConnectionState state) {
+		return this.connectionState.compareAndSet(expected, state);
 	}
 
 	@Deprecated

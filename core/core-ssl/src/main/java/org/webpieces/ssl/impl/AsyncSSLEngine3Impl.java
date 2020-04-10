@@ -80,14 +80,14 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		ByteBuffer newEncryptedData = combine(cached, encryptedInData);
 		mem.setCachedEncryptedData(newEncryptedData);
 
-		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
+		boolean justStarted = mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 
 
 		//This is a bit complex to allow backpressure through the SSL Layer.  If not enough CompletableFutures
 		//are resolved, the lower layers turn off the socket(deregister from selector) until quite a few are
 		//resolved and we catch up.  This prevents the server from tanking under load ;).  Yes, it's pretty
 		//fucking sick!!!  well, that's my opinion since I had fun adding shit that you'll never know about.
-		doWork();
+		doWork(justStarted);
 		
 		return future;
 	}
@@ -105,7 +105,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		return nextBuffer;
 	}
 	
-	private void doWork() {
+	private void doWork(boolean justStarted) {
 		SSLEngine engine = mem.getEngine();
 
 		//keep doing work NEED_UNWRAP, NEED_WRAP, NEED_TASK until all done and return all the futures as one
@@ -113,7 +113,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		while(true && !sslEngineIsFarting) {
 			HandshakeStatus hsStatus = engine.getHandshakeStatus();
 
-			if(needUnwrap(hsStatus)) {
+			if(needUnwrap(justStarted, hsStatus)) {
 				boolean isNotEnoughData = unwrapPacket();
 				if(isNotEnoughData)
 					break;
@@ -127,9 +127,10 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		sslEngineIsFarting = false; //it's done farting
 	}
 
-	private boolean needUnwrap(HandshakeStatus hsStatus) {
-		return (hsStatus == HandshakeStatus.NOT_HANDSHAKING || hsStatus == HandshakeStatus.NEED_UNWRAP)
-				&& mem.getCachedToProcess().hasRemaining();
+	private boolean needUnwrap(boolean justStarted, HandshakeStatus hsStatus) {
+		//1. When engine starts and other end begins handshake, we are in NOT_HANDSHAKING and need to unwrap.
+		//2. AFTER handshake, we are in the NOT_HANDSHAKING state and need to unwrap on encrypted data coming in		
+		return (hsStatus == HandshakeStatus.NOT_HANDSHAKING || hsStatus == HandshakeStatus.NEED_UNWRAP) && mem.getCachedToProcess().hasRemaining();
 	}
 
 	private CompletableFuture<Void> doHandshakeWork() {
@@ -191,7 +192,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				fireClose();
 		}
 
-		logAndCheck(remainBeforeDecrypt, encryptedData, result, cachedOutBuffer, status, hsStatus);
+		//If we are in a state of NOT_HANDSHAKING, sometimes the bytes coming off are not enough for a FULL packet so BUFFER_UNDERFLOW will occur
+		//This is normal
 		logTrace(encryptedData, status, hsStatus);
 
 		int totalBytesToAck = remainBeforeDecrypt - encryptedData.remaining();
@@ -265,28 +267,13 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 	private void logTrace1(ByteBuffer encryptedInData, HandshakeStatus hsStatus) {
 		if(log.isTraceEnabled())
-		log.trace(mem+"[sockToEngine] going to unwrap pos="+encryptedInData.position()+
+			log.trace(mem+"[sockToEngine] going to unwrap pos="+encryptedInData.position()+
 							" lim="+encryptedInData.limit()+" hsStatus="+hsStatus+" cached="+mem.getCachedToProcess());
 	}
 	
 	private void logTrace(ByteBuffer encryptedData, Status status, HandshakeStatus hsStatus) {
 		if(log.isTraceEnabled())
 			log.trace(mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
-	}
-	
-	private void logAndCheck(int remainBeforeDecrypt, ByteBuffer encryptedData, SSLEngineResult result, ByteBuffer outBuffer, Status status, HandshakeStatus hsStatus) {
-		final ByteBuffer data = encryptedData;
-
-		if(log.isTraceEnabled())
-		log.trace(mem+"[sockToEngine] unwrap done pos="+data.position()+" lim="+
-							data.limit()+" status="+status+" hs="+hsStatus);
-		
-		if(status == Status.BUFFER_UNDERFLOW) {
-			final ByteBuffer data1 = encryptedData;
-			log.warn(mem+"buffer underflow async3. data="+data1.remaining()+" beforeDecrypt="+remainBeforeDecrypt
-					+"\n[sockToEngine] unwrap done pos="+data.position()+" lim="+
-					data.limit()+" status="+status+" hs="+hsStatus+" outBuf="+outBuffer.position()+" outRem="+outBuffer.remaining());
-		}
 	}
 
 	private CompletableFuture<Void> createRunnable() {
