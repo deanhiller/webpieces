@@ -190,7 +190,9 @@ public class TestSslCloseClient {
 
 	public static TCPChannel createClientChannel(String name, MockJdk mockJdk) throws GeneralSecurityException, IOException {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
-		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
+	
+		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
+		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(name+"Mgr", pool, new BackpressureConfig(), new DirectExecutor());
 
 		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();	

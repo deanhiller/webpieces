@@ -68,7 +68,7 @@ public class BufferCreationPool implements BufferPool, BufferWebManaged {
 		
 		metrics.gauge(id+".freePackets", freePackets, (f) -> f.size());
 		checkoutCounter = metrics.counter(id+".checkout");
-		checkinCounter = metrics.counter(id+".checkout");
+		checkinCounter = metrics.counter(id+".checkin");
 	}
 	
 	public ByteBuffer nextBuffer(int minSize) {

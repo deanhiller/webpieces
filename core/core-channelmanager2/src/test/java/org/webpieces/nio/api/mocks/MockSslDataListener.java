@@ -40,7 +40,7 @@ public class MockSslDataListener extends MockSuperclass implements DataListener 
 	public synchronized ByteBuffer getSingleBuffer() {
 		List<ParametersPassedIn> list = super.getCalledMethodList(Method.INCOMING);
 		if(list.size() != 1)
-			throw new IllegalStateException("not exactly 1 is called");
+			throw new IllegalStateException("not exactly 1 is called. size="+list.size());
 		return (ByteBuffer) list.get(0).getArgs()[1];
 	}
 
