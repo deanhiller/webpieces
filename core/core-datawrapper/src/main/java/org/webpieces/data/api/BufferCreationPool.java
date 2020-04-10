@@ -30,7 +30,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 public class BufferCreationPool implements BufferPool, BufferWebManaged {
 
 	private static final Logger log = LoggerFactory.getLogger(BufferCreationPool.class);
-	public static final int DEFAULT_MAX_BUFFER_SIZE = 20001;
+	public static final int DEFAULT_MAX_BUFFER_SIZE = 20001; //used to be 16921
 	
 	//a rough counter...doesn't need to be too accurate..
 	private AtomicInteger counter = new AtomicInteger();
