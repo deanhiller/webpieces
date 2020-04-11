@@ -13,12 +13,16 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
  * Feel free to completely override this class but basically as ChannelManager feeds
- * you ByteBuffers, they are 100% ALWAYS created from this pool.  You can then release
- * the ByteBuffer to be re-used (rather than having to garbage collect request memory
- * over and over taking that performance hit).   Just call 
- * 
- * BufferCreationPool.releaseBuffer(buffer); and ChannelManager will clear that buffer 
- * and re-use it for the next set of data coming in.
+ * ByteBuffers, they are 100% ALWAYS created from this pool.  The SSL layer if one exists will
+ * release them OR the http1 OR http2 layer will release them as processing happens.  IF you
+ * use ChannelManager directly, you can release them for performance enhancement so you don't need
+ * to constantly GC ByteBuffers.  You do NOT need to release them, and if you don't release,
+ * the pool gets exhausted and degrades to just a ByteBuffer creation tool only.
+ *
+ * In most cases, 5k bytes is reasonable.  In fact, SSLEngine ALWAYS spits out around 1389 unencrypted
+ * bytes when decrypting BUT forces a 17k ByteBuffer(what a waste!!!) so it's VERY important for
+ * those Buffers to be released when consuming plain decrypted packets so you don't allocate 17k, then
+ * deallocate 17k.  Instead, just consume from the SSLPool.
  * 
  * We could behind the BufferPool have N BufferCreationPools as well to further reduce
  * contention if any existed since this class is shared between async http parser,
@@ -30,7 +34,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 public class BufferCreationPool implements BufferPool, BufferWebManaged {
 
 	private static final Logger log = LoggerFactory.getLogger(BufferCreationPool.class);
-	public static final int DEFAULT_MAX_BUFFER_SIZE = 20001; //used to be 16921
+	public static final int DEFAULT_MAX_BUFFER_SIZE = 5000; //used to be 16921
 	
 	//a rough counter...doesn't need to be too accurate..
 	private AtomicInteger counter = new AtomicInteger();
@@ -75,7 +79,7 @@ public class BufferCreationPool implements BufferPool, BufferWebManaged {
 		checkoutCounter.increment();
 		
 		if(bufferSize < minSize) {
-			log.error("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+bufferSize+".  You should reconfigure this ");
+			log.warn("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+bufferSize+".  You should reconfigure this if it happens tooo much to speed things up");
 			return createBuffer(minSize);
 		}
 		
