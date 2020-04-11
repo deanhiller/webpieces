@@ -153,7 +153,8 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		
 		@Override
 		public CompletableFuture<Void> packetUnencrypted(ByteBuffer out) {
-			return clientDataListener.incomingData(SslTCPChannel.this, out);
+			CompletableFuture<Void> future = clientDataListener.incomingData(SslTCPChannel.this, out);
+			return future;
 		}
 
 		@Override
