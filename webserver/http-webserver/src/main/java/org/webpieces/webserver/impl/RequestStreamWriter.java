@@ -125,7 +125,7 @@ public class RequestStreamWriter implements StreamWriter {
 		ProxyResponse streamer = null;
 		try {
 			streamer = facade.createProxyResponse();
-			streamer.init(routerRequest, requestHeaders, stream, facade.getMaxBodySize());
+			streamer.init(routerRequest, requestHeaders, stream, facade.getMaxBodySizeToSend());
 		} catch(Throwable e) {
 			log.error("FATAL, cannot respond since could not create proxy response", e);
 			return CompletableFuture.completedFuture(null);

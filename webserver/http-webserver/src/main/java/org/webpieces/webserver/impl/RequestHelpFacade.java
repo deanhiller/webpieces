@@ -31,7 +31,7 @@ public class RequestHelpFacade implements StreamsWebManaged {
 	//The max size of body for dynamic pages for Full responses and chunked responses.  This
 	//is used to determine send chunks instead of full response as well since it won't fit
 	//in full response sometimes
-	private int maxBodySize = TwoPools.DEFAULT_MAX_BASE_BUFFER_SIZE;
+	private int maxBodySizeToSend = TwoPools.DEFAULT_MAX_BASE_BUFFER_SIZE;
 
 	@Inject
 	public RequestHelpFacade(RouterService routingService, WebServerConfig config, UrlEncodedParser urlEncodedParser,
@@ -81,13 +81,13 @@ public class RequestHelpFacade implements StreamsWebManaged {
 	}
 
 	@Override
-	public int getMaxBodySize() {
-		return maxBodySize;
+	public int getMaxBodySizeToSend() {
+		return maxBodySizeToSend;
 	}
 
 	@Override
-	public void setMaxBodySize(int maxBodySize) {
-		this.maxBodySize = maxBodySize;
+	public void setMaxBodySizeSend(int maxBodySize) {
+		this.maxBodySizeToSend = maxBodySize;
 	}
 
 }

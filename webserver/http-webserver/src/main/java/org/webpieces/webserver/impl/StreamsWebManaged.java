@@ -4,7 +4,7 @@ public interface StreamsWebManaged {
 
 	public String getCategory();
 	
-	public int getMaxBodySize();
+	public int getMaxBodySizeToSend();
 	
-	public void setMaxBodySize(int maxSize);
+	public void setMaxBodySizeSend(int maxSize);
 }

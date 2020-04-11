@@ -97,7 +97,9 @@ public abstract class XFileReader {
 		//Because asyncRead creates a new future every time and dumps it to a fileExecutor threadpool, we do not need
 		//to use future.thenApplyAsync to avoid a stackoverflow
 
-		ByteBuffer buf = pool.nextBuffer(TwoPools.DEFAULT_MAX_BASE_BUFFER_SIZE);
+		//It will grab a MUCH bigger buffer like 5k BUT the point is to RELY on the configuration of the ByteBuffer pool here
+		//so if they make it bigger or smaller, we get that size of ByteBuffers as long as it is 1000 or larger
+		ByteBuffer buf = pool.nextBuffer(1000);
 
 		//NOTE: I don't like inlining code BUT this is recursive and I HATE recursion between multiple methods so
 		//this method fileReadLoop ONLY calls itself below as it continues to read and send chunks
