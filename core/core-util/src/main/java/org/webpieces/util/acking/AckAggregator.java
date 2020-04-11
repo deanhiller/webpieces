@@ -11,14 +11,14 @@ public class AckAggregator {
 	private static final Logger log = LoggerFactory.getLogger(AckAggregator.class);
 	
 	private AtomicInteger countDown;
-	private CompletableFuture<Void> future = new CompletableFuture<Void>();
+	private CompletableFuture<Void> future = new CompletableFuture<>();
 
 	public AckAggregator(
-		int numAcksNeeded,
+		int numFuturesToResolveOnceBytesAreAcked,
 		int numBytesToAck,
 		ByteAckTracker tracker
 	) {
-		this.countDown = new AtomicInteger(numAcksNeeded);
+		this.countDown = new AtomicInteger(numFuturesToResolveOnceBytesAreAcked);
 		future.thenApply(v -> {
 			tracker.ackBytes(numBytesToAck);
 			return null;
@@ -30,6 +30,7 @@ public class AckAggregator {
 			//all others quite possibly will not ack at all)
 			//This is very confusing and we seem to log at least one case already.
 			//we MAY lose visibility into other cases...ick...not sure..hard to see completely
+			//You can also turn on trace logs of this package or class to see the exception
 			log.error("Exception should have been logged above.  If not, enable trace logs");
 			if(log.isTraceEnabled())
 				log.trace("Exception", new RuntimeException(t));
