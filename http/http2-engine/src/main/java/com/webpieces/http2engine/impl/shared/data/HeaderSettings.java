@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.webpieces.data.api.TwoPools;
+
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
@@ -17,7 +19,11 @@ public class HeaderSettings {
 	private volatile boolean isPushEnabled = true;
 	private volatile Long maxConcurrentStreams = null; //no limit by default per spec
 	private long initialWindowSize = 65_535;
-	private AtomicInteger maxFrameSize = new AtomicInteger(16_384);
+	
+	//NOTE: The spec default is 16_384 which if you have a server with many connections can waste quite a bit of memory 
+	//per channel in streaming AND it's BETTER to match DEFAULT ByteBuffer size in the buffer pool
+	private AtomicInteger maxFrameSize = new AtomicInteger(TwoPools.DEFAULT_MAX_BASE_BUFFER_SIZE);
+	
 	private long maxHeaderListSize = 4096;
 	private Map<Short, byte[]> unknownSettings = new HashMap<>();
 	
