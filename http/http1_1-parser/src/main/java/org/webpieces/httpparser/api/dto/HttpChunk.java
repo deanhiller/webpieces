@@ -35,7 +35,7 @@ public class HttpChunk extends HttpData {
 	}
 
 	public String createMetaLine() {
-		String metaLine = Integer.toHexString(getBody().getReadableSize());
+		String metaLine = Integer.toHexString(getBodyNonNull().getReadableSize());
 		for(HttpChunkExtension extension : getExtensions()) {
 			metaLine += ";"+extension.getName();
 			if(extension.getValue() != null)
