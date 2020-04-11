@@ -3,6 +3,13 @@ dependencies {
 	compile project(':http:http2-translations')
 	
 	testCompile project(':core:core-mock')
+	
+	
+	testImplementation 'com.google.guava:guava:28.1-jre'
+	testImplementation project(':webserver-plugins:plugin-json-jackson')
+	testImplementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: '0.20.0'
+    testImplementation 'com.google.cloud:google-cloud-monitoring:1.100.0'// https://mvnrepository.com/artifact/com.auth0/java-jwt
+    testImplementation group: 'com.auth0', name: 'java-jwt', version: '3.10.2'
 }
 
 publishing.publications.mavenJava.pom.description='http2 client api that talks http1 in case you want to convert from http2 to http1.1 without changing code'
