@@ -153,14 +153,16 @@ public class TestSslBasicClient {
 		DataWrapper encrypted = svrSslParser.encrypt(data);
 		
 		mockChannel.forceDataRead(mockJdk, encrypted);
-
-		ByteBuffer buffer = mockClientDataListener.getSingleBuffer();
 		
 		mockChannel.forceDataRead(mockJdk);
-		
-		ByteBuffer buffer2 = mockClientDataListener.getSingleBuffer();		
 
-		Assert.assertEquals(17000, buffer.remaining()+buffer2.remaining());
+		mockChannel.forceDataRead(mockJdk);
+
+		mockChannel.forceDataRead(mockJdk);
+
+		ByteBuffer[] buffer = mockClientDataListener.getTwoBuffers();
+		
+		Assert.assertEquals(17000, buffer[0].remaining()+buffer[1].remaining());
 	}
 	
 	@Test

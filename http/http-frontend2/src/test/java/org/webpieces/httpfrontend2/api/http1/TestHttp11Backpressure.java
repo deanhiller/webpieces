@@ -11,8 +11,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2translations.api.Http11ToHttp2;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpparser.api.HttpParserFactory;
@@ -147,7 +147,7 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 		
 		HttpLastChunk lastChunk = new HttpLastChunk();
 		
-		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
+		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 
 		ByteBuffer buf1 = parser.marshalToByteBuffer(req);
 		ByteBuffer buf2 = parser.marshalToByteBuffer(chunk);

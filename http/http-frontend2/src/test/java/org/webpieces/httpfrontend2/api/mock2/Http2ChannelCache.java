@@ -9,11 +9,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
@@ -26,6 +26,8 @@ import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 
@@ -40,7 +42,7 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 	private ChannelSession session = new ChannelSessionImpl();
 
 	public Http2ChannelCache() {
-		BufferPool bufferPool = new BufferCreationPool();
+		BufferPool bufferPool = new TwoPools("pl", new SimpleMeterRegistry());
 		parser = HpackParserFactory.createParser(bufferPool, false);
 		unmarshalState = parser.prepareToUnmarshal("mockChannel", 4096, 4096, 4096);
 	}

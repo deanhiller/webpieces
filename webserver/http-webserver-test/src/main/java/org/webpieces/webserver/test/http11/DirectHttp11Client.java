@@ -2,7 +2,7 @@ package org.webpieces.webserver.test.http11;
 
 import javax.net.ssl.SSLEngine;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.httpclient11.api.HttpClient;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpclient11.impl.HttpSocketImpl;
@@ -24,7 +24,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 public class DirectHttp11Client implements HttpClient {
 
 	private MockChannelManager mgr;
-	private HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
+	private HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 
 	public DirectHttp11Client(MockChannelManager mgr) {
 		this.mgr = mgr;

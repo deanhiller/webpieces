@@ -6,7 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.impl.FrontEndServerManagerImpl;
 import org.webpieces.httpparser.api.HttpParser;
@@ -70,7 +70,7 @@ public abstract class HttpFrontendFactory {
 	
 	public static HttpFrontendManager createFrontEnd(
 			ChannelManager chanMgr, ScheduledExecutorService timer, InjectionConfig injConfig, MeterRegistry metrics) {
-        BufferCreationPool pool = new BufferCreationPool(chanMgr.getName()+".bufpoolmain", metrics);
+        TwoPools pool = new TwoPools(chanMgr.getName()+".bufpoolmain", metrics);
 		HttpParser httpParser = HttpParserFactory.createParser(chanMgr.getName(), metrics, pool);
 		return createFrontEnd(chanMgr, timer, injConfig, httpParser, metrics);
 	}

@@ -9,9 +9,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.webpieces.http2client.api.Http2Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.dto.Http2Push;

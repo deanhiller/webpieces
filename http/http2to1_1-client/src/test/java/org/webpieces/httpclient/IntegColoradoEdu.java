@@ -3,9 +3,9 @@ package org.webpieces.httpclient;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.http2client.api.Http2Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.http2client.api.Http2Socket;
 
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Request;

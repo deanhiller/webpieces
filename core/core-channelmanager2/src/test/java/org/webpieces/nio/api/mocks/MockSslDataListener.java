@@ -52,5 +52,15 @@ public class MockSslDataListener extends MockSuperclass implements DataListener 
 		List<ParametersPassedIn> list = super.getCalledMethodList(Method.INCOMING);
 		return (ByteBuffer) list.get(0).getArgs()[1];
 	}
+	
+	public ByteBuffer[] getTwoBuffers() {
+		List<ParametersPassedIn> list = super.getCalledMethodList(Method.INCOMING);
+		if(list.size() != 2)
+			throw new IllegalStateException("not exactly 2 is called. size="+list.size());
+		ByteBuffer[] buffers = new ByteBuffer[2];
+		buffers[0] = (ByteBuffer) list.get(0).getArgs()[1];
+		buffers[1] = (ByteBuffer) list.get(1).getArgs()[1];
+		return buffers;
+	}
 
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.mocks.MockConnectionListener;
@@ -19,6 +19,7 @@ import org.webpieces.nio.api.mocks.MockMulithreadedSslDataListener;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestSslOverLocalhost {
 
@@ -63,7 +64,7 @@ public class TestSslOverLocalhost {
 	private ChannelManager createSvrChanMgr(String name) {
 		ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory(name));
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
-		ChannelManager svrMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new BufferCreationPool(), new BackpressureConfig(), executor);
+		ChannelManager svrMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new TwoPools("pl", new SimpleMeterRegistry()), new BackpressureConfig(), executor);
 		return svrMgr;
 	}
 }

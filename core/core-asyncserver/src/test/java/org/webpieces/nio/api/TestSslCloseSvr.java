@@ -20,9 +20,9 @@ import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.mocks.MockAsyncListener;
@@ -113,7 +113,7 @@ public class TestSslCloseSvr {
 
 	private SSLParser createClientParser() {
 		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
-		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
+		BufferPool pool = new TwoPools("p1", new SimpleMeterRegistry());
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();
 		SSLMetrics sslMetrics = new SSLMetrics("", new SimpleMeterRegistry());
 		SSLParser clientSslParser1 = AsyncSSLFactory.create("svr", clientSsl, pool, sslMetrics);
@@ -124,7 +124,7 @@ public class TestSslCloseSvr {
 		MeterRegistry meters = Metrics.globalRegistry;
 		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new TwoPools("pl", new SimpleMeterRegistry()), new BackpressureConfig(), new DirectExecutor());
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 		AsyncServer server1 = svrMgr.createTcpServer(new AsyncConfig(), listener, sslFactory);
 		return server1;

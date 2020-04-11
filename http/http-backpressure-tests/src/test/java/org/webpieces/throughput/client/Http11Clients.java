@@ -1,6 +1,6 @@
 package org.webpieces.throughput.client;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 import org.webpieces.nio.api.ChannelManager;
@@ -26,7 +26,7 @@ public class Http11Clients implements Clients {
 			return Http2to11ClientFactory.createHttpClient("onlyClient", config.getClientThreadCount(), config.getBackpressureConfig(), metrics);
 			
 		//single threaded version...
-		BufferCreationPool pool = new BufferCreationPool();
+		TwoPools pool = new TwoPools("pl", new SimpleMeterRegistry());
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, config.getBackpressureConfig());
 		

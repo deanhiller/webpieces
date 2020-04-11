@@ -9,7 +9,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.mocks.MockClientSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockDataListener;
@@ -17,6 +17,7 @@ import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.util.threading.DirectExecutor;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestReading {
 
@@ -33,7 +34,7 @@ public class TestReading {
 		BackpressureConfig config = new BackpressureConfig();
 		config.setMaxBytes(6);
 		config.setStartReadingThreshold(2);
-		mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), config, exec);
+		mgr = factory.createMultiThreadedChanMgr("test'n", new TwoPools("pl", new SimpleMeterRegistry()), config, exec);
 		
 		listener = new MockDataListener();
 		

@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.api.client;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.util.time.Time;
 import org.webpieces.util.time.TimeImpl;
 
@@ -28,7 +28,7 @@ public class InjectionConfig {
 	
 	public InjectionConfig(Time time, Http2Config config, MeterRegistry metrics) {
 		this(
-			HpackParserFactory.createParser(new BufferCreationPool(config.getId()+".bufpool", metrics), false),
+			HpackParserFactory.createParser(new TwoPools(config.getId()+".bufpool", metrics), false),
 			time,
 			config
 		);

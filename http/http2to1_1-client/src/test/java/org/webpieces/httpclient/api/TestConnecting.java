@@ -6,8 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.httpclient.api.mocks.MockChannel;
@@ -24,7 +24,7 @@ public class TestConnecting {
 
 	@Before
 	public void setup() {
-		BufferPool pool = new BufferCreationPool();
+		BufferPool pool = new TwoPools("pl", new SimpleMeterRegistry());
 		httpClient = Http2to11ClientFactory.createHttpClient("myClient2", mockChannelMgr, new SimpleMeterRegistry(), pool);
 	}
 

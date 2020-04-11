@@ -10,7 +10,7 @@ import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.mocks.MockAsyncListener;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSvrChannel;
@@ -19,6 +19,7 @@ import org.webpieces.util.threading.DirectExecutor;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestAccepting {
 
@@ -31,7 +32,7 @@ public class TestAccepting {
 	public void setup() {
 		MeterRegistry meters = Metrics.globalRegistry;
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new TwoPools("pl", new SimpleMeterRegistry()), new BackpressureConfig(), new DirectExecutor());
 
 		svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 	}

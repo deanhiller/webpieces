@@ -10,8 +10,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.AbstractTest;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.MockStreamWriter;
@@ -26,6 +26,8 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestBackpressure extends AbstractTest {
 
@@ -86,7 +88,7 @@ public class TestBackpressure extends AbstractTest {
 	}
 	
 	private List<ByteBuffer> create4BuffersWith3Messags() {
-		HpackStatefulParser parser = HpackParserFactory.createStatefulParser(new BufferCreationPool(), new HpackConfig("tests"));
+		HpackStatefulParser parser = HpackParserFactory.createStatefulParser(new TwoPools("pl", new SimpleMeterRegistry()), new HpackConfig("tests"));
 
 		Http2Response response1 = Requests.createResponse(1);
 		DataFrame response2 = Requests.createBigData(1, false);

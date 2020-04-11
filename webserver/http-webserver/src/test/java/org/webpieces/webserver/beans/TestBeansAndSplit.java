@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -99,7 +99,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 		);
 
 		DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-		HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
+		HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 		MarshalState state = parser.prepareToMarshal();
 		ByteBuffer buffer = parser.marshalToByteBuffer(state, req.getRequest());
 		DataWrapper d1 = dataGen.wrapByteBuffer(buffer);
@@ -123,7 +123,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 		Assert.assertEquals(56, user.getAccounts().get(2).getAddresses().get(0).getNumber());
 	}
 	
-	private HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
+	private HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 	
 	private ResponseWrapper create() {
 		List<HttpPayload> payloads = parser.parse(dataReceived);

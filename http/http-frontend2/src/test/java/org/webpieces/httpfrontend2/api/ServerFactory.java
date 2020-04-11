@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.frontend2.api.FrontendMgrConfig;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
@@ -31,6 +31,7 @@ import com.webpieces.http2parser.api.dto.Http2Method;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 class ServerFactory {
 	private static final Logger log = LoggerFactory.getLogger(ServerFactory.class);
@@ -38,7 +39,7 @@ class ServerFactory {
     static final String PUSHED_RESPONSE = "Here's the css";
 
     static int createTestServer(boolean alwaysHttp2, Long maxConcurrentStreams) {
-        BufferCreationPool pool = new BufferCreationPool();
+        TwoPools pool = new TwoPools("pl", new SimpleMeterRegistry());
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
         FrontendMgrConfig config = new FrontendMgrConfig();
         HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", timer, pool, config, Metrics.globalRegistry);

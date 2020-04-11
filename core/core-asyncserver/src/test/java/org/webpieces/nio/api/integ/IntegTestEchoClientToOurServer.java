@@ -8,14 +8,15 @@ import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class IntegTestEchoClientToOurServer {
 
@@ -38,7 +39,7 @@ public class IntegTestEchoClientToOurServer {
 		EchoClient client = new EchoClient();
 		
 		Executor executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("serverThread"));
-		BufferPool pool = new BufferCreationPool();
+		BufferPool pool = new TwoPools("pl", new SimpleMeterRegistry());
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("server", pool, new BackpressureConfig(), executor);
 		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer(mgr, Metrics.globalRegistry);

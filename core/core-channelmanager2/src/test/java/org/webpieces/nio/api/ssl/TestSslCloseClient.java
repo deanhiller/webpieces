@@ -16,9 +16,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -191,7 +191,7 @@ public class TestSslCloseClient {
 	public static TCPChannel createClientChannel(String name, MockJdk mockJdk) throws GeneralSecurityException, IOException {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
 	
-		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
+		BufferPool pool = new TwoPools("pClient", new SimpleMeterRegistry());
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(name+"Mgr", pool, new BackpressureConfig(), new DirectExecutor());
 
 		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();
@@ -202,7 +202,7 @@ public class TestSslCloseClient {
 	
 	public static SSLParser createSslSvrParser() throws GeneralSecurityException, IOException {
 		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();
-		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
+		BufferPool pool = new TwoPools("pSvr", new SimpleMeterRegistry());
 		SSLEngine svrSsl = sslFactory.createEngineForServerSocket();
 		SSLMetrics metrics = new SSLMetrics("", new SimpleMeterRegistry());
 		return AsyncSSLFactory.create("svr", svrSsl, pool, metrics);

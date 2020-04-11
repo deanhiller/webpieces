@@ -5,8 +5,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.TwoPools;
 
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
@@ -14,9 +14,11 @@ import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 public class TestHttp2Ping {
 	
-    private static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
+    private static Http2Parser parser = Http2ParserFactory.createParser(new TwoPools("pl", new SimpleMeterRegistry()));
 
     private static String getPingFrame() {
             String ping = 

@@ -3,7 +3,6 @@ package org.webpieces.frontend2.api;
 import java.net.InetSocketAddress;
 
 import org.webpieces.asyncserver.api.AsyncConfig;
-import org.webpieces.data.api.BufferCreationPool;
 
 public class HttpSvrConfig {
 
@@ -32,8 +31,6 @@ public class HttpSvrConfig {
 	 */
 	public int maxHeaderSize = 4096;
 	
-	public int maxBodyOrChunkSize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
-
 	public HttpSvrConfig(String id) {
 		this(id, new InetSocketAddress(0));
 	}

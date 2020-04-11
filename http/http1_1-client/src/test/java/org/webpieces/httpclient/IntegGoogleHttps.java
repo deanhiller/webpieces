@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient11.api.DataWriter;
@@ -83,7 +83,7 @@ public class IntegGoogleHttps {
 	}
 	
 	public static HttpClient createHttpClient() {
-		BufferPool pool2 = new BufferCreationPool();
+		BufferPool pool2 = new TwoPools("pl", new SimpleMeterRegistry());
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(Metrics.globalRegistry);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, new BackpressureConfig(), executor2);

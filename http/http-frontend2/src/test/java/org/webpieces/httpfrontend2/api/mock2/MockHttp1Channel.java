@@ -12,11 +12,11 @@ import java.util.stream.Stream;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.MarshalState;
@@ -47,7 +47,7 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 	private MarshalState marshalState;
 
 	public MockHttp1Channel() {
-		BufferPool pool = new BufferCreationPool();
+		BufferPool pool = new TwoPools("pl", new SimpleMeterRegistry());
 		parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), pool);
 		memento = parser.prepareToParse();
 		marshalState = parser.prepareToMarshal();

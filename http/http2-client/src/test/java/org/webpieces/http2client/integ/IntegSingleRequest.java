@@ -9,16 +9,16 @@ import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLEngine;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.HpackParser;
@@ -36,6 +36,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class IntegSingleRequest {
 
@@ -81,7 +82,7 @@ public class IntegSingleRequest {
 	}
 
 	public static Http2Socket createHttpClient(String id, boolean isHttp, InetSocketAddress addr) {
-		BufferPool pool2 = new BufferCreationPool();
+		BufferPool pool2 = new TwoPools("pl", new SimpleMeterRegistry());
 		HpackParser hpackParser = HpackParserFactory.createParser(pool2, false);
 
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));

@@ -10,7 +10,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.util.urlparse.UrlEncodedParser;
 import org.webpieces.webserver.api.WebServerConfig;
@@ -31,7 +31,7 @@ public class RequestHelpFacade implements StreamsWebManaged {
 	//The max size of body for dynamic pages for Full responses and chunked responses.  This
 	//is used to determine send chunks instead of full response as well since it won't fit
 	//in full response sometimes
-	private int maxBodySize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
+	private int maxBodySize = TwoPools.DEFAULT_MAX_BASE_BUFFER_SIZE;
 
 	@Inject
 	public RequestHelpFacade(RouterService routingService, WebServerConfig config, UrlEncodedParser urlEncodedParser,

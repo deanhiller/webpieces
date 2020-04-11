@@ -24,8 +24,8 @@ INF 2019-06-26 19:39:32,115 [-] [main] o.w.r.i.m.GuiceWebpiecesListener webpiece
 INF 2019-06-26 19:39:32,117 [-] [main] o.w.r.i.m.GuiceWebpiecesListener webpieces platform class=class org.webpieces.webserver.impl.WebServerImpl interfaces=[Ljava.lang.Class;@1838ccb8
 INF 2019-06-26 19:39:32,118 [-] [main] o.w.r.i.m.GuiceWebpiecesListener webpieces platform class=class org.webpieces.webserver.impl.RouterLookupProxy interfaces=[Ljava.lang.Class;@7d9e8ef7
 INF 2019-06-26 19:39:32,120 [-] [main] o.w.r.i.m.GuiceWebpiecesListener webpieces platform class=class org.webpieces.webserver.impl.ConverterLookupProxy interfaces=[Ljava.lang.Class;@51133c06
-INF 2019-06-26 19:39:32,122 [-] [main] o.w.r.i.m.GuiceWebpiecesListener webpieces platform class=class org.webpieces.data.api.BufferCreationPool interfaces=[Ljava.lang.Class;@4ebff610
-INF 2019-06-26 19:39:32,122 [-] [main] o.w.r.i.m.GuiceWebpiecesListener FOUND a managed bean=class org.webpieces.data.api.BufferCreationPool
+INF 2019-06-26 19:39:32,122 [-] [main] o.w.r.i.m.GuiceWebpiecesListener webpieces platform class=class org.webpieces.data.api.TwoPools interfaces=[Ljava.lang.Class;@4ebff610
+INF 2019-06-26 19:39:32,122 [-] [main] o.w.r.i.m.GuiceWebpiecesListener FOUND a managed bean=class org.webpieces.data.api.TwoPools
 INF 2019-06-26 19:39:32,124 [-] [main] o.w.r.i.m.GuiceWebpiecesListener webpieces platform class=class org.webpieces.util.time.TimeImpl interfaces=[Ljava.lang.Class;@44d52de2
 INF 2019-06-26 19:39:32,135 [-] [main] o.w.r.i.m.GuiceWebpiecesListener webpieces platform class=class org.webpieces.router.impl.routers.AMasterRouter interfaces=[Ljava.lang.Class;@12d2ce03
 INF 2019-06-26 19:39:32,144 [-] [main] o.w.r.i.m.GuiceWebpiecesListener webpieces platform class=class org.webpieces.router.impl.params.ParamValueTreeCreator interfaces=[Ljava.lang.Class;@2421cc4
@@ -68,7 +68,7 @@ INF 2019-06-26 19:39:32,237 [-] [main] o.w.t.a.HtmlTagLookup     adding tag=fiel
 INF 2019-06-26 19:39:32,237 [-] [main] o.w.t.a.HtmlTagLookup     adding tag=mytag
 INF 2019-06-26 19:39:32,238 [-] [main] o.w.t.a.HtmlTagLookup     adding tag=id
 INF 2019-06-26 19:39:32,238 [-] [main] o.w.t.a.HtmlTagLookup     adding tag=myfield
-INF 2019-06-26 19:39:32,238 [-] [main] o.w.r.i.m.GuiceCreateListener hearing object all setup=org.webpieces.data.api.BufferCreationPool and interface=interface org.webpieces.data.api.BufferWebManaged
+INF 2019-06-26 19:39:32,238 [-] [main] o.w.r.i.m.GuiceCreateListener hearing object all setup=org.webpieces.data.api.TwoPools and interface=interface org.webpieces.data.api.BufferWebManaged
 INF 2019-06-26 19:39:32,239 [-] [main] o.w.r.i.m.GuiceCreateListener hearing object all setup=org.webpieces.webserver.impl.RequestHelpFacade and interface=interface org.webpieces.webserver.impl.StreamsWebManaged
 INF 2019-06-26 19:39:32,296 [-] [main] o.w.w.i.WebServerImpl     starting server
 INF 2019-06-26 19:39:32,296 [-] [main] o.w.r.i.ProdRouterService Starting PROD server with NO compiling classloader

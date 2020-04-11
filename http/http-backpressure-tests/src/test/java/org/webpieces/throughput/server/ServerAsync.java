@@ -5,9 +5,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.frontend2.api.FrontendMgrConfig;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
@@ -16,8 +18,6 @@ import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.throughput.AsyncConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.webpieces.http2engine.api.client.Http2Config;
 
@@ -52,7 +52,7 @@ public class ServerAsync {
 		}
 		
 		log.info("Creating single threaded server");
-		BufferCreationPool pool = new BufferCreationPool();
+		TwoPools pool = new TwoPools("pl", new SimpleMeterRegistry());
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("svrCmLoop", pool, config.getBackpressureConfig());
@@ -75,7 +75,7 @@ public class ServerAsync {
 		log.info("Creating multithreaded server. threads="+frontendConfig.getThreadPoolSize());
 
 		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd(
-				"deansvr", timer, new BufferCreationPool(), frontendConfig, metrics);
+				"deansvr", timer, new TwoPools("pl", new SimpleMeterRegistry()), frontendConfig, metrics);
 		
 		return mgr.createHttpServer(new HttpSvrConfig("asyncsvr"), new EchoListener());
 	}

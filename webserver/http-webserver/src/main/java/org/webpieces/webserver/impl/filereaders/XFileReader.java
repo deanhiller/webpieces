@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -97,7 +97,7 @@ public abstract class XFileReader {
 		//Because asyncRead creates a new future every time and dumps it to a fileExecutor threadpool, we do not need
 		//to use future.thenApplyAsync to avoid a stackoverflow
 
-		ByteBuffer buf = pool.nextBuffer(BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE);
+		ByteBuffer buf = pool.nextBuffer(TwoPools.DEFAULT_MAX_BASE_BUFFER_SIZE);
 
 		//NOTE: I don't like inlining code BUT this is recursive and I HATE recursion between multiple methods so
 		//this method fileReadLoop ONLY calls itself below as it continues to read and send chunks

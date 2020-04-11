@@ -10,10 +10,12 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpPayload;
@@ -21,9 +23,6 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.throughput.RequestCreator;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServerHttp11Sync {
 	private static final Logger log = LoggerFactory.getLogger(ServerHttp11Sync.class);
@@ -54,7 +53,7 @@ public class ServerHttp11Sync {
     private static class ServerRunnable implements Runnable {
     	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-		private HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
+		private HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 		private ServerSocket server;
 
 		public ServerRunnable(ServerSocket server) {

@@ -9,8 +9,8 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.httpclient.api.mocks.MockChannel;
@@ -34,7 +34,7 @@ public class TestWriteReads {
 
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
-		BufferPool pool = new BufferCreationPool();
+		BufferPool pool = new TwoPools("pl", new SimpleMeterRegistry());
 		httpClient = Http2to11ClientFactory.createHttpClient("myClient4", mockChannelMgr, new SimpleMeterRegistry(), pool);
 		
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);

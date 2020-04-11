@@ -1,4 +1,4 @@
-package org.webpieces.data.api;
+package org.webpieces.data.impl;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.BufferWebManaged;
+import org.webpieces.data.api.DataWrapper;
 
 /**
  * Feel free to completely override this class but basically as ChannelManager feeds
@@ -24,52 +27,43 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
  * those Buffers to be released when consuming plain decrypted packets so you don't allocate 17k, then
  * deallocate 17k.  Instead, just consume from the SSLPool.
  * 
- * We could behind the BufferPool have N BufferCreationPools as well to further reduce
+ * We could behind the BufferPool have N TwoPoolss as well to further reduce
  * contention if any existed since this class is shared between async http parser,
  * async ssl engine, clients, channelmanager writes involving all threads from
- * SessionExecutor and all threads that call write() from the client as well...TBD
+ * SessionExecutor and all threads that call write() from the client as well...DONE ---> TwoPools.java
  * 
  * @author dhiller
  */
 public class BufferCreationPool implements BufferPool, BufferWebManaged {
 
 	private static final Logger log = LoggerFactory.getLogger(BufferCreationPool.class);
-	public static final int DEFAULT_MAX_BUFFER_SIZE = 5000; //used to be 16921
+	public static final int DEFAULT_MAX_BUFFER_SIZE = 5000; 
 	
 	//a rough counter...doesn't need to be too accurate..
 	private AtomicInteger counter = new AtomicInteger();
 	private ConcurrentLinkedQueue<ByteBuffer> freePackets = new ConcurrentLinkedQueue<ByteBuffer>();
 	private boolean isDirect;
 	private int bufferSize;
-	private int poolSize;
+	private int poolSize = 4000;
 	private Counter checkoutCounter;
 	private Counter checkinCounter;
 	
-	/**
-	 * @deprecated Use new BufferCreationPool("", new SimpleMeterRegistry()) instead
-	 */
-	@Deprecated
-	public BufferCreationPool() {
-		this("", new SimpleMeterRegistry());
-	}
-	
 	public BufferCreationPool(String id, MeterRegistry metrics) {
-		this(id, metrics, false, DEFAULT_MAX_BUFFER_SIZE, 4000);
+		this(id, metrics, false, DEFAULT_MAX_BUFFER_SIZE);
 	}
 
 	/**
 	 * @deprecated Use the constructor we call instad of this one
 	 */
 	@Deprecated
-	public BufferCreationPool(boolean isDirect, int bufferSize, int poolSize) {
-		this("", new SimpleMeterRegistry(), isDirect, bufferSize, poolSize);
+	public BufferCreationPool(boolean isDirect, int bufferSize) {
+		this("", new SimpleMeterRegistry(), isDirect, bufferSize);
 	}
 
-	public BufferCreationPool(String id, MeterRegistry metrics, boolean isDirect, int bufferSize, int poolSize) {
+	public BufferCreationPool(String id, MeterRegistry metrics, boolean isDirect, int bufferSize) {
 		this.isDirect = isDirect;
 		this.bufferSize = bufferSize;
-		this.poolSize = poolSize;
-		
+
 		metrics.gauge(id+".freePackets", freePackets, (f) -> f.size());
 		checkoutCounter = metrics.counter(id+".checkout");
 		checkinCounter = metrics.counter(id+".checkin");
@@ -128,6 +122,10 @@ public class BufferCreationPool implements BufferPool, BufferWebManaged {
 		}
 		buffer.clear();
 		freePackets.add(buffer);
+	}
+
+	public int getSupportedBufferSize() {
+		return bufferSize;
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -15,7 +15,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 
 public class TestReceiveHttp2 {
-	private HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
+	private HttpParser parser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	@Test

@@ -6,11 +6,11 @@ import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.hpack.api.HpackParser;
@@ -21,6 +21,8 @@ import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
  * Write out to the channel like it really happens in production, and read what the server wrote back 
@@ -41,7 +43,7 @@ public class MockHttp2Channel {
 
 	public MockHttp2Channel(Http2ChannelCache mockHttp2Channel) {
 		this.mockHttp2Channel = mockHttp2Channel;
-		BufferPool bufferPool = new BufferCreationPool();
+		BufferPool bufferPool = new TwoPools("pl", new SimpleMeterRegistry());
 		parser = HpackParserFactory.createParser(bufferPool, false);
 		marshalState = parser.prepareToMarshal(4096, 4096);
 		frameParser = Http2ParserFactory.createParser(bufferPool);

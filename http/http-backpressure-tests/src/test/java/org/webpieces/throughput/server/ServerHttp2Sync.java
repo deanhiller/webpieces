@@ -9,13 +9,13 @@ import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.throughput.RequestCreator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackConfig;
 import com.webpieces.hpack.api.HpackParserFactory;
@@ -25,6 +25,8 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class ServerHttp2Sync {
 	private static final Logger log = LoggerFactory.getLogger(ServerHttp2Sync.class);
@@ -60,7 +62,7 @@ public class ServerHttp2Sync {
     private static class ServerRunnable implements Runnable {
     	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-    	private HpackStatefulParser parser = HpackParserFactory.createStatefulParser(new BufferCreationPool(), new HpackConfig("deansHpack"));
+    	private HpackStatefulParser parser = HpackParserFactory.createStatefulParser(new TwoPools("pl", new SimpleMeterRegistry()), new HpackConfig("deansHpack"));
 		private ServerSocket server;
 
 		public ServerRunnable(ServerSocket server) {

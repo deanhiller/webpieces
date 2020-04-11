@@ -8,13 +8,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.frontend2.api.Protocol;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.throughput.AsyncConfig;
 import org.webpieces.throughput.RequestCreator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.ResponseHandler;

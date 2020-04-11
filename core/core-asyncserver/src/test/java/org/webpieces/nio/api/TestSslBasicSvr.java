@@ -21,11 +21,11 @@ import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.mocks.MockAsyncListener;
 import org.webpieces.nio.api.mocks.MockAsyncListener.ConnectionOpen;
@@ -41,6 +41,7 @@ import org.webpieces.util.threading.DirectExecutor;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestSslBasicSvr {
 
@@ -66,7 +67,7 @@ public class TestSslBasicSvr {
 
 		MeterRegistry meters = Metrics.globalRegistry;
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new TwoPools("pl", new SimpleMeterRegistry()), new BackpressureConfig(), new DirectExecutor());
 
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 		server = svrMgr.createTcpServer(new AsyncConfig(), listener, sslFactory);
@@ -78,7 +79,7 @@ public class TestSslBasicSvr {
 		mockJdk.fireSelector();
 		future.get(2, TimeUnit.SECONDS);
 		
-		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
+		BufferPool pool = new TwoPools("p1", new SimpleMeterRegistry());
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();
 		SSLMetrics sslMetrics = new SSLMetrics("", meters);
 		clientSslParser = AsyncSSLFactory.create("svr", clientSsl, pool, sslMetrics);

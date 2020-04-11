@@ -3,7 +3,7 @@ package org.webpieces.http2client.api;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.impl.Http2ClientImpl;
 import org.webpieces.nio.api.ChannelManager;
@@ -26,7 +26,7 @@ public abstract class Http2ClientFactory {
 		Executor executor = Executors.newFixedThreadPool(config.getNumThreads(), new NamedThreadFactory("httpclient"));
 		ExecutorServiceMetrics.monitor(metrics, executor, config.getId());
 
-		BufferCreationPool pool = new BufferCreationPool(config.getId()+".bufferpool", metrics);
+		TwoPools pool = new TwoPools(config.getId()+".bufferpool", metrics);
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);

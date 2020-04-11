@@ -6,10 +6,10 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2translations.api.Http11ToHttp2;
 import org.webpieces.http2translations.api.Http2ToHttp11;
 import org.webpieces.httpparser.api.HttpParserFactory;
@@ -38,7 +38,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	}
 
 	public MockChannel() {
-		parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
+		parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 	}
 	
 	@SuppressWarnings("unchecked")

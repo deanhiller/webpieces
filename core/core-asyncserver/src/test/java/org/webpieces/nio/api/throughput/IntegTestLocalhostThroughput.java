@@ -12,8 +12,8 @@ import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -22,6 +22,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class IntegTestLocalhostThroughput {
 
@@ -45,7 +46,7 @@ public class IntegTestLocalhostThroughput {
 	
 	public void testThroughput() throws InterruptedException, ExecutionException, TimeoutException {
 		Executor executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("serverThread"));
-		BufferPool pool = new BufferCreationPool(false, 32768, 100000);
+		BufferPool pool = new TwoPools("p1", new SimpleMeterRegistry());
 		BackpressureConfig config = new BackpressureConfig();
 		config.setMaxBytes(16_384*10);
 		config.setStartReadingThreshold(512);
@@ -54,7 +55,7 @@ public class IntegTestLocalhostThroughput {
 		AsyncServer server = serverMgr.createTcpServer(new AsyncConfig("tcpServer"), new AsyncServerDataListener(recorder, pool));
 		server.start(new InetSocketAddress(8080));
 		
-		BufferPool pool2 = new BufferCreationPool(false, 32768, 100000);
+		BufferPool pool2 = new TwoPools("p2", new SimpleMeterRegistry());
 		DataListener listener = new ClientDataListener(pool2, recorder);
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
 		TCPChannel channel = createClientChannel(pool2, executor2, config);

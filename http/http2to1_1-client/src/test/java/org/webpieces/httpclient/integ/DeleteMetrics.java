@@ -1,10 +1,5 @@
 package org.webpieces.httpclient.integ;
 
-import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.GoogleCredentials;
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.http2client.api.dto.FullResponse;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,6 +8,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.http2client.api.dto.FullResponse;
+
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
 
 public class DeleteMetrics {
     public static void main(String[] args) throws InterruptedException, TimeoutException, ExecutionException, IOException {

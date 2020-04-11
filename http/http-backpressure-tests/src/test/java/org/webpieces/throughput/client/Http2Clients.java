@@ -1,6 +1,6 @@
 package org.webpieces.throughput.client;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientConfig;
 import org.webpieces.http2client.api.Http2ClientFactory;
@@ -11,6 +11,7 @@ import org.webpieces.throughput.AsyncConfig;
 import com.webpieces.http2engine.api.client.Http2Config;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class Http2Clients implements Clients {
 
@@ -31,7 +32,7 @@ public class Http2Clients implements Clients {
 			return createMultiThreadedClient();
 		
 		//single threaded version...
-		BufferCreationPool pool = new BufferCreationPool();
+		TwoPools pool = new TwoPools("pl", new SimpleMeterRegistry());
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, config.getBackpressureConfig());
 		return Http2ClientFactory.createHttpClient(http2Config, chanMgr, pool);

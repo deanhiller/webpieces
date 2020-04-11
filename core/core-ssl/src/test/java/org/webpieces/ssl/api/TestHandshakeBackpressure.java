@@ -16,7 +16,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.ssl.api.MockSslListener.BufferedFuture;
 
@@ -37,7 +37,7 @@ public class TestHandshakeBackpressure {
 
 		SSLMetrics metrics = new SSLMetrics("", new SimpleMeterRegistry());
 		MockSSLEngineFactory sslEngineFactory = new MockSSLEngineFactory();	
-		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
+		BufferPool pool = new TwoPools("p1", new SimpleMeterRegistry());
 		SSLEngine client = sslEngineFactory.createEngineForSocket();
 		SSLEngine svr = sslEngineFactory.createEngineForServerSocket();
 		clientEngine = AsyncSSLFactory.create("client", client, pool, clientListener, metrics);

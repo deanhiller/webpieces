@@ -1,10 +1,10 @@
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 
 import com.webpieces.hpack.api.HpackConfig;
 import com.webpieces.hpack.api.HpackParserFactory;
@@ -13,6 +13,8 @@ import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestSplitHeaders {
 
@@ -24,7 +26,7 @@ public class TestSplitHeaders {
 		HpackConfig config = new HpackConfig("myhpack");
 		config.setLocalMaxFrameSize(50);
 		config.setRemoteMaxFrameSize(50);
-		parser = HpackParserFactory.createStatefulParser(new BufferCreationPool(), config);		
+		parser = HpackParserFactory.createStatefulParser(new TwoPools("pl", new SimpleMeterRegistry()), config);
 	}
 	
 	@Test

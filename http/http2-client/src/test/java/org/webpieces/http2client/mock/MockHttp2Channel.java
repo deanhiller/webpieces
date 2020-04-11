@@ -13,11 +13,11 @@ import java.util.stream.Stream;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
@@ -33,6 +33,8 @@ import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 
@@ -51,10 +53,10 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	private boolean isClosed;
 
 	public MockHttp2Channel() {
-		BufferPool bufferPool = new BufferCreationPool();
+		BufferPool bufferPool = new TwoPools("pl", new SimpleMeterRegistry());
 		parser = HpackParserFactory.createParser(bufferPool, false);
 		unmarshalState = parser.prepareToUnmarshal("mockChannel", 4096, 4096, 4096);
-		BufferPool pool = new BufferCreationPool();
+		BufferPool pool = new TwoPools("pl", new SimpleMeterRegistry());
 		frameParser = Http2ParserFactory.createParser(pool);
 	}
 	

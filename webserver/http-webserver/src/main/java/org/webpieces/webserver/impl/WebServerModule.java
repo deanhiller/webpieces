@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
@@ -80,7 +80,7 @@ public class WebServerModule implements Module {
 		
 		binder.bind(ConverterLookup.class).to(ConverterLookupProxy.class).asEagerSingleton();
 		
-		binder.bind(BufferPool.class).to(BufferCreationPool.class).asEagerSingleton();
+		binder.bind(BufferPool.class).to(TwoPools.class).asEagerSingleton();
 		
 		binder.bind(Time.class).to(TimeImpl.class).asEagerSingleton();
 		

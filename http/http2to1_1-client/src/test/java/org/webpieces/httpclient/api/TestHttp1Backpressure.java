@@ -12,8 +12,8 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2translations.api.Http2ToHttp11;
@@ -46,7 +46,7 @@ public class TestHttp1Backpressure {
 
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
-		BufferPool pool = new BufferCreationPool();
+		BufferPool pool = new TwoPools("pl", new SimpleMeterRegistry());
 		httpClient = Http2to11ClientFactory.createHttpClient("myClient3", mockChannelMgr, new SimpleMeterRegistry(), pool);
 		
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
@@ -112,7 +112,7 @@ public class TestHttp1Backpressure {
 	}
 
 	private List<ByteBuffer> create3BuffersWithTwoMessags(Http2Response response1, HttpData response2) {
-		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
+		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 
 		HttpResponse resp1 = Http2ToHttp11.translateResponse(response1);
 		
@@ -197,7 +197,7 @@ public class TestHttp1Backpressure {
 	}
 	
 	private List<ByteBuffer> create4BuffersWith3Messags(Http2Response response1, HttpChunk response2, HttpLastChunk lastChunk) {
-		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new BufferCreationPool());
+		HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 
 		HttpResponse resp1 = Http2ToHttp11.translateResponse(response1);
 		

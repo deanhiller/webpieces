@@ -20,18 +20,19 @@ import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestBasicSslClientServer {
 
 	private static final Logger log = LoggerFactory.getLogger(TestBasicSslClientServer.class);
-	private BufferCreationPool pool;
+	private TwoPools pool;
 	private List<Integer> values = new ArrayList<>();
 
 	@Before
@@ -48,7 +49,7 @@ public class TestBasicSslClientServer {
 
 	@Test
 	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException {
-		pool = new BufferCreationPool();
+		pool = new TwoPools("pl", new SimpleMeterRegistry());
 		MeterRegistry meters = Metrics.globalRegistry;
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(meters);
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool, new BackpressureConfig());

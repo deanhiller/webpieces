@@ -6,8 +6,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.webpieces.data.api.BufferCreationPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -17,11 +19,10 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.throughput.BytesRecorder;
 import org.webpieces.nio.api.throughput.ClientDataListener;
 import org.webpieces.nio.api.throughput.IntegTestLocalhostThroughput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class IntegTestClientToEchoServer {
 
@@ -46,7 +47,7 @@ public class IntegTestClientToEchoServer {
 	public void testSoTimeoutOnSocket() throws InterruptedException {
 		runEchoServer();
 		
-		BufferPool pool2 = new BufferCreationPool();
+		BufferPool pool2 = new TwoPools("pl", new SimpleMeterRegistry());
 		DataListener listener = new ClientDataListener(pool2, recorder);
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
 		TCPChannel channel = createClientChannel(pool2, executor2);
