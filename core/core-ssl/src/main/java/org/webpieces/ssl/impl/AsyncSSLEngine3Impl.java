@@ -15,6 +15,7 @@ import javax.net.ssl.SSLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLEngineException;
 import org.webpieces.ssl.api.ConnectionState;
@@ -198,19 +199,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 		int totalBytesToAck = remainBeforeDecrypt - encryptedData.remaining();
 		if(cachedOutBuffer.position() != 0) {
-			cachedOutBuffer.flip();
-			metrics.recordPlainBytesToClient(cachedOutBuffer.remaining());
-			listener.packetUnencrypted(cachedOutBuffer).handle((v, t) -> {
-				if(t != null)
-					log.error("Exception in ssl listener", t);
-				
-				//after the client consumes the packet(completes the future), ack the number of bytes corresponding
-				//to the packet we sent to the consumer.  NOTE: We do NOT care about how many bytes we sent the
-				//consumer BUT only how many encrypted bytes there were to ack those bytes and release our nio library to
-				//keep processing.  (in this way, the lower layer shuts off the peer from writing to us if your app gets slow)
-				decryptionTracker.ackBytes(totalBytesToAck);
-				return null;
-			});
+			firePlainPacketToListener(cachedOutBuffer, totalBytesToAck);
 		} else {
 			cachedOutBuffer.position(cachedOutBuffer.limit()); //pretend like all data is consumed
 			pool.releaseBuffer(cachedOutBuffer); //buffer not needed since we did not use it and fill it with data
@@ -247,6 +236,36 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			return true;
 
 		return false;
+	}
+
+	private void firePlainPacketToListener(ByteBuffer cachedOutBuffer, int totalBytesToAck) {
+		cachedOutBuffer.flip();
+		metrics.recordPlainBytesToClient(cachedOutBuffer.remaining());
+
+		if(pool instanceof TwoPools) {
+			//IF we are using two pools(ONE for the large large buffers sslEngine requires even though it only spits
+			//out like 1389 bytes, then do this to release the large buffer as we only have so many large buffers
+			//(we don't want too many large buffers as that eats up memory very fast)
+			if(cachedOutBuffer.remaining() <= pool.getSuggestedBufferSize()) {
+				ByteBuffer largeSslBuffer = cachedOutBuffer;
+				cachedOutBuffer = pool.nextBuffer(largeSslBuffer.remaining());
+				cachedOutBuffer.put(largeSslBuffer);
+				cachedOutBuffer.flip();
+				pool.releaseBuffer(largeSslBuffer);
+			}
+		}
+
+		listener.packetUnencrypted(cachedOutBuffer).handle((v, t) -> {
+			if(t != null)
+				log.error("Exception in ssl listener", t);
+			
+			//after the client consumes the packet(completes the future), ack the number of bytes corresponding
+			//to the packet we sent to the consumer.  NOTE: We do NOT care about how many bytes we sent the
+			//consumer BUT only how many encrypted bytes there were to ack those bytes and release our nio library to
+			//keep processing.  (in this way, the lower layer shuts off the peer from writing to us if your app gets slow)
+			decryptionTracker.ackBytes(totalBytesToAck);
+			return null;
+		});
 	}
 
 	private CompletableFuture<Void> doHandshakeLoop() {

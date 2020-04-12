@@ -20,7 +20,7 @@ public class SSLMetrics {
 	public SSLMetrics(String name, MeterRegistry metrics) {
 		fromSocket = DistributionSummary
 			    .builder(name+".ssl.fromsocket.size")
-			    .distributionStatisticBufferLength(100)
+			    .distributionStatisticBufferLength(1)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.5, 0.99, 1)
 			    .baseUnit("bytes") // optional (1)
@@ -28,7 +28,7 @@ public class SSLMetrics {
 
 		toSocket = DistributionSummary
 			    .builder(name+".ssl.tosocket.size")
-			    .distributionStatisticBufferLength(100)
+			    .distributionStatisticBufferLength(1)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.5, 0.99, 1)
 			    .baseUnit("bytes") // optional (1)
@@ -36,7 +36,7 @@ public class SSLMetrics {
 		
 		fromClient = DistributionSummary
 			    .builder(name+".ssl.fromclient.size")
-			    .distributionStatisticBufferLength(100)
+			    .distributionStatisticBufferLength(1)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.5, 0.99, 1)
 			    .baseUnit("bytes") // optional (1)
@@ -44,7 +44,7 @@ public class SSLMetrics {
 		
 		toClient = DistributionSummary
 			    .builder(name+".ssl.toclient.size")
-			    .distributionStatisticBufferLength(100)
+			    .distributionStatisticBufferLength(1)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.5, 0.99, 1)
 			    .baseUnit("bytes") // optional (1)

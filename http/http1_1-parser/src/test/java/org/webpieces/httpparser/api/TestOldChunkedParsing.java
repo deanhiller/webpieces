@@ -25,9 +25,9 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
-public class TestChunkedParsing {
+public class TestOldChunkedParsing {
 	
-	private HttpParser parser = HttpParserFactory.createParser("", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
+	private HttpParser parser = HttpParserFactory.createParser("", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()), false);
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private MarshalState state = parser.prepareToMarshal();
 	

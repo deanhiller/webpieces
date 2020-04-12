@@ -31,6 +31,7 @@ public class MementoImpl implements Memento {
 	private int numBytesJustParsed;
 	private boolean isReadingChunkHeader = true;
 	private boolean lastChunk;
+	private boolean needMoreData;
 
 	@Override
 	public List<HttpPayload> getParsedMessages() {
@@ -156,6 +157,14 @@ public class MementoImpl implements Memento {
 
 	public boolean isLastChunk() {
 		return lastChunk;
+	}
+
+	public boolean isNeedMoreData() {
+		return needMoreData;
+	}
+
+	public void setNeedMoreData(boolean needMoreData) {
+		this.needMoreData = needMoreData;
 	}
 
 }

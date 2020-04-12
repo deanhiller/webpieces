@@ -20,7 +20,7 @@ public abstract class Http2to11ClientFactory {
 	}
 
 	public static Http2Client createHttpClient(String id, ChannelManager mgr, MeterRegistry metrics, BufferPool pool) {
-		return createHttpClient(id, mgr, metrics, pool);
+		return createHttpClient(id, mgr, metrics, pool, true);
 	}
 	
 	public static Http2Client createHttpClient(String id, ChannelManager mgr, MeterRegistry metrics, BufferPool pool, boolean optimizeForBufferPool) {
