@@ -1,14 +1,19 @@
 package org.webpieces.httpparser.api.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 public class HttpData extends HttpPayload {
 
+	public static final String TRAILER_STR = "\r\n";
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private static final DataWrapper EMPTY_WRAPPER = dataGen.emptyWrapper();
 	
+	protected List<HttpChunkExtension> extensions = new ArrayList<>();
 	private DataWrapper body;
 	private boolean isEndOfData;
 	private boolean isStartOfChunk;
@@ -105,4 +110,36 @@ public class HttpData extends HttpPayload {
 		return isEndOfChunk;
 	}
 
+	public void setExtensions(List<HttpChunkExtension> extensions2) {
+		this.extensions = extensions2;
+	}
+	
+	public void addExtension(HttpChunkExtension extension) {
+		extensions.add(extension);
+	}
+
+	public List<HttpChunkExtension> getExtensions() {
+		return extensions;
+	}
+
+	public String createMetaLine() {
+		String metaLine = Integer.toHexString(getBodyNonNull().getReadableSize());
+		for(HttpChunkExtension extension : getExtensions()) {
+			metaLine += ";"+extension.getName();
+			if(extension.getValue() != null)
+				metaLine += "="+extension.getValue();
+		}		
+		return metaLine+TRAILER_STR;
+	}
+
+	public String createTrailer() {
+		return TRAILER_STR;
+	}
+
+	@Override
+	public String toString() {
+		String metaLine = createMetaLine();
+		String trailer = createTrailer();
+		return metaLine+trailer;
+	}
 }

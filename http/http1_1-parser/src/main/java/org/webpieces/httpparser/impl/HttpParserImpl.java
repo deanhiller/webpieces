@@ -24,6 +24,7 @@ import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpChunkExtension;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
+import org.webpieces.httpparser.api.dto.HttpLastData;
 import org.webpieces.httpparser.api.dto.HttpMessage;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
@@ -600,6 +601,9 @@ public class HttpParserImpl implements HttpParser {
 		inPayloadSize.record(body.getReadableSize());
 		
 		HttpData data = new HttpData();
+		if(memento.isLastChunk())
+			data = new HttpLastData();
+		
 		data.setBody(body);
 		data.setStartOfChunk(isStartOfChunk);
 		data.setEndOfChunk(true); //since we are reading the full chunk to the \r\n, this is the end of A chunk(more to come if isFinalChunk = false)

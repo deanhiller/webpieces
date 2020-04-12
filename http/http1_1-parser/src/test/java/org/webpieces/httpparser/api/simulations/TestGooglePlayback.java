@@ -7,16 +7,16 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.webpieces.data.api.TwoPools;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.api.TwoPools;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpChunk;
-import org.webpieces.httpparser.api.dto.HttpLastChunk;
+import org.webpieces.httpparser.api.dto.HttpLastData;
+import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.recording.api.Playback;
@@ -33,14 +33,19 @@ public class TestGooglePlayback {
 	public void testGooglePlayback() {
 		List<HttpPayload> results = runPlayback("google.com.11015.recording");
 
-		Assert.assertEquals(3, results.size());
+		int size = 0;
+		for(HttpPayload result : results) {
+			if(result.getMessageType() != HttpMessageType.DATA)
+				continue;
+			
+			size += result.getHttpData().getBodyNonNull().getReadableSize();
+		}
+		Assert.assertEquals(10349, size);
 		
 		HttpResponse resp = (HttpResponse) results.get(0);
-		HttpChunk chunk = (HttpChunk) results.get(1);
-		HttpLastChunk lastChunk = (HttpLastChunk) results.get(2);
+		HttpLastData lastChunk = (HttpLastData) results.get(results.size() - 1);
 		
 		Assert.assertEquals("chunked", resp.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING).getValue());
-		Assert.assertEquals(10349, chunk.getBody().getReadableSize());
 		Assert.assertTrue(lastChunk.isEndOfData());
 	}
 
@@ -48,14 +53,19 @@ public class TestGooglePlayback {
 	public void testHttpsGooglePlayback() {
 		List<HttpPayload> results = runPlayback("https.google.com.recording");
 
-		Assert.assertEquals(3, results.size());
+		int size = 0;
+		for(HttpPayload result : results) {
+			if(result.getMessageType() != HttpMessageType.DATA)
+				continue;
+			
+			size += result.getHttpData().getBodyNonNull().getReadableSize();
+		}
+		Assert.assertEquals(10396, size);
 		
 		HttpResponse resp = (HttpResponse) results.get(0);
-		HttpChunk chunk = (HttpChunk) results.get(1);
-		HttpLastChunk lastChunk = (HttpLastChunk) results.get(2);
+		HttpLastData lastChunk = (HttpLastData) results.get(results.size()-1);
 		
 		Assert.assertEquals("chunked", resp.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING).getValue());
-		Assert.assertEquals(10396, chunk.getBody().getReadableSize());
 		Assert.assertTrue(lastChunk.isEndOfData());		
 	}
 	
