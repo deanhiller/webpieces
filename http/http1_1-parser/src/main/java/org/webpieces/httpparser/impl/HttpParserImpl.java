@@ -267,8 +267,8 @@ public class HttpParserImpl implements HttpParser {
 			log.trace("Trying to parse message");
 
 		boolean isNeedMoreData = false;
-		//loop while we do NOT need more data.  Once we need more data, stop looping
-		while(!isNeedMoreData && !memento.isHttp2()) {
+		//loop while we do NOT need more data OR if we have an http2 marker, cut short reading since this is an http stream
+		while(!isNeedMoreData && !memento.isHasHttp2MarkerMsg()) {
 //			if(log.isDebugEnabled()) {
 //				byte[] someData = memento.getLeftOverData().createByteArray();
 //				String readable = conversion.convertToReadableForm(someData);
@@ -756,7 +756,7 @@ public class HttpParserImpl implements HttpParser {
 		if("SM".equals(requestLine)) {
 			Http2MarkerMessage msg = new Http2MarkerMessage();
 			//we are http2 so return an Http2Message and SHORT-CIRCUIT FURTHER PARSING
-			memento.setHasHttpMarkerMsg(true);
+			memento.setHasHttp2MarkerMsg(true);
 			memento.addMessage(msg);
 			return msg;
 		}

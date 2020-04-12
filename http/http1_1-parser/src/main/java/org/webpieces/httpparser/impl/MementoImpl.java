@@ -27,7 +27,7 @@ public class MementoImpl implements Memento {
 	private boolean isHttp2;
 	
 	private Integer contentLengthLeftToRead;
-	private boolean hasHttpMarkerMsg;
+	private boolean hasHttp2MarkerMsg;
 	private int numBytesJustParsed;
 	private boolean isReadingChunkHeader = true;
 	private boolean lastChunk;
@@ -126,12 +126,12 @@ public class MementoImpl implements Memento {
 		this.contentLengthLeftToRead = contentLengthLeftToRead;
 	}
 
-	public boolean isHasHttpMarkerMsg() {
-		return hasHttpMarkerMsg;
+	public boolean isHasHttp2MarkerMsg() {
+		return hasHttp2MarkerMsg;
 	}
 
-	public void setHasHttpMarkerMsg(boolean hasHttpMarkerMsg) {
-		this.hasHttpMarkerMsg = hasHttpMarkerMsg;
+	public void setHasHttp2MarkerMsg(boolean hasHttpMarkerMsg) {
+		this.hasHttp2MarkerMsg = hasHttpMarkerMsg;
 	}
 
 	@Override
