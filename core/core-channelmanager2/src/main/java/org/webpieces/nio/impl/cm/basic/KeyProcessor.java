@@ -59,7 +59,7 @@ public final class KeyProcessor {
 
 		payloadSize = DistributionSummary
 			    .builder(id+".bytes.read.size")
-			    .distributionStatisticBufferLength(100)
+			    .distributionStatisticBufferLength(1)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.50, 0.99, 1)
 			    .baseUnit("bytes") // optional (1)
@@ -67,7 +67,7 @@ public final class KeyProcessor {
 		
 		backupSize = DistributionSummary
 			    .builder(id+".bytes.read.size")
-			    .distributionStatisticBufferLength(100)
+			    .distributionStatisticBufferLength(1)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
 			    .publishPercentiles(0.50, 0.99, 1)
 			    .baseUnit("bytes") // optional (1)
