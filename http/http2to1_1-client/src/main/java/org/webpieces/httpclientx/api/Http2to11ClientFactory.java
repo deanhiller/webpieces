@@ -20,7 +20,11 @@ public abstract class Http2to11ClientFactory {
 	}
 
 	public static Http2Client createHttpClient(String id, ChannelManager mgr, MeterRegistry metrics, BufferPool pool) {
-		HttpParser parser = HttpParserFactory.createParser(id, metrics, pool);
+		return createHttpClient(id, mgr, metrics, pool);
+	}
+	
+	public static Http2Client createHttpClient(String id, ChannelManager mgr, MeterRegistry metrics, BufferPool pool, boolean optimizeForBufferPool) {
+		HttpParser parser = HttpParserFactory.createParser(id, metrics, pool, optimizeForBufferPool);
 		HttpClient client11 = HttpClientFactory.createHttpClient(id, mgr, parser);
 		return new Http2ClientProxy(client11);
 	}

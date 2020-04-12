@@ -13,20 +13,25 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class HttpParserFactory {
 
 	public static final Charset ISO8859_1 = Charset.forName("ISO-8859-1");
+	
+	public static HttpParser createParser(String id, MeterRegistry metrics, BufferPool pool) {
+		return createParser(id, metrics, pool, true);
+	}
+	
 	/**
 	 * 
 	 * @param pool Purely to release ByteBuffers back to the pool and be released
 	 * @return
 	 */
-	public static HttpParser createParser(String id, MeterRegistry metrics, BufferPool pool) {
+	public static HttpParser createParser(String id, MeterRegistry metrics, BufferPool pool, boolean optimizeForBufferPool) {
 		//to get around verifydesign later AND enforce build breaks on design violations
 		//like api depending on implementation, we need reflection here to create this
 		//instance...
-		return new HttpParserImpl(id, metrics, pool);
+		return new HttpParserImpl(id, metrics, pool, optimizeForBufferPool);
 	}
 	
 	public static HttpStatefulParser createStatefulParser(String id, MeterRegistry metrics, BufferPool pool) {
-		return new HttpStatefulParserImpl(createParser(id, metrics, pool));
+		return new HttpStatefulParserImpl(createParser(id, metrics, pool, true));
 	}
 	
 	public static HeaderPriorityParser createHeaderParser() {

@@ -11,6 +11,8 @@ public class HttpData extends HttpPayload {
 	
 	private DataWrapper body;
 	private boolean isEndOfData;
+	private boolean isStartOfChunk;
+	private boolean isEndOfChunk;
 	
 	public HttpData() {
 	}
@@ -20,6 +22,9 @@ public class HttpData extends HttpPayload {
 		this.isEndOfData = isEndOfData;
 	}
 
+	/**
+	 * Returns if this is the very last HttpData for this stream of HttpDatas
+	 */
 	public boolean isEndOfData() {
 		return isEndOfData;
 	}
@@ -61,6 +66,43 @@ public class HttpData extends HttpPayload {
 	@Override
 	public HttpMessageType getMessageType() {
 		return HttpMessageType.DATA;
+	}
+
+	public void setStartOfChunk(boolean isStartOfChunk) {
+		this.isStartOfChunk = isStartOfChunk;
+	}
+
+	/**
+	 * There can be many HttpData that represent ONE chunk OR one HttpData 
+	 * representing a http Chunk.  This tells you if this is the first of an
+	 * http chunk.  There are many chunks in a stream of data so isStart can be
+	 * true for quite a few HttpData.  isEndofData() tells
+	 * you if it is the last HttpData AND also the last HttpChunk or another
+	 * words the last last part of the request or response.  The first
+	 * HttpData you get is obviously the isFirstData so we don't have a 
+	 * flag for that.
+	 * 
+	 * @return
+	 */
+	public boolean isStartOfChunk() {
+		return isStartOfChunk;
+	}
+
+	public void setEndOfChunk(boolean isEndOfChunk) {
+		this.isEndOfChunk = isEndOfChunk;
+	}
+
+	/**
+	 * There can be many HttpData that represent ONE chunk OR one HttpData 
+	 * representing a http Chunk.  This tells you if this is the last of that
+	 * chunk.  There are many chunks in a stream of data.  isEndofData() tells
+	 * you if it is the last HttpData AND also the last HttpChunk or another
+	 * words the last last part of the request or response
+	 * 
+	 * @return
+	 */
+	public boolean isEndOfChunk() {
+		return isEndOfChunk;
 	}
 
 }

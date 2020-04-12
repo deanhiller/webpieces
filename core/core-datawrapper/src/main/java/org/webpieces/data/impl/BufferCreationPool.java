@@ -143,4 +143,9 @@ public class BufferCreationPool implements BufferPool, BufferWebManaged {
 		return "Webpieces Core";
 	}
 
+	@Override
+	public int getSuggestedBufferSize() {
+		return bufferSize;
+	}
+
 }

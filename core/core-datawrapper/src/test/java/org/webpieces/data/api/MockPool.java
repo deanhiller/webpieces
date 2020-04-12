@@ -23,4 +23,9 @@ public class MockPool implements BufferPool {
 		return null;
 	}
 
+	@Override
+	public int getSuggestedBufferSize() {
+		return 5000;
+	}
+
 }

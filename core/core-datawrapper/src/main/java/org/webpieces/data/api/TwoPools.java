@@ -98,4 +98,9 @@ public class TwoPools implements BufferPool, TwoPoolManaged {
     public int getSslBufferPoolSize() {
         return sslPool.getBufferPoolSize();
     }
+
+	@Override
+	public int getSuggestedBufferSize() {
+		return smallPool.getBufferPoolSize();
+	}
 }

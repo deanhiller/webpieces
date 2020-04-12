@@ -51,9 +51,11 @@ public class HttpParserImpl implements HttpParser {
 	private DistributionSummary outPayloadSize;
 	private DistributionSummary inPayloadSize;
 	private DistributionSummary bytesParsedDist;
+	private boolean optimizeForBufferPool;
 
-	public HttpParserImpl(String id, MeterRegistry metrics, BufferPool pool) {
+	public HttpParserImpl(String id, MeterRegistry metrics, BufferPool pool, boolean optimizeForBufferPool) {
 		this.pool = pool;
+		this.optimizeForBufferPool = optimizeForBufferPool;
 		
 		outPayloadSize = DistributionSummary
 			    .builder(id+".http1.payloadout.size")
@@ -91,6 +93,10 @@ public class HttpParserImpl implements HttpParser {
 		byte[] data = marshalToBytes(state, request);
 		outPayloadSize.record(data.length);
 		
+		//TODO: Use the BufferPool and return ByteBuffer[] to write out instead so they can be released back to pool
+		//This would be more memory efficient than to keep creating them and discarding them.
+		//BETTER, can we in the marshal phase WRITE to the ByteBuffer directly instead of returning byte[] data
+		//in fact, this looks greaet https://stackoverflow.com/questions/1252468/java-converting-string-to-and-from-bytebuffer-and-associated-problems
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		return buffer;
 	}
@@ -407,6 +413,103 @@ public class HttpParserImpl implements HttpParser {
 	}
 
 	private void processChunks(MementoImpl memento) {
+		if(optimizeForBufferPool) {
+			if(memento.getHalfParsedChunk() != null)
+				throw new IllegalStateException("Bug, this shold not be possible as we do HttpData not chunks in this case");
+			processChunksUsingPoolsBufferSize(memento);
+		} else {
+			//OLD SCHOOL using the size in the front of each chunk.  For example, in hex, google had a size of 8000 which in 
+			//decimal is 32768 bytes.  Instead, it is preferable for chunk size to match buffer pool's suggestion(which is 
+			//configurable BUT you won't receive the chunk in your program as a chunk!!  you will just receive data
+			processChunksUsingChunkSize(memento);
+		}
+	}
+	
+	private void processChunksUsingPoolsBufferSize(MementoImpl memento) {
+		//we have two scenarios and have to loop over different states
+		//IF we are reading in chunks header with the size up to the \r\n is STATE One
+		//IF we are reading in the body, we need to loop over reading in potentially many body's since limit can be 5k on a 32k chunk and we
+		//keep reading
+		//WHEN are we done looping?  
+		//        We are done when in STATE One, we went through all bytes NOT finding \r\n
+		//        We are done when there are no bytes left OR there is a \r sitting in the buffer(we don't have the \n yet to finish processing
+		//        The final trailing chunk is 0;{headers}\r\n\r\n  sooooo, the final LAST_DATA packet needs \r\n\r\n to complete so that the
+		//        trailing headers ARE in the HttpData LAST_DATA packet in addition to it's chunk-extensions
+		while(true) { 
+			
+			List<HttpChunkExtension> extensions = null;
+			if(memento.isReadingChunkHeader()) {
+				extensions = processChunkSizeSection(memento);
+				if(extensions == null)
+					return; //null is returned if the header is not finished processing and we need more data
+			}
+			
+			if(!memento.isReadingChunkHeader()) {
+				//process until we don't have enough data
+				if(memento.getNumBytesLeftToReadOnChunk() > 0) {
+					readMoreOfChunk(memento, extensions);
+				}
+				
+				if(memento.getLeftOverData().getReadableSize() == 0) {
+					return;
+				}
+			}
+		}
+	}
+
+	private List<HttpChunkExtension> processChunkSizeSection(MementoImpl memento) {
+		int i = memento.getReadingHttpMessagePointer();
+		for(;i < memento.getLeftOverData().getReadableSize() - 1; i++) {
+			DataWrapper dataToRead = memento.getLeftOverData();
+			
+			byte firstByte = dataToRead.readByteAt(i);
+			byte secondByte = dataToRead.readByteAt(i+1);
+
+			//format of a chunk found on wikipedia https://en.wikipedia.org/wiki/Chunked_transfer_encoding
+			//BUT is {size in HEX}\r\n{data}\r\n
+			boolean isFirstCr = conversion.isCarriageReturn(firstByte);
+			boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
+			
+			if(isFirstCr && isSecondLineFeed) {
+				List<HttpChunkExtension> extensions = readDataHeader(memento, i);
+				//since we swapped out memento.getLeftOverData to be 
+				//what's left, we can read from 0 again
+				memento.setReadingHttpMessagePointer(0);
+				memento.setReadingChunkHeader(false);
+				return extensions;
+			}
+		}
+
+		memento.setReadingHttpMessagePointer(i);
+		return null;
+	}
+
+	private void readMoreOfChunk(MementoImpl memento, List<HttpChunkExtension> extensions) {
+		DataWrapper leftOver = memento.getLeftOverData();
+		int numBytesLeftToReadOnChunk = memento.getNumBytesLeftToReadOnChunk();		
+		int bufSize = leftOver.getReadableSize();
+
+		//Only the first piece of a chunk will have extensions
+		boolean isStartOfChunk = extensions != null;
+		
+		//must read in all the data of the chunk AND /r/n
+		int chunkSizePlus2 = 2 + numBytesLeftToReadOnChunk;
+		
+		if(chunkSizePlus2 <= bufSize) {
+			readChunkToItsEnd(memento, leftOver, numBytesLeftToReadOnChunk, isStartOfChunk);
+		} else if(numBytesLeftToReadOnChunk == bufSize || numBytesLeftToReadOnChunk + 1 == bufSize) {
+			//wait for final 2 bytes(the \r\n) so above code kicks in for us
+			//if we are equal, we need 2 more.  If bufSize is 1+chunkSize, we need ONE more byte(the \n byte)
+			//NOTE: The above readFullChunk is best at processing the trailing 0\r\n chunk since it has 0 bytes
+			//readPartialChunk can do extensions but has to rely on readRestOfChunk
+			return;
+		} else {
+			//bufSize < numBytesToReadForFullChunk
+			readPartialChunk(memento, leftOver, numBytesLeftToReadOnChunk, isStartOfChunk);
+		}
+	}
+
+	private void processChunksUsingChunkSize(MementoImpl memento) {
 		if(memento.getHalfParsedChunk() != null) {
 			readInChunkBody(memento, true);
 			if(memento.getHalfParsedChunk() != null)
@@ -420,7 +523,10 @@ public class HttpParserImpl implements HttpParser {
 			DataWrapper dataToRead = memento.getLeftOverData();
 			byte firstByte = dataToRead.readByteAt(i);
 			byte secondByte = dataToRead.readByteAt(i+1);
+			
 
+			//format of a chunk found on wikipedia https://en.wikipedia.org/wiki/Chunked_transfer_encoding
+			//BUT is {size in HEX}\r\n{data}\r\n
 			boolean isFirstCr = conversion.isCarriageReturn(firstByte);
 			boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
 			
@@ -437,6 +543,92 @@ public class HttpParserImpl implements HttpParser {
 		memento.setReadingHttpMessagePointer(i);
 	}
 
+	private List<HttpChunkExtension> readDataHeader(MementoImpl memento, int i) {
+		DataWrapper dataToRead = memento.getLeftOverData();
+		//split off the header AND /r/n (ie. the +2)
+		List<? extends DataWrapper> split = dataGen.split(dataToRead, i+2);
+		DataWrapper chunkMetaData = split.get(0);
+		DataWrapper leftOver = split.get(1);
+		
+		
+		List<HttpChunkExtension> extensions = new ArrayList<>();
+		int numBytesToReadForFullChunk = parseExtensions(chunkMetaData, extensions);
+		
+		memento.setNumBytesLeftToReadOnChunk(numBytesToReadForFullChunk);
+		memento.setLeftOverData(leftOver);
+		if(numBytesToReadForFullChunk == 0) {
+			//chunk size of 0 signifies it is the last chunk
+			memento.setLastChunk(true);
+		}
+		
+		return extensions;
+	}
+
+	private void readPartialChunk(MementoImpl memento, DataWrapper leftOver, int numBytesToReadForFullChunk, boolean isStartOfChunk) {
+		inPayloadSize.record(leftOver.getReadableSize());
+
+		HttpData data = new HttpData();
+		data.setStartOfChunk(isStartOfChunk);
+		data.setBody(leftOver);
+		
+		int numLeftToRead = numBytesToReadForFullChunk - leftOver.getReadableSize();
+		memento.addMessage(data);
+		memento.setNumBytesLeftToReadOnChunk(numLeftToRead);
+		memento.setLeftOverData(DataWrapperGeneratorFactory.EMPTY);
+	}
+
+	private HttpData readChunkToItsEnd(MementoImpl memento, DataWrapper leftOver, int numBytesToReadForFullChunk, boolean isStartOfChunk) {
+		//read all but the 2 bytes
+		List<? extends DataWrapper> splitPieces = dataGen.split(leftOver, numBytesToReadForFullChunk);
+		//read the 2 bytes
+		List<? extends DataWrapper> split2 = dataGen.split(splitPieces.get(1), 2);
+
+		DataWrapper trailer = split2.get(0);
+		String trailerStr = trailer.createStringFrom(0, trailer.getReadableSize(), iso8859_1);
+		if(!TRAILER_STR.equals(trailerStr))
+			throw new IllegalStateException("The chunk did not end with \\r\\n .  The format is invalid");
+		
+		DataWrapper body = splitPieces.get(0);
+		
+		inPayloadSize.record(body.getReadableSize());
+		
+		HttpData data = new HttpData();
+		data.setBody(body);
+		data.setStartOfChunk(isStartOfChunk);
+		data.setEndOfChunk(true); //since we are reading the full chunk to the \r\n, this is the end of A chunk(more to come if isFinalChunk = false)
+		data.setEndOfData(memento.isLastChunk());
+		if(memento.isLastChunk())
+			memento.setLastChunk(false); //reset for next chain of chunking
+		
+		memento.setLeftOverData(split2.get(1));
+		memento.setNumBytesLeftToReadOnChunk(0);
+		memento.addMessage(data);
+		memento.setReadingChunkHeader(true);
+
+		if(body.getReadableSize() == 0) {
+			//this is the last chunk as it is 0 size
+			memento.setInChunkParsingMode(false);
+		}
+		
+		return data;
+	}
+
+	private int parseExtensions(DataWrapper chunkMetaData, List<HttpChunkExtension> extensions) {
+		String chunkMetaStr = chunkMetaData.createStringFrom(0, chunkMetaData.getReadableSize(), iso8859_1);
+		String hexSize = chunkMetaStr.trim();
+		if(chunkMetaStr.contains(";")) {
+			String[] extensionsArray = chunkMetaStr.split(";");
+			hexSize = extensionsArray[0];
+			for(int n = 1; n < extensionsArray.length; n++) {
+				HttpChunkExtension ext = createExtension(extensionsArray[n]);
+				extensions.add(ext);
+			}
+		}
+		
+		int chunkSize = Integer.parseInt(hexSize, 16);
+		return chunkSize;
+	}
+	
 	private void readChunk(MementoImpl memento, int i) {
 		HttpChunk chunk = createHttpChunk(memento, i);
 		memento.setHalfParsedChunk(chunk);
@@ -457,21 +649,13 @@ public class HttpParserImpl implements HttpParser {
 		
 		List<HttpChunkExtension> extensions = new ArrayList<>();
 		
-		String chunkMetaStr = chunkMetaData.createStringFrom(0, chunkMetaData.getReadableSize(), iso8859_1);
-		String hexSize = chunkMetaStr.trim();
-		if(chunkMetaStr.contains(";")) {
-			String[] extensionsArray = chunkMetaStr.split(";");
-			hexSize = extensionsArray[0];
-			for(int n = 1; n < extensionsArray.length; n++) {
-				HttpChunkExtension ext = createExtension(extensionsArray[n]);
-				extensions.add(ext);
-			}
-		}
-
-		int chunkSize = Integer.parseInt(hexSize, 16);
+		int chunkSize = parseExtensions(chunkMetaData, extensions);
+		
 		HttpChunk chunk = new HttpChunk();
 		if(chunkSize == 0)
 			chunk = new HttpLastChunk();
+		
+		chunk.setExtensions(extensions);
 		
 		//must read in all the data of the chunk AND /r/n
 		int size = 2 + chunkSize;

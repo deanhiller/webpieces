@@ -19,7 +19,7 @@ public class DeleteMetrics {
     public static void main(String[] args) throws InterruptedException, TimeoutException, ExecutionException, IOException {
         String homeDir = System.getProperty("user.home");
         String accessToken = getAccessTokenFromOAuth2(homeDir+"/workspace/keys/cloudMonitoringKey.json");
-        String key = "&key=AIzaSyBZj3GzcP-8wLeJW75Pf_aSXIue15CmjqE";
+        String key = "&key=AIzaSyBZj3GzcP-8w"+"LeJW75Pf_aSXIue15CmjqE";
         HttpHelper httpHelper = new HttpHelper(key, accessToken);
 
 

@@ -29,6 +29,8 @@ public class MementoImpl implements Memento {
 	private Integer contentLengthLeftToRead;
 	private boolean hasHttpMarkerMsg;
 	private int numBytesJustParsed;
+	private boolean isReadingChunkHeader = true;
+	private boolean lastChunk;
 
 	@Override
 	public List<HttpPayload> getParsedMessages() {
@@ -138,6 +140,22 @@ public class MementoImpl implements Memento {
 
 	public void setNumBytesJustParsed(int numBytesJustParsed) {
 		this.numBytesJustParsed = numBytesJustParsed;
+	}
+
+	public boolean isReadingChunkHeader() {
+		return isReadingChunkHeader;
+	}
+
+	public void setReadingChunkHeader(boolean isReadingChunkHeader) {
+		this.isReadingChunkHeader = isReadingChunkHeader;
+	}
+
+	public void setLastChunk(boolean lastChunk) {
+		this.lastChunk = lastChunk;
+	}
+
+	public boolean isLastChunk() {
+		return lastChunk;
 	}
 
 }

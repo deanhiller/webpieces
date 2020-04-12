@@ -26,6 +26,10 @@ public class HttpChunk extends HttpData {
 		return HttpMessageType.CHUNK;
 	}
 
+	public void setExtensions(List<HttpChunkExtension> extensions2) {
+		this.extensions = extensions2;
+	}
+	
 	public void addExtension(HttpChunkExtension extension) {
 		extensions.add(extension);
 	}
@@ -54,4 +58,5 @@ public class HttpChunk extends HttpData {
 		String trailer = createTrailer();
 		return metaLine+trailer;
 	}
+
 }

@@ -3,6 +3,15 @@ package org.webpieces.data.api;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+/**
+ * A library that HIDES ByteBuffer[] so that you don't have to copy data on processing to save on
+ * performance of GC and other stuff.  Unfortunately, there is no interface on ByteBuffer that we
+ * could implement due to some jdk reasons for doing direct memory.  Of course, they could have
+ * written a higher level library hiding the details as copying data is still not cheap.
+ * 
+ * @author dean
+ *
+ */
 public interface DataWrapperGenerator {
 
 	DataWrapper emptyWrapper();

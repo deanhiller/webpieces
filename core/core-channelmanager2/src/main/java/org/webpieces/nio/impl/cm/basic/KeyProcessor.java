@@ -360,7 +360,7 @@ public final class KeyProcessor {
 			log.warn(channel+"Overloaded channel.  unregistering until YOU catch up you slowass(lol). num="+unackedByteCnt+" max="+channel.getMaxUnacked());
 			unregisterSelectableChannel(channel, SelectionKey.OP_READ);
 		}
-		
+
 		future.handle((v, t) -> {
 			boolean register = false;
 			int unackedCnt;
@@ -371,7 +371,7 @@ public final class KeyProcessor {
 					register = true;
 				}
 			}
-			
+
 			if(register) {
 				registeredSocket.increment();
 				log.warn(channel+"BOOM. you caught back up, reregistering for reads now. unackedCnt="+unackedCnt+" readThreshold="+channel.getReadThreshold());

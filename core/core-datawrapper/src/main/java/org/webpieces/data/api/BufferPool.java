@@ -22,4 +22,11 @@ public interface BufferPool {
 	/** Create a ByteBuffer filled with the DataWrapper */
 	public ByteBuffer createWithDataWrapper(DataWrapper data);
 
+	/**
+	 * Gets the suggested size.  This is the size of the base buffer for TwoPools.java 
+	 * or otherwise the suggested size so parsers using this pool can ask what size to 
+	 * demarcate chunks of data to feed to optimize for pool use 
+	 */
+	public int getSuggestedBufferSize();
+	
 }
