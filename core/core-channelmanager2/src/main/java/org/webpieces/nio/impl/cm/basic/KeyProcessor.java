@@ -1,18 +1,5 @@
 package org.webpieces.nio.impl.cm.basic;
 
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.MeterRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.webpieces.data.api.BufferPool;
-import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.channels.ChannelSession;
-import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.exceptions.NioException;
-import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.nio.api.jdk.JdkSelect;
-
 import java.io.IOException;
 import java.net.PortUnreachableException;
 import java.nio.ByteBuffer;
@@ -20,13 +7,24 @@ import java.nio.channels.CancelledKeyException;
 import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.BufferPool;
+import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.channels.RegisterableChannel;
+import org.webpieces.nio.api.exceptions.NioException;
+import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.jdk.JdkSelect;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
 
 
 public final class KeyProcessor {
@@ -369,7 +367,6 @@ public final class KeyProcessor {
 		future.handle((v, t) -> {
 			AtomicInteger counter = channel.getUnackedBytes();
 			int unackedCnt = counter.addAndGet(-bytes);
-			//addUnackedBytes(channel.getSession(), false, -bytes, unackedCnt);
 
 			if(channel.isUnderThreshold(unackedCnt) && connectionState.get() == BackflowState1.UNREGISTERED) {
 				channel.registerForReads(() -> shouldRegister(channel));
