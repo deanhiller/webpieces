@@ -75,36 +75,30 @@ public class TestHttp1Backpressure {
 
 		DataListener dataListener = mockChannel.getConnectedListener();
 
-		CompletableFuture<StreamWriter> future = new CompletableFuture<StreamWriter>();
-		listener.addProcessResponse(future);
+		CompletableFuture<StreamWriter> requestFuture = new CompletableFuture<StreamWriter>();
+		listener.addProcessResponse(requestFuture);
 
 		CompletableFuture<Void> fut1 = dataListener.incomingData(mockChannel, buffers.get(0));
-		Assert.assertFalse(fut1.isDone()); //not resolved yet since client did not process(only has half the data)
+		Assert.assertTrue(fut1.isDone()); //resolved since data is cached in parser (client doesn't receive this data)
 		
 		//This next one is confusing BUT in http1.1 parsing terms, data is data for content length so this results
 		//in a full HttpData packet actually...
 		CompletableFuture<Void> fut2 = dataListener.incomingData(mockChannel, buffers.get(1));
-		Assert.assertFalse(fut1.isDone()); //not resolved yet since client did not resolve future yet
 		Assert.assertFalse(fut2.isDone()); //not resolved yet since client only has part of the data
 		
 		MockStreamWriter mockWriter = new MockStreamWriter();
-		CompletableFuture<Void> future2 = new CompletableFuture<Void>();
-		mockWriter.addProcessResponse(future2);
-		future.complete(mockWriter); //This releases BOTH packets above to be processed!!!(not just the one)
-		
-		Assert.assertFalse(fut1.isDone()); //not done until BOTH processed
+		CompletableFuture<Void> streamWriterFuture = new CompletableFuture<Void>();
+		mockWriter.addProcessResponse(streamWriterFuture);
+		requestFuture.complete(mockWriter); //This releases BOTH packets above to be processed!!!(not just the one)
 		Assert.assertFalse(fut2.isDone());
 		
-		future2.complete(null);
+		streamWriterFuture.complete(null);
+		fut2.get(2, TimeUnit.SECONDS); //NOW it's resolved
 
-		fut1.get(2, TimeUnit.SECONDS);
-		fut2.get(2, TimeUnit.SECONDS);
-		
 		//feed the last buffer in
 		CompletableFuture<Void> future3 = new CompletableFuture<Void>();
 		mockWriter.addProcessResponse(future3);		
-		CompletableFuture<Void> fut3 = dataListener.incomingData(mockChannel, buffers.get(2));
-		
+		CompletableFuture<Void> fut3 = dataListener.incomingData(mockChannel, buffers.get(2));		
 		Assert.assertFalse(fut3.isDone());
 		
 		future3.complete(null);
@@ -156,43 +150,43 @@ public class TestHttp1Backpressure {
 		DataListener dataListener = mockChannel.getConnectedListener();
 
 		CompletableFuture<Void> fut1 = dataListener.incomingData(mockChannel, buffers.get(0));
-		Assert.assertFalse(fut1.isDone()); //not resolved yet since client did not process(only has half the data)
+		Assert.assertTrue(fut1.isDone()); //resolved since it never made it to the client. 
+		                               //this keeps bytes in-memory that is less than bufPool.getSuggestedSize. ie. < 5k 
 		
-		CompletableFuture<StreamWriter> future = new CompletableFuture<StreamWriter>();
-		listener.addProcessResponse(future);
+		CompletableFuture<StreamWriter> requestFuture = new CompletableFuture<StreamWriter>();
+		listener.addProcessResponse(requestFuture);
 		
 		CompletableFuture<Void> fut2 = dataListener.incomingData(mockChannel, buffers.get(1));
-		Assert.assertFalse(fut1.isDone()); //not resolved yet since client did not resolve future yet
 		Assert.assertFalse(fut2.isDone()); //not resolved yet since client only has part of the data
 		
+		CompletableFuture<Void> streamWriterFuture = new CompletableFuture<Void>();
 		MockStreamWriter mockWriter = new MockStreamWriter();
-		future.complete(mockWriter); //This releases the response msg acking 10 bytes
+		mockWriter.addProcessResponse(streamWriterFuture);
+		requestFuture.complete(mockWriter); //This releases the response BUT 'some' data was with response so can't ack yet
+		Assert.assertFalse(fut2.isDone()); //not resolved yet since requestFuture AND streamWriterFutuer BOTH need to be resolved
+		                                   //This is BECAUSE 68 bytes resulted in TWO messages and both futures can ack the 68 bytes.
 		
-		fut1.get(2, TimeUnit.SECONDS);
-		Assert.assertFalse(fut2.isDone());
+		streamWriterFuture.complete(null);
+		fut2.get(2, TimeUnit.SECONDS); //NOW it's resolved
 		
 		//feed the rest of first chunk in and feed part of last chunk
 		CompletableFuture<Void> firstChunkAck = new CompletableFuture<Void>();
 		mockWriter.addProcessResponse(firstChunkAck);	
 		CompletableFuture<Void> fut3 = dataListener.incomingData(mockChannel, buffers.get(2));
 		
-		Assert.assertFalse(fut2.isDone());
 		Assert.assertFalse(fut3.isDone());
 		
 		firstChunkAck.complete(null); //ack the http chunk packet
 		
-		fut2.get(2, TimeUnit.SECONDS);
-		Assert.assertFalse(fut3.isDone());
+		fut3.get(2, TimeUnit.SECONDS);
 
 		CompletableFuture<Void> lastChunkAck = new CompletableFuture<Void>();
 		mockWriter.addProcessResponse(lastChunkAck);			
 		CompletableFuture<Void> fut4 = dataListener.incomingData(mockChannel, buffers.get(3));
-		Assert.assertFalse(fut3.isDone());
 		Assert.assertFalse(fut4.isDone());
 		
 		lastChunkAck.complete(null);
 		
-		fut3.get(2, TimeUnit.SECONDS);
 		fut4.get(2, TimeUnit.SECONDS);
 	}
 	

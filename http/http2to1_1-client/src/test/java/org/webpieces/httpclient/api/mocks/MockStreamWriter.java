@@ -19,7 +19,6 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 	}
 	
 	public MockStreamWriter() {
-		setDefaultReturnValue(Method.INCOMING_DATA, CompletableFuture.completedFuture(null));
 	}
 	
 	@SuppressWarnings("unchecked")

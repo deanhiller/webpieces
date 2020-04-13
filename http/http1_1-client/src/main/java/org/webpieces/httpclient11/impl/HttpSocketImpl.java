@@ -27,8 +27,6 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
-import org.webpieces.util.acking.AckAggregator;
-import org.webpieces.util.acking.ByteAckTracker;
 
 public class HttpSocketImpl implements HttpSocket {
 
@@ -121,42 +119,47 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 	
 	private class MyDataListener implements DataListener {
-
-		private ByteAckTracker tracker2 = new ByteAckTracker();
-
-		private CompletableFuture<DataWriter> future;
+		private CompletableFuture<DataWriter> dataWriterFuture;
 
 		@Override
 		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 
-			int bytesIn = b.remaining();
-			CompletableFuture<Void> future2 = tracker2.addBytesToTrack(bytesIn);
 			memento = parser.parse(memento, wrapper);
-			
+			if(memento.getNumBytesJustParsed() == 0)
+				return CompletableFuture.completedFuture(null); //ack the future as we need more data.  there is nothing to track here			
+
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 
-			AckAggregator aggregator = new AckAggregator(parsedMessages.size(), memento.getNumBytesJustParsed(), tracker2);
-			//AckAggregator ack = tracker.createTracker(bytesIn, parsedMessages.size(), memento.getNumBytesJustParsed());
-
+			CompletableFuture<Void> allFutures = CompletableFuture.completedFuture(null);
 			for(HttpPayload msg : parsedMessages) {
 				if(msg instanceof HttpData) {
 					HttpData data = (HttpData) msg;
 					if(data.isEndOfData())
 						responsesToComplete.poll();
-					
-					future.thenCompose(w -> {
-						return w.incomingData(data).handle((v, t) -> aggregator.ack(v, t));
+			
+					//BIG NOTE: WE WANT to LOOP super fast IF dataWriterFuture is complete with a datawriter
+					//and just slam incomingData in BUT tie all those newFutures that are unresolved into the allFutures
+					//allFutures should complete when ALL dataWriterFuture plus the array of 'newFuture' resolves
+					CompletableFuture<Void> newFuture = dataWriterFuture.thenCompose(w -> {
+						return w.incomingData(data);
 					});
 					
+
+					//Need to chain all futures into allFutures
+					allFutures = allFutures.thenCompose(s -> newFuture);
+					
 				} else if(msg instanceof HttpResponse) {
-					future = processResponse((HttpResponse)msg)
-								.handle((w, t) -> aggregator.ack(w, t));
+					dataWriterFuture = processResponse((HttpResponse)msg);
+					
+					//Need to chain all futures into allFutures
+					allFutures = allFutures.thenCompose(s -> dataWriterFuture).thenApply(s -> (Void)null);					
+					
 				} else
 					throw new IllegalStateException("invalid payload received="+msg);
 			}
 			
-			return future2;
+			return allFutures;
 		}
 
 		private CompletableFuture<DataWriter> processResponse(HttpResponse msg) {

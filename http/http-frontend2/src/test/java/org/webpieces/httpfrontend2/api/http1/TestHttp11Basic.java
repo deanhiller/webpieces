@@ -18,6 +18,7 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
+import org.webpieces.httpparser.api.dto.HttpLastData;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -72,12 +73,12 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		
 		List<HttpPayload> frames = mockChannel.getFramesAndClear();
 		Assert.assertEquals(2, frames.size());
-		HttpChunk chunk = (HttpChunk) frames.get(0);
+		HttpData chunk = (HttpData) frames.get(0);
 		DataWrapper body = chunk.getBodyNonNull();
 		String result = body.createStringFromUtf8(0, body.getReadableSize());
 		Assert.assertEquals(bodyStr, result);
 
-		HttpLastChunk last = (HttpLastChunk) frames.get(1);
+		HttpLastData last = (HttpLastData) frames.get(1);
 		Assert.assertEquals(0, last.getBodyNonNull().getReadableSize());
 	}
 	
