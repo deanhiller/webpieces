@@ -1,22 +1,11 @@
 package org.webpieces.httpclient11.impl;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient11.api.DataWriter;
-import org.webpieces.httpclient11.api.HttpDataWriter;
-import org.webpieces.httpclient11.api.HttpFullRequest;
-import org.webpieces.httpclient11.api.HttpFullResponse;
-import org.webpieces.httpclient11.api.HttpResponseListener;
-import org.webpieces.httpclient11.api.HttpSocket;
+import org.webpieces.httpclient11.api.*;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
@@ -27,6 +16,12 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
+
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class HttpSocketImpl implements HttpSocket {
 
@@ -117,7 +112,7 @@ public class HttpSocketImpl implements HttpSocket {
 			return null;
 		});
 	}
-	
+
 	private class MyDataListener implements DataListener {
 		private CompletableFuture<DataWriter> dataWriterFuture;
 
@@ -127,7 +122,7 @@ public class HttpSocketImpl implements HttpSocket {
 
 			memento = parser.parse(memento, wrapper);
 			if(memento.getNumBytesJustParsed() == 0)
-				return CompletableFuture.completedFuture(null); //ack the future as we need more data.  there is nothing to track here			
+				return CompletableFuture.completedFuture(null); //ack the future as we need more data.  there is nothing to track here
 
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 
@@ -137,24 +132,24 @@ public class HttpSocketImpl implements HttpSocket {
 					HttpData data = (HttpData) msg;
 					if(data.isEndOfData())
 						responsesToComplete.poll();
-			
+
 					//BIG NOTE: WE WANT to LOOP super fast IF dataWriterFuture is complete with a datawriter
 					//and just slam incomingData in BUT tie all those newFutures that are unresolved into the allFutures
 					//allFutures should complete when ALL dataWriterFuture plus the array of 'newFuture' resolves
 					CompletableFuture<Void> newFuture = dataWriterFuture.thenCompose(w -> {
 						return w.incomingData(data);
 					});
-					
+
 
 					//Need to chain all futures into allFutures
 					allFutures = allFutures.thenCompose(s -> newFuture);
-					
+
 				} else if(msg instanceof HttpResponse) {
 					dataWriterFuture = processResponse((HttpResponse)msg);
-					
+
 					//Need to chain all futures into allFutures
-					allFutures = allFutures.thenCompose(s -> dataWriterFuture).thenApply(s -> (Void)null);					
-					
+					allFutures = allFutures.thenCompose(s -> dataWriterFuture).thenApply(s -> (Void)null);
+
 				} else
 					throw new IllegalStateException("invalid payload received="+msg);
 			}

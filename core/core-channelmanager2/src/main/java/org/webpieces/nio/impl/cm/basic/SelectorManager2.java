@@ -31,6 +31,7 @@ import java.nio.channels.SelectionKey;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,18 +98,18 @@ public class SelectorManager2 implements SelectorListener {
 	
 	public CompletableFuture<Void> registerServerSocketChannel(BasTCPServerChannel s, ConnectionListener listener) 
 					throws IOException, InterruptedException {
-		return asyncRegister(s, SelectionKey.OP_ACCEPT, listener);
+		return asyncRegister(s, SelectionKey.OP_ACCEPT, listener, () -> true);
 	}
 	public CompletableFuture<Channel> registerChannelForConnect(final RegisterableChannelImpl s)
 					throws IOException, InterruptedException {
 		CompletableFuture<Channel> future = new CompletableFuture<Channel>();
-		registerSelectableChannel(s, SelectionKey.OP_CONNECT, future);
+		registerSelectableChannel(s, SelectionKey.OP_CONNECT, future, () -> true);
 		return future;
 	}
 	
-	public CompletableFuture<Void> registerChannelForRead(final RegisterableChannelImpl s, final DataListener listener)
+	public CompletableFuture<Void> registerChannelForRead(final RegisterableChannelImpl s, final DataListener listener, Supplier<Boolean> shouldRegister)
 					throws IOException, InterruptedException {
-		return registerSelectableChannel(s, SelectionKey.OP_READ, listener);
+		return registerSelectableChannel(s, SelectionKey.OP_READ, listener, shouldRegister);
 	}
 	public CompletableFuture<Void> unregisterChannelForRead(BasChannelImpl c) throws IOException, InterruptedException {
 		return unregisterSelectableChannel(c, SelectionKey.OP_READ);
@@ -127,7 +128,7 @@ public class SelectorManager2 implements SelectorListener {
 			return asynchUnregister(channel, ops);			
 	}
 	
-	CompletableFuture<Void> registerSelectableChannel(final RegisterableChannelImpl s, final int validOps, final Object listener) {	
+	CompletableFuture<Void> registerSelectableChannel(final RegisterableChannelImpl s, final int validOps, final Object listener, Supplier<Boolean> shouldRegister) {	
 		if(stopped)  {
 			CompletableFuture<Void> future = new CompletableFuture<Void>();
 			future.completeExceptionally(new IllegalStateException("This chanMgr is stopped")); //do nothing if stopped
@@ -135,14 +136,14 @@ public class SelectorManager2 implements SelectorListener {
 		} else if(!isRunning())
 			throw new IllegalStateException("ChannelMgr is not running, call ChannelManager.start first");
 		else if(Thread.currentThread().equals(selector.getThread())) {
-			registerChannelOnThisThread(s, validOps, listener);
+			registerChannelOnThisThread(s, validOps, listener, shouldRegister);
 			return CompletableFuture.completedFuture(null);
 		} else
-			return asyncRegister(s, validOps, listener);
+			return asyncRegister(s, validOps, listener, shouldRegister);
 	}
 
 	private void registerChannelOnThisThread(
-			RegisterableChannelImpl channel, int validOps, Object listener) {
+			RegisterableChannelImpl channel, int validOps, Object listener, Supplier<Boolean> shouldRegister) {
 		if(channel == null)
 			throw new IllegalArgumentException("cannot register a null channel");
 		else if(!Thread.currentThread().equals(selector.getThread()))
@@ -151,6 +152,9 @@ public class SelectorManager2 implements SelectorListener {
 			return; //do nothing if the channel is closed
 		else if(!selector.isRunning())
 			return; //do nothing if the selector is not running
+		
+		if(!shouldRegister.get())
+			return;	
 		
 		ChannelInfo struct;
 		
@@ -210,7 +214,7 @@ public class SelectorManager2 implements SelectorListener {
 	}
 	
 	private CompletableFuture<Void> asyncRegister(
-			final RegisterableChannelImpl s, final int validOps, final Object listener) {
+			final RegisterableChannelImpl s, final int validOps, final Object listener, final Supplier<Boolean> causedByBackPressureForReads) {
 		if(s.isBlocking()) 
 			throw new IllegalArgumentException(s+"Only non-blocking selectable channels can be used.  " +
 					"please call SelectableChannel.configureBlocking before passing in the channel");
@@ -227,7 +231,7 @@ public class SelectorManager2 implements SelectorListener {
 			public void run() {
 //				if((validOps & SelectionKey.OP_READ) > 0)
 //					log.info("really registering for reads");
-				registerChannelOnThisThread(s, validOps, listener);
+				registerChannelOnThisThread(s, validOps, listener, causedByBackPressureForReads);
 			}
 		};
 		

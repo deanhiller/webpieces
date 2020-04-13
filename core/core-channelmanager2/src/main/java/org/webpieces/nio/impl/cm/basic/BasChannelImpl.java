@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +56,11 @@ public abstract class BasChannelImpl
 	protected ChannelState channelState;
 
 	private boolean isRemoteEndInitiateClose;
-	private int unackedBytes;
 	private Integer maxUnackedBytes;
 	private Integer readingThreshold;
+
+	private AtomicInteger unackedBytes = new AtomicInteger(0);
+	private AtomicReference<BackflowState1> backflowState = new AtomicReference<>(BackflowState1.REGISTERED);
 
 	public BasChannelImpl(String id, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config) {
 		super(id, selMgr);
@@ -204,7 +209,7 @@ public abstract class BasChannelImpl
 	private void registerForWrites() {
         if(log.isTraceEnabled())
 			log.trace(this+"registering channel for write msg. size="+dataToBeWritten.size());
-        selMgr.registerSelectableChannel(this, SelectionKey.OP_WRITE, null);
+        selMgr.registerSelectableChannel(this, SelectionKey.OP_WRITE, null, () -> true);
 	}
        
     /**
@@ -298,10 +303,10 @@ public abstract class BasChannelImpl
     
     CompletableFuture<Void> registerForReads(DataListener l) {
     	this.dataListener = l;
-    	return registerForReads();
+    	return registerForReads(() -> true);
     }
     
-	public CompletableFuture<Void> registerForReads() {
+	public CompletableFuture<Void> registerForReads(Supplier<Boolean> shouldRegister) {
 		if(dataListener == null)
 			throw new IllegalArgumentException(this+"listener cannot be null");
 		else if(channelState != ChannelState.CONNECTED) {
@@ -313,7 +318,7 @@ public abstract class BasChannelImpl
 			apiLog.trace(this+"Basic.registerForReads called");
 		
         try {
-			return selMgr.registerChannelForRead(this, dataListener);
+			return selMgr.registerChannelForRead(this, dataListener, shouldRegister);
 		} catch (IOException e) {
 			throw new NioException(e);
 		} catch (InterruptedException e) {
@@ -379,16 +384,11 @@ public abstract class BasChannelImpl
     	return session;
     }
 
-	public int addUnackedByteCount(int bytes) {
-		unackedBytes += bytes;
-		return unackedBytes;
-	}
-
-	public boolean isOverMaxUnacked() {
+	public boolean isOverMaxUnacked(int unackedBytes) {
 		return unackedBytes >= maxUnackedBytes;
 	}
 
-	public boolean isUnderThreshold() {
+	public boolean isUnderThreshold(int unackedBytes) {
 		if(unackedBytes <= readingThreshold)
 			return true;
 		return false;
@@ -401,5 +401,12 @@ public abstract class BasChannelImpl
 	public int getReadThreshold() {
 		return readingThreshold;
 	}
-	
+
+	public AtomicInteger getUnackedBytes() {
+    	return unackedBytes;
+	}
+
+	public AtomicReference<BackflowState1> getCompareSetBackflowState() {
+    	return backflowState;
+	}
 }

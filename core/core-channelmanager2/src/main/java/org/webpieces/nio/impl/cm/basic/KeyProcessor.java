@@ -1,5 +1,18 @@
 package org.webpieces.nio.impl.cm.basic;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.BufferPool;
+import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.channels.ChannelSession;
+import org.webpieces.nio.api.channels.RegisterableChannel;
+import org.webpieces.nio.api.exceptions.NioException;
+import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.jdk.JdkSelect;
+
 import java.io.IOException;
 import java.net.PortUnreachableException;
 import java.nio.ByteBuffer;
@@ -7,22 +20,13 @@ import java.nio.channels.CancelledKeyException;
 import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.webpieces.data.api.BufferPool;
-import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.exceptions.NioException;
-import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.nio.api.jdk.JdkSelect;
-
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.MeterRegistry;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public final class KeyProcessor {
@@ -39,8 +43,8 @@ public final class KeyProcessor {
 	private Counter connectionErrors;
 	private Counter specialConnectionErrors;
 	private DistributionSummary payloadSize;
-	private Counter unregisteredSocket;
-	private Counter registeredSocket;
+	private Counter backPressureUnregisterSocket;
+	private Counter backPressureRegisterSocket;
 	private DistributionSummary backupSize;
 	private Counter readErrorType1Close;
 	private Counter readErrorType2Close;
@@ -52,8 +56,8 @@ public final class KeyProcessor {
 		connectionOpen = metrics.counter(id+".connections.opened");
 		connectionErrors = metrics.counter(id+".connections.errors");
 		specialConnectionErrors = metrics.counter(id+".connections.errors2");
-		unregisteredSocket = metrics.counter(id+".connections.unregistered");
-		registeredSocket = metrics.counter(id+".connections.registered");
+		backPressureUnregisterSocket = metrics.counter(id+".connections.backpressure.unregistered");
+		backPressureRegisterSocket = metrics.counter(id+".connections.backpressure.register");
 		readErrorType1Close = metrics.counter(id+".connections.readerror1");
 		readErrorType2Close = metrics.counter(id+".connections.readerror2");
 
@@ -108,15 +112,15 @@ public final class KeyProcessor {
 				//CancelledKeyException on linux so the tests don't fail
 				RegisterableChannel fChannel = channel;
 				if(log.isTraceEnabled())
-					log.trace(fChannel+"Processing of key failed, but continuing channel manager loop", e);
+					log.trace(fChannel+" Processing of key failed, but continuing channel manager loop", e);
 			} catch(Throwable e) {
 				connectionErrors.increment();
 				
-				log.error(channel+"Processing of key failed, but continuing channel manager loop", e);
+				log.error(channel+" Processing of key failed, but continuing channel manager loop", e);
 				try {
 					key.cancel();
 				} catch(Throwable ee) {
-					log.info(channel+"cancelling key failed.  exception type="+ee.getClass()+" msg="+ee.getMessage());
+					log.info(channel+" cancelling key failed.  exception type="+ee.getClass()+" msg="+ee.getMessage());
 				}
 			}
 		}
@@ -131,7 +135,7 @@ public final class KeyProcessor {
 	
 	private void processKey(SelectionKey key, ChannelInfo info) throws IOException, InterruptedException {
 		if(log.isTraceEnabled())
-			log.trace(key.attachment()+"proccessing");
+			log.trace(key.attachment()+" proccessing");
 
 		//This is code to try to avoid the CancelledKeyExceptions as it makes the chances tighter
 		if(!selector.isChannelOpen(key) || !key.isValid())
@@ -161,7 +165,7 @@ public final class KeyProcessor {
 	// and we pass key and the Channel.  We can cast to the proper one.
 	private void acceptSocket(SelectionKey key, ChannelInfo info) throws IOException {
 		if(log.isTraceEnabled())
-			log.trace(info.getChannel()+"Incoming Connection="+key);
+			log.trace(info.getChannel()+" Incoming Connection="+key);
 		
 		BasTCPServerChannel channel = (BasTCPServerChannel)info.getChannel();
 		channel.accept(channel.getChannelCount());
@@ -169,7 +173,7 @@ public final class KeyProcessor {
 	
 	private void connect(SelectionKey key, ChannelInfo info) throws IOException {
 		if(log.isTraceEnabled())
-			log.trace(info.getChannel()+"finishing connect process");
+			log.trace(info.getChannel()+" finishing connect process");
 		
 		CompletableFuture<Channel> callback = info.getConnectCallback();
 		BasTCPChannel channel = (BasTCPChannel)info.getChannel();
@@ -204,11 +208,11 @@ public final class KeyProcessor {
 		
 		try {
             if(logBufferNextRead)
-            	log.info(channel+"buffer="+chunk);
+            	log.info(channel+" buffer="+chunk);
             int bytes = channel.readImpl(chunk);
             if(logBufferNextRead) {
             	logBufferNextRead = false;
-            	log.info(channel+"buffer2="+chunk);                	
+            	log.info(channel+" buffer2="+chunk);
             }
 
             processBytes(key, info, chunk, bytes);
@@ -340,42 +344,35 @@ public final class KeyProcessor {
 
 	private void fireIncomingRead(SelectionKey key, int bytes, DataListener in, BasChannelImpl channel, ByteBuffer b) {
 		payloadSize.record(bytes);
-		
-		CompletableFuture<Void> future = in.incomingData(channel, b);
+
 		boolean unregister = false;
+		CompletableFuture<Void> future = in.incomingData(channel, b);
 		int unackedByteCnt = 0;
-		synchronized(channel) {
-			if(channel.getMaxUnacked() != null) {
-				unackedByteCnt = channel.addUnackedByteCount(bytes);				
-				backupSize.record(unackedByteCnt);
-				
-				if(channel.isOverMaxUnacked()) {
-					unregister = true;
-				}
+		AtomicReference<BackflowState1> connectionState = channel.getCompareSetBackflowState();
+		if(channel.getMaxUnacked() != null) {
+			//backpressure is ENABLED since it has a value
+			AtomicInteger counter = channel.getUnackedBytes();
+			unackedByteCnt = counter.addAndGet(bytes);
+			backupSize.record(unackedByteCnt);
+
+			if(channel.isOverMaxUnacked(unackedByteCnt)) {
+				unregister = connectionState.compareAndSet(BackflowState1.REGISTERED, BackflowState1.UNREGISTERED);
 			}
 		}
 
 		if(unregister) {
-			unregisteredSocket.increment();
-			log.warn(channel+"Overloaded channel.  unregistering until YOU catch up you slowass(lol). num="+unackedByteCnt+" max="+channel.getMaxUnacked());
+			backPressureUnregisterSocket.increment();
+			log.warn(channel + " Overloaded channel.  unregistering until YOU catch up you slowass(lol). num=" + unackedByteCnt + " max=" + channel.getMaxUnacked());
 			unregisterSelectableChannel(channel, SelectionKey.OP_READ);
 		}
 
 		future.handle((v, t) -> {
-			boolean register = false;
-			int unackedCnt;
-			synchronized(channel) {
-				unackedCnt = channel.addUnackedByteCount(-bytes);
-				backupSize.record(unackedCnt);
-				if(!isReading(key) && channel.isUnderThreshold()) {
-					register = true;
-				}
-			}
+			AtomicInteger counter = channel.getUnackedBytes();
+			int unackedCnt = counter.addAndGet(-bytes);
+			//addUnackedBytes(channel.getSession(), false, -bytes, unackedCnt);
 
-			if(register) {
-				registeredSocket.increment();
-				log.warn(channel+"BOOM. you caught back up, reregistering for reads now. unackedCnt="+unackedCnt+" readThreshold="+channel.getReadThreshold());
-				channel.registerForReads();
+			if(channel.isUnderThreshold(unackedCnt) && connectionState.get() == BackflowState1.UNREGISTERED) {
+				channel.registerForReads(() -> shouldRegister(channel));
 			}
 			
 			if(t != null)
@@ -384,11 +381,28 @@ public final class KeyProcessor {
 		});
 	}
 
-    private boolean isReading(SelectionKey key) {
-    	if((key.interestOps() & SelectionKey.OP_READ) > 0)
-    		return true;
-    	return false;
-    }
+	//We ONLY do registers/unregisters ON the SINGLE selector thread.
+	//soooo, this function has to be given to the selector thread to run...
+	private Boolean shouldRegister(BasChannelImpl basicChannel) {
+		//  Because backpressure register socket is 
+		//triggered from another thread.  We need to check the state of things to make sure we still want to register or not
+		int unackedBytes = basicChannel.getUnackedBytes().get();
+		if(!basicChannel.isUnderThreshold(unackedBytes)) {
+			log.warn("PSYCH....you thought you were caught up and are not!!!!!!   unackedBytes="+unackedBytes+" > readLevel="+basicChannel.getReadThreshold());
+			return false; //don't register, we are NOT caught up (not sure how this happens)
+		}
+
+		AtomicReference<BackflowState1> connectionState = basicChannel.getCompareSetBackflowState();
+		boolean unregister = connectionState.compareAndSet(BackflowState1.UNREGISTERED, BackflowState1.REGISTERED);
+		if(!unregister) {
+			//There may be 1-N calls to channel.registerForReads(() -> checkForUnregister(channel)); BUT we only need to process register ONCE 
+			return false;
+		}
+
+		backPressureRegisterSocket.increment();
+		log.warn(basicChannel+" BOOM. you caught back up, reregistering for reads now. unackedCnt="+unackedBytes+" readThreshold="+basicChannel.getReadThreshold());
+		return true;
+	}
     
 	private void write(SelectionKey key, ChannelInfo info) throws IOException, InterruptedException {
 		if(log.isTraceEnabled())
@@ -419,7 +433,7 @@ public final class KeyProcessor {
 		int opsNow = previous & ~ops; //subtract out the operation
 		key.interestOps(opsNow);
 		
-		//log.info("unregistering="+Helper.opType(opsNow)+" opToSubtract="+Helper.opType(ops)+" previous="+Helper.opType(previous)+" type="+type);
+		//log.info(channel+" unregistering="+Helper.opType(opsNow)+" opToSubtract="+Helper.opType(ops)+" previous="+Helper.opType(previous)+" type="+type);
 		
 		//make sure we remove the appropriate listener and clean up
 		if(key.attachment() != null) {
