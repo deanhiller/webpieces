@@ -11,6 +11,7 @@ import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.util.filters.ExceptionUtil;
 
 public class Layer1ServerListener implements AsyncDataListener {
 	private static final Logger log = LoggerFactory.getLogger(Layer1ServerListener.class);
@@ -43,37 +44,43 @@ public class Layer1ServerListener implements AsyncDataListener {
 		case HTTP1_1:
 			return http11Handler.incomingData(socket, b);
 		case UNKNOWN:
-			initialData(b, socket);
-			return CompletableFuture.completedFuture(null);
+			return initialData(b, socket);
 		default:
 			throw new IllegalStateException("Unknown protocol="+socket.getProtocol());
 		}
 	}
 
-	private void initialData(ByteBuffer b, FrontendSocketImpl socket) {
+	private CompletableFuture<Void> initialData(ByteBuffer b, FrontendSocketImpl socket) {
 		
-		InitiationResult initialData;
-		try {
-			initialData = http11Handler.initialData(socket, b);
-		} catch(ParseException e) {
-			log.info("Parse exception on initial connection", e);
+		CompletableFuture<InitiationResult> future = ExceptionUtil.wrap( () -> http11Handler.initialData(socket, b));
+		future.exceptionally( t -> {
 			socket.close("reason not needed");
-			return;
-		}
+			return null;
+		});
+
+		return future.thenCompose( initialData -> {
 		
-		if(initialData == null)
-			return; //nothing to do, we don't know protocol yet
-		else if(initialData.getInitialStatus() == InitiationStatus.HTTP1_1) {
-			socket.setProtocol(ProtocolType.HTTP1_1);
-		} else if(initialData.getInitialStatus() == InitiationStatus.PREFACE) {
-			socket.setProtocol(ProtocolType.HTTP2);
-			http2Handler.initialize(socket);
-			
-			//process any leftover data next
-			http2Handler.incomingData(socket, initialData.getLeftOverData());
-		} else {
-			throw new UnsupportedOperationException("Did not implement case="+initialData.getInitialStatus()+" yet");
-		}
+			if(initialData == null)
+				return CompletableFuture.completedFuture(null); //nothing to do, we don't know protocol yet
+			else if(initialData.getInitialStatus() == InitiationStatus.HTTP1_1) {
+				socket.setProtocol(ProtocolType.HTTP1_1);
+				return CompletableFuture.completedFuture(null);
+			} else if(initialData.getInitialStatus() == InitiationStatus.PREFACE) {
+				socket.setProtocol(ProtocolType.HTTP2);
+				CompletableFuture<Void> initFuture = http2Handler.initialize(socket);
+				
+				//process any leftover data next
+				CompletableFuture<Void> dataFuture = http2Handler.incomingData(socket, initialData.getLeftOverData());
+				
+				return initFuture.thenCompose(s -> dataFuture);
+				
+			} else {
+				throw new UnsupportedOperationException("Did not implement case="+initialData.getInitialStatus()+" yet");
+			}
+		
+		});
+		
+		
 	}
 
 	@Override

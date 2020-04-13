@@ -28,12 +28,12 @@ public class Layer2Http2Handler {
 		this.httpListener = httpListener;
 	}
 
-	public void initialize(FrontendSocketImpl socket) {
+	public CompletableFuture<Void> initialize(FrontendSocketImpl socket) {
 		Layer3Http2EngineListener listener = new Layer3Http2EngineListener(socket, httpListener);
 		Http2ServerEngine engine = svrEngineFactory.createEngine(socket+"", listener);
 		socket.setHttp2Engine(engine);
 		
-		engine.intialize();
+		return engine.intialize();
 	}
 	
 	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer b) {

@@ -34,18 +34,17 @@ public class Layer2Http11Handler {
 	private HttpParser httpParser;
 	private StreamListener httpListener;
 	private AtomicInteger counter = new AtomicInteger(1);
-	private ByteAckTracker tracker2 = new ByteAckTracker();
 
 	public Layer2Http11Handler(HttpParser httpParser, StreamListener httpListener) {
 		this.httpParser = httpParser;
 		this.httpListener = httpListener;
 	}
 
-	public InitiationResult initialData(FrontendSocketImpl socket, ByteBuffer buf) {
-			return initialDataImpl(socket, buf);
+	public CompletableFuture<InitiationResult> initialData(FrontendSocketImpl socket, ByteBuffer buf) {
+		return initialDataImpl(socket, buf);
 	}
 	
-	public InitiationResult initialDataImpl(FrontendSocketImpl socket, ByteBuffer buf) {
+	public CompletableFuture<InitiationResult> initialDataImpl(FrontendSocketImpl socket, ByteBuffer buf) {
 		
 		Memento state = socket.getHttp11ParseState();
 		int newDataSize = buf.remaining();
@@ -55,26 +54,21 @@ public class Layer2Http11Handler {
 		//IF we are receiving a preface, there will ONLY be ONE message AND leftover data
 		InitiationResult result = checkForPreface(socket, state);
 		if(result != null)
-			return result;
+			return CompletableFuture.completedFuture(result);
 
 		//TODO: check for EXACTLY ONE http request AND check if it is an h2c header with Http-Settings header!!!!
 		//if so, return that initiation result and start using the http2 code
 		
 		//if we get this far, we now know we are http1.1
 		if(state.getParsedMessages().size() > 0) {
-			processWithBackpressure(socket, newDataSize, numBytesRead)
-				.exceptionally(t -> logException(t));
-			return new InitiationResult(InitiationStatus.HTTP1_1);
-		} else {
-			tracker2.addBytesToTrack(newDataSize);
+			CompletableFuture<Void> fut = processWithBackpressure(socket, newDataSize, numBytesRead);
+			
+			return fut.thenApply(s -> {
+				return new InitiationResult(InitiationStatus.HTTP1_1);				
+			});
 		}
 		
-		return null; // we don't know yet(not enough data)
-	}
-	
-	private Void logException(Throwable t) {
-		log.error("exception", t);
-		return null;
+		return CompletableFuture.completedFuture(null);
 	}
 
 	private InitiationResult checkForPreface(FrontendSocketImpl socket, Memento state) {
@@ -104,21 +98,20 @@ public class Layer2Http11Handler {
 	public CompletableFuture<Void> processWithBackpressure(
 			FrontendSocketImpl socket, int newDataSize, int numBytesRead) {
 		
-		CompletableFuture<Void> future2 = tracker2.addBytesToTrack(newDataSize);
-		
 		Memento state = socket.getHttp11ParseState();
 		List<HttpPayload> parsed = state.getParsedMessages();
 		
-		AckAggregator aggregator = new AckAggregator(parsed.size(), numBytesRead, tracker2);
-
 		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 		for(HttpPayload payload : parsed) {
-			future = future.thenCompose(w -> {
-				return processCorrectly(socket, payload);
-			}).handle((v, t) -> aggregator.ack(v, t));
+			CompletableFuture<Void> fut = processCorrectly(socket, payload);
+			
+			//done afterwards sooo, the loop will SLAM through the payloads gathering up the
+			//futures and chaining them.  IF you chain them above, then each processCorrectly call
+			//has to wait for previous future to resolve
+			future = future.thenCompose(s -> fut);
 		}
 		
-		return future2;
+		return future;
 	}
 
 	private Memento parse(FrontendSocketImpl socket, ByteBuffer buf) {

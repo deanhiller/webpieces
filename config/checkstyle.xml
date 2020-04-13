@@ -18,7 +18,7 @@ page at http://checkstyle.sourceforge.net/config.html -->
   </module-->
 
   <module name="FileLength">
-    <property name="max" value="783"/>
+    <property name="max" value="897"/>
     <property name="fileExtensions" value=".java"/>    
   </module>
 

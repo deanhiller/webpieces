@@ -42,47 +42,39 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 		List<ByteBuffer> buffers = create4SplitPayloads();
 		
 		CompletableFuture<Void> ackBytePayload1 = mockChannel.sendToSvr(buffers.get(0));
-		Assert.assertFalse(ackBytePayload1.isDone());
+		Assert.assertTrue(ackBytePayload1.isDone());//not enough data.  parser consumes and acks future for more data(no client ack needed right now)
 		
 		CompletableFuture<StreamWriter> ackRequest = new CompletableFuture<StreamWriter>();
 		mockListener.addMockStreamToReturn(ackRequest);
 		CompletableFuture<Void> ackBytePayload2 = mockChannel.sendToSvr(buffers.get(1));
-		Assert.assertFalse(ackBytePayload1.isDone());
 		Assert.assertFalse(ackBytePayload2.isDone());
 
 		ackRequest.complete(mockStreamWriter); //This releases the response msg acking 10 bytes
-		ackBytePayload1.get(2, TimeUnit.SECONDS);
-		Assert.assertFalse(ackBytePayload2.isDone());
+		Assert.assertTrue(ackBytePayload2.isDone());
 		
 		//feed the rest of first chunk in and feed part of last chunk
 		CompletableFuture<Void> firstChunkAck = new CompletableFuture<Void>();
 		mockStreamWriter.addProcessResponse(firstChunkAck);	
 		CompletableFuture<Void> ackBytePayload3 = mockChannel.sendToSvr(buffers.get(2));
-
-		Assert.assertFalse(ackBytePayload2.isDone());
 		Assert.assertFalse(ackBytePayload3.isDone());
 		
 		firstChunkAck.complete(null); //ack the http chunk packet
+		Assert.assertTrue(ackBytePayload3.isDone());
 		
-		ackBytePayload2.get(2, TimeUnit.SECONDS);
-		Assert.assertFalse(ackBytePayload3.isDone());
-
 		CompletableFuture<Void> lastChunkAck = new CompletableFuture<Void>();
 		mockStreamWriter.addProcessResponse(lastChunkAck);			
 		CompletableFuture<Void> ackBytePayload4 = mockChannel.sendToSvr(buffers.get(3));
-		Assert.assertFalse(ackBytePayload3.isDone());
 		Assert.assertFalse(ackBytePayload4.isDone());
 		
 		lastChunkAck.complete(null);
-		
-		ackBytePayload3.get(2, TimeUnit.SECONDS);
-		ackBytePayload4.get(2, TimeUnit.SECONDS);
+		Assert.assertTrue(ackBytePayload4.isDone());
 	}
 	
 	private void initialize() throws InterruptedException, ExecutionException, TimeoutException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 
-		mockChannel.sendToSvr(req);		
+		CompletableFuture<Void> future2 = mockChannel.sendToSvrAsync(req);
+		Assert.assertTrue(future2.isDone()); //The default return was a completed future so no backpressure here
 		PassedIn in1 = mockListener.getSingleRequest();
 		
 		HttpResponse resp1 = Requests.createResponse(1);
@@ -101,38 +93,41 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 		List<ByteBuffer> buffers = create4SplitPayloads();
 		
 		CompletableFuture<Void> ackBytePayload1 = mockChannel.sendToSvr(buffers.get(0));
-		//server side, backpressure ONLY starts working after first request headers fully processed as it has to determine
-		//the protocol
 		ackBytePayload1.get(2, TimeUnit.SECONDS);
 		
 		CompletableFuture<StreamWriter> ackRequest = new CompletableFuture<StreamWriter>();
 		mockListener.addMockStreamToReturn(ackRequest);
 		CompletableFuture<Void> ackBytePayload2 = mockChannel.sendToSvr(buffers.get(1));
-		ackBytePayload2.get(2, TimeUnit.SECONDS); //not resolved yet since client only has part of the data
+		//have to ack TWO...the stream writer AND the first HttpData fed in
+		Assert.assertFalse(ackBytePayload2.isDone()); 
+
+		CompletableFuture<Void> firstChunkAck1 = new CompletableFuture<Void>();		
+		mockStreamWriter.addProcessResponse(firstChunkAck1);
+		ackRequest.complete(mockStreamWriter);
+		Assert.assertFalse(ackBytePayload2.isDone());
+
+		firstChunkAck1.complete(null);
+		Assert.assertTrue(ackBytePayload2.isDone());
+		
+
+		
 		
 		//feed the rest of first chunk in and feed part of last chunk
 		CompletableFuture<Void> firstChunkAck = new CompletableFuture<Void>();
 		mockStreamWriter.addProcessResponse(firstChunkAck);	
 		CompletableFuture<Void> ackBytePayload3 = mockChannel.sendToSvr(buffers.get(2));
-
-		ackRequest.complete(mockStreamWriter);
-
 		Assert.assertFalse(ackBytePayload3.isDone());
-		
+
 		firstChunkAck.complete(null); //ack the http chunk packet
-		
-		ackBytePayload2.get(2, TimeUnit.SECONDS);
-		Assert.assertFalse(ackBytePayload3.isDone());
+		Assert.assertTrue(ackBytePayload3.isDone());
 
 		CompletableFuture<Void> lastChunkAck = new CompletableFuture<Void>();
 		mockStreamWriter.addProcessResponse(lastChunkAck);			
 		CompletableFuture<Void> ackBytePayload4 = mockChannel.sendToSvr(buffers.get(3));
-		Assert.assertFalse(ackBytePayload3.isDone());
 		Assert.assertFalse(ackBytePayload4.isDone());
 		
 		lastChunkAck.complete(null);
 		
-		ackBytePayload3.get(2, TimeUnit.SECONDS);
 		ackBytePayload4.get(2, TimeUnit.SECONDS);
 	}
 
