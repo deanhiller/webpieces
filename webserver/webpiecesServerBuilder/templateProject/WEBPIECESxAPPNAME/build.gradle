@@ -54,22 +54,6 @@ compileJava.doLast {
    logger.warn("processed resources="+sourceSets.main.output.resourcesDir)
 }
 
-    //ok, this is the deal here.  JPA/hibernate made the decision to look for a persistence.xml file
-    //and scan for classes with @Entity in the directory OR jar with that xml file only
-    //maven(and I hate this) a long time ago separated src/main/java and src/main/resources but
-    //this screws tools in many situations like this one so this puts it back so the output is at
-    //least put to the same location
-    //sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
-
-task copyPersistenceXml(type: Copy, dependsOn: 'compileTestJava') {
-    from 'src/main/resources/META-INF'
-    into 'output/classes/java/main/META-INF'
-    include 'persistence.xml'
-    //outputs.upToDateWhen { false }
-}
-
-test.dependsOn ("copyPersistenceXml")
-
 test {
     if (!project.hasProperty('includeSelenium')) {
         exclude '**/*Selenium*'

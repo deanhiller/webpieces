@@ -5,7 +5,6 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;

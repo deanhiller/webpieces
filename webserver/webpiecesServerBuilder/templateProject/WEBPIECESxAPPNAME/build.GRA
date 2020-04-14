@@ -40,22 +40,6 @@ if (System.getProperty('idea.active')) {
     }
 }
 
-//ok, this is the deal here.  JPA/hibernate made the decision to look for a persistence.xml file
-//and scan for classes with @Entity in the directory OR jar with that xml file only
-//maven(and I hate this) a long time ago separated src/main/java and src/main/resources but
-//this screws tools in many situations like this one so this puts it back so the output is at
-//least put to the same location
-//sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
-
-task copyPersistenceXml(type: Copy, dependsOn: 'compileTestJava') {
-    from 'src/main/resources/META-INF'
-    into 'output/classes/java/main/META-INF'
-    include 'persistence.xml'
-    //outputs.upToDateWhen { false }
-}
-
-test.dependsOn ("copyPersistenceXml")
-
 dependencies {
   //add maven dependencies here
   compile deps['web-webserver']
@@ -105,8 +89,6 @@ jar {
 
 mainClassName = "webpiecesxxxxxpackage.Server"
 applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
-
-build.dependsOn 'assembleDist'
 
 //Here, we must modify the start scripts to set cd to user.dir correctly as setting user.dir does NOT work
 //as new File("relative") ignores user.dir and uses something else.  We do this such that user.dir IS
