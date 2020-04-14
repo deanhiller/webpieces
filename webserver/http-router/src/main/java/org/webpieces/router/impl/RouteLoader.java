@@ -1,22 +1,13 @@
 package org.webpieces.router.impl;
 
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.util.Modules;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppConfig;
@@ -38,11 +29,18 @@ import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.threading.SafeRunnable;
 
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.util.Modules;
-
-import io.micrometer.core.instrument.MeterRegistry;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Singleton
 public class RouteLoader {
@@ -67,7 +65,7 @@ public class RouteLoader {
 	private RoutingHolder routingHolder;
 	private Module theModule;
 	private ObjectToParamTranslator reverseTranslator;
-	private MeterRegistry metrics;
+	private MeterRegistry appMetricsOnly;
 	private WebInjector webInjector;
 
 	@Inject
@@ -81,7 +79,7 @@ public class RouteLoader {
 		RouteBuilderLogic routeBuilderLogic,
 		RedirectFormation portLookup,
 		ObjectToParamTranslator reverseTranslator,
-		MeterRegistry metrics,
+		@Named(RouterSvcFactory.APP_METRICS_KEY) MeterRegistry appMetricsOnly,
 		WebInjector webInjector
 	) {
 		this.config = config;
@@ -93,7 +91,7 @@ public class RouteLoader {
 		this.routeBuilderLogic = routeBuilderLogic;
 		this.redirectFormation = portLookup;
 		this.reverseTranslator = reverseTranslator;
-		this.metrics = metrics;
+		this.appMetricsOnly = appMetricsOnly;
 		this.webInjector = webInjector;
 	}
 	
@@ -226,7 +224,7 @@ public class RouteLoader {
 		});
 				
 		guiceModules.add(new WebpiecesToAppBindingModule(
-				routingHolder, beanMeta, objectTranslator, scheduler, metrics));
+				routingHolder, beanMeta, objectTranslator, scheduler, appMetricsOnly));
 		
 		Module module = Modules.combine(guiceModules);
 		

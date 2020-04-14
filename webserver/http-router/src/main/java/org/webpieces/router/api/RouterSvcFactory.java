@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.inject.*;
+import com.google.inject.Module;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
@@ -11,15 +14,17 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.common.collect.Lists;
-import com.google.inject.Binder;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 public class RouterSvcFactory {
-	
+
+	public static final String APP_METRICS_KEY = "app.metrics";
+	public static final String PLATFORM_METRICS_KEY = "platform.metrics";
+
     protected RouterSvcFactory() {}
 
     public static RouterService create(MeterRegistry metrics, VirtualFile routersFile) {
@@ -59,6 +64,21 @@ public class RouterSvcFactory {
 
 		public MetricModule(MeterRegistry metrics) {
 			this.metrics = metrics;
+		}
+
+		@Singleton
+		@Provides
+		@Named(RouterSvcFactory.PLATFORM_METRICS_KEY)
+		public MeterRegistry providePlatformMetrics(MeterRegistry base) {
+			//install a default for platform metrics...
+			return base;
+		}
+
+		@Singleton
+		@Provides
+		@Named(RouterSvcFactory.APP_METRICS_KEY)
+		public MeterRegistry provideAppMetrics(MeterRegistry base) {
+			return base;
 		}
 
 		@Override

@@ -19,6 +19,7 @@ import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.cmdline2.Arguments;
@@ -64,14 +65,30 @@ public class WebServerModule implements Module {
 		httpsAddress = args.createOptionalInetArg(HTTPS_PORT_KEY, ":8443", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
 		backendAddress = args.createOptionalInetArg(BACKEND_PORT_KEY, null, "Http(s) host&port for backend.  syntax: {host}:{port} or just :{port}.  Also, null means put the pages on the https/http ports");
 	}
-	
+
+	@Singleton
+	@Provides
+	public MeterRegistry provideBaseMetrics() {
+		return new SimpleMeterRegistry();
+	}
+
+	@Singleton
+	@Provides
+	@Named(RouterSvcFactory.PLATFORM_METRICS_KEY)
+	public MeterRegistry providePlatformMetrics(MeterRegistry base) {
+		//install a default for platform metrics...
+		return base;
+	}
+
+	@Singleton
+	@Provides
+	@Named(RouterSvcFactory.APP_METRICS_KEY)
+	public MeterRegistry provideAppMetrics(MeterRegistry base) {
+		return base;
+	}
+
 	@Override
 	public void configure(Binder binder) {
-		//install a default for metrics...
-		CompositeMeterRegistry metrics = new CompositeMeterRegistry();
-		metrics.add(new SimpleMeterRegistry());
-		binder.bind(MeterRegistry.class).toInstance(metrics);
-		
 		binder.bind(WebServer.class).to(WebServerImpl.class);
 
 		binder.bind(WebServerConfig.class).toInstance(config);
