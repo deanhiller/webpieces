@@ -69,3 +69,12 @@ echo "IMPORTANT: Next go cd ../webpiecesexample-all and run git status and git d
 echo "THEN, undo the build.gradle version number, the securekey, and the README usually and leave everything else"
 echo "THEN, check it in and commit with the message of this version you just released $@"
 echo "###################################"
+
+echo "###########################################################################"
+echo "###########################################################################"
+echo "###########################################################################"
+echo "       DO NOT FORGET, git commit webpiecesexample-all with $@"
+echo "###########################################################################"
+echo "###########################################################################"
+echo "###########################################################################"
+echo "###########################################################################"
