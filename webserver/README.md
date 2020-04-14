@@ -45,9 +45,6 @@ I still REALLY don't like 5xx on posts as the url then stays on the post url so 
 
 * (6/27)TEST WINDOWS NOW...should be fixed with ... fix https://discuss.gradle.org/t/i18n-issue-with-chinese-directly-in-java-string-on-windows-mac-is-fine/32216
 
-WEBPIECESxPACKAGE.TestLesson4BasicStart > testBasicProdStartup FAILED
-    java.lang.IllegalStateException: Previously existing file is missing=/var/folders/fk/2v2j6fhj4yb681vxdj1l2h740000gp/T/webpieces/WEBPIECESxAPPNAMECache/precompressedFiles/assets/primesTheme/index.html.gz Your file cache was corrupted.  You will need to delete the whole cache directory
-
 attack this issue
 https://discuss.gradle.org/t/gradle-5-3-1-jdk-11-yields-new-module-not-found-error/31567/3
 

@@ -52,7 +52,7 @@ public class ResponseCreator {
 
 	public String readVersion() {
 		Properties properties = new Properties();
-		try (InputStream stream = this.getClass().getResourceAsStream("/version.properties")) {
+		try (InputStream stream = this.getClass().getResourceAsStream("/webpiecesVersion.properties")) {
 			properties.load(stream);
 			return properties.getProperty("version");
 		} catch (IOException e) {

@@ -15,6 +15,11 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import io.micrometer.core.instrument.MeterRegistry;
+
 /**
  * When persistence.xml is found in gradles output/java/resources/META-INF, it tries to scan
  * output/java/resources for class files and entities and there are no class files.
@@ -25,19 +30,29 @@ public class DbSettingsProd implements PersistenceUnitInfo {
 	private static final Logger log = LoggerFactory.getLogger(DbSettingsProd.class);
 
 	private Properties properties = new Properties();
+
+	private HikariDataSource dataSource;
 	
-	public DbSettingsProd() {
+	public DbSettingsProd(MeterRegistry metrics) {
         //<!-- property name="javax.persistence.jdbc.driver" value="org.h2.Driver" /-->
-		properties.setProperty("javax.persistence.jdbc.driver", "net.sf.log4jdbc.DriverSpy");
-		properties.setProperty("javax.persistence.jdbc.url", "jdbc:log4jdbc:h2:mem:test");
-		properties.setProperty("javax.persistence.jdbc.user", "sa");
-		properties.setProperty("javax.persistence.jdbc.password", "");
+		//properties.setProperty("javax.persistence.jdbc.driver", "net.sf.log4jdbc.DriverSpy");
+		//properties.setProperty("javax.persistence.jdbc.url", "jdbc:log4jdbc:h2:mem:test");
+		//properties.setProperty("javax.persistence.jdbc.user", "sa");
+		//properties.setProperty("javax.persistence.jdbc.password", "");
 		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
 		properties.setProperty("hibernate.hbm2ddl.auto", "update");
 		properties.setProperty("hibernate.show_sql", "false");
 		properties.setProperty("hibernate.format_sql", "false");
 		properties.setProperty("hibernate.transaction.flush_before_completion", "true");
-		properties.setProperty("hibernate.connection.provider_class", "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
+		//properties.setProperty("hibernate.connection.provider_class", "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
+		
+		HikariConfig config = new HikariConfig();
+        config.setDriverClassName("net.sf.log4jdbc.DriverSpy");
+        config.setJdbcUrl("jdbc:log4jdbc:h2:mem:test");
+        config.setUsername("sa");
+        config.setPassword("");
+         
+        dataSource = new HikariDataSource(config);
 	}
 	
 	@Override
@@ -62,7 +77,7 @@ public class DbSettingsProd implements PersistenceUnitInfo {
 
 	@Override
 	public DataSource getNonJtaDataSource() {
-		return null;
+		return dataSource;
 	}
 
 	@Override

@@ -59,7 +59,7 @@ public class FileCopy {
 
 		//we have 
 		//   - WEBPIECESxCLASS
-		//   - WEBPIECESxPACKAGE
+		//   - webpiecesxxxxxpackage
 		// and need to replace those three things in file names, or file text
 		//ALSO, must rename all *.GRA files to *.GRADLE so the build is in place
 
@@ -97,8 +97,8 @@ public class FileCopy {
 			String contents = new String(out.toByteArray(), Charset.defaultCharset());
 			String original = contents;
 
-			contents = contents.replace("/WEBPIECESxPACKAGE/", "/"+packageDir+"/");
-			contents = contents.replace("WEBPIECESxPACKAGE", packageStr);
+			contents = contents.replace("/webpiecesxxxxxpackage/", "/"+packageDir+"/");
+			contents = contents.replace("webpiecesxxxxxpackage", packageStr);
 			contents = contents.replace("WEBPIECESxCLASS", appClassName);
 			contents = contents.replace("WEBPIECESxAPPNAME", appName);
 			contents = contents.replace("//@Ignore", "@Ignore");
@@ -123,7 +123,7 @@ public class FileCopy {
 		String name = getFileName(f);
 		
 		String[] pieces = new String[] { name };
-		if("WEBPIECESxPACKAGE".equals(name)) {
+		if("webpiecesxxxxxpackage".equals(name)) {
 			pieces = packagePieces;
 		}
 		

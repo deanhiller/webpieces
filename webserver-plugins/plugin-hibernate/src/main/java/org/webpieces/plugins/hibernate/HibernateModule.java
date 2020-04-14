@@ -3,6 +3,9 @@ package org.webpieces.plugins.hibernate;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
+
+import io.micrometer.core.instrument.MeterRegistry;
+
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.slf4j.Logger;
@@ -14,6 +17,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.spi.PersistenceUnitInfo;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,11 +47,11 @@ public class HibernateModule extends AbstractModule {
 
 	@Singleton
 	@Provides
-	public EntityManagerFactory providesSessionFactory() throws IOException {
+	public EntityManagerFactory providesSessionFactory(MeterRegistry metrics) throws IOException {
 		boolean loadByClassMeta = loadByClassFile.get();
 		String pu = persistenceUnit.get();		
 		if(loadByClassMeta) {
-			return loadByClassMeta(pu);
+			return loadByClassMeta(pu, metrics);
 		} else {
 			return createEntityMgrFromPuFile(pu);
 		}
@@ -62,12 +66,14 @@ public class HibernateModule extends AbstractModule {
 		return factory;
 	}
 
-	private EntityManagerFactory loadByClassMeta(String clazz) {
+	private EntityManagerFactory loadByClassMeta(String clazz, MeterRegistry metrics) {
 		log.info("Loading Hibernate from class meta.  ENTITY classloader="+entityClassLoader+" hibernate classloader="+this.getClass().getClassLoader()+" class="+clazz);
 
+		Class<?> loadClass = null;
 		try {
-			Class<?> loadClass = entityClassLoader.loadClass(clazz);
-			Object newInstance = loadClass.getDeclaredConstructor().newInstance();
+			loadClass = entityClassLoader.loadClass(clazz);
+			Constructor<?> ctr = loadClass.getDeclaredConstructor(MeterRegistry.class);
+			Object newInstance = ctr.newInstance(metrics);
 			if(!(newInstance instanceof PersistenceUnitInfo))
 				throw new IllegalArgumentException(clazz+" is not an instanceof PersistenceUnitInfo and must be");
 		
@@ -79,7 +85,9 @@ public class HibernateModule extends AbstractModule {
 			Map<String, Object> overrideProperties = createClassLoaderProperty();		
 			
 			return new HibernatePersistenceProvider().createContainerEntityManagerFactory(proxy, overrideProperties);
-		} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch(NoSuchMethodException e) {
+			throw new IllegalStateException("A constructor "+loadClass.getSimpleName()+"(MeterRegistry metrics) was not found in class="+loadClass.getName());
+		} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
 			throw new IllegalStateException("Could not construct DB settings", e);
 		}
 		
