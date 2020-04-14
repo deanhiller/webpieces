@@ -11,7 +11,7 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
+import org.webpieces.util.threading.MonitorThreadPool;
 
 public class AsyncServerMgrFactory {
 
@@ -23,7 +23,7 @@ public class AsyncServerMgrFactory {
 	
 	public static AsyncServerManager createAsyncServer(String id, BufferPool pool, BackpressureConfig config, MeterRegistry metrics) {
 		ExecutorService executor = Executors.newFixedThreadPool(10);
-		ExecutorServiceMetrics.monitor(metrics, executor, id);
+		MonitorThreadPool.monitor(metrics, executor, id);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr(id, pool, config, executor);
 		return createAsyncServer(mgr, metrics);

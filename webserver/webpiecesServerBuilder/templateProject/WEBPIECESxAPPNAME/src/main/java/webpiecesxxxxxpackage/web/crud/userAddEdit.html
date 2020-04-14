@@ -19,6 +19,9 @@
     	
     	*{optional in case this is the add operation and so this is used in case of edits only }*
     	<input type="hidden" name="entity.id" value="${entity?.id}$"/>
+
+        <input name="myFile" type="file" class="input-xlarge">
+        
         
         *{Generally, we only use field, but for purposes of demonstration, we use the myfield tag as an example of a custom 'field' tag you own in your project}*
         #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
@@ -26,7 +29,7 @@
         #{myfield 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/myfield}#
         #{field 'password', label:'Password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge">#{/field}#
         
-        #{field 'entity.fun', label: 'Is Fun:'}#<input type="checkbox" name="${field.name}$" value="true" ${field.checked}$>#{/field}#
+        #{field 'entity.isFun', label: 'Is Fun:'}#<input type="checkbox" name="${field.name}$" value="true" ${field.checked}$>#{/field}#
         
         #{field 'entity.levelOfEducation', label:'School Level'}#
 			<select size="1" name="${field.name}$" class="input-xlarge">

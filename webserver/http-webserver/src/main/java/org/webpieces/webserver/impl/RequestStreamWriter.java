@@ -155,8 +155,7 @@ public class RequestStreamWriter implements StreamWriter {
 		int port = 80;
         if(routerRequest.isHttps)
                 port = 443;
-        //if there is a firewall this port is wrong....and the above or below is right
-		//int port = socketInfo.getLocalBoundAddress().getPort();
+
 		
 		int index2 = domain.indexOf(":");
 		//host header may have port in it format is user@domain:port where user and port are optional
@@ -165,6 +164,9 @@ public class RequestStreamWriter implements StreamWriter {
 			port = Integer.parseInt(domain.substring(index2+1));
 			domain = domain.substring(0, index2);
 		}
+
+        //if there is a firewall the socket's port is wrong(ie. the line below)....and the above is correct!!!
+		//int port = socketInfo.getLocalBoundAddress().getPort();
 		
 		String methodString = requestHeaders.getMethodString();
 		HttpMethod method = HttpMethod.lookup(methodString);

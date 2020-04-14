@@ -13,6 +13,7 @@ import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.util.threading.MonitorThreadPool;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.util.time.TimeImpl;
 
@@ -23,7 +24,6 @@ import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 public abstract class HttpFrontendFactory {
 	
@@ -52,7 +52,7 @@ public abstract class HttpFrontendFactory {
 	public static HttpFrontendManager createFrontEnd(
 			String id, ScheduledExecutorService timer, BufferPool pool, FrontendMgrConfig config, MeterRegistry metrics) {
 		Executor executor = Executors.newFixedThreadPool(config.getThreadPoolSize(), new NamedThreadFactory(id));
-		ExecutorServiceMetrics.monitor(metrics, executor, id);
+		MonitorThreadPool.monitor(metrics, executor, id);
 
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, config.getBackpressureConfig(), executor);

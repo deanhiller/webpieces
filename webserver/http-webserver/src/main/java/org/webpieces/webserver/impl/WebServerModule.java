@@ -22,6 +22,7 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.threading.MonitorThreadPool;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.util.time.Time;
 import org.webpieces.util.time.TimeImpl;
@@ -36,7 +37,6 @@ import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -98,7 +98,7 @@ public class WebServerModule implements Module {
 	public ExecutorService provideExecutor(MeterRegistry metrics) {
 		String id = "fileReadPool";
 		ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory(id));
-		ExecutorServiceMetrics.monitor(metrics, executor, id);
+		MonitorThreadPool.monitor(metrics, executor, id);
 		return executor;
 	}
 	
@@ -113,8 +113,8 @@ public class WebServerModule implements Module {
 	public ChannelManager providesChanMgr(WebServerConfig config, BufferPool pool, MeterRegistry metrics) {
 		String id = config.getId()+".tPool";
 		Executor executor = Executors.newFixedThreadPool(config.getNumFrontendServerThreads(), new NamedThreadFactory(id));
-		ExecutorServiceMetrics.monitor(metrics, executor, id);		
-		
+		MonitorThreadPool.monitor(metrics, executor, id);
+
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(config.getId(), pool, config.getBackpressureConfig(), executor);
 		

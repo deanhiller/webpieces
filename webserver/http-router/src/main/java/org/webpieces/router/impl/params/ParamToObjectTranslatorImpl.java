@@ -229,7 +229,7 @@ public class ParamToObjectTranslatorImpl {
 		
 		Class<?> superclass = beanType.getSuperclass();
 		if(superclass == null)
-			throw new IllegalArgumentException("Field with name="+key+" not found in any of the classes="+classList);
+			throw new IllegalArgumentException("Private Field(not getter or setter!!) with name="+key+" not found in any of the classes="+classList);
 		
 		return findBeanFieldType(superclass, key, classList);
 	}

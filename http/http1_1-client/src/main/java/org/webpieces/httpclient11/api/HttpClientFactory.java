@@ -10,16 +10,16 @@ import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.util.threading.MonitorThreadPool;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 public abstract class HttpClientFactory {
 
 	public static HttpClient createHttpClient(String id, int numThreads, BackpressureConfig backPressureConfig, MeterRegistry metrics) {
 		Executor executor = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory("httpclient"));
-		ExecutorServiceMetrics.monitor(metrics, executor, id);
+		MonitorThreadPool.monitor(metrics, executor, id);
 
 		TwoPools pool = new TwoPools(id+".bufferpool", metrics);
 		HttpParser parser = HttpParserFactory.createParser(id, metrics, pool);
