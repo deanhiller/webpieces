@@ -52,6 +52,7 @@ public class DbSettingsInMemory implements PersistenceUnitInfo {
         config.setJdbcUrl("jdbc:log4jdbc:h2:mem:test");
         config.setUsername("sa");
         config.setPassword("");
+        config.setMetricRegistry(metrics);
          
         dataSource = new HikariDataSource(config);
 		
