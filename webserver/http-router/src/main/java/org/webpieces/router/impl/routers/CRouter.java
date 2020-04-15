@@ -13,7 +13,7 @@ import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.impl.model.RouterInfo;
-import org.webpieces.util.filters.ExceptionUtil;
+import org.webpieces.util.futures.ExceptionUtil;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
 public class CRouter extends DScopedRouter {

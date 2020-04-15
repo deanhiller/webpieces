@@ -1,4 +1,4 @@
-package org.webpieces.util.filters;
+package org.webpieces.util.futures;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
@@ -30,6 +30,44 @@ public class ExceptionUtil {
 		}
 		
 		return wrapExceptionWithConversion(future, chainedException);
+	}
+
+	public static <T> CompletableFuture<T> finallyBlock(
+			Callable<CompletableFuture<T>> function,
+			Runnable finallyCode
+	) {
+		//convert sync exceptions into async exceptions so we can re-use same exception handling logic.. 
+		CompletableFuture<T> future = wrap(function);
+		
+		//Now, handle ANY (sync or aysnc) exceptions the same by running a finally block......
+		CompletableFuture<T> local = future.handle((r, t) -> {
+			//RUN the finally code BUT try....catch it
+			try {
+				finallyCode.run();
+			} catch (Exception e) {
+				CompletableFuture<T> failedFuture = new CompletableFuture<>();
+				if(t != null) {				
+					failedFuture.completeExceptionally(t);
+					t.addSuppressed(e);
+					return failedFuture;
+				} else {
+					failedFuture.completeExceptionally(e);
+					return failedFuture;
+					
+				}
+			}
+			
+			if(t != null) {
+				CompletableFuture<T> failedFuture = new CompletableFuture<>();
+				failedFuture.completeExceptionally(t);
+				return failedFuture;
+			}
+			
+			CompletableFuture<T> res = CompletableFuture.<T>completedFuture(r);
+			return res;
+		}).thenCompose(Function.identity());
+	
+		return local;
 	}
 	
 	private static <T> CompletableFuture<T> wrapExceptionWithConversion(

@@ -11,8 +11,8 @@ import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
-import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.futures.ExceptionUtil;
 
 public class SvcProxyForContent implements Service<MethodMeta, Action> {
 

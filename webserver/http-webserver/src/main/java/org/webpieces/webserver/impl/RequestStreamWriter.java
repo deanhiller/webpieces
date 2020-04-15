@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.ctx.api.AcceptMediaType;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterCookie;
@@ -21,6 +23,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.router.api.exceptions.BadCookieException;
+import org.webpieces.util.futures.ExceptionUtil;
 import org.webpieces.webserver.impl.body.BodyParser;
 import org.webpieces.webserver.impl.body.BodyParsers;
 
@@ -71,6 +74,7 @@ public class RequestStreamWriter implements StreamWriter {
 		headersSupported.add(Http2HeaderName.UPGRADE_INSECURE_REQUESTS);
 	}
 
+	private Random random = new Random();
 	private RequestHelpFacade facade;
 	private ResponseStream stream;
 	private Http2Request requestHeaders;
@@ -110,6 +114,19 @@ public class RequestStreamWriter implements StreamWriter {
 	}
 
 	CompletableFuture<Void> handleCompleteRequest() {
+		MDC.put("txId", generate());
+		
+		return ExceptionUtil.finallyBlock(() -> handleCompleteRequestImpl(), () -> { MDC.put("txId", null); } );
+	}
+
+	public String generate() {
+		String randomTxId = ""+random.nextInt(1_000_000); 
+		String s1 = randomTxId.substring(0, 3);
+		String s2 = randomTxId.substring(3, 6);
+		return s1+"-"+s2; //human readable instance id
+	}
+
+	CompletableFuture<Void> handleCompleteRequestImpl() {
 		for(Http2Header h : requestHeaders.getHeaders()) {
 			if (!headersSupported.contains(h.getKnownName()))
 				log.debug("This webserver has not thought about supporting header="

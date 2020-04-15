@@ -29,7 +29,7 @@ import org.webpieces.router.impl.dto.View;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.tags.BootstrapModalTag;
-import org.webpieces.util.filters.ExceptionUtil;
+import org.webpieces.util.futures.ExceptionUtil;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Request;

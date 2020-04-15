@@ -21,7 +21,7 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.ExceptionWrap;
-import org.webpieces.util.filters.ExceptionUtil;
+import org.webpieces.util.futures.ExceptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

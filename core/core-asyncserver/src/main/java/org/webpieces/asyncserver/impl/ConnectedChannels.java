@@ -20,7 +20,7 @@ public class ConnectedChannels {
 	
 	public ConnectedChannels(String id, MeterRegistry metrics) {
 		
-		MetricsCreator.createGauge(metrics, id+".connectionCouuunt", connectedChannels, (c) -> c.size());
+		MetricsCreator.createGauge(metrics, id+".connectionCount", connectedChannels, (c) -> c.size());
 		
 		addedCounter = MetricsCreator.createCounter(metrics, id, "connectionsAdded", false);
 		removedCounter = MetricsCreator.createCounter(metrics, id, "connectionsRemoved", false);

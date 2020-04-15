@@ -63,7 +63,7 @@ public class ChunkedStream extends OutputStream {
 		byte[] data = str.toByteArray();
 		str = new ByteArrayOutputStream();
 		DataWrapper body = wrapperFactory.wrapByteArray(data);
-		log.info("caching "+type+" data="+body.getReadableSize());
+		log.debug("caching "+type+" data="+body.getReadableSize());
 
 		DataFrame frame = new DataFrame();
 		frame.setEndOfStream(false);

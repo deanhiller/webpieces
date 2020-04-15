@@ -5,8 +5,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
-import org.webpieces.util.filters.ExceptionUtil;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.futures.ExceptionUtil;
 
 /**
  * NOTE: This is for InternalError AND NotFound BUT if they deviate separate so we stay with

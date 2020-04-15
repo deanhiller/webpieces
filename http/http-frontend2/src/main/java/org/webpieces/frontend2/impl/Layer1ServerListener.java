@@ -11,7 +11,7 @@ import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.util.filters.ExceptionUtil;
+import org.webpieces.util.futures.ExceptionUtil;
 
 public class Layer1ServerListener implements AsyncDataListener {
 	private static final Logger log = LoggerFactory.getLogger(Layer1ServerListener.class);

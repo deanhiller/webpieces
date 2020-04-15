@@ -2,6 +2,8 @@ package org.webpieces.util.filters;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.util.futures.ExceptionUtil;
+
 public abstract class Filter<REQ, RESP> {
 
 	public abstract CompletableFuture<RESP> filter(REQ meta, Service<REQ, RESP> nextFilter);

@@ -37,7 +37,7 @@ public class MetricsCreator {
 		return DistributionSummary
 			    .builder(namePrefix+".packetsize")
 			    .tag("name", name)
-			    .tag("sslType", sslType)
+			    .tag("type", sslType)
 			    .tag("direction", direction)
 			    .distributionStatisticBufferLength(1)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
