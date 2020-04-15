@@ -8,7 +8,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.impl.Http2ClientImpl;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.util.threading.MonitorThreadPool;
+import org.webpieces.util.metrics.MetricsCreator;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.util.time.TimeImpl;
 
@@ -24,7 +24,7 @@ public abstract class Http2ClientFactory {
 
 	public static Http2Client createHttpClient(Http2ClientConfig config, MeterRegistry metrics) {
 		Executor executor = Executors.newFixedThreadPool(config.getNumThreads(), new NamedThreadFactory("httpclient"));
-		MonitorThreadPool.monitor(metrics, executor, config.getId());
+		MetricsCreator.monitor(metrics, executor, config.getId());
 
 		TwoPools pool = new TwoPools(config.getId()+".bufferpool", metrics);
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);

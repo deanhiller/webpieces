@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.util.metrics.MetricsCreator;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -18,15 +19,11 @@ public class ConnectedChannels {
 	private Counter removedCounter;
 	
 	public ConnectedChannels(String id, MeterRegistry metrics) {
-		String metricName = id + "/connections/count";
-		metrics.gauge(metricName, connectedChannels, (c) -> c.size());
 		
-		String metricName1 = id + "/connections/added";		
-		addedCounter = metrics.counter(metricName1);
+		MetricsCreator.createGauge(metrics, id+".connectionCouuunt", connectedChannels, (c) -> c.size());
 		
-		String metricName2 = id + "/connections/removed";
-		removedCounter = metrics.counter(metricName2);
-
+		addedCounter = MetricsCreator.createCounter(metrics, id, "connectionsAdded", false);
+		removedCounter = MetricsCreator.createCounter(metrics, id, "connectionsRemoved", false);
 	}
 
 	public boolean addChannel(Channel channel) {

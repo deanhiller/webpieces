@@ -2,7 +2,6 @@ package org.webpieces.httpparser.impl;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +35,7 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatus;
 import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.HttpVersion;
+import org.webpieces.util.metrics.MetricsCreator;
 
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -58,29 +58,9 @@ public class HttpParserImpl implements HttpParser {
 		this.pool = pool;
 		this.optimizeForBufferPool = optimizeForBufferPool;
 		
-		outPayloadSize = DistributionSummary
-			    .builder(id+".http1.payloadout.size")
-			    .distributionStatisticBufferLength(1)
-				.distributionStatisticExpiry(Duration.ofMinutes(10))
-			    .publishPercentiles(0.50, 0.99, 1)
-			    .baseUnit("bytes") // optional (1)
-			    .register(metrics);
-
-		bytesParsedDist = DistributionSummary
-			    .builder(id+".http1.payloadin.size")
-			    .distributionStatisticBufferLength(1)
-				.distributionStatisticExpiry(Duration.ofMinutes(10))
-			    .publishPercentiles(0.50, 0.99, 1)
-			    .baseUnit("bytes") // optional (1)
-			    .register(metrics);
-		
-		inPayloadSize = DistributionSummary
-			    .builder(id+".http1.payloadin.size")
-			    .distributionStatisticBufferLength(1)
-				.distributionStatisticExpiry(Duration.ofMinutes(10))
-			    .publishPercentiles(0.50, 0.99, 1)
-			    .baseUnit("bytes") // optional (1)
-			    .register(metrics);
+		outPayloadSize = MetricsCreator.createSizeDistribution(metrics, id, "http1", "tosocket");
+		inPayloadSize = MetricsCreator.createSizeDistribution(metrics, id, "http1", "fromsocket");
+		bytesParsedDist = MetricsCreator.createSizeDistribution(metrics, id, "http1", "parsedbytes");
 	}
 	
 	@Override

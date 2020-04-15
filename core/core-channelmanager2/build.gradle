@@ -1,6 +1,6 @@
 
 dependencies {
-    compile project(':core:core-util'), project(':core:core-datawrapper'), project(':core:core-ssl')
+    compile project(':core:core-datawrapper'), project(':core:core-ssl')
 	
 	testCompile project(':core:core-mock')
 }

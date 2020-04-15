@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
+import org.webpieces.util.metrics.MetricsCreator;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -43,37 +45,26 @@ public final class KeyProcessor {
 	private DistributionSummary payloadSize;
 	private Counter backPressureUnregisterSocket;
 	private Counter backPressureRegisterSocket;
-	private DistributionSummary backupSize;
 	private Counter readErrorType1Close;
 	private Counter readErrorType2Close;
+	private AtomicLong totalBackupCounter = new AtomicLong();
 
 	public KeyProcessor(String id, JdkSelect selector, BufferPool pool, MeterRegistry metrics) {
 		this.selector = selector;
 		this.pool = pool;
-		connectionClosed = metrics.counter(id+".connections.closed");
-		connectionOpen = metrics.counter(id+".connections.opened");
-		connectionErrors = metrics.counter(id+".connections.errors");
-		specialConnectionErrors = metrics.counter(id+".connections.errors2");
-		backPressureUnregisterSocket = metrics.counter(id+".connections.backpressure.unregistered");
-		backPressureRegisterSocket = metrics.counter(id+".connections.backpressure.register");
-		readErrorType1Close = metrics.counter(id+".connections.readerror1");
-		readErrorType2Close = metrics.counter(id+".connections.readerror2");
-
-		payloadSize = DistributionSummary
-			    .builder(id+".bytes.read.size")
-			    .distributionStatisticBufferLength(1)
-				.distributionStatisticExpiry(Duration.ofMinutes(10))
-			    .publishPercentiles(0.50, 0.99, 1)
-			    .baseUnit("bytes") // optional (1)
-			    .register(metrics);
 		
-		backupSize = DistributionSummary
-			    .builder(id+".bytes.read.size")
-			    .distributionStatisticBufferLength(1)
-				.distributionStatisticExpiry(Duration.ofMinutes(10))
-			    .publishPercentiles(0.50, 0.99, 1)
-			    .baseUnit("bytes") // optional (1)
-			    .register(metrics);	
+		connectionClosed = MetricsCreator.createCounter(metrics, id, "connectionsClosed", false);
+		connectionOpen = MetricsCreator.createCounter(metrics, id, "connectionsOpened", false);
+		connectionErrors = MetricsCreator.createCounter(metrics, id, "connectionErrors1", true);
+		specialConnectionErrors = MetricsCreator.createCounter(metrics, id, "connectionErrors2", true);
+		backPressureUnregisterSocket = MetricsCreator.createCounter(metrics, id, "backPressureStart", false);
+		backPressureRegisterSocket = MetricsCreator.createCounter(metrics, id, "backPressureStop", false);
+		readErrorType1Close = MetricsCreator.createCounter(metrics, id, "connectionsReadError1", true);
+		readErrorType2Close = MetricsCreator.createCounter(metrics, id, "connectionsReadError2", true);
+
+		payloadSize = MetricsCreator.createSizeDistribution(metrics, id, "unknown", "fromsocket");
+
+		MetricsCreator.createGauge(metrics, id+".allChannelsBackPressure", totalBackupCounter, (c) -> c.get());
 	}
 	
 	public void processKeys(Set<SelectionKey> keySet) {
@@ -351,7 +342,7 @@ public final class KeyProcessor {
 			//backpressure is ENABLED since it has a value
 			AtomicInteger counter = channel.getUnackedBytes();
 			unackedByteCnt = counter.addAndGet(bytes);
-			backupSize.record(unackedByteCnt);
+			totalBackupCounter.addAndGet(bytes);
 
 			if(channel.isOverMaxUnacked(unackedByteCnt)) {
 				unregister = connectionState.compareAndSet(BackflowState1.REGISTERED, BackflowState1.UNREGISTERED);
@@ -367,6 +358,7 @@ public final class KeyProcessor {
 		future.handle((v, t) -> {
 			AtomicInteger counter = channel.getUnackedBytes();
 			int unackedCnt = counter.addAndGet(-bytes);
+			totalBackupCounter.addAndGet(-bytes);
 
 			if(channel.isUnderThreshold(unackedCnt) && connectionState.get() == BackflowState1.UNREGISTERED) {
 				channel.registerForReads(() -> shouldRegister(channel));

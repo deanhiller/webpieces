@@ -13,6 +13,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.BufferWebManaged;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.util.metrics.MetricsCreator;
 
 /**
  * Feel free to completely override this class but basically as ChannelManager feeds
@@ -64,9 +65,9 @@ public class BufferCreationPool implements BufferPool, BufferWebManaged {
 		this.isDirect = isDirect;
 		this.bufferSize = bufferSize;
 
-		metrics.gauge(id+".freePackets", freePackets, (f) -> f.size());
-		checkoutCounter = metrics.counter(id+".checkout");
-		checkinCounter = metrics.counter(id+".checkin");
+		MetricsCreator.createGauge(metrics, id, freePackets, (q) -> q.size());
+		checkoutCounter = MetricsCreator.createCounter(metrics, id, "checkout", false);
+		checkinCounter = MetricsCreator.createCounter(metrics, id, "checkin", false);
 	}
 	
 	public ByteBuffer nextBuffer(int minSize) {
