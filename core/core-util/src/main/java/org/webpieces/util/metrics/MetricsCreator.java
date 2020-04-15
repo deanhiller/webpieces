@@ -36,19 +36,19 @@ public class MetricsCreator {
 	public static DistributionSummary createSizeDistribution(MeterRegistry metrics, String name, String sslType, String direction) {
 		return DistributionSummary
 			    .builder(namePrefix+".packetsize")
-			    .tag("metricId", name)
+			    .tag("name", name)
 			    .tag("sslType", sslType)
 			    .tag("direction", direction)
 			    .distributionStatisticBufferLength(1)
 				.distributionStatisticExpiry(Duration.ofMinutes(10))
-			    .publishPercentiles(0.5, 0.99, 1)
+			    .publishPercentiles(0.5, 0.99)
 			    .baseUnit("bytes") // optional (1)
 			    .register(metrics);
 	}
 
 	public static <T> void createGauge(MeterRegistry metrics, String name, T obj, ToDoubleFunction<T> valueFunction) {
 		List<Tag> tags = new ArrayList<Tag>();
-		tags.add(Tag.of("metricId", name));
+		tags.add(Tag.of("name", name));
 		metrics.gauge(namePrefix+".guageSize", tags, obj, valueFunction);
 	}
 
@@ -56,7 +56,7 @@ public class MetricsCreator {
 		String errors = "false";
 		if(errorType)
 			errors = "true";
-		return metrics.counter(namePrefix+".counter", "metricId", name, "type", type, "isError", errors);
+		return metrics.counter(namePrefix+".counter", "name", name, "type", type, "isError", errors);
 	}
 	
 }
