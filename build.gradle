@@ -66,10 +66,10 @@ ext {
 
        'javax-inject':    'javax.inject:javax.inject:1',
        'jaxb':            'javax.xml.bind:jaxb-api:2.3.0',
-       'slf4j-api':       'org.slf4j:slf4j-api:1.7.21',
+       'slf4j-api':       'org.slf4j:slf4j-api:1.7.30',
        //do we need this one...
-       //'logback-core':  'ch.qos.logback:logback-core:1.1.7', 
-       'logback-classic': 'ch.qos.logback:logback-classic:1.1.7',
+       //'logback-core':  'ch.qos.logback:logback-core:1.2.3',
+       'logback-classic': 'ch.qos.logback:logback-classic:1.2.3',
        'joda-time':       'joda-time:joda-time:2.9.4',
        'guice':           'com.google.inject:guice:4.2.2',
        'guice-multibindings': 'com.google.inject.extensions:guice-multibindings:4.2.2',
