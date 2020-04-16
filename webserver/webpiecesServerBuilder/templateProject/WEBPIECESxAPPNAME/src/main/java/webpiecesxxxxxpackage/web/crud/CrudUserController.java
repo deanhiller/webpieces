@@ -61,7 +61,7 @@ public class CrudUserController {
 	}
 
 	public Redirect postSaveUser(@UseQuery("findByIdWithRoleJoin") UserDbo entity, 
-			List<RoleEnum> selectedRoles, String password, String myFile) {
+			List<RoleEnum> selectedRoles, String password) {
 		//TODO: if we wire in JSR303 bean validation into the platform, it could be 
 		//done there as well though would
 		//need to figure out how to do i18n for the messages in that case
