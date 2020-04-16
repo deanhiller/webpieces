@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
@@ -22,8 +25,6 @@ import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.futures.ExceptionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -57,7 +58,12 @@ public abstract class AbstractRouterService implements RouterService {
 			ApplicationContext ctx = webInjector.getAppContext(); 
 			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest, ctx);
 			
-			return processRequest(requestCtx, responseCb);
+			
+			String user = session.get("userId");
+			MDC.put("userId", user);
+			return ExceptionUtil.finallyBlock(
+					() -> processRequest(requestCtx, responseCb), 
+					() -> { MDC.put("userId", null); });
 			
 		} catch(BadCookieException e) {
 			throw e;

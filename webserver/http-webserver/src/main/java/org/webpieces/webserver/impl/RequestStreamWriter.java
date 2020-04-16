@@ -115,8 +115,10 @@ public class RequestStreamWriter implements StreamWriter {
 
 	CompletableFuture<Void> handleCompleteRequest() {
 		MDC.put("txId", generate());
-		
-		return ExceptionUtil.finallyBlock(() -> handleCompleteRequestImpl(), () -> { MDC.put("txId", null); } );
+		return ExceptionUtil.finallyBlock(
+				() -> handleCompleteRequestImpl(), 
+				() -> MDC.put("txId", null)
+		);
 	}
 
 	public String generate() {

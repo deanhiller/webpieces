@@ -1,8 +1,10 @@
 # webpieces
 
+* wire futures backpressure all the way in server and test
 * Document prod/staging/local development environments and properties plugin
 * Document more examples on the examples page stuff
 * Document the ApplicationContext
+* Add in MetricApi to hide any metric libraries and classes.  HAVE an actual API
 * http1 parser, write directly to a ByteBuffer[] from the pool with https://stackoverflow.com/questions/1252468/java-converting-string-to-and-from-bytebuffer-and-associated-problems
 * fix extra webpieces cache directory
 * simulate initial project creation and see if there is a git checkin issue...do this on a real repo

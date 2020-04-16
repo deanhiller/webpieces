@@ -17,7 +17,7 @@
        each request and client apps have to do nothing to get it for free
        Client apps must fill in the %X{user} themselves with MDC.put call -->
     <encoder>
-      <pattern>%date{ISO8601} [%X{txId}-%X{user}] [%thread] %caller{1}
+      <pattern>%date{ISO8601} [[%X{txId}:%X{userId}]] [%thread] %caller{1}
         %-4level: %message%n</pattern>
     </encoder>
   </appender>
@@ -28,7 +28,7 @@
     </filter>
 
     <encoder>
-      <pattern>%date{ISO8601} [%X{txId}-%X{user}] %caller{1} %-4level:
+      <pattern>%date{ISO8601} [[%X{txId}:%X{userId}]] %caller{1} %-4level:
         %message%n</pattern>
     </encoder>
     <target>System.err</target>
