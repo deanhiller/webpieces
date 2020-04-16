@@ -120,9 +120,12 @@ public class RequestStreamWriter implements StreamWriter {
 	}
 
 	public String generate() {
-		String randomTxId = ""+random.nextInt(1_000_000); 
-		String s1 = randomTxId.substring(0, 3);
-		String s2 = randomTxId.substring(3, 6);
+		String randomTxId = ""+random.nextInt(1_000_000);
+		if(randomTxId.length() < 6)
+			randomTxId = "00000000"+randomTxId;
+		int len = randomTxId.length();
+		String s1 = randomTxId.substring(len-6, len-3);
+		String s2 = randomTxId.substring(len-3, len);
 		return s1+"-"+s2; //human readable instance id
 	}
 
