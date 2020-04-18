@@ -48,6 +48,7 @@ public class Level3SvrOutgoingSynchro extends Level3OutgoingSynchro {
 
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
+			data.setStreamId(stream.getStreamId());
 			return streams.sendDataToSocket(stream, data);
 		}
 	}

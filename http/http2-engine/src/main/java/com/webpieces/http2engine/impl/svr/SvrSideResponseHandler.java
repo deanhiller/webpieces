@@ -24,12 +24,11 @@ public class SvrSideResponseHandler implements ResponseHandler {
 
 	@Override
 	public CompletableFuture<StreamWriter> process(Http2Response response) {
-		if(response.getStreamId() != stream.getStreamId())
-			throw new IllegalArgumentException("The stream id is incorrect for this stream.  stream="+stream.getStreamId()+" frame(with bad streamId)="+response);
-		else if(!response.isStatusSet())
+		response.setStreamId(stream.getStreamId());
+
+		if(!response.isStatusSet())
 			throw new IllegalArgumentException("The response must have the status header set.  bad frame="+response);
 		
-		response.setStreamId(stream.getStreamId());
 		return level1ServerEngine.sendResponseHeaders(stream, response);
 	}
 

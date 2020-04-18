@@ -22,10 +22,14 @@ public class HeaderSettings {
 	
 	//NOTE: The spec default is 16_384 which if you have a server with many connections can waste quite a bit of memory 
 	//per channel in streaming AND it's BETTER to match DEFAULT ByteBuffer size in the buffer pool
-	private AtomicInteger maxFrameSize = new AtomicInteger(TwoPools.DEFAULT_MAX_BASE_BUFFER_SIZE);
+	//16_384 is the minimum!! grrrr...that's a little big to be honest.  5k would be better to save on memory costs.
+	private AtomicInteger maxFrameSize = new AtomicInteger(16_384);
 	
 	private long maxHeaderListSize = 4096;
 	private Map<Short, byte[]> unknownSettings = new HashMap<>();
+	
+	public HeaderSettings() {
+	}
 	
 	public int getHeaderTableSize() {
 		return headerTableSize;

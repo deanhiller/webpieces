@@ -116,24 +116,20 @@ public abstract class Level2ParsingAndRemoteSettings {
 	
 	public CompletableFuture<Void> parseImpl(DataWrapper newData) {
 		
-		CompletableFuture<Void> future2 = tracker2.addBytesToTrack(newData.getReadableSize());
-		
 		parsingState = lowLevelParser.unmarshal(parsingState, newData);
 		
 		List<Http2Msg> parsedMessages = parsingState.getParsedFrames();
 		
-		int numBytesParsed = parsingState.getNumBytesJustParsed();
-		
-		AckAggregator aggregator = new AckAggregator(parsedMessages.size(), numBytesParsed, tracker2);
-		
-		CompletableFuture<Void> future = CompletableFuture.completedFuture((Void)null);
+		CompletableFuture<Void> allFutures = CompletableFuture.completedFuture((Void)null);
 		for(Http2Msg lowLevelFrame : parsedMessages) {
-			future = future.thenCompose(v -> {
-				return process(lowLevelFrame)
-						.handle((s, t) -> aggregator.ack(s, t));
-			});
+			CompletableFuture<Void> messageFuture = process(lowLevelFrame);
+
+			//compose done AFTER so that process can be called N times, instead of waiting to call
+			//process as client acks each piece.  
+			allFutures = allFutures.thenCompose( f -> messageFuture);
 		}
-		return future2;
+		
+		return allFutures;
 	}
 
 	public CompletableFuture<Void> process(Http2Msg msg) {

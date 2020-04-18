@@ -47,43 +47,37 @@ public class TestBackpressure extends AbstractTest {
 		DataListener dataListener = mockChannel.getConnectedListener();
 
 		CompletableFuture<Void> fut1 = dataListener.incomingData(mockChannel, buffers.get(0));
-		Assert.assertFalse(fut1.isDone()); //not resolved yet since client did not process(only has half the data)
+		Assert.assertTrue(fut1.isDone()); //consume since not enough data for client
 		
 		CompletableFuture<StreamWriter> future = new CompletableFuture<StreamWriter>();
 		listener.addReturnValueIncomingResponse(future);
 
 		CompletableFuture<Void> fut2 = dataListener.incomingData(mockChannel, buffers.get(1));
-		Assert.assertFalse(fut1.isDone()); //not resolved yet since client did not resolve future yet
 		Assert.assertFalse(fut2.isDone()); //not resolved yet since client only has part of the data
 		
 		MockStreamWriter mockWriter = new MockStreamWriter();
 		future.complete(mockWriter); //This releases the response msg acking 10 bytes
 		
-		fut1.get(2, TimeUnit.SECONDS);
-		Assert.assertFalse(fut2.isDone());
+		fut2.get(2, TimeUnit.SECONDS);
 		
 		//feed the rest of first chunk in and feed part of last chunk
 		CompletableFuture<Void> firstChunkAck = new CompletableFuture<Void>();
 		mockWriter.addProcessResponse(firstChunkAck);	
 		CompletableFuture<Void> fut3 = dataListener.incomingData(mockChannel, buffers.get(2));
 		
-		Assert.assertFalse(fut2.isDone());
 		Assert.assertFalse(fut3.isDone());
 		
 		firstChunkAck.complete(null); //ack the http chunk packet
 		
-		fut2.get(2, TimeUnit.SECONDS);
-		Assert.assertFalse(fut3.isDone());
+		fut3.get(2, TimeUnit.SECONDS);
 
 		CompletableFuture<Void> lastChunkAck = new CompletableFuture<Void>();
 		mockWriter.addProcessResponse(lastChunkAck);			
 		CompletableFuture<Void> fut4 = dataListener.incomingData(mockChannel, buffers.get(3));
-		Assert.assertFalse(fut3.isDone());
 		Assert.assertFalse(fut4.isDone());
 		
 		lastChunkAck.complete(null);
 		
-		fut3.get(2, TimeUnit.SECONDS);
 		fut4.get(2, TimeUnit.SECONDS);
 	}
 	
