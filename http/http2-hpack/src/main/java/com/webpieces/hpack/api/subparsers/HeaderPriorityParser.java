@@ -22,4 +22,6 @@ public interface HeaderPriorityParser {
 
 	List<String> parseAcceptEncoding(Http2Headers req);
 
+	ParsedContentType parseContentType(Http2Headers req);
+
 }

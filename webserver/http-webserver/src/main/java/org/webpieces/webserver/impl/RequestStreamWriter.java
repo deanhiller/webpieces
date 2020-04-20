@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.webpieces.ctx.api.AcceptMediaType;
+import org.webpieces.ctx.api.ContentType;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
@@ -32,6 +33,7 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.subparsers.AcceptType;
 import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
+import com.webpieces.hpack.api.subparsers.ParsedContentType;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -199,6 +201,7 @@ public class RequestStreamWriter implements StreamWriter {
 		parseAcceptLang(requestHeaders, routerRequest);
 		parseAccept(requestHeaders, routerRequest);
 		routerRequest.encodings = headerParser.parseAcceptEncoding(requestHeaders);
+		routerRequest.contentTypeHeaderValue = parse(requestHeaders);
 
 		String referHeader = requestHeaders.getSingleHeaderValue(Http2HeaderName.REFERER);
 		if(referHeader != null)
@@ -230,6 +233,13 @@ public class RequestStreamWriter implements StreamWriter {
 		routerRequest.isSendAheadNextResponses = false;
 		if(routerRequest.relativePath.contains("?"))
 			throw new UnsupportedOperationException("not supported yet");
+	}
+
+	private ContentType parse(Http2Request requestHeaders2) {
+		ParsedContentType parsedType = headerParser.parseContentType(requestHeaders2);
+		if(parsedType == null)
+			return null;
+		return new ContentType(parsedType.getMimeType(), parsedType.getCharSet(), parsedType.getBoundary(), parsedType.getFullValue());
 	}
 
 	private void fillInHttpsValue(RouterRequest routerRequest) {
@@ -297,7 +307,6 @@ public class RequestStreamWriter implements StreamWriter {
 
 	private void parseBody(Http2Headers req, RouterRequest routerRequest) {
 		String lengthHeader = req.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);
-		String typeHeader = req.getSingleHeaderValue(Http2HeaderName.CONTENT_TYPE);
 
 		routerRequest.body = data;
 
@@ -306,10 +315,6 @@ public class RequestStreamWriter implements StreamWriter {
 			//reading in the body
 			routerRequest.contentLengthHeaderValue = Integer.parseInt(lengthHeader);
 		} 
-		
-		if(typeHeader != null) {
-			routerRequest.contentTypeHeaderValue = typeHeader;
-		}
 		
 		parseBodyFromContentType(routerRequest);
 	}
@@ -331,7 +336,7 @@ public class RequestStreamWriter implements StreamWriter {
 		
 		BodyParsers requestBodyParsers = facade.getBodyParsers();
 		
-		BodyParser parser = requestBodyParsers.lookup(req.contentTypeHeaderValue);
+		BodyParser parser = requestBodyParsers.lookup(req.contentTypeHeaderValue.getContentType());
 		if(parser == null) {
 			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req+" httpReq="+req.orginalRequest);
 			return;

@@ -15,6 +15,7 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.subparsers.AcceptType;
 import com.webpieces.hpack.api.subparsers.HeaderItem;
 import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
+import com.webpieces.hpack.api.subparsers.ParsedContentType;
 import com.webpieces.hpack.api.subparsers.ResponseCookie;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -89,6 +90,41 @@ public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 		return orderedItems;
 	}
 
+	@Override
+    public ParsedContentType parseContentType(Http2Headers req) {
+		String cookieHeader = req.getSingleHeaderValue(Http2HeaderName.CONTENT_TYPE);
+		if(cookieHeader == null) {
+			return null;
+		}
+
+		String fullValue = cookieHeader;
+		String mimeType = null;
+		String charSet = null;
+		String boundary = null;
+		
+		
+		boolean isMimeType = true;
+    	String[] split = cookieHeader.split(";");
+    	for(String keyValPair : split) {
+    		if(isMimeType) {
+    			mimeType = keyValPair.trim();
+    			isMimeType = false;
+    			continue;
+    		}
+    		
+	    	int index = keyValPair.indexOf("=");
+	    	String name = keyValPair.substring(0, index).trim();
+	    	String val = keyValPair.substring(index+1).trim();
+    	    	
+	    	if("charset".equalsIgnoreCase(name)) {
+	    		charSet = val.trim();
+	    	} else if("boundary".equalsIgnoreCase(name)) {
+	    		boundary = val.trim();
+	    	}
+    	}
+		return new ParsedContentType(mimeType, charSet, boundary, fullValue);
+    }
+	
 	@Override
     public Map<String, String> parseCookiesFromRequest(Http2Headers req) {
 		String cookieHeader = req.getSingleHeaderValue(Http2HeaderName.COOKIE);

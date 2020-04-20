@@ -221,7 +221,7 @@ public class RouterRequest {
 	/**
 	 * Set to the CONTENT_TYPE header
 	 */
-	public String contentTypeHeaderValue;
+	public ContentType contentTypeHeaderValue;
 
 	/**
 	 * This is the body that is set only if not streaming the body upload in chunks.
