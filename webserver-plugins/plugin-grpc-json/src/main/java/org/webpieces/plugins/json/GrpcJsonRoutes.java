@@ -31,7 +31,7 @@ public class GrpcJsonRoutes implements Routes {
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
 		String baseUrl = config.getBaseUrl();
-		String filterPattern = baseUrl+"/*";
+		String filterPattern = baseUrl+"/.*";
 		
 		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		Pattern pattern = Pattern.compile(filterPattern);
