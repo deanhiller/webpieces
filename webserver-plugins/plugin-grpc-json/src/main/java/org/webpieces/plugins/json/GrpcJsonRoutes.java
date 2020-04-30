@@ -30,13 +30,13 @@ public class GrpcJsonRoutes implements Routes {
 	
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		Class<? extends GrpcJsonCatchAllFilter> filter = config.getFilterClazz();
 		String baseUrl = config.getBaseUrl();
 		String filterPattern = baseUrl+"/*";
 		
 		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		Pattern pattern = Pattern.compile(filterPattern);
 		
+		Class<GrpcJsonCatchAllFilter> filter = GrpcJsonCatchAllFilter.class;
 		bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, false), FilterPortType.ALL_FILTER);		
 		bldr.addNotFoundFilter(filter, new JsonConfig(pattern, true), FilterPortType.ALL_FILTER);
 		
@@ -46,10 +46,12 @@ public class GrpcJsonRoutes implements Routes {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void loadRoutes(RouteBuilder bldr, String baseUrl, ServiceMetaInfo meta) {
 		try {
-			String controller = meta.getController();
-			Class<?> grpcClazz = Class.forName(meta.getGrpcService());
+			String controller = meta.getController().getName();
+			Class grpcClazz = meta.getGrpcService();
+			@SuppressWarnings("unchecked")
 			Method method = grpcClazz.getMethod("getServiceDescriptor");
 			ServiceDescriptor descriptor = (ServiceDescriptor) method.invoke(null);
 			Collection<MethodDescriptor<?, ?>> methods = descriptor.getMethods();
@@ -65,8 +67,6 @@ public class GrpcJsonRoutes implements Routes {
 				//this plugin is EASY to copy and fork and maintain your self so you can easily do that
 				bldr.addContentRoute(HTTPS, POST, baseUrl+"/" + fullMethodName, controller + "." + javaMethodName);
 			}	
-		} catch (ClassNotFoundException e) {
-			throw new IllegalArgumentException("Could not find grpc class", e);
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException("bug", e);
 		} catch (IllegalAccessException e) {

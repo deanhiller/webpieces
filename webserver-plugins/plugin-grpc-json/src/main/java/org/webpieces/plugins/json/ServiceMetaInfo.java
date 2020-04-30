@@ -1,20 +1,21 @@
 package org.webpieces.plugins.json;
 
+@SuppressWarnings("rawtypes")
 public class ServiceMetaInfo {
 
-	private String controller;
-	private String grpcService;
+	private Class controller;
+	private Class grpcService;
 
-	public ServiceMetaInfo(String controller, String grpcService) {
-		this.controller = controller;
-		this.grpcService = grpcService;
+	public ServiceMetaInfo(Class controller2, Class grpcService2) {
+		this.controller = controller2;
+		this.grpcService = grpcService2;
 	}
 
-	public String getController() {
+	public Class getController() {
 		return controller;
 	}
 
-	public String getGrpcService() {
+	public Class getGrpcService() {
 		return grpcService;
 	}
 	

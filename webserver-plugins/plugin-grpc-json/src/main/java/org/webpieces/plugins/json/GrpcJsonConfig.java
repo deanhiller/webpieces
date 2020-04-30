@@ -5,13 +5,12 @@ import java.util.List;
 
 public class GrpcJsonConfig {
 
-	private Class<? extends GrpcJsonCatchAllFilter> filterClazz;
 	private String baseUrl;
 	private List<ServiceMetaInfo> services = new ArrayList<>();
 
-	public GrpcJsonConfig(String baseUrl, Class<? extends GrpcJsonCatchAllFilter> filterClazz, String controller, String grpcService) {
+	@SuppressWarnings("rawtypes")
+	public GrpcJsonConfig(String baseUrl, Class controller, Class grpcService) {
 		this.baseUrl = baseUrl;
-		this.filterClazz = filterClazz;
 		addService(controller, grpcService);
 	}
 
@@ -19,12 +18,9 @@ public class GrpcJsonConfig {
 		return baseUrl;
 	}
 
-	public Class<? extends GrpcJsonCatchAllFilter> getFilterClazz() {
-		return filterClazz;
-	}
-
-	public void addService(String controller, String grpcService) {
-		if(!grpcService.endsWith("Grpc"))
+	@SuppressWarnings("rawtypes")
+	public void addService(Class controller, Class grpcService) {
+		if(!grpcService.getSimpleName().endsWith("Grpc"))
 			throw new IllegalArgumentException("grpcService should end with Grpc");
 		services.add(new ServiceMetaInfo(controller, grpcService));
 	}

@@ -26,7 +26,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 
-public abstract class GrpcJsonCatchAllFilter extends RouteFilter<JsonConfig> {
+public class GrpcJsonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	private static final Logger log = LoggerFactory.getLogger(GrpcJsonCatchAllFilter.class);
 	public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
