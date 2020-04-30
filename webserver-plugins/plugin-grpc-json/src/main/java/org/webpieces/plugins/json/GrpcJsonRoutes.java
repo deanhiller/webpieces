@@ -49,8 +49,14 @@ public class GrpcJsonRoutes implements Routes {
 	@SuppressWarnings("rawtypes")
 	private void loadRoutes(RouteBuilder bldr, String baseUrl, ServiceMetaInfo meta) {
 		try {
+			//MUST use Thread context class loader in case we are in DevelopmentServer.
+			//This class is loaded in AppClassLoader.  We need to be using CompilingClassLoader in dev server
+			ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
+			
 			String controller = meta.getController().getName();
-			Class grpcClazz = meta.getGrpcService();
+			
+			//NOTE: If we do not do this, it will not recompile in the DevelopmentServer as it will use the original class
+			Class grpcClazz = threadClassLoader.loadClass(meta.getGrpcService().getName());
 			@SuppressWarnings("unchecked")
 			Method method = grpcClazz.getMethod("getServiceDescriptor");
 			ServiceDescriptor descriptor = (ServiceDescriptor) method.invoke(null);
@@ -73,6 +79,8 @@ public class GrpcJsonRoutes implements Routes {
 			throw new RuntimeException("bug", e);
 		} catch (InvocationTargetException e) {
 			throw new RuntimeException("bug??", e);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("weird bug since we went from class to string to class", e);
 		}
 	}
 
