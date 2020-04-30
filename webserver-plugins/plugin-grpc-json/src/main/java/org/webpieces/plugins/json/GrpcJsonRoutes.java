@@ -23,6 +23,8 @@ public class GrpcJsonRoutes implements Routes {
 	public GrpcJsonRoutes(GrpcJsonConfig config) {
 		if(config.getBaseUrl().endsWith("/"))
 			throw new IllegalArgumentException("config.getBaseUrl must not end with /");
+		else if(!config.getBaseUrl().startsWith("/"))
+			throw new IllegalArgumentException("config.getBaseUrl must start with /");
 		this.config = config;
 	}
 	
@@ -61,7 +63,7 @@ public class GrpcJsonRoutes implements Routes {
 				//the world is moving ALL to HTTPS so it's not bad to just do it all on https
 				//POST is fine for rpc calls.  YES, some calls may be stricly get BUT this is rpc at this point so POST
 				//this plugin is EASY to copy and fork and maintain your self so you can easily do that
-				bldr.addContentRoute(HTTPS, POST, "/grpcjson/" + fullMethodName, controller + "." + javaMethodName);
+				bldr.addContentRoute(HTTPS, POST, baseUrl+"/" + fullMethodName, controller + "." + javaMethodName);
 			}	
 		} catch (ClassNotFoundException e) {
 			throw new IllegalArgumentException("Could not find grpc class", e);
