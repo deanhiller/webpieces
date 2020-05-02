@@ -7,6 +7,12 @@ import org.webpieces.router.api.routes.Routes;
 
 public class HibernateRoutes implements Routes {
 
+	private HibernateConfiguration config;
+
+	public HibernateRoutes(HibernateConfiguration config) {
+		this.config = config;
+	}
+
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
 		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
@@ -14,7 +20,11 @@ public class HibernateRoutes implements Routes {
 		//as if the database goes down, you will end up with error to error to webpieces fail-safe 500 page which
 		//does not look like your website
 		//Also, we don't wrap NotFound but you could do that as well
-		bldr.addFilter(".*", TransactionFilter.class, null, FilterPortType.ALL_FILTER);
+		String filterPath = ".*"; //every path with use the filter
+		if(config != null && config.getFilterRegExPath() != null)
+			filterPath = config.getFilterRegExPath();
+
+		bldr.addFilter(filterPath, TransactionFilter.class, null, FilterPortType.ALL_FILTER);
 	}
 
 }

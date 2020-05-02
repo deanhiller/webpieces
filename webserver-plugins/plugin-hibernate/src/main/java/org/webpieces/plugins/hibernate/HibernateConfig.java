@@ -1,5 +1,6 @@
 package org.webpieces.plugins.hibernate;
 
+@Deprecated
 public class HibernateConfig {
 
 	private String persistenceUnit;
