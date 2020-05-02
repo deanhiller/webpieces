@@ -9,12 +9,12 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 
 @Singleton
-public class AMasterRouter {
+public class ARouter {
 
-	private BDomainRouter domainRouter;
+	private BRouter domainRouter;
 
 	@Inject
-	public AMasterRouter() {
+	public ARouter() {
 		
 	}
 	
@@ -26,7 +26,7 @@ public class AMasterRouter {
 		domainRouter.printRoutes();
 	}
 
-	public void setDomainRouter(BDomainRouter domainRouter) {
+	public void setDomainRouter(BRouter domainRouter) {
 		this.domainRouter = domainRouter;
 	}
 

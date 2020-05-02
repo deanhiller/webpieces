@@ -32,11 +32,11 @@ import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractDynamicRouter;
 import org.webpieces.router.impl.routers.AbstractRouter;
-import org.webpieces.router.impl.routers.DScopedRouter;
+import org.webpieces.router.impl.routers.EScopedRouter;
 import org.webpieces.router.impl.routers.DynamicInfo;
-import org.webpieces.router.impl.routers.EContentRouter;
-import org.webpieces.router.impl.routers.EHtmlRouter;
-import org.webpieces.router.impl.routers.EStaticRouter;
+import org.webpieces.router.impl.routers.FContentRouter;
+import org.webpieces.router.impl.routers.FHtmlRouter;
+import org.webpieces.router.impl.routers.FStaticRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.router.impl.services.SvcProxyForContent;
 import org.webpieces.router.impl.services.SvcProxyForHtml;
@@ -56,7 +56,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	private final Map<String, ScopedRouteBuilderImpl> pathToBuilder = new HashMap<>();
 
 	private final List<RouterAndInfo> newDynamicRoutes = new ArrayList<>();
-	private final List<EStaticRouter> staticRouters = new ArrayList<>();
+	private final List<FStaticRouter> staticRouters = new ArrayList<>();
 
 	//private final List<StaticRouteMeta> staticRoutes = new ArrayList<>();
 	//private List<StaticRoute> allStaticRoutes;
@@ -81,7 +81,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo, true);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
-		EContentRouter router = new EContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
+		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic());
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getLoadedController(), svc);
 		
@@ -122,7 +122,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		LoadedController loadedController = holder.getFinder().loadHtmlController(resettingLogic.getInjector(), routeInfo, true, isPostOnly);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
-		EHtmlRouter router = new EHtmlRouter(holder.getRouteInvoker2(), matchInfo, checkToken);	
+		FHtmlRouter router = new FHtmlRouter(holder.getRouteInvoker2(), matchInfo, checkToken);	
 		SvcProxyForHtml svc = new SvcProxyForHtml(holder.getSvcProxyLogic());
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, loadedController, svc);
 		
@@ -245,7 +245,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		MatchInfo matchInfo = new MatchInfo(urlPath, exposedPort, httpMethod, urlEncoding, patternToMatch, pathParamNames);
 		String relativePath = urlSubPath.substring(1);
 		File targetCacheLocation = FileFactory.newFile(holder.getCachedCompressedDirectory(), relativePath);
-		EStaticRouter router = new EStaticRouter(holder.getRouteInvoker2(), matchInfo, file, isOnClassPath, targetCacheLocation, isFile);
+		FStaticRouter router = new FStaticRouter(holder.getRouteInvoker2(), matchInfo, file, isOnClassPath, targetCacheLocation, isFile);
 		staticRouters.add(router);
 		log.info("scope:'"+routerInfo+"' added route="+matchInfo+" fileSystemPath="+file);
 	}
@@ -277,7 +277,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		
 		ScopedRouteBuilderImpl r = pathToBuilder.get(path);
 		if(r == null) {
-			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getDomain(), routerInfo.getPath()+path), holder, resettingLogic);
+			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getRouterId(), routerInfo.getPath()+path), holder, resettingLogic);
 			pathToBuilder.put(path, r);
 		}
 		
@@ -300,8 +300,8 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		return new String[] {path, leftover};
 	}
 	
-	public Collection<? extends EStaticRouter> getStaticRoutes() {
-		List<EStaticRouter> allStaticRouters = new ArrayList<>();
+	public Collection<? extends FStaticRouter> getStaticRoutes() {
+		List<FStaticRouter> allStaticRouters = new ArrayList<>();
 		for(Entry<String, ScopedRouteBuilderImpl> entry : pathToBuilder.entrySet()) {
 			allStaticRouters.addAll(entry.getValue().getStaticRoutes());
 		}
@@ -310,18 +310,18 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		return allStaticRouters;
 	}
 	
-	public DScopedRouter build(List<FilterInfo<?>> routeFilters) {
+	public EScopedRouter build(List<FilterInfo<?>> routeFilters) {
 		List<AbstractRouter> routers = buildRoutes(routeFilters);
 		
-		Map<String, DScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
+		Map<String, EScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 		
-		return new DScopedRouter(routerInfo, pathToRouter, routers);
+		return new EScopedRouter(routerInfo, pathToRouter, routers);
 	}
 
-	protected Map<String, DScopedRouter> buildScopedRouters(List<FilterInfo<?>> routeFilters) {
-		Map<String, DScopedRouter> pathToRouter = new HashMap<>();
+	protected Map<String, EScopedRouter> buildScopedRouters(List<FilterInfo<?>> routeFilters) {
+		Map<String, EScopedRouter> pathToRouter = new HashMap<>();
 		for(Entry<String, ScopedRouteBuilderImpl> entry : pathToBuilder.entrySet()) {
-			DScopedRouter router2 = entry.getValue().build(routeFilters);
+			EScopedRouter router2 = entry.getValue().build(routeFilters);
 			pathToRouter.put(entry.getKey(), router2);
 		}
 		return pathToRouter;

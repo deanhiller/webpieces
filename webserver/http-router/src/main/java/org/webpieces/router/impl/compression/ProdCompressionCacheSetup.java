@@ -14,13 +14,13 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
-import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
-import org.webpieces.router.impl.routers.EStaticRouter;
-import org.webpieces.util.file.FileFactory;
-import org.webpieces.util.file.VirtualFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
+import org.webpieces.router.impl.routers.FStaticRouter;
+import org.webpieces.util.file.FileFactory;
+import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.Security;
 
 public class ProdCompressionCacheSetup implements CompressionCacheSetup {
@@ -43,21 +43,21 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		this.fileUtil = fileUtil;
 	}
 	
-	public void setupCache(List<EStaticRouter> staticRoutes) {
+	public void setupCache(List<FStaticRouter> staticRoutes) {
 		if(config.getCachedCompressedDirectory() == null) {
 			log.info("NOT setting up compressed cached directory so performance will not be as good");
 			return;
 		}
 		
 		log.info("setting up compressed cache directories");
-		for(EStaticRouter route : staticRoutes) {
+		for(FStaticRouter route : staticRoutes) {
 			if(!route.isOnClassPath())
 				createCache(route);
 		}
 		log.info("all cached directories setup");
 	}
 
-	private void createCache(EStaticRouter route) {
+	private void createCache(FStaticRouter route) {
 		File routeCache = route.getTargetCacheLocation();
 		createDirectory(routeCache);
 		

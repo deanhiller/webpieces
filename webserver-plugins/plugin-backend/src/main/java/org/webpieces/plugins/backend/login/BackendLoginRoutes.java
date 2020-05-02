@@ -66,6 +66,6 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 
 	@Override
 	protected RouteBuilder fetchBuilder(DomainRouteBuilder domainRouteBldr) {
-		return domainRouteBldr.getBackendRouteBuilder();
+		return domainRouteBldr.getBackendBuilder().getBldrForAllOtherContentTypes();
 	}
 }

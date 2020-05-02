@@ -17,7 +17,7 @@ public class H2DbRoutes implements Routes {
 
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder bldr = domainRouteBldr.getBackendRouteBuilder();
+		RouteBuilder bldr = domainRouteBldr.getBackendBuilder().getBldrForAllOtherContentTypes();
 		bldr.addRoute(BOTH, HttpMethod.GET, urlPath, "H2DbController.redirectToDatabaseGui", H2DbRouteId.REDIRECT_TO_DB_GUI);
 		
 		RouteBuilder httpBuilder = domainRouteBldr.getAllDomainsRouteBuilder();

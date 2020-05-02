@@ -13,7 +13,7 @@ import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
 
-public class EStaticRouter extends AbstractRouterImpl {
+public class FStaticRouter extends AbstractRouterImpl {
 
 	private final MatchInfo matchInfo;
 	private final RouteInvoker invoker;
@@ -23,7 +23,7 @@ public class EStaticRouter extends AbstractRouterImpl {
 	private final VirtualFile fileSystemPath;
 	private Properties hashMeta;
 
-	public EStaticRouter(RouteInvoker invoker, MatchInfo matchInfo, VirtualFile fileSystemPath, boolean isOnClassPath, File targetCatchLocation, boolean isFile) {
+	public FStaticRouter(RouteInvoker invoker, MatchInfo matchInfo, VirtualFile fileSystemPath, boolean isOnClassPath, File targetCatchLocation, boolean isFile) {
 		super(matchInfo);
 		this.invoker = invoker;
 		this.matchInfo = matchInfo;

@@ -2,20 +2,20 @@ package org.webpieces.router.impl.model;
 
 public class RouterInfo {
 
-	private String domain;
+	private String routerId;
 	private String path;
 
-	public RouterInfo(String domain) {
-		this(domain, "");
+	public RouterInfo(String routerId) {
+		this(routerId, "");
 	}
 	
-	public RouterInfo(String domain, String path) {
-		this.domain = domain;
+	public RouterInfo(String id, String path) {
+		this.routerId = id;
 		this.path = path;
 	}
 
-	public String getDomain() {
-		return domain;
+	public String getRouterId() {
+		return routerId;
 	}
 
 	public String getPath() {
@@ -26,9 +26,9 @@ public class RouterInfo {
 	public String toString() {
 		//any host EXCEPT specific hosts that were defined by client app
 		//ie. not any host, but we print xxxhost instead
-		String host = "<xxxhost>";
-		if(domain != null)
-			host = domain;
+		String host = "<xxxhost:anyContent>";
+		if(routerId != null)
+			host = routerId;
 		return host+path;
 	}
 	

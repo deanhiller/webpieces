@@ -23,7 +23,7 @@ public class DocumentationRoutes implements Routes {
 
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder baseBldr = domainRouteBldr.getBackendRouteBuilder();
+		RouteBuilder baseBldr = domainRouteBldr.getBackendBuilder().getBldrForAllOtherContentTypes();
 		ScopedRouteBuilder scopedBldr = baseBldr.getScopedRouteBuilder(path);
 		
 		scopedBldr.addRoute(BOTH, HttpMethod.GET,  "", "DocumentationController.mainDocs", DocumentationRouteId.MAIN_DOCS);

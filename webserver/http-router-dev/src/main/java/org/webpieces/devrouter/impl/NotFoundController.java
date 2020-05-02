@@ -11,9 +11,8 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.impl.RoutingHolder;
-import org.webpieces.router.impl.routers.BDomainRouter;
+import org.webpieces.router.impl.routers.BRouter;
 import org.webpieces.router.impl.routers.CRouter;
-import org.webpieces.router.impl.routers.DScopedRouter;
 
 @Singleton
 public class NotFoundController {
@@ -39,7 +38,7 @@ public class NotFoundController {
 
 		Collection<CRouter> routers = new ArrayList<>();
 		CRouter router;
-		BDomainRouter domainRouter = routingHolder.getDomainRouter();
+		BRouter domainRouter = routingHolder.getDomainRouter();
 
 		if(request.isBackendRequest) {
 			router = domainRouter.getBackendRouter();
@@ -57,7 +56,7 @@ public class NotFoundController {
 		return Actions.renderThis("domains", routers, "routeHtml", routeHtml, "error", error, "url", url);
 	}
 
-	private String build(DScopedRouter mainRoutes) {
+	private String build(CRouter mainRoutes) {
 		return mainRoutes.buildHtml(" ");
 	}
 }

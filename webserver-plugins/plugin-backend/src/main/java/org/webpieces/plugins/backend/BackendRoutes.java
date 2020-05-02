@@ -15,7 +15,7 @@ public abstract class BackendRoutes implements Routes {
 
 	@Override
 	public final void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder routeBldr = domainRouteBldr.getBackendRouteBuilder();
+		RouteBuilder routeBldr = domainRouteBldr.getBackendBuilder().getBldrForAllOtherContentTypes();
 		String scope = getScope();
 		ScopedRouteBuilder scopedRouter = routeBldr.getScopedRouteBuilder(scope);
 		configure(routeBldr, scopedRouter);

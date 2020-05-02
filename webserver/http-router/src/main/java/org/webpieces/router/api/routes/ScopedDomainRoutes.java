@@ -22,7 +22,7 @@ public class ScopedDomainRoutes implements Routes {
 
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder scopedRouter = domainRouteBldr.getDomainScopedRouteBuilder(domain);
+		RouteBuilder scopedRouter = domainRouteBldr.getDomainScopedBuilder(domain).getBldrForAllOtherContentTypes();
 		
 		for(BasicRoutes module : modules) {
 			CurrentPackage.set(new RouteModuleInfo(module.getClass()));

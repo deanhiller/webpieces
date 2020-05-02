@@ -5,19 +5,17 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.ctx.api.ApplicationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.routers.AMasterRouter;
+import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 
 import com.google.inject.Injector;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class ProdRouterService extends AbstractRouterService {
@@ -26,7 +24,7 @@ public class ProdRouterService extends AbstractRouterService {
 	
 	private RouteLoader routeLoader;
 	private ClassForName loader;
-	private AMasterRouter router;
+	private ARouter router;
 	
 	@Inject
 	public ProdRouterService(
@@ -34,7 +32,7 @@ public class ProdRouterService extends AbstractRouterService {
 			CookieTranslator cookieTranslator, 
 			ObjectTranslator translator, 
 			ProdClassForName loader,
-			AMasterRouter router,
+			ARouter router,
 			WebInjector webInjector
 	) {
 		super(webInjector, routeLoader, cookieTranslator, translator);

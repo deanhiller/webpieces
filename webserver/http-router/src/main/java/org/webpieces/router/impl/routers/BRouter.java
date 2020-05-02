@@ -4,22 +4,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.ResponseStreamer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.router.api.ResponseStreamer;
 
 /**
  * Routes based on domain or if no domain delegates to allOtherDomainsRouter
  */
-public class BDomainRouter {
-	private static final Logger log = LoggerFactory.getLogger(BDomainRouter.class);
+public class BRouter {
+	private static final Logger log = LoggerFactory.getLogger(BRouter.class);
 
 	private final Map<String, CRouter> domainToRouter;
 	private final CRouter allOtherDomainsRouter;
 	private CRouter backendRouter;
 
-	public BDomainRouter(
+	public BRouter(
 		CRouter allOtherDomainsRouter, 
 		CRouter backendRouter, //ONLY enabled IF configured
 		Map<String, CRouter> domainToRouter
@@ -30,17 +30,15 @@ public class BDomainRouter {
 	}
 
 	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb) {
-		String relativePath = ctx.getRequest().relativePath;
-
 		if(ctx.getRequest().isBackendRequest) {
-			return backendRouter.invokeRoute(ctx, responseCb, relativePath);
+			return backendRouter.invokeRoute(ctx, responseCb);
 		}
 
 		CRouter specificDomainRouter = getDomainToRouter().get(ctx.getRequest().domain);
 		if(specificDomainRouter != null)
-			return specificDomainRouter.invokeRoute(ctx, responseCb, relativePath);
+			return specificDomainRouter.invokeRoute(ctx, responseCb);
 		
-		return allOtherDomainsRouter.invokeRoute(ctx, responseCb, relativePath);
+		return allOtherDomainsRouter.invokeRoute(ctx, responseCb);
 	}
 
 	public CRouter getLeftOverDomains() {

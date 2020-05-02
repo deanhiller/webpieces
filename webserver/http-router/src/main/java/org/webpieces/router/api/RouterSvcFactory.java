@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.inject.*;
-import com.google.inject.Module;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
@@ -14,11 +14,13 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.common.collect.Lists;
+import com.google.inject.Binder;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Provides;
 
 import io.micrometer.core.instrument.MeterRegistry;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 public class RouterSvcFactory {
 

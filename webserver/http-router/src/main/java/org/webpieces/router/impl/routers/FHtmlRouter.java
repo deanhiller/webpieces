@@ -11,7 +11,7 @@ import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForHtml;
 
-public class EHtmlRouter extends AbstractDynamicRouterImpl implements ReversableRouter {
+public class FHtmlRouter extends AbstractDynamicRouterImpl implements ReversableRouter {
 	
 	private final RouteInvoker invoker;
 	//private final RouteId routeId;
@@ -21,7 +21,7 @@ public class EHtmlRouter extends AbstractDynamicRouterImpl implements Reversable
 	//without quite a bit of work
 	private BaseRouteInfo baseRouteInfo;
 
-	public EHtmlRouter(RouteInvoker invoker, MatchInfo matchInfo, boolean checkToken) {
+	public FHtmlRouter(RouteInvoker invoker, MatchInfo matchInfo, boolean checkToken) {
 		super(matchInfo);
 		this.invoker = invoker;
 		this.isCheckSecureToken = checkToken;

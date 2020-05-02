@@ -7,76 +7,86 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.AllContentTypesBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
-import org.webpieces.router.impl.routers.BDomainRouter;
+import org.webpieces.router.impl.routers.BRouter;
 import org.webpieces.router.impl.routers.CRouter;
-import org.webpieces.router.impl.routers.EStaticRouter;
+import org.webpieces.router.impl.routers.FStaticRouter;
 
 public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 
 	private final RouteBuilderLogic holder;
 
-	private final RouteBuilderImpl leftOverDomainsBuilder;
-	private final RouteBuilderImpl backendRouteBuilder;
-	private final Map<String, RouteBuilderImpl> domainToRouteBuilder = new HashMap<>();
+	private final AllContentTypesBuilderImpl leftOverDomainsBuilder2;
+	private final AllContentTypesBuilderImpl backendRouteBuilder2;
+	private final Map<String, AllContentTypesBuilderImpl> domainToRouteBuilder2 = new HashMap<>();
+	
+//	private final RouteBuilderImpl leftOverDomainsBuilder;
+//	private final RouteBuilderImpl backendRouteBuilder;
+//	private final Map<String, RouteBuilderImpl> domainToRouteBuilder = new HashMap<>();
 
 	private ResettingLogic resettingLogic;
-	
+
 	public DomainRouteBuilderImpl(RouteBuilderLogic holder, ResettingLogic resettingLogic, boolean useUniqueBackendRouter) {
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
-		this.leftOverDomainsBuilder = new RouteBuilderImpl("<any>", holder, resettingLogic);
+		this.leftOverDomainsBuilder2 = new AllContentTypesBuilderImpl("<any>", holder, resettingLogic);
 		if(useUniqueBackendRouter)
-			this.backendRouteBuilder = new RouteBuilderImpl("<backend>", holder, resettingLogic);
+			this.backendRouteBuilder2 = new AllContentTypesBuilderImpl("<backend>", holder, resettingLogic);
 		else {
-			this.backendRouteBuilder = this.leftOverDomainsBuilder;
+			this.backendRouteBuilder2 = this.leftOverDomainsBuilder2;
 		}
-	}
+	}	
 
 	@Override
 	public RouteBuilder getAllDomainsRouteBuilder() {
-		return leftOverDomainsBuilder;
+		return leftOverDomainsBuilder2.getBldrForAllOtherContentTypes();
 	}
 
-	@Override
-	public RouteBuilder getBackendRouteBuilder() {
-		return backendRouteBuilder;
-	}
-	
-	@Override
-	public RouteBuilder getDomainScopedRouteBuilder(String domain) {
-		RouteBuilderImpl builder = domainToRouteBuilder.get(domain);
-		if(builder != null)
-			return builder;
-		
-		builder = new RouteBuilderImpl(domain, holder, resettingLogic);
-		domainToRouteBuilder.put(domain, builder);
-		return builder;
-	}
-
-	public BDomainRouter build() {
-		CRouter router = leftOverDomainsBuilder.buildRouter();
-		CRouter backendRouter = backendRouteBuilder.buildRouter();
+	public BRouter build() {
+		CRouter router = leftOverDomainsBuilder2.buildRouter();
+		CRouter backendRouter = backendRouteBuilder2.buildRouter();
 		
 		Map<String, CRouter> domainToRouter = new HashMap<>();
-		for(Entry<String, RouteBuilderImpl> entry : domainToRouteBuilder.entrySet()) {
+		for(Entry<String, AllContentTypesBuilderImpl> entry : domainToRouteBuilder2.entrySet()) {
 			CRouter router2 = entry.getValue().buildRouter();
 			domainToRouter.put(entry.getKey(), router2);
 		}
 		
-		return new BDomainRouter(router, backendRouter, domainToRouter);
+		return new BRouter(router, backendRouter, domainToRouter);
 	}
 
-	public List<EStaticRouter> getStaticRoutes() {
-		List<EStaticRouter> staticRouters = new ArrayList<>();
-		for(Entry<String, RouteBuilderImpl> entry : domainToRouteBuilder.entrySet()) {
-			staticRouters.addAll(entry.getValue().getStaticRoutes());
+	public List<FStaticRouter> getStaticRoutes() {
+		List<FStaticRouter> staticRouters = new ArrayList<>();
+		for(Entry<String, AllContentTypesBuilderImpl> entry : domainToRouteBuilder2.entrySet()) {
+			staticRouters.addAll(entry.getValue().getBldrForAllOtherContentTypes().getStaticRoutes());
 		}		
 		
-		staticRouters.addAll(leftOverDomainsBuilder.getStaticRoutes());
+		staticRouters.addAll(leftOverDomainsBuilder2.getBldrForAllOtherContentTypes().getStaticRoutes());
 		return staticRouters;
 	}
 
+	@Override
+	public AllContentTypesBuilder getBuilderForAllOtherDomains() {
+		return leftOverDomainsBuilder2;
+	}
+
+	@Override
+	public AllContentTypesBuilder getDomainScopedBuilder(String domainRegEx) {
+		AllContentTypesBuilderImpl builder = domainToRouteBuilder2.get(domainRegEx);
+		if(builder != null)
+			return builder;
+		
+		builder = new AllContentTypesBuilderImpl(domainRegEx, holder, resettingLogic);
+		domainToRouteBuilder2.put(domainRegEx, builder);
+		return builder;
+	}
+
+	//NOT NEEDED YET so don't expose to keep things simple
+	@Override
+	public AllContentTypesBuilder getBackendBuilder() {
+		return backendRouteBuilder2;
+	}
 }

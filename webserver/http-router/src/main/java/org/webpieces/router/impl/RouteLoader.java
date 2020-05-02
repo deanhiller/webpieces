@@ -1,9 +1,19 @@
 package org.webpieces.router.impl;
 
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.util.Modules;
-import io.micrometer.core.instrument.MeterRegistry;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouterConfig;
@@ -23,24 +33,17 @@ import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routebldr.CurrentPackage;
 import org.webpieces.router.impl.routebldr.DomainRouteBuilderImpl;
 import org.webpieces.router.impl.routeinvoker.RedirectFormation;
-import org.webpieces.router.impl.routers.AMasterRouter;
-import org.webpieces.router.impl.routers.BDomainRouter;
+import org.webpieces.router.impl.routers.ARouter;
+import org.webpieces.router.impl.routers.BRouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.threading.SafeRunnable;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.util.Modules;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 @Singleton
 public class RouteLoader {
@@ -52,7 +55,7 @@ public class RouteLoader {
 	private final PluginSetup pluginSetup;
 	private final ManagedBeanMeta beanMeta;
 	private final ObjectTranslator objectTranslator;
-	private final AMasterRouter masterRouter;
+	private final ARouter masterRouter;
 	private final RouterConfig config;
 	private final RouteBuilderLogic routeBuilderLogic;
 
@@ -71,7 +74,7 @@ public class RouteLoader {
 	@Inject
 	public RouteLoader(
 		RouterConfig config, 
-		AMasterRouter masterRouter,
+		ARouter masterRouter,
 		CompressionCacheSetup compressionCacheSetup,
 		PluginSetup pluginSetup,
 		ManagedBeanMeta beanMeta,
@@ -279,7 +282,7 @@ public class RouteLoader {
 
 		reverseRoutes.finalSetup();
 		
-		BDomainRouter domainRouter = routerBuilder.build();
+		BRouter domainRouter = routerBuilder.build();
 		
 		routingHolder.setDomainRouter(domainRouter);
 		masterRouter.setDomainRouter(domainRouter);

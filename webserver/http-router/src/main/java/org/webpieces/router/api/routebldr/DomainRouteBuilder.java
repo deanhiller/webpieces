@@ -8,29 +8,19 @@ public interface DomainRouteBuilder {
 	 * are then excluded and no routes built with this builder will match when requests come from the
 	 * DomainScopedRouteBuilder domains.
 	 * 
-	 * @return
+	 * NOTE: This is EXACTLY the same and just a delegate method of getRtBuilderForAllOtherDomains().getBldrForAllOtherContentTypes()
 	 */
 	RouteBuilder getAllDomainsRouteBuilder();
 
 	/**
-	 * Only used if you host multiple domains(like me)!!!!!  All paths refer to all domains EXCEPT the ones defined
-	 * in a DomainScopedRouter.  Only domains matching the pattern of domainRegEx will see these pages and
-	 * the rest are served a not found (or are served the page defined in another module rather than the
-	 * one for the specific domains)
-	 *  
-	 * @param path
-	 * @param isSecure true if only available over https otherwise available over http and https
-	 * @return
+	 * 90% of the time, using this is what you want!!!
 	 */
-	RouteBuilder getDomainScopedRouteBuilder(String domainRegEx);
-
+	AllContentTypesBuilder getBuilderForAllOtherDomains();
 	/**
-	 * A special builder that builds routes along side the application (when run in Development mode
-	 * or not configured) OR if configured will run an internal website for management over a 
-	 * backend port.  This is generally used by plugins to install backend plugins
-	 * 
-	 * @return
+	 * DO NOT USE this unless you know what you are doing.  This is for advanced users.
 	 */
-	RouteBuilder getBackendRouteBuilder();
+	AllContentTypesBuilder getDomainScopedBuilder(String domainRegEx);
+	
+	AllContentTypesBuilder getBackendBuilder();
 	
 }

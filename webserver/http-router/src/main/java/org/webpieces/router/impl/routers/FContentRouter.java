@@ -12,7 +12,7 @@ import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
 
-public class EContentRouter extends AbstractDynamicRouterImpl implements ReversableRouter {
+public class FContentRouter extends AbstractDynamicRouterImpl implements ReversableRouter {
 
 	private final RouteInvoker routeInvoker;
 	private final MatchInfo matchInfo;
@@ -20,7 +20,7 @@ public class EContentRouter extends AbstractDynamicRouterImpl implements Reversa
 
 	private BaseRouteInfo baseRouteInfo;
 
-	public EContentRouter(RouteInvoker routeInvoker, MatchInfo matchInfo, BodyContentBinder bodyContentBinder) {
+	public FContentRouter(RouteInvoker routeInvoker, MatchInfo matchInfo, BodyContentBinder bodyContentBinder) {
 		super(matchInfo);
 		this.routeInvoker = routeInvoker;
 		this.matchInfo = matchInfo;

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.FilterPortType;
@@ -15,14 +17,12 @@ import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractRouter;
-import org.webpieces.router.impl.routers.CRouter;
-import org.webpieces.router.impl.routers.DInternalErrorRouter;
-import org.webpieces.router.impl.routers.DNotFoundRouter;
-import org.webpieces.router.impl.routers.DScopedRouter;
+import org.webpieces.router.impl.routers.DRouter;
+import org.webpieces.router.impl.routers.EInternalErrorRouter;
+import org.webpieces.router.impl.routers.ENotFoundRouter;
+import org.webpieces.router.impl.routers.EScopedRouter;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBuilder {
 
@@ -38,8 +38,8 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	private LoadedController notFoundControllerInst;
 	private LoadedController internalErrorController;
 	
-	public RouteBuilderImpl(String domain, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
-		super(new RouterInfo(domain, ""), holder, resettingLogic);
+	public RouteBuilderImpl(String id, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+		super(new RouterInfo(id, ""), holder, resettingLogic);
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	@Override
 	public void setPageNotFoundRoute(String controllerMethod) {
 		if(pageNotFoundInfo != null)
-			throw new IllegalStateException("Page Not found for domain="+routerInfo.getDomain()+" was already set.  cannot set again.  previous="+pageNotFoundInfo);
+			throw new IllegalStateException("Page Not found for domain="+routerInfo.getRouterId()+" was already set.  cannot set again.  previous="+pageNotFoundInfo);
 		RouteInfo route = new RouteInfo(CurrentPackage.get(), controllerMethod);
 		log.info("scope:'"+routerInfo+"' adding PAGE_NOT_FOUND route method="+route.getControllerMethodString());
 		
@@ -76,7 +76,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	@Override
 	public void setInternalErrorRoute(String controllerMethod) {
 		if(internalErrorInfo != null)
-			throw new IllegalStateException("Internal Error Route for domain="+routerInfo.getDomain()+" was already set.  cannot set again");
+			throw new IllegalStateException("Internal Error Route for domain="+routerInfo.getRouterId()+" was already set.  cannot set again");
 		RouteInfo route = new RouteInfo(CurrentPackage.get(), controllerMethod);
 		log.info("scope:'"+routerInfo+"' adding INTERNAL_SVR_ERROR route method="+route.getControllerMethodString());
 		
@@ -86,10 +86,10 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		this.internalErrorInfo = route;
 	}
 
-	public CRouter buildRouter() {
-		List<AbstractRouter> routers = buildRoutes(routeFilters);
+	public DRouter buildRouter() {
+		List<AbstractRouter> routers = super.buildRoutes(routeFilters);
 
-		Map<String, DScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
+		Map<String, EScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 
 		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(holder.getSvcProxyLogic().getServiceInvoker());
 
@@ -103,15 +103,15 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 				RouteType.INTERNAL_SERVER_ERROR);
 
 		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorRoute, true);
-		DInternalErrorRouter internalErrorRouter = new DInternalErrorRouter(holder.getRouteInvoker2(), internalErrorRoute, internalErrorController, svc);
+		EInternalErrorRouter internalErrorRouter = new EInternalErrorRouter(holder.getRouteInvoker2(), internalErrorRoute, internalErrorController, svc);
 
 		//NOTE: We do NOT create a Service<MethodMeta, Action> here with Filters
 		//Service<MethodMeta, Action> must be created on demand(it's cheap operation) because filters must pattern match
 		//on the request coming in and then we form the service per request
 		//WE could turn this off and expose an addGlobalNotFoundFilter that applies always to every not found????
 		//it's faster performance due to know pattern matching every request I guess
-		DNotFoundRouter notFoundRouter = new DNotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst);
-		return new CRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter);
+		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst);
+		return new DRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter);
 	}
 
 }

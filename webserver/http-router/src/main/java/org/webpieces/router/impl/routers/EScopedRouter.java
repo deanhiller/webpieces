@@ -15,14 +15,14 @@ import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.futures.ExceptionUtil;
 
-public class DScopedRouter {
-	private static final Logger log = LoggerFactory.getLogger(DScopedRouter.class);
+public class EScopedRouter {
+	private static final Logger log = LoggerFactory.getLogger(EScopedRouter.class);
 
 	protected final RouterInfo routerInfo;
-	private final Map<String, DScopedRouter> pathPrefixToNextRouter;
+	private final Map<String, EScopedRouter> pathPrefixToNextRouter;
 	private List<AbstractRouter> routers;
 
-	public DScopedRouter(RouterInfo routerInfo, Map<String, DScopedRouter> pathPrefixToNextRouter, List<AbstractRouter> routers) {
+	public EScopedRouter(RouterInfo routerInfo, Map<String, EScopedRouter> pathPrefixToNextRouter, List<AbstractRouter> routers) {
 		this.routerInfo = routerInfo;
 		this.pathPrefixToNextRouter = pathPrefixToNextRouter;
 		this.routers = routers;
@@ -44,7 +44,7 @@ public class DScopedRouter {
 			prefix = subPath.substring(0, index);
 		}
 
-		DScopedRouter routeInfo = getPathPrefixToNextRouter().get(prefix);
+		EScopedRouter routeInfo = getPathPrefixToNextRouter().get(prefix);
 		if(routeInfo != null) {
 			if(index < 0)
 				return routeInfo.invokeRoute(ctx, responseCb, "");
@@ -84,7 +84,7 @@ public class DScopedRouter {
 		return new SpecificRouterInvokeException(info, t);
 	}
 
-	public Map<String, DScopedRouter> getPathPrefixToNextRouter() {
+	public Map<String, EScopedRouter> getPathPrefixToNextRouter() {
 		return pathPrefixToNextRouter;
 	}
 
@@ -108,8 +108,8 @@ public class DScopedRouter {
 	public String build(String spacing) {
 		String text = "\n";
 		
-		for(Map.Entry<String, DScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
-			DScopedRouter childRouting = entry.getValue();
+		for(Map.Entry<String, EScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
+			EScopedRouter childRouting = entry.getValue();
 			text += spacing+ "SCOPE:"+entry.getKey();
 			text += childRouting.build(spacing + spacing);
 		}
@@ -131,8 +131,8 @@ public class DScopedRouter {
 			html += spacing+"<li>"+route.getMatchInfo().getLoggableString("&nbsp;")+"</li>\n";
 		}
 		
-		for(Map.Entry<String, DScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
-			DScopedRouter childRouting = entry.getValue();
+		for(Map.Entry<String, EScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
+			EScopedRouter childRouting = entry.getValue();
 			html += spacing+"<li>SCOPE:"+entry.getKey()+"</li>\n";
 			html += spacing+childRouting.buildHtml(spacing+spacing);
 		}

@@ -1,112 +1,55 @@
 package org.webpieces.router.impl.routers;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
-import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
-import org.webpieces.router.impl.model.RouterInfo;
-import org.webpieces.util.futures.ExceptionUtil;
-import org.webpieces.util.logging.SupressedExceptionLog;
 
-public class CRouter extends DScopedRouter {
+public class CRouter {
 
-	private static final Logger log = LoggerFactory.getLogger(CRouter.class);
-
-	private DNotFoundRouter pageNotFoundRouter;
-	private DInternalErrorRouter internalSvrErrorRouter;
+	private final Map<String, DRouter> requestContentTypeToRouter;
+	private final DRouter allOtherRequestTypes;
 
 	public CRouter(
-			RouterInfo routerInfo, 
-			Map<String, DScopedRouter> pathPrefixToNextRouter, 
-			List<AbstractRouter> routers, 
-			DNotFoundRouter notFoundRouter, 
-			DInternalErrorRouter internalErrorRouter
+		DRouter allOtherContentTypesRouter, 
+		Map<String, DRouter> requestContentTypeToRouter
 	) {
-		super(routerInfo, pathPrefixToNextRouter, routers);
-		this.pageNotFoundRouter = notFoundRouter;
-		this.internalSvrErrorRouter = internalErrorRouter;
+		this.allOtherRequestTypes = allOtherContentTypesRouter;
+		this.requestContentTypeToRouter = requestContentTypeToRouter;
 	}
 
-	@Override
-	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
-		CompletableFuture<Void> future = invokeRouteCatchNotFound(ctx, responseCb, subPath);
+	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb) {
+		String relativePath = ctx.getRequest().relativePath;
+
+		DRouter requestTypeRouter = getRequestContentTypeToRouter().get(ctx.getRequest().domain);
+		if(requestTypeRouter != null)
+			return requestTypeRouter.invokeRoute(ctx, responseCb, relativePath);
 		
-		return future.handle((r, t) -> {
-			if(t != null) {
-				if(ExceptionWrap.isChannelClosed(t)) {
-					//if the socket was closed before we responded, do not log a failure
-					if(log.isTraceEnabled())
-						log.trace("async exception due to socket being closed", t);
-					return CompletableFuture.<Void>completedFuture(null);
-				}
-				
-				String failedRoute = "<Unknown Route>";
-				if(t instanceof SpecificRouterInvokeException)
-					failedRoute = ((SpecificRouterInvokeException) t).getMatchInfo()+"";
-				
-				log.error("There is three parts to this error message... request, route found, and the exception "
-						+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"
-						+ctx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", t);
-				SupressedExceptionLog.log(log, t);
-				
-
-				CompletableFuture<Void> retVal = invokeWebAppErrorController(t, ctx, responseCb, failedRoute);
-				return retVal;
-			}
-			return CompletableFuture.completedFuture(r); 
-		}).thenCompose(Function.identity());
+		return allOtherRequestTypes.invokeRoute(ctx, responseCb, relativePath);
 	}
-	/**
-	 * NOTE: We have to catch any exception from the method processNotFound so we can't catch and call internalServerError in this
-	 * method without nesting even more!!! UGH, more nesting sucks
-	 */
-	private CompletableFuture<Void> invokeRouteCatchNotFound(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
 
-		CompletableFuture<Void> future = ExceptionUtil.wrap(
-			() -> super.invokeRoute(ctx, responseCb, subPath)
-		);
+	public DRouter getLeftOverDomains() {
+		return allOtherRequestTypes;
+	}
+
+	public Map<String, DRouter> getRequestContentTypeToRouter() {
+		return requestContentTypeToRouter;
+	}
+
+	public String build(String spacing) {
+		String routes = "";
+		for(Entry<String, DRouter> entry : requestContentTypeToRouter.entrySet()) {
+			routes = spacing+"Request Content-Type="+entry.getKey()+" router=\n"+entry.getValue().build(spacing);
+		}
 		
-		return future.handle((r, t) -> {
-			if(t instanceof NotFoundException)
-				return notFound((NotFoundException)t, ctx, responseCb);
-			else if(t != null) {
-				return ExceptionUtil.<Void>failedFuture(t);
-			}
-			
-			return CompletableFuture.completedFuture(r); 
-		}).thenCompose(Function.identity());
+		routes = routes + spacing + "ALL OTHER Request Content-Types=\n"+allOtherRequestTypes.build(spacing);
+		return routes;
 	}
 
-	private CompletableFuture<Void> invokeWebAppErrorController(
-			Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, Object failedRoute) {
-		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
-		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
-		return ExceptionUtil.wrapException(
-			() -> internalSvrErrorRouter.invokeErrorRoute(requestCtx, responseCb),
-			(t) -> convert(failedRoute, t)
-		);
+	public String buildHtml(String spacing) {
+		return allOtherRequestTypes.buildHtml(spacing);
 	}
 
-	private InternalErrorRouteFailedException convert(Object failedRoute, Throwable t) {
-		return new InternalErrorRouteFailedException(t, failedRoute);
-	}
-	
-	private CompletableFuture<Void> notFound(NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
-		return ExceptionUtil.wrap(
-			() -> pageNotFoundRouter.invokeNotFoundRoute(requestCtx, responseCb, exc),
-			(e) -> new RuntimeException("NotFound Route had an exception", e)
-		);
-	}
-	
-	public String getDomain() {
-		return routerInfo.getDomain();
-	}
 }

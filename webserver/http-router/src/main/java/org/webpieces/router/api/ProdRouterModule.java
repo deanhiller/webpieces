@@ -1,7 +1,5 @@
 package org.webpieces.router.api;
 
-import org.webpieces.ctx.api.ApplicationContext;
-import org.webpieces.router.impl.ApplicationContextImpl;
 import org.webpieces.router.impl.ProdRouterService;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.compression.ProdCompressionCacheSetup;

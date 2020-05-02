@@ -19,7 +19,7 @@ public class ExampleRoutes implements Routes {
 	
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
-		RouteBuilder baseBldr = domainRouteBldr.getBackendRouteBuilder();
+		RouteBuilder baseBldr = domainRouteBldr.getBackendBuilder().getBldrForAllOtherContentTypes();
 		ScopedRouteBuilder scopedBldr = baseBldr.getScopedRouteBuilder(path);
 		
     	//The GET/POST Routes
