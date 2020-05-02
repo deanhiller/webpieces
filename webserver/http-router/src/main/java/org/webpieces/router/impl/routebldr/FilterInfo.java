@@ -12,10 +12,12 @@ public class FilterInfo<T> {
 	private T initialConfig;
 	private Pattern patternToMatch;
 	private FilterPortType portType;
+	private int filterApplyLevel;
 
-	public FilterInfo(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type) {
-		this.path = path;
-		this.patternToMatch = Pattern.compile(path);
+	public FilterInfo(String regExPathSrc, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel) {
+		this.path = regExPathSrc;
+		this.filterApplyLevel = filterApplyLevel;
+		this.patternToMatch = Pattern.compile(regExPathSrc);
 		this.filter = filter;
 		this.initialConfig = initialConfig;
 		this.portType = type;
@@ -54,7 +56,11 @@ public class FilterInfo<T> {
 
 	@Override
 	public String toString() {
-		return "FilterInfo [path=" + path + ", filter=" + filter + ", portType=" + portType + "]";
+		return "FilterInfo [path=" + path + ", filter=" + filter + ", portType=" + portType + ", level="+filterApplyLevel+"]";
+	}
+
+	public int getFilterApplyLevel() {
+		return filterApplyLevel;
 	}
 	
 }

@@ -24,7 +24,10 @@ public class HibernateRoutes implements Routes {
 		if(config != null && config.getFilterRegExPath() != null)
 			filterPath = config.getFilterRegExPath();
 
-		bldr.addFilter(filterPath, TransactionFilter.class, null, FilterPortType.ALL_FILTER);
+		int filterApplyLevel = 500;
+		if(config != null)
+			config.getFilterApplyLevel();
+		bldr.addFilter(filterPath, TransactionFilter.class, null, FilterPortType.ALL_FILTER, filterApplyLevel);
 	}
 
 }

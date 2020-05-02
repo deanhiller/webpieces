@@ -5,6 +5,7 @@ import java.util.List;
 
 public class GrpcJsonConfig {
 
+	private int filterApplyLevel = 0;
 	private String baseUrl;
 	private List<ServiceMetaInfo> services = new ArrayList<>();
 
@@ -27,6 +28,14 @@ public class GrpcJsonConfig {
 
 	public List<ServiceMetaInfo> getServices() {
 		return services;
+	}
+
+	public int getFilterApplyLevel() {
+		return filterApplyLevel;
+	}
+
+	public void setFilterApplyLevel(int filterApplyLevel) {
+		this.filterApplyLevel = filterApplyLevel;
 	}
 	
 }

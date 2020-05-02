@@ -5,11 +5,11 @@ import org.webpieces.router.api.routes.RouteFilter;
 
 public interface RouteBuilder extends ScopedRouteBuilder {
 
-	<T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type);
+	<T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel);
 	
-	<T> void addNotFoundFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type);
+	<T> void addNotFoundFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel);
 
-	<T> void addInternalErrorFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type);
+	<T> void addInternalErrorFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel);
 	
 	/**
 	 * This is the controller for 404's where the path was not found AND this MUST be set

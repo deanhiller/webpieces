@@ -36,11 +36,11 @@ public class HttpsRoutes implements Routes {
 		//Unlike routes which apply regex to request urls, filters regexs are applied to route regexs so if a filter
 		//matches a route, it will be added to all requests for that route.  This is done so we don't have to
 		//figure out which filters to apply on each request and on startup can wire up all filters once
-		bldr.addFilter("/secure/.*", LoginFilter.class, new LoginInfo(HttpsController.LOGIN_TOKEN, HttpsRouteId.LOGIN), FilterPortType.HTTPS_FILTER);
-		bldr.addFilter("/backend/.*", LoginFilter.class, new LoginInfo("mgrId", HttpsRouteId.LOGIN_BACKEND), FilterPortType.HTTPS_FILTER);
+		bldr.addFilter("/secure/.*", LoginFilter.class, new LoginInfo(HttpsController.LOGIN_TOKEN, HttpsRouteId.LOGIN), FilterPortType.HTTPS_FILTER, 0);
+		bldr.addFilter("/backend/.*", LoginFilter.class, new LoginInfo("mgrId", HttpsRouteId.LOGIN_BACKEND), FilterPortType.HTTPS_FILTER, 0);
 	
-		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(HttpsController.LOGIN_TOKEN, HttpsRouteId.LOGIN), FilterPortType.HTTPS_FILTER);
-		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo("mgrId", HttpsRouteId.LOGIN_BACKEND), FilterPortType.HTTPS_FILTER);
+		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(HttpsController.LOGIN_TOKEN, HttpsRouteId.LOGIN), FilterPortType.HTTPS_FILTER, 0);
+		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo("mgrId", HttpsRouteId.LOGIN_BACKEND), FilterPortType.HTTPS_FILTER, 0);
 
 		bldr.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
 		bldr.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");

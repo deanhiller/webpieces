@@ -20,9 +20,9 @@ public class DevRoutes implements Routes {
 
 		router.addRoute(BOTH, GET , "/filter",             "DevController.filter", DevRouteId.FILTER_ROUTE);
 		
-		router.addFilter("/filter", MyFilter.class, null, FilterPortType.ALL_FILTER);
+		router.addFilter("/filter", MyFilter.class, null, FilterPortType.ALL_FILTER, 0);
 		
-		router.addNotFoundFilter(NotFoundFilter.class, null, FilterPortType.ALL_FILTER);
+		router.addNotFoundFilter(NotFoundFilter.class, null, FilterPortType.ALL_FILTER, 0);
 		
 		router.setPageNotFoundRoute("DevController.notFound");
 		router.setInternalErrorRoute("DevController.internalError");

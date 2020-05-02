@@ -22,7 +22,8 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 	 * @param securePath The path for the secure filter that ensures everyone under that path is secure
 	 */
 	public BackendLoginRoutes(Supplier<Boolean> isUsePluginAssets, String controller, String basePath, String securePath) {
-		super(controller, basePath, securePath, "password");
+		//this filter is best up very high in the stack such that no other filters run if person is not logged in
+		super(controller, basePath, securePath, 10000000, "password");
 		this.isUsePluginAssets = isUsePluginAssets;
 	}
 	

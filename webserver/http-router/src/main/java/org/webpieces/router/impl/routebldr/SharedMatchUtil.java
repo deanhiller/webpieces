@@ -1,6 +1,7 @@
 package org.webpieces.router.impl.routebldr;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class SharedMatchUtil {
 	protected final ResettingLogic resettingLogic;
 	protected final List<RouterAndInfo> newDynamicRoutes = new ArrayList<>();
 
+	private FilterComparator comparator = new FilterComparator();
 	
 	public SharedMatchUtil(RouteBuilderLogic holder, ResettingLogic resettingLogic2) {
 		this.holder = holder;
@@ -80,6 +82,10 @@ public class SharedMatchUtil {
 				matchingFilters.add(0, info);
 			}
 		}
+		
+		//sort filters according to apply level
+		matchingFilters.sort(comparator);
+		
 		return matchingFilters;
 	}
 }

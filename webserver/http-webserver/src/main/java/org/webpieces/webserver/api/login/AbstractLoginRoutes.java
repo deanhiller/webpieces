@@ -17,11 +17,17 @@ public abstract class AbstractLoginRoutes implements Routes {
 	private String securePath;
 	protected String basePath;
 	private String[] secureFields;
+	private int filterLevel;
 
 	public AbstractLoginRoutes(String controller, String basePath, String securePath, String ... secureFields) {
+		this(controller, basePath, securePath, 10000, secureFields);
+	}
+	
+	public AbstractLoginRoutes(String controller, String basePath, String securePath, int filterLevel, String ... secureFields) {
 		this.controller = controller;
 		this.basePath = basePath;
 		this.securePath = securePath;
+		this.filterLevel = filterLevel;
 		this.secureFields = secureFields;
 	}
 	
@@ -38,10 +44,10 @@ public abstract class AbstractLoginRoutes implements Routes {
 
 		addLoggedInHome(bldr, scopedBldr);
 		
-		bldr.addFilter(securePath, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER);
+		bldr.addFilter(securePath, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);
 		//redirects all queries for non-existent pages to a login (then the clients don't know which urls exist and don't exist which is good)
 		//ie. you can only get not found AFTER logging in
-		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER);
+		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);
 	}
 
 	protected abstract RouteBuilder fetchBuilder(DomainRouteBuilder domainRouteBldr);

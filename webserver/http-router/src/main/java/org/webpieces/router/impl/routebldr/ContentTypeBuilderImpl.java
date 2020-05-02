@@ -74,7 +74,7 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 	
 	@Override
 	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, int filterApplyLevel) {
-		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, FilterPortType.HTTPS_FILTER);
+		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, FilterPortType.HTTPS_FILTER, filterApplyLevel);
 		routeFilters.add(info);
 	}
 

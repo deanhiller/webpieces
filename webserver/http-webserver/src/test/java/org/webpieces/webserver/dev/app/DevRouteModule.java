@@ -19,9 +19,9 @@ public class DevRouteModule implements Routes {
 
 		bldr.addRoute(BOTH, GET , "/filter",             "DevController.filter", DevRouteId.FILTER_ROUTE);
 		
-		bldr.addFilter("/filter", MyFilter.class, null, FilterPortType.ALL_FILTER);
+		bldr.addFilter("/filter", MyFilter.class, null, FilterPortType.ALL_FILTER, 0);
 		
-		bldr.addNotFoundFilter(NotFoundFilter.class, null, FilterPortType.ALL_FILTER);
+		bldr.addNotFoundFilter(NotFoundFilter.class, null, FilterPortType.ALL_FILTER, 0);
 		
 		bldr.setPageNotFoundRoute("DevController.notFound");
 		bldr.setInternalErrorRoute("DevController.internalError");

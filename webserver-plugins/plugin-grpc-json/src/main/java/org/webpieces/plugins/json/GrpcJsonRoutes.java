@@ -37,8 +37,8 @@ public class GrpcJsonRoutes implements Routes {
 		Pattern pattern = Pattern.compile(filterPattern);
 		
 		Class<GrpcJsonCatchAllFilter> filter = GrpcJsonCatchAllFilter.class;
-		bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, false), FilterPortType.ALL_FILTER);		
-		bldr.addNotFoundFilter(filter, new JsonConfig(pattern, true), FilterPortType.ALL_FILTER);
+		bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, false), FilterPortType.ALL_FILTER, config.getFilterApplyLevel());		
+		bldr.addNotFoundFilter(filter, new JsonConfig(pattern, true), FilterPortType.ALL_FILTER, config.getFilterApplyLevel());
 		
 		
 		for(ServiceMetaInfo descriptor : config.getServices()) {

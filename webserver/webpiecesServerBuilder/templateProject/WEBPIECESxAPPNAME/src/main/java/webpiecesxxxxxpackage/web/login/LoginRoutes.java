@@ -23,7 +23,8 @@ public class LoginRoutes extends AbstractLoginRoutes {
 	 * @param sessionToken
 	 */
 	public LoginRoutes(String controller, String securePath, String ... secureFields) {
-		super(controller, null, securePath, secureFields);
+		//filter apply level is made to be high as we want to run this filter above most since it's fast and needs no DB connection
+		super(controller, null, securePath, 10000, secureFields);
 	}
 	
 	@Override

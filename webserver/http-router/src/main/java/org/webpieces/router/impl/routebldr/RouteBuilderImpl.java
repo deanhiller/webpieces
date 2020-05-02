@@ -43,20 +43,20 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	}
 
 	@Override
-	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type) {
-		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, type);
+	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel) {
+		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, type, filterApplyLevel);
 		routeFilters.add(info);
 	}
 
 	@Override
-	public <T> void addNotFoundFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type) {
-		FilterInfo<T> info = new FilterInfo<>("", filter, initialConfig, type);
+	public <T> void addNotFoundFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel) {
+		FilterInfo<T> info = new FilterInfo<>("", filter, initialConfig, type, filterApplyLevel);
 		notFoundFilters.add(info);		
 	}
 
 	@Override
-	public <T> void addInternalErrorFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type) {
-		FilterInfo<T> info = new FilterInfo<>("", filter, initialConfig, type);
+	public <T> void addInternalErrorFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel) {
+		FilterInfo<T> info = new FilterInfo<>("", filter, initialConfig, type, filterApplyLevel);
 		internalErrorFilters.add(info);		
 	}
 

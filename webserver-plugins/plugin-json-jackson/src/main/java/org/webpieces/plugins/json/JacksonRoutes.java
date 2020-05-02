@@ -11,8 +11,10 @@ public class JacksonRoutes implements Routes {
 
 	private String filterPattern;
 	private Class<? extends JacksonCatchAllFilter> filter;
+	private JacksonConfig config;
 
 	public JacksonRoutes(JacksonConfig config) {
+		this.config = config;
 		this.filterPattern = config.getFilterPattern();
 		this.filter = config.getFilterClazz();
 	}
@@ -22,8 +24,8 @@ public class JacksonRoutes implements Routes {
 		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		Pattern pattern = Pattern.compile(filterPattern);
 		
-		bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, false), FilterPortType.ALL_FILTER);		
-		bldr.addNotFoundFilter(filter, new JsonConfig(pattern, true), FilterPortType.ALL_FILTER);
+		bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, false), FilterPortType.ALL_FILTER, config.getFilterApplyLevel());		
+		bldr.addNotFoundFilter(filter, new JsonConfig(pattern, true), FilterPortType.ALL_FILTER, config.getFilterApplyLevel());
 	}
 
 }
