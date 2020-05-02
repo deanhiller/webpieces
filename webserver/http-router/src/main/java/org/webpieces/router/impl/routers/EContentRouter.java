@@ -5,13 +5,14 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.extensions.BodyContentBinder;
+import org.webpieces.router.impl.ReversableRouter;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
 
-public class EContentRouter extends AbstractDynamicRouterImpl {
+public class EContentRouter extends AbstractDynamicRouterImpl implements ReversableRouter {
 
 	private final RouteInvoker routeInvoker;
 	private final MatchInfo matchInfo;
@@ -40,6 +41,11 @@ public class EContentRouter extends AbstractDynamicRouterImpl {
 	@Override
 	public void setBaseRouteInfo(BaseRouteInfo baseRouteInfo) {
 		this.baseRouteInfo = baseRouteInfo;
+	}
+	
+	@Override
+	public String getFullPath() {
+		return matchInfo.getFullPath();
 	}
 
 }

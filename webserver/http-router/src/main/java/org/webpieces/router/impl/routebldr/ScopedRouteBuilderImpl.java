@@ -66,9 +66,14 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
 	}
-	
+
 	@Override
 	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod) {
+		addContentRoute(port, method, path, controllerMethod, null);
+	}
+	
+	@Override
+	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		UrlPath p = new UrlPath(routerInfo, path);
 		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
@@ -81,6 +86,9 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getLoadedController(), svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
+		if(routeId != null) //if there is a routeId, then add the reverse mapping
+			resettingLogic.getReverseRoutes().addRoute(routeId, router);
+
 		log.info("scope:'"+routerInfo+"' added content route="+matchInfo+" method="+routeInfo.getControllerMethodString());
 	}
 	
@@ -120,6 +128,7 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 		
 		newDynamicRoutes.add(routerAndInfo);
 		resettingLogic.getReverseRoutes().addRoute(routeId, router);
+		
 		log.info("scope:'"+routerInfo+"' added route="+matchInfo+" method="+routeInfo.getControllerMethodString());
 	}
 

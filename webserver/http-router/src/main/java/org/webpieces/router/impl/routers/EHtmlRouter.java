@@ -4,13 +4,14 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.impl.ReversableRouter;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForHtml;
 
-public class EHtmlRouter extends AbstractDynamicRouterImpl {
+public class EHtmlRouter extends AbstractDynamicRouterImpl implements ReversableRouter {
 	
 	private final RouteInvoker invoker;
 	//private final RouteId routeId;

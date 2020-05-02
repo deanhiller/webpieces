@@ -16,13 +16,19 @@ public interface ScopedRouteBuilder {
 	void addRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken);
 
 	/**
-	 * A pure content route has no RouteId.  This is generally used for apis since RouteId are used for reverse
-	 * translation from web templates like @[RouteId.MyRouteId]@ would be reverse translated to some url
-	 * While this sets up a controller that is invoked and will just return content with no need to reverse
-	 * translate urls
+	 * A pure content route has no RouteId UNLESS you want to call it from javascript as you will need the route id
+	 * to reverse the route id to url so you can change the url in one place.  This method thoough is generally used 
+	 * for apis since RouteId is not passed in.
 	 */
 	void addContentRoute(Port port, HttpMethod method, String urlPath, String controllerMethod);
-	
+
+	/**
+	 * Only use this method if you plan on calling this endpoint from your website and if you do, you can use the
+	 * html webpieces tags like @[RouteId.MyRouteId]@ in the javascript so that the url is generated for you.
+	 * In this way, the url only exists in one place in your entire app. 
+	 */
+	void addContentRoute(Port port, HttpMethod method, String urlPath, String controllerMethod, RouteId routeId);
+
 	void addCrud(Port port, String entity, String controller, CrudRouteIds routeIds);
 
 	/**
