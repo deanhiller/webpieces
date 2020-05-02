@@ -10,7 +10,8 @@ import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.CRouter;
-import org.webpieces.router.impl.routers.DRouter;
+import org.webpieces.router.impl.routers.DContentTypeRouter;
+import org.webpieces.router.impl.routers.DScopedRouter;
 
 public class AllContentTypesBuilderImpl implements AllContentTypesBuilder {
 
@@ -47,11 +48,11 @@ public class AllContentTypesBuilderImpl implements AllContentTypesBuilder {
 	}
 
 	public CRouter buildRouter() {
-		DRouter router = leftOverDomainsBuilder.buildRouter();
+		DScopedRouter router = leftOverDomainsBuilder.buildRouter();
 		
-		Map<String, DRouter> domainToRouter = new HashMap<>();
+		Map<String, DContentTypeRouter> domainToRouter = new HashMap<>();
 		for(Entry<String, ContentTypeBuilderImpl> entry : domainToRouteBuilder.entrySet()) {
-			DRouter router2 = entry.getValue().buildRouter();
+			DContentTypeRouter router2 = entry.getValue().buildRouter();
 			domainToRouter.put(entry.getKey(), router2);
 		}
 		

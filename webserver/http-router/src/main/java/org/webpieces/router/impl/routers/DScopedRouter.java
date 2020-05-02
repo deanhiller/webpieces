@@ -16,14 +16,14 @@ import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.futures.ExceptionUtil;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
-public class DRouter extends EScopedRouter {
+public class DScopedRouter extends EScopedRouter {
 
-	private static final Logger log = LoggerFactory.getLogger(DRouter.class);
+	private static final Logger log = LoggerFactory.getLogger(DScopedRouter.class);
 
 	private ENotFoundRouter pageNotFoundRouter;
 	private EInternalErrorRouter internalSvrErrorRouter;
 
-	public DRouter(
+	public DScopedRouter(
 			RouterInfo routerInfo, 
 			Map<String, EScopedRouter> pathPrefixToNextRouter, 
 			List<AbstractRouter> routers, 

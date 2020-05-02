@@ -18,11 +18,15 @@ public interface ContentTypeRouteBuilder {
 	 */
 	void addRoute(String path, String controllerMethod);
 
-	<T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig);
-	
-	<T> void addNotFoundFilter(Class<? extends RouteFilter<T>> filter, T initialConfig);
-
-	<T> void addInternalErrorFilter(Class<? extends RouteFilter<T>> filter, T initialConfig);
+	/**
+	 * 
+	 * @param <T>
+	 * @param path
+	 * @param filter
+	 * @param initialConfig
+	 * @param filterApplyLevel Higher means higher in the stack of filters.  Plugins MUST require a configuration level for any filters they install
+	 */
+	<T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, int filterApplyLevel);
 
 	
 }

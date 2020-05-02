@@ -11,16 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
 import org.webpieces.router.api.routes.CrudRouteIds;
-import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.ResettingLogic;
@@ -30,10 +27,8 @@ import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
-import org.webpieces.router.impl.routers.AbstractDynamicRouter;
 import org.webpieces.router.impl.routers.AbstractRouter;
 import org.webpieces.router.impl.routers.EScopedRouter;
-import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.routers.FContentRouter;
 import org.webpieces.router.impl.routers.FHtmlRouter;
 import org.webpieces.router.impl.routers.FStaticRouter;
@@ -44,9 +39,8 @@ import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.file.VirtualFileFactory;
-import org.webpieces.util.filters.Service;
 
-public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
+public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRouteBuilder {
 
 	private static final Logger log = LoggerFactory.getLogger(ScopedRouteBuilderImpl.class);
 
@@ -55,13 +49,13 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	protected final RouterInfo routerInfo;
 	private final Map<String, ScopedRouteBuilderImpl> pathToBuilder = new HashMap<>();
 
-	private final List<RouterAndInfo> newDynamicRoutes = new ArrayList<>();
 	private final List<FStaticRouter> staticRouters = new ArrayList<>();
 
 	//private final List<StaticRouteMeta> staticRoutes = new ArrayList<>();
 	//private List<StaticRoute> allStaticRoutes;
 	
 	public ScopedRouteBuilderImpl(RouterInfo routerInfo, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+		super(holder, resettingLogic);
 		this.routerInfo = routerInfo;
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
@@ -328,45 +322,12 @@ public class ScopedRouteBuilderImpl implements ScopedRouteBuilder {
 	}
 
 	protected List<AbstractRouter> buildRoutes(List<FilterInfo<?>> routeFilters) {
-		List<AbstractRouter> routers = new ArrayList<>();
-		for(RouterAndInfo routerAndInfo : newDynamicRoutes) {
-			AbstractDynamicRouter router = routerAndInfo.getRouter();
-			MatchInfo matchInfo = router.getMatchInfo();
-			String path = matchInfo.getFullPath();
-			Port port = matchInfo.getExposedPorts();
-			List<FilterInfo<?>> filters = findMatchingFilters(path, port, routeFilters);
-			
-			BaseRouteInfo baseRouteInfo = new BaseRouteInfo(
-					resettingLogic.getInjector(), routerAndInfo.getRouteInfo(), routerAndInfo.getSvcProxy(), filters, routerAndInfo.getRouteType());
-			Service<MethodMeta, Action> service = holder.getFinder().loadFilters(baseRouteInfo, true);
-
-			router.setBaseRouteInfo(baseRouteInfo);
-			router.setDynamicInfo(new DynamicInfo(routerAndInfo.getLoadedController(), service));
-			routers.add(router);
-		}
+		List<AbstractRouter> routers = super.buildRoutes(routeFilters);
 		
 		//static routes get cached in browser typically so add them last so dynamic routes which are not cached are 
 		//pattern matched first
 		routers.addAll(staticRouters);
-		
 		return routers;
 	}
 
-	public List<FilterInfo<?>> findMatchingFilters(String path, Port exposedPorts, List<FilterInfo<?>> routeFilters) {
-		boolean isHttpsOnly = exposedPorts == Port.HTTPS;
-		List<FilterInfo<?>> matchingFilters = new ArrayList<>();
-		for(FilterInfo<?> info : routeFilters) {
-			if(!info.securityMatch(isHttpsOnly))
-				continue; //skip this filter
-			
-			Pattern patternToMatch = info.getPatternToMatch();
-			Matcher matcher = patternToMatch.matcher(path);
-			if(matcher.matches()) {
-				if(log.isDebugEnabled())
-					log.debug("Adding filter="+info.getFilter()+" to path="+path);
-				matchingFilters.add(0, info);
-			}
-		}
-		return matchingFilters;
-	}
 }

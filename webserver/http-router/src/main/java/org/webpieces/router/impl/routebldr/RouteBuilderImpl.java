@@ -17,7 +17,7 @@ import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractRouter;
-import org.webpieces.router.impl.routers.DRouter;
+import org.webpieces.router.impl.routers.DScopedRouter;
 import org.webpieces.router.impl.routers.EInternalErrorRouter;
 import org.webpieces.router.impl.routers.ENotFoundRouter;
 import org.webpieces.router.impl.routers.EScopedRouter;
@@ -86,7 +86,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		this.internalErrorInfo = route;
 	}
 
-	public DRouter buildRouter() {
+	public DScopedRouter buildRouter() {
 		List<AbstractRouter> routers = super.buildRoutes(routeFilters);
 
 		Map<String, EScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
@@ -111,7 +111,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		//WE could turn this off and expose an addGlobalNotFoundFilter that applies always to every not found????
 		//it's faster performance due to know pattern matching every request I guess
 		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst);
-		return new DRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter);
+		return new DScopedRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter);
 	}
 
 }

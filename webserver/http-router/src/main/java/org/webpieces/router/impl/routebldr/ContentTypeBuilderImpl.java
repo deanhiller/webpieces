@@ -18,12 +18,13 @@ import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
-import org.webpieces.router.impl.routers.DRouter;
+import org.webpieces.router.impl.routers.AbstractRouter;
+import org.webpieces.router.impl.routers.DContentTypeRouter;
 import org.webpieces.router.impl.routers.FContentRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.router.impl.services.SvcProxyForContent;
 
-public class ContentTypeBuilderImpl implements ContentTypeRouteBuilder {
+public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTypeRouteBuilder {
 
 	private static final Logger log = LoggerFactory.getLogger(ContentTypeBuilderImpl.class);
 
@@ -32,15 +33,14 @@ public class ContentTypeBuilderImpl implements ContentTypeRouteBuilder {
 	private ResettingLogic resettingLogic;
 
 	private List<FilterInfo<?>> routeFilters = new ArrayList<>();
-	private List<FilterInfo<?>> notFoundFilters = new ArrayList<>();
-	private List<FilterInfo<?>> internalErrorFilters = new ArrayList<>();
 	private final List<RouterAndInfo> newDynamicRoutes = new ArrayList<>();
 
 	public ContentTypeBuilderImpl(RouterInfo routerInfo, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+		super(holder, resettingLogic);
 		this.routerInfo = routerInfo;
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
-		throw new UnsupportedOperationException("Not supported yet, but coming soon for grpc and content types that need the root url / to work");
+		throw new UnsupportedOperationException("Not supported yet, but coming soon for grpc and content types that need the root url / to work.  In fact, it's done except for testing");
 	}
 
 	@Override
@@ -73,27 +73,15 @@ public class ContentTypeBuilderImpl implements ContentTypeRouteBuilder {
 	}
 	
 	@Override
-	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig) {
+	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, int filterApplyLevel) {
 		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, FilterPortType.HTTPS_FILTER);
 		routeFilters.add(info);
 	}
 
-	@Override
-	public <T> void addNotFoundFilter(Class<? extends RouteFilter<T>> filter, T initialConfig) {
-		FilterInfo<T> info = new FilterInfo<>("", filter, initialConfig, FilterPortType.HTTPS_FILTER);
-		notFoundFilters.add(info);		
-	}
+	public DContentTypeRouter buildRouter() {
+		List<AbstractRouter> routers = buildRoutes(routeFilters);
 
-	@Override
-	public <T> void addInternalErrorFilter(Class<? extends RouteFilter<T>> filter, T initialConfig) {
-		FilterInfo<T> info = new FilterInfo<>("", filter, initialConfig, FilterPortType.HTTPS_FILTER);
-		internalErrorFilters.add(info);		
-	}
-	
-
-	public DRouter buildRouter() {
-		
-		return null;
+		return new DContentTypeRouter(routers);
 	}
 
 }
