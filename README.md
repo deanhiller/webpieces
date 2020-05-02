@@ -60,10 +60,9 @@ One thing to note in the video is I was caught off guard by a minor bug(that is 
 10. To view the documentation, you need to start the development server in eclipse setup or intellij setup below
 
 
-### Eclipse Setup
+### Eclipse Setup (Intellij setup below this section)
 
 NOTE: last tested running eclipse on jdk-11.0.3.jdk Eclipse 2019-06 Version: 2019-06 (4.12.0) Build id: 20190614-1200
-BIG NOTE: I was having huge troubles with Eclipse 2019-03 but it could have been my environment and I could not figure out what was wrong, so try 2019-06 if you have issues
 
 1. import project into eclipse using gradle
    * Click File menu -> Import...
@@ -76,7 +75,7 @@ BIG NOTE: I was having huge troubles with Eclipse 2019-03 but it could have been
    * Expand 'Java' and click 'Compiler' 
    * select a checkbox near the bottom that says 'Store information about method parameters'
 3. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
-4. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
+4. Run OR Debug the class named DevelopmentServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
 5. In a browser go to http://localhost:8080
 6. refactor your code like crazy and hit the website again(no restart needed)
 7. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
@@ -84,24 +83,23 @@ BIG NOTE: I was having huge troubles with Eclipse 2019-03 but it could have been
 
 ### Intellij Setup
 
-In Intellij, you will have a bit more pain in the debugger(the debugger is not as nice as eclipse BUT the IDE usability is much better). 
-NOTE: last tested on Intellij 2019.1
+NOTE: last tested on Intellij 2019.3.4.  
 
 1. Import Project
    * From Welcome screen, choose Import Project
    * Select your folder {yourapp}-all and click ok
-   * Choose 'Import project from external model' and choose gradle and click next
-   * Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
+   * Choose 'Import project from external model' and choose gradle and click Finish
 2. Modify some build settings and compiling with parameters option(Intellij does not suck this setting in from gradle :( )
    * Open Preferences, expand "Build, Execution, and Deployment", 
    * expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
-   * Click Ok to close dialogue
+   * Click Apply to save the setting
    * Expand 'Build Tools' (also under 'Build, Execution, and Deployment')
    * Click on 'Gradle' and change the two settings under 'Build and run' to IntelliJ (rather than Gradle by default)
-   * Click Build menu and click Rebuild Project
+   * Click Ok to save and close dialog
+   * Click Build menu and click Rebuild Project (VERY important after changing -parameters as unlike eclipse, intellij doesn't detect the need to rebuild)
 3. Modify TWO auto-recompile settings documented here https://stackoverflow.com/questions/12744303/intellij-idea-java-classes-not-auto-compiling-on-save
 4. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
-5. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
+5. Run OR Debug the class named DevelopmentServer.java which compiles your code as your code changes so you don't need to restart the webserver (even in debug mode)
 6. In a browser go to http://localhost:8080
 7. refactor your code like crazy and hit the website again(no restart needed)
 8. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
