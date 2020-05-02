@@ -95,6 +95,7 @@ NOTE: last tested on Intellij 2019.3.4.
    * Click Apply to save the setting
    * Expand 'Build Tools' (also under 'Build, Execution, and Deployment')
    * Click on 'Gradle' and change the two settings under 'Build and run' to IntelliJ (rather than Gradle by default)
+   * This previous step is CRITICAL for scanning new entities because the gradle build doesn't hot compile build jar on changes so the changes are not found
    * Click Ok to save and close dialog
    * Click Build menu and click Rebuild Project (VERY important after changing -parameters as unlike eclipse, intellij doesn't detect the need to rebuild)
 3. Modify TWO auto-recompile settings documented here https://stackoverflow.com/questions/12744303/intellij-idea-java-classes-not-auto-compiling-on-save

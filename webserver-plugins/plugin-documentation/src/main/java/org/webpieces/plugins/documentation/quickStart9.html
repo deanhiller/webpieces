@@ -7,20 +7,24 @@
 
 <h2>Server.java Walkthrough</h2>
 
+<p>Last updated: May 2nd, 2020</p>
+
 <p>When you start up DevelopmentServer.java, most changes to your web application will not require a restart.  Because
-    webpieces is a library, however, changes to the 3 classes that startup webpieces would require a restart and they are</p>
+    webpieces is a library, however, changes to this one class and any classes referenced from this class classes that 
+    would require a restart</p>
 
 <ol>
     <li><a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/Server.java">Server.java</a></li>
-    <li><a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/ServerConfig.java">ServerConfig.java</a></li>
-    <li><a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/WebSSLFactory.java">WebSSLFactory.java</a></li>
 </ol>
 
-<p>YOU own these classes now to modify to your heart's content.  Any changes to these classes or classes
+<p>YOU own this class now to modify to your heart's content.  Any changes to this class or classes
     that these depend on would require a development server restart to see the changes. Luckily, these
-    classes pretty much do not really need to ever be touched.</p>
+    classes pretty much do not really need to ever be touched except in extreme server customization
+    OR you can swap platform classes to fix a bug (instead of forking a git repo which is a PITA to do
+    that AND try to rebuild all the jars, deliver them somewhere...fuck all that shit!! save time and swap
+    out the platform class that has the bug yourself...please do report though so we can fix it)</p>
 
-<p>Looking closer at Server.java, you will notice 3 different configurations</p>
+<p>Next navigate into WebpiecesServer.java and look at the meat of the constructor. You will notice 3 different configurations</p>
 
 <ol>
     <li>WebServerConfig</li>
@@ -28,35 +32,21 @@
     <li>TemplateConfig</li>
 </ol>
 
-<p>Each config object configures that piece of the webserver making it easier to trace what different configurations do
-    as well as keep each piece separate from each other.</p>
-
-<p>We have a firm belief that nearly all properties should be in the database and not on the filesystem including
-    configuration properties.  We generate Server.java such that you could modify it and put any properties
-    you like on the filesystem but we advise against 99% of properties there as typically you want property file
-    changes to go through your test team rather than someone getting on a production server and tweaking a property.
-    Of course, the 1 property that must be a command line argument or a property is the database connection such that
-    your server can exist in multiple environments like development, staging, and production with different database
-    connections.  Then if you really need to be able to change a setting/property, we also believe it belongs in
-the database as well not in a properties file on the filesystem.</p>
+<p>Each config object configures that piece of the webserver making it easier to trace what different configurations do.
+As a side note, you can copy this class and modify to your hearts content as well.  It used to be generated for you
+actually and only sits on top of webpieces apis.  We decided to own a default version of this class</p>
 
 <p>To make it simpler for all components/plugins to read/write properties into a database, an interface SimpleStorage.java
     is provided.  The generated application implements this interface connecting it to hibernate but you could change it
-    to connect to some noSQL database or whatever else you would like.  The current implementation generated is
-<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/libs/SimpleStorageImpl.java">SimpleStorageImpl.java</a>.
-You know own that code as well and can swap it out to a noSQL database or anything you like.</p>
+    to connect to some noSQL database or microservice or whatever else you would like.  The current implementation generated is
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/service/SimpleStorageImpl.java">SimpleStorageImpl.java</a>.
+You now own that code as well and can swap it out to a noSQL database or anything you like.</p>
 
-<p><b>NOTE: In the future, we want to add a bean plugin that exposes MBeans to a web gui for you and also
-    saves changes to the database thereby eliminating the need for property files for basically everything. It would
-    do the following for you...</b></p>
-
-<ol>
-    <li>expose a web page dynamically to modify those properties(for one node or for all machines)</li>
-    <li>read in the properties from SimpleStorage on startup to set them back to what they were</li>
-    <li>write changes from the web page into the database so they are persisted</li>
-</ol>
-
-<p>This automatically managed way of doing properties is preferred over using property files</p>
+<p><b>The properties plugin -</b>In the backend(see documentation on backend), there is now a plugin where you can take any
+Guice injected class in your app and extend ****Managed.java.  The plugin detects that and creates a backend webpage so
+you can change the properties of your bean from the webpage. <b>Not only that</b>, but it saves changes to the database
+and on restart, the properties are re-applied before the server goes live.  This method tends to leave the old school
+way of using property files in the dust</p>
 
 <h2>A walkthrough of Meta & Modules & Plugins</h2>
 
@@ -64,15 +54,16 @@ You know own that code as well and can swap it out to a noSQL database or anythi
 DevelopmentServer.java defines a metaFile variable pointing to myhelloworld-all/myhelloworld/src/main/resources/appmetadev.txt.
 Each of these files has a String pointing to the main Meta class bootstrap for your webapp.  This file is also the
 cutpoint of recompiling so that if this file changes, or the meta it points to changes and so on, all that code can
-recompile(in DevelopmentServer only though).  In production, everything is pre-compiled and ready for speed.</p>
+recompile(in DevelopmentServer only though).  In production, everything is pre-compiled and ready for speed. 
+Production is kept clean with no classloading tricks that DevelopmentServer has on purpose.</p>
 
 <p>If you look closely, you will notice the appmeta-dev.txt contains
-    <a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample-dev/src/main/java/org/webpieces/meta/DeveloperMeta.java">DeveloperMeta.java</a>
+    <a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample-dev/src/main/java/org/webpieces/meta/DevServerMeta.java">DevServerMeta.java</a>
     and in that file, he just re-uses all
-    the production meta stuff as well as adding 2 plugins that are only in the development server.  After all, we don't
-    want to expose a SQL GUI nor webpieces documentation on our production website.</p>
+    the production meta stuff as well as adding a few plugins that are only in the development server.  After all, we don't
+    want to expose an SQL GUI nor webpieces documentation on our production website.</p>
 
-<p>Next, looking at MyHelloWorldMeta.java file, you will notice it is broken down into 3 main components</p>
+<p>Next, looking at ProdServerMeta.java file, you will notice it is broken down into 3 main components</p>
 
 <ol>
     <li>list of Guice Modules</li>
@@ -90,7 +81,8 @@ recompile(in DevelopmentServer only though).  In production, everything is pre-c
 <pre><code>*[public Server(
     Module platformOverrides,
     Module appOverrides,
-    ServerConfig svrConfig
+    ServerConfig svrConfig,
+    String ... args
 ) {]*</code></pre>
 
 <p>If you are familiar with Guice, webpieces creates one injector to create the webpieces webserver and a
@@ -99,16 +91,15 @@ passed into the Server constructor are for 2 things</p>
 
 <ol>
     <li>For the DevelopmentServer to swap in some specific development code that doesn't run in production</li>
-    <li>For testing so tests can swap out specific pieces to wire up the test</li>
+    <li>Rapid Bug fixing as you can swap most classes(including private methods) out and in with your bug fix</li>    
 </ol>
 
-<p>The appOverrides is mainly for test purposes allowing you to swap out ANY class on your stack created
+<p>The appOverrides is mainly for test purposes and staging environments allowing you to swap out ANY class on your stack created
 by Guice no matter how deep it is in your stack of code.  This is how we typically swap out remote clients for
-a mock client for instance.  Lastly, the ServerConfig exposes just enough configuration allowing tests
-to bind to port 0 so tests can run in parallel and things like that.</p>
+a mock client for instance. </p>
 
 <p>Using platformOverrides, you can actually swap out nearly any class in webpieces BUT</p>
 
-<p>With great power comes great responsibility - Voltaire, no Uncle Ben from spider man did not say it first!</p>
+<p>With great power comes great responsibility - Voltaire  (no, Uncle Ben from spider man did not say it first!)</p>
 
 <p>Ok, that was lame, but whatever, hack away!!!!</p>

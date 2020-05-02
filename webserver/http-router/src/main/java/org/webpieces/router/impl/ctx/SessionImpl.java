@@ -24,7 +24,7 @@ public class SessionImpl extends CookieScopeImpl implements Session, SecureCooki
 	}
 
 	@Override
-	public String getSecureToken()  {
+	public String getOrCreateSecureToken()  {
         if (!containsKey(SECURE_TOKEN_KEY)) {
         	String secureToken = UUID.randomUUID().toString().replaceAll("-", "");
             put(SECURE_TOKEN_KEY, secureToken);

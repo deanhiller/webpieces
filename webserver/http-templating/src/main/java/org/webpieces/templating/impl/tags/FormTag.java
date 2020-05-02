@@ -41,7 +41,7 @@ public class FormTag implements HtmlTag {
         if (enctype == null)
             enctype = "application/x-www-form-urlencoded";
         
-        String secureToken = Current.session().getSecureToken();
+        String secureToken = Current.session().getOrCreateSecureToken();
         String tokenKeyName = RequestContext.SECURE_TOKEN_FORM_NAME;
         
         String formHeader = "<form action=`" + url + "` method=`" + method.toLowerCase() + "` accept-charset=`" + encoding.toLowerCase()

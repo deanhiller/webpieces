@@ -9,7 +9,7 @@
 
 <h2>Introduction</h2>
 
-<p>Last updated: Feb 12, 2020</p>
+<p>Last updated: May 2nd, 2020</p>
 
 <p>A very simple tutorial, that will just help you to learn the Webpieces library 
 with the famous ‘Hello World’ example.</p>
@@ -19,7 +19,7 @@ everything that a real project needs: validation, error handling, an automated t
 
 <h2>Prerequisites</h2>
 
-<p>Webpieces requires that you have a working installation of jdk9.  We do not require intellij or eclipse
+<p>Webpieces requires that you have a working installation of jdk11 or greater.  We do not require intellij or eclipse
 but highly recommend one of those as your editors.</p>  
 
 <p>We will assume you already have knowledge of Java and Web development(especially HTML, CSS).  However,
@@ -49,6 +49,7 @@ these steps</p>
     <li>Download the release(https://github.com/deanhiller/webpieces/releases)</li>
     <li>unzip the file you downloaded</li>
     <li>run ./createProject.sh</li>
+    <li>IMPORTANT: Type these steps in exactly if you want to be able to cut/paste code from this tutorial</li>
     <li>For the camel case app name, enter 'MyHelloWorld'</li>
     <li>For the package, enter org.webpieces.helloworld</li>
     <li>For the directory, enter '..'</li>
@@ -89,6 +90,13 @@ Now, if you look there are 6 directories which are</p>
 <p>Next, view the section in the <a href="https://github.com/deanhiller/webpieces">README on github</a> on 
 Eclipse Setup or Intellij Setup.</p>
 
+<p>We mine as well do all the examples while the development server is running so shutdown the previous production server (ctrl-C).
+Follow the instructions for your IDE setup above.  <b>Then start the DevelopmentServer.java and keep it running</b>.  Also, while it's 
+running, you can view these instructions at http://localhost:8080/@documentation</p>
+
+<h4>To be 'very' clear.  You SHOULD run the Development Server for the whole tutorial without restarting.  I even run my server
+overnight and develop the next day</h4>
+
 <p>There is built in documentation at http://localhost:8080/@documentation when running the development server.  The production
 server above does not have this so you will want to run the development server in intellij or eclipse.  This is because the
 documentation plugin is only installed on the development server.  You could install it on the production server if you
@@ -120,6 +128,7 @@ RouteModule called MyMainRoutes with a single route to our new webpage</p>
 <code>package org.webpieces.helloworld.myapp;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
@@ -127,7 +136,7 @@ import org.webpieces.router.api.routebldr.RouteBuilder;
 public class MyMainRoutes implements Routes {
 
     @Override
-    protected void configure() {
+    public void configure(DomainRouteBuilder bldr) {
         RouteBuilder b = bldr.getAllDomainsRouteBuilder();
 
         b.addRoute(Port.BOTH, HttpMethod.GET, "/helloworld", "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
@@ -136,7 +145,7 @@ public class MyMainRoutes implements Routes {
 </pre>
 
 <p>Here, we are saying when the browser calls any of these urls that end up on our server, webpieces will invoke
-MyMainController.helloWorld</p>
+MyMainController.helloWorld.  <b>This won't work just YET!</b>.  We need to implement controller first</p>
 
 <ol>
     <li>http://localhost:8080/helloworld</li>
@@ -144,8 +153,10 @@ MyMainController.helloWorld</p>
     <li>http://anydomain.com/helloworld  #As long as your DNS is setup properly and we receive the request</li>
 </ol>
 
-<p>Basically, domains are ignored by default though you can match on domain(see the Routes Reference for more info).
-Now that we defined a route and a Controller and method to invoke, we should create the Controller</p>
+<p>Notice we used the getAllDomainsRouteBuilder which means these routes apply to all domains EXCEPT domains created
+with bldr.getDomainScopedRouteBuilder(String domain) which is a more advanced topic. If you have DNS domainX.com and
+domainY.com all pointing to your ip with this server, then domainX.com/hello and domainY.com/hello end up calling
+the same controller. Now that we defined a route and a Controller and method to invoke, we should create the Controller.</p>
 
 <pre>
 <code>package org.webpieces.helloworld.myapp;
@@ -175,20 +186,20 @@ next create a file called helloWorld.html in the same directory as the Controlle
 </pre>
 
 <p>Finally, the one last step is we need to tell webpieces about this RouteModule that we created.  Inside the class
-MyHelloWorldMeta.java, modify it to add the RouteModule to the list of RouteModules already defined.  Your new
+ProdServerMeta.java, modify it to add the RouteModule to the list of RouteModules already defined.  Your new
 getRouteModules method should look like so</p>
 
 <pre>
 <code>*[@Override
 public List<Routes> getRouteModules() {
     return Lists.newArrayList(
-        new AppRoutes(),
-        new LoginRoutes("/org/webpieces/helloworld/base/crud/login/AppLoginController", "/secure/.*"),
-        new CrudRoutes(),
-        new AjaxCrudRoutes(),
-        new JsonRoutes(),
-        new MyMainRoutes()
-        );
+            new AppRoutes(),
+            new LoginRoutes("/org/webpieces/helloworld/web/login/AppLoginController", "/secure/.*", "password"),
+            new CrudRoutes(),
+            new AjaxCrudRoutes(),
+            new JsonRoutes(),
+            new MyMainRoutes()
+            );
 }]*</code>
 </pre>
 
