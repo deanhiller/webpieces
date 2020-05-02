@@ -1,7 +1,6 @@
 package org.webpieces.plugins.hibernate;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -9,14 +8,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.HttpException;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.util.filters.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class TransactionFilter extends RouteFilter<Void> {
@@ -25,11 +23,15 @@ public class TransactionFilter extends RouteFilter<Void> {
 	private EntityManagerFactory factory;
 
 	//for test only.  I could not figure out a good way to test ALL the way from the edges without this
+	//BUT NOW webpieces has metrics so IF we metered it, we could just check the metrics but not sure this is something
+	//we want metered?
 	private static int state = 0; //0 for start, 1 for in progress, 2 for rolled back, 3 for committed
+	private TxCompleters txCompleters;
 	
 	@Inject
-	public TransactionFilter(EntityManagerFactory factory) {
+	public TransactionFilter(EntityManagerFactory factory, TxCompleters txCompleters) {
 		this.factory = factory;
+		this.txCompleters = txCompleters;
 	}
 	
 	@Override
@@ -57,8 +59,7 @@ public class TransactionFilter extends RouteFilter<Void> {
 		
 		if(t != null) {
 			log.info("Transaction being rolled back");
-			rollbackTx(t, tx);
-			closeEm(t, em);
+			rollbackCloseSuppress(t, em, tx);
 			if(t instanceof HttpException)
 				throw (HttpException)t; //the platform needs the original HttpException to translate to an http code
 			else
@@ -72,32 +73,13 @@ public class TransactionFilter extends RouteFilter<Void> {
 	}
 	
 	private void commit(EntityTransaction tx, EntityManager em) {
-		try {
-			state = 3;
-			tx.commit();
-			
-			em.close();
-		} catch(Throwable e) {
-			closeEm(e, em);
-			throw new RuntimeException(e);
-		}
+		state = 3;
+		txCompleters.commit(tx, em);
 	}
 
-	private void closeEm(Throwable t, EntityManager em) {
-		try {
-			em.close();
-		} catch(Throwable e) {
-			t.addSuppressed(e);
-		}
-	}
-
-	private void rollbackTx(Throwable t, EntityTransaction tx) {
-		try {
-			state = 2;
-			tx.rollback();
-		} catch(Throwable e) {
-			t.addSuppressed(e);
-		}
+	private void rollbackCloseSuppress(Throwable t, EntityManager mgr, EntityTransaction tx) {
+		state = 2;
+		txCompleters.rollbackCloseSuppress(t, mgr, tx);
 	}
 
 	@Override
