@@ -9,6 +9,12 @@
 
 <p>Last updated: May 2nd, 2020</p>
 
+<p>Before we start, let's checkout the in-memory db plugin for webpieces.  Go to http://localhost:8080/@db and for
+the JDBC URL, change it to 'jdbc:h2:mem:test' so it hits the in-memory database.  All other settings are
+fine.  Then click the Connect button.  Notice there is a few tables from the examples generated from webpieces
+template creation.  We will revisit this later in this example.  Also, notice there is no Car table as that will
+be created for us while we code ;)</p>
+
 <p>Ideally however in a dynamic web application, we would like to let people persist data for a later time and
 modify that data.  A Hibernate plugin is installed by default for rapid prototyping though you can remove the
 hibernate plugin from the build files if you desire and use something else.  In the meantime, welcome to
