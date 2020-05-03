@@ -19,7 +19,7 @@ public interface RouteBuilder extends ScopedRouteBuilder {
 	 * 
 	 * All filters are applied on startup so that performance is very fast at handling requests.
 	 */
-	//<T> void addPackageFilter(String regEx, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel);
+	<T> void addPackageFilter(String regEx, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel);
 
 	/**
 	 * When a controller is not found to call.  These are all the filters that are applied to the not found controller below.

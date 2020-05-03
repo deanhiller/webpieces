@@ -4,14 +4,21 @@ public class HibernateConfiguration {
 
 	private String filterRegExPath;
 	private int filterApplyLevel;
+	private boolean applyRegExPackage;
 
+	@Deprecated
 	public HibernateConfiguration(String filterRegExPath) {
-		this(filterRegExPath, 10000);
+		this(filterRegExPath, false, 500);
+	}
+
+	public HibernateConfiguration(String filterRegExPath, boolean applyRegExPackage) {
+		this(filterRegExPath, true, 500);
 	}
 	
-	public HibernateConfiguration(String filterRegExPath, int filterApplyLevel) {
+	public HibernateConfiguration(String filterRegExPath, boolean applyRegExPackage, int filterApplyLevel) {
 		super();
 		this.filterRegExPath = filterRegExPath;
+		this.applyRegExPackage = applyRegExPackage;
 		this.setFilterApplyLevel(filterApplyLevel);
 	}
 
@@ -33,6 +40,10 @@ public class HibernateConfiguration {
 
 	public void setFilterApplyLevel(int filterApplyLevel) {
 		this.filterApplyLevel = filterApplyLevel;
+	}
+
+	public boolean isApplyRegExPackage() {
+		return applyRegExPackage;
 	}
 
 }

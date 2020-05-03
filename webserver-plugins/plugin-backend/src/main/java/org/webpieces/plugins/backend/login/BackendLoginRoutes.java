@@ -23,7 +23,7 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 	 */
 	public BackendLoginRoutes(Supplier<Boolean> isUsePluginAssets, String controller, String basePath, String securePath) {
 		//this filter is best up very high in the stack such that no other filters run if person is not logged in
-		super(controller, basePath, securePath, 10000000, "password");
+		super(controller, basePath, securePath, false, 10000000, "password");
 		this.isUsePluginAssets = isUsePluginAssets;
 	}
 	

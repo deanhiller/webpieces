@@ -48,12 +48,12 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		routeFilters.add(info);
 	}
 	
-//	@Override
-//	public <T> void addPackageFilter(String regEx, Class<? extends RouteFilter<T>> filter, T initialConfig,
-//			FilterPortType type, int filterApplyLevel) {
-//		FilterInfo<T> info = new FilterInfo<>(regEx, true, filter, initialConfig, type, filterApplyLevel);
-//		routeFilters.add(info);		
-//	}
+	@Override
+	public <T> void addPackageFilter(String regEx, Class<? extends RouteFilter<T>> filter, T initialConfig,
+			FilterPortType type, int filterApplyLevel) {
+		FilterInfo<T> info = new FilterInfo<>(regEx, true, filter, initialConfig, type, filterApplyLevel);
+		routeFilters.add(info);		
+	}
 	
 	@Override
 	public <T> void addNotFoundFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel) {

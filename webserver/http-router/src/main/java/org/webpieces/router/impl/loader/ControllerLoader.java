@@ -43,7 +43,7 @@ public class ControllerLoader {
 	}
 
 	public LoadedController loadNotFoundController(Injector injector, RouteInfo route, boolean isInitializingAllControllers) {
-		LoadedController loadedController = loadGenericController(injector, route, isInitializingAllControllers);
+		LoadedController loadedController = loadGenericController(injector, route, isInitializingAllControllers).getLoadedController();
 		if(loadedController != null) {
 			preconditionCheckForErrorRoute(loadedController);
 		}
@@ -51,7 +51,7 @@ public class ControllerLoader {
 	}
 	
 	public LoadedController loadErrorController(Injector injector, RouteInfo route, boolean isInitializingAllControllers) {
-		LoadedController loadedController = loadGenericController(injector, route, isInitializingAllControllers);
+		LoadedController loadedController = loadGenericController(injector, route, isInitializingAllControllers).getLoadedController();
 		if(loadedController != null) {
 			preconditionCheckForErrorRoute(loadedController);
 		}
@@ -78,28 +78,30 @@ public class ControllerLoader {
 	}
 	
 	public BinderAndLoader loadContentController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers) {
-		LoadedController loadedController = loadGenericController(injector, routeInfo, isInitializingAllControllers);
+		MethodMetaAndController mAndC = loadGenericController(injector, routeInfo, isInitializingAllControllers);
 		BodyContentBinder binder = null;
+		LoadedController loadedController = mAndC.getLoadedController();
 		if(loadedController != null)
 			binder = binderChecker.contentPreconditionCheck(injector, routeInfo, loadedController.getControllerMethod(), loadedController.getParameters());
 
-		return new BinderAndLoader(loadedController, binder);
+		return new BinderAndLoader(mAndC, binder);
 	}
 	
-	public LoadedController loadHtmlController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers, boolean isPostOnly) {
-		LoadedController loadedController = loadGenericController(injector, routeInfo, isInitializingAllControllers);
-		if(loadedController != null)
-			htmlPreconditionCheck(routeInfo, loadedController.getControllerMethod(), isPostOnly);
-		return loadedController;
+	public MethodMetaAndController loadHtmlController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers, boolean isPostOnly) {
+		MethodMetaAndController mAndC = loadGenericController(injector, routeInfo, isInitializingAllControllers);
+		if(mAndC.getLoadedController() != null)
+			htmlPreconditionCheck(routeInfo, mAndC.getLoadedController().getControllerMethod(), isPostOnly);
+		return mAndC;
 	}
 	
 	/**
 	 * isInitializingAllControllers is true if in process of initializing ALL controllers and false if just being called to
 	 * initialize on controller(which is done only in the DevServer)
 	 */
-	public LoadedController loadGenericController(Injector injector, RouteInfo base, boolean isInitializingAllControllers) {
+	public MethodMetaAndController loadGenericController(Injector injector, RouteInfo base, boolean isInitializingAllControllers) {
 		ResolvedMethod method = resolver.resolveControllerClassAndMethod(base);
-		return loader.loadControllerIntoMeta(injector, method, isInitializingAllControllers);
+		LoadedController loadedController = loader.loadControllerIntoMeta(injector, method, isInitializingAllControllers);
+		return new MethodMetaAndController(method, loadedController);
 	}
 	
 	public Service<MethodMeta, Action> loadFilters(BaseRouteInfo neededData, boolean isInitializingAllFilters) {

@@ -24,7 +24,7 @@ import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
-import org.webpieces.router.impl.loader.LoadedController;
+import org.webpieces.router.impl.loader.MethodMetaAndController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractRouter;
@@ -77,7 +77,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic());
-		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getLoadedController(), svc);
+		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getMetaAndController(), svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
 		if(routeId != null) //if there is a routeId, then add the reverse mapping
@@ -113,12 +113,12 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 
 		//MUST DO loadControllerIntoMetat HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		LoadedController loadedController = holder.getFinder().loadHtmlController(resettingLogic.getInjector(), routeInfo, true, isPostOnly);
+		MethodMetaAndController metaAndController = holder.getFinder().loadHtmlController(resettingLogic.getInjector(), routeInfo, true, isPostOnly);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		FHtmlRouter router = new FHtmlRouter(holder.getRouteInvoker2(), matchInfo, checkToken);	
 		SvcProxyForHtml svc = new SvcProxyForHtml(holder.getSvcProxyLogic());
-		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, loadedController, svc);
+		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, metaAndController, svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
 		resettingLogic.getReverseRoutes().addRoute(routeId, router);

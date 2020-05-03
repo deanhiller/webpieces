@@ -14,19 +14,22 @@ import org.webpieces.router.api.routes.Routes;
 public abstract class AbstractLoginRoutes implements Routes {
 
 	private String controller;
-	private String securePath;
+	private String secureRegEx;
 	protected String basePath;
 	private String[] secureFields;
 	private int filterLevel;
+	private boolean regExMatchPackage;
 
+	@Deprecated
 	public AbstractLoginRoutes(String controller, String basePath, String securePath, String ... secureFields) {
-		this(controller, basePath, securePath, 10000, secureFields);
+		this(controller, basePath, securePath, false, 10000, secureFields);
 	}
 	
-	public AbstractLoginRoutes(String controller, String basePath, String securePath, int filterLevel, String ... secureFields) {
+	public AbstractLoginRoutes(String controller, String basePath, String secureRegEx, boolean regExMatchPackage, int filterLevel, String ... secureFields) {
 		this.controller = controller;
 		this.basePath = basePath;
-		this.securePath = securePath;
+		this.secureRegEx = secureRegEx;
+		this.regExMatchPackage = regExMatchPackage;
 		this.filterLevel = filterLevel;
 		this.secureFields = secureFields;
 	}
@@ -44,10 +47,17 @@ public abstract class AbstractLoginRoutes implements Routes {
 
 		addLoggedInHome(bldr, scopedBldr);
 		
-		bldr.addFilter(securePath, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);
-		//redirects all queries for non-existent pages to a login (then the clients don't know which urls exist and don't exist which is good)
-		//ie. you can only get not found AFTER logging in
-		bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);
+		
+		if(regExMatchPackage) {
+			//being in a package secures all NotFound based on changing params so hackers can't probe urls of dynamic urls of /secure/{name} guessing names and such
+			bldr.addPackageFilter(secureRegEx, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);
+			
+		} else {
+			bldr.addFilter(secureRegEx, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);
+			//redirects all queries for non-existent pages to a login (then the clients don't know which urls exist and don't exist which is good)
+			//ie. you can only get not found AFTER logging in
+			bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(secureRegEx, getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);
+		}
 	}
 
 	protected abstract RouteBuilder fetchBuilder(DomainRouteBuilder domainRouteBldr);

@@ -14,6 +14,7 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.ResettingLogic;
+import org.webpieces.router.impl.loader.ResolvedMethod;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractDynamicRouter;
@@ -53,21 +54,23 @@ public class SharedMatchUtil {
 			MatchInfo matchInfo = router.getMatchInfo();
 			String path = matchInfo.getFullPath();
 			Port port = matchInfo.getExposedPorts();
-			List<FilterInfo<?>> filters = findMatchingFilters(path, port, routeFilters);
+			ResolvedMethod methodMeta = routerAndInfo.getMetaAndController().getMethodMeta();
+			
+			List<FilterInfo<?>> filters = findMatchingFilters(methodMeta, path, port, routeFilters);
 			
 			BaseRouteInfo baseRouteInfo = new BaseRouteInfo(
 					resettingLogic.getInjector(), routerAndInfo.getRouteInfo(), routerAndInfo.getSvcProxy(), filters, routerAndInfo.getRouteType());
 			Service<MethodMeta, Action> service = holder.getFinder().loadFilters(baseRouteInfo, true);
 
 			router.setBaseRouteInfo(baseRouteInfo);
-			router.setDynamicInfo(new DynamicInfo(routerAndInfo.getLoadedController(), service));
+			router.setDynamicInfo(new DynamicInfo(routerAndInfo.getMetaAndController().getLoadedController(), service));
 			routers.add(router);
 		}
 		
 		return routers;
 	}
 
-	public List<FilterInfo<?>> findMatchingFilters(String path, Port exposedPorts, List<FilterInfo<?>> routeFilters) {
+	public List<FilterInfo<?>> findMatchingFilters(ResolvedMethod methodMeta, String path, Port exposedPorts, List<FilterInfo<?>> routeFilters) {
 		boolean isHttpsOnly = exposedPorts == Port.HTTPS;
 		List<FilterInfo<?>> matchingFilters = new ArrayList<>();
 		for(FilterInfo<?> info : routeFilters) {
@@ -75,7 +78,15 @@ public class SharedMatchUtil {
 				continue; //skip this filter
 			
 			Pattern patternToMatch = info.getPatternToMatch();
-			Matcher matcher = patternToMatch.matcher(path);
+			
+			Matcher matcher;
+			if(info.isApplyToPackage()) {
+				String controllerAndMethod = methodMeta.getControllerStr()+"."+methodMeta.getMethodStr();
+				matcher = patternToMatch.matcher(controllerAndMethod);
+			} else {
+				matcher = patternToMatch.matcher(path);
+			}
+			
 			if(matcher.matches()) {
 				if(log.isDebugEnabled())
 					log.debug("Adding filter="+info.getFilter()+" to path="+path);

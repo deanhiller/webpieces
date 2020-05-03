@@ -4,16 +4,16 @@ import org.webpieces.router.api.extensions.BodyContentBinder;
 
 public class BinderAndLoader {
 
-	private final LoadedController loadedController;
+	private final MethodMetaAndController methodAndController;
 	private final BodyContentBinder binder;
 
-	public BinderAndLoader(LoadedController loadedController, BodyContentBinder binder) {
-		this.loadedController = loadedController;
+	public BinderAndLoader(MethodMetaAndController methodAndController, BodyContentBinder binder) {
+		this.methodAndController = methodAndController;
 		this.binder = binder;
 	}
 
-	public LoadedController getLoadedController() {
-		return loadedController;
+	public MethodMetaAndController getMetaAndController() {
+		return methodAndController;
 	}
 
 	public BodyContentBinder getBinder() {

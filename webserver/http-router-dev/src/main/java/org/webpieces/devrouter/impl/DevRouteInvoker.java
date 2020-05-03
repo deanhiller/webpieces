@@ -20,6 +20,7 @@ import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
+import org.webpieces.router.impl.loader.MethodMetaAndController;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
@@ -99,9 +100,9 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		DynamicInfo newInfo = info;
 		if(info.getLoadedController() == null) {
 			BaseRouteInfo route = invokeInfo.getRoute();
-			LoadedController controller = controllerFinder.loadHtmlController(route.getInjector(), route.getRouteInfo(), false, htmlRoute.isPostOnly());
+			MethodMetaAndController controller = controllerFinder.loadHtmlController(route.getInjector(), route.getRouteInfo(), false, htmlRoute.isPostOnly());
 			Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route, false);
-			newInfo = new DynamicInfo(controller, svc);
+			newInfo = new DynamicInfo(controller.getLoadedController(), svc);
 		}
 		return super.invokeHtmlController(invokeInfo, newInfo, data);
 	}
@@ -114,7 +115,8 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 			BaseRouteInfo route = invokeInfo.getRoute();
 			BinderAndLoader binderAndLoader = controllerFinder.loadContentController(route.getInjector(), route.getRouteInfo(), false);
 			Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route, false);
-			newInfo = new DynamicInfo(binderAndLoader.getLoadedController(), svc);
+			LoadedController loadedController = binderAndLoader.getMetaAndController().getLoadedController();
+			newInfo = new DynamicInfo(loadedController, svc);
 			data = new RouteInfoForContent(binderAndLoader.getBinder());
 		}
 		return super.invokeContentController(invokeInfo, newInfo, data);
@@ -146,7 +148,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 				new SvcProxyFixedRoutes(serviceInvoker),
 				new ArrayList<>(), RouteType.NOT_FOUND);
 		
-		LoadedController newLoadedController = controllerFinder.loadGenericController(route.getInjector(), routeInfo, false);
+		LoadedController newLoadedController = controllerFinder.loadGenericController(route.getInjector(), routeInfo, false).getLoadedController();
 		
 		String reason = "Your route was not found in routes table";
 		if(notFoundExc != null)

@@ -21,13 +21,22 @@ public class HibernateRoutes implements Routes {
 		//does not look like your website
 		//Also, we don't wrap NotFound but you could do that as well
 		String filterPath = ".*"; //every path with use the filter
-		if(config != null && config.getFilterRegExPath() != null)
-			filterPath = config.getFilterRegExPath();
+		boolean applyFilterToClassName = false;
+		if(config != null) {
+			applyFilterToClassName = config.isApplyRegExPackage();
+			if(config.getFilterRegExPath() != null)
+				filterPath = config.getFilterRegExPath();
+		}
 
 		int filterApplyLevel = 500;
 		if(config != null)
 			config.getFilterApplyLevel();
-		bldr.addFilter(filterPath, TransactionFilter.class, null, FilterPortType.ALL_FILTER, filterApplyLevel);
+		
+		if(applyFilterToClassName) {
+			bldr.addPackageFilter(filterPath, TransactionFilter.class, null, FilterPortType.ALL_FILTER, filterApplyLevel);
+		} else {
+			bldr.addFilter(filterPath, TransactionFilter.class, null, FilterPortType.ALL_FILTER, filterApplyLevel);
+		}
 	}
 
 }
