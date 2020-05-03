@@ -6,7 +6,7 @@ Codecov.io / jacoco has two bugs, one related to aggregation reporting (so we ar
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 It's hard to narrow down my 5 favorite features but here is a try
-* You can fix a bug in webpieces without forking the git repo (Just swap out the class that has the private method with the bug via Guice!!)
+* You can fix a bug in webpieces without forking the git repo (Just swap class with the bug via Guice!!)
 * DevelopmentServer.java - I can add CarDbo.java and with no-restart, it hot-recompiles and creates the database table
 * backpressure for http1.1 http2 - If server gets overloaded, server makes clients pause requests.  ask me how :smirk:!!
 * Every log line in intellij/eclipse has a clickable link taking you right to the log (talk about speed for developers)
