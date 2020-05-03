@@ -20,18 +20,18 @@ The BELOW 23 minute video barely scratches the surface but demonstrates
 * Visit the pluggable backend at http://localhost:8080/@backend
 * importing into intellij
 * starting up the DevelopmentServer
-* Adding Routes
-* Adding Controller
-* Adding Entity Bean
-* Adding CRUD operations, errors, persistence
+* Adding Routes while DevServer is running
+* Adding Controller while DevServer is running
+* Adding Entity Bean while DevServer is running
+* Adding CRUD operations, errors, persistence while DevServer is running
 * Quick example of back button WORKING
 * Quick example of 'DevelopmentServer' not found page helping you debug faster
-* Quite a few examples where I screw up to show how good the errors are
-* Logging Error/Warn is done in RED, to help you not miss errors in your application
+* Quite a few examples where I screw up to show how good the errors are (I am anal but good messages so please report bad error messages)
+* Logging Error/Warn is done in RED in intellij/eclipse, to help you not miss errors in your application
 * development server only in-memory database GUI at http://localhost:8080/@db
 * development server only in-memory documentation at http://localhost:8080/@documentation
 
-#### BIG NOTE: There is 1 location in the video I had to restart the server ONLY because there are settings in intelij I forgot to setup
+#### BIG NOTE: There is 1 location in the video I had to restart the server ONLY because there are settings in intelij I forgot to setup. 
 ## [Webpieces YouTube QuickStart](https://youtu.be/4FtdAX_wKD0)
 
 One thing to note in the video is I was caught off guard by a minor bug(that is easily worked around) and had to restart the DevelopmentServer as for some reason, the hibernate rescan of entities and table creations did not work.  We may have that fixed by the time you watch the video(hopefully)
