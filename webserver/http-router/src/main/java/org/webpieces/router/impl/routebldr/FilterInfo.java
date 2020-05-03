@@ -13,9 +13,15 @@ public class FilterInfo<T> {
 	private Pattern patternToMatch;
 	private FilterPortType portType;
 	private int filterApplyLevel;
+	private boolean applyToPackage;
 
 	public FilterInfo(String regExPathSrc, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel) {
+		this(regExPathSrc, false, filter, initialConfig, type, filterApplyLevel);
+	}
+	
+	public FilterInfo(String regExPathSrc, boolean applyToPackage, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel) {
 		this.path = regExPathSrc;
+		this.applyToPackage = applyToPackage;
 		this.filterApplyLevel = filterApplyLevel;
 		this.patternToMatch = Pattern.compile(regExPathSrc);
 		this.filter = filter;
@@ -61,6 +67,10 @@ public class FilterInfo<T> {
 
 	public int getFilterApplyLevel() {
 		return filterApplyLevel;
+	}
+
+	public boolean isApplyToPackage() {
+		return applyToPackage;
 	}
 	
 }
