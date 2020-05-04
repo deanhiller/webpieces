@@ -750,12 +750,16 @@ public class HttpParserImpl implements HttpParser {
 
 	private HttpMessage checkSpecialCase(MementoImpl memento, List<String> lines) {
 		String requestLine = lines.get(0);
+		
+		log.info("Initial Connection of Socket.  check for http2.  requestLine="+requestLine);
 		if("PRI * HTTP/2.0".equals(requestLine)) {
+			log.info("HTTP/2 found.  verifying");
 			//we are http2 so return an Http2Message and SHORT-CIRCUIT FURTHER PARSING
 			memento.setHttp2(true);
 			return null;
 		}
 		
+		log.info("HTTP/2 not found.  using http1.1");
 		return parseRequest(memento, lines);
 	}
 
