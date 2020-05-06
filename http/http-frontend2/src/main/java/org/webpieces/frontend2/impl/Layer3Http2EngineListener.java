@@ -29,8 +29,13 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 
 	@Override
 	public StreamHandle openStream() {
-		HttpStream handle2 = httpListener.openStream();
+		HttpStream handle2 = httpListener.openStream(socket);
 		return new FrontendStreamProxy(handle2);
+	}
+	
+	public void closeSocket(ShutdownConnection reason) {
+		httpListener.fireIsClosed(socket);
+		socket.internalClose();
 	}
 	
 	private class FrontendStreamProxy implements StreamHandle {
@@ -62,10 +67,6 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 			f.completeExceptionally(e);
 			return f;
 		}
-	}
-
-	public void closeSocket(ShutdownConnection reason) {
-		socket.internalClose();
 	}
 
 }

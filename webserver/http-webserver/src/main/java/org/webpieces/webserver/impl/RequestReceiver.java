@@ -3,6 +3,7 @@ package org.webpieces.webserver.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamListener;
 
@@ -20,8 +21,14 @@ public class RequestReceiver implements StreamListener {
 	}
 
 	@Override
-	public HttpStream openStream() {
+	public HttpStream openStream(FrontendSocket socket) {
 		return new WebpiecesStreamHandle(facade);
+	}
+
+	@Override
+	public void fireIsClosed(FrontendSocket socketThatClosed) {
+		//TODO: ((dhiller) fill this in calling RequestHelpFacade or something?
+		
 	}
 
 }

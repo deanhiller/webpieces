@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.StreamListener;
@@ -19,7 +20,7 @@ public class EchoListener implements StreamListener {
 	private static final Logger log = LoggerFactory.getLogger(EchoListener.class);
 	
 	@Override
-	public HttpStream openStream() {
+	public HttpStream openStream(FrontendSocket socket) {
 		return new EchoStream();
 	}
 
@@ -38,5 +39,9 @@ public class EchoListener implements StreamListener {
 			log.error("This should not happen in this test. reason="+payload);
 			return CompletableFuture.completedFuture(null);
 		}
+	}
+
+	@Override
+	public void fireIsClosed(FrontendSocket socketThatClosed) {
 	}
 }

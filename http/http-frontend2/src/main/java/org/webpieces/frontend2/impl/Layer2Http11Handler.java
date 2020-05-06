@@ -163,7 +163,7 @@ public class Layer2Http11Handler {
 		return permitQueue.runRequest(() -> {
 			Http11StreamImpl currentStream = new Http11StreamImpl(id, socket, httpParser, permitQueue, http1Req, headers);
 
-			HttpStream streamHandle = httpListener.openStream();
+			HttpStream streamHandle = httpListener.openStream(socket);
 			currentStream.setStreamHandle(streamHandle);
 			socket.setCurrentStream(currentStream);
 
@@ -197,6 +197,7 @@ public class Layer2Http11Handler {
 	}
 
 	public void farEndClosed(FrontendSocketImpl socket) {
+		httpListener.fireIsClosed(socket);
 		socket.farEndClosed(httpListener);
 	}
 

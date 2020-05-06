@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.StreamListener;
@@ -47,7 +48,7 @@ public class MockHttp2RequestListener extends MockSuperclass implements StreamLi
 	}
 	
 	@Override
-	public HttpStream openStream() {
+	public HttpStream openStream(FrontendSocket socket) {
 		return new StreamHandleProxy();
 	}
 
@@ -113,6 +114,10 @@ public class MockHttp2RequestListener extends MockSuperclass implements StreamLi
 
 	public int getNumCancelsThatCameIn() {
 		return super.getCalledMethodList(Method.CANCEL).size();
+	}
+
+	@Override
+	public void fireIsClosed(FrontendSocket socketThatClosed) {
 	}
 
 }

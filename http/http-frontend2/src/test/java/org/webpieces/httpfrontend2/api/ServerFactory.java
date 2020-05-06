@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.frontend2.api.FrontendMgrConfig;
+import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
@@ -63,13 +64,18 @@ class ServerFactory {
 //        private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
 
 		@Override
-		public 	HttpStream openStream() {
+		public 	HttpStream openStream(FrontendSocket socket) {
 			return new StreamHandleImpl();
 		}
 		
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public void fireIsClosed(FrontendSocket socketThatClosed) {
+			
 		}
 
     }

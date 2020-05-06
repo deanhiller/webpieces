@@ -86,6 +86,7 @@ public class FrontendSocketImpl implements FrontendSocket {
 	public void farEndClosed(StreamListener httpListener) {
 		isClosed = true;
 		FarEndClosedConnection conn = new FarEndClosedConnection(this+" The far end closed the socket");
+		
 		if(protocol == ProtocolType.HTTP1_1) {
 			cancelAllStreams(httpListener, conn);
 		}
