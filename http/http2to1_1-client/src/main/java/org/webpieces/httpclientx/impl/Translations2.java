@@ -1,6 +1,8 @@
 package org.webpieces.httpclientx.impl;
 
+import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2parser.api.dto.Http2Method;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import org.slf4j.Logger;
@@ -20,12 +22,11 @@ public class Translations2 {
 
 	public static HttpFullRequest translate(FullRequest request) {
 		//String scheme = request.getHeaders().getScheme();
-		String authority = request.getHeaders().getAuthority();
-		String path = request.getHeaders().getPath();
-		String methodString = request.getHeaders().getMethodString();
-		if(!path.startsWith("/"))
-			throw new IllegalArgumentException("http2 request :path header must start with /");
-		else if(methodString == null)
+		Http2Request headers = request.getHeaders();
+		String authority = headers.getAuthority();
+		String path = headers.getPath();
+		String methodString = headers.getMethodString();
+		if(methodString == null)
 			throw new IllegalArgumentException("http2 :method header is required");
 		else if(authority == null) {
 			throw new IllegalArgumentException("http1 required host header so http2 message must have :authority header set");
@@ -41,7 +42,7 @@ public class Translations2 {
 		DataWrapper data = request.getPayload();
 
 		//translate all other headers here as well...
-		for(Http2Header header : request.getHeaders().getHeaders()) {
+		for(Http2Header header : headers.getHeaders()) {
 			if(!header.getName().startsWith(":")) //All standard headers go elsewhere except HOST which we do below
 				httpReq.addHeader(new Header(header.getName(), header.getValue()));
 		}
