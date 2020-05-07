@@ -78,4 +78,10 @@ public class MockChannelManager implements ChannelManager {
 	public String getName() {
 		return "mockChanMgr2";
 	}
+
+	@Override
+	public TCPServerChannel createTCPUpgradableChannel(String id, ConnectionListener connectionListener,
+			SSLEngineFactory factory) {
+		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
+	}
 }

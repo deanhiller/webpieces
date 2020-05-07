@@ -67,6 +67,18 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		return frontend;
 	}
 
+
+	@Override
+	public HttpServer createUpgradableServer(HttpSvrConfig config, StreamListener httpListener, SSLEngineFactory factory) {
+		preconditionCheck(config);
+		
+		Layer1ServerListener listener = buildDatalListener(httpListener, true, false);
+		AsyncServer tcpServer = svrManager.createUpgradableServer(config.asyncServerConfig, listener, factory);
+		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
+		
+		return frontend;
+	}
+	
 	@Override
 	public HttpServer createBackendHttpsServer(HttpSvrConfig config, StreamListener httpListener, SSLEngineFactory factory) {
 		preconditionCheck(config);

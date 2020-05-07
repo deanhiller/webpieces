@@ -135,14 +135,29 @@ public class WebServerImpl implements WebServer {
 
 		//START http server if wanted...
 		InetSocketAddress httpAddress = portAddresses.getHttpAddr().get();
+		boolean httpsOverHttpEnabled = portAddresses.getAllowHttpsIntoHttp().get();
 		CompletableFuture<Void> fut1;
 		if(httpAddress != null) {
-			log.info("Creating and starting the "+"http"+" over port="+httpAddress);
-		
-			HttpSvrConfig httpSvrConfig = new HttpSvrConfig("http", httpAddress, 10000);
-			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
-			
-			httpServer = serverMgr.createHttpServer(httpSvrConfig, serverListener);
+
+			String type;
+			if(httpsOverHttpEnabled) {
+				type = "both";
+				//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
+				//enable the backend or https ports
+				SSLEngineFactory factory = fetchSSLEngineFactory(injector);
+
+				HttpSvrConfig httpSvrConfig = new HttpSvrConfig(type, httpAddress, 10000);
+				httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
+				httpServer = serverMgr.createUpgradableServer(httpSvrConfig, serverListener, factory);
+			} else {
+				type = "http";
+				HttpSvrConfig httpSvrConfig = new HttpSvrConfig(type, httpAddress, 10000);
+				httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
+				httpServer = serverMgr.createHttpServer(httpSvrConfig, serverListener);
+			}
+
+			log.info("Created and now starting the '"+type+"' over port="+httpAddress+"  'both' means this port supports both http and https");
+
 			fut1 = httpServer.start();
 		
 		} else {
@@ -158,18 +173,14 @@ public class WebServerImpl implements WebServer {
 		if(httpsAddress != null) {
 			//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
 			//enable the backend or https ports
-			SSLConfiguration sslConfiguration = injector.getInstance(SSLConfiguration.class);
+			SSLEngineFactory factory = fetchSSLEngineFactory(injector);
 
-			String type2 = "https";
-			if(sslConfiguration.getHttpsSslEngineFactory() == null)
-				type2 = "http";
-			
-			log.info("Creating and starting https over port="+httpsAddress+" AND using '"+type2+"'");
+			String type = "https";
+			log.info("Creating and starting https over port="+httpsAddress+" AND using '"+type+"'");
 		
-			HttpSvrConfig httpSvrConfig = new HttpSvrConfig("https", httpsAddress, 10000);
+			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(type, httpsAddress, 10000);
 			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
 			
-			SSLEngineFactory factory = (SSLEngineFactory) sslConfiguration.getHttpsSslEngineFactory();
 			httpsServer = serverMgr.createHttpsServer(httpSvrConfig, serverListener, factory);
 			fut2 = httpsServer.start();
 		
@@ -223,7 +234,15 @@ public class WebServerImpl implements WebServer {
 			return null;
 		});
 	}
-	
+
+	private SSLEngineFactory fetchSSLEngineFactory(Injector injector) {
+		SSLConfiguration sslConfiguration = injector.getInstance(SSLConfiguration.class);
+
+		if(sslConfiguration.getHttpsSslEngineFactory() == null)
+			throw new IllegalArgumentException("sslConfiguration.getHttpsSslEngineFactory() was null.  Can't setup https on this port");
+		return (SSLEngineFactory) sslConfiguration.getHttpsSslEngineFactory();
+	}
+
 	/**
 	 * This is a bit clunky BUT if jdk authors add methods that you can configure, we do not have
 	 * to change our platform every time so you can easily set the new properties rather than waiting for

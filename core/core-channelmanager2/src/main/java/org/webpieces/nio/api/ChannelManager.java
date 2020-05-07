@@ -37,7 +37,9 @@ public interface ChannelManager {
 
     public TCPServerChannel createTCPServerChannel(
     		String id, ConnectionListener connectionListener, SSLEngineFactory factory);
-    
+
+    public TCPServerChannel createTCPUpgradableChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory);
+
     /**
      * Returns a non-blocking TCPChannel.
      * @param id (Should not be null)Used for logging purposes.

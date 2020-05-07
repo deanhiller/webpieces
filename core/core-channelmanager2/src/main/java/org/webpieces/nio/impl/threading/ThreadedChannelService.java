@@ -61,6 +61,12 @@ public class ThreadedChannelService implements ChannelManager {
 	}
 
 	@Override
+	public TCPServerChannel createTCPUpgradableChannel(String id, ConnectionListener connectionListener,
+			SSLEngineFactory factory) {
+		throw new UnsupportedOperationException("SSL not supported at this level.");
+	}
+
+	@Override
 	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
 		throw new UnsupportedOperationException("SSL not supported at this level.");
 	}

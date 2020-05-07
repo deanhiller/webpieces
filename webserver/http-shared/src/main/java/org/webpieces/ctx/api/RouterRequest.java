@@ -227,6 +227,8 @@ public class RouterRequest {
 	 * This is the body that is set only if not streaming the body upload in chunks.
 	 */
 	public DataWrapper body;
+
+	public UriInfo requestUri;
 	
 	public void putMultipart(String key, String value) {
 		List<String> values = new ArrayList<>();

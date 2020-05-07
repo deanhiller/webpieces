@@ -94,7 +94,7 @@ public class Http11ToHttp2 {
         headerList.add(new Http2Header(":method", requestLine.getMethod().getMethodAsString()));
 
         UrlInfo urlInfo = requestLine.getUri().getUriBreakdown();
-        headerList.add(new Http2Header(":path", urlInfo.getFullPath()));
+        headerList.add(new Http2Header(":path", requestLine.getUri().getUri()));
 
         // Figure out scheme
         if(urlInfo.getPrefix() != null) {

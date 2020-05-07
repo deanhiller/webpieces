@@ -19,15 +19,24 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 		this.channelManager = channelManager;
 		this.metrics = metrics;
 	}
-
+	@Override
+	public AsyncServer createTcpServer(AsyncConfig config, AsyncDataListener listener) {
+		return createTcpServerImpl(config, listener, null, false);
+	}
+	
 	@Override
 	public AsyncServer createTcpServer(
 			AsyncConfig config, AsyncDataListener listener, SSLEngineFactory sslFactory) {
-		return createTcpServerImpl(config, listener, sslFactory);
+		return createTcpServerImpl(config, listener, sslFactory, false);
+	}
+	
+	@Override
+	public AsyncServer createUpgradableServer(AsyncConfig config, AsyncDataListener listener, SSLEngineFactory sslFactory) {
+		return createTcpServerImpl(config, listener, sslFactory, true);
 	}
 	
 	private AsyncServer createTcpServerImpl(AsyncConfig config,
-			AsyncDataListener listener, SSLEngineFactory sslFactory) {
+			AsyncDataListener listener, SSLEngineFactory sslFactory, boolean isUpgradable) {
 		if(config.id == null)
 			throw new IllegalArgumentException("config.id must not be null");
 		
@@ -38,7 +47,12 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 
 		TCPServerChannel serverChannel;
 		if(sslFactory != null) {
-			serverChannel = channelManager.createTCPServerChannel(config.id, connectionListener, sslFactory);
+			if(isUpgradable) {
+				//create plain text that can accept SSL immediately OR change to SSL later
+				serverChannel = channelManager.createTCPUpgradableChannel(config.id, connectionListener, sslFactory);
+			} else {
+				serverChannel = channelManager.createTCPServerChannel(config.id, connectionListener, sslFactory);
+			}
 		} else {
 			serverChannel = channelManager.createTCPServerChannel(config.id, connectionListener);
 		}
@@ -49,11 +63,6 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 		serverChannel.configure(config.functionToConfigureBeforeBind);
 		
 		return new AsyncServerImpl(serverChannel, connectionListener, proxyListener, sslFactory);
-	}
-
-	@Override
-	public AsyncServer createTcpServer(AsyncConfig config, AsyncDataListener listener) {
-		return createTcpServerImpl(config, listener, null);
 	}
 
 	@Override

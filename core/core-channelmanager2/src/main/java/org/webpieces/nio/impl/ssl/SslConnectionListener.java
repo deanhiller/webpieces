@@ -17,12 +17,14 @@ public class SslConnectionListener implements ConnectionListener {
 	private BufferPool pool;
 	private SSLEngineFactory sslFactory;
 	private SSLMetrics metrics;
+	private boolean isStartInPlainText;
 
-	public SslConnectionListener(ConnectionListener connectionListener, BufferPool pool, SSLEngineFactory sslFactory, SSLMetrics metrics) {
+	public SslConnectionListener(ConnectionListener connectionListener, BufferPool pool, SSLEngineFactory sslFactory, SSLMetrics metrics, boolean isStartInPlainText) {
 		this.connectionListener = connectionListener;
 		this.pool = pool;
 		this.sslFactory = sslFactory;
 		this.metrics = metrics;
+		this.isStartInPlainText = isStartInPlainText;
 	}
 
 	//thanks to SessionExecutor we will not start getting data to the listener until connected returns
@@ -30,9 +32,16 @@ public class SslConnectionListener implements ConnectionListener {
 	@Override
 	public CompletableFuture<DataListener> connected(Channel c, boolean isReadyForWrites) {
 		TCPChannel realChannel = (TCPChannel) c;
-		SslTCPChannel sslChannel = new SslTCPChannel(pool, realChannel, connectionListener, sslFactory, metrics);
-		connectionListener.connected(sslChannel, false);
-		return CompletableFuture.completedFuture(sslChannel.getSocketDataListener());
+		SslTCPChannel sslChannel = new SslTCPChannel(pool, realChannel, connectionListener, sslFactory, metrics, isStartInPlainText);
+		CompletableFuture<DataListener> plainTextListener = null;
+		if(isStartInPlainText)
+			plainTextListener = connectionListener.connected(sslChannel, true); //connected right away
+		else
+			plainTextListener = connectionListener.connected(sslChannel, false); //SSL Handshake in process so NOT fully connected
+		
+		return plainTextListener.thenApply( plainListener -> {
+			return sslChannel.getSocketDataListener(plainListener);
+		});
 	}
 
 	@Override

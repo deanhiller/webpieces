@@ -20,6 +20,7 @@ import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.impl.params.PrimitiveConverter;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.cmdline2.Arguments;
@@ -45,6 +46,7 @@ public class WebServerModule implements Module {
 
 	public static final String HTTP_PORT_KEY = "http.port";
 	public static final String HTTPS_PORT_KEY = "https.port";
+	public static final String HTTPS_OVER_HTTP = "https.over.http";
 	
 	//3 pieces consume this key to make it work :( and all 3 pieces do NOT depend on each other so
 	//this key is copied in 3 locations
@@ -55,6 +57,7 @@ public class WebServerModule implements Module {
 	private final Supplier<InetSocketAddress> httpsAddress;
 	private final Supplier<InetSocketAddress> backendAddress;
 	private final WebServerPortInformation portLookup;
+	private final Supplier<Boolean> allowHttpsIntoHttp;
 
 	public WebServerModule(WebServerConfig config, WebServerPortInformation portLookup, Arguments args) {
 		this.config = config;
@@ -62,6 +65,7 @@ public class WebServerModule implements Module {
 		
 		//this is too late, have to do in the Guice modules
 		httpAddress = args.createOptionalInetArg(HTTP_PORT_KEY, ":8080", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
+		allowHttpsIntoHttp = args.createOptionalArg(HTTPS_OVER_HTTP, "false", "This enables the http port to receive SSL connections.", (s) -> Boolean.parseBoolean(s));
 		httpsAddress = args.createOptionalInetArg(HTTPS_PORT_KEY, ":8443", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
 		backendAddress = args.createOptionalInetArg(BACKEND_PORT_KEY, null, "Http(s) host&port for backend.  syntax: {host}:{port} or just :{port}.  Also, null means put the pages on the https/http ports");
 	}
@@ -106,7 +110,7 @@ public class WebServerModule implements Module {
 
 		//in webpieces modules, you can't read until a certain phase :( :( so we can't read them here
 		//like we can in app modules and in plugins!!
-		binder.bind(PortConfiguration.class).toInstance(new PortConfiguration(httpAddress, httpsAddress, backendAddress));
+		binder.bind(PortConfiguration.class).toInstance(new PortConfiguration(httpAddress, httpsAddress, backendAddress, allowHttpsIntoHttp));
 	}
 
 	@Provides

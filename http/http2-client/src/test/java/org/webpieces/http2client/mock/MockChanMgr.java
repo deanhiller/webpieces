@@ -71,4 +71,10 @@ public class MockChanMgr extends MockSuperclass implements ChannelManager {
 		return "mockChanMgr1";
 	}
 
+	@Override
+	public TCPServerChannel createTCPUpgradableChannel(String id, ConnectionListener connectionListener,
+			SSLEngineFactory factory) {
+		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
+	}
+
 }

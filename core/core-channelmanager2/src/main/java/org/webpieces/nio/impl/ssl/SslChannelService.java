@@ -41,9 +41,18 @@ public class SslChannelService implements ChannelManager {
 	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory) {
 		if(factory == null || connectionListener == null || id == null)
 			throw new IllegalArgumentException("no arguments can be null");
-		ConnectionListener wrapperConnectionListener = new SslConnectionListener(connectionListener, pool, factory, sslMetrics);
+		ConnectionListener wrapperConnectionListener = new SslConnectionListener(connectionListener, pool, factory, sslMetrics, false);
 		//because no methods return futures in this type of class, we do not need to proxy him....
 		return mgr.createTCPServerChannel(id, wrapperConnectionListener);
+	}
+
+	@Override
+	public TCPServerChannel createTCPUpgradableChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory) {
+		if(factory == null || connectionListener == null || id == null)
+			throw new IllegalArgumentException("no arguments can be null");
+		ConnectionListener wrapperConnectionListener = new SslConnectionListener(connectionListener, pool, factory, sslMetrics, true);
+		//because no methods return futures in this type of class, we do not need to proxy him....
+		return mgr.createTCPServerChannel(id, wrapperConnectionListener);		
 	}
 
 	@Override

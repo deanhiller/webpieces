@@ -60,6 +60,12 @@ class BasChannelService implements ChannelManager {
 		throw new UnsupportedOperationException("SSL not supported at this level.");
 	}
 	
+	@Override
+	public TCPServerChannel createTCPUpgradableChannel(String id, ConnectionListener connectionListener,
+			SSLEngineFactory factory) {
+		throw new UnsupportedOperationException("SSL not supported at this level.");		
+	}
+	
 	private void preconditionChecks(String id) {
 		if(id == null)
             throw new IllegalArgumentException("id cannot be null");

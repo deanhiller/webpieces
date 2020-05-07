@@ -35,12 +35,13 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private SslTryCatchListener clientDataListener;
 	private final TCPChannel realChannel;
 	
-	private SocketDataListener socketDataListener;
+	private final SocketDataListener socketDataListener;
 	private CompletableFuture<Void> closeFuture = new CompletableFuture<>();
 	private OurSslListener sslListener;
 	private SSLEngineFactory sslFactory;
 	private BufferPool pool;
 	private ClientHelloParser parser;
+	private boolean isInPlainTextMode;
 	
 	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, TCPChannel realChannel, SSLMetrics metrics) {
 		super(realChannel);
@@ -48,11 +49,13 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		this.socketDataListener = new SocketDataListener(metrics);
 		sslEngine = function.apply(sslListener );
 		this.realChannel = realChannel;
+		isInPlainTextMode = false;
 	}
 
-	public SslTCPChannel(BufferPool pool, TCPChannel realChannel2, ConnectionListener connectionListener, SSLEngineFactory sslFactory, SSLMetrics metrics) {
+	public SslTCPChannel(BufferPool pool, TCPChannel realChannel2, ConnectionListener connectionListener, SSLEngineFactory sslFactory, SSLMetrics metrics, boolean isStartInPlainText) {
 		super(realChannel2);
 		this.pool = pool;
+		this.isInPlainTextMode = isStartInPlainText;
 		this.socketDataListener = new SocketDataListener(metrics);
 		parser = new ClientHelloParser(pool);
 		this.realChannel = realChannel2;
@@ -68,7 +71,8 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		return future.thenCompose( c -> beginHandshake());
 	}
 
-	public SocketDataListener getSocketDataListener() {
+	public SocketDataListener getSocketDataListener(DataListener plainTextListener) {
+		socketDataListener.init(plainTextListener);
 		return socketDataListener;
 	}
 
@@ -83,7 +87,12 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	public CompletableFuture<Void> write(ByteBuffer b) {
 		if(b.remaining() == 0)
 			throw new IllegalArgumentException("You must pass in bytebuffers that contain data.  b.remaining==0 in this buffer");
-		return sslEngine.feedPlainPacket(b);
+		
+		if(isInPlainTextMode) {
+			return realChannel.write(b);
+		} else {
+			return sslEngine.feedPlainPacket(b);
+		}
 	}
 
 	@Override
@@ -169,13 +178,32 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private class SocketDataListener implements DataListener {
 		
 		private SSLMetrics sslMetrics;
+		private DataListener plainTextListener;
+		private boolean firstPacket = true;
 
 		public SocketDataListener(SSLMetrics sslMetrics) {
 			this.sslMetrics = sslMetrics;
 		}
 		
+		public void init(DataListener plainTextListener) {
+			this.plainTextListener = plainTextListener;
+		}
+		
 		@Override
 		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+			if(isInPlainTextMode && firstPacket) {
+				//For HTTPS (and TLS/SSL generally) the first byte will be 0x16 (TLS), or >= 0x80 (SSLv2). For HTTP the first byte will be good-old printable 7-bit ASCII
+				if(firstCharacterIsSSL(b)) {
+				   isInPlainTextMode = false;
+				}
+				firstPacket = false;
+			}
+
+			if(isInPlainTextMode) {
+				//NOT in SSL mode, don't decrypt and pass to incoming data..
+				return feedPlainPacketWithCatch(channel, b);
+			}
+			
 			if(sslEngine == null) {
 				b = setupSSLEngine(channel, b);
 				
@@ -186,6 +214,31 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			}
 			
 			return sslEngine.feedEncryptedPacket(b);
+		}
+
+		private boolean firstCharacterIsSSL(ByteBuffer b) {
+			//For HTTPS (and TLS/SSL generally) the first byte will be 0x16 (TLS), or >= 0x80 (SSLv2). For HTTP the first byte will be good-old printable 7-bit ASCII
+			int position = b.position();
+			byte theFirstByte = b.get();
+			if(position+1 != b.position())
+				throw new IllegalArgumentException("Bug, for some reason, consuming a byte did not increase the position marker");
+			//reset position for processing by plain text or SSL parsers...
+			b.position(position);
+
+			int unsignedByte = signedByteToUnsignedByteAsInt(theFirstByte);
+			if(unsignedByte == 0x16 || unsignedByte >= 0x80) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public int signedByteToUnsignedByteAsInt(byte b) {
+			return b & 0xFF;
+		}
+
+		private CompletableFuture<Void> feedPlainPacketWithCatch(Channel channel, ByteBuffer b) {
+			return plainTextListener.incomingData(channel, b);
 		}
 
 		private ByteBuffer setupSSLEngine(Channel channel, ByteBuffer b) {

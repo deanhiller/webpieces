@@ -81,10 +81,17 @@ public class DevelopmentServer {
 		
 		String[] args;
 		if(usePortZero)
-			args = new String[] {"-http.port=:0", "-https.port=:0", 
-					"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true"};
+			args = new String[] {
+					"-https.over.http=true",
+					"-http.port=:0",
+					"-https.port=:0",
+					"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory",
+					"-hibernate.loadclassmeta=true"};
 		else
-			args = new String[] {"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true"};
+			args = new String[] {
+					"-https.over.http=true", //in DevelopmentServer, we allow https into the http port(and http).  In production, it's your choice
+					"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory",
+					"-hibernate.loadclassmeta=true"};
 		
 		ServerConfig config = new ServerConfig(false);
 

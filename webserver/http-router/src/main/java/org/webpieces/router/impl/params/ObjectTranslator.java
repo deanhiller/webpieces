@@ -9,6 +9,9 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 
+//TODO(dhiller): Make this class part of utils?  It's very useful for argument conversion as well.
+//We hae to worry about startup and whether converters are installed early enough to also parse arguments though!!
+
 /**
  * This is THE class to translate objects to strings and strings to objects.  Overriding this, you can also add types 
  * to translate as well like jodatime dates or java.util.Dates etc.  This translator applies to EVERYTHING in the

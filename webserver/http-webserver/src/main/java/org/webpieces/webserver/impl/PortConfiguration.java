@@ -8,11 +8,13 @@ public class PortConfiguration {
 	private Supplier<InetSocketAddress> httpAddr;
 	private Supplier<InetSocketAddress> httpsAddr;
 	private Supplier<InetSocketAddress> backendAddr;
+	private Supplier<Boolean> allowHttpsIntoHttp;
 
-	public PortConfiguration(Supplier<InetSocketAddress> httpAddr, Supplier<InetSocketAddress> httpsAddr, Supplier<InetSocketAddress> backendAddr) {
+	public PortConfiguration(Supplier<InetSocketAddress> httpAddr, Supplier<InetSocketAddress> httpsAddr, Supplier<InetSocketAddress> backendAddr, Supplier<Boolean> allowHttpsIntoHttp) {
 		this.httpAddr = httpAddr;
 		this.httpsAddr = httpsAddr;
 		this.backendAddr = backendAddr;
+		this.allowHttpsIntoHttp = allowHttpsIntoHttp;
 	}
 
 	public Supplier<InetSocketAddress> getHttpAddr() {
@@ -26,5 +28,8 @@ public class PortConfiguration {
 	public Supplier<InetSocketAddress> getBackendAddr() {
 		return backendAddr;
 	}
-	
+
+	public Supplier<Boolean> getAllowHttpsIntoHttp() {
+		return allowHttpsIntoHttp;
+	}
 }

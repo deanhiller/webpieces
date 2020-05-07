@@ -19,6 +19,7 @@ import org.webpieces.ctx.api.ContentType;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.UriInfo;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -164,6 +165,48 @@ public class RequestStreamWriter implements StreamWriter {
 		}
 	}
 
+	//TODO(dhiller): This code now exists in TWO locations.  modify to share SAME code instead of copying
+	public UriInfo getUriBreakdown(String uri) {
+	    int doubleslashIndex = uri.indexOf("://");
+	    if(doubleslashIndex == -1)
+	    	return new UriInfo(uri);
+	    
+	    int domainStartIndex = doubleslashIndex+3;
+	    String prefix = uri.substring(0, doubleslashIndex);
+	    Integer port  = null;
+	    
+	    String path = "";
+	    int firstSlashIndex = uri.indexOf('/', domainStartIndex);
+	    if(firstSlashIndex < 0) {
+	    	firstSlashIndex = uri.length();
+	    	path = "/";
+	    } else {
+	    	path = uri.substring(firstSlashIndex);
+	    }
+
+	    
+	    
+	    int domainEndIndex = firstSlashIndex;
+	    int portIndex = uri.indexOf(':', domainStartIndex);
+	    if(portIndex > 0 && portIndex < firstSlashIndex) {
+	    	domainEndIndex = portIndex;
+	    	String portStr = uri.substring(portIndex+1, firstSlashIndex);
+	    	port = convert(portStr, uri);
+	    }
+	    	
+	    String host = uri.substring(domainStartIndex, domainEndIndex);
+
+	    return new UriInfo(prefix, host, port, path);
+	}
+	
+	private Integer convert(String portStr, String uri2) {
+		try {
+			return Integer.parseInt(portStr);
+		} catch(NumberFormatException e) {
+			throw new IllegalStateException("port in uri="+uri2+" is not an integer", e);
+		}
+	}
+	
 	private void fillInRouterRequest(RouterRequest routerRequest) {
 		routerRequest.orginalRequest = requestHeaders;
 		
@@ -211,9 +254,13 @@ public class RequestStreamWriter implements StreamWriter {
 		if("XMLHttpRequest".equals(xRequestedWithHeader))
 			routerRequest.isAjaxRequest = true;
 		
-		String fullPath = requestHeaders.getPath();
-		if(fullPath == null)
+		String thePath = requestHeaders.getPath();
+		if(thePath == null)
 			throw new IllegalArgumentException(":path header(http2) or path in request line(http1.1) is required");
+		
+		UriInfo uriBreakdown = getUriBreakdown(thePath);
+		String fullPath = uriBreakdown.getFullPath();
+		routerRequest.requestUri = uriBreakdown;
 		
 		parseBody(requestHeaders, routerRequest);
 		routerRequest.method = method;
