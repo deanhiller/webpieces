@@ -17,6 +17,9 @@ Usage:
                   minimally one, can be multiple
 EOM
 
+
+echo "Building all projects with version=$SHA"
+
 # Find script directory (no support for symlinks)
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
@@ -39,7 +42,16 @@ for PROJECT in $@; do
     echo "Triggering build for project '$PROJECT' projects=$@"
     PROJECT_NAME=$(basename $PROJECT)
     cd $DIR/../../../$PROJECT
-    ../../xgradlew build &
+
+    if [ -z "$SHA" ]
+    then
+        echo "Running just xgradlew build (so will not deploy)"
+        ../../../tools/ospath/xgradlew build &
+    else
+        echo "Running xgradlew build -PprojVersion=$SHA"
+        ../../../tools/ospath/xgradlew build -PprojVersion=$SHA &
+    fi
+
     PID=$!
 
     wait $PID

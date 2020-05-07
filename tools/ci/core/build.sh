@@ -8,11 +8,19 @@
 #   build.sh
 ##
 
+
 function log {
     MESSAGE=$1
     >&2 echo "$MESSAGE"
 }
 
+if [ -z "$1" ]
+then
+      log "no argument given so NOT building docker image and deploying to staging"
+else
+      export SHA=$1
+      log "Argument supplied so building with version=$SHA (usually this is a git SHA but doesn't need to be)"
+fi
 
 # Find script directory (no support for symlinks)
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -61,7 +69,7 @@ echo "-----------------------------------------------------------------"
 
 # Build all modified projects
 echo "$PROJECTS_TO_BUILD" | while read PROJECTS; do
-    log "Calling build-projects.sh ${PROJECTS}"
+    log "Calling build-projects.sh ${PROJECTS} with SHA=$SHA"
     $DIR/build-projects.sh ${PROJECTS}
 
     if [ $? -eq 0 ]

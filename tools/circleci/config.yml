@@ -1,0 +1,81 @@
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+
+version: 2
+jobs:
+  build:
+    branches:
+      only:
+        - /submit_.*/
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
+    steps:
+      - checkout
+      - run: echo "$(git log -1 --pretty=format:'%ae')"
+      - run: echo "$(git log -1 --pretty=format:'%an')"
+      - run: git config --global user.email "$(git log -1 --pretty=format:'%ae')"
+      - run: git config --global user.name "$(git log -1 --pretty=format:'%an')"
+      - run: git checkout master
+      - run: git fetch origin
+      - run: git reset --hard origin/master
+      - run: git checkout -b tempBranch
+      - run: git status
+      - run: git merge --squash $CIRCLE_BRANCH
+      - run: git commit --no-edit
+      - run: git commit --amend -m"$CIRCLE_BRANCH" -m"$(git log --format=%B -n1)"
+
+      # NEED to rework this caching to checksum new global location of gradle properties file
+      - restore_cache:
+          key: v1-gradle-wrapper-{{ checksum "java/servers/customerportal-all/gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_cache:
+      # NEED to rework our gradle build so we can checksum a single file that contains the mono-repo gradle versions for all files
+          key: v1-gradle-cache-{{ checksum "java/servers/customerportal-all/build.gradle" }}
+
+      - run: echo "A first hello to branch $CIRCLE_BRANCH build=$CIRCLE_BUILD_NUM"
+      - run: 
+          name: Mono Build
+          command: |
+            ./monobuild.sh            
+
+      - save_cache:
+          paths:
+            - ~/.gradle/wrapper
+          key: v1-gradle-wrapper-{{ checksum "java/servers/customerportal-all/gradle/wrapper/gradle-wrapper.properties" }}
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+          key: v1-gradle-cache-{{ checksum "java/servers/customerportal-all/build.gradle" }}
+
+      - run: git checkout master
+      # This is tricky for monobuild to rerun only changes, things need to look change and tempBranch changes to
+      # a state showing now changes so instead use tempBranch2
+      #- run: git checkout -b deployBranch
+      #- run: git merge --squash $CIRCLE_BRANCH
+      #- run: git commit --no-edit
+
+      #NOW continue and merge good tempBranch into master and push so changes are there regardless of deployment failures
+      - run: git checkout master
+      - run: git merge --no-edit tempBranch
+      - run: git push
+      - run: git push origin --delete $CIRCLE_BRANCH
+      #- run: git checkout deployBranch
+      #- run: 
+      #    name: Build & Deploy Docker Images 
+      #    command: |
+      #      ./monobuild.sh $CIRCLE_SHA1 

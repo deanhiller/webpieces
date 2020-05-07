@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 BRANCH=`git rev-parse --abbrev-ref HEAD`
@@ -14,7 +13,9 @@ fi
 
 echo "Beginning monobuild"
 
-$DIR/../ci/core/build.sh
+cd $DIR/../..
+
+$DIR/../ci/core/build.sh $@
 
 if [ $? -eq 0 ]
 then

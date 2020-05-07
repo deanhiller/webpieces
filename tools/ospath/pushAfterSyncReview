@@ -1,0 +1,19 @@
+#!/bin/bash
+
+git commit --no-edit
+
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+REVIEW_BRANCH="review${BRANCH:6}"
+push
+if [ $? -eq 0 ]
+then
+   #delete old branches
+   "Successfully pushed to CI"   
+else
+   exit 1
+fi
+
+echo "DELETING BRANCH: $REVIEW_BRANCH"
+git branch -D "$REVIEW_BRANCH"
+
+git push --delete origin "$REVIEW_BRANCH"

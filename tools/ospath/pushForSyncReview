@@ -1,0 +1,49 @@
+#!/bin/bash
+
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+
+if [[ $BRANCH != "review_"* ]]; then
+   echo "You named your branch wrong for review. It must start with review_<YOUR NAME>"
+   exit 1
+fi
+
+function evil_git_dirty {
+  [[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]] && echo "*"
+}
+
+NUM_FILES="$(evil_git_dirty)"
+echo "Num files not committed=$NUM_FILES"
+if [[ "$NUM_FILES" == "*" ]]; then
+   echo ""
+   echo "You have outstanding files that are not committed.  commit first or stash, then you can push"
+   echo ""
+   git status
+   echo "----------------------------------------------------------------------------------------------"
+   echo "You have outstanding files that are not committed.  commit first or stash, then you can push"
+   echo "----------------------------------------------------------------------------------------------"
+   exit 1
+fi
+
+#Make sure developer has latest master so he doesn't push to CI without merging first
+updateToOriginMaster.sh
+
+if [ $? -eq 0 ]
+then
+   echo "Successfully merged master"
+else
+   exit 1
+fi
+
+monobuild.sh
+if [ $? -eq 0 ]
+then
+   echo "Successfully merged master"
+else
+   exit 1
+fi
+
+git push -u origin $BRANCH
+
+git checkout master
+
+git branch -d $BRANCH

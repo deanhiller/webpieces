@@ -70,24 +70,24 @@ function process_dependants {
     local PROJECT=$1
     local DEPENDENCIES=$(echo "$PROJECT_DEPENDENCIES" | grep ".* $PROJECT")
     local NEW_DEPENDENCEIS=$DEPENDENCIES
-    log "--------------------$PROJECT dependencies--------------------"
-    log "                    Starting to match amongst..."
-    log "$NEW_DEPENDENCEIS"
-    log "-------------------------------------------------------------"
+    #log "--------------------$PROJECT dependencies--------------------"
+    #log "                    Starting to match amongst..."
+    #log "$NEW_DEPENDENCEIS"
+    #log "-------------------------------------------------------------"
     echo "$NEW_DEPENDENCEIS" | while read DEPENDENCY; do
-        log "$PROJECT Start Processing dependencies"
+        #log "$PROJECT Start Processing dependencies"
         DEPENDENCY=$(echo "$DEPENDENCY" | cut -d " " -f1)
-        log "$PROJECT DEPEND=$DEPENDENCY"
+        #log "$PROJECT DEPEND=$DEPENDENCY"
         TEMPVAR=$(echo "$CHANGED_PROJECTS" | grep "$DEPENDENCY")
-        log "$PROJECT TEMPVAR=$TEMPVAR"
+        #log "$PROJECT TEMPVAR=$TEMPVAR"
         if [[ ! $(echo "$CHANGED_PROJECTS" | grep "$DEPENDENCY") ]]; then
-            log "$PROJECT RECURSING into to find more dependencies"
+            #log "$PROJECT RECURSING into to find more dependencies"
             NEW_DEPENDENCEIS="$DEPENDENCIES${NL}$(process_dependants $DEPENDENCY)"
         fi
 
-        log "--------------------$PROJECT Bottom of LOOP-----------------"
-        log "$NEW_DEPENDENCEIS"
-        log "------------------------------------------------------------"
+        #log "--------------------$PROJECT Bottom of LOOP-----------------"
+        #log "$NEW_DEPENDENCEIS"
+        #log "------------------------------------------------------------"
     done   
 
     echo "$NEW_DEPENDENCEIS"
