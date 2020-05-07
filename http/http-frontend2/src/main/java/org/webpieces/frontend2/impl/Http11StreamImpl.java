@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
@@ -27,6 +28,7 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.Http2Method;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
@@ -55,6 +57,9 @@ public class Http11StreamImpl implements ResponseStream {
 
 	private HttpRequest http1Req;
 
+	private boolean isForConnectRequeest;
+	private boolean hasRespondedToConnect;
+
 	public Http11StreamImpl(
 			int streamId, 
 			FrontendSocketImpl socket, 
@@ -69,6 +74,8 @@ public class Http11StreamImpl implements ResponseStream {
 		this.permitQueue = permitQueue;
 		this.http1Req = http1Req;
 		this.http2Request = headers;
+		if(headers.getKnownMethod() == Http2Method.CONNECT)
+			isForConnectRequeest = true;
 	}
 
 	@Override
@@ -76,7 +83,10 @@ public class Http11StreamImpl implements ResponseStream {
 		closeCheck();
 		HttpResponse response = Http2ToHttp11.translateResponse(headers);
 		
-		if(headers.isEndOfStream()) {
+		if(http2Request.getKnownMethod() == Http2Method.CONNECT) {
+			//In this case, it is an upgrade to a bi-directional stream
+			return write(response).thenApply(c -> new Http11ChunkedWriter(http1Req, http2Request));
+		} else if(headers.isEndOfStream()) {
 			validateHeader(response);
 			remove(headers);
 			return write(response).thenApply(w -> {
@@ -237,7 +247,19 @@ public class Http11StreamImpl implements ResponseStream {
 	}
 	
 	private CompletableFuture<Void> write(HttpPayload payload) {
+		if(hasRespondedToConnect) {
+			HttpChunk chunk = payload.getHttpChunk();
+			DataWrapper body = chunk.getBodyNonNull();
+			byte[] createByteArray = body.createByteArray();
+			ByteBuffer buffer = ByteBuffer.wrap(createByteArray);
+			return socket.getChannel().write(buffer);
+		}
+		
+		
 		ByteBuffer buf = http11Parser.marshalToByteBuffer(socket.getHttp11MarshalState(), payload);
+		if(isForConnectRequeest) {
+			hasRespondedToConnect = true;
+		}
 		return socket.getChannel().write(buf);
 	}
 	
@@ -283,6 +305,10 @@ public class Http11StreamImpl implements ResponseStream {
 
 	public void setSentFullRequest(boolean sent) {
 		this.sentFullRequest = sent;
+	}
+
+	public boolean isForConnectRequeest() {
+		return isForConnectRequeest;
 	}
 
 }

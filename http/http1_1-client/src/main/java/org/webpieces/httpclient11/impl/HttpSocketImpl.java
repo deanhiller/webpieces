@@ -12,7 +12,9 @@ import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpRequestMethod;
 import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
@@ -39,6 +41,7 @@ public class HttpSocketImpl implements HttpSocket {
 	private DataListener dataListener = new MyDataListener();
 	private boolean isRecording = false;
 	private MarshalState state;
+	private boolean isConnect;
 	
 	public HttpSocketImpl(ChannelProxy channel, HttpParser parser) {
 		this.channel = channel;
@@ -94,10 +97,14 @@ public class HttpSocketImpl implements HttpSocket {
 		HttpResponseListener l = new CatchResponseListener(listener);
 		ByteBuffer wrap = parser.marshalToByteBuffer(state, request);
 		
+		isConnect = false;
+		if(request.getRequestLine().getMethod().getKnownStatus() == KnownHttpMethod.CONNECT)
+			isConnect = true;
+		
 		//put this on the queue before the write to be completed from the listener below
 		responsesToComplete.offer(l);
 		
-		return channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state));
+		return channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect));
 	}
 	
 	@Override
@@ -115,12 +122,28 @@ public class HttpSocketImpl implements HttpSocket {
 
 	private class MyDataListener implements DataListener {
 		private CompletableFuture<DataWriter> dataWriterFuture;
+		private boolean connectResponseReceived;
 
 		@Override
 		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 
+			if(connectResponseReceived) {
+				//special case of just sending data through as we are doing proxying SSL stuff
+				HttpData data = new HttpData(wrapper, false);
+				return dataWriterFuture.thenCompose(w -> {
+					return w.incomingData(data);
+				});
+			}
+			
 			memento = parser.parse(memento, wrapper);
+			
+			if(memento.getParsedMessages().size() == 1 && isConnect) {
+				//If it was a connect, we should get 1 response AND from then on, we need to switch to 
+				//pure data since this is an SSL tunnel through the proxy
+				connectResponseReceived = true;
+			}
+			
 			if(memento.getNumBytesJustParsed() == 0)
 				return CompletableFuture.completedFuture(null); //ack the future as we need more data.  there is nothing to track here
 

@@ -84,6 +84,19 @@ public class Layer2Http11Handler {
 	}
 
 	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
+		
+		Http11StreamImpl currentStream = socket.getCurrentStream();
+		if(currentStream != null && currentStream.isForConnectRequeest()) {
+			//This is for doing an http proxy that upgrades to an SSL proxy and can't see traffic
+			//going through itself.  it just passes traffic through
+			DataFrame dataFrame = new DataFrame();
+			DataWrapper wrapper = dataGen.wrapByteBuffer(buf);
+			dataFrame.setData(wrapper);
+			StreamWriter requestWriter = currentStream.getRequestWriter();
+			//We skip permit queue because this is chunking now in SSL that we can't read;
+			return requestWriter.processPiece(dataFrame);
+		}
+		
 		Memento state = socket.getHttp11ParseState();
 		int newDataSize = buf.remaining();
 		state = parse(socket, buf);

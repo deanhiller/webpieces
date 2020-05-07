@@ -156,8 +156,8 @@ public class Http2ToHttp11 {
 	}
 
 	public static HttpData translate(DataFrame data, HttpRequest fromRequest) {
-		
-		return null;
+		HttpData http11Data = new HttpData(data.getData(), data.isEndOfStream());
+		return http11Data;
 	}
 
 }
