@@ -138,28 +138,7 @@ public class WebServerImpl implements WebServer {
 		boolean httpsOverHttpEnabled = portAddresses.getAllowHttpsIntoHttp().get();
 		CompletableFuture<Void> fut1;
 		if(httpAddress != null) {
-
-			String type;
-			if(httpsOverHttpEnabled) {
-				type = "both";
-				//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
-				//enable the backend or https ports
-				SSLEngineFactory factory = fetchSSLEngineFactory(injector);
-
-				HttpSvrConfig httpSvrConfig = new HttpSvrConfig(type, httpAddress, 10000);
-				httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
-				httpServer = serverMgr.createUpgradableServer(httpSvrConfig, serverListener, factory);
-			} else {
-				type = "http";
-				HttpSvrConfig httpSvrConfig = new HttpSvrConfig(type, httpAddress, 10000);
-				httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
-				httpServer = serverMgr.createHttpServer(httpSvrConfig, serverListener);
-			}
-
-			log.info("Created and now starting the '"+type+"' over port="+httpAddress+"  'both' means this port supports both http and https");
-
-			fut1 = httpServer.start();
-		
+			fut1 = startServerOnHttpPort(injector, httpAddress, httpsOverHttpEnabled);
 		} else {
 			fut1 = CompletableFuture.completedFuture(null);
 			log.info("Serving the "+"http"+" is disabled since there was no address specified");
@@ -171,19 +150,7 @@ public class WebServerImpl implements WebServer {
 		InetSocketAddress httpsAddress = portAddresses.getHttpsAddr().get();
 		CompletableFuture<Void> fut2;
 		if(httpsAddress != null) {
-			//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
-			//enable the backend or https ports
-			SSLEngineFactory factory = fetchSSLEngineFactory(injector);
-
-			String type = "https";
-			log.info("Creating and starting https over port="+httpsAddress+" AND using '"+type+"'");
-		
-			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(type, httpsAddress, 10000);
-			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
-			
-			httpsServer = serverMgr.createHttpsServer(httpSvrConfig, serverListener, factory);
-			fut2 = httpsServer.start();
-		
+			fut2 = startHttpsServer(injector, httpsAddress);
 		} else {
 			fut2 = CompletableFuture.completedFuture(null);
 			log.info("Serving the "+"https"+" is disabled since there was no address specified");
@@ -196,24 +163,7 @@ public class WebServerImpl implements WebServer {
 		InetSocketAddress backendAddress = portAddresses.getBackendAddr().get();
 		CompletableFuture<Void> fut33;
 		if(backendAddress != null) {
-			//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
-			//enable the backend or https ports
-			SSLConfiguration sslConfiguration = injector.getInstance(SSLConfiguration.class);
-
-			String type = "https";
-			if(sslConfiguration.getBackendSslEngineFactory() == null)
-				type = "http";
-			String serverName = "backend."+type;
-			
-			log.info("Creating and starting the "+serverName+" over port="+backendAddress+" AND using '"+type+"'");
-		
-			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(serverName, backendAddress, 10000);
-			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
-			
-			SSLEngineFactory factory = (SSLEngineFactory) sslConfiguration.getBackendSslEngineFactory();
-			backendServer = serverMgr.createBackendHttpsServer(httpSvrConfig, serverListener, factory);
-			fut33 = backendServer.start();
-		
+			fut33 = startBackendServer(injector, backendAddress);
 		} else {
 			fut33 = CompletableFuture.completedFuture(null);
 			log.info("Serving the backend over it's own port is disabled since there was no address specified");
@@ -233,6 +183,71 @@ public class WebServerImpl implements WebServer {
 			log.info("All servers started");	
 			return null;
 		});
+	}
+
+	private CompletableFuture<Void> startBackendServer(Injector injector, InetSocketAddress backendAddress) {
+		CompletableFuture<Void> fut33;
+		//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
+		//enable the backend or https ports
+		SSLConfiguration sslConfiguration = injector.getInstance(SSLConfiguration.class);
+
+		String type = "https";
+		if(sslConfiguration.getBackendSslEngineFactory() == null)
+			type = "http";
+		String serverName = "backend."+type;
+		
+		log.info("Creating and starting the "+serverName+" over port="+backendAddress+" AND using '"+type+"'");
+
+		HttpSvrConfig httpSvrConfig = new HttpSvrConfig(serverName, backendAddress, 10000);
+		httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
+		
+		SSLEngineFactory factory = (SSLEngineFactory) sslConfiguration.getBackendSslEngineFactory();
+		backendServer = serverMgr.createBackendHttpsServer(httpSvrConfig, serverListener, factory);
+		fut33 = backendServer.start();
+		return fut33;
+	}
+
+	private CompletableFuture<Void> startHttpsServer(Injector injector, InetSocketAddress httpsAddress) {
+		CompletableFuture<Void> fut2;
+		//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
+		//enable the backend or https ports
+		SSLEngineFactory factory = fetchSSLEngineFactory(injector);
+
+		String type = "https";
+		log.info("Creating and starting https over port="+httpsAddress+" AND using '"+type+"'");
+
+		HttpSvrConfig httpSvrConfig = new HttpSvrConfig(type, httpsAddress, 10000);
+		httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
+		
+		httpsServer = serverMgr.createHttpsServer(httpSvrConfig, serverListener, factory);
+		fut2 = httpsServer.start();
+		return fut2;
+	}
+
+	private CompletableFuture<Void> startServerOnHttpPort(Injector injector, InetSocketAddress httpAddress,
+			boolean httpsOverHttpEnabled) {
+		CompletableFuture<Void> fut1;
+		String type;
+		if(httpsOverHttpEnabled) {
+			type = "both";
+			//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
+			//enable the backend or https ports
+			SSLEngineFactory factory = fetchSSLEngineFactory(injector);
+
+			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(type, httpAddress, 10000);
+			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
+			httpServer = serverMgr.createUpgradableServer(httpSvrConfig, serverListener, factory);
+		} else {
+			type = "http";
+			HttpSvrConfig httpSvrConfig = new HttpSvrConfig(type, httpAddress, 10000);
+			httpSvrConfig.asyncServerConfig.functionToConfigureBeforeBind = s -> configure(s);
+			httpServer = serverMgr.createHttpServer(httpSvrConfig, serverListener);
+		}
+
+		log.info("Created and now starting the '"+type+"' over port="+httpAddress+"  'both' means this port supports both http and https");
+
+		fut1 = httpServer.start();
+		return fut1;
 	}
 
 	private SSLEngineFactory fetchSSLEngineFactory(Injector injector) {
