@@ -12,14 +12,16 @@ import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
+import org.webpieces.util.futures.FutureHelper;
 
 public class ProdRouteInvoker extends AbstractRouteInvoker {
 
 	@Inject
 	public ProdRouteInvoker(
-		ControllerLoader controllerFinder
+		ControllerLoader controllerFinder,
+		FutureHelper futureUtil
 	) {
-		super(controllerFinder);
+		super(controllerFinder, futureUtil);
 	}
 	
 	@Override

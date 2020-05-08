@@ -14,6 +14,7 @@ import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.routers.BRouter;
 import org.webpieces.router.impl.routers.CRouter;
 import org.webpieces.router.impl.routers.FStaticRouter;
+import org.webpieces.util.futures.FutureHelper;
 
 public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 
@@ -29,12 +30,15 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 
 	private ResettingLogic resettingLogic;
 
-	public DomainRouteBuilderImpl(RouteBuilderLogic holder, ResettingLogic resettingLogic, boolean useUniqueBackendRouter) {
+	private FutureHelper futureUtil;
+
+	public DomainRouteBuilderImpl(FutureHelper futureUtil, RouteBuilderLogic holder, ResettingLogic resettingLogic, boolean useUniqueBackendRouter) {
+		this.futureUtil = futureUtil;
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
-		this.leftOverDomainsBuilder2 = new AllContentTypesBuilderImpl("<any>", holder, resettingLogic);
+		this.leftOverDomainsBuilder2 = new AllContentTypesBuilderImpl("<any>", holder, resettingLogic, futureUtil);
 		if(useUniqueBackendRouter)
-			this.backendRouteBuilder2 = new AllContentTypesBuilderImpl("<backend>", holder, resettingLogic);
+			this.backendRouteBuilder2 = new AllContentTypesBuilderImpl("<backend>", holder, resettingLogic, futureUtil);
 		else {
 			this.backendRouteBuilder2 = this.leftOverDomainsBuilder2;
 		}
@@ -79,7 +83,7 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 		if(builder != null)
 			return builder;
 		
-		builder = new AllContentTypesBuilderImpl(domainRegEx, holder, resettingLogic);
+		builder = new AllContentTypesBuilderImpl(domainRegEx, holder, resettingLogic, futureUtil);
 		domainToRouteBuilder2.put(domainRegEx, builder);
 		return builder;
 	}

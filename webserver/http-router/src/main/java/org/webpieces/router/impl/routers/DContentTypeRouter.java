@@ -7,13 +7,15 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.model.MatchResult2;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 
 public class DContentTypeRouter {
 
 	private List<AbstractRouter> routers;
+	private FutureHelper futureUtil;
 
-	public DContentTypeRouter(List<AbstractRouter> routers) {
+	public DContentTypeRouter(FutureHelper futureUtil, List<AbstractRouter> routers) {
+		this.futureUtil = futureUtil;
 		this.routers = routers;
 	}
 
@@ -39,7 +41,7 @@ public class DContentTypeRouter {
 			}
 		}
 
-		return ExceptionUtil.<Void>failedFuture(new NotFoundException("route not found"));
+		return futureUtil.<Void>failedFuture(new NotFoundException("route not found"));
 	}
 
 }

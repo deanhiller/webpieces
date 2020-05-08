@@ -13,7 +13,7 @@ import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.impl.model.RouterInfo;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
 public class DScopedRouter extends EScopedRouter {
@@ -22,17 +22,20 @@ public class DScopedRouter extends EScopedRouter {
 
 	private ENotFoundRouter pageNotFoundRouter;
 	private EInternalErrorRouter internalSvrErrorRouter;
+	private FutureHelper futureUtil;
 
 	public DScopedRouter(
 			RouterInfo routerInfo, 
 			Map<String, EScopedRouter> pathPrefixToNextRouter, 
 			List<AbstractRouter> routers, 
 			ENotFoundRouter notFoundRouter, 
-			EInternalErrorRouter internalErrorRouter
+			EInternalErrorRouter internalErrorRouter,
+			FutureHelper futureUtil
 	) {
-		super(routerInfo, pathPrefixToNextRouter, routers);
+		super(futureUtil, routerInfo, pathPrefixToNextRouter, routers);
 		this.pageNotFoundRouter = notFoundRouter;
 		this.internalSvrErrorRouter = internalErrorRouter;
+		this.futureUtil = futureUtil;
 	}
 
 	@Override
@@ -70,26 +73,22 @@ public class DScopedRouter extends EScopedRouter {
 	 */
 	private CompletableFuture<Void> invokeRouteCatchNotFound(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
 
-		CompletableFuture<Void> future = ExceptionUtil.wrap(
-			() -> super.invokeRoute(ctx, responseCb, subPath)
+		return futureUtil.catchBlock(
+				() -> super.invokeRoute(ctx, responseCb, subPath),
+				(t) -> {
+					if(t instanceof NotFoundException)
+						return notFound((NotFoundException)t, ctx, responseCb);
+					return futureUtil.<Void>failedFuture(t);
+				}
 		);
-		
-		return future.handle((r, t) -> {
-			if(t instanceof NotFoundException)
-				return notFound((NotFoundException)t, ctx, responseCb);
-			else if(t != null) {
-				return ExceptionUtil.<Void>failedFuture(t);
-			}
-			
-			return CompletableFuture.completedFuture(r); 
-		}).thenCompose(Function.identity());
+	
 	}
 
 	private CompletableFuture<Void> invokeWebAppErrorController(
 			Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, Object failedRoute) {
 		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
 		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
-		return ExceptionUtil.wrapException(
+		return futureUtil.catchBlockWrap(
 			() -> internalSvrErrorRouter.invokeErrorRoute(requestCtx, responseCb),
 			(t) -> convert(failedRoute, t)
 		);
@@ -100,7 +99,7 @@ public class DScopedRouter extends EScopedRouter {
 	}
 	
 	private CompletableFuture<Void> notFound(NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
-		return ExceptionUtil.wrap(
+		return futureUtil.catchBlockWrap(
 			() -> pageNotFoundRouter.invokeNotFoundRoute(requestCtx, responseCb, exc),
 			(e) -> new RuntimeException("NotFound Route had an exception", e)
 		);

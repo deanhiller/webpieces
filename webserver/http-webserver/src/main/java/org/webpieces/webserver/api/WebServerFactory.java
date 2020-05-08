@@ -10,6 +10,8 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.filters.Filter;
+import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.webserver.impl.PortConfigLookupImpl;
 import org.webpieces.webserver.impl.WebServerImpl;
 import org.webpieces.webserver.impl.WebServerModule;
@@ -57,6 +59,12 @@ public abstract class WebServerFactory {
 
 		Injector injector = Guice.createInjector(allModules);
 		WebServerImpl serverImpl = injector.getInstance(WebServerImpl.class);
+		
+		//special case and I HATE statics but if customer swapped in their own FutureUtil, then we replace it with theirs here.  If they didn't
+		//this literally just sets the same FutureUtil into the filters
+		FutureHelper util = injector.getInstance(FutureHelper.class);
+		Filter.setFutureUtil(util);
+		
 		serverImpl.configureSync(args); //configure must be called as after configured, Arguments.checkConsumedCorrectly must
 		  						//be called before start is called on the webserver
 		return serverImpl;

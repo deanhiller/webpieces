@@ -6,7 +6,7 @@ import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -22,12 +22,16 @@ public class Layer1ServerListener implements AsyncDataListener {
 	private ServerSocketInfo svrSocketInfo;
 	//private MsgRateRecorder recorder = new MsgRateRecorder(10, "bytes/second");
 
+	private FutureHelper futureUtil;
+
 	public Layer1ServerListener(
+			FutureHelper futureUtil,
 			Layer2Http11Handler http11Listener, 
 			Layer2Http2Handler http2Listener,
 			boolean isHttps, 
 			boolean isBackendRequest
 	) {
+		this.futureUtil = futureUtil;
 		this.http11Handler = http11Listener;
 		this.http2Handler = http2Listener;
 		svrSocketInfo = new ServerSocketInfo(isHttps, isBackendRequest);
@@ -51,14 +55,15 @@ public class Layer1ServerListener implements AsyncDataListener {
 
 	private CompletableFuture<Void> initialData(ByteBuffer b, FrontendSocketImpl socket) {
 		
-		CompletableFuture<InitiationResult> future = ExceptionUtil.wrap( () -> http11Handler.initialData(socket, b));
-		future.exceptionally( t -> {
-			socket.close("reason not needed");
-			return null;
-		});
-
-		return future.thenCompose( initialData -> {
+		CompletableFuture<InitiationResult> future = futureUtil.catchBlockWrap(
+				() -> http11Handler.initialData(socket, b),
+				(t) -> {
+					socket.close("reason not needed");
+					return t;
+				}
+		);
 		
+		return future.thenCompose( initialData -> {
 			if(initialData == null)
 				return CompletableFuture.completedFuture(null); //nothing to do, we don't know protocol yet
 			else if(initialData.getInitialStatus() == InitiationStatus.HTTP1_1) {

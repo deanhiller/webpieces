@@ -13,7 +13,7 @@ import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 
 public class EScopedRouter {
 	private static final Logger log = LoggerFactory.getLogger(EScopedRouter.class);
@@ -21,8 +21,10 @@ public class EScopedRouter {
 	protected final RouterInfo routerInfo;
 	private final Map<String, EScopedRouter> pathPrefixToNextRouter;
 	private List<AbstractRouter> routers;
+	private FutureHelper futureUtil;
 
-	public EScopedRouter(RouterInfo routerInfo, Map<String, EScopedRouter> pathPrefixToNextRouter, List<AbstractRouter> routers) {
+	public EScopedRouter(FutureHelper futureUtil, RouterInfo routerInfo, Map<String, EScopedRouter> pathPrefixToNextRouter, List<AbstractRouter> routers) {
+		this.futureUtil = futureUtil;
 		this.routerInfo = routerInfo;
 		this.pathPrefixToNextRouter = pathPrefixToNextRouter;
 		this.routers = routers;
@@ -66,13 +68,13 @@ public class EScopedRouter {
 			}
 		}
 
-		return ExceptionUtil.<Void>failedFuture(new NotFoundException("route not found"));
+		return futureUtil.<Void>failedFuture(new NotFoundException("route not found"));
 	}
 	
 	private CompletableFuture<Void> invokeRouter(AbstractRouter router, RequestContext ctx,
 			ResponseStreamer responseCb) {
 		//We re-use this method to avoid chaining when it's a NotFoundException
-		return ExceptionUtil.<Void>wrapException(
+		return futureUtil.<Void>catchBlockWrap(
 			() -> router.invoke(ctx, responseCb),
 			(t) -> convert(router.getMatchInfo(), t)
 		);

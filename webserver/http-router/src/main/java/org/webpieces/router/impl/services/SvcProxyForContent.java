@@ -12,21 +12,23 @@ import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 
 public class SvcProxyForContent implements Service<MethodMeta, Action> {
 
 	private final ParamToObjectTranslatorImpl translator;
 	private final ServiceInvoker invoker;
+	private FutureHelper futureUtil;
 
-	public SvcProxyForContent(SvcProxyLogic svcProxyLogic) {
+	public SvcProxyForContent(SvcProxyLogic svcProxyLogic, FutureHelper futureUtil) {
+		this.futureUtil = futureUtil;
 		this.translator = svcProxyLogic.getTranslator();
 		this.invoker = svcProxyLogic.getServiceInvoker();
 	}
 
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {
-		return ExceptionUtil.wrap(() -> invokeMethod(meta));
+		return futureUtil.syncToAsyncException(() -> invokeMethod(meta));
 	}
 
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 

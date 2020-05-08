@@ -24,7 +24,7 @@ import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 
 public abstract class AbstractRouteInvoker implements RouteInvoker {
 
@@ -32,10 +32,14 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	protected ReverseRoutes reverseRoutes;
 
+	protected FutureHelper futureUtil;
+
 	public AbstractRouteInvoker(
-			ControllerLoader controllerFinder
+			ControllerLoader controllerFinder,
+			FutureHelper futureUtil
 	) {
 		this.controllerFinder = controllerFinder;
+		this.futureUtil = futureUtil;
 	}
 
 	@Override
@@ -94,7 +98,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		MethodMeta methodMeta = new MethodMeta(loadedController, Current.getContext(), data);
 		CompletableFuture<Action> response;
 		try {
-			response = ExceptionUtil.wrapException( 
+			response = futureUtil.catchBlockWrap( 
 				() -> service.invoke(methodMeta),
 				(t) -> convert(loadedController, t)	
 			);

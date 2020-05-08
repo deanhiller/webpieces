@@ -23,6 +23,7 @@ import org.webpieces.router.impl.routers.DContentTypeRouter;
 import org.webpieces.router.impl.routers.FContentRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.router.impl.services.SvcProxyForContent;
+import org.webpieces.util.futures.FutureHelper;
 
 public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTypeRouteBuilder {
 
@@ -35,7 +36,9 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 	private List<FilterInfo<?>> routeFilters = new ArrayList<>();
 	private final List<RouterAndInfo> newDynamicRoutes = new ArrayList<>();
 
-	public ContentTypeBuilderImpl(RouterInfo routerInfo, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+	private FutureHelper futureUtil;
+
+	public ContentTypeBuilderImpl(FutureHelper futureUtil, RouterInfo routerInfo, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
 		super(holder, resettingLogic);
 		this.routerInfo = routerInfo;
 		this.holder = holder;
@@ -53,7 +56,7 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 		
 		MatchInfo matchInfo = createMatchInfo(p, Port.HTTPS, HttpMethod.POST, holder.getUrlEncoding());
 		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
-		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic());
+		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getMetaAndController(), svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
@@ -81,7 +84,7 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 	public DContentTypeRouter buildRouter() {
 		List<AbstractRouter> routers = buildRoutes(routeFilters);
 
-		return new DContentTypeRouter(routers);
+		return new DContentTypeRouter(futureUtil, routers);
 	}
 
 }

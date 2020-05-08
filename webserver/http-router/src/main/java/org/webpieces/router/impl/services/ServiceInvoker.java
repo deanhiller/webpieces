@@ -6,13 +6,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.slf4j.MDC;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.impl.loader.LoadedController;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 
+@Singleton
 public class ServiceInvoker {
 
+	private FutureHelper futureUtil;
+
+	@Inject
+	public ServiceInvoker(FutureHelper futureUtil) {
+		this.futureUtil = futureUtil;
+	}
+	
 	public Object invokeController(LoadedController meta, Object[] args) throws IllegalAccessException, InvocationTargetException {
 		Method m = meta.getControllerMethod();
 		Object obj = meta.getControllerInstance();
@@ -30,7 +41,7 @@ public class ServiceInvoker {
 			//Java will not implement scalas Local.scala(like a ThreadLocal but for futures so you can have state follow
 			//the request.  This means, logging breaks over some threads in the controller and we CANNOT fix that!!!
 			CompletableFuture<Action> future = (CompletableFuture<Action>) retVal;
-			return ExceptionUtil.finallyBlock( () -> future, () -> {
+			return futureUtil.finallyBlock( () -> future, () -> {
 				for(Entry<String, String> entry : mdcCopy.entrySet()) {
 					MDC.put(entry.getKey(), entry.getValue());
 				}

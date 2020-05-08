@@ -23,6 +23,7 @@ import org.webpieces.router.impl.routers.ENotFoundRouter;
 import org.webpieces.router.impl.routers.EScopedRouter;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.futures.FutureHelper;
 
 public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBuilder {
 
@@ -37,9 +38,12 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 
 	private LoadedController notFoundControllerInst;
 	private LoadedController internalErrorController;
+
+	private FutureHelper futureUtil;
 	
-	public RouteBuilderImpl(String id, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
-		super(new RouterInfo(id, ""), holder, resettingLogic);
+	public RouteBuilderImpl(String id, RouteBuilderLogic holder, ResettingLogic resettingLogic, FutureHelper futureUtil) {
+		super(new RouterInfo(id, ""), holder, resettingLogic, futureUtil);
+		this.futureUtil = futureUtil;
 	}
 
 	@Override
@@ -98,7 +102,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 
 		Map<String, EScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 
-		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(holder.getSvcProxyLogic().getServiceInvoker());
+		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(holder.getSvcProxyLogic().getServiceInvoker(), futureUtil);
 
 		BaseRouteInfo notFoundRoute = new BaseRouteInfo(
 				resettingLogic.getInjector(), pageNotFoundInfo, 
@@ -118,7 +122,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		//WE could turn this off and expose an addGlobalNotFoundFilter that applies always to every not found????
 		//it's faster performance due to know pattern matching every request I guess
 		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst);
-		return new DScopedRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter);
+		return new DScopedRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter, futureUtil);
 	}
 
 }

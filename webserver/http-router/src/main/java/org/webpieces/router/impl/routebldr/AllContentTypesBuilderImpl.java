@@ -12,6 +12,7 @@ import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.CRouter;
 import org.webpieces.router.impl.routers.DContentTypeRouter;
 import org.webpieces.router.impl.routers.DScopedRouter;
+import org.webpieces.util.futures.FutureHelper;
 
 public class AllContentTypesBuilderImpl implements AllContentTypesBuilder {
 
@@ -23,12 +24,15 @@ public class AllContentTypesBuilderImpl implements AllContentTypesBuilder {
 	private ResettingLogic resettingLogic;
 
 	private String domain;
+
+	private FutureHelper futureUtil;
 	
-	public AllContentTypesBuilderImpl(String domain, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+	public AllContentTypesBuilderImpl(String domain, RouteBuilderLogic holder, ResettingLogic resettingLogic, FutureHelper futureUtil) {
 		this.domain = domain;
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
-		this.leftOverDomainsBuilder = new RouteBuilderImpl(domain+":<anycontent>", holder, resettingLogic);
+		this.futureUtil = futureUtil;
+		this.leftOverDomainsBuilder = new RouteBuilderImpl(domain+":<anycontent>", holder, resettingLogic, futureUtil);
 	}
 
 	@Override
@@ -42,7 +46,7 @@ public class AllContentTypesBuilderImpl implements AllContentTypesBuilder {
 		if(builder != null)
 			return builder;
 		
-		builder = new ContentTypeBuilderImpl(new RouterInfo(domain+":"+requestContentType, ""), holder, resettingLogic);
+		builder = new ContentTypeBuilderImpl(futureUtil, new RouterInfo(domain+":"+requestContentType, ""), holder, resettingLogic);
 		domainToRouteBuilder.put(requestContentType, builder);
 		return builder;
 	}

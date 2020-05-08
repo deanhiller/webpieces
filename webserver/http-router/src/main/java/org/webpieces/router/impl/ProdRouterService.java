@@ -14,6 +14,7 @@ import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
 
@@ -33,9 +34,10 @@ public class ProdRouterService extends AbstractRouterService {
 			ObjectTranslator translator, 
 			ProdClassForName loader,
 			ARouter router,
-			WebInjector webInjector
+			WebInjector webInjector,
+			FutureHelper futureUtil
 	) {
-		super(webInjector, routeLoader, cookieTranslator, translator);
+		super(futureUtil, webInjector, routeLoader, cookieTranslator, translator);
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 		this.router = router;

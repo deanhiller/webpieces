@@ -37,6 +37,7 @@ import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.router.impl.routers.BRouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.threading.SafeRunnable;
 
 import com.google.inject.Injector;
@@ -70,6 +71,7 @@ public class RouteLoader {
 	private ObjectToParamTranslator reverseTranslator;
 	private MeterRegistry appMetricsOnly;
 	private WebInjector webInjector;
+	private FutureHelper futureUtil;
 
 	@Inject
 	public RouteLoader(
@@ -83,7 +85,8 @@ public class RouteLoader {
 		RedirectFormation portLookup,
 		ObjectToParamTranslator reverseTranslator,
 		@Named(RouterSvcFactory.APP_METRICS_KEY) MeterRegistry appMetricsOnly,
-		WebInjector webInjector
+		WebInjector webInjector,
+		FutureHelper futureUtil
 	) {
 		this.config = config;
 		this.masterRouter = masterRouter;
@@ -96,6 +99,7 @@ public class RouteLoader {
 		this.reverseTranslator = reverseTranslator;
 		this.appMetricsOnly = appMetricsOnly;
 		this.webInjector = webInjector;
+		this.futureUtil = futureUtil;
 	}
 	
 	public WebAppMeta configure(ClassForName loader, Arguments arguments) {
@@ -257,7 +261,7 @@ public class RouteLoader {
 		reverseRoutes = new ReverseRoutes(config, redirectFormation, objectTranslator, reverseTranslator);
 		ResettingLogic resettingLogic = new ResettingLogic(reverseRoutes, injector);
 		Boolean enableSeparateBackend = backPortExists.get();
-		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routeBuilderLogic, resettingLogic, enableSeparateBackend);
+		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(futureUtil, routeBuilderLogic, resettingLogic, enableSeparateBackend);
 
 		routingHolder.setReverseRouteLookup(reverseRoutes);
 		routeBuilderLogic.init(reverseRoutes);

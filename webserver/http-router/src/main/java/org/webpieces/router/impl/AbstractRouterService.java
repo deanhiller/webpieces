@@ -24,7 +24,7 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.ExceptionWrap;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -38,8 +38,10 @@ public abstract class AbstractRouterService implements RouterService {
 	private ObjectTranslator translator;
 	private CookieTranslator cookieTranslator;
 	private WebInjector webInjector;
+	private FutureHelper futureUtil;
 	
-	public AbstractRouterService(WebInjector webInjector, RouteLoader routeLoader, CookieTranslator cookieTranslator, ObjectTranslator translator) {
+	public AbstractRouterService(FutureHelper futureUtil, WebInjector webInjector, RouteLoader routeLoader, CookieTranslator cookieTranslator, ObjectTranslator translator) {
+		this.futureUtil = futureUtil;
 		this.webInjector = webInjector;
 		this.routeLoader = routeLoader;
 		this.cookieTranslator = cookieTranslator;
@@ -61,7 +63,7 @@ public abstract class AbstractRouterService implements RouterService {
 			
 			String user = session.get("userId");
 			MDC.put("userId", user);
-			return ExceptionUtil.finallyBlock(
+			return futureUtil.finallyBlock(
 					() -> processRequest(requestCtx, responseCb), 
 					() -> { MDC.put("userId", null); });
 			
@@ -74,21 +76,22 @@ public abstract class AbstractRouterService implements RouterService {
 	}
 
 	private CompletableFuture<Void> processRequest(RequestContext requestCtx, ResponseStreamer responseCb) {
-		CompletableFuture<Void> future = ExceptionUtil.wrap(() -> incomingRequestImpl(requestCtx, responseCb));
-		future.exceptionally(e -> finalFailure(responseCb, e, requestCtx));
-		return future;
+		return futureUtil.catchBlockWrap(
+				() -> incomingRequestImpl(requestCtx, responseCb),
+				(t) -> finalFailure(responseCb, t, requestCtx)
+		);
 	}
 
-	public Void finalFailure(ResponseStreamer responseCb, Throwable e, RequestContext requestCtx) {
+	public Throwable finalFailure(ResponseStreamer responseCb, Throwable e, RequestContext requestCtx) {
 		ResponseFailureProcessor processor = new ResponseFailureProcessor(requestCtx, responseCb);
 
 		
 		if(ExceptionWrap.isChannelClosed(e))
-			return null;
+			return e;
 
 		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
 
-		CompletableFuture<Void> future = ExceptionUtil.wrap(
+		CompletableFuture<Void> future = futureUtil.syncToAsyncException(
 				() -> processor.failureRenderingInternalServerErrorPage(e)
 		);
 		
@@ -96,7 +99,7 @@ public abstract class AbstractRouterService implements RouterService {
 			log.error("Webpieces failed at rendering it's internal error page since webapps internal erorr app page failed", t);
 			return null;
 		});
-		return null;
+		return e;
 	}
 	
 	protected abstract CompletableFuture<Void> incomingRequestImpl(RequestContext req, ResponseStreamer responseCb);

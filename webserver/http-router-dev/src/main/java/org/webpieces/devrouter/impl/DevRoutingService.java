@@ -19,6 +19,7 @@ import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
 
@@ -43,9 +44,10 @@ public class DevRoutingService extends AbstractRouterService {
 			DevClassForName loader, 
 			CookieTranslator cookieTranslator,
 			ObjectTranslator objTranslator,
-			WebInjector webInjector
+			WebInjector webInjector,
+			FutureHelper futureUtil
 	) {
-		super(webInjector, routeConfig, cookieTranslator, objTranslator);
+		super(futureUtil, webInjector, routeConfig, cookieTranslator, objTranslator);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.router = router;

@@ -15,15 +15,17 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 
 public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 
 	private final ParamToObjectTranslatorImpl translator;
 	private final RouterConfig config;
 	private final ServiceInvoker invoker;
+	private FutureHelper futureUtil;
 	
-	public SvcProxyForHtml(SvcProxyLogic svcProxyLogic) {
+	public SvcProxyForHtml(SvcProxyLogic svcProxyLogic, FutureHelper futureUtil) {
+		this.futureUtil = futureUtil;
 		this.translator = svcProxyLogic.getTranslator();
 		this.config = svcProxyLogic.getConfig();
 		this.invoker = svcProxyLogic.getServiceInvoker();
@@ -31,7 +33,7 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {
-		return ExceptionUtil.wrap(() -> invokeMethod(meta));
+		return futureUtil.syncToAsyncException(() -> invokeMethod(meta));
 	}
 
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 

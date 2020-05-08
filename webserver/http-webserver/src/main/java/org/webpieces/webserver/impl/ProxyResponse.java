@@ -29,7 +29,7 @@ import org.webpieces.router.impl.dto.View;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.tags.BootstrapModalTag;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Request;
@@ -62,6 +62,8 @@ public class ProxyResponse implements ResponseStreamer {
 	private int maxBodySize;
 	private Object responseSent = null;
 
+	private FutureHelper futureUtil;
+
 	@Inject
 	public ProxyResponse(
 		TemplateService templatingService, 
@@ -69,7 +71,8 @@ public class ProxyResponse implements ResponseStreamer {
 		CompressionLookup compressionLookup, 
 		ResponseCreator responseCreator, 
 		ChannelCloser channelCloser,
-		BufferPool pool
+		BufferPool pool,
+		FutureHelper futureUtil
 	) {
 		super();
 		this.templatingService = templatingService;
@@ -78,6 +81,7 @@ public class ProxyResponse implements ResponseStreamer {
 		this.responseCreator = responseCreator;
 		this.channelCloser = channelCloser;
 		this.pool = pool;
+		this.futureUtil = futureUtil;
 	}
 
 	public void init(RouterRequest req, Http2Request requestHeaders, ResponseStream responseSender, int maxBodySize) {
@@ -217,7 +221,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 		String finalExt = extension;
 		
-		return ExceptionUtil.wrapException(
+		return futureUtil.catchBlockWrap(
 				 () -> createResponseAndSend(statusCode, content, finalExt, "text/plain"), 
 				 (t) -> convert(t));
 	}
@@ -237,7 +241,7 @@ public class ProxyResponse implements ResponseStreamer {
 		if(log.isDebugEnabled())
 			log.debug("Sending render static html response. req="+request);
 		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, stream);
-		return ExceptionUtil.wrapException(
+		return futureUtil.catchBlockWrap(
 			() -> reader.sendRenderStatic(requestInfo, renderStatic), 
 			(t) -> convert(t)
 		);

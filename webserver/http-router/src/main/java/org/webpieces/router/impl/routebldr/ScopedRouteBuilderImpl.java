@@ -39,6 +39,7 @@ import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.file.VirtualFileFactory;
+import org.webpieces.util.futures.FutureHelper;
 
 public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRouteBuilder {
 
@@ -51,14 +52,17 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 
 	private final List<FStaticRouter> staticRouters = new ArrayList<>();
 
+	private FutureHelper futureUtil;
+
 	//private final List<StaticRouteMeta> staticRoutes = new ArrayList<>();
 	//private List<StaticRoute> allStaticRoutes;
 	
-	public ScopedRouteBuilderImpl(RouterInfo routerInfo, RouteBuilderLogic holder, ResettingLogic resettingLogic) {
+	public ScopedRouteBuilderImpl(RouterInfo routerInfo, RouteBuilderLogic holder, ResettingLogic resettingLogic, FutureHelper futureUtil) {
 		super(holder, resettingLogic);
 		this.routerInfo = routerInfo;
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
+		this.futureUtil = futureUtil;
 	}
 
 	@Override
@@ -76,7 +80,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
-		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic());
+		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getMetaAndController(), svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
@@ -117,7 +121,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		FHtmlRouter router = new FHtmlRouter(holder.getRouteInvoker2(), matchInfo, checkToken);	
-		SvcProxyForHtml svc = new SvcProxyForHtml(holder.getSvcProxyLogic());
+		SvcProxyForHtml svc = new SvcProxyForHtml(holder.getSvcProxyLogic(), futureUtil);
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, metaAndController, svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
@@ -271,7 +275,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		
 		ScopedRouteBuilderImpl r = pathToBuilder.get(path);
 		if(r == null) {
-			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getRouterId(), routerInfo.getPath()+path), holder, resettingLogic);
+			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getRouterId(), routerInfo.getPath()+path), holder, resettingLogic, futureUtil);
 			pathToBuilder.put(path, r);
 		}
 		
@@ -309,7 +313,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		
 		Map<String, EScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 		
-		return new EScopedRouter(routerInfo, pathToRouter, routers);
+		return new EScopedRouter(futureUtil, routerInfo, pathToRouter, routers);
 	}
 
 	protected Map<String, EScopedRouter> buildScopedRouters(List<FilterInfo<?>> routeFilters) {

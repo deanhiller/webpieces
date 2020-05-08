@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.util.filters.Service;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 
 /**
  * NOTE: This is for InternalError AND NotFound BUT if they deviate separate so we stay with
@@ -15,14 +15,16 @@ import org.webpieces.util.futures.ExceptionUtil;
 public class SvcProxyFixedRoutes implements Service<MethodMeta, Action> {
 
 	private ServiceInvoker invoker;
+	private FutureHelper futureUtil;
 
-	public SvcProxyFixedRoutes(ServiceInvoker invoker) {
+	public SvcProxyFixedRoutes(ServiceInvoker invoker, FutureHelper futureUtil) {
 		this.invoker = invoker;
+		this.futureUtil = futureUtil;
 	}
 	
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {
-		return ExceptionUtil.wrap(() -> invokeMethod(meta));
+		return futureUtil.syncToAsyncException(() -> invokeMethod(meta));
 	}
 	
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 

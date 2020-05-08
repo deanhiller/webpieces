@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.router.api.RouterService;
+import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.urlparse.UrlEncodedParser;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.body.BodyParsers;
@@ -23,6 +24,7 @@ public class RequestHelpFacade implements StreamsWebManaged {
 	private final WebServerConfig config;
 	private final UrlEncodedParser urlEncodedParser;
 	private final BodyParsers bodyParsers;
+	private final FutureHelper futureUtil;
 	
 	//I don't use javax.inject.Provider much as reflection creation is a tad slower but screw it......(it's fast enough)..AND
 	//it keeps the code a bit more simple.  We could fix this later
@@ -35,13 +37,14 @@ public class RequestHelpFacade implements StreamsWebManaged {
 
 	@Inject
 	public RequestHelpFacade(RouterService routingService, WebServerConfig config, UrlEncodedParser urlEncodedParser,
-			BodyParsers bodyParsers, Provider<ProxyResponse> responseProvider) {
+			BodyParsers bodyParsers, Provider<ProxyResponse> responseProvider, FutureHelper futureUtil) {
 		super();
 		this.routingService = routingService;
 		this.config = config;
 		this.urlEncodedParser = urlEncodedParser;
 		this.bodyParsers = bodyParsers;
 		this.responseProvider = responseProvider;
+		this.futureUtil = futureUtil;
 	}
 
 	public void urlEncodeParse(String postfix, RouterRequest routerRequest) {
@@ -74,7 +77,7 @@ public class RequestHelpFacade implements StreamsWebManaged {
 	public BodyParsers getBodyParsers() {
 		return bodyParsers;
 	}
-
+	
 	@Override
 	public String getCategory() {
 		return "Webpieces Webserver";
@@ -88,6 +91,10 @@ public class RequestHelpFacade implements StreamsWebManaged {
 	@Override
 	public void setMaxBodySizeSend(int maxBodySize) {
 		this.maxBodySizeToSend = maxBodySize;
+	}
+
+	public FutureHelper getFutureUtil() {
+		return futureUtil;
 	}
 
 }

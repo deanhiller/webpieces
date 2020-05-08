@@ -35,6 +35,7 @@ import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.router.impl.services.ServiceInvoker;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.futures.FutureHelper;
 
 public class DevRouteInvoker extends ProdRouteInvoker {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
@@ -46,9 +47,10 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	public DevRouteInvoker(
 			WebInjector webInjector, 
 			ControllerLoader loader, 
-			ServiceInvoker invoker 
+			ServiceInvoker invoker,
+			FutureHelper futureUtil
 	) {
-		super(loader);
+		super(loader, futureUtil);
 		this.webInjector = webInjector;
 		this.serviceInvoker = invoker;
 	}
@@ -145,7 +147,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		RouteInfo routeInfo = new RouteInfo(new RouteModuleInfo("", null), "/org/webpieces/devrouter/impl/NotFoundController.notFound");
 		BaseRouteInfo webpiecesNotFoundRoute = new BaseRouteInfo(
 				route.getInjector(), routeInfo, 
-				new SvcProxyFixedRoutes(serviceInvoker),
+				new SvcProxyFixedRoutes(serviceInvoker, futureUtil),
 				new ArrayList<>(), RouteType.NOT_FOUND);
 		
 		LoadedController newLoadedController = controllerFinder.loadGenericController(route.getInjector(), routeInfo, false).getLoadedController();

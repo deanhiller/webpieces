@@ -2,11 +2,14 @@ package org.webpieces.util.filters;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.util.futures.FutureHelper;
+
 public class MyFilter extends Filter<Integer, String> {
 
 	private String txt;
 
 	public MyFilter(String txt) {
+		super();
 		this.txt = txt;
 	}
 

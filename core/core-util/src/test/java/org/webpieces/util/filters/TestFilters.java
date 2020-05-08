@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.webpieces.util.futures.FutureHelper;
 
 
 public class TestFilters {
@@ -17,6 +18,7 @@ public class TestFilters {
 	 */
 	@Test
 	public void testFilters() throws InterruptedException, ExecutionException {
+		Filter.setFutureUtil(new FutureHelper());
 		MyFilter filterMiddle = new MyFilter("middle");
 		MyFilter filterTop = new MyFilter("top");
 		

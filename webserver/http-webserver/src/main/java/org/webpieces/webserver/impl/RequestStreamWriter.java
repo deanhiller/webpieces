@@ -25,7 +25,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.router.api.exceptions.BadCookieException;
-import org.webpieces.util.futures.ExceptionUtil;
+import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.webserver.impl.body.BodyParser;
 import org.webpieces.webserver.impl.body.BodyParsers;
 
@@ -85,11 +85,13 @@ public class RequestStreamWriter implements StreamWriter {
 	private volatile CompletableFuture<Void> outstandingRequest = CompletableFuture.completedFuture(null); //prevent nullPointers
 	private DataWrapper data = dataGen.emptyWrapper();
 	private boolean cancelled;
+	private FutureHelper futureUtil;
 
 	public RequestStreamWriter(RequestHelpFacade facade, ResponseStream stream, Http2Request headers) {
 		this.facade = facade;
 		this.stream = stream;
 		this.requestHeaders = headers;
+		this.futureUtil = facade.getFutureUtil();
 	}
 	
 	@Override
@@ -118,7 +120,7 @@ public class RequestStreamWriter implements StreamWriter {
 
 	CompletableFuture<Void> handleCompleteRequest() {
 		MDC.put("txId", generate());
-		return ExceptionUtil.finallyBlock(
+		return futureUtil.finallyBlock(
 				() -> handleCompleteRequestImpl(), 
 				() -> MDC.put("txId", null)
 		);
