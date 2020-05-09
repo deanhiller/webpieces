@@ -2,8 +2,6 @@ package org.webpieces.webserver.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import org.webpieces.nio.api.BackpressureConfig;
 
@@ -28,20 +26,9 @@ public class WebServerConfig {
 	 * The eclipse compiler is not on the production classpath and only on the DevelopmentServer classpath.
 	 */
 	private Module platformOverrides = null;
-	
-	private Locale defaultLocale = Locale.getDefault();
-	
-	//On startup, we protect developers from breaking clients.  In http, all files that change
-	//must also change the hash url param automatically and the %%{ }%% tag generates those hashes so the
-    //files loaded are always the latest
-	//this is what gets put in the cache header for static files...and should be set to the max
-	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(255, TimeUnit.DAYS);
-	
+		
 	private Http2Config http2Config = new Http2Config();
 	private BackpressureConfig backpressureConfig = new BackpressureConfig();
-	
-	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
-
 	
 	public String getId() {
 		return id;
@@ -78,24 +65,6 @@ public class WebServerConfig {
 		return this;
 	}
 
-	public Locale getDefaultLocale() {
-		return defaultLocale;
-	}
-
-	public WebServerConfig setDefaultLocale(Locale defaultLocale) {
-		this.defaultLocale = defaultLocale;
-		return this;
-	}
-
-	public Long getStaticFileCacheTimeSeconds() {
-		return staticFileCacheTimeSeconds ;
-	}
-
-	public WebServerConfig setStaticFileCacheTimeSeconds(Long staticFileCacheTimeSeconds) {
-		this.staticFileCacheTimeSeconds = staticFileCacheTimeSeconds;
-		return this;
-	}
-
 	public int getHttp2EngineThreadCount() {
 		return http2EngineThreadCount;
 	}
@@ -120,15 +89,6 @@ public class WebServerConfig {
 
 	public WebServerConfig setBackpressureConfig(BackpressureConfig backpressureConfig) {
 		this.backpressureConfig = backpressureConfig;
-		return this;
-	}
-	
-	public Charset getDefaultFormAcceptEncoding() {
-		return defaultFormAcceptEncoding;
-	}
-	
-	public WebServerConfig setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
-		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
 		return this;
 	}
 

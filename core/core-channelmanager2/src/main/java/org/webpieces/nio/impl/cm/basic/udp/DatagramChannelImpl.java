@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.DatagramChannel;
-import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DatagramListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
+import org.webpieces.util.exceptions.NioException;
 
 
 /**

@@ -6,6 +6,8 @@ import org.webpieces.devrouter.impl.DevLoader;
 import org.webpieces.devrouter.impl.DevRouteInvoker;
 import org.webpieces.devrouter.impl.DevRoutingService;
 import org.webpieces.router.api.RouterService;
+import org.webpieces.router.impl.AbstractRouterService;
+import org.webpieces.router.impl.RouterServiceImpl;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
@@ -17,7 +19,9 @@ public class ForTestingStaticDevelopmentModeModule implements Module {
 
 	@Override
 	public void configure(Binder binder) {
-		binder.bind(RouterService.class).to(DevRoutingService.class).asEagerSingleton();
+		binder.bind(RouterService.class).to(RouterServiceImpl.class).asEagerSingleton();
+
+		binder.bind(AbstractRouterService.class).to(DevRoutingService.class).asEagerSingleton();
         binder.bind(MetaLoaderProxy.class).to(DevLoader.class).asEagerSingleton();
 		binder.bind(ClassForName.class).to(DevClassForName.class).asEagerSingleton();
 		

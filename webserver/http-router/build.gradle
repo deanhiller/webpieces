@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 dependencies {
     compile deps['guice']
     compile deps['guice-multibindings']
@@ -6,6 +8,10 @@ dependencies {
     compile project(':webserver:http-shared')
 
     testCompile deps['apache-commons-io']
+}
+
+processResources {
+    filter(ReplaceTokens, beginToken: '', endToken: '', tokens:["version-to-be-replaced": "version="+project.version])
 }
 
 publishing.publications.mavenJava.pom.description='Http Router where you feed http requests in and get responses in the form of which view needs to be shown with the arguments that you need to give to that view'

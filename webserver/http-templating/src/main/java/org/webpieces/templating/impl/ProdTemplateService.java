@@ -16,7 +16,7 @@ import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 
 @Singleton
-public class ProdTemplateService implements TemplateService {
+public class ProdTemplateService extends AbstractTemplateService implements TemplateService {
 
 	private HtmlTagLookup lookup;
 	private boolean isInitialized = false;
@@ -29,7 +29,7 @@ public class ProdTemplateService implements TemplateService {
 	}
 	
 	@Override
-	public void loadAndRunTemplate(String templatePath, StringWriter out, Map<String, Object> pageArgs) {
+	public void loadAndRunTemplateImpl(String templatePath, StringWriter out, Map<String, Object> pageArgs) {
 		Template template = loadTemplate(templatePath);
 		runTemplate(template, out, pageArgs);
 	}

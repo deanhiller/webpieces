@@ -40,7 +40,7 @@ public class DevTemplateService extends ProdTemplateService {
 	}
 
 	@Override
-	public void loadAndRunTemplate(String templatePath, StringWriter out, Map<String, Object> pageArgs) {
+	public void loadAndRunTemplateImpl(String templatePath, StringWriter out, Map<String, Object> pageArgs) {
 		//TODO: big nit and for fun, we should look into recreating OurGroovyClassLoader ONLY when
 		//the html files have changed.  to do this, I think we would have to save a Holder object with the first 
 		//classloader and only swap him on changes to the html files instead of on every request.  I think if we
@@ -52,7 +52,7 @@ public class DevTemplateService extends ProdTemplateService {
 		currentCl.set(new OurGroovyClassLoader());
 		
 		try {
-			super.loadAndRunTemplate(templatePath, out, pageArgs);
+			super.loadAndRunTemplateImpl(templatePath, out, pageArgs);
 		} finally {
 			currentCl.set(null);
 		}

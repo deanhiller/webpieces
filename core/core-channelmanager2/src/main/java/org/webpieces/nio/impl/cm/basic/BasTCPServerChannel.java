@@ -15,13 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.nio.api.exceptions.NioClosedChannelException;
-import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
+import org.webpieces.util.exceptions.NioClosedChannelException;
+import org.webpieces.util.exceptions.NioException;
 
 
 

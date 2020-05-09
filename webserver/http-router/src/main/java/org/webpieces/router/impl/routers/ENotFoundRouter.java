@@ -2,8 +2,10 @@ package org.webpieces.router.impl.routers;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
@@ -25,8 +27,8 @@ public class ENotFoundRouter {
 		this.loadedController = loadedController;
 	}
 
-	public CompletableFuture<Void> invokeNotFoundRoute(RequestContext ctx, ResponseStreamer responseCb, NotFoundException exc) {
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, responseCb);
+	public CompletableFuture<StreamWriter> invokeNotFoundRoute(RequestContext ctx, RouterStreamHandle handle, NotFoundException exc) {
+		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handle);
 		RouteData data = new RouteInfoForNotFound(exc);
 		return invoker.invokeNotFound(invokeInfo, loadedController, data);
 	}

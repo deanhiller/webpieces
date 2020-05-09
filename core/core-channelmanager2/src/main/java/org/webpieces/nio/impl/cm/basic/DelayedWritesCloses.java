@@ -1,6 +1,6 @@
 package org.webpieces.nio.impl.cm.basic;
 
-import org.webpieces.nio.api.exceptions.NioException;
+import org.webpieces.util.exceptions.NioException;
 
 public interface DelayedWritesCloses {
 

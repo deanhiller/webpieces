@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,20 +13,24 @@ import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.WebInjector;
+import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.MethodMetaAndController;
 import org.webpieces.router.impl.model.RouteModuleInfo;
+import org.webpieces.router.impl.proxyout.ProxyResponse;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
+import org.webpieces.router.impl.routeinvoker.WebSettings;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
@@ -36,6 +41,8 @@ import org.webpieces.router.impl.services.ServiceInvoker;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
+
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class DevRouteInvoker extends ProdRouteInvoker {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
@@ -48,27 +55,30 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 			WebInjector webInjector, 
 			ControllerLoader loader, 
 			ServiceInvoker invoker,
-			FutureHelper futureUtil
+			FutureHelper futureUtil,
+			WebSettings webSettings,
+			BodyParsers bodyParsers,
+			Provider<ResponseStreamer> proxyProvider
 	) {
-		super(loader, futureUtil);
+		super(loader, futureUtil, webSettings, bodyParsers, proxyProvider);
 		this.webInjector = webInjector;
 		this.serviceInvoker = invoker;
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeStatic(RequestContext ctx, ResponseStreamer responseCb,
+	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, RouterStreamHandle handle,
 			RouteInfoForStatic data) {
 		//RESET the encodings to known so we don't try to go the compressed cache which doesn't
 		//exist in dev server since we want the latest files always
 		ctx.getRequest().encodings = new ArrayList<>();
-		return super.invokeStatic(ctx, responseCb, data);
+		return super.invokeStatic(ctx, handle, data);
 	}
 
 	/**
 	 * This one is definitely special
 	 */
 	@Override
-	public CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		if(loadedController == null) {
 			loadedController = controllerFinder.loadNotFoundController(route.getInjector(), route.getRouteInfo(), false);
@@ -83,7 +93,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		DynamicInfo newInfo = info;
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
@@ -96,7 +106,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		RouteInfoForHtml htmlRoute = (RouteInfoForHtml) data;
 		//If we haven't loaded it already, load it now		
 		DynamicInfo newInfo = info;
@@ -110,7 +120,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeContentController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeContentController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		DynamicInfo newInfo = info;
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
@@ -124,10 +134,10 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		return super.invokeContentController(invokeInfo, newInfo, data);
 	}
 
-	private CompletableFuture<Void> invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	private CompletableFuture<StreamWriter> invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
-		ResponseStreamer responseCb = invokeInfo.getResponseCb();
+		RouterStreamHandle handler = invokeInfo.getHandler();
 		RouteInfoForNotFound notFoundData = (RouteInfoForNotFound) data;
 		NotFoundException notFoundExc = notFoundData.getNotFoundException();
 
@@ -161,10 +171,11 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		newRequest.putMultipart("url", req.relativePath);
 		newRequest.isHttps = req.isHttps;
 		newRequest.isBackendRequest = req.isBackendRequest;
+		newRequest.orginalRequest = req.orginalRequest;
 		
 		ApplicationContext ctx = webInjector.getAppContext();
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);
-		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, responseCb);
+		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, handler);
 		return super.invokeNotFound(newInvokeInfo, newLoadedController, data);
 	}
 }

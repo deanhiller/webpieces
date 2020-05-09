@@ -114,7 +114,10 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	@Override
 	public boolean isForServingHttpsPages() {
-		return svrSocketInfo.isForServingHttpsPages();
+		if(svrSocketInfo.isBackendSocket())
+			return false;
+		else
+			return channel.isSslChannel();
 	}
 
 	@Override

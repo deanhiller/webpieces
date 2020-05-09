@@ -12,6 +12,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.webpieces.data.api.TwoPools;
+import org.webpieces.ctx.api.Constants;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
@@ -20,6 +21,7 @@ import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.impl.params.PrimitiveConverter;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
@@ -100,27 +102,17 @@ public class WebServerModule implements Module {
 		binder.bind(RouterLookup.class).to(RouterLookupProxy.class).asEagerSingleton();
 		
 		binder.bind(ConverterLookup.class).to(ConverterLookupProxy.class).asEagerSingleton();
-		
-		binder.bind(BufferPool.class).to(TwoPools.class).asEagerSingleton();
-		
+
 		binder.bind(Time.class).to(TimeImpl.class).asEagerSingleton();
-		
+
+		binder.bind(TemplateApi.class).to(WebServerTemplateProxy.class);
+
 		//what the webserver writes to
 		binder.bind(WebServerPortInformation.class).toInstance(portLookup);
 
 		//in webpieces modules, you can't read until a certain phase :( :( so we can't read them here
 		//like we can in app modules and in plugins!!
 		binder.bind(PortConfiguration.class).toInstance(new PortConfiguration(httpAddress, httpsAddress, backendAddress, allowHttpsIntoHttp));
-	}
-
-	@Provides
-	@Singleton
-	@Named(HttpFrontendFactory.FILE_READ_EXECUTOR)
-	public ExecutorService provideExecutor(MeterRegistry metrics) {
-		String id = "fileReadPool";
-		ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory(id));
-		MetricsCreator.monitor(metrics, executor, id);
-		return executor;
 	}
 	
 	@Provides

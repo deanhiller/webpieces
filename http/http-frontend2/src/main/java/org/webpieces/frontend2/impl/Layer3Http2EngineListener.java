@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamListener;
-import org.webpieces.nio.api.exceptions.NioClosedChannelException;
+import org.webpieces.util.exceptions.NioClosedChannelException;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.ResponseHandler;

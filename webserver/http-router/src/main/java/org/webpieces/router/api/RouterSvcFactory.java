@@ -19,6 +19,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provides;
+import com.google.inject.util.Modules;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -29,29 +30,31 @@ public class RouterSvcFactory {
 
     protected RouterSvcFactory() {}
 
-    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile) {
+    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile, TemplateApi templateApi, Module routerOverrides) {
     		File baseWorkingDir = FileFactory.getBaseWorkingDir();
     		Arguments arguments = new CommandLineParser().parse();
     		RouterConfig config = new RouterConfig(baseWorkingDir)
     									.setMetaFile(routersFile)
     									.setSecretKey(SecretKeyInfo.generateForTest());
-    		RouterService svc = create(metrics, config);
+    		RouterService svc = create(metrics, config, templateApi, routerOverrides);
     		svc.configure(arguments);
     		arguments.checkConsumedCorrectly();
     		return svc;
     }
     
-	public static RouterService create(MeterRegistry metrics, RouterConfig config) {
-		Injector injector = Guice.createInjector(getModules(metrics, config));
+	public static RouterService create(MeterRegistry metrics, RouterConfig config, TemplateApi templateApi, Module routerOverrides) {
+		List<Module> modules = getModules(metrics, config, templateApi);
+		Module module = Modules.override(modules).with(routerOverrides);
+		Injector injector = Guice.createInjector(module);
 		RouterService svc = injector.getInstance(RouterService.class);
 		return svc;	
 	}
 
 
-	public static List<Module> getModules(MeterRegistry metrics, RouterConfig config) {
+	public static List<Module> getModules(MeterRegistry metrics, RouterConfig config, TemplateApi templateApi) {
 		List<Module> modules = new ArrayList<Module>();
 		modules.addAll(getModules(config));
-		modules.add(new MetricModule(metrics));
+		modules.add(new ExtrasModule(metrics, templateApi));
 		return modules;
 	}
 	
@@ -60,12 +63,14 @@ public class RouterSvcFactory {
 		return modules;
 	}
 	
-	private static class MetricModule implements Module {
+	private static class ExtrasModule implements Module {
 
 		private MeterRegistry metrics;
+		private TemplateApi templateApi;
 
-		public MetricModule(MeterRegistry metrics) {
+		public ExtrasModule(MeterRegistry metrics, TemplateApi templateApi) {
 			this.metrics = metrics;
+			this.templateApi = templateApi;
 		}
 
 		@Singleton
@@ -86,6 +91,7 @@ public class RouterSvcFactory {
 		@Override
 		public void configure(Binder binder) {
 			binder.bind(MeterRegistry.class).toInstance(metrics);
+			binder.bind(TemplateApi.class).toInstance(templateApi);
 		}
 		
 	}

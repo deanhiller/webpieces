@@ -2,8 +2,10 @@ package org.webpieces.router.impl.routers;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.ReversableRouter;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
@@ -28,9 +30,9 @@ public class FHtmlRouter extends AbstractDynamicRouterImpl implements Reversable
 	}
 
 	@Override
-	public CompletableFuture<Void> invoke(RequestContext ctx, ResponseStreamer responseCb) {
+	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, RouterStreamHandle handler) {
 		RouteData data = new RouteInfoForHtml(isCheckSecureToken, matchInfo.getHttpMethod());
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, responseCb);
+		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler);
 		return invoker.invokeHtmlController(invokeInfo, dynamicInfo, data);
 	}
 	

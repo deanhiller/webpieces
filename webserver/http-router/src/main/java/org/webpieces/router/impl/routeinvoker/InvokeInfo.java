@@ -2,17 +2,18 @@ package org.webpieces.router.impl.routeinvoker;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 
 public class InvokeInfo {
 	private final BaseRouteInfo route;
 	private final RequestContext requestCtx;
-	private final ResponseStreamer responseCb;
+	private RouterStreamHandle handler;
 
-	public InvokeInfo(BaseRouteInfo route, RequestContext ctx, ResponseStreamer responseCb) {
+	public InvokeInfo(BaseRouteInfo route, RequestContext ctx, RouterStreamHandle handler) {
 		this.route = route;
 		this.requestCtx = ctx;
-		this.responseCb = responseCb;
+		this.handler = handler;
 	}
 	
 	public BaseRouteInfo getRoute() {
@@ -23,8 +24,7 @@ public class InvokeInfo {
 		return requestCtx;
 	}
 
-	public ResponseStreamer getResponseCb() {
-		return responseCb;
+	public RouterStreamHandle getHandler() {
+		return handler;
 	}
-	
 }

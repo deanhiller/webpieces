@@ -15,6 +15,11 @@ public class MockTcpChannel implements TCPChannel {
 	private ChannelSession session = new ChannelSessionImpl();
 
 	private DataListener dataListener;
+	private boolean isSsl;
+
+	public MockTcpChannel(boolean isSsl) {
+		this.isSsl = isSsl;
+	}
 
 	@Override
 	public CompletableFuture<Void> write(ByteBuffer b) {
@@ -49,7 +54,7 @@ public class MockTcpChannel implements TCPChannel {
 
 	@Override
 	public boolean isSslChannel() {
-		return false;
+		return isSsl;
 	}
 
 	@Override

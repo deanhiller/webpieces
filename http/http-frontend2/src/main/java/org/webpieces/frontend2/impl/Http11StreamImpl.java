@@ -1,6 +1,8 @@
 package org.webpieces.frontend2.impl;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,7 +43,7 @@ public class Http11StreamImpl implements ResponseStream {
 	private FrontendSocketImpl socket;
 	private HttpParser http11Parser;
 	private AtomicReference<Http2Msg> endingFrame = new AtomicReference<>();
-	private StreamSession session = new StreamSessionImpl();
+	private Map<String, Object> session = new HashMap<String, Object>();
 
 	private HttpStream streamHandle;
 
@@ -279,7 +281,7 @@ public class Http11StreamImpl implements ResponseStream {
 	}
 
 	@Override
-	public StreamSession getSession() {
+	public Map<String, Object> getSession() {
 		return session;
 	}
 

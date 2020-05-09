@@ -12,10 +12,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.mocks.MockClientSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockDataListener;
 import org.webpieces.nio.api.mocks.MockJdk;
+import org.webpieces.util.exceptions.NioException;
 import org.webpieces.util.threading.DirectExecutor;
 
 import io.micrometer.core.instrument.Metrics;

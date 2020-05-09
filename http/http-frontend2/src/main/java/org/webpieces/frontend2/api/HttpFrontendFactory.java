@@ -26,9 +26,7 @@ import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
 import io.micrometer.core.instrument.MeterRegistry;
 
 public abstract class HttpFrontendFactory {
-	
-	public static final String FILE_READ_EXECUTOR = "fileReadExecutor";
-	
+		
 	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrMgr, BufferPool pool, Http2Config http2Config, MeterRegistry metrics) {
 		ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 	

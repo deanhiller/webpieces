@@ -4,13 +4,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2engine.api.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.futures.FutureHelper;
@@ -30,16 +33,16 @@ public class EScopedRouter {
 		this.routers = routers;
 	}
 	
-	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
+	public CompletableFuture<StreamWriter> invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
 		if("".equals(subPath))
-			return findAndInvokeRoute(ctx, responseCb, subPath);
+			return findAndInvokeRoute(ctx, handler, subPath);
 		else if(!subPath.startsWith("/"))
 			throw new IllegalArgumentException("path must start with /");
 		
 		String prefix = subPath;
 		int index = subPath.indexOf("/", 1);
 		if(index == 1) {
-			CompletableFuture<Void> future = new CompletableFuture<>();
+			CompletableFuture<StreamWriter> future = new CompletableFuture<>();
 			future.completeExceptionally(new NotFoundException("Bad path="+ctx.getRequest().relativePath+" request="+ctx.getRequest()));
 			return future;
 		} else if(index > 1) {
@@ -49,33 +52,33 @@ public class EScopedRouter {
 		EScopedRouter routeInfo = getPathPrefixToNextRouter().get(prefix);
 		if(routeInfo != null) {
 			if(index < 0)
-				return routeInfo.invokeRoute(ctx, responseCb, "");
+				return routeInfo.invokeRoute(ctx, handler, "");
 			
 			String newRelativePath = subPath.substring(index, subPath.length());
-			return routeInfo.invokeRoute(ctx, responseCb, newRelativePath);
+			return routeInfo.invokeRoute(ctx, handler, newRelativePath);
 		}
 		
-		return findAndInvokeRoute(ctx, responseCb, subPath);
+		return findAndInvokeRoute(ctx, handler, subPath);
 	}
 	
-	private CompletableFuture<Void> findAndInvokeRoute(RequestContext ctx, ResponseStreamer responseCb, String subPath) {
+	private CompletableFuture<StreamWriter> findAndInvokeRoute(RequestContext ctx, RouterStreamHandle handler, String subPath) {
 		for(AbstractRouter router : routers) {
 			MatchResult2 result = router.matches(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
 				ctx.setPathParams(result.getPathParams());
 				
-				return invokeRouter(router, ctx, responseCb);
+				return invokeRouter(router, ctx, handler);
 			}
 		}
 
-		return futureUtil.<Void>failedFuture(new NotFoundException("route not found"));
+		return futureUtil.<StreamWriter>failedFuture(new NotFoundException("route not found"));
 	}
 	
-	private CompletableFuture<Void> invokeRouter(AbstractRouter router, RequestContext ctx,
-			ResponseStreamer responseCb) {
+	private CompletableFuture<StreamWriter> invokeRouter(AbstractRouter router, RequestContext ctx,
+												 RouterStreamHandle handler) {
 		//We re-use this method to avoid chaining when it's a NotFoundException
-		return futureUtil.<Void>catchBlockWrap(
-			() -> router.invoke(ctx, responseCb),
+		return futureUtil.catchBlockWrap(
+			() -> router.invoke(ctx, handler),
 			(t) -> convert(router.getMatchInfo(), t)
 		);
 	}

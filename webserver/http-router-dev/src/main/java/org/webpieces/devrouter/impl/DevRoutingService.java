@@ -5,23 +5,25 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
+import com.google.inject.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.routes.WebAppMeta;
-import org.webpieces.router.impl.AbstractRouterService;
-import org.webpieces.router.impl.CookieTranslator;
-import org.webpieces.router.impl.RouteLoader;
-import org.webpieces.router.impl.WebInjector;
+import org.webpieces.router.impl.*;
 import org.webpieces.router.impl.params.ObjectTranslator;
+import org.webpieces.router.impl.proxyout.ProxyResponse;
+import org.webpieces.router.impl.routeinvoker.WebSettings;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class DevRoutingService extends AbstractRouterService {
 
@@ -38,6 +40,7 @@ public class DevRoutingService extends AbstractRouterService {
 
 	@Inject
 	public DevRoutingService(
+			FailureResponder failureResponder,
 			RouteLoader routeConfig, 
 			RouterConfig config, 
 			ARouter router, 
@@ -45,9 +48,11 @@ public class DevRoutingService extends AbstractRouterService {
 			CookieTranslator cookieTranslator,
 			ObjectTranslator objTranslator,
 			WebInjector webInjector,
-			FutureHelper futureUtil
+			FutureHelper futureUtil,
+			Provider<ResponseStreamer> proxyProvider,
+			WebSettings webSettings
 	) {
-		super(futureUtil, webInjector, routeConfig, cookieTranslator, objTranslator);
+		super(failureResponder, futureUtil, webInjector, routeConfig, cookieTranslator, objTranslator, proxyProvider, webSettings);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.router = router;
@@ -64,25 +69,19 @@ public class DevRoutingService extends AbstractRouterService {
 	@Override
 	public Injector start() {
 		log.info("Starting DEVELOPMENT server with CompilingClassLoader and HotSwap");
-		Injector inj = loadOrReload(injector -> runStartupHooks(injector)); 
-		started = true;
+		Injector inj = loadOrReload(injector -> runStartupHooks(injector));
 		return inj;
 	}
 
 	@Override
-	public void stop() {
-		started = false;
-	}
-	
-	@Override
-	public CompletableFuture<Void> incomingRequestImpl(RequestContext ctx, ResponseStreamer responseCb) {
+	public CompletableFuture<StreamWriter> incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		
 		if(!reloaded)
 			reloadIfClassFilesChanged();
 		
-		return router.invoke(ctx, responseCb);
+		return router.invoke(ctx, handler);
 	}
 
 	/**

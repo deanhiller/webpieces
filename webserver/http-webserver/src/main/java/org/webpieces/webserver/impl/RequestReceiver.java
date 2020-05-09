@@ -6,23 +6,24 @@ import javax.inject.Singleton;
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamListener;
+import org.webpieces.router.api.RouterService;
 
 @Singleton
 public class RequestReceiver implements StreamListener {
 	
 	//private static final Logger log = LoggerFactory.getLogger(RequestReceiver.class);
 	
-	private final RequestHelpFacade facade;
-	
+	private RouterService service;
+
 	@Inject
-	public RequestReceiver(RequestHelpFacade facade) {
+	public RequestReceiver(RouterService service) {
 		super();
-		this.facade = facade;
+		this.service = service;
 	}
 
 	@Override
 	public HttpStream openStream(FrontendSocket socket) {
-		return new WebpiecesStreamHandle(facade);
+		return new WebpiecesStreamHandle(service);
 	}
 
 	@Override

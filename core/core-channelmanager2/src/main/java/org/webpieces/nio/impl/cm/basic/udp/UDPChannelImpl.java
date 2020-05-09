@@ -17,8 +17,6 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.UDPChannel;
-import org.webpieces.nio.api.exceptions.NioClosedChannelException;
-import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.NioPortUnreachableException;
 import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
@@ -26,6 +24,8 @@ import org.webpieces.nio.impl.cm.basic.ChannelInfo;
 import org.webpieces.nio.impl.cm.basic.ChannelState;
 import org.webpieces.nio.impl.cm.basic.KeyProcessor;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
+import org.webpieces.util.exceptions.NioClosedChannelException;
+import org.webpieces.util.exceptions.NioException;
 
 
 public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {

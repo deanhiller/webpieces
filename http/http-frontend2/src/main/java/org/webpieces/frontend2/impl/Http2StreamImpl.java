@@ -1,11 +1,12 @@
 package org.webpieces.frontend2.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.ResponseStream;
-import org.webpieces.frontend2.api.StreamSession;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
@@ -19,7 +20,7 @@ public class Http2StreamImpl implements ResponseStream {
 	private FrontendSocketImpl socket;
 	private AtomicBoolean sentResponseHeaders = new AtomicBoolean(false);
 	private ResponseHandler responseHandler;
-	private StreamSession session = new StreamSessionImpl();
+	private Map<String, Object> session = new HashMap<String, Object>();
 	private int streamId;
 
 	public Http2StreamImpl(FrontendSocketImpl socket, ResponseHandler responseHandler, int streamId) {
@@ -52,7 +53,7 @@ public class Http2StreamImpl implements ResponseStream {
 	}
 
 	@Override
-	public StreamSession getSession() {
+	public Map<String, Object> getSession() {
 		return session;
 	}
 

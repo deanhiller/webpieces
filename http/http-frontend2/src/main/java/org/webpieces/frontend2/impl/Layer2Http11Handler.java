@@ -21,6 +21,7 @@ import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.util.acking.AckAggregator;
 import org.webpieces.util.acking.ByteAckTracker;
+import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.locking.PermitQueue;
 
 import com.webpieces.hpack.api.dto.Http2Request;
@@ -33,6 +34,7 @@ public class Layer2Http11Handler {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser httpParser;
 	private StreamListener httpListener;
+	private FutureHelper futureUtil = new FutureHelper();
 	private AtomicInteger counter = new AtomicInteger(1);
 
 	public Layer2Http11Handler(HttpParser httpParser, StreamListener httpListener) {
@@ -155,17 +157,21 @@ public class Layer2Http11Handler {
 			if(msg.isEndOfStream())
 				stream.setSentFullRequest(true);
 
-			return requestWriter.processPiece(msg).thenApply(v -> {
-				stream.setRequestWriter(requestWriter);
-				//since this is NOT end of stream, release permit for next data to come in
-				if(!msg.isEndOfStream())
-					permitQueue.releasePermit();
-				//else we need to wait for FULL response to be sent back and then release 
-				//the permit
-				
-				return null;
-			});
+			return futureUtil.finallyBlock(
+					() -> requestWriter.processPiece(msg),
+					() -> possiblyReleaseeQueue(msg, permitQueue)
+			);
+
 		});
+
+	}
+
+	private void possiblyReleaseeQueue(DataFrame msg, PermitQueue permitQueue) {
+		//since this is NOT end of stream, release permit for next data to come in
+		if(!msg.isEndOfStream())
+			permitQueue.releasePermit();
+		//else we need to wait for FULL response to be sent back and then release
+		//the permit
 
 	}
 
@@ -181,8 +187,10 @@ public class Layer2Http11Handler {
 			socket.setCurrentStream(currentStream);
 
 			if(!headers.isEndOfStream()) {
+
 				//in this case, we are NOT at the end of the request so we must let the next piece of
 				//data run right after the request
+				//TODO(dhiller): Replace this section with futureUtil.trySuccessFinally
 				return streamHandle.incomingRequest(headers, currentStream).thenApply(w -> {
 					currentStream.setRequestWriter(w);
 					//must release the permit so the next data piece(which may be cached) can come in

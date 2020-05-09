@@ -6,7 +6,31 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class FutureHelper {
-	
+
+	/**
+	 * USAGE:
+	 *
+	 *	    CompletableFuture<Response> future = futureUtil.tryCatchFinallyBlock(
+	 *			() -> handleCompleteRequestImpl(),
+	 *		    () -> runOnSuccessOfAboveMethod()
+	 *			() -> runOnSuccessOrFailureOfAboveTwoMethods()
+	 *	    );
+	 */
+	public <T> CompletableFuture<T> trySuccessFinallyBlock(
+			Callable<CompletableFuture<T>> function,
+			Callable<CompletableFuture<T>> successFunction,
+			Runnable finallyCode
+	) {
+		//convert sync exceptions into async exceptions so we can re-use same exception handling logic..
+		CompletableFuture<T> future = syncToAsyncException(function);
+		CompletableFuture<T> newFuture = syncToAsyncException(successFunction);
+		CompletableFuture<T> lastFuture = finallyBlock(
+				() -> newFuture,
+				() -> finallyCode.run()
+		);
+
+		return lastFuture;
+	}
 
 	/**
 	 * USAGE: 

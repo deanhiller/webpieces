@@ -6,6 +6,7 @@ import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.TemplateApi;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
@@ -22,20 +23,20 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class DevRouterFactory {
     protected DevRouterFactory() {}
 
-    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile, CompileConfig compileConfig) {
+    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile, CompileConfig compileConfig, TemplateApi templateApi, Module routerOverrides) {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		Arguments arguments = new CommandLineParser().parse();
 		RouterConfig config = new RouterConfig(baseWorkingDir)
 									.setMetaFile(routersFile)
 									.setSecretKey(SecretKeyInfo.generateForTest());
-    	RouterService svc = create(metrics, config, compileConfig);
+    	RouterService svc = create(metrics, config, compileConfig, templateApi, routerOverrides);
     	svc.configure(arguments);
     	arguments.checkConsumedCorrectly();
     	return svc;
     }
     
-	public static RouterService create(MeterRegistry metrics, RouterConfig config, CompileConfig compileConfig) {
-		Module devModules = Modules.override(RouterSvcFactory.getModules(metrics, config)).with(new DevRouterModule(compileConfig));
+	public static RouterService create(MeterRegistry metrics, RouterConfig config, CompileConfig compileConfig, TemplateApi templateApi, Module routerOverrides) {
+		Module devModules = Modules.override(RouterSvcFactory.getModules(metrics, config, templateApi)).with(new DevRouterModule(compileConfig), routerOverrides);
 		
 		Injector injector = Guice.createInjector(devModules);
 		RouterService svc = injector.getInstance(RouterService.class);

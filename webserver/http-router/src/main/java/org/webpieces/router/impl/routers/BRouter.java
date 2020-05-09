@@ -4,10 +4,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2engine.api.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.ProxyStreamHandle;
 
 /**
  * Routes based on domain or if no domain delegates to allOtherDomainsRouter
@@ -29,16 +32,16 @@ public class BRouter {
 		this.domainToRouter = domainToRouter;
 	}
 
-	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb) {
+	public CompletableFuture<StreamWriter> invokeRoute(RequestContext ctx, ProxyStreamHandle handler) {
 		if(ctx.getRequest().isBackendRequest) {
-			return backendRouter.invokeRoute(ctx, responseCb);
+			return backendRouter.invokeRoute(ctx, handler);
 		}
 
 		CRouter specificDomainRouter = getDomainToRouter().get(ctx.getRequest().domain);
 		if(specificDomainRouter != null)
-			return specificDomainRouter.invokeRoute(ctx, responseCb);
+			return specificDomainRouter.invokeRoute(ctx, handler);
 		
-		return allOtherDomainsRouter.invokeRoute(ctx, responseCb);
+		return allOtherDomainsRouter.invokeRoute(ctx, handler);
 	}
 
 	public CRouter getLeftOverDomains() {

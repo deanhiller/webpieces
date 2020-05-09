@@ -4,8 +4,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.ProxyStreamHandle;
+
 /**
  * The request Content-Type header router routing to special Content-Type routers if they exist
  * 
@@ -27,14 +31,14 @@ public class CRouter {
 		this.requestContentTypeToRouter = requestContentTypeToRouter;
 	}
 
-	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb) {
+	public CompletableFuture<StreamWriter> invokeRoute(RequestContext ctx, ProxyStreamHandle handler) {
 		String relativePath = ctx.getRequest().relativePath;
 
 		DContentTypeRouter requestTypeRouter = getRequestContentTypeToRouter().get(ctx.getRequest().domain);
 		if(requestTypeRouter != null)
-			return requestTypeRouter.invokeRoute(ctx, responseCb, relativePath);
+			return requestTypeRouter.invokeRoute(ctx, handler, relativePath);
 		
-		return allOtherRequestTypes.invokeRoute(ctx, responseCb, relativePath);
+		return allOtherRequestTypes.invokeRoute(ctx, handler, relativePath);
 	}
 
 	public DScopedRouter getLeftOverDomains() {

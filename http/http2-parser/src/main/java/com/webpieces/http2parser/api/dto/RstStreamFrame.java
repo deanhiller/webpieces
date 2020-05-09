@@ -75,4 +75,9 @@ public class RstStreamFrame extends AbstractHttp2Frame implements CancelReason {
                 "} ";
     }
 
+	@Override
+	public boolean isEndOfStream() {
+		return true;
+	}
+
 }

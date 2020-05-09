@@ -28,13 +28,12 @@ public class Layer1ServerListener implements AsyncDataListener {
 			FutureHelper futureUtil,
 			Layer2Http11Handler http11Listener, 
 			Layer2Http2Handler http2Listener,
-			boolean isHttps, 
 			boolean isBackendRequest
 	) {
 		this.futureUtil = futureUtil;
 		this.http11Handler = http11Listener;
 		this.http2Handler = http2Listener;
-		svrSocketInfo = new ServerSocketInfo(isHttps, isBackendRequest);
+		svrSocketInfo = new ServerSocketInfo(isBackendRequest);
 	}
 
 	@Override

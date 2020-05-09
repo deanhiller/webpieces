@@ -3,12 +3,13 @@ package org.webpieces.router.api;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.util.cmdline2.Arguments;
 
 import com.google.inject.Injector;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.StreamWriter;
 
 public interface RouterService {
 
@@ -26,7 +27,7 @@ public interface RouterService {
 
 	void stop();
 
-	CompletableFuture<Void> incomingCompleteRequest(RouterRequest req, ResponseStreamer streamer);
+	CompletableFuture<StreamWriter> incomingRequest(Http2Request req, RouterStreamHandle handler);
 
 	/**
 	 * This is exposed as the webserver wires router and templating engine and the templating engine needs a callback to

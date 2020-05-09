@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import com.google.inject.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -14,7 +15,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterService;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.Startable;
@@ -23,76 +24,87 @@ import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
+import org.webpieces.router.impl.proxyout.ProxyResponse;
+import org.webpieces.router.impl.proxyout.ResponseOverrideSender;
+import org.webpieces.router.impl.routeinvoker.WebSettings;
 import org.webpieces.router.impl.routers.ExceptionWrap;
+import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.StreamWriter;
 
-public abstract class AbstractRouterService implements RouterService {
+public abstract class AbstractRouterService {
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractRouterService.class);
-	protected boolean started = false;
 	private RouteLoader routeLoader;
 	private ObjectTranslator translator;
+	private Provider<ResponseStreamer> proxyProvider;
+	private WebSettings webSettings;
 	private CookieTranslator cookieTranslator;
 	private WebInjector webInjector;
+	private FailureResponder failureResponder;
 	private FutureHelper futureUtil;
 	
-	public AbstractRouterService(FutureHelper futureUtil, WebInjector webInjector, RouteLoader routeLoader, CookieTranslator cookieTranslator, ObjectTranslator translator) {
+	public AbstractRouterService(
+			FailureResponder failureResponder,
+			FutureHelper futureUtil,
+			WebInjector webInjector,
+			RouteLoader routeLoader,
+			CookieTranslator cookieTranslator,
+			ObjectTranslator translator,
+			Provider<ResponseStreamer> proxyProvider,
+			WebSettings webSettings
+	) {
+		this.failureResponder = failureResponder;
 		this.futureUtil = futureUtil;
 		this.webInjector = webInjector;
 		this.routeLoader = routeLoader;
 		this.cookieTranslator = cookieTranslator;
 		this.translator = translator;
+		this.proxyProvider = proxyProvider;
+		this.webSettings = webSettings;
 	}
 
-	@Override
-	public final CompletableFuture<Void> incomingCompleteRequest(RouterRequest routerRequest, ResponseStreamer responseCb) {
+	public CompletableFuture<StreamWriter> incomingRequest(RouterRequest routerRequest, ProxyStreamHandle handler) {
 		try {
-			if(!started)
-				throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
-			
 			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(translator));
 			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(translator));
 			Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(translator));
 			ApplicationContext ctx = webInjector.getAppContext(); 
 			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest, ctx);
 			
-			
 			String user = session.get("userId");
 			MDC.put("userId", user);
-			return futureUtil.finallyBlock(
-					() -> processRequest(requestCtx, responseCb), 
-					() -> { MDC.put("userId", null); });
-			
+			return processRequest(requestCtx, handler);
+
 		} catch(BadCookieException e) {
-			throw e;
-		} catch (Throwable e) {
-			log.warn("uncaught exception", e);
-			return responseCb.failureRenderingInternalServerErrorPage(e);
+			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
+			return failureResponder.sendRedirectAndClearCookie(new ResponseOverrideSender(handler), routerRequest, e.getCookieName());
 		}
 	}
 
-	private CompletableFuture<Void> processRequest(RequestContext requestCtx, ResponseStreamer responseCb) {
+	private CompletableFuture<StreamWriter> processRequest(RequestContext requestCtx, ProxyStreamHandle handler) {
+		ResponseStreamer proxy = proxyProvider.get();
+		proxy.init(requestCtx.getRequest(), handler, webSettings.getMaxBodySizeToSend());
 		return futureUtil.catchBlockWrap(
-				() -> incomingRequestImpl(requestCtx, responseCb),
-				(t) -> finalFailure(responseCb, t, requestCtx)
+				() -> incomingRequestImpl(requestCtx, handler),
+				(t) -> finalFailure(handler, t, requestCtx, proxy)
 		);
 	}
 
-	public Throwable finalFailure(ResponseStreamer responseCb, Throwable e, RequestContext requestCtx) {
-		ResponseFailureProcessor processor = new ResponseFailureProcessor(requestCtx, responseCb);
-
-		
+	public Throwable finalFailure(ProxyStreamHandle handler, Throwable e, RequestContext requestCtx, ResponseStreamer proxy) {
 		if(ExceptionWrap.isChannelClosed(e))
 			return e;
 
 		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
 
 		CompletableFuture<Void> future = futureUtil.syncToAsyncException(
-				() -> processor.failureRenderingInternalServerErrorPage(e)
+				() -> failureResponder.failureRenderingInternalServerErrorPage(requestCtx, e, proxy)
 		);
 		
 		future.exceptionally((t) -> {
@@ -102,14 +114,12 @@ public abstract class AbstractRouterService implements RouterService {
 		return e;
 	}
 	
-	protected abstract CompletableFuture<Void> incomingRequestImpl(RequestContext req, ResponseStreamer responseCb);
+	protected abstract CompletableFuture<StreamWriter> incomingRequestImpl(RequestContext req, ProxyStreamHandle handler);
 	
-	@Override
 	public String convertToUrl(String routeId, Map<String, Object> args, boolean isValidating) {
 		return routeLoader.convertToUrl(routeId, args, isValidating);
 	}
 	
-	@Override
 	public FileMeta relativeUrlToHash(String urlPath) {
 		if(!urlPath.startsWith("/"))
 			urlPath = "/"+urlPath;
@@ -138,8 +148,12 @@ public abstract class AbstractRouterService implements RouterService {
 		}
 	}
 	
-	@Override
 	public <T> ObjectStringConverter<T> getConverterFor(T bean) {
 		return translator.getConverterFor(bean);
 	}
+
+	protected abstract void configure(Arguments arguments);
+
+	protected abstract Injector start();
+
 }

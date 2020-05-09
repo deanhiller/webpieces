@@ -33,18 +33,18 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createHttpServer(HttpSvrConfig config, StreamListener httpListener) {
 		preconditionCheck(config);
 
-		Layer1ServerListener listener = buildDatalListener(httpListener, false, false);
+		Layer1ServerListener listener = buildDatalListener(httpListener, false);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 
 		return frontend;
 	}
 
-	private Layer1ServerListener buildDatalListener(StreamListener httpListener, boolean isHttps, boolean isBackend) {
+	private Layer1ServerListener buildDatalListener(StreamListener httpListener, boolean isBackend) {
 		Layer2Http11Handler http11 = new Layer2Http11Handler(httpParser, httpListener);
 		Layer2Http2Handler http2 = new Layer2Http2Handler(http2EngineFactory, httpListener);
 		FutureHelper futureUtil = new FutureHelper();
-		Layer1ServerListener listener = new Layer1ServerListener(futureUtil, http11, http2, isHttps, isBackend);
+		Layer1ServerListener listener = new Layer1ServerListener(futureUtil, http11, http2, isBackend);
 		return listener;
 	}
 
@@ -62,7 +62,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		
-		Layer1ServerListener listener = buildDatalListener(httpListener, true, false);
+		Layer1ServerListener listener = buildDatalListener(httpListener, false);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 		
@@ -74,7 +74,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createUpgradableServer(HttpSvrConfig config, StreamListener httpListener, SSLEngineFactory factory) {
 		preconditionCheck(config);
 		
-		Layer1ServerListener listener = buildDatalListener(httpListener, true, false);
+		Layer1ServerListener listener = buildDatalListener(httpListener, false);
 		AsyncServer tcpServer = svrManager.createUpgradableServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 		
@@ -85,7 +85,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createBackendHttpsServer(HttpSvrConfig config, StreamListener httpListener, SSLEngineFactory factory) {
 		preconditionCheck(config);
 		
-		Layer1ServerListener listener = buildDatalListener(httpListener, true, true);
+		Layer1ServerListener listener = buildDatalListener(httpListener, true);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 		

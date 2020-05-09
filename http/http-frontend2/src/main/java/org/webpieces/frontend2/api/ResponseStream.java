@@ -1,5 +1,6 @@
 package org.webpieces.frontend2.api;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -13,12 +14,12 @@ public interface ResponseStream {
 	PushStreamHandle openPushStream();
 	
 	/**
-	 * Cancel the request stream and all push streams as well.  
+	 * Cancel the request stream and all push streams as well.
 	 */
 	CompletableFuture<Void> cancelStream();
 
 	FrontendSocket getSocket();
 	
-    StreamSession getSession();
+    Map<String, Object> getSession();
 
 }

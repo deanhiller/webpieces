@@ -32,7 +32,7 @@ public class DirectHttp11Client implements HttpClient {
 
 	public HttpSocket createHttpSocket() {
 		ConnectionListener listener = mgr.getHttpConnection();
-		MockTcpChannel channel = new MockTcpChannel();
+		MockTcpChannel channel = new MockTcpChannel(false);
 
 		try {
 			return new HttpSocketImpl(new DelayedProxy(listener, channel), parser);
@@ -44,7 +44,7 @@ public class DirectHttp11Client implements HttpClient {
 
 	public HttpSocket createHttpsSocket(SSLEngine engine) {
 		ConnectionListener listener = mgr.getHttpsConnection();
-		MockTcpChannel channel = new MockTcpChannel();
+		MockTcpChannel channel = new MockTcpChannel(true);
 
 		try {
 			return new HttpSocketImpl(new DelayedProxy(listener, channel), parser);

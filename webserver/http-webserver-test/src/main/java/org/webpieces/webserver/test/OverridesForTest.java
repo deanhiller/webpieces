@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.Constants;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
@@ -64,7 +65,7 @@ public class OverridesForTest implements Module {
 
 	@Provides
 	@Singleton
-	@Named(HttpFrontendFactory.FILE_READ_EXECUTOR)
+	@Named(Constants.FILE_READ_EXECUTOR)
 	public ExecutorService provideExecutor() {
 		return new DirectExecutorService();
 	}

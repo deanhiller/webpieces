@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
 import org.webpieces.data.api.DataWrapper;
 
 /**
@@ -50,8 +52,10 @@ public class RouterRequest {
 	 * see the picture of dependencies in the design at http://localhost:8080/@documentation in
 	 * development mode. 
 	 */
-	public Object orginalRequest;
-	
+	public Http2Request orginalRequest;
+
+	public Http2Headers trailingHeaders;
+
 	/**
 	 * Used by router, not really needed by Controllers
 	 * 
@@ -224,13 +228,17 @@ public class RouterRequest {
 	public ContentType contentTypeHeaderValue;
 
 	/**
-	 * This is the body that is set only if not streaming the body upload in chunks.
+	 * This is the body that is set ONLY IF this is not a Streaming path.
+	 * ie. If you added a Content-Type route using ContentTypeRouteBuilder which currently only does streaming routes
+	 * OR called an addStreamingRoute() instead of addRoute()
+	 *
+	 * This happens to be filled in later then all the other data (I kind of hate that but it's working well anyways)
 	 */
 	public DataWrapper body;
 
 	public UriInfo requestUri;
-	
-	public void putMultipart(String key, String value) {
+
+    public void putMultipart(String key, String value) {
 		List<String> values = new ArrayList<>();
 		values.add(value);
 		multiPartFields.put(key, values);

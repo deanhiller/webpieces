@@ -54,7 +54,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 	private MockSomeOtherLib mockSomeOtherLib = new MockSomeOtherLib();
 	private MockExecutor mockExecutor = new MockExecutor();
 
-	private MockTcpChannel channel = new MockTcpChannel();
+	private MockTcpChannel channel = new MockTcpChannel(false);
 	private DataListener dataListener;
 	private DataWrapper dataReceived = dataGen.emptyWrapper();
 

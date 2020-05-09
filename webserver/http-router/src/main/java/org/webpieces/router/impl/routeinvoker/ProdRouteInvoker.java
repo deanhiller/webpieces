@@ -3,14 +3,19 @@ package org.webpieces.router.impl.routeinvoker;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
+import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
+import org.webpieces.router.impl.services.RouteInfoForInternalError;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.futures.FutureHelper;
 
@@ -19,42 +24,55 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	@Inject
 	public ProdRouteInvoker(
 		ControllerLoader controllerFinder,
-		FutureHelper futureUtil
+		FutureHelper futureUtil,
+		WebSettings webSettings,
+		BodyParsers bodyParsers,
+		Provider<ResponseStreamer> proxyProvider
 	) {
-		super(controllerFinder, futureUtil);
+		super(controllerFinder, futureUtil, webSettings, bodyParsers, proxyProvider);
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeStatic(RequestContext ctx, ResponseStreamer responseCb, RouteInfoForStatic data) {
-		return super.invokeStatic(ctx, responseCb, data);
+	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, RouterStreamHandle handle, RouteInfoForStatic data) {
+		return super.invokeStatic(ctx, handle, data).thenApply(s -> new NullWriter());
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		RouteInfoForInternalError routeData = (RouteInfoForInternalError) data;
+		ResponseStreamer proxyResponse = proxyProvider.get();
+		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler(), webSettings.getMaxBodySizeToSend());
+
 		ResponseProcessorAppError processor = new ResponseProcessorAppError(
-				invokeInfo.getRequestCtx(), dynamicInfo.getLoadedController(), invokeInfo.getResponseCb());
-		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
+				invokeInfo.getRequestCtx(), dynamicInfo.getLoadedController(), proxyResponse);
+		return invokeImpl(invokeInfo, dynamicInfo, data, processor, routeData.isForceEndOfStream());
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		ResponseStreamer proxyResponse = proxyProvider.get();
+		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler(), webSettings.getMaxBodySizeToSend());
+
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
 				invokeInfo.getRequestCtx(), reverseRoutes, 
-				dynamicInfo.getLoadedController(), invokeInfo.getResponseCb());
-		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
+				dynamicInfo.getLoadedController(), proxyResponse);
+		return invokeImpl(invokeInfo, dynamicInfo, data, processor, false);
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		ResponseStreamer proxyResponse = proxyProvider.get();
+		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler(), webSettings.getMaxBodySizeToSend());
+
 		RouteInfoForContent content = (RouteInfoForContent) data;
 		if(content.getBodyContentBinder() == null)
 			throw new IllegalArgumentException("bodyContentBinder is required for these routes yet it is null here.  bug");
-		ResponseProcessorContent processor = new ResponseProcessorContent(invokeInfo.getRequestCtx(), invokeInfo.getResponseCb());
-		return invokeImpl(invokeInfo, dynamicInfo, data, processor);
+		ResponseProcessorContent processor = new ResponseProcessorContent(invokeInfo.getRequestCtx(), proxyResponse);
+		return invokeImpl(invokeInfo, dynamicInfo, data, processor, false);
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		return super.invokeNotFound(invokeInfo, loadedController, data);
 	}
 

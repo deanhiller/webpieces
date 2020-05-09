@@ -65,10 +65,6 @@ dependencies {
 //    outputFile = file(new File(buildDir, "resources/version.properties"))
 //}
 
-processResources {
-    filter(ReplaceTokens, beginToken: '', endToken: '', tokens:["version-to-be-replaced": "version="+project.version])
-}
-
 publishing.publications.mavenJava.pom.description='The full webpieces server AS A library'
 
 test {

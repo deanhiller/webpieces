@@ -27,4 +27,14 @@ public class ShutdownStream implements CancelReason {
 		return cause;
 	}
 
+	@Override
+	public boolean isEndOfStream() {
+		return true;
+	}
+
+	@Override
+	public void setStreamId(int streamId) {
+		this.streamId = streamId;
+	}
+
 }

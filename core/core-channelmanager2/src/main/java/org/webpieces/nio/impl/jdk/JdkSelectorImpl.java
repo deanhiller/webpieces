@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
 import org.webpieces.nio.api.jdk.JdkDatagramChannel;
 import org.webpieces.nio.api.jdk.JdkSelect;
@@ -17,6 +16,7 @@ import org.webpieces.nio.api.jdk.JdkServerSocketChannel;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
 import org.webpieces.nio.api.jdk.Keys;
 import org.webpieces.nio.api.jdk.SelectorListener;
+import org.webpieces.util.exceptions.NioException;
 
 
 

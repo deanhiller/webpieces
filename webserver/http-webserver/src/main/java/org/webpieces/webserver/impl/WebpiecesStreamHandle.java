@@ -8,33 +8,28 @@ import org.webpieces.frontend2.api.ResponseStream;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
+import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.api.RouterService;
 
 public class WebpiecesStreamHandle implements HttpStream {
 
-	private RequestHelpFacade facade;
-	private RequestStreamWriter writer;
+	private RouterService routingService;
+	private CompletableFuture<StreamWriter> future;
 
-	public WebpiecesStreamHandle(RequestHelpFacade facade) {
-		this.facade = facade;
+	public WebpiecesStreamHandle(RouterService routingService) {
+		this.routingService = routingService;
 	}
 
 	@Override
 	public CompletableFuture<StreamWriter> incomingRequest(Http2Request headers, ResponseStream stream) {
-		writer = new RequestStreamWriter(facade, stream, headers);
-		
-		if(headers.isEndOfStream()) {
-			CompletableFuture<Void> future = writer.handleCompleteRequest();
-			writer.setOutstandingRequest(future);
-			return future.thenApply( v -> writer);
-		}
-
-		return CompletableFuture.completedFuture(writer);
+		RouterStreamHandle handler = new RouterResponseHandlerImpl(stream);
+		future = routingService.incomingRequest(headers, handler);
+		return future;
 	}
 
 	@Override
 	public CompletableFuture<Void> incomingCancel(CancelReason c) {
-		writer.cancelOutstandingRequest();
-		return CompletableFuture.completedFuture(null);
+		return future.thenCompose(writer -> writer.processPiece(c));
 	}
 
 }

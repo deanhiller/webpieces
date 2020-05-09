@@ -2,8 +2,10 @@ package org.webpieces.router.impl.routers;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.loader.LoadedController;
@@ -28,10 +30,10 @@ public class EInternalErrorRouter {
 		this.svc = svc;
 	}
 
-	public CompletableFuture<Void> invokeErrorRoute(RequestContext ctx, ResponseStreamer responseCb) {
+	public CompletableFuture<StreamWriter> invokeErrorRoute(RequestContext ctx, RouterStreamHandle handler, boolean forceEndOfStream) {
 		DynamicInfo info = new DynamicInfo(loadedController, svc);
-		RouteInfoForInternalError data = new RouteInfoForInternalError();
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, responseCb);
+		RouteInfoForInternalError data = new RouteInfoForInternalError(forceEndOfStream);
+		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler);
 		return invoker.invokeErrorController(invokeInfo, info, data);
 	}
 }

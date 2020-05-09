@@ -6,10 +6,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
@@ -45,7 +47,12 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
 		return (CompletableFuture<Void>) super.calledMethod(MockMethod.FAILURE, e);
 	}
-	
+
+	@Override
+	public void init(RouterRequest request, RouterStreamHandle handler, int maxBodySizeToSend) {
+
+	}
+
 	@Override
 	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
 		throw new UnsupportedOperationException("not implemented yet");

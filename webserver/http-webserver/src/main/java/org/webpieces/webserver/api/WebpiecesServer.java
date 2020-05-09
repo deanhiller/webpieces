@@ -59,12 +59,13 @@ public class WebpiecesServer {
 											.setWebappOverrides(appOverrides)
 											.setSecretKey(new SecretKeyInfo(fetchKey(base64Key), "HmacSHA1"))
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
-											.setTokenCheckOn(svrConfig.isTokenCheckOn());
+											.setTokenCheckOn(svrConfig.isTokenCheckOn())
+											.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
 
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(platformOverrides)
-										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
-										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
+										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup());
+										
 
 		TemplateConfig templateConfig = new TemplateConfig();
 		

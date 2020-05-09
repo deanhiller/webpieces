@@ -4,16 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import javax.inject.Provider;
+
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.ControllerException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ReverseRoutes;
+import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
@@ -26,20 +31,30 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
+import com.webpieces.http2engine.api.StreamWriter;
+
 public abstract class AbstractRouteInvoker implements RouteInvoker {
 
 	protected final ControllerLoader controllerFinder;
 	
 	protected ReverseRoutes reverseRoutes;
-
 	protected FutureHelper futureUtil;
+	protected WebSettings webSettings;
+	protected Provider<ResponseStreamer> proxyProvider;
+	private BodyParsers requestBodyParsers;
 
 	public AbstractRouteInvoker(
 			ControllerLoader controllerFinder,
-			FutureHelper futureUtil
+			FutureHelper futureUtil,
+			WebSettings webSettings,
+			BodyParsers bodyParsers,
+			Provider<ResponseStreamer> proxyProvider
 	) {
 		this.controllerFinder = controllerFinder;
 		this.futureUtil = futureUtil;
+		this.webSettings = webSettings;
+		this.proxyProvider = proxyProvider;
+		this.requestBodyParsers = bodyParsers;
 	}
 
 	@Override
@@ -48,7 +63,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeStatic(RequestContext ctx, ResponseStreamer responseCb, RouteInfoForStatic data) {
+	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, RouterStreamHandle handler, RouteInfoForStatic data) {
 		
 		boolean isOnClassPath = data.isOnClassPath();
 
@@ -65,18 +80,42 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			resp.setFileAndRelativePath(fullPath, relativeUrl);
 		}
 
-		ResponseStaticProcessor processor = new ResponseStaticProcessor(ctx, responseCb);
+		ResponseStreamer proxyResponse = proxyProvider.get();
+		proxyResponse.init(ctx.getRequest(), handler, webSettings.getMaxBodySizeToSend());
+		ResponseStaticProcessor processor = new ResponseStaticProcessor(ctx, proxyResponse);
 
-		return processor.renderStaticResponse(resp);
+		return processor.renderStaticResponse(resp).thenApply(s -> new NullWriter());
 	}
 	
-	protected CompletableFuture<Void> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor) {
+	protected CompletableFuture<StreamWriter> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
 		Service<MethodMeta, Action> service = dynamicInfo.getService();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
-		return invokeAny(invokeInfo, loadedController, service, data, processor);
+		return invokeAny(invokeInfo, loadedController, service, data, processor, forceEndOfStream);
 	}
 
-	private CompletableFuture<Void> invokeAny(
+	private CompletableFuture<StreamWriter> invokeAny(
+			InvokeInfo invokeInfo,
+			LoadedController loadedController,
+			Service<MethodMeta, Action> service,
+			RouteData data,
+			Processor processor,
+			boolean forceEndOfStream) {
+		boolean endOfStream = invokeInfo.getRequestCtx().getRequest().orginalRequest.isEndOfStream();
+		if(forceEndOfStream || endOfStream) {
+			//If there is no body, just invoke to process
+			invokeInfo.getRequestCtx().getRequest().body = DataWrapperGeneratorFactory.EMPTY;
+			return invokeAnyImpl(invokeInfo, loadedController, service, data, processor).thenApply(voidd -> null);
+		}
+
+		//At this point, we don't have the end of the stream
+		RequestStreamWriter2 writer = new RequestStreamWriter2(requestBodyParsers, invokeInfo,
+				(newInfo) -> invokeAnyImpl(newInfo, loadedController, service, data, processor)
+		);
+
+		return CompletableFuture.completedFuture(writer);
+	}
+
+	private CompletableFuture<Void> invokeAnyImpl(
 		InvokeInfo invokeInfo, 
 		LoadedController loadedController, 
 		Service<MethodMeta, Action> service,
@@ -85,8 +124,8 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
-		ResponseStreamer responseCb = invokeInfo.getResponseCb();
-		
+		RouterStreamHandle handler = invokeInfo.getHandler();
+
 		if(service == null)
 			throw new IllegalStateException("Bug, service should never be null at this point");
 		
@@ -105,7 +144,9 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		} finally {
 			Current.setContext(null);
 		}
-		
+
+		ResponseStreamer responseCb = proxyProvider.get();
+		responseCb.init(requestCtx.getRequest(), handler, webSettings.getMaxBodySizeToSend());
 		return response.thenCompose(resp -> processor.continueProcessing(resp, responseCb));
 	}
 	
@@ -116,14 +157,18 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
+
+		ResponseStreamer responseCb = proxyProvider.get();
+		responseCb.init(requestCtx.getRequest(), invokeInfo.getHandler(), webSettings.getMaxBodySizeToSend());
+
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
 				invokeInfo.getRequestCtx(), reverseRoutes, 
-				loadedController, invokeInfo.getResponseCb());
-		return invokeAny(invokeInfo, loadedController, service, data, processor);
+				loadedController, responseCb);
+		return invokeAny(invokeInfo, loadedController, service, data, processor, false);
 	}
 	
 	private  Service<MethodMeta, Action> createNotFoundService(BaseRouteInfo route, RouterRequest req) {

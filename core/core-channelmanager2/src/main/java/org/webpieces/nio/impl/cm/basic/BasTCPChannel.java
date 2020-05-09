@@ -17,10 +17,10 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.exceptions.NioClosedChannelException;
-import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
+import org.webpieces.util.exceptions.NioClosedChannelException;
+import org.webpieces.util.exceptions.NioException;
 
 
 
@@ -255,5 +255,6 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 			throw new NioClosedChannelException("On registering, we received closedChannel(did remote end or local end close the socket", e);
 		}
 	}
+
 
 }
