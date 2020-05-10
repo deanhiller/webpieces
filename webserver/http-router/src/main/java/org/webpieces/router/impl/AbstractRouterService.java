@@ -77,11 +77,9 @@ public abstract class AbstractRouterService {
 	}
 
 	private CompletableFuture<StreamWriter> processRequest(RequestContext requestCtx, ProxyStreamHandle handler) {
-		ResponseStreamer proxy = proxyProvider.get();
-		proxy.init(requestCtx.getRequest(), handler);
 		return futureUtil.catchBlock(
 				() -> incomingRequestImpl(requestCtx, handler),
-				(t) -> handler.finalFailure(t, requestCtx, proxy)
+				(t) -> handler.finalFailure(t, requestCtx)
 		);
 	}
 	

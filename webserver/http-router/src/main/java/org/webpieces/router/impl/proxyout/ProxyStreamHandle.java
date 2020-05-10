@@ -141,14 +141,14 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return handle.hasSentResponseAlready();
 	}
 
-	public CompletableFuture<StreamWriter> finalFailure(Throwable e, RequestContext requestCtx, ResponseStreamer proxy) {
+	public CompletableFuture<StreamWriter> finalFailure(Throwable e, RequestContext requestCtx) {
 		if(ExceptionWrap.isChannelClosed(e))
 			return CompletableFuture.completedFuture(null);
 
 		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
 
 		CompletableFuture<Void> future = futureUtil.syncToAsyncException(
-				() -> failureRenderingInternalServerErrorPage(requestCtx, e, proxy)
+				() -> failureRenderingInternalServerErrorPage(requestCtx, e)
 		);
 		
 		future.exceptionally((t) -> {
@@ -158,7 +158,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return future.thenApply(s -> null);
 	}
 
-    public CompletableFuture<Void> failureRenderingInternalServerErrorPage(RequestContext ctx, Throwable e, ResponseStreamer proxyResponse) {
+    public CompletableFuture<Void> failureRenderingInternalServerErrorPage(RequestContext ctx, Throwable e) {
         return ContextWrap.wrap(ctx, () -> failureRenderingInternalServerErrorPage(e));
     }
 
