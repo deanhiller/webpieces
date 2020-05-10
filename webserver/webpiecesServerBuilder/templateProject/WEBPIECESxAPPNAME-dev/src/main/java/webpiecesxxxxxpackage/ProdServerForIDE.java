@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.router.api.PrecompressedCache;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -17,6 +16,7 @@ import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import webpiecesxxxxxpackage.meta.JavaCache;
 
 /**
  * Uses the production Router but the dev template compiler so you 'could' step through prod router code
@@ -74,7 +74,7 @@ public class ProdServerForIDE {
 				new SimpleMeterModule(metrics),
 				new DevTemplateModule(templateConfig));
 
-		ServerConfig config = new ServerConfig(PrecompressedCache.getCacheLocation(), false);
+		ServerConfig config = new ServerConfig(JavaCache.getCacheLocation(), false);
 		
 		//It is very important to turn off caching or developers will get very confused when they
 		//change stuff and they don't see changes in the website

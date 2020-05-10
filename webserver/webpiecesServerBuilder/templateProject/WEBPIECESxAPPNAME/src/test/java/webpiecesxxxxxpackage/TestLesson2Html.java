@@ -22,7 +22,6 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.router.api.PrecompressedCache;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
@@ -33,6 +32,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteSystem;
 import webpiecesxxxxxpackage.service.RemoteService;
 
@@ -70,7 +70,7 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(
 				getOverrides(isRemote, metrics), new AppOverridesModule(), 
-				new ServerConfig(PrecompressedCache.getCacheLocation()), args);
+				new ServerConfig(JavaCache.getCacheLocation()), args);
 		
 		webserver.start();
 		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());

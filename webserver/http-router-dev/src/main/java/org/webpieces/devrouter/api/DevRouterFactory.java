@@ -23,10 +23,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class DevRouterFactory {
     protected DevRouterFactory() {}
 
-    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile, CompileConfig compileConfig, TemplateApi templateApi, Module ... routerOverrides) {
+    public static RouterService create(String testName, MeterRegistry metrics, VirtualFile routersFile, CompileConfig compileConfig, TemplateApi templateApi, Module ... routerOverrides) {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		Arguments arguments = new CommandLineParser().parse();
-		RouterConfig config = new RouterConfig(baseWorkingDir)
+		RouterConfig config = new RouterConfig(baseWorkingDir, testName)
 									.setMetaFile(routersFile)
 									.setSecretKey(SecretKeyInfo.generateForTest());
     	RouterService svc = create(metrics, config, compileConfig, templateApi);

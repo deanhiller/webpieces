@@ -74,7 +74,7 @@ public class PrivateWebserverForTest {
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
 				.setPlatformOverrides(testConfig.getPlatformOverrides());
-		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
+		RouterConfig routerConfig = new RouterConfig(baseWorkingDir, "webpiecesTestSuite")
 											.setMetaFile(testConfig.getMetaFile() )
 											.setWebappOverrides(testConfig.getAppOverrides())
 											.setFileEncoding(CHAR_SET_TO_USE)

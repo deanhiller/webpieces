@@ -19,7 +19,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
-import org.webpieces.router.api.PrecompressedCache;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
@@ -28,6 +27,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import webpiecesxxxxxpackage.mock.JavaCache;
 
 //import org.junit.Ignore;
 
@@ -64,7 +64,7 @@ public class TestLesson5WithSelenium {
 		//mocks after every test and NOT drop tables but clear and re-populate
 		Server webserver = new Server(
 				new OverridesForTestRealServer(metrics), new AppOverridesModule(), 
-				new ServerConfig(PrecompressedCache.getCacheLocation()), args);
+				new ServerConfig(JavaCache.getCacheLocation()), args);
 		
 		webserver.start();
 		httpPort = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();

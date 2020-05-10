@@ -54,7 +54,7 @@ public class TestSimpleRoutes {
 		TestModule module = new TestModule();
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		Arguments args = new CommandLineParser().parse();
-		RouterConfig config = new RouterConfig(baseWorkingDir)
+		RouterConfig config = new RouterConfig(baseWorkingDir, "TestSimpleRoutes")
 										.setMetaFile(f)
 										.setWebappOverrides(module)
 										.setSecretKey(SecretKeyInfo.generateForTest());

@@ -162,7 +162,7 @@ public class ErrorCommonTest {
 
 		TemplateApi nullApi = new NullTemplateApi();
 		if(isProdTest)
-			return RouterSvcFactory.create(metrics, f, nullApi);
+			return RouterSvcFactory.create("ErrorCommonTest", metrics, f, nullApi);
 		
 		//otherwise create the development server
 		String filePath = System.getProperty("user.dir");
@@ -170,7 +170,7 @@ public class ErrorCommonTest {
 		VirtualFile cacheLocation = new VirtualFileImpl(FileFactory.newCacheLocation("webpieces/"+ErrorCommonTest.class.getSimpleName()+"/bytecode"));
 		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), cacheLocation);		
 		log.info("bytecode dir="+compileConfig.getByteCodeCacheDir());
-		RouterService server = DevRouterFactory.create(metrics, f, compileConfig, nullApi);
+		RouterService server = DevRouterFactory.create("ErrorCommonTest", metrics, f, compileConfig, nullApi);
 		return server;
 	}
 }

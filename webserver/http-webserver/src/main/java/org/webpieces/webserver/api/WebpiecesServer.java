@@ -52,7 +52,7 @@ public class WebpiecesServer {
 		//A SECOND note is that webpieces strives to default most configuration and expose it through an
 		//amazing properties plugin that not only has a web page for making changes BUT persists those
 		//changes across the cluster so they are re-applied at startup
-		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
+		RouterConfig routerConfig = new RouterConfig(baseWorkingDir, projectName)
 											.setMetaFile(svrConfig.getMetaFile())
 											.setWebappOverrides(appOverrides)
 											.setSecretKey(new SecretKeyInfo(fetchKey(base64Key), "HmacSHA1"))

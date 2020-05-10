@@ -52,7 +52,7 @@ public class TestProdRouter {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		TestModule module = new TestModule();
 		Arguments args = new CommandLineParser().parse();
-		RouterConfig config = new RouterConfig(baseWorkingDir)
+		RouterConfig config = new RouterConfig(baseWorkingDir, "TestProdRouter")
 										.setMetaFile(f)
 										.setWebappOverrides(module)
 										.setSecretKey(SecretKeyInfo.generateForTest());

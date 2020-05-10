@@ -48,7 +48,7 @@ public class TestCompressionCache {
 		File stagingDir = FileFactory.newBaseFile("output/staging");
 		FileUtils.deleteDirectory(stagingDir);
 		
-		RouterConfig config = new RouterConfig(FileFactory.getBaseWorkingDir());
+		RouterConfig config = new RouterConfig(FileFactory.getBaseWorkingDir(), "TestCompressionCache");
 		config.setSecretKey(SecretKeyInfo.generateForTest());
 		config.setCachedCompressedDirectory(cacheDir);
 

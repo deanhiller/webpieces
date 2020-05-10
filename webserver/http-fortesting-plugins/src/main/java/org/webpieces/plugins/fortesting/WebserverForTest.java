@@ -62,7 +62,7 @@ public class WebserverForTest {
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
 				.setPlatformOverrides(platformOverrides);
-		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
+		RouterConfig routerConfig = new RouterConfig(baseWorkingDir, "pluginTests")
 											.setMetaFile(metaFile )
 											.setWebappOverrides(testConfig.getAppOverrides())
 											.setFileEncoding(CHAR_SET_TO_USE)

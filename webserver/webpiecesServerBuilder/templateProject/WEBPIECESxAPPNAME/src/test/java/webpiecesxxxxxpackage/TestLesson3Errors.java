@@ -14,7 +14,6 @@ import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.router.api.PrecompressedCache;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
@@ -25,6 +24,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteSystem;
 import webpiecesxxxxxpackage.mock.MockSomeLibrary;
 import webpiecesxxxxxpackage.service.RemoteService;
@@ -65,7 +65,7 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(isRemote, metrics), new AppOverridesModule(), new ServerConfig(PrecompressedCache.getCacheLocation()), args);
+		Server webserver = new Server(getOverrides(isRemote, metrics), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()), args);
 		webserver.start();
 		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

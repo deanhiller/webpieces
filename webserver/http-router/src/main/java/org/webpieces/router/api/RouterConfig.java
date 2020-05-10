@@ -54,12 +54,20 @@ public class RouterConfig {
 
 	private File workingDirectory;
 
-	public RouterConfig(File workingDirectory) {
+	public RouterConfig(File workingDirectory, String name) {
 		if(!workingDirectory.isAbsolute())
 			throw new IllegalArgumentException("baseDirectory must be absolute and can typically be FileFactory.getBaseDirectory()");
-		this.workingDirectory = workingDirectory;
+		this.workingDirectory = workingDirectory;		
+		
 		//default location is the user's home directory BUT production server overrides to it's working dir by setting it after
-		cachedCompressedDirectory = PrecompressedCache.getCacheLocation();
+		cachedCompressedDirectory = PrecompressedCache2.getCacheLocation(name);
+	}
+	public RouterConfig(File workingDirectory, boolean isProduction) {
+		if(!workingDirectory.isAbsolute())
+			throw new IllegalArgumentException("baseDirectory must be absolute and can typically be FileFactory.getBaseDirectory()");
+		else if(!isProduction) 
+			throw new IllegalArgumentException("Only use this constructor for production");
+		this.workingDirectory = workingDirectory;
 	}
 	
 	public VirtualFile getMetaFile() {

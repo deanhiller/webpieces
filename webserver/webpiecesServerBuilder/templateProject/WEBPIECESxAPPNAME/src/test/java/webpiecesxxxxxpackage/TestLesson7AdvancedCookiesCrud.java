@@ -20,7 +20,6 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.router.api.PrecompressedCache;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
@@ -29,6 +28,7 @@ import org.webpieces.webserver.test.WebBrowserSimulator;
 import org.webpieces.webserver.test.http11.Requests;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import webpiecesxxxxxpackage.mock.JavaCache;
 
 /**
  * These are working examples of tests that sometimes are better done with the BasicSeleniumTest example but are here for completeness
@@ -58,7 +58,7 @@ public class TestLesson7AdvancedCookiesCrud extends AbstractWebpiecesTest {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(false, metrics), null, new ServerConfig(PrecompressedCache.getCacheLocation()), args);
+		Server webserver = new Server(getOverrides(false, metrics), null, new ServerConfig(JavaCache.getCacheLocation()), args);
 		webserver.start();
 		HttpSocket https11Socket = connectHttps(false, null, webserver.getUnderlyingHttpChannel().getLocalAddress());
 		webBrowser = new WebBrowserSimulator(https11Socket);
