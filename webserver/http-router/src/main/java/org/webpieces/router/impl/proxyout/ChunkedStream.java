@@ -53,9 +53,7 @@ public class ChunkedStream extends OutputStream {
 	
 	@Override
 	public void close() {
-		if(str.size() > 0) {
-			writeDataOut();
-		}
+		flush();
 		isClosed = true;
 	}
 	
