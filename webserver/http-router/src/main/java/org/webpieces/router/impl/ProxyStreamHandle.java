@@ -60,39 +60,39 @@ public class ProxyStreamHandle implements RouterStreamHandle {
     }
 
     private void checkForCompression(Http2Response response) {
-    	if(routerRequest == null) {
-    		//The exception happened BEFORE Http2Request Accept Header encodings were parsed which we HAVE to know
-    		//as that is what the client accepts for compression
-    		return;
-    	}
-    	
-    	if(preCompressed) {
-    		//Some contentRouters precompress their content so they are responsible for checking the accept header and picking
-    		//a file that is already compressed.  In this case, don't compress on top of their cached compression
-    		return;
-    	}
-		
-    	
-        boolean compressed = false;
-
-      	Http2Header header = response.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_TYPE);
-      	if(header == null)
-      		throw new IllegalArgumentException("Response must contain a Content-Type header so we can determine compression");
-      	else if(header.getValue() == null)
-              throw new IllegalArgumentException("Response contains a Content-Type header with a null value which is not allowed");
-
-        MimeTypes.MimeTypeResult mimeType = mimeTypes.createMimeType(header.getValue());
-
-        Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, mimeType);
-
-        Compression usingCompression;
-        if (compression == null) {
-          usingCompression = new NoCompression();
-        } else {
-          usingCompression = compression;
-          compressed = true;
-          response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
-        }
+//    	if(routerRequest == null) {
+//    		//The exception happened BEFORE Http2Request Accept-Encoding Header encodings were parsed which we HAVE to know
+//    		//as that is what the client accepts for compression
+//    		return;
+//    	}
+//    	
+//    	if(preCompressed) {
+//    		//Some contentRouters precompress their content so they are responsible for checking the accept header and picking
+//    		//a file that is already compressed.  In this case, don't compress on top of their cached compression
+//    		return;
+//    	}
+//		
+//    	
+//        boolean compressed = false;
+//
+//      	Http2Header header = response.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_TYPE);
+//      	if(header == null)
+//      		throw new IllegalArgumentException("Response must contain a Content-Type header so we can determine compression");
+//      	else if(header.getValue() == null)
+//              throw new IllegalArgumentException("Response contains a Content-Type header with a null value which is not allowed");
+//
+//        MimeTypes.MimeTypeResult mimeType = mimeTypes.createMimeType(header.getValue());
+//
+//        Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, mimeType);
+//
+//        Compression usingCompression;
+//        if (compression == null) {
+//          usingCompression = new NoCompression();
+//        } else {
+//          usingCompression = compression;
+//          compressed = true;
+//          response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
+//        }
 	}
 
 	public boolean hasSentResponseAlready() {

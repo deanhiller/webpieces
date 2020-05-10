@@ -230,14 +230,14 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private CompletableFuture<Void> maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
 		Http2Response resp = tuple.response;
-
-		MimeTypeResult mimeType = mimeTypes.createMimeType(resp.getSingleHeaderValue(Http2HeaderName.CONTENT_TYPE));
-		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, mimeType);
 		
 		if(bytes.length == 0) {
 			resp.setEndOfStream(true);
 			return stream.sendResponse(resp).thenApply(w -> null);
 		}
+		
+		MimeTypeResult mimeType = mimeTypes.createMimeType(resp.getSingleHeaderValue(Http2HeaderName.CONTENT_TYPE));
+		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, mimeType);
 		
 		return sendChunkedResponse(resp, bytes, compression);
 	}
