@@ -1,16 +1,14 @@
 package webpiecesxxxxxpackage.web.main;
 
-import static webpiecesxxxxxpackage.web.main.AppRouteId.ASYNC_ROUTE;
-import static webpiecesxxxxxpackage.web.main.AppRouteId.MAIN_ROUTE;
-import static webpiecesxxxxxpackage.web.main.AppRouteId.SYNC_ROUTE;
-import static org.webpieces.ctx.api.HttpMethod.GET;
-import static org.webpieces.router.api.routes.Port.BOTH;
-
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.Routes;
 
-public class AppRoutes implements Routes {
+import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.router.api.routes.Port.BOTH;
+import static webpiecesxxxxxpackage.web.main.MainRouteId.*;
+
+public class MainRoutes implements Routes {
 
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {

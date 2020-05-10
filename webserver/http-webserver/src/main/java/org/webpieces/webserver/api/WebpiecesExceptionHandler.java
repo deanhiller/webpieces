@@ -11,8 +11,13 @@ public class WebpiecesExceptionHandler implements UncaughtExceptionHandler {
 
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
-		log.error("VERY VERY Bad, your thread is NOW DEAD and won't run!!\n"
-				+ "Install a try catch if you need to keep your thread alive.\n"
+		if("main".equals(t.getName())) {
+			log.error("Your main threaad jsut died due to an exception", e);
+			return;
+		}
+		
+		log.error("This could be VERY Bad, your thread may have died DEAD and won't run!!\n"
+				+ "Install a try catch to not see this last ditch effor of a warning.\n"
 				+ "Uncaught Exception. thread="+t.getName(), e);
 	}
 

@@ -48,12 +48,15 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 
 	@Override
 	public void addRoute(String path, String controllerMethod) {
+		if(!controllerMethod.contains("."))
+			throw new IllegalArgumentException("controllerMethod must contain a . for the form Controller.method");
+		
 		UrlPath p = new UrlPath(routerInfo, path);
 		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
-		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
+		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what
 		//he did wrong when reading the exception!!
 		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo, true);
-		
+
 		MatchInfo matchInfo = createMatchInfo(p, Port.HTTPS, HttpMethod.POST, holder.getUrlEncoding());
 		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
