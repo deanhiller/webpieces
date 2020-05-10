@@ -8,6 +8,8 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.OverwritePlatformResponse;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.router.api.RouterStreamHandle;
@@ -64,7 +66,16 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 
         Compression compression = checkForCompression(response);
 		ChunkedStream chunkedStream = new ChunkedStream(webSettings.getMaxBodySizeToSend());
-				
+			
+		Http2Response finalResp = response;
+		if(Current.isContextSet()) {
+			//in some exceptional cases like incoming cookies failing to parse, there will be no context
+			List<OverwritePlatformResponse> callbacks = Current.getContext().getCallbacks();
+			for(OverwritePlatformResponse callback : callbacks) {
+				finalResp = (Http2Response)callback.modifyOrReplace(finalResp);
+			}
+		}
+		
         return handler.process(response)
                 .thenApply(w -> new ProxyStreamWriter(compression, chunkedStream, w));
     }
