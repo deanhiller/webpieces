@@ -13,7 +13,6 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
@@ -39,6 +38,8 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	private CompressionChunkingHandle handle;
 	private ResponseCreator responseCreator;
 
+	//NOTE: We already copied this method into here BUT need to move it all into CompressionChunk....
+	@Deprecated
 	private ChannelCloser channelCloser;
 
 	private FutureHelper futureUtil;
@@ -47,12 +48,10 @@ public class ProxyStreamHandle implements RouterStreamHandle {
     public ProxyStreamHandle(
     	CompressionChunkingHandle handle,
     	ResponseCreator responseCreator,
-    	ChannelCloser channelCloser,
     	FutureHelper futureUtil
     ) {
 		this.handle = handle;
 		this.responseCreator = responseCreator;
-		this.channelCloser = channelCloser;
 		this.futureUtil = futureUtil;
     }
 
@@ -67,22 +66,8 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	public void turnCompressionOff() {
 		handle.turnCompressionOff();
 	}
-	
-    public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
-        RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
-        Http2Response response = responseCreator.createRedirect(req.orginalRequest, httpResponse);
-
-        responseCreator.addDeleteCookie(response, badCookieName);
-
-        log.info("sending REDIRECT(due to bad cookie) response responseSender="+ this);
-        CompletableFuture<StreamWriter> future = process(response);
-
-        closeIfNeeded(req.orginalRequest);
-
-        return future.thenApply(s -> null);
-    }
     
-	public Void closeIfNeeded(Http2Headers request) {
+	public StreamWriter closeIfNeeded(Http2Headers request, StreamWriter w) {
 		String connHeader = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
 		boolean close = false;
 		if(!"keep-alive".equals(connHeader)) {
@@ -93,7 +78,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		if(close)
 			closeIfNeeded();
 		
-		return null;
+		return w;
 	}
 	
     @Override
@@ -141,6 +126,35 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return handle.hasSentResponseAlready();
 	}
 
+    public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
+    	handle.setHandleKeepAlive(false);
+    	
+        RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
+        Http2Response response = responseCreator.createRedirect(req.originalRequest, httpResponse);
+
+        responseCreator.addDeleteCookie(response, badCookieName);
+
+        log.info("sending REDIRECT(due to bad cookie) response responseSender="+ this);
+
+        return process(response)
+        		.thenApply((w) -> closeIfNeeded(req.originalRequest, w));
+    }
+    
+	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
+    	handle.setHandleKeepAlive(false);
+
+		Http2Request request = handle.getRouterRequest().originalRequest;
+		if(log.isDebugEnabled())
+			log.debug("Sending redirect response. req="+request);
+		Http2Response response = responseCreator.createRedirect(request, httpResponse);
+		
+		log.info("sending REDIRECT response responseSender="+ this);
+		return process(response).thenApply(w -> {
+			closeIfNeeded(request, w);
+			return null;
+		});
+	}
+	
 	public CompletableFuture<StreamWriter> finalFailure(Throwable e, RequestContext requestCtx) {
 		if(ExceptionWrap.isChannelClosed(e))
 			return CompletableFuture.completedFuture(null);
@@ -184,7 +198,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		if(content == null)
 			throw new IllegalArgumentException("content cannot be null");
 		
-		Http2Request request = handle.getRouterRequest().orginalRequest;
+		Http2Request request = handle.getRouterRequest().originalRequest;
 		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, true);
 		
 		if(log.isDebugEnabled())

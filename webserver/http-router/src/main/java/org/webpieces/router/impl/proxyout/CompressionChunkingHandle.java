@@ -18,6 +18,7 @@ import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.routeinvoker.WebSettings;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
@@ -28,6 +29,13 @@ import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
+/**
+ * NOTE: All of these pieces SHOULD move into FrontendManager so that anyone uses frontend gets compression and keep alive stuff for
+ * free!!!  We are consolidating here for a move.  Keep alive is still not handled here yet
+ * 
+ * @author dean
+ *
+ */
 public class CompressionChunkingHandle implements RouterStreamHandle {
     private RouterStreamHandle handler;
     private MimeTypes mimeTypes;
@@ -36,6 +44,7 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 	private boolean compressionOff;
 	private RouterRequest routerRequest;
 	private WebSettings webSettings;
+	private boolean handleKeepAlive = true; //must be turned off by legacy code that we need to move over so we can remove this field and do ALL closes in one section
 	
 	@Inject
     public CompressionChunkingHandle(
@@ -80,10 +89,37 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 			}
 		}
 		
+		boolean closeAfterResponding = false;
+		if(handleKeepAlive && closeAfterResponding(routerRequest.originalRequest))
+			closeAfterResponding = true;
+		
+		boolean shouldClose = closeAfterResponding;
+		
         return handler.process(response)
-                .thenApply(w -> new ProxyStreamWriter(compression, chunkedStream, w));
+        		.thenApply(w -> possiblyClose(shouldClose, response, w))
+                .thenApply(w -> new ProxyStreamWriter(shouldClose, compression, chunkedStream, w));
     }
 
+    
+    
+	private StreamWriter possiblyClose(boolean closeAfterResponding, Http2Response response, StreamWriter w) {
+		if(closeAfterResponding && response.isEndOfStream())
+			this.closeIfNeeded();
+		
+		return w;
+	}
+
+	public boolean closeAfterResponding(Http2Headers request) {
+		String connHeader = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
+		boolean close = false;
+		if(!"keep-alive".equals(connHeader)) {
+			close = true;
+		} else
+			close = false;
+
+		return close;
+	}
+	
     private Compression checkForCompression(Http2Response response) {
     	if(routerRequest == null) {
     		//The exception happened BEFORE Http2Request Accept-Encoding Header encodings were parsed which we HAVE to know
@@ -118,13 +154,15 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
         return lastResponseSent != null;
     }
 
-    private static class ProxyStreamWriter implements StreamWriter {
+    private class ProxyStreamWriter implements StreamWriter {
 
 		private ChunkedStream chunkedStream;
 		private StreamWriter w;
 		private OutputStream chainStream;
+		private boolean shouldClose;
 
-		public ProxyStreamWriter(Compression compression, ChunkedStream chunkedStream, StreamWriter w) {
+		public ProxyStreamWriter(boolean shouldClose, Compression compression, ChunkedStream chunkedStream, StreamWriter w) {
+			this.shouldClose = shouldClose;
 			this.chunkedStream = chunkedStream;
 			this.w = w;
 			chainStream = compression.createCompressionStream(chunkedStream);
@@ -165,12 +203,16 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 
 			for(int i = 0; i < frames.size(); i++) {
 				DataFrame f = frames.get(i);
+				CompletableFuture<Void> fut;
 				if(eos && i == frames.size()-1) {
 					//IF client sent LAST frame, we must mark last frame we are sending as last frame too
 					f.setEndOfStream(true);
+					fut = w.processPiece(f).thenApply(voidd -> maybeClose());
+				} else {
+					fut = w.processPiece(f);	
 				}
 				
-				CompletableFuture<Void> fut = w.processPiece(f);
+				 
 				//compose AFTER processPiece so we call processPiece FAST N times, then
 				//add to future's last result
 				future = future.thenCompose(s -> fut);
@@ -178,6 +220,14 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 			
 			return future;
         }
+
+		private Void maybeClose() {
+			if(shouldClose)
+				closeIfNeeded();
+			
+			return null;
+		}
+
     }
 
     @Override
@@ -219,4 +269,13 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 	public void turnCompressionOff() {
 		this.compressionOff = true;
 	}
+
+	public boolean isHandleKeepAlive() {
+		return handleKeepAlive;
+	}
+
+	public void setHandleKeepAlive(boolean handleKeepAlive) {
+		this.handleKeepAlive = handleKeepAlive;
+	}
+
 }

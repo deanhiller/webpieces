@@ -3,7 +3,7 @@ package org.webpieces.router.api.simplesvr;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,14 +15,16 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.devrouter.api.DevRouterFactory;
-import org.webpieces.router.api.*;
+import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.RouterService;
+import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.error.MockStreamHandle;
 import org.webpieces.router.api.error.OverridesForRefactor;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
-import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
@@ -33,6 +35,9 @@ import org.webpieces.util.security.SecretKeyInfo;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -42,9 +47,6 @@ public class TestSimpleRoutes {
 	private static final Logger log = LoggerFactory.getLogger(TestSimpleRoutes.class);
 	private RouterService server;
 
-	private RouterStreamHandle nullStream = new MockStreamHandle();
-	private MockResponseStream mockResponseStream;
-	
 	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters
 	public static Collection bothServers() {
@@ -81,8 +83,8 @@ public class TestSimpleRoutes {
 		args2.checkConsumedCorrectly();
 		
 		return Arrays.asList(new Object[][] {
-	         { prodSvc, module, mock },
-	         { devSvc, module, mock }
+	         { prodSvc, module },
+	         { devSvc, module }
 	      });
 	}
 	
@@ -95,9 +97,8 @@ public class TestSimpleRoutes {
 		}
 	}
 	
-	public TestSimpleRoutes(RouterService svc, TestModule module, MockResponseStream mockResponse) {
+	public TestSimpleRoutes(RouterService svc, TestModule module) {
 		this.server = svc;
-		mockResponseStream = mockResponse;
 		log.info("constructing test class for server="+svc.getClass().getSimpleName());
 	}
 	
@@ -110,29 +111,24 @@ public class TestSimpleRoutes {
 	public void testBasicRoute() {
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 		
-		server.incomingRequest(req, nullStream);
+		MockStreamHandle mockStream = new MockStreamHandle();
+		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
-		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();
-		Assert.assertEquals(1, responses.size());
-		
-		RedirectResponse response = responses.get(0);
-		Assert.assertEquals(req.getAuthority(), response.domain);
-		Assert.assertFalse(response.isHttps);
-		Assert.assertEquals("/something", response.redirectToPath);
+		Http2Response resp = mockStream.getLastResponse();
+		Assert.assertEquals("http://"+req.getAuthority()+"/something", resp.getSingleHeaderValue(Http2HeaderName.LOCATION));
 	}
 
 	@Test
 	public void testOneParamRoute() {
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.POST, "/meeting");
-		server.incomingRequest(req, nullStream);
 		
-		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();
-		Assert.assertEquals(1, responses.size());
+		MockStreamHandle mockStream = new MockStreamHandle();
+		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
-		RedirectResponse response = responses.get(0);
-		Assert.assertEquals(req.getAuthority(), response.domain);
-		Assert.assertFalse(response.isHttps);
-		Assert.assertEquals("/meeting/888", response.redirectToPath);
+		Http2Response resp = mockStream.getLastResponse();
+		Assert.assertEquals("http://"+req.getAuthority()+"/meeting/888", resp.getSingleHeaderValue(Http2HeaderName.LOCATION));
 	}
 	
 

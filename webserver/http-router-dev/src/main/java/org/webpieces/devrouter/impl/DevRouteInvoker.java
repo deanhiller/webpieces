@@ -168,7 +168,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		newRequest.putMultipart("url", req.relativePath);
 		newRequest.isHttps = req.isHttps;
 		newRequest.isBackendRequest = req.isBackendRequest;
-		newRequest.orginalRequest = req.orginalRequest;
+		newRequest.originalRequest = req.originalRequest;
 		
 		ApplicationContext ctx = webInjector.getAppContext();
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);

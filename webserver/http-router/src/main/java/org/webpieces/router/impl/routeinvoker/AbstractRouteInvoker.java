@@ -97,7 +97,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			RouteData data,
 			Processor processor,
 			boolean forceEndOfStream) {
-		boolean endOfStream = invokeInfo.getRequestCtx().getRequest().orginalRequest.isEndOfStream();
+		boolean endOfStream = invokeInfo.getRequestCtx().getRequest().originalRequest.isEndOfStream();
 		if(forceEndOfStream || endOfStream) {
 			//If there is no body, just invoke to process
 			invokeInfo.getRequestCtx().getRequest().body = DataWrapperGeneratorFactory.EMPTY;
@@ -164,7 +164,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
 				invokeInfo.getRequestCtx(), reverseRoutes, 
-				loadedController, responseCb);
+				loadedController, responseCb, invokeInfo.getHandler());
 		return invokeAny(invokeInfo, loadedController, service, data, processor, false);
 	}
 	

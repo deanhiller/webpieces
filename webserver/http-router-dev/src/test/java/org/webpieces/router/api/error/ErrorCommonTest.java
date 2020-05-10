@@ -33,6 +33,7 @@ import org.webpieces.util.file.VirtualFileImpl;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -77,11 +78,42 @@ public class ErrorCommonTest {
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
 		
-		Http2Response response = mockStream.getResponse();
+		Http2Response response = mockStream.getLastResponse();
 		String contents = mockStream.getResponseBody();
 
 		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "500");
 		Assert.assertTrue(contents.contains("This website had a bug, then when rendering the page explaining the bug, well, they hit another bug"));
+		
+		//We did not send a keep alive so it should close
+		Assert.assertTrue(mockStream.isWasClosed());
+	}
+
+	@Test
+	public void testRedirectRouteNotEnoughArgumentsBUTwithKeepAlive() {
+		//say method is something(int arg, String this)
+		//we verify redirects MUST match type and number of method arguments every time
+		//then when we form url, we put the stuff in the path OR put it as query params so it works on the way back in again too
+		String moduleFileContents = CommonRoutesModules.class.getName();
+		RouterService server = createServer(isProdTest, moduleFileContents, mockResponseStream);
+		
+		server.start();
+		
+		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/user/5553");
+		//ADD a keep alive to test keeping alive
+		req.addHeader(new Http2Header(Http2HeaderName.CONNECTION, "keep-alive"));
+
+		MockStreamHandle mockStream = new MockStreamHandle();
+		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
+		
+		Http2Response response = mockStream.getLastResponse();
+		String contents = mockStream.getResponseBody();
+
+		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "500");
+		Assert.assertTrue(contents.contains("This website had a bug, then when rendering the page explaining the bug, well, they hit another bug"));
+		
+		//We did not send a keep alive so it should close
+		Assert.assertFalse(mockStream.isWasClosed());
 	}
 	
 	@Test

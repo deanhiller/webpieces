@@ -55,7 +55,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
 				invokeInfo.getRequestCtx(), reverseRoutes, 
-				dynamicInfo.getLoadedController(), proxyResponse);
+				dynamicInfo.getLoadedController(), proxyResponse, invokeInfo.getHandler());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor, false);
 	}
 	

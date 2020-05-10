@@ -8,6 +8,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 @Singleton
 public class ChannelCloser {
 
+	@Deprecated
 	public Void closeIfNeeded(Http2Headers request, ProxyStreamHandle channel) {
 		String connHeader = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
 		boolean close = false;

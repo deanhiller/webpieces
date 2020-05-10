@@ -3,7 +3,6 @@ package org.webpieces.router.api.simplesvr;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
@@ -14,14 +13,16 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.*;
+import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.RouterService;
+import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.error.MockStreamHandle;
 import org.webpieces.router.api.error.OverridesForRefactor;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
-import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
@@ -31,6 +32,9 @@ import org.webpieces.util.security.SecretKeyInfo;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -40,9 +44,6 @@ public class TestProdRouter {
 	private static final Logger log = LoggerFactory.getLogger(TestProdRouter.class);
 	private RouterService server;
 	private TestModule overrides;
-
-	private RouterStreamHandle nullStream = new MockStreamHandle();
-	private MockResponseStream mockResponseStream;
 	
 	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters
@@ -67,7 +68,7 @@ public class TestProdRouter {
 		args.checkConsumedCorrectly();
 		
 		return Arrays.asList(new Object[][] {
-	         { prodSvc, module , mock }
+	         { prodSvc, module }
 	      });
 	}
 	
@@ -80,10 +81,9 @@ public class TestProdRouter {
 		}
 	}
 	
-	public TestProdRouter(RouterService svc, TestModule module, MockResponseStream mockResponseStream) {
+	public TestProdRouter(RouterService svc, TestModule module) {
 		this.server = svc;
 		this.overrides = module;
-		this.mockResponseStream = mockResponseStream;
 		
 		log.info("constructing test class for server="+svc.getClass().getSimpleName());
 	}
@@ -112,22 +112,25 @@ public class TestProdRouter {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		overrides.mockService.addToReturn(future);
 		
-		server.incomingRequest(req, nullStream);
-		
+		MockStreamHandle mockStream = new MockStreamHandle();
+		CompletableFuture<StreamWriter> theFuture = server.incomingRequest(req, mockStream);
+		Assert.assertFalse(theFuture.isDone());
+
 		//no response yet...
-		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();
-		Assert.assertEquals(0, responses.size());
-		
+		Assert.assertNull(mockStream.getLastResponse());
+
+		//release controlleer
 		int id = 78888;
 		future.complete(id);
 
-		responses = mockResponseStream.getSendRedirectCalledList();
-		Assert.assertEquals(1, responses.size());
+		Assert.assertTrue(theFuture.isDone() && !theFuture.isCompletedExceptionally());
 		
-		RedirectResponse response = responses.get(0);
-		Assert.assertEquals(req.getAuthority(), response.domain);
-		Assert.assertFalse(response.isHttps);
-		Assert.assertEquals("/meeting/"+id, response.redirectToPath);		
+		Http2Response resp = mockStream.getLastResponse();
+		Assert.assertNull(resp.getSingleHeaderValue(Http2HeaderName.AUTHORITY));
+		Assert.assertEquals("http://"+req.getAuthority()+"/meeting/"+id, resp.getSingleHeaderValue(Http2HeaderName.LOCATION));
+
+		//We did not send a keep alive so it should close
+		Assert.assertTrue(mockStream.isWasClosed());
 	}
 
 }

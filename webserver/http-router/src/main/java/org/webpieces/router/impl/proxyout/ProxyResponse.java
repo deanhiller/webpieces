@@ -39,7 +39,6 @@ public class ProxyResponse implements ResponseStreamer {
 	private final TemplateApi templatingService;
 	private final StaticFileReader reader;
 	private final ResponseCreator responseCreator;
-	private final ChannelCloser channelCloser;
 	private final BufferPool pool;
 	
 	private ProxyStreamHandle stream;
@@ -54,7 +53,6 @@ public class ProxyResponse implements ResponseStreamer {
 		TemplateApi templatingService, 
 		StaticFileReader reader,
 		ResponseCreator responseCreator, 
-		ChannelCloser channelCloser,
 		BufferPool pool,
 		FutureHelper futureUtil
 	) {
@@ -62,28 +60,14 @@ public class ProxyResponse implements ResponseStreamer {
 		this.templatingService = templatingService;
 		this.reader = reader;
 		this.responseCreator = responseCreator;
-		this.channelCloser = channelCloser;
 		this.pool = pool;
 		this.futureUtil = futureUtil;
 	}
 
 	public void init(RouterRequest req, ProxyStreamHandle responseSender) {
 		this.routerRequest = req;
-		this.request = req.orginalRequest;
+		this.request = req.originalRequest;
 		this.stream = responseSender;
-	}
-
-	@Override
-	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
-		if(log.isDebugEnabled())
-			log.debug("Sending redirect response. req="+request);
-		Http2Response response = responseCreator.createRedirect(request, httpResponse);
-		
-		log.info("sending REDIRECT response responseSender="+ stream);
-		return stream.process(response).thenApply(w -> {
-			channelCloser.closeIfNeeded(request, stream);
-			return null;
-		});
 	}
 
 	@Override

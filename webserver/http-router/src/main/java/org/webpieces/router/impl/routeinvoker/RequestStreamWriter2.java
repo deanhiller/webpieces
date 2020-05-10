@@ -71,7 +71,7 @@ public class RequestStreamWriter2 implements StreamWriter {
     private CompletableFuture<Void> handleCompleteRequestImpl() {
 
         RouterRequest request = invokeInfo.getRequestCtx().getRequest();
-        parseBody(request.orginalRequest, request);
+        parseBody(request.originalRequest, request);
         request.trailingHeaders = trailingHeaders;
 
         responseFuture = invoker.apply(invokeInfo);
@@ -105,13 +105,13 @@ public class RequestStreamWriter2 implements StreamWriter {
             return;
 
         if(req.contentTypeHeaderValue == null) {
-            log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req+" httpReq="+req.orginalRequest);
+            log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req+" httpReq="+req.originalRequest);
             return;
         }
 
         BodyParser parser = requestBodyParsers.lookup(req.contentTypeHeaderValue.getContentType());
         if(parser == null) {
-            log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req+" httpReq="+req.orginalRequest);
+            log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req+" httpReq="+req.originalRequest);
             return;
         }
 

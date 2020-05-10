@@ -52,7 +52,7 @@ public class RouterRequest {
 	 * see the picture of dependencies in the design at http://localhost:8080/@documentation in
 	 * development mode. 
 	 */
-	public Http2Request orginalRequest;
+	public Http2Request originalRequest;
 
 	public Http2Headers trailingHeaders;
 

@@ -186,7 +186,7 @@ public class RouterServiceImpl implements RouterService {
 	}
 
 	private void fillInRouterRequest(Http2Request requestHeaders, RouterRequest routerRequest, RouterStreamHandle handler) {
-		routerRequest.orginalRequest = requestHeaders;
+		routerRequest.originalRequest = requestHeaders;
 		
 		fillInHttpsValue(requestHeaders, routerRequest, handler);
 		

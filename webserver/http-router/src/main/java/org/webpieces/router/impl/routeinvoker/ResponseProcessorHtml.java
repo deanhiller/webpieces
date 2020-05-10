@@ -26,23 +26,27 @@ import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.loader.LoadedController;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 public class ResponseProcessorHtml implements Processor {
 
 	private RequestContext ctx;
 	private ReverseRoutes reverseRoutes;
 	private LoadedController loadedController;
-	private ResponseStreamer responseCb;
+	private ProxyStreamHandle responseCb;
+	private ResponseStreamer oldResponseCb;
 
 	public ResponseProcessorHtml(
 			RequestContext ctx, 
 			ReverseRoutes reverseRoutes,
 			LoadedController loadedController, 
-			ResponseStreamer responseCb 
+			ResponseStreamer oldResponseCb,
+			ProxyStreamHandle responseCb 
 	) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.loadedController = loadedController;
+		this.oldResponseCb = oldResponseCb;
 		this.responseCb = responseCb;
 	}
 
@@ -127,12 +131,12 @@ public class ResponseProcessorHtml implements Processor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.HTML);
 		
-		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
+		return ContextWrap.wrap(ctx, () -> oldResponseCb.sendRenderHtml(resp));
 	}
 
 	public CompletableFuture<Void> createContentResponse(RenderContent r) {
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
-		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
+		return ContextWrap.wrap(ctx, () -> oldResponseCb.sendRenderContent(resp));
 	}
 
 	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb) {

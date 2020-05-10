@@ -19,12 +19,18 @@ public class MockStreamHandle implements RouterStreamHandle {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-	private Http2Response response;
+	private Http2Response lastResponse;
 	private DataWrapper allData = dataGen.emptyWrapper();
+
+	private boolean tooManyResponses;
+
+	private boolean wasClosed;
 
 	@Override
 	public CompletableFuture<StreamWriter> process(Http2Response response) {
-		this.response = response;
+		if(this.lastResponse != null)
+			tooManyResponses = true;
+		this.lastResponse = response;
 		return CompletableFuture.completedFuture(new MockStreamWriter());
 	}
 
@@ -72,16 +78,27 @@ public class MockStreamHandle implements RouterStreamHandle {
 
 	@Override
 	public Void closeIfNeeded() {
-		throw new UnsupportedOperationException();
+		wasClosed = true;
+		return null;
 	}
 
-	public Http2Response getResponse() {
-		return response;
+	public Http2Response getLastResponse() {
+		if(tooManyResponses)
+			throw new IllegalStateException("There was too many responses.  this mock only can take one response at a time");
+		Http2Response temp = lastResponse;
+		lastResponse = null;
+		return temp;
 	}
 
 	public String getResponseBody() {
 		String content = allData.createStringFromUtf8(0, allData.getReadableSize());
+		allData = dataGen.emptyWrapper();
 		return content;
 	}
 
+	public boolean isWasClosed() {
+		return wasClosed;
+	}
+
+	
 }

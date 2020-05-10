@@ -29,12 +29,6 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 		super.setDefaultReturnValue(MockMethod.SEND_STATIC_HTML, CompletableFuture.completedFuture(null));
 
 	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
-		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_REDIRECT, httpResponse);
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
