@@ -150,7 +150,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("The webpieces platform saved them");
+		response.assertContains("There was a bug in the developers application or webpieces server");
 	}
 	
 	/**
@@ -194,7 +194,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("The webpieces platform saved them");	
+		response.assertContains("There was a bug in the developers application or webpieces server");	
 	}
 
 	@Test

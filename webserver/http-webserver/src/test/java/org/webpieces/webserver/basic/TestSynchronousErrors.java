@@ -121,7 +121,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("The webpieces platform saved them");
+		response.assertContains("There was a bug in the developers application or webpieces server");
 	}
 	
 	//This would be very weird but make sure it works in case they do it...
@@ -135,7 +135,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("The webpieces platform saved them");
+		response.assertContains("There was a bug in the developers application or webpieces server");
 	}
 	
 	/**
@@ -164,7 +164,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("The webpieces platform saved them");	
+		response.assertContains("There was a bug in the developers application or webpieces server");	
 	}
 
 	//This stack is deeper and a good test to make sure no one breaks the 500 rendering of

@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
@@ -20,10 +19,8 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class DevRoutingService extends AbstractRouterService {
@@ -47,11 +44,9 @@ public class DevRoutingService extends AbstractRouterService {
 			DevClassForName loader, 
 			CookieTranslator cookieTranslator,
 			ObjectTranslator objTranslator,
-			WebInjector webInjector,
-			FutureHelper futureUtil,
-			Provider<ResponseStreamer> proxyProvider
+			WebInjector webInjector
 	) {
-		super(futureUtil, webInjector, routeConfig, cookieTranslator, objTranslator, proxyProvider);
+		super(webInjector, routeConfig, cookieTranslator, objTranslator);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.router = router;

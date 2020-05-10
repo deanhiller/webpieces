@@ -23,20 +23,20 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class DevRouterFactory {
     protected DevRouterFactory() {}
 
-    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile, CompileConfig compileConfig, TemplateApi templateApi, Module routerOverrides) {
+    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile, CompileConfig compileConfig, TemplateApi templateApi, Module ... routerOverrides) {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		Arguments arguments = new CommandLineParser().parse();
 		RouterConfig config = new RouterConfig(baseWorkingDir)
 									.setMetaFile(routersFile)
 									.setSecretKey(SecretKeyInfo.generateForTest());
-    	RouterService svc = create(metrics, config, compileConfig, templateApi, routerOverrides);
+    	RouterService svc = create(metrics, config, compileConfig, templateApi);
     	svc.configure(arguments);
     	arguments.checkConsumedCorrectly();
     	return svc;
     }
     
-	public static RouterService create(MeterRegistry metrics, RouterConfig config, CompileConfig compileConfig, TemplateApi templateApi, Module routerOverrides) {
-		Module devModules = Modules.override(RouterSvcFactory.getModules(metrics, config, templateApi)).with(new DevRouterModule(compileConfig), routerOverrides);
+	public static RouterService create(MeterRegistry metrics, RouterConfig config, CompileConfig compileConfig, TemplateApi templateApi) {
+		Module devModules = Modules.override(RouterSvcFactory.getModules(metrics, config, templateApi)).with(new DevRouterModule(compileConfig));
 		
 		Injector injector = Guice.createInjector(devModules);
 		RouterService svc = injector.getInstance(RouterService.class);

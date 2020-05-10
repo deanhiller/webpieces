@@ -3,11 +3,9 @@ package org.webpieces.router.impl.routeinvoker;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.proxyout.filereaders.StaticFileReader;
@@ -22,20 +20,17 @@ public class RouteInvokerStatic {
 	private StaticFileReader reader;
 	private BufferPool pool;
 	protected FutureHelper futureUtil;
-	private Provider<ResponseStreamer> proxyProvider;
 	
 	@Inject
 	public RouteInvokerStatic(
 			StaticFileReader reader, 
 			BufferPool pool, 
-			FutureHelper futureUtil,
-			Provider<ResponseStreamer> proxyProvider
+			FutureHelper futureUtil
 	) {
 		super();
 		this.reader = reader;
 		this.pool = pool;
 		this.futureUtil = futureUtil;
-		this.proxyProvider = proxyProvider;
 	}
 
 

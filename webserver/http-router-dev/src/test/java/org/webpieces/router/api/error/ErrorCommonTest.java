@@ -3,7 +3,6 @@ package org.webpieces.router.api.error;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
@@ -15,17 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.devrouter.api.DevRouterFactory;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterService;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.error.dev.CommonRoutesModules;
-import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.router.api.simplesvr.NullTemplateApi;
-import org.webpieces.router.impl.dto.RenderResponse;
-import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
@@ -43,20 +37,18 @@ public class ErrorCommonTest {
 
 	private static final Logger log = LoggerFactory.getLogger(ErrorCommonTest.class);
 	private boolean isProdTest;
-	private MockResponseStream mockResponseStream;
 
 	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters
 	public static Collection bothServers() {
 		return Arrays.asList(new Object[][] {
-	        { true, true , new MockResponseStream()},
-	         { false, true, new MockResponseStream() }
+	        { true, true },
+	         { false, true }
 	      });
 	}
 	
-	public ErrorCommonTest(boolean isProdTest, boolean expected, MockResponseStream mockResponseStream) {
+	public ErrorCommonTest(boolean isProdTest, boolean expected) {
 		this.isProdTest = isProdTest;
-		this.mockResponseStream = mockResponseStream;
 		log.info("constructing test suite for server prod="+isProdTest);
 	}
 	
@@ -66,7 +58,7 @@ public class ErrorCommonTest {
 		//we verify redirects MUST match type and number of method arguments every time
 		//then when we form url, we put the stuff in the path OR put it as query params so it works on the way back in again too
 		String moduleFileContents = CommonRoutesModules.class.getName();
-		RouterService server = createServer(isProdTest, moduleFileContents, mockResponseStream);
+		RouterService server = createServer(isProdTest, moduleFileContents);
 		
 		server.start();
 		
@@ -81,7 +73,7 @@ public class ErrorCommonTest {
 		String contents = mockStream.getResponseBody();
 
 		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "500");
-		Assert.assertTrue(contents.contains("This website had a bug, then when rendering the page explaining the bug, well, they hit another bug"));
+		Assert.assertTrue(contents.contains("There was a bug in the developers application or webpieces server"));
 		
 		//We did not send a keep alive so it should close
 		Assert.assertTrue(mockStream.isWasClosed());
@@ -93,7 +85,7 @@ public class ErrorCommonTest {
 		//we verify redirects MUST match type and number of method arguments every time
 		//then when we form url, we put the stuff in the path OR put it as query params so it works on the way back in again too
 		String moduleFileContents = CommonRoutesModules.class.getName();
-		RouterService server = createServer(isProdTest, moduleFileContents, mockResponseStream);
+		RouterService server = createServer(isProdTest, moduleFileContents);
 		
 		server.start();
 		
@@ -109,7 +101,7 @@ public class ErrorCommonTest {
 		String contents = mockStream.getResponseBody();
 
 		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "500");
-		Assert.assertTrue(contents.contains("This website had a bug, then when rendering the page explaining the bug, well, they hit another bug"));
+		Assert.assertTrue(contents.contains("There was a bug in the developers application or webpieces server"));
 		
 		//We did send a keep alive so it should close
 		Assert.assertFalse(mockStream.isWasClosed());
@@ -119,7 +111,7 @@ public class ErrorCommonTest {
 	public void testArgsTypeMismatch() {
 		log.info("starting");
 		String moduleFileContents = CommonRoutesModules.class.getName();
-		RouterService server = createServer(isProdTest, moduleFileContents, mockResponseStream);
+		RouterService server = createServer(isProdTest, moduleFileContents);
 		
 		server.start();
 		
@@ -146,7 +138,7 @@ public class ErrorCommonTest {
 	public void testGetNotMatchPostRoute() {
 		log.info("starting");
 		String moduleFileContents = CommonRoutesModules.class.getName();
-		RouterService server = createServer(isProdTest, moduleFileContents, mockResponseStream);
+		RouterService server = createServer(isProdTest, moduleFileContents);
 		
 		server.start();
 		
@@ -164,13 +156,13 @@ public class ErrorCommonTest {
 		Assert.assertTrue(mockStream.isWasClosed());
 	}
 
-	public static RouterService createServer(boolean isProdTest, String moduleFileContents, ResponseStreamer mock) {
+	public static RouterService createServer(boolean isProdTest, String moduleFileContents) {
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 
 		TemplateApi nullApi = new NullTemplateApi();
 		if(isProdTest)
-			return RouterSvcFactory.create(metrics, f, nullApi, new OverridesForRefactor(mock));
+			return RouterSvcFactory.create(metrics, f, nullApi);
 		
 		//otherwise create the development server
 		String filePath = System.getProperty("user.dir");
@@ -178,7 +170,7 @@ public class ErrorCommonTest {
 		VirtualFile cacheLocation = new VirtualFileImpl(FileFactory.newCacheLocation("webpieces/"+ErrorCommonTest.class.getSimpleName()+"/bytecode"));
 		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), cacheLocation);		
 		log.info("bytecode dir="+compileConfig.getByteCodeCacheDir());
-		RouterService server = DevRouterFactory.create(metrics, f, compileConfig, nullApi, new OverridesForRefactor(mock));
+		RouterService server = DevRouterFactory.create(metrics, f, compileConfig, nullApi);
 		return server;
 	}
 }

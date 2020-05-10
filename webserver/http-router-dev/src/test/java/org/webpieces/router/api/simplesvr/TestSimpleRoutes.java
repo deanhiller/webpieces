@@ -20,10 +20,8 @@ import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.error.MockStreamHandle;
-import org.webpieces.router.api.error.OverridesForRefactor;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.extensions.SimpleStorage;
-import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
@@ -53,8 +51,6 @@ public class TestSimpleRoutes {
 		String moduleFileContents = AppModules.class.getName();
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		
-		MockResponseStream mock = new MockResponseStream();
-
 		TestModule module = new TestModule();
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		Arguments args = new CommandLineParser().parse();
@@ -65,7 +61,7 @@ public class TestSimpleRoutes {
 		
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		TemplateApi nullApi = new NullTemplateApi();
-		RouterService prodSvc = RouterSvcFactory.create(metrics, config, nullApi, new OverridesForRefactor(mock));
+		RouterService prodSvc = RouterSvcFactory.create(metrics, config, nullApi);
 		prodSvc.configure(args);
 		args.checkConsumedCorrectly();
 
@@ -78,7 +74,7 @@ public class TestSimpleRoutes {
 		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), cacheLocation);
 		Arguments args2 = new CommandLineParser().parse();
 		SimpleMeterRegistry metrics2 = new SimpleMeterRegistry();
-		RouterService devSvc = DevRouterFactory.create(metrics2, config, compileConfig, nullApi, new OverridesForRefactor(mock));
+		RouterService devSvc = DevRouterFactory.create(metrics2, config, compileConfig, nullApi);
 		devSvc.configure(args2);
 		args2.checkConsumedCorrectly();
 		

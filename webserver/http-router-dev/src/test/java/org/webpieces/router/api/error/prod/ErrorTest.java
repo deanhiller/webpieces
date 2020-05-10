@@ -1,6 +1,7 @@
 package org.webpieces.router.api.error.prod;
 
-import com.webpieces.http2engine.api.StreamWriter;
+import java.util.concurrent.CompletableFuture;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -11,23 +12,21 @@ import org.webpieces.router.api.error.ErrorCommonTest;
 import org.webpieces.router.api.error.MockStreamHandle;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.error.dev.NoMethodRouterModules;
-import org.webpieces.router.api.mocks.MockResponseStream;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-
-import java.util.concurrent.CompletableFuture;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.StatusCode;
 
 public class ErrorTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(ErrorTest.class);
-	private MockResponseStream mockResponseStream = new MockResponseStream();
-	private MockStreamHandle nullStream = new MockStreamHandle();
 
 	@Test
 	public void testNoMethod() {
 		log.info("starting");
 		String moduleFileContents = NoMethodRouterModules.class.getName();
-		RouterService server = ErrorCommonTest.createServer(true, moduleFileContents, mockResponseStream);
+		RouterService server = ErrorCommonTest.createServer(true, moduleFileContents);
 
 		try {
 			server.start();
@@ -38,13 +37,18 @@ public class ErrorTest {
 		
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 
-		CompletableFuture<StreamWriter> future = server.incomingRequest(req, nullStream);
-		Assert.assertTrue(future.isCompletedExceptionally());
+		MockStreamHandle mockStream = new MockStreamHandle();
+		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		
+		//done and no exception SINCE we responded to client successfully
+		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally()); 
 
-		//TODO(dhiller): make sure we sent response to customers
-//		Exception e = mockResponseStream.getOnlyException();
-//		Assert.assertEquals(IllegalStateException.class, e.getClass());
-//		Assert.assertTrue(e.getMessage().contains("start was not called by client or start threw"));
+		Http2Response response = mockStream.getLastResponse();
+		String body = mockStream.getResponseBody();
+		
+		Assert.assertEquals(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, response.getKnownStatusCode());
+		Assert.assertTrue(body.contains("There was a bug in the developers application or webpieces server"));
+		
 	}
 
 }

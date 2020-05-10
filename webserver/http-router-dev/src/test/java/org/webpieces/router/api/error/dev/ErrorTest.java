@@ -12,7 +12,6 @@ import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.error.ErrorCommonTest;
 import org.webpieces.router.api.error.MockStreamHandle;
 import org.webpieces.router.api.error.RequestCreation;
-import org.webpieces.router.api.mocks.MockResponseStream;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -22,7 +21,6 @@ import com.webpieces.http2parser.api.dto.StatusCode;
 public class ErrorTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(ErrorTest.class);
-	private MockResponseStream mockResponseStream = new MockResponseStream();
 
 	@Before
 	public void setUp() {
@@ -32,7 +30,7 @@ public class ErrorTest {
 	public void testNoMethod() {
 		log.info("starting");
 		String moduleFileContents = NoMethodRouterModules.class.getName();
-		RouterService server = ErrorCommonTest.createServer(false, moduleFileContents, mockResponseStream);
+		RouterService server = ErrorCommonTest.createServer(false, moduleFileContents);
 
 		//this should definitely not throw since we lazy load everything in dev...
 		server.start();
@@ -44,7 +42,12 @@ public class ErrorTest {
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 
 		Http2Response response = mockStream.getLastResponse();
+		String body = mockStream.getResponseBody();
+		
 		Assert.assertEquals(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, response.getKnownStatusCode());
+		//Since we have no template installed for converting error routes, body will be ""
+		//Realize that since start did not fail, this test operates differently than the other production ErrorTest.java
+		Assert.assertEquals("", body);
 	}
 
 }

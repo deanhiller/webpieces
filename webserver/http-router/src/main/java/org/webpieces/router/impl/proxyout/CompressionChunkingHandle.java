@@ -19,6 +19,7 @@ import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.routeinvoker.WebSettings;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
@@ -42,6 +43,7 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
     private CompressionLookup compressionLookup;
     private Http2Response lastResponseSent;
 	private boolean compressionOff;
+	private Http2Request originalRequest;
 	private RouterRequest routerRequest;
 	private WebSettings webSettings;
 	
@@ -56,16 +58,17 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 		this.webSettings = webSettings;
     }
 
+	public void init(RouterStreamHandle handler, Http2Request req) {
+		this.handler = handler;
+		this.originalRequest = req;
+	}
+	
 	public void setRouterRequest(RouterRequest routerRequest) {
 		this.routerRequest = routerRequest;
 	}
 
 	public RouterRequest getRouterRequest() {
 		return this.routerRequest;
-	}
-	
-	public void init(RouterStreamHandle handler) {
-		this.handler = handler;
 	}
 	
     @Override
@@ -89,7 +92,7 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 		}
 		
 		boolean closeAfterResponding = false;
-		if(closeAfterResponding(routerRequest.originalRequest))
+		if(closeAfterResponding(originalRequest))
 			closeAfterResponding = true;
 		
 		boolean shouldClose = closeAfterResponding;

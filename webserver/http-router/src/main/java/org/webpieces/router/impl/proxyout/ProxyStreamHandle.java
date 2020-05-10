@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.MissingPropException;
-import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -25,7 +24,6 @@ import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
-import org.webpieces.router.impl.routeinvoker.ContextWrap;
 import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
@@ -65,8 +63,8 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		handle.setRouterRequest(routerRequest);
 	}
 
-	public void init(RouterStreamHandle originalHandle) {
-		handle.init(originalHandle);
+	public void init(RouterStreamHandle originalHandle, Http2Request req) {
+		handle.init(originalHandle, req);
 	}
 	
 	public void turnCompressionOff() {
@@ -121,7 +119,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
 		Http2Request request = handle.getRouterRequest().originalRequest;
 		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
-		return maybeCompressAndSend(null, tuple, resp.getPayload()); 
+		return maybeCompressAndSend(request, null, tuple, resp.getPayload()); 
 	}
 	
     public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
@@ -145,50 +143,44 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return process(response).thenApply(s -> null);
 	}
 	
-	public CompletableFuture<StreamWriter> finalFailure(Throwable e, RequestContext requestCtx) {
+	public CompletableFuture<StreamWriter> topLevelFailure(Http2Request req, Throwable e) {
 		if(ExceptionWrap.isChannelClosed(e))
 			return CompletableFuture.completedFuture(null);
-
-		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
-
-		CompletableFuture<Void> future = futureUtil.syncToAsyncException(
-				() -> failureRenderingInternalServerErrorPage(requestCtx, e)
-		);
-		
-		future.exceptionally((t) -> {
-			log.error("Webpieces failed at rendering it's internal error page since webapps internal erorr app page failed", t);
-			return null;
-		});
-		return future.thenApply(s -> null);
-	}
-
-    public CompletableFuture<Void> failureRenderingInternalServerErrorPage(RequestContext ctx, Throwable e) {
-        return ContextWrap.wrap(ctx, () -> failureRenderingInternalServerErrorPage(e));
-    }
-
-	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
 		
 		if(log.isDebugEnabled())
 			log.debug("Sending failure html response. req="+handle.getRouterRequest());
 
-		//TODO: IF instance of HttpException with a KnownStatusCode, we should actually send that status code
 		//TODO: we should actually just render our own internalServerError.html page with styling and we could do that.
 
 		//This is a final failure so we send a webpieces page next (in the future, we should just use a customer static html file if set)
-		//This is only if the webapp 500 html page fails as many times it is a template and they could have another bug in that template.
-		String html = "<html><head></head><body>This website had a bug, "
-				+ "then when rendering the page explaining the bug, well, they hit another bug.  "
-				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
-				+ "with a screen shot of this page</body></html>";
+		//An exception is caught here for one of two reasons that we know of
+		//1. The app failed, and we called their internal error controller and that failed too!!!
+		//2. There was a bug in webpieces
+		
+		String html = 
+				"<html>"
+				+"   <head></head>"
+				+ "  <body>"
+				+ "      There was a bug in the developers application or webpieces server.  Contact website owner with a screen shot of this page."
+				+ "      <br/><br/>"
+				+ "      This page shows up for one of two reasons.  In both cases, we first ran into a bug in the webapplication typically"
+				+ "      <ol>"
+				+ "         <li>Webpieces simply had a bug where it did not call the webapp developers internal error controller OR</li>"
+				+ "         <li>The app's error controller failed</li>"
+				+ "      </ol>"
+				+ "  </body>"
+				+ "</html>";
 
-		return createResponseAndSend(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
+		//One of two cases at this point.  Either, we got far enough that we have a bunch of request info or we did not get far enough
+		
+		
+		return createResponseAndSend(req, StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html").thenApply(voidd->null);
 	}
 	
-	public CompletableFuture<Void> createResponseAndSend(StatusCode statusCode, String content, String extension, String defaultMime) {
+	public CompletableFuture<Void> createResponseAndSend(Http2Request request, StatusCode statusCode, String content, String extension, String defaultMime) {
 		if(content == null)
 			throw new IllegalArgumentException("content cannot be null");
 		
-		Http2Request request = handle.getRouterRequest().originalRequest;
 		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, true);
 		
 		if(log.isDebugEnabled())
@@ -197,10 +189,10 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
 		byte[] bytes = content.getBytes(encoding);
 		
-		return maybeCompressAndSend(extension, tuple, bytes);
+		return maybeCompressAndSend(request, extension, tuple, bytes);
 	}
 	
-	public CompletableFuture<Void> maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
+	public CompletableFuture<Void> maybeCompressAndSend(Http2Request request, String extension, ResponseEncodingTuple tuple, byte[] bytes) {
 		Http2Response resp = tuple.response;
 		
 		if(bytes.length == 0) {
@@ -208,13 +200,12 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 			return process(resp).thenApply(w -> null);
 		}
 		
-		return sendChunkedResponse(resp, bytes);
+		return sendChunkedResponse(request, resp, bytes);
 	}
 
-	private CompletableFuture<Void> sendChunkedResponse(Http2Response resp, byte[] bytes) {
+	private CompletableFuture<Void> sendChunkedResponse(Http2Request req, Http2Response resp, byte[] bytes) {
 
-		RouterRequest routerRequest = handle.getRouterRequest();
-		log.info("sending RENDERHTML response. size="+bytes.length+" code="+resp+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ this);
+		log.info("sending RENDERHTML response. size="+bytes.length+" resp="+resp+" for req="+req+" responseSender="+ this);
 
 		// Send the headers and get the responseid.
 		return process(resp)
@@ -293,7 +284,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		String finalExt = extension;
 		
 		return futureUtil.catchBlockWrap(
-				 () -> createResponseAndSend(statusCode, content, finalExt, "text/plain"), 
+				 () -> createResponseAndSend(request, statusCode, content, finalExt, "text/plain"), 
 				 (t) -> convert(t));
 	}
 	

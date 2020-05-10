@@ -30,7 +30,7 @@ public class RouterSvcFactory {
 
     protected RouterSvcFactory() {}
 
-    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile, TemplateApi templateApi, Module routerOverrides) {
+    public static RouterService create(MeterRegistry metrics, VirtualFile routersFile, TemplateApi templateApi, Module ... routerOverrides) {
     		File baseWorkingDir = FileFactory.getBaseWorkingDir();
     		Arguments arguments = new CommandLineParser().parse();
     		RouterConfig config = new RouterConfig(baseWorkingDir)
@@ -42,7 +42,7 @@ public class RouterSvcFactory {
     		return svc;
     }
     
-	public static RouterService create(MeterRegistry metrics, RouterConfig config, TemplateApi templateApi, Module routerOverrides) {
+	public static RouterService create(MeterRegistry metrics, RouterConfig config, TemplateApi templateApi, Module ... routerOverrides) {
 		List<Module> modules = getModules(metrics, config, templateApi);
 		Module module = Modules.override(modules).with(routerOverrides);
 		Injector injector = Guice.createInjector(module);

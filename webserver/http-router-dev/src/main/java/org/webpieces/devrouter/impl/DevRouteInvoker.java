@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +11,6 @@ import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -56,10 +54,9 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 			ServiceInvoker invoker,
 			FutureHelper futureUtil,
 			RouteInvokerStatic staticInvoker,
-			BodyParsers bodyParsers,
-			Provider<ResponseStreamer> proxyProvider
+			BodyParsers bodyParsers
 	) {
-		super(loader, futureUtil, staticInvoker, bodyParsers, proxyProvider);
+		super(loader, futureUtil, staticInvoker, bodyParsers);
 		this.webInjector = webInjector;
 		this.serviceInvoker = invoker;
 	}

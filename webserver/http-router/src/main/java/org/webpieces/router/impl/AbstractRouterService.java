@@ -13,7 +13,6 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
 import org.webpieces.ctx.api.Validation;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.Startable;
@@ -24,11 +23,9 @@ import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.cmdline2.Arguments;
-import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.webpieces.http2engine.api.StreamWriter;
 
@@ -37,25 +34,19 @@ public abstract class AbstractRouterService {
 	private static final Logger log = LoggerFactory.getLogger(AbstractRouterService.class);
 	private RouteLoader routeLoader;
 	private ObjectTranslator translator;
-	private Provider<ResponseStreamer> proxyProvider;
 	private CookieTranslator cookieTranslator;
 	private WebInjector webInjector;
-	private FutureHelper futureUtil;
 	
 	public AbstractRouterService(
-			FutureHelper futureUtil,
 			WebInjector webInjector,
 			RouteLoader routeLoader,
 			CookieTranslator cookieTranslator,
-			ObjectTranslator translator,
-			Provider<ResponseStreamer> proxyProvider
+			ObjectTranslator translator
 	) {
-		this.futureUtil = futureUtil;
 		this.webInjector = webInjector;
 		this.routeLoader = routeLoader;
 		this.cookieTranslator = cookieTranslator;
 		this.translator = translator;
-		this.proxyProvider = proxyProvider;
 	}
 
 	public CompletableFuture<StreamWriter> incomingRequest(RouterRequest routerRequest, ProxyStreamHandle handler) {
@@ -68,19 +59,13 @@ public abstract class AbstractRouterService {
 			
 			String user = session.get("userId");
 			MDC.put("userId", user);
-			return processRequest(requestCtx, handler);
+			return incomingRequestImpl(requestCtx, handler);
 
 		} catch(BadCookieException e) {
+			//CHEAT: we know this is syncrhonous exception from the translateCookieToScope
 			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
 			return handler.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
 		}
-	}
-
-	private CompletableFuture<StreamWriter> processRequest(RequestContext requestCtx, ProxyStreamHandle handler) {
-		return futureUtil.catchBlock(
-				() -> incomingRequestImpl(requestCtx, handler),
-				(t) -> handler.finalFailure(t, requestCtx)
-		);
 	}
 	
 	protected abstract CompletableFuture<StreamWriter> incomingRequestImpl(RequestContext req, ProxyStreamHandle handler);

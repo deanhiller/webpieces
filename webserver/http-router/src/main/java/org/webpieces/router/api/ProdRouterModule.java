@@ -20,7 +20,6 @@ import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.loader.ProdLoader;
 import org.webpieces.router.impl.mgmt.GuiceWebpiecesListener;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
-import org.webpieces.router.impl.proxyout.ProxyResponse;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.util.metrics.MetricsCreator;
@@ -51,9 +50,6 @@ public class ProdRouterModule implements Module {
 		binder.bind(AbstractRouterService.class).to(ProdRouterService.class).asEagerSingleton();;
 
 		binder.bind(BufferPool.class).to(TwoPools.class).asEagerSingleton();
-
-		//TODO(dhiller): rework this to remove the interface.
-		binder.bind(ResponseStreamer.class).to(ProxyResponse.class);
 
 		binder.bind(MetaLoaderProxy.class).to(ProdLoader.class).asEagerSingleton();
 		binder.bind(RouteInvoker.class).to(ProdRouteInvoker.class).asEagerSingleton();

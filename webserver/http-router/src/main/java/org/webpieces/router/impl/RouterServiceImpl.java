@@ -138,19 +138,13 @@ public class RouterServiceImpl implements RouterService {
 		//is very worth it AND customers can swap out these critical classes if they need to quickly temporarily fix a bug while
 		//we work on the bug.  We can easily give customers bug fixes like add binder.bind(ClassWithBug.class).to(BugFixCode.class)
 		ProxyStreamHandle proxyHandler = proxyProvider.get();
-		proxyHandler.init(handler);
+		proxyHandler.init(handler, req);
 		
 		//top level handler...
-		return futureUtil.catchBlockWrap(
+		return futureUtil.catchBlock(
 				() -> incomingRequestImpl(req, proxyHandler).thenApply(w -> new TxStreamWriter(txId, w)),
-				(t) -> respondToFailure(t)
+				(t) -> proxyHandler.topLevelFailure(req, t)
 		);
-	}
-
-	private Throwable respondToFailure(Throwable t) {
-		//TODO: dhiller implement here  to send response once we have compression and other stuff in place
-
-		return t;
 	}
 
 	public String generate() {

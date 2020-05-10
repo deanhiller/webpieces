@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import javax.inject.Provider;
-
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.ControllerException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
@@ -37,7 +34,6 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	protected ReverseRoutes reverseRoutes;
 	protected FutureHelper futureUtil;
-	protected Provider<ResponseStreamer> proxyProvider;
 	private BodyParsers requestBodyParsers;
 
 	private RouteInvokerStatic staticInvoker;
@@ -47,13 +43,11 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			ControllerLoader controllerFinder,
 			FutureHelper futureUtil,
 			RouteInvokerStatic staticInvoker,
-			BodyParsers bodyParsers,
-			Provider<ResponseStreamer> proxyProvider
+			BodyParsers bodyParsers
 	) {
 		this.controllerFinder = controllerFinder;
 		this.futureUtil = futureUtil;
 		this.staticInvoker = staticInvoker;
-		this.proxyProvider = proxyProvider;
 		this.requestBodyParsers = bodyParsers;
 	}
 

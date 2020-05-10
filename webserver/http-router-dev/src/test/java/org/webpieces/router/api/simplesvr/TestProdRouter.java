@@ -18,10 +18,8 @@ import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.error.MockStreamHandle;
-import org.webpieces.router.api.error.OverridesForRefactor;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.extensions.SimpleStorage;
-import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
@@ -51,8 +49,6 @@ public class TestProdRouter {
 		String moduleFileContents = AppModules.class.getName();
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		
-		MockResponseStream mock = new MockResponseStream();
-
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		TestModule module = new TestModule();
 		Arguments args = new CommandLineParser().parse();
@@ -63,7 +59,7 @@ public class TestProdRouter {
 
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		TemplateApi nullApi = new NullTemplateApi();
-		RouterService prodSvc = RouterSvcFactory.create(metrics, config, nullApi, new OverridesForRefactor(mock));
+		RouterService prodSvc = RouterSvcFactory.create(metrics, config, nullApi);
 		prodSvc.configure(args);
 		args.checkConsumedCorrectly();
 		

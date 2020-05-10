@@ -8,7 +8,6 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
@@ -18,7 +17,6 @@ import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.webpieces.http2engine.api.StreamWriter;
 
 @Singleton
@@ -38,10 +36,9 @@ public class ProdRouterService extends AbstractRouterService {
 			ProdClassForName loader,
 			ARouter router,
 			WebInjector webInjector,
-			FutureHelper futureUtil,
-			Provider<ResponseStreamer> proxyProvider
+			FutureHelper futureUtil
 	) {
-		super(futureUtil, webInjector, routeLoader, cookieTranslator, translator, proxyProvider);
+		super(webInjector, routeLoader, cookieTranslator, translator);
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 		this.router = router;

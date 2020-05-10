@@ -3,10 +3,8 @@ package org.webpieces.router.impl.routeinvoker;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
@@ -27,10 +25,9 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 		ControllerLoader controllerFinder,
 		FutureHelper futureUtil,
 		RouteInvokerStatic staticInvoker,
-		BodyParsers bodyParsers,
-		Provider<ResponseStreamer> proxyProvider
+		BodyParsers bodyParsers
 	) {
-		super(controllerFinder, futureUtil, staticInvoker, bodyParsers, proxyProvider);
+		super(controllerFinder, futureUtil, staticInvoker, bodyParsers);
 	}
 	
 	@Override
