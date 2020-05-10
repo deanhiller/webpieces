@@ -4,15 +4,20 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.MDC;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.MimeTypes;
+import org.webpieces.router.impl.proxyout.NoCompression;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class ProxyStreamHandle implements RouterStreamHandle {
@@ -23,6 +28,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
     private CompressionLookup compressionLookup;
     private Http2Response lastResponseSent;
 	private boolean preCompressed;
+	private RouterRequest routerRequest;
 
     public ProxyStreamHandle(
         String txId,
@@ -46,35 +52,50 @@ public class ProxyStreamHandle implements RouterStreamHandle {
                     + lastResponseSent +" 2nd response="+response);
         lastResponseSent = response;
 
-        boolean compressed = false;
-
-//        if(!preCompressed) {
-//        	Http2Header header = response.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_TYPE);
-//        	if(header == null)
-//        		throw new IllegalArgException("Response must contain a Content-Type header so we can determine compression");
-//        	else if(header.getValue() == null)
-//                throw new IllegalArgException("Response contains a Content-Type header with a null value which is not allowed");
-//
-//            MimeTypes.MimeTypeResult mimType = mimeTypes.createMimeType(header.getValue());
-//
-//            Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, mimeType);
-//
-//            Compression usingCompression;
-//            if (compression == null) {
-//                usingCompression = new NoCompression();
-//            } else {
-//                usingCompression = compression;
-//                compressed = true;
-//                response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
-//            }
-//        }
+        checkForCompression(response);
 
         MDC.put("txId", txId);
         return handler.process(response)
                 .thenApply(w -> new ProxyStreamWriter(txId, w));
     }
 
-    public boolean hasSentResponseAlready() {
+    private void checkForCompression(Http2Response response) {
+    	if(routerRequest == null) {
+    		//The exception happened BEFORE Http2Request Accept Header encodings were parsed which we HAVE to know
+    		//as that is what the client accepts for compression
+    		return;
+    	}
+    	
+    	if(preCompressed) {
+    		//Some contentRouters precompress their content so they are responsible for checking the accept header and picking
+    		//a file that is already compressed.  In this case, don't compress on top of their cached compression
+    		return;
+    	}
+		
+    	
+        boolean compressed = false;
+
+      	Http2Header header = response.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_TYPE);
+      	if(header == null)
+      		throw new IllegalArgumentException("Response must contain a Content-Type header so we can determine compression");
+      	else if(header.getValue() == null)
+              throw new IllegalArgumentException("Response contains a Content-Type header with a null value which is not allowed");
+
+        MimeTypes.MimeTypeResult mimeType = mimeTypes.createMimeType(header.getValue());
+
+        Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, mimeType);
+
+        Compression usingCompression;
+        if (compression == null) {
+          usingCompression = new NoCompression();
+        } else {
+          usingCompression = compression;
+          compressed = true;
+          response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
+        }
+	}
+
+	public boolean hasSentResponseAlready() {
         return lastResponseSent != null;
     }
 
@@ -133,5 +154,9 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 
 	public void setPrecompressedStream(boolean preCompressed) {
 		this.preCompressed = preCompressed;
+	}
+
+	public void setRouterRequest(RouterRequest routerRequest) {
+		this.routerRequest = routerRequest;
 	}
 }

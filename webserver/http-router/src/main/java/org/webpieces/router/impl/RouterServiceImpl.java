@@ -174,6 +174,9 @@ public class RouterServiceImpl implements RouterService {
 		RouterRequest routerRequest = new RouterRequest();
 		fillInRouterRequest(req, routerRequest, handler);
 		
+		//Set the info into the ProxyHandler who can use the info if it exists(he doesn't need it but if there, he will use it)
+		handler.setRouterRequest(routerRequest);
+		
 		if(log.isDebugEnabled())
 			log.debug("received request="+req+" routerRequest="+routerRequest);		
 		
