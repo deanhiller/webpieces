@@ -6,6 +6,7 @@ public class FileFactory {
 
 	/**
 	 * Unlike user.dir property, we can override this for the whole JVM now to make things work
+	 * From these posts, you can see, while you can set the user.dir property, it may not actually change sometimes...
 	 * see http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4117557
 	 * and https://stackoverflow.com/questions/45130661/user-dir-property-broken-on-osx-jdk-1-8-0-111-how-about-other-os-versions
 	 */

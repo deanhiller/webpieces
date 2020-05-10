@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.router.api.PrecompressedCache;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -72,8 +73,8 @@ public class ProdServerForIDE {
 		Module platformOverrides = Modules.combine(
 				new SimpleMeterModule(metrics),
 				new DevTemplateModule(templateConfig));
-		
-		ServerConfig config = new ServerConfig(false);
+
+		ServerConfig config = new ServerConfig(PrecompressedCache.getCacheLocation(), false);
 		
 		//It is very important to turn off caching or developers will get very confused when they
 		//change stuff and they don't see changes in the website

@@ -201,19 +201,6 @@ public class WebpiecesServer {
 		}
 	}
 
-	private static ServerConfig createServerConfig() {
-		ServerConfig config = new ServerConfig(true);
-		return config;
-	}
-	
-	private static String[] addArgs(String[] originalArgs, String ... additionalArgs) {
-		ArrayList<String> listArgs = Lists.newArrayList(originalArgs);
-		for(String arg : additionalArgs) {
-			listArgs.add(arg);
-		}
-		return listArgs.toArray(new String[0]);
-	}
-	
 	public void start() {
 		webServer.startSync();
 	}

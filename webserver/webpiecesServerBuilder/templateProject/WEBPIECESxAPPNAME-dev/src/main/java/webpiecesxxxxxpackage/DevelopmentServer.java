@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
+import org.webpieces.router.api.PrecompressedCache;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -93,7 +94,7 @@ public class DevelopmentServer {
 					"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory",
 					"-hibernate.loadclassmeta=true"};
 		
-		ServerConfig config = new ServerConfig(false);
+		ServerConfig config = new ServerConfig(PrecompressedCache.getCacheLocation(), false);
 
 		//READ the documentation in HttpSvrInstanceConfig for more about these settings
 //		HttpSvrInstanceConfig backendSvrConfig = new HttpSvrInstanceConfig(new InetSocketAddress(8444), sslFactory);

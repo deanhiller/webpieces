@@ -58,7 +58,8 @@ public class RouterConfig {
 		if(!workingDirectory.isAbsolute())
 			throw new IllegalArgumentException("baseDirectory must be absolute and can typically be FileFactory.getBaseDirectory()");
 		this.workingDirectory = workingDirectory;
-		cachedCompressedDirectory = FileFactory.newFile(workingDirectory, "webpiecesCache/precompressedFiles");
+		//default location is the user's home directory BUT production server overrides to it's working dir by setting it after
+		cachedCompressedDirectory = PrecompressedCache.getCacheLocation();
 	}
 	
 	public VirtualFile getMetaFile() {

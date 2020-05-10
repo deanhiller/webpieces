@@ -3,6 +3,7 @@ package webpiecesxxxxxpackage;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.webpieces.router.api.PrecompressedCache;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.Asserts;
 
@@ -21,7 +22,7 @@ public class TestLesson6RouteValidation {
 		if(property == null || !"true".equals(property))
 			return; //don't run test except in gradle build
 		
-		ServerConfig serverConfig = new ServerConfig(JavaCache.getCacheLocation());
+		ServerConfig serverConfig = new ServerConfig(PrecompressedCache.getCacheLocation());
 		serverConfig.setValidateRouteIdsOnStartup(true);
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
 		Server server = new Server(null, null, serverConfig, args);
