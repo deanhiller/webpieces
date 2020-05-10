@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Constants;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Flash;
@@ -18,8 +19,6 @@ import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.impl.GroovyTemplateSuperclass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import groovy.lang.Closure;
 

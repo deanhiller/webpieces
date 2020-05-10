@@ -118,7 +118,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		CompletableFuture<Action> response;
 		try {
 			response = futureUtil.catchBlockWrap( 
-				() -> service.invoke(methodMeta),
+				() -> invokeService(service, methodMeta),
 				(t) -> convert(loadedController, t)	
 			);
 		} finally {
@@ -128,6 +128,9 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		ResponseStreamer responseCb = proxyProvider.get();
 		responseCb.init(requestCtx.getRequest(), handler);
 		return response.thenCompose(resp -> processor.continueProcessing(resp, responseCb));
+	}
+	public CompletableFuture<Action> invokeService(Service<MethodMeta, Action> service, MethodMeta methodMeta) {
+		return service.invoke(methodMeta);
 	}
 	
 	private Throwable convert(LoadedController loadedController, Throwable t) {

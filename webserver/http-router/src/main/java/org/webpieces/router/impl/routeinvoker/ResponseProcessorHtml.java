@@ -132,11 +132,6 @@ public class ResponseProcessorHtml implements Processor {
 		return ContextWrap.wrap(ctx, () -> oldResponseCb.sendRenderHtml(resp));
 	}
 
-	public CompletableFuture<Void> createContentResponse(RenderContent r) {
-		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
-		return ContextWrap.wrap(ctx, () -> oldResponseCb.sendRenderContent(resp));
-	}
-
 	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb) {
 		if(controllerResponse instanceof RedirectImpl) {
 			return createFullRedirect((RedirectImpl)controllerResponse);
