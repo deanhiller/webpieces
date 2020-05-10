@@ -34,13 +34,17 @@ public class MimeTypes {
         if (contentType == null){
             contentType = defaultContentType;
         }
-        if(contentType.contains(";")) {
+        return createMimeType(contentType);
+    }
+
+	public MimeTypeResult createMimeType(String contentType) {
+		if(contentType.contains(";")) {
         	String[] split = contentType.split(";");
         	String encoding = split[1].trim();
         	String[] pair = encoding.split("=");
         	String charSetStr = pair[1];
         	Charset charSet = Charset.forName(charSetStr);
-        	return new MimeTypeResult(contentType, charSet);
+        	return new MimeTypeResult(split[0], charSet);
         } else if(contentType.startsWith("text/")) {
             String mime = contentType + "; charset=" + config.getDefaultResponseBodyEncoding().name().toLowerCase();
             return new MimeTypeResult(mime, config.getDefaultResponseBodyEncoding());
@@ -48,7 +52,7 @@ public class MimeTypes {
         
         //otherwise default the encoding...
         return new MimeTypeResult(contentType, config.getDefaultResponseBodyEncoding());
-    }
+	}
     
     public static class MimeTypeResult {
 

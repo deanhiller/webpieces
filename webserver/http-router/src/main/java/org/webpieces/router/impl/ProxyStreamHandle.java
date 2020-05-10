@@ -5,6 +5,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.MDC;
 import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.compression.CompressionLookup;
+import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -17,13 +19,23 @@ public class ProxyStreamHandle implements RouterStreamHandle {
     private String txId;
     private RouterStreamHandle handler;
     private FutureHelper futureUtil;
+    private MimeTypes mimeTypes;
+    private CompressionLookup compressionLookup;
     private Http2Response lastResponseSent;
 	private boolean preCompressed;
 
-    public ProxyStreamHandle(String txId, RouterStreamHandle handler, FutureHelper futureUtil) {
+    public ProxyStreamHandle(
+        String txId,
+        RouterStreamHandle handler,
+        FutureHelper futureUtil,
+        MimeTypes mimeTypes,
+        CompressionLookup compressionLookup
+    ) {
         this.txId = txId;
         this.handler = handler;
         this.futureUtil = futureUtil;
+        this.mimeTypes = mimeTypes;
+        this.compressionLookup = compressionLookup;
     }
 
     @Override
@@ -33,6 +45,29 @@ public class ProxyStreamHandle implements RouterStreamHandle {
                     + "do not call Actions.redirect or Actions.render more than once.  previous response="
                     + lastResponseSent +" 2nd response="+response);
         lastResponseSent = response;
+
+        boolean compressed = false;
+
+//        if(!preCompressed) {
+//        	Http2Header header = response.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_TYPE);
+//        	if(header == null)
+//        		throw new IllegalArgException("Response must contain a Content-Type header so we can determine compression");
+//        	else if(header.getValue() == null)
+//                throw new IllegalArgException("Response contains a Content-Type header with a null value which is not allowed");
+//
+//            MimeTypes.MimeTypeResult mimType = mimeTypes.createMimeType(header.getValue());
+//
+//            Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, mimeType);
+//
+//            Compression usingCompression;
+//            if (compression == null) {
+//                usingCompression = new NoCompression();
+//            } else {
+//                usingCompression = compression;
+//                compressed = true;
+//                response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
+//            }
+//        }
 
         MDC.put("txId", txId);
         return handler.process(response)

@@ -25,7 +25,9 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
+import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.FileMeta;
+import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.urlparse.UrlEncodedParser;
@@ -83,6 +85,10 @@ public class RouterServiceImpl implements RouterService {
 	private final Random random;
 	private boolean started;
 
+	private MimeTypes mimeTypes;
+
+	private CompressionLookup compressionLookup;
+
 	@Inject
 	public RouterServiceImpl(
 		RouterConfig config,
@@ -90,7 +96,9 @@ public class RouterServiceImpl implements RouterService {
 		HeaderPriorityParserImpl headerParser,
 		UrlEncodedParser urlEncodedParser,
 		FutureHelper futureUtil,
-		Random random
+		Random random,
+		MimeTypes mimeTypes,
+		CompressionLookup compressionLookup
 	) {
 		this.config = config;
 		this.service = service;
@@ -98,6 +106,8 @@ public class RouterServiceImpl implements RouterService {
 		this.urlEncodedParser = urlEncodedParser;
 		this.futureUtil = futureUtil;
 		this.random = random;
+		this.mimeTypes = mimeTypes;
+		this.compressionLookup = compressionLookup;
 	}
 	
 	@Override
@@ -121,8 +131,12 @@ public class RouterServiceImpl implements RouterService {
 
 	@Override
 	public CompletableFuture<StreamWriter> incomingRequest(Http2Request req, RouterStreamHandle handler) {
+		//******************************************************************************************
+		// DO NOT ADD CODE HERE OR ABOVE THIS METHOD in RouterService.  This is our CATCH-ALL point so
+		// ANY code above that is not protected from our catch and respond to clients
+		//******************************************************************************************
 		String txId = generate();
-		ProxyStreamHandle proxyHandler = new ProxyStreamHandle(txId, handler, futureUtil);
+		ProxyStreamHandle proxyHandler = new ProxyStreamHandle(txId, handler, futureUtil, mimeTypes, compressionLookup);
 		
 		//top level handler...
 		return futureUtil.catchBlockWrap(

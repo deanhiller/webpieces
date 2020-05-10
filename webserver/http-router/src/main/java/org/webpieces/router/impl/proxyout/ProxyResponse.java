@@ -23,6 +23,8 @@ import org.webpieces.router.api.exceptions.WebSocketClosedException;
 import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
+import org.webpieces.router.impl.compression.MimeTypes;
+import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
@@ -62,6 +64,8 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private FutureHelper futureUtil;
 
+	private MimeTypes mimeTypes;
+
 	@Inject
 	public ProxyResponse(
 		TemplateApi templatingService, 
@@ -70,7 +74,8 @@ public class ProxyResponse implements ResponseStreamer {
 		ResponseCreator responseCreator, 
 		ChannelCloser channelCloser,
 		BufferPool pool,
-		FutureHelper futureUtil
+		FutureHelper futureUtil,
+		MimeTypes mimeTypes
 	) {
 		super();
 		this.templatingService = templatingService;
@@ -80,6 +85,7 @@ public class ProxyResponse implements ResponseStreamer {
 		this.channelCloser = channelCloser;
 		this.pool = pool;
 		this.futureUtil = futureUtil;
+		this.mimeTypes = mimeTypes;
 	}
 
 	public void init(RouterRequest req, RouterStreamHandle responseSender, int maxBodySize) {
@@ -223,9 +229,12 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	private CompletableFuture<Void> maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
-		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, tuple.mimeType);
-		
 		Http2Response resp = tuple.response;
+
+		MimeTypeResult mimeType = mimeTypes.createMimeType(resp.getSingleHeaderValue(Http2HeaderName.CONTENT_TYPE));
+		
+		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, mimeType);
+		
 
 		if(bytes.length == 0) {
 			resp.setEndOfStream(true);
