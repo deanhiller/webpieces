@@ -11,6 +11,8 @@ import org.webpieces.util.futures.FutureHelper;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Layer1ServerListener implements AsyncDataListener {
 	private static final Logger log = LoggerFactory.getLogger(Layer1ServerListener.class);
@@ -54,8 +56,10 @@ public class Layer1ServerListener implements AsyncDataListener {
 
 	private CompletableFuture<Void> initialData(ByteBuffer b, FrontendSocketImpl socket) {
 		
+		Consumer<ProtocolType> function = (p) -> socket.setProtocol(p); //allows setting protocol type 'before' sending messages to clients
+		
 		CompletableFuture<InitiationResult> future = futureUtil.catchBlockWrap(
-				() -> http11Handler.initialData(socket, b),
+				() -> http11Handler.initialData(socket, function, b),
 				(t) -> {
 					socket.close("reason not needed");
 					return t;

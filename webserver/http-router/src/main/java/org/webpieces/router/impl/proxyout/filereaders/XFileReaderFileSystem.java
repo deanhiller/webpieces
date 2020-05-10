@@ -20,13 +20,13 @@ import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
-import org.webpieces.router.impl.proxyout.ChannelCloser;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.proxyout.ResponseCreator;
 import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
 import org.webpieces.util.exceptions.NioException;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -46,12 +46,12 @@ public class XFileReaderFileSystem extends XFileReader {
 	@Inject
 	public XFileReaderFileSystem(
 		ResponseCreator responseCreator, 
-		ChannelCloser channelCloser,
 		RouterConfig routerConfig, 
+		FutureHelper futureUtil,
 		CompressionLookup compressionLookup, 
 		@Named(Constants.FILE_READ_EXECUTOR) ExecutorService fileExecutor
 	) {
-		super(responseCreator, routerConfig, channelCloser);
+		super(responseCreator, routerConfig, futureUtil);
 		this.routerConfig = routerConfig;
 		this.compressionLookup = compressionLookup;
 		this.fileExecutor = fileExecutor;

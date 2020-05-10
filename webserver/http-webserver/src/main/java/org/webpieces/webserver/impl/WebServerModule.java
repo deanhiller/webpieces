@@ -2,7 +2,6 @@ package org.webpieces.webserver.impl;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -11,8 +10,6 @@ import java.util.function.Supplier;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.webpieces.data.api.TwoPools;
-import org.webpieces.ctx.api.Constants;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
@@ -22,7 +19,6 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.TemplateApi;
-import org.webpieces.router.impl.params.PrimitiveConverter;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.cmdline2.Arguments;
@@ -41,7 +37,6 @@ import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class WebServerModule implements Module {

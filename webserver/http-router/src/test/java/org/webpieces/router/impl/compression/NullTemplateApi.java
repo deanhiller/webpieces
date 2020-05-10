@@ -1,9 +1,9 @@
 package org.webpieces.router.impl.compression;
 
-import org.webpieces.router.api.TemplateApi;
-
 import java.io.StringWriter;
 import java.util.Map;
+
+import org.webpieces.router.api.TemplateApi;
 
 public class NullTemplateApi implements TemplateApi {
     @Override

@@ -1,29 +1,33 @@
 package org.webpieces.httpclient11.impl;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient11.api.*;
+import org.webpieces.httpclient11.api.DataWriter;
+import org.webpieces.httpclient11.api.HttpDataWriter;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
+import org.webpieces.httpclient11.api.HttpResponseListener;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpRequestMethod;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
-
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class HttpSocketImpl implements HttpSocket {
 
@@ -214,6 +218,11 @@ public class HttpSocketImpl implements HttpSocket {
 	@Override
 	public String toString() {
 		return "HttpSocketImpl [channel=" + channel + "]";
+	}
+
+	@Override
+	public boolean isClosed() {
+		return isClosed;
 	}
 	
 }

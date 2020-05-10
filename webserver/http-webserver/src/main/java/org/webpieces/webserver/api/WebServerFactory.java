@@ -21,8 +21,6 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-
 public abstract class WebServerFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(WebServerFactory.class);

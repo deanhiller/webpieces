@@ -26,10 +26,11 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	public ProdRouteInvoker(
 		ControllerLoader controllerFinder,
 		FutureHelper futureUtil,
+		RouteInvokerStatic staticInvoker,
 		BodyParsers bodyParsers,
 		Provider<ResponseStreamer> proxyProvider
 	) {
-		super(controllerFinder, futureUtil, bodyParsers, proxyProvider);
+		super(controllerFinder, futureUtil, staticInvoker, bodyParsers, proxyProvider);
 	}
 	
 	@Override

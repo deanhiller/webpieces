@@ -12,11 +12,10 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
-import org.webpieces.router.impl.proxyout.ChannelCloser;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.proxyout.ResponseCreator;
-import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
@@ -32,13 +31,17 @@ public abstract class XFileReader {
 	
 	private final ResponseCreator responseCreator;
 	private final RouterConfig config;
-	private final ChannelCloser channelCloser;
+	private FutureHelper futureUtil;
 	
-	public XFileReader(ResponseCreator responseCreator, RouterConfig config, ChannelCloser channelCloser) {
+	public XFileReader(
+			ResponseCreator responseCreator, 
+			RouterConfig config, 
+			FutureHelper futureUtil
+	) {
 		super();
 		this.responseCreator = responseCreator;
 		this.config = config;
-		this.channelCloser = channelCloser;
+		this.futureUtil = futureUtil;
 	}
 
 	public CompletableFuture<Void> runFileRead(RequestInfo info, RenderStaticResponse renderStatic, ProxyStreamHandle handle) throws IOException {
@@ -67,20 +70,15 @@ public abstract class XFileReader {
 		
 		ChunkReader reader = createFileReader(
 				response, renderStatic, fileName, fullFilePath, info, extension, tuple, handle);
+
+		if(log.isDebugEnabled())
+			log.debug("sending chunked file via async read="+reader);
 		
-		CompletableFuture<Void> future;
-		try {
-			if(log.isDebugEnabled())
-				log.debug("sending chunked file via async read="+reader);
-			future = info.getResponseSender().process(response)
-					.thenCompose(s -> readLoop(s, info.getPool(), reader, 0));
-		} catch(Throwable e) {
-			future = new CompletableFuture<Void>();
-			future.completeExceptionally(e);
-		}
-		
-		return future.handle((s, exc) -> handleClose(info, reader, exc)) //our finally block for failures
-					.thenAccept(s -> empty());
+		ProxyStreamHandle stream = info.getResponseSender();
+		return futureUtil.finallyBlock(
+				() -> stream.process(response).thenCompose(s -> readLoop(s, info.getPool(), reader, 0)), 
+				() -> handleClose(info, reader)
+		);
 	}
 
 	protected abstract String getNameToUse(VirtualFile fullFilePath);
@@ -148,29 +146,13 @@ public abstract class XFileReader {
 		});
 	}
 	
-	private Void handleClose(RequestInfo info, ChunkReader reader, Throwable exc) {
-
-		//now we close if needed
-		try {
-			channelCloser.closeIfNeeded(info.getRequest(), info.getResponseSender());
-		} catch(Throwable e) {
-			if(exc == null) //Previous exception more important so only log if no previous exception
-				log.error("Exception closing if needed", e);
-		}
-		
+	private Void handleClose(RequestInfo info, ChunkReader reader) {		
 		try {
 			reader.close();
 		} catch(Throwable e) {
-			if(exc == null) //Previous exception way more important so ignore this until they fix previous exception
-				log.error("Exception closing reader", e);
+			throw new ReadOrSendException(e);
 		}
 		
-		if(exc != null) {
-			if(exc instanceof NioClosedChannelException)
-				throw (NioClosedChannelException)exc;
-			else 
-				throw new ReadOrSendException(exc);
-		}
 		return null;
 	}
 

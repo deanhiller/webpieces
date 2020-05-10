@@ -24,4 +24,5 @@ public interface HttpSocket {
 
 	public CompletableFuture<Void> close();
 
+	public boolean isClosed();
 }

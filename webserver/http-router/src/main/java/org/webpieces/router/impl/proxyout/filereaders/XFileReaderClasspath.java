@@ -8,10 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
-import org.webpieces.router.impl.proxyout.ChannelCloser;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.proxyout.ResponseCreator;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 
@@ -23,9 +23,9 @@ public class XFileReaderClasspath extends XFileReader {
 	public XFileReaderClasspath(
 		ResponseCreator responseCreator,
 		RouterConfig config,
-		ChannelCloser channelCloser
+		FutureHelper futureUtil
 	) {
-		super(responseCreator, config, channelCloser);
+		super(responseCreator, config, futureUtil);
 	}
 	
 	@Override

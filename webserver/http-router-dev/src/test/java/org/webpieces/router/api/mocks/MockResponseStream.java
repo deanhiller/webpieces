@@ -68,10 +68,4 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 		return responseStr.collect(Collectors.toList());		
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic, ProxyStreamHandle handle) {
-		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_STATIC_HTML, renderStatic);
-	}
-
 }

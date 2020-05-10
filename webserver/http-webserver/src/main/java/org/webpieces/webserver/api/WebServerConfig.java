@@ -1,8 +1,5 @@
 package org.webpieces.webserver.api;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
 import org.webpieces.nio.api.BackpressureConfig;
 
 import com.google.inject.Module;

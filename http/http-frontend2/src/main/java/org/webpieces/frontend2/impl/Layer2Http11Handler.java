@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +43,11 @@ public class Layer2Http11Handler {
 		this.httpListener = httpListener;
 	}
 
-	public CompletableFuture<InitiationResult> initialData(FrontendSocketImpl socket, ByteBuffer buf) {
-		return initialDataImpl(socket, buf);
+	public CompletableFuture<InitiationResult> initialData(FrontendSocketImpl socket, Consumer<ProtocolType> function, ByteBuffer buf) {
+		return initialDataImpl(socket, function, buf);
 	}
 	
-	public CompletableFuture<InitiationResult> initialDataImpl(FrontendSocketImpl socket, ByteBuffer buf) {
+	public CompletableFuture<InitiationResult> initialDataImpl(FrontendSocketImpl socket, Consumer<ProtocolType> function, ByteBuffer buf) {
 		
 		Memento state = socket.getHttp11ParseState();
 		int newDataSize = buf.remaining();
@@ -55,14 +56,18 @@ public class Layer2Http11Handler {
 		
 		//IF we are receiving a preface, there will ONLY be ONE message AND leftover data
 		InitiationResult result = checkForPreface(socket, state);
-		if(result != null)
+		
+		if(result != null) {
 			return CompletableFuture.completedFuture(result);
+		}
 
 		//TODO: check for EXACTLY ONE http request AND check if it is an h2c header with Http-Settings header!!!!
 		//if so, return that initiation result and start using the http2 code
 		
 		//if we get this far, we now know we are http1.1
 		if(state.getParsedMessages().size() > 0) {
+			function.accept(ProtocolType.HTTP1_1);
+			
 			CompletableFuture<Void> fut = processWithBackpressure(socket, newDataSize, numBytesRead);
 			
 			return fut.thenApply(s -> {

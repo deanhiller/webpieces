@@ -1,13 +1,14 @@
 package org.webpieces.webserver.impl;
 
-import org.webpieces.router.api.TemplateApi;
-import org.webpieces.templating.api.TemplateService;
-import org.webpieces.templating.api.TemplateUtil;
+import java.io.StringWriter;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.StringWriter;
-import java.util.Map;
+
+import org.webpieces.router.api.TemplateApi;
+import org.webpieces.templating.api.TemplateService;
+import org.webpieces.templating.api.TemplateUtil;
 
 @Singleton
 public class WebServerTemplateProxy implements TemplateApi {

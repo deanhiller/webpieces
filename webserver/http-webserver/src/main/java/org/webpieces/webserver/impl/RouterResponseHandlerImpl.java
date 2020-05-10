@@ -1,15 +1,16 @@
 package org.webpieces.webserver.impl;
 
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.impl.ProtocolType;
 import org.webpieces.router.api.RouterStreamHandle;
 
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class RouterResponseHandlerImpl implements RouterStreamHandle {
     private ResponseStream stream;

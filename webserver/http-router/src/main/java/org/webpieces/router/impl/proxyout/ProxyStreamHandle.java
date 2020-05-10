@@ -38,10 +38,6 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	private CompressionChunkingHandle handle;
 	private ResponseCreator responseCreator;
 
-	//NOTE: We already copied this method into here BUT need to move it all into CompressionChunk....
-	@Deprecated
-	private ChannelCloser channelCloser;
-
 	private FutureHelper futureUtil;
 
 	@Inject
@@ -139,7 +135,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
         return process(response)
         		.thenApply((w) -> closeIfNeeded(req.originalRequest, w));
     }
-    
+	
 	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
     	handle.setHandleKeepAlive(false);
 

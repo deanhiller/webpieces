@@ -18,7 +18,6 @@ import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.body.BodyParsers;
-import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
@@ -27,7 +26,6 @@ import org.webpieces.router.impl.routebldr.FilterInfo;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
-import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
@@ -42,14 +40,19 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	protected Provider<ResponseStreamer> proxyProvider;
 	private BodyParsers requestBodyParsers;
 
+	private RouteInvokerStatic staticInvoker;
+
+
 	public AbstractRouteInvoker(
 			ControllerLoader controllerFinder,
 			FutureHelper futureUtil,
+			RouteInvokerStatic staticInvoker,
 			BodyParsers bodyParsers,
 			Provider<ResponseStreamer> proxyProvider
 	) {
 		this.controllerFinder = controllerFinder;
 		this.futureUtil = futureUtil;
+		this.staticInvoker = staticInvoker;
 		this.proxyProvider = proxyProvider;
 		this.requestBodyParsers = bodyParsers;
 	}
@@ -61,27 +64,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	@Override
 	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
-		
-		boolean isOnClassPath = data.isOnClassPath();
-
-		RenderStaticResponse resp = new RenderStaticResponse(data.getTargetCacheLocation(), isOnClassPath);
-
-		//NOTE: Looking up resource pictures in localhost:8080/@documentation stopped working if we
-		//did not use the data.isRouteAFile() and used the filesystem information
-		//we do have a test for this now if you try to fix it
-		if(data.isRouteAFile()) {
-			resp.setFilePath(data.getFileSystemPath());
-		} else {
-			String relativeUrl = ctx.getPathParams().get("resource");
-			VirtualFile fullPath = data.getFileSystemPath().child(relativeUrl);
-			resp.setFileAndRelativePath(fullPath, relativeUrl);
-		}
-
-		ResponseStreamer proxyResponse = proxyProvider.get();
-		proxyResponse.init(ctx.getRequest(), handler);
-		ResponseStaticProcessor processor = new ResponseStaticProcessor(ctx, proxyResponse, handler);
-
-		return processor.renderStaticResponse(resp).thenApply(s -> new NullWriter());
+		return staticInvoker.invokeStatic(ctx, handler, data);
 	}
 	
 	protected CompletableFuture<StreamWriter> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {

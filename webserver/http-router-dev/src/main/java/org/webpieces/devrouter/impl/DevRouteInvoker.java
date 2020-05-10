@@ -29,6 +29,7 @@ import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
+import org.webpieces.router.impl.routeinvoker.RouteInvokerStatic;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
@@ -54,10 +55,11 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 			ControllerLoader loader, 
 			ServiceInvoker invoker,
 			FutureHelper futureUtil,
+			RouteInvokerStatic staticInvoker,
 			BodyParsers bodyParsers,
 			Provider<ResponseStreamer> proxyProvider
 	) {
-		super(loader, futureUtil, bodyParsers, proxyProvider);
+		super(loader, futureUtil, staticInvoker, bodyParsers, proxyProvider);
 		this.webInjector = webInjector;
 		this.serviceInvoker = invoker;
 	}

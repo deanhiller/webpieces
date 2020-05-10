@@ -1,7 +1,6 @@
 package org.webpieces.router.impl.proxyout;
 
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -16,19 +15,14 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
-import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
-import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
-import org.webpieces.router.impl.proxyout.filereaders.RequestInfo;
-import org.webpieces.router.impl.proxyout.filereaders.StaticFileReader;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2parser.api.dto.StatusCode;
 
 //MUST NOT BE @Singleton!!! since this is created per request
@@ -37,13 +31,9 @@ public class ProxyResponse implements ResponseStreamer {
 	private static final Logger log = LoggerFactory.getLogger(ProxyResponse.class);
 	
 	private final TemplateApi templatingService;
-	private final StaticFileReader reader;
 	private final ResponseCreator responseCreator;
-	private final BufferPool pool;
 	
 	private ProxyStreamHandle stream;
-	//private HttpRequest request;
-	private RouterRequest routerRequest;
 	private Http2Request request;
 
 	private FutureHelper futureUtil;
@@ -51,21 +41,17 @@ public class ProxyResponse implements ResponseStreamer {
 	@Inject
 	public ProxyResponse(
 		TemplateApi templatingService, 
-		StaticFileReader reader,
 		ResponseCreator responseCreator, 
 		BufferPool pool,
 		FutureHelper futureUtil
 	) {
 		super();
 		this.templatingService = templatingService;
-		this.reader = reader;
 		this.responseCreator = responseCreator;
-		this.pool = pool;
 		this.futureUtil = futureUtil;
 	}
 
 	public void init(RouterRequest req, ProxyStreamHandle responseSender) {
-		this.routerRequest = req;
 		this.request = req.originalRequest;
 		this.stream = responseSender;
 	}
@@ -145,18 +131,6 @@ public class ProxyResponse implements ResponseStreamer {
 			return new WebSocketClosedException("Socket is already closed", t);
 		else
 			return t;
-	}
-	
-	
-	@Override
-	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic, ProxyStreamHandle handle) {
-		if(log.isDebugEnabled())
-			log.debug("Sending render static html response. req="+request);
-		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, stream);
-		return futureUtil.catchBlockWrap(
-			() -> reader.sendRenderStatic(requestInfo, renderStatic, handle), 
-			(t) -> convert(t)
-		);
 	}
 	
 	private String getTemplatePath(String packageStr, String templateClassName, String extension) {
