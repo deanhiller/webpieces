@@ -13,7 +13,6 @@ import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -25,13 +24,11 @@ import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.MethodMetaAndController;
 import org.webpieces.router.impl.model.RouteModuleInfo;
-import org.webpieces.router.impl.proxyout.ProxyResponse;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
-import org.webpieces.router.impl.routeinvoker.WebSettings;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
@@ -57,11 +54,10 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 			ControllerLoader loader, 
 			ServiceInvoker invoker,
 			FutureHelper futureUtil,
-			WebSettings webSettings,
 			BodyParsers bodyParsers,
 			Provider<ResponseStreamer> proxyProvider
 	) {
-		super(loader, futureUtil, webSettings, bodyParsers, proxyProvider);
+		super(loader, futureUtil, bodyParsers, proxyProvider);
 		this.webInjector = webInjector;
 		this.serviceInvoker = invoker;
 	}
@@ -138,7 +134,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	private CompletableFuture<StreamWriter> invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
-		RouterStreamHandle handler = invokeInfo.getHandler();
+		ProxyStreamHandle handler = invokeInfo.getHandler();
 		RouteInfoForNotFound notFoundData = (RouteInfoForNotFound) data;
 		NotFoundException notFoundExc = notFoundData.getNotFoundException();
 

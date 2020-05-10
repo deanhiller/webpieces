@@ -72,7 +72,7 @@ public abstract class XFileReader {
 		try {
 			if(log.isDebugEnabled())
 				log.debug("sending chunked file via async read="+reader);
-			future = info.getResponseSender().sendResponse(response)
+			future = info.getResponseSender().process(response)
 					.thenCompose(s -> readLoop(s, info.getPool(), reader, 0));
 		} catch(Throwable e) {
 			future = new CompletableFuture<Void>();

@@ -23,8 +23,6 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
-import org.webpieces.router.impl.proxyout.ResponseOverrideSender;
-import org.webpieces.router.impl.routeinvoker.WebSettings;
 import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
@@ -41,7 +39,6 @@ public abstract class AbstractRouterService {
 	private RouteLoader routeLoader;
 	private ObjectTranslator translator;
 	private Provider<ResponseStreamer> proxyProvider;
-	private WebSettings webSettings;
 	private CookieTranslator cookieTranslator;
 	private WebInjector webInjector;
 	private FailureResponder failureResponder;
@@ -54,8 +51,7 @@ public abstract class AbstractRouterService {
 			RouteLoader routeLoader,
 			CookieTranslator cookieTranslator,
 			ObjectTranslator translator,
-			Provider<ResponseStreamer> proxyProvider,
-			WebSettings webSettings
+			Provider<ResponseStreamer> proxyProvider
 	) {
 		this.failureResponder = failureResponder;
 		this.futureUtil = futureUtil;
@@ -64,7 +60,6 @@ public abstract class AbstractRouterService {
 		this.cookieTranslator = cookieTranslator;
 		this.translator = translator;
 		this.proxyProvider = proxyProvider;
-		this.webSettings = webSettings;
 	}
 
 	public CompletableFuture<StreamWriter> incomingRequest(RouterRequest routerRequest, ProxyStreamHandle handler) {
@@ -81,13 +76,13 @@ public abstract class AbstractRouterService {
 
 		} catch(BadCookieException e) {
 			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
-			return failureResponder.sendRedirectAndClearCookie(new ResponseOverrideSender(handler), routerRequest, e.getCookieName());
+			return failureResponder.sendRedirectAndClearCookie(handler, routerRequest, e.getCookieName());
 		}
 	}
 
 	private CompletableFuture<StreamWriter> processRequest(RequestContext requestCtx, ProxyStreamHandle handler) {
 		ResponseStreamer proxy = proxyProvider.get();
-		proxy.init(requestCtx.getRequest(), handler, webSettings.getMaxBodySizeToSend());
+		proxy.init(requestCtx.getRequest(), handler);
 		return futureUtil.catchBlockWrap(
 				() -> incomingRequestImpl(requestCtx, handler),
 				(t) -> finalFailure(handler, t, requestCtx, proxy)

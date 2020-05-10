@@ -5,25 +5,26 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-import com.google.inject.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.routes.WebAppMeta;
-import org.webpieces.router.impl.*;
+import org.webpieces.router.impl.AbstractRouterService;
+import org.webpieces.router.impl.CookieTranslator;
+import org.webpieces.router.impl.FailureResponder;
+import org.webpieces.router.impl.RouteLoader;
+import org.webpieces.router.impl.WebInjector;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.proxyout.ProxyResponse;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
-import org.webpieces.router.impl.routeinvoker.WebSettings;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class DevRoutingService extends AbstractRouterService {
@@ -50,10 +51,9 @@ public class DevRoutingService extends AbstractRouterService {
 			ObjectTranslator objTranslator,
 			WebInjector webInjector,
 			FutureHelper futureUtil,
-			Provider<ResponseStreamer> proxyProvider,
-			WebSettings webSettings
+			Provider<ResponseStreamer> proxyProvider
 	) {
-		super(failureResponder, futureUtil, webInjector, routeConfig, cookieTranslator, objTranslator, proxyProvider, webSettings);
+		super(failureResponder, futureUtil, webInjector, routeConfig, cookieTranslator, objTranslator, proxyProvider);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.router = router;

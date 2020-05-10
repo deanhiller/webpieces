@@ -11,7 +11,6 @@ import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
@@ -50,7 +49,7 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	}
 
 	@Override
-	public void init(RouterRequest request, RouterStreamHandle handler, int maxBodySizeToSend) {
+	public void init(RouterRequest request, ProxyStreamHandle handler) {
 
 	}
 

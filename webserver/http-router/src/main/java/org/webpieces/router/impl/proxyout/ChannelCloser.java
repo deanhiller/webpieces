@@ -8,7 +8,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 @Singleton
 public class ChannelCloser {
 
-	public Void closeIfNeeded(Http2Headers request, ResponseOverrideSender channel) {
+	public Void closeIfNeeded(Http2Headers request, ProxyStreamHandle channel) {
 		String connHeader = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
 		boolean close = false;
 		if(!"keep-alive".equals(connHeader)) {
@@ -17,7 +17,7 @@ public class ChannelCloser {
 			close = false;
 		
 		if(close)
-			channel.close();
+			channel.closeIfNeeded();
 		
 		return null;
 	}

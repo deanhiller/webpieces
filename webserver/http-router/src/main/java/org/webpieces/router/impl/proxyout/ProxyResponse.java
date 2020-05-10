@@ -16,7 +16,6 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
@@ -56,12 +55,10 @@ public class ProxyResponse implements ResponseStreamer {
 	private final ChannelCloser channelCloser;
 	private final BufferPool pool;
 	
-	private ResponseOverrideSender stream;
+	private ProxyStreamHandle stream;
 	//private HttpRequest request;
 	private RouterRequest routerRequest;
 	private Http2Request request;
-
-	private int maxBodySize;
 
 	private FutureHelper futureUtil;
 
@@ -89,11 +86,10 @@ public class ProxyResponse implements ResponseStreamer {
 		this.mimeTypes = mimeTypes;
 	}
 
-	public void init(RouterRequest req, RouterStreamHandle responseSender, int maxBodySize) {
+	public void init(RouterRequest req, ProxyStreamHandle responseSender) {
 		this.routerRequest = req;
 		this.request = req.orginalRequest;
-		this.maxBodySize = maxBodySize;
-		this.stream = new ResponseOverrideSender(responseSender);
+		this.stream = responseSender;
 	}
 
 	@Override
@@ -103,7 +99,7 @@ public class ProxyResponse implements ResponseStreamer {
 		Http2Response response = responseCreator.createRedirect(request, httpResponse);
 		
 		log.info("sending REDIRECT response responseSender="+ stream);
-		return stream.sendResponse(response).thenApply(w -> {
+		return stream.process(response).thenApply(w -> {
 			channelCloser.closeIfNeeded(request, stream);
 			return null;
 		});
@@ -234,7 +230,7 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		if(bytes.length == 0) {
 			resp.setEndOfStream(true);
-			return stream.sendResponse(resp).thenApply(w -> null);
+			return stream.process(resp).thenApply(w -> null);
 		}
 		
 		MimeTypeResult mimeType = mimeTypes.createMimeType(resp.getSingleHeaderValue(Http2HeaderName.CONTENT_TYPE));
@@ -248,7 +244,7 @@ public class ProxyResponse implements ResponseStreamer {
 		log.info("sending RENDERHTML response. size="+bytes.length+" code="+resp+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ stream);
 
 		// Send the headers and get the responseid.
-		return stream.sendResponse(resp)
+		return stream.process(resp)
 				.thenCompose(w -> createFrame(bytes, w));
 	}
 

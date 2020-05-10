@@ -11,8 +11,8 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.proxyout.ChannelCloser;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.proxyout.ResponseCreator;
-import org.webpieces.router.impl.proxyout.ResponseOverrideSender;
 import org.webpieces.router.impl.routeinvoker.ContextWrap;
 
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -33,14 +33,14 @@ public class FailureResponder {
         this.responseCreator = responseCreator;
     }
 
-    public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(ResponseOverrideSender stream, RouterRequest req, String badCookieName) {
+    public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(ProxyStreamHandle stream, RouterRequest req, String badCookieName) {
         RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
         Http2Response response = responseCreator.createRedirect(req.orginalRequest, httpResponse);
 
         responseCreator.addDeleteCookie(response, badCookieName);
 
         log.info("sending REDIRECT(due to bad cookie) response responseSender="+ stream);
-        CompletableFuture<StreamWriter> future = stream.sendResponse(response);
+        CompletableFuture<StreamWriter> future = stream.process(response);
 
         channelCloser.closeIfNeeded(req.orginalRequest, stream);
 

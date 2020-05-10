@@ -26,11 +26,10 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	public ProdRouteInvoker(
 		ControllerLoader controllerFinder,
 		FutureHelper futureUtil,
-		WebSettings webSettings,
 		BodyParsers bodyParsers,
 		Provider<ResponseStreamer> proxyProvider
 	) {
-		super(controllerFinder, futureUtil, webSettings, bodyParsers, proxyProvider);
+		super(controllerFinder, futureUtil, bodyParsers, proxyProvider);
 	}
 	
 	@Override
@@ -42,7 +41,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RouteInfoForInternalError routeData = (RouteInfoForInternalError) data;
 		ResponseStreamer proxyResponse = proxyProvider.get();
-		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler(), webSettings.getMaxBodySizeToSend());
+		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler());
 
 		ResponseProcessorAppError processor = new ResponseProcessorAppError(
 				invokeInfo.getRequestCtx(), dynamicInfo.getLoadedController(), proxyResponse);
@@ -52,7 +51,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	@Override
 	public CompletableFuture<StreamWriter> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		ResponseStreamer proxyResponse = proxyProvider.get();
-		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler(), webSettings.getMaxBodySizeToSend());
+		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler());
 
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
 				invokeInfo.getRequestCtx(), reverseRoutes, 
@@ -63,7 +62,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	@Override
 	public CompletableFuture<StreamWriter> invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		ResponseStreamer proxyResponse = proxyProvider.get();
-		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler(), webSettings.getMaxBodySizeToSend());
+		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler());
 
 		RouteInfoForContent content = (RouteInfoForContent) data;
 		if(content.getBodyContentBinder() == null)

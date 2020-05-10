@@ -12,7 +12,6 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.ControllerException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
@@ -40,20 +39,17 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	protected ReverseRoutes reverseRoutes;
 	protected FutureHelper futureUtil;
-	protected WebSettings webSettings;
 	protected Provider<ResponseStreamer> proxyProvider;
 	private BodyParsers requestBodyParsers;
 
 	public AbstractRouteInvoker(
 			ControllerLoader controllerFinder,
 			FutureHelper futureUtil,
-			WebSettings webSettings,
 			BodyParsers bodyParsers,
 			Provider<ResponseStreamer> proxyProvider
 	) {
 		this.controllerFinder = controllerFinder;
 		this.futureUtil = futureUtil;
-		this.webSettings = webSettings;
 		this.proxyProvider = proxyProvider;
 		this.requestBodyParsers = bodyParsers;
 	}
@@ -82,7 +78,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		}
 
 		ResponseStreamer proxyResponse = proxyProvider.get();
-		proxyResponse.init(ctx.getRequest(), handler, webSettings.getMaxBodySizeToSend());
+		proxyResponse.init(ctx.getRequest(), handler);
 		ResponseStaticProcessor processor = new ResponseStaticProcessor(ctx, proxyResponse, handler);
 
 		return processor.renderStaticResponse(resp).thenApply(s -> new NullWriter());
@@ -125,7 +121,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
-		RouterStreamHandle handler = invokeInfo.getHandler();
+		ProxyStreamHandle handler = invokeInfo.getHandler();
 
 		if(service == null)
 			throw new IllegalStateException("Bug, service should never be null at this point");
@@ -147,7 +143,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		}
 
 		ResponseStreamer responseCb = proxyProvider.get();
-		responseCb.init(requestCtx.getRequest(), handler, webSettings.getMaxBodySizeToSend());
+		responseCb.init(requestCtx.getRequest(), handler);
 		return response.thenCompose(resp -> processor.continueProcessing(resp, responseCb));
 	}
 	
@@ -164,7 +160,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
 
 		ResponseStreamer responseCb = proxyProvider.get();
-		responseCb.init(requestCtx.getRequest(), invokeInfo.getHandler(), webSettings.getMaxBodySizeToSend());
+		responseCb.init(requestCtx.getRequest(), invokeInfo.getHandler());
 
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
 				invokeInfo.getRequestCtx(), reverseRoutes, 

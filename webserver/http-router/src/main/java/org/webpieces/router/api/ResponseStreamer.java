@@ -21,5 +21,5 @@ public interface ResponseStreamer {
 
 	CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e);
 
-	void init(RouterRequest request, RouterStreamHandle handler, int maxBodySizeToSend);
+	void init(RouterRequest request, ProxyStreamHandle handler);
 }

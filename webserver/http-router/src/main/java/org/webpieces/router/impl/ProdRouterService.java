@@ -13,7 +13,6 @@ import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
-import org.webpieces.router.impl.routeinvoker.WebSettings;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
@@ -41,10 +40,9 @@ public class ProdRouterService extends AbstractRouterService {
 			ARouter router,
 			WebInjector webInjector,
 			FutureHelper futureUtil,
-			Provider<ResponseStreamer> proxyProvider,
-			WebSettings webSettings
+			Provider<ResponseStreamer> proxyProvider
 	) {
-		super(failureResponder, futureUtil, webInjector, routeLoader, cookieTranslator, translator, proxyProvider, webSettings);
+		super(failureResponder, futureUtil, webInjector, routeLoader, cookieTranslator, translator, proxyProvider);
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 		this.router = router;
@@ -70,7 +68,6 @@ public class ProdRouterService extends AbstractRouterService {
 			router.printAllRoutes();
 	
 		return router.invoke(ctx, handler);
-
 	}
 
 }

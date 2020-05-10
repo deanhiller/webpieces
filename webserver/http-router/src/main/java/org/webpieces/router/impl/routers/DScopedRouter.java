@@ -7,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
@@ -103,7 +102,7 @@ public class DScopedRouter extends EScopedRouter {
 		return new InternalErrorRouteFailedException(t, failedRoute);
 	}
 	
-	private CompletableFuture<StreamWriter> notFound(NotFoundException exc, RequestContext requestCtx, RouterStreamHandle handler) {
+	private CompletableFuture<StreamWriter> notFound(NotFoundException exc, RequestContext requestCtx, ProxyStreamHandle handler) {
 		return futureUtil.catchBlockWrap(
 			() -> pageNotFoundRouter.invokeNotFoundRoute(requestCtx, handler, exc),
 			(e) -> new RuntimeException("NotFound Route had an exception", e)
