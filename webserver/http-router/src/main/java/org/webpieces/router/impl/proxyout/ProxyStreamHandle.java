@@ -2,6 +2,7 @@ package org.webpieces.router.impl.proxyout;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import javax.inject.Inject;
 
@@ -9,9 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.dto.RedirectResponse;
+import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
 import org.webpieces.router.impl.routeinvoker.ContextWrap;
 import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.futures.FutureHelper;
@@ -21,10 +25,13 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class ProxyStreamHandle implements RouterStreamHandle {
 	private static final Logger log = LoggerFactory.getLogger(ProxyStreamHandle.class);
+
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private CompressionChunkingHandle handle;
 	private ResponseCreator responseCreator;
@@ -152,5 +159,33 @@ public class ProxyStreamHandle implements RouterStreamHandle {
         return ContextWrap.wrap(ctx, () -> proxyResponse.failureRenderingInternalServerErrorPage(e));
     }
 
+	public CompletableFuture<Void> maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
+		Http2Response resp = tuple.response;
+		
+		if(bytes.length == 0) {
+			resp.setEndOfStream(true);
+			return process(resp).thenApply(w -> null);
+		}
+		
+		return sendChunkedResponse(resp, bytes);
+	}
+
+	private CompletableFuture<Void> sendChunkedResponse(Http2Response resp, byte[] bytes) {
+
+		RouterRequest routerRequest = handle.getRouterRequest();
+		log.info("sending RENDERHTML response. size="+bytes.length+" code="+resp+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ this);
+
+		// Send the headers and get the responseid.
+		return process(resp)
+				.thenCompose(w -> createFrame(bytes, w));
+	}
+
+	private CompletionStage<Void> createFrame(byte[] bytes, StreamWriter writer) {
+		DataFrame frame = new DataFrame();
+		frame.setEndOfStream(true);
+		frame.setData(dataGen.wrapByteArray(bytes));
+		
+		return writer.processPiece(frame);
+	}
 
 }

@@ -4,7 +4,6 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 import javax.inject.Inject;
 
@@ -13,14 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.MissingPropException;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
-import org.webpieces.router.impl.compression.CompressionLookup;
-import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
@@ -34,8 +29,6 @@ import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.StatusCode;
 
 //MUST NOT BE @Singleton!!! since this is created per request
@@ -43,11 +36,8 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private static final Logger log = LoggerFactory.getLogger(ProxyResponse.class);
 	
-	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-
 	private final TemplateApi templatingService;
 	private final StaticFileReader reader;
-	private final CompressionLookup compressionLookup;
 	private final ResponseCreator responseCreator;
 	private final ChannelCloser channelCloser;
 	private final BufferPool pool;
@@ -59,28 +49,22 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private FutureHelper futureUtil;
 
-	private MimeTypes mimeTypes;
-
 	@Inject
 	public ProxyResponse(
 		TemplateApi templatingService, 
 		StaticFileReader reader,
-		CompressionLookup compressionLookup, 
 		ResponseCreator responseCreator, 
 		ChannelCloser channelCloser,
 		BufferPool pool,
-		FutureHelper futureUtil,
-		MimeTypes mimeTypes
+		FutureHelper futureUtil
 	) {
 		super();
 		this.templatingService = templatingService;
 		this.reader = reader;
-		this.compressionLookup = compressionLookup;
 		this.responseCreator = responseCreator;
 		this.channelCloser = channelCloser;
 		this.pool = pool;
 		this.futureUtil = futureUtil;
-		this.mimeTypes = mimeTypes;
 	}
 
 	public void init(RouterRequest req, ProxyStreamHandle responseSender) {
@@ -204,7 +188,7 @@ public class ProxyResponse implements ResponseStreamer {
 	@Override
 	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
 		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
-		return maybeCompressAndSend(null, tuple, resp.getPayload()); 
+		return stream.maybeCompressAndSend(null, tuple, resp.getPayload()); 
 	}
 	
 	public CompletableFuture<Void> createResponseAndSend(StatusCode statusCode, String content, String extension, String defaultMime) {
@@ -219,36 +203,10 @@ public class ProxyResponse implements ResponseStreamer {
 		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
 		byte[] bytes = content.getBytes(encoding);
 		
-		return maybeCompressAndSend(extension, tuple, bytes);
+		return stream.maybeCompressAndSend(extension, tuple, bytes);
 	}
 
-	private CompletableFuture<Void> maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
-		Http2Response resp = tuple.response;
-		
-		if(bytes.length == 0) {
-			resp.setEndOfStream(true);
-			return stream.process(resp).thenApply(w -> null);
-		}
-		
-		return sendChunkedResponse(resp, bytes);
-	}
 
-	private CompletableFuture<Void> sendChunkedResponse(Http2Response resp, byte[] bytes) {
-
-		log.info("sending RENDERHTML response. size="+bytes.length+" code="+resp+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ stream);
-
-		// Send the headers and get the responseid.
-		return stream.process(resp)
-				.thenCompose(w -> createFrame(bytes, w));
-	}
-
-	private CompletionStage<Void> createFrame(byte[] bytes, StreamWriter writer) {
-		DataFrame frame = new DataFrame();
-		frame.setEndOfStream(true);
-		frame.setData(dataGen.wrapByteArray(bytes));
-		
-		return writer.processPiece(frame);
-	}
 
 	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
 		if(log.isDebugEnabled())

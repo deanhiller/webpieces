@@ -52,6 +52,10 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 		this.routerRequest = routerRequest;
 	}
 
+	public RouterRequest getRouterRequest() {
+		return this.routerRequest;
+	}
+	
 	public void init(RouterStreamHandle handler) {
 		this.handler = handler;
 	}
