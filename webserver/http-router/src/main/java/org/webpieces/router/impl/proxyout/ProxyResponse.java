@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.ctx.api.Constants;
 import org.webpieces.ctx.api.MissingPropException;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
@@ -20,7 +19,6 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
-import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
 import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.compression.Compression;
@@ -225,7 +223,7 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	private CompletableFuture<Void> maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
-		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, extension, tuple.mimeType);
+		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, tuple.mimeType);
 		
 		Http2Response resp = tuple.response;
 

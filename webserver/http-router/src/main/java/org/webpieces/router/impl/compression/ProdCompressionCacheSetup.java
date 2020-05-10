@@ -134,7 +134,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		String extension = name.substring(indexOf+1);
 		
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, "application/octet-stream");
-		Compression compression = lookup.createCompressionStream(encodings, extension, mimeType);
+		Compression compression = lookup.createCompressionStream(encodings, mimeType);
 		if(compression == null) {
 			pathToFileMeta.put(urlPath, new FileMeta());
 			return false;

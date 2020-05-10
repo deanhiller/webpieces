@@ -1,8 +1,8 @@
 package org.webpieces.router.api;
 
-import com.webpieces.http2engine.api.ResponseHandler;
-
 import java.util.Map;
+
+import com.webpieces.http2engine.api.ResponseHandler;
 
 public interface RouterStreamHandle extends ResponseHandler {
 

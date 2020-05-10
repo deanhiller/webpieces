@@ -5,11 +5,10 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.ProxyStreamHandle;
+
+import com.webpieces.http2engine.api.StreamWriter;
 
 @Singleton
 public class ARouter {

@@ -4,12 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2engine.api.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
@@ -17,6 +14,8 @@ import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.futures.FutureHelper;
+
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class EScopedRouter {
 	private static final Logger log = LoggerFactory.getLogger(EScopedRouter.class);

@@ -1,10 +1,7 @@
 package org.webpieces.router.impl.routebldr;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,7 +13,6 @@ import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.loader.ResolvedMethod;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
-import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractDynamicRouter;
 import org.webpieces.router.impl.routers.AbstractRouter;
 import org.webpieces.router.impl.routers.DynamicInfo;

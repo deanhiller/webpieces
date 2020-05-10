@@ -1,16 +1,13 @@
 package org.webpieces.router.impl.routers;
 
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
-import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.RouterStreamHandle;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+
 import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.util.futures.FutureHelper;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class NonStreamingWebAppErrorProxy implements StreamWriter {
     private FutureHelper futureUtil;

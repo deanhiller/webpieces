@@ -16,7 +16,6 @@ import javax.inject.Named;
 
 import org.webpieces.ctx.api.Constants;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.compression.Compression;
@@ -73,7 +72,7 @@ public class XFileReaderFileSystem extends XFileReader {
 		
 		Path file;
 		Compression compr = compressionLookup.createCompressionStream(
-				info.getRouterRequest().encodings, extension, tuple.mimeType);
+				info.getRouterRequest().encodings, tuple.mimeType);
 		//since we do compression of all text files on server startup, we only support the compression that was used
 		//during startup as I don't feel like paying a cpu penalty for compressing while live
 	    if(compr != null && compr.getCompressionType().equals(routerConfig.getStartupCompression())) {

@@ -1,24 +1,22 @@
 package org.webpieces.router.impl;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.StatusCode;
+import java.util.concurrent.CompletableFuture;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.proxyout.ChannelCloser;
-import org.webpieces.router.impl.proxyout.ProxyResponse;
 import org.webpieces.router.impl.proxyout.ResponseCreator;
 import org.webpieces.router.impl.proxyout.ResponseOverrideSender;
 import org.webpieces.router.impl.routeinvoker.ContextWrap;
 
-import javax.inject.Inject;
-import java.util.concurrent.CompletableFuture;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class FailureResponder {
 

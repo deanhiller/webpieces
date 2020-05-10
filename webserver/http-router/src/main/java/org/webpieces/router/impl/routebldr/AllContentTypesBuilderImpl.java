@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.webpieces.router.api.routebldr.ContentTypeRouteBuilder;
 import org.webpieces.router.api.routebldr.AllContentTypesBuilder;
+import org.webpieces.router.api.routebldr.ContentTypeRouteBuilder;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;

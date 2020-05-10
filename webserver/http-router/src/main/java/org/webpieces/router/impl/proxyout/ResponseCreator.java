@@ -23,6 +23,7 @@ import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
+import org.webpieces.router.impl.dto.RedirectResponse;
 
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.dto.Http2Request;
@@ -32,7 +33,6 @@ import com.webpieces.hpack.api.subparsers.ResponseCookie;
 import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-import org.webpieces.router.impl.dto.RedirectResponse;
 
 @Singleton
 public class ResponseCreator {

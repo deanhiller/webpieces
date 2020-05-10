@@ -5,23 +5,21 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.google.inject.Provider;
-import com.webpieces.http2engine.api.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.proxyout.ProxyResponse;
 import org.webpieces.router.impl.routeinvoker.WebSettings;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.webpieces.http2engine.api.StreamWriter;
 
 @Singleton
 public class ProdRouterService extends AbstractRouterService {

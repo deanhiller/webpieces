@@ -3,14 +3,13 @@ package org.webpieces.router.impl.routers;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.util.futures.FutureHelper;
+
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class DContentTypeRouter {
 

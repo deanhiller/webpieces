@@ -21,8 +21,8 @@ public class CompressionLookup {
 		compressions.put(gzipCompression.getCompressionType(), gzipCompression);
 	}
 	
-	public Compression createCompressionStream(List<String> encodings, String extension, MimeTypeResult mimeType) {
-		if(!toCompressOrNotToCompress.isCompressableType(extension, mimeType)) {
+	public Compression createCompressionStream(List<String> encodings, MimeTypeResult mimeType) {
+		if(!toCompressOrNotToCompress.isCompressableType(mimeType)) {
 			return null;
 		}
 		

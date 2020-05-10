@@ -1,13 +1,8 @@
 package org.webpieces.router.impl.routeinvoker;
 
-import com.webpieces.hpack.api.HpackParserFactory;
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
@@ -17,15 +12,18 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.impl.body.BodyParser;
 import org.webpieces.router.impl.body.BodyParsers;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class RequestStreamWriter2 implements StreamWriter {
 
     private static final Logger log = LoggerFactory.getLogger(RequestStreamWriter2.class);
 
     //TODO(dhiller): Remove static and inject so bugs can be fixed in these...
-    private static final HeaderPriorityParser headerParser = HpackParserFactory.createHeaderParser();
     private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     private Http2Headers trailingHeaders;

@@ -4,11 +4,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.ProxyStreamHandle;
+
+import com.webpieces.http2engine.api.StreamWriter;
 
 /**
  * The request Content-Type header router routing to special Content-Type routers if they exist

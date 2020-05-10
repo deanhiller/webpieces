@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import com.google.inject.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -15,7 +14,6 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.Startable;
@@ -24,7 +22,6 @@ import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.proxyout.ProxyResponse;
 import org.webpieces.router.impl.proxyout.ResponseOverrideSender;
 import org.webpieces.router.impl.routeinvoker.WebSettings;
 import org.webpieces.router.impl.routers.ExceptionWrap;
@@ -33,9 +30,8 @@ import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public abstract class AbstractRouterService {

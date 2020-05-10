@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.AllContentTypesBuilder;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.model.RouteBuilderLogic;

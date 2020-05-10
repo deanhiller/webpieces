@@ -17,6 +17,7 @@ import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.WebInjector;
 import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.dto.RouteType;
@@ -66,7 +67,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, RouterStreamHandle handle,
+	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, ProxyStreamHandle handle,
 			RouteInfoForStatic data) {
 		//RESET the encodings to known so we don't try to go the compressed cache which doesn't
 		//exist in dev server since we want the latest files always
