@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.proxyout.ChannelCloser;
 import org.webpieces.router.impl.proxyout.ResponseCreator;
@@ -35,7 +36,7 @@ public class XFileReaderClasspath extends XFileReader {
 	@Override
 	protected ChunkReader createFileReader(Http2Response response, RenderStaticResponse renderStatic,
 			String fileName, VirtualFile fullFilePath, RequestInfo info, String extension,
-			ResponseCreator.ResponseEncodingTuple tuple) {
+			ResponseCreator.ResponseEncodingTuple tuple, ProxyStreamHandle handle) {
 
 		if(log.isDebugEnabled())
 			log.debug("Opening class path file "+fullFilePath);

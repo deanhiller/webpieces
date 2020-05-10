@@ -5,10 +5,9 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
@@ -18,6 +17,8 @@ import org.webpieces.router.impl.services.RouteInfoForContent;
 import org.webpieces.router.impl.services.RouteInfoForInternalError;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.futures.FutureHelper;
+
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class ProdRouteInvoker extends AbstractRouteInvoker {
 
@@ -33,7 +34,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, RouterStreamHandle handle, RouteInfoForStatic data) {
+	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, ProxyStreamHandle handle, RouteInfoForStatic data) {
 		return super.invokeStatic(ctx, handle, data).thenApply(s -> new NullWriter());
 	}
 	

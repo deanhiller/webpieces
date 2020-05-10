@@ -7,6 +7,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.extensions.BodyContentBinder;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.ReversableRouter;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
@@ -35,7 +36,7 @@ public class FContentRouter extends AbstractDynamicRouterImpl implements Reversa
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, RouterStreamHandle handler) {
+	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteData data = new RouteInfoForContent(bodyContentBinder);
 		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler);
 		return routeInvoker.invokeContentController(invokeInfo, dynamicInfo, data);	}

@@ -6,14 +6,14 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
-import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
+
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class FStaticRouter extends AbstractRouterImpl {
 
@@ -43,7 +43,7 @@ public class FStaticRouter extends AbstractRouterImpl {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, RouterStreamHandle handler) {
+	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteInfoForStatic routeInfo = new RouteInfoForStatic(isOnClassPath, targetCacheLocation, fileSystemPath, isFile);
 		return invoker.invokeStatic(ctx, handler, routeInfo);
 	}

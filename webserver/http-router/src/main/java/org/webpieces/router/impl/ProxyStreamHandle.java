@@ -17,6 +17,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
     private RouterStreamHandle handler;
     private FutureHelper futureUtil;
     private Http2Response lastResponseSent;
+	private boolean preCompressed;
 
     public ProxyStreamHandle(String txId, RouterStreamHandle handler, FutureHelper futureUtil) {
         this.txId = txId;
@@ -93,4 +94,8 @@ public class ProxyStreamHandle implements RouterStreamHandle {
     public CompletableFuture<Void> cancel(CancelReason payload) {
         return handler.cancel(payload);
     }
+
+	public void setPrecompressedStream(boolean preCompressed) {
+		this.preCompressed = preCompressed;
+	}
 }

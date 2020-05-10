@@ -18,6 +18,7 @@ import org.webpieces.ctx.api.Constants;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
@@ -66,7 +67,8 @@ public class XFileReaderFileSystem extends XFileReader {
 		VirtualFile fullFilePath, 
 		RequestInfo info, 
 		String extension, 
-		ResponseEncodingTuple tuple
+		ResponseEncodingTuple tuple,
+		ProxyStreamHandle handle
 	) {
 		
 		Path file;
@@ -75,20 +77,24 @@ public class XFileReaderFileSystem extends XFileReader {
 		//since we do compression of all text files on server startup, we only support the compression that was used
 		//during startup as I don't feel like paying a cpu penalty for compressing while live
 	    if(compr != null && compr.getCompressionType().equals(routerConfig.getStartupCompression())) {
-		    	response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compr.getCompressionType()));
-		    	File routesCache = renderStatic.getTargetCache();
-	
-		    	String relativeUrl = renderStatic.getRelativeUrl();
-		    	File fileReference;
-		    	if(relativeUrl == null) {
-		    	    fileReference = FileFactory.newFile(routesCache, fileName);
-		    	} else {
-		    		fileReference = FileFactory.newFile(routesCache, relativeUrl);
-		    	}
-		    	
-		    	file = fetchFile("Compressed File from cache=", fileReference.getAbsolutePath()+".gz");
+	    	
+	    	handle.setPrecompressedStream(true);
+	    	
+	    	response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compr.getCompressionType()));
+	    	File routesCache = renderStatic.getTargetCache();
+
+	    	String relativeUrl = renderStatic.getRelativeUrl();
+	    	File fileReference;
+	    	if(relativeUrl == null) {
+	    	    fileReference = FileFactory.newFile(routesCache, fileName);
+	    	} else {
+	    		fileReference = FileFactory.newFile(routesCache, relativeUrl);
+	    	}
+	    	
+	    	file = fetchFile("Compressed File from cache=", fileReference.getAbsolutePath()+".gz");
+	    	
 	    } else {
-	    		file = fetchFile("File=", fullFilePath.getAbsolutePath());
+	    	file = fetchFile("File=", fullFilePath.getAbsolutePath());
 	    }
 
 		AsynchronousFileChannel asyncFile;

@@ -6,6 +6,7 @@ import com.webpieces.http2engine.api.StreamWriter;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.routers.DynamicInfo;
@@ -28,6 +29,6 @@ public interface RouteInvoker {
 	
 	CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data);
 
-	CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, RouterStreamHandle handler, RouteInfoForStatic data);
+	CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data);
 
 }

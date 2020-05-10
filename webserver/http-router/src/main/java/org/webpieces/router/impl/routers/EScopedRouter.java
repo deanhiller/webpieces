@@ -61,7 +61,7 @@ public class EScopedRouter {
 		return findAndInvokeRoute(ctx, handler, subPath);
 	}
 	
-	private CompletableFuture<StreamWriter> findAndInvokeRoute(RequestContext ctx, RouterStreamHandle handler, String subPath) {
+	private CompletableFuture<StreamWriter> findAndInvokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
 		for(AbstractRouter router : routers) {
 			MatchResult2 result = router.matches(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
@@ -75,7 +75,7 @@ public class EScopedRouter {
 	}
 	
 	private CompletableFuture<StreamWriter> invokeRouter(AbstractRouter router, RequestContext ctx,
-												 RouterStreamHandle handler) {
+												 ProxyStreamHandle handler) {
 		//We re-use this method to avoid chaining when it's a NotFoundException
 		return futureUtil.catchBlockWrap(
 			() -> router.invoke(ctx, handler),

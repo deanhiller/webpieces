@@ -11,6 +11,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.proxyout.ChannelCloser;
 import org.webpieces.router.impl.proxyout.ResponseCreator;
@@ -40,7 +41,9 @@ public abstract class XFileReader {
 		this.channelCloser = channelCloser;
 	}
 
-	public CompletableFuture<Void> runFileRead(RequestInfo info, RenderStaticResponse renderStatic) throws IOException {
+	public CompletableFuture<Void> runFileRead(RequestInfo info, RenderStaticResponse renderStatic, ProxyStreamHandle handle) throws IOException {
+		
+		
 		VirtualFile fullFilePath = renderStatic.getFilePath();
 
 		String fileName = getNameToUse(fullFilePath);
@@ -63,7 +66,7 @@ public abstract class XFileReader {
 			response.addHeader(new Http2Header(Http2HeaderName.CACHE_CONTROL, "max-age="+timeSeconds));
 		
 		ChunkReader reader = createFileReader(
-				response, renderStatic, fileName, fullFilePath, info, extension, tuple);
+				response, renderStatic, fileName, fullFilePath, info, extension, tuple, handle);
 		
 		CompletableFuture<Void> future;
 		try {
@@ -84,7 +87,7 @@ public abstract class XFileReader {
 
 	protected abstract ChunkReader createFileReader(Http2Response response, RenderStaticResponse renderStatic,
 			String fileName, VirtualFile fullFilePath, RequestInfo info, String extension,
-			ResponseCreator.ResponseEncodingTuple tuple);
+			ResponseCreator.ResponseEncodingTuple tuple, ProxyStreamHandle handle);
 
 	private void empty() {}
 

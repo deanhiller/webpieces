@@ -22,6 +22,7 @@ import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.dto.RedirectResponse;
@@ -182,12 +183,12 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	
 	@Override
-	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
+	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic, ProxyStreamHandle handle) {
 		if(log.isDebugEnabled())
 			log.debug("Sending render static html response. req="+request);
 		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, stream);
 		return futureUtil.catchBlockWrap(
-			() -> reader.sendRenderStatic(requestInfo, renderStatic), 
+			() -> reader.sendRenderStatic(requestInfo, renderStatic, handle), 
 			(t) -> convert(t)
 		);
 	}

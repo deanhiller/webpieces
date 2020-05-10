@@ -17,6 +17,7 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.ControllerException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
@@ -63,7 +64,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, RouterStreamHandle handler, RouteInfoForStatic data) {
+	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
 		
 		boolean isOnClassPath = data.isOnClassPath();
 
@@ -82,7 +83,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 
 		ResponseStreamer proxyResponse = proxyProvider.get();
 		proxyResponse.init(ctx.getRequest(), handler, webSettings.getMaxBodySizeToSend());
-		ResponseStaticProcessor processor = new ResponseStaticProcessor(ctx, proxyResponse);
+		ResponseStaticProcessor processor = new ResponseStaticProcessor(ctx, proxyResponse, handler);
 
 		return processor.renderStaticResponse(resp).thenApply(s -> new NullWriter());
 	}

@@ -12,6 +12,7 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
@@ -82,7 +83,7 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
+	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic, ProxyStreamHandle handle) {
 		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_STATIC_HTML, renderStatic);
 	}
 
