@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,9 +15,12 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.devrouter.api.DevRouterFactory;
-import org.webpieces.router.api.*;
+import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterService;
+import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.error.dev.CommonRoutesModules;
-import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.router.api.simplesvr.NullTemplateApi;
@@ -27,6 +31,9 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 
 import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -36,7 +43,7 @@ public class ErrorCommonTest {
 	private static final Logger log = LoggerFactory.getLogger(ErrorCommonTest.class);
 	private boolean isProdTest;
 	private MockResponseStream mockResponseStream;
-	private RouterStreamHandle nullStream = new NullStreamHandle();
+	private RouterStreamHandle nullStream = new MockStreamHandle();
 
 	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters
@@ -65,21 +72,16 @@ public class ErrorCommonTest {
 		
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/user/5553");
 
-		server.incomingRequest(req, nullStream);
-			
-		//AFTER the first route fails, it then calls the controller internal error route which fails and
-		//then results in ErrorRouteFailedException
-		//Of course, usually you are supposed to put a secondary error like ErrorRouteFailedException
-		//in the suppressed exceptions of the root exception but internal error routes should never fail
-		//so we make it a primary exception to be fixed immediately.
-		Throwable e = mockResponseStream.getOnlyException();
-		Assert.assertEquals(InternalErrorRouteFailedException.class, e.getClass());
+		MockStreamHandle mockStream = new MockStreamHandle();
+		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
-		while(e.getCause() != null) {
-			e = e.getCause();
-		}
 		
-		Assert.assertEquals(IllegalStateException.class, e.getClass());
+		Http2Response response = mockStream.getResponse();
+		String contents = mockStream.getResponseBody();
+
+		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "500");
+		Assert.assertTrue(contents.contains("This website had a bug, then when rendering the page explaining the bug, well, they hit another bug"));
 	}
 	
 	@Test

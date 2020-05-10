@@ -141,9 +141,9 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return handle.hasSentResponseAlready();
 	}
 
-	public Throwable finalFailure(Throwable e, RequestContext requestCtx, ResponseStreamer proxy) {
+	public CompletableFuture<StreamWriter> finalFailure(Throwable e, RequestContext requestCtx, ResponseStreamer proxy) {
 		if(ExceptionWrap.isChannelClosed(e))
-			return e;
+			return CompletableFuture.completedFuture(null);
 
 		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
 
@@ -155,13 +155,31 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 			log.error("Webpieces failed at rendering it's internal error page since webapps internal erorr app page failed", t);
 			return null;
 		});
-		return e;
+		return future.thenApply(s -> null);
 	}
 
     public CompletableFuture<Void> failureRenderingInternalServerErrorPage(RequestContext ctx, Throwable e, ResponseStreamer proxyResponse) {
-        return ContextWrap.wrap(ctx, () -> proxyResponse.failureRenderingInternalServerErrorPage(e));
+        return ContextWrap.wrap(ctx, () -> failureRenderingInternalServerErrorPage(e));
     }
 
+	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
+		
+		if(log.isDebugEnabled())
+			log.debug("Sending failure html response. req="+handle.getRouterRequest());
+
+		//TODO: IF instance of HttpException with a KnownStatusCode, we should actually send that status code
+		//TODO: we should actually just render our own internalServerError.html page with styling and we could do that.
+
+		//This is a final failure so we send a webpieces page next (in the future, we should just use a customer static html file if set)
+		//This is only if the webapp 500 html page fails as many times it is a template and they could have another bug in that template.
+		String html = "<html><head></head><body>This website had a bug, "
+				+ "then when rendering the page explaining the bug, well, they hit another bug.  "
+				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
+				+ "with a screen shot of this page</body></html>";
+
+		return createResponseAndSend(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
+	}
+	
 	public CompletableFuture<Void> createResponseAndSend(StatusCode statusCode, String content, String extension, String defaultMime) {
 		if(content == null)
 			throw new IllegalArgumentException("content cannot be null");

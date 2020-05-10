@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.error.ErrorCommonTest;
-import org.webpieces.router.api.error.NullStreamHandle;
+import org.webpieces.router.api.error.MockStreamHandle;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.impl.dto.RenderResponse;
@@ -22,7 +22,7 @@ public class ErrorTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(ErrorTest.class);
 	private MockResponseStream mockResponseStream = new MockResponseStream();
-	private NullStreamHandle nullStream = new NullStreamHandle();
+	private MockStreamHandle nullStream = new MockStreamHandle();
 
 	@Before
 	public void setUp() {

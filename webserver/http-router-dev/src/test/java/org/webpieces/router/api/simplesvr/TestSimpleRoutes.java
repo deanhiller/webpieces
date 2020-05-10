@@ -16,7 +16,7 @@ import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.*;
-import org.webpieces.router.api.error.NullStreamHandle;
+import org.webpieces.router.api.error.MockStreamHandle;
 import org.webpieces.router.api.error.OverridesForRefactor;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.extensions.SimpleStorage;
@@ -42,7 +42,7 @@ public class TestSimpleRoutes {
 	private static final Logger log = LoggerFactory.getLogger(TestSimpleRoutes.class);
 	private RouterService server;
 
-	private RouterStreamHandle nullStream = new NullStreamHandle();
+	private RouterStreamHandle nullStream = new MockStreamHandle();
 	private MockResponseStream mockResponseStream;
 	
 	@SuppressWarnings("rawtypes")

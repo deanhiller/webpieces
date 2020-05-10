@@ -41,12 +41,6 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	public CompletableFuture<Void> sendRenderHtml(RenderResponse resp) {
 		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_RENDER_HTML, resp);
 	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
-		return (CompletableFuture<Void>) super.calledMethod(MockMethod.FAILURE, e);
-	}
 
 	@Override
 	public void init(RouterRequest request, ProxyStreamHandle handler) {

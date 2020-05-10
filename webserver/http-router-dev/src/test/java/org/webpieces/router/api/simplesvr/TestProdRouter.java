@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.*;
-import org.webpieces.router.api.error.NullStreamHandle;
+import org.webpieces.router.api.error.MockStreamHandle;
 import org.webpieces.router.api.error.OverridesForRefactor;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.extensions.SimpleStorage;
@@ -41,7 +41,7 @@ public class TestProdRouter {
 	private RouterService server;
 	private TestModule overrides;
 
-	private RouterStreamHandle nullStream = new NullStreamHandle();
+	private RouterStreamHandle nullStream = new MockStreamHandle();
 	private MockResponseStream mockResponseStream;
 	
 	@SuppressWarnings("rawtypes")

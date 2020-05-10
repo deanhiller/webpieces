@@ -191,23 +191,5 @@ public class ProxyResponse implements ResponseStreamer {
 		return stream.maybeCompressAndSend(null, tuple, resp.getPayload()); 
 	}
 
-
-	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
-		if(log.isDebugEnabled())
-			log.debug("Sending failure html response. req="+request);
-
-		//TODO: IF instance of HttpException with a KnownStatusCode, we should actually send that status code
-		//TODO: we should actually just render our own internalServerError.html page with styling and we could do that.
-
-		//This is a final failure so we send a webpieces page next (in the future, we should just use a customer static html file if set)
-		//This is only if the webapp 500 html page fails as many times it is a template and they could have another bug in that template.
-		String html = "<html><head></head><body>This website had a bug, "
-				+ "then when rendering the page explaining the bug, well, they hit another bug.  "
-				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
-				+ "with a screen shot of this page</body></html>";
-
-		return stream.createResponseAndSend(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
-	}
-
 }
 

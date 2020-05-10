@@ -19,7 +19,5 @@ public interface ResponseStreamer {
 
 	CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic, ProxyStreamHandle handle);
 
-	CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e);
-
 	void init(RouterRequest request, ProxyStreamHandle handler);
 }
