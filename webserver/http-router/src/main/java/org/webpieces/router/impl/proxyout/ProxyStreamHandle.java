@@ -5,23 +5,36 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.impl.dto.RedirectResponse;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class ProxyStreamHandle implements RouterStreamHandle {
+	private static final Logger log = LoggerFactory.getLogger(ProxyStreamHandle.class);
 
 	private CompressionChunkingHandle handle;
+	private ResponseCreator responseCreator;
+
+	private ChannelCloser channelCloser;
 
 	@Inject
     public ProxyStreamHandle(
-    	CompressionChunkingHandle handle
+    	CompressionChunkingHandle handle,
+    	ResponseCreator responseCreator,
+    	ChannelCloser channelCloser
     ) {
 		this.handle = handle;
+		this.responseCreator = responseCreator;
+		this.channelCloser = channelCloser;
     }
 
 	public void setRouterRequest(RouterRequest routerRequest) {
@@ -34,6 +47,34 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	
 	public void turnCompressionOff() {
 		handle.turnCompressionOff();
+	}
+	
+    public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
+        RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
+        Http2Response response = responseCreator.createRedirect(req.orginalRequest, httpResponse);
+
+        responseCreator.addDeleteCookie(response, badCookieName);
+
+        log.info("sending REDIRECT(due to bad cookie) response responseSender="+ this);
+        CompletableFuture<StreamWriter> future = process(response);
+
+        closeIfNeeded(req.orginalRequest);
+
+        return future.thenApply(s -> null);
+    }
+    
+	public Void closeIfNeeded(Http2Headers request) {
+		String connHeader = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
+		boolean close = false;
+		if(!"keep-alive".equals(connHeader)) {
+			close = true;
+		} else
+			close = false;
+		
+		if(close)
+			closeIfNeeded();
+		
+		return null;
 	}
 	
     @Override

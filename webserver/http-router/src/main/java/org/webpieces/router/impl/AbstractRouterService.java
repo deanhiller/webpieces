@@ -76,7 +76,7 @@ public abstract class AbstractRouterService {
 
 		} catch(BadCookieException e) {
 			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
-			return failureResponder.sendRedirectAndClearCookie(handler, routerRequest, e.getCookieName());
+			return handler.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
 		}
 	}
 
