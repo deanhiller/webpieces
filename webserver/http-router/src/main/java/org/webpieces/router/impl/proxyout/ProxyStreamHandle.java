@@ -1,5 +1,6 @@
 package org.webpieces.router.impl.proxyout;
 
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -21,11 +22,13 @@ import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class ProxyStreamHandle implements RouterStreamHandle {
@@ -159,6 +162,22 @@ public class ProxyStreamHandle implements RouterStreamHandle {
         return ContextWrap.wrap(ctx, () -> proxyResponse.failureRenderingInternalServerErrorPage(e));
     }
 
+	public CompletableFuture<Void> createResponseAndSend(StatusCode statusCode, String content, String extension, String defaultMime) {
+		if(content == null)
+			throw new IllegalArgumentException("content cannot be null");
+		
+		Http2Request request = handle.getRouterRequest().orginalRequest;
+		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, true);
+		
+		if(log.isDebugEnabled())
+			log.debug("content about to be sent back="+content);
+		
+		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
+		byte[] bytes = content.getBytes(encoding);
+		
+		return maybeCompressAndSend(extension, tuple, bytes);
+	}
+	
 	public CompletableFuture<Void> maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
 		Http2Response resp = tuple.response;
 		

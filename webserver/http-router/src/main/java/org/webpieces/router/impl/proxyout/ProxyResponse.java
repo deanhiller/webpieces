@@ -150,7 +150,7 @@ public class ProxyResponse implements ResponseStreamer {
 		String finalExt = extension;
 		
 		return futureUtil.catchBlockWrap(
-				 () -> createResponseAndSend(statusCode, content, finalExt, "text/plain"), 
+				 () -> stream.createResponseAndSend(statusCode, content, finalExt, "text/plain"), 
 				 (t) -> convert(t));
 	}
 	
@@ -190,22 +190,6 @@ public class ProxyResponse implements ResponseStreamer {
 		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
 		return stream.maybeCompressAndSend(null, tuple, resp.getPayload()); 
 	}
-	
-	public CompletableFuture<Void> createResponseAndSend(StatusCode statusCode, String content, String extension, String defaultMime) {
-		if(content == null)
-			throw new IllegalArgumentException("content cannot be null");
-		
-		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, true);
-		
-		if(log.isDebugEnabled())
-			log.debug("content about to be sent back="+content);
-		
-		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
-		byte[] bytes = content.getBytes(encoding);
-		
-		return stream.maybeCompressAndSend(extension, tuple, bytes);
-	}
-
 
 
 	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
@@ -222,7 +206,7 @@ public class ProxyResponse implements ResponseStreamer {
 				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
 				+ "with a screen shot of this page</body></html>";
 
-		return createResponseAndSend(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
+		return stream.createResponseAndSend(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
 	}
 
 }
