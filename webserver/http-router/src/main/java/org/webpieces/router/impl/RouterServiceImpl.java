@@ -12,9 +12,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
-import com.webpieces.http2parser.api.dto.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.AcceptMediaType;
@@ -23,13 +21,11 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.UriInfo;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.compression.FileMeta;
-import org.webpieces.router.impl.proxyout.ResponseCreator;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.urlparse.UrlEncodedParser;
@@ -84,9 +80,7 @@ public class RouterServiceImpl implements RouterService {
 	private final UrlEncodedParser urlEncodedParser;
 	private final FutureHelper futureUtil;
 	private final RouterConfig config;
-	private ResponseCreator responseCreator;
 	private final Random random;
-	private Provider<ResponseStreamer> proxyProvider;
 	private boolean started;
 
 	@Inject
@@ -96,18 +90,14 @@ public class RouterServiceImpl implements RouterService {
 		HeaderPriorityParserImpl headerParser,
 		UrlEncodedParser urlEncodedParser,
 		FutureHelper futureUtil,
-		ResponseCreator responseCreator,
-		Random random,
-		Provider<ResponseStreamer> proxyProvider
+		Random random
 	) {
 		this.config = config;
 		this.service = service;
 		this.headerParser = headerParser;
 		this.urlEncodedParser = urlEncodedParser;
 		this.futureUtil = futureUtil;
-		this.responseCreator = responseCreator;
 		this.random = random;
-		this.proxyProvider = proxyProvider;
 	}
 	
 	@Override
@@ -131,23 +121,20 @@ public class RouterServiceImpl implements RouterService {
 
 	@Override
 	public CompletableFuture<StreamWriter> incomingRequest(Http2Request req, RouterStreamHandle handler) {
+		String txId = generate();
+		ProxyStreamHandle proxyHandler = new ProxyStreamHandle(txId, handler, futureUtil);
+		
 		//top level handler...
 		return futureUtil.catchBlockWrap(
-				() -> incomingRequest111(req, handler),
+				() -> incomingRequestImpl(req, proxyHandler),
 				(t) -> respondToFailure(t)
 		);
 	}
 
 	private Throwable respondToFailure(Throwable t) {
-		//TODO: dhiller implement here  to send response once we have chunking and other stuff in place
+		//TODO: dhiller implement here  to send response once we have compression and other stuff in place
 
 		return t;
-	}
-
-	private CompletableFuture<StreamWriter> incomingRequest111(Http2Request req, RouterStreamHandle handler) {
-		String txId = generate();
-		ProxyStreamHandle proxyHandler = new ProxyStreamHandle(txId, handler, futureUtil);
-		return incomingRequestImpl(req, proxyHandler);
 	}
 
 	public String generate() {
