@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.impl.ProxyStreamHandle;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 import com.webpieces.http2engine.api.StreamWriter;
 

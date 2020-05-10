@@ -7,9 +7,9 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.proxyout.ChannelCloser;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.proxyout.ResponseCreator;
 import org.webpieces.util.file.VirtualFile;
 

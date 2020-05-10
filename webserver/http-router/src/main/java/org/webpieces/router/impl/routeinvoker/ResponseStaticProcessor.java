@@ -5,8 +5,8 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 public class ResponseStaticProcessor {
 

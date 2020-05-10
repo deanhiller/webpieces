@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +26,8 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
-import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.FileMeta;
-import org.webpieces.router.impl.compression.MimeTypes;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.urlparse.UrlEncodedParser;
@@ -83,11 +83,10 @@ public class RouterServiceImpl implements RouterService {
 	private final FutureHelper futureUtil;
 	private final RouterConfig config;
 	private final Random random;
+	private final Provider<ProxyStreamHandle> proxyProvider;
+
 	private boolean started;
 
-	private MimeTypes mimeTypes;
-
-	private CompressionLookup compressionLookup;
 
 	@Inject
 	public RouterServiceImpl(
@@ -95,19 +94,17 @@ public class RouterServiceImpl implements RouterService {
 		AbstractRouterService service,
 		HeaderPriorityParserImpl headerParser,
 		UrlEncodedParser urlEncodedParser,
+		Provider<ProxyStreamHandle> proxyProvider,
 		FutureHelper futureUtil,
-		Random random,
-		MimeTypes mimeTypes,
-		CompressionLookup compressionLookup
+		Random random
 	) {
 		this.config = config;
 		this.service = service;
 		this.headerParser = headerParser;
 		this.urlEncodedParser = urlEncodedParser;
+		this.proxyProvider = proxyProvider;
 		this.futureUtil = futureUtil;
 		this.random = random;
-		this.mimeTypes = mimeTypes;
-		this.compressionLookup = compressionLookup;
 	}
 	
 	@Override
@@ -136,11 +133,16 @@ public class RouterServiceImpl implements RouterService {
 		// ANY code above that is not protected from our catch and respond to clients
 		//******************************************************************************************
 		String txId = generate();
-		ProxyStreamHandle proxyHandler = new ProxyStreamHandle(txId, handler, futureUtil, mimeTypes, compressionLookup);
+		
+		//I do NOT like doing Guice creation on the request path(Dagger creation would probably be ok) BUT this
+		//is very worth it AND customers can swap out these critical classes if they need to quickly temporarily fix a bug while
+		//we work on the bug.  We can easily give customers bug fixes like add binder.bind(ClassWithBug.class).to(BugFixCode.class)
+		ProxyStreamHandle proxyHandler = proxyProvider.get();
+		proxyHandler.init(handler);
 		
 		//top level handler...
 		return futureUtil.catchBlockWrap(
-				() -> incomingRequestImpl(req, proxyHandler),
+				() -> incomingRequestImpl(req, proxyHandler).thenApply(w -> new TxStreamWriter(txId, w)),
 				(t) -> respondToFailure(t)
 		);
 	}

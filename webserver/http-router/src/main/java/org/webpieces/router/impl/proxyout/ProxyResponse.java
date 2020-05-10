@@ -1,12 +1,10 @@
 package org.webpieces.router.impl.proxyout;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import javax.inject.Inject;
 
@@ -15,12 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.MissingPropException;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
-import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.MimeTypes;
@@ -38,9 +37,9 @@ import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.StatusCode;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 //MUST NOT BE @Singleton!!! since this is created per request
@@ -48,6 +47,8 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private static final Logger log = LoggerFactory.getLogger(ProxyResponse.class);
 	
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+
 	private final TemplateApi templatingService;
 	private final StaticFileReader reader;
 	private final CompressionLookup compressionLookup;
@@ -243,59 +244,20 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	private CompletableFuture<Void> sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
-				
-		boolean compressed = false;
-		Compression usingCompression;
-		if(compression == null) {
-			usingCompression = new NoCompression();
-		} else {
-			usingCompression = compression;
-			compressed = true;
-			resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
-		}
 
 		log.info("sending RENDERHTML response. size="+bytes.length+" code="+resp+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ stream);
 
-		boolean isCompressed = compressed;
-
 		// Send the headers and get the responseid.
-		return stream.sendResponse(resp).thenCompose(writer -> {
-
-			List<DataFrame> frames = possiblyCompress(bytes, usingCompression, isCompressed);
-			
-			CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
-
-			for(int i = 0; i < frames.size(); i++) {
-				DataFrame f = frames.get(i);
-				if(i == frames.size()-1)
-					f.setEndOfStream(true);
-				
-				future = future.thenCompose(v -> {
-					return writer.processPiece(f);
-				});
-			}
-			
-			return future;
-			
-		}).thenApply(w -> null);
+		return stream.sendResponse(resp)
+				.thenCompose(w -> createFrame(bytes, w));
 	}
 
-	private List<DataFrame> possiblyCompress(byte[] bytes, Compression usingCompression, boolean isCompressed) {
-		ChunkedStream chunkedStream = new ChunkedStream(maxBodySize, isCompressed);
-
-		try(OutputStream chainStream = usingCompression.createCompressionStream(chunkedStream)) {
-			//IF wrapped in compression above(ie. not NoCompression), sending the WHOLE byte[] in comes out in
-			//pieces that get sent out as it is being compressed
-			//and http chunks are sent under the covers(in ChunkedStream)
-			chainStream.write(bytes);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		if(!chunkedStream.isClosed())
-			throw new IllegalStateException("ChunkedStream should have been closed");
+	private CompletionStage<Void> createFrame(byte[] bytes, StreamWriter writer) {
+		DataFrame frame = new DataFrame();
+		frame.setEndOfStream(true);
+		frame.setData(dataGen.wrapByteArray(bytes));
 		
-		List<DataFrame> frames = chunkedStream.getFrames();
-		return frames;
+		return writer.processPiece(frame);
 	}
 
 	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {

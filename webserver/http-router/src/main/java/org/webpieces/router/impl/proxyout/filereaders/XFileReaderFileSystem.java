@@ -17,11 +17,11 @@ import javax.inject.Named;
 import org.webpieces.ctx.api.Constants;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.proxyout.ChannelCloser;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.proxyout.ResponseCreator;
 import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
 import org.webpieces.util.exceptions.NioException;
@@ -77,7 +77,7 @@ public class XFileReaderFileSystem extends XFileReader {
 		//during startup as I don't feel like paying a cpu penalty for compressing while live
 	    if(compr != null && compr.getCompressionType().equals(routerConfig.getStartupCompression())) {
 	    	
-	    	handle.setPrecompressedStream(true);
+	    	handle.turnCompressionOff();
 	    	
 	    	response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compr.getCompressionType()));
 	    	File routesCache = renderStatic.getTargetCache();

@@ -3,7 +3,7 @@ package org.webpieces.router.impl.routers;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import org.webpieces.router.impl.ProxyStreamHandle;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.http2engine.api.StreamWriter;

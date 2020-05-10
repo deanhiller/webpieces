@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.impl.ProxyStreamHandle;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 import com.webpieces.http2engine.api.StreamWriter;
 

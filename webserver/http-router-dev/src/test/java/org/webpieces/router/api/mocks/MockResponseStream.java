@@ -12,11 +12,11 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterStreamHandle;
-import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 public class MockResponseStream extends MockSuperclass implements ResponseStreamer{
 

@@ -11,8 +11,8 @@ import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
-import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.model.RouterInfo;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.logging.SupressedExceptionLog;
 

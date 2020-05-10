@@ -6,8 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 @Singleton
 public class StaticFileReader {

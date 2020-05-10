@@ -1,5 +1,7 @@
 # webpieces
 
+* fix up TestError test case on startup so that we know respond to clients
+* ResponseOverrideSender is in wrong location...needs to be in top top level proxy of streamhandling(after chunking/compression)
 * wire futures backpressure all the way in server and test
 * Document prod/staging/local development environments and properties plugin
 * Document more examples on the examples page stuff

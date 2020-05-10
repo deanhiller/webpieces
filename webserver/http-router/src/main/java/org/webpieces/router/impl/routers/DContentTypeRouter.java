@@ -5,8 +5,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.ProxyStreamHandle;
 import org.webpieces.router.impl.model.MatchResult2;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.http2engine.api.StreamWriter;
