@@ -6,14 +6,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
-import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 public class MockResponseStream extends MockSuperclass implements ResponseStreamer{
 
@@ -25,17 +23,6 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 		super.setDefaultReturnValue(MockMethod.FAILURE, CompletableFuture.completedFuture(null));
 		super.setDefaultReturnValue(MockMethod.SEND_RENDER_HTML, CompletableFuture.completedFuture(null));
 		super.setDefaultReturnValue(MockMethod.SEND_STATIC_HTML, CompletableFuture.completedFuture(null));
-
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public CompletableFuture<Void> sendRenderHtml(RenderResponse resp) {
-		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_RENDER_HTML, resp);
-	}
-
-	@Override
-	public void init(RouterRequest request, ProxyStreamHandle handler) {
 
 	}
 

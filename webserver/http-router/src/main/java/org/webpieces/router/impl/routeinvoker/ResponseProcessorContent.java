@@ -25,7 +25,7 @@ public class ResponseProcessorContent implements Processor {
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
 	}
 
-	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> continueProcessing(Action controllerResponse) {
 		if(!(controllerResponse instanceof RenderContent)) {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
 					+ "precondition check on content routes to assert the correct return types");

@@ -26,7 +26,6 @@ public class ResponseProcessorNotFound implements Processor {
 
 	private RequestContext ctx;
 	private LoadedController loadedController;
-	private ResponseStreamer oldResponseCb;
 	private ReverseRoutes reverseRoutes;
 	private ProxyStreamHandle responseCb;
 
@@ -34,13 +33,11 @@ public class ResponseProcessorNotFound implements Processor {
 			RequestContext ctx, 
 			ReverseRoutes reverseRoutes, 
 			LoadedController loadedController, 
-			ResponseStreamer oldResponseCb,
 			ProxyStreamHandle responseCb
 	) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.loadedController = loadedController;
-		this.oldResponseCb = oldResponseCb;
 		this.responseCb = responseCb;
 	}
 
@@ -64,7 +61,7 @@ public class ResponseProcessorNotFound implements Processor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.NOT_FOUND);
 		
-		return ContextWrap.wrap(ctx, () -> oldResponseCb.sendRenderHtml(resp));
+		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
 	}
 
 	public CompletableFuture<Void> createContentResponse(RenderContent r) {
@@ -92,7 +89,7 @@ public class ResponseProcessorNotFound implements Processor {
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(redirectResponse));
 	}
 	
-	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> continueProcessing(Action controllerResponse) {
 		if(controllerResponse instanceof RenderImpl) {
 			return createRenderResponse((RenderImpl) controllerResponse);
 		} else if(controllerResponse instanceof RenderContent) {

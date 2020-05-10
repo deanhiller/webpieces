@@ -8,7 +8,4 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 public interface ResponseStreamer {
 
-	CompletableFuture<Void> sendRenderHtml(RenderResponse resp);
-
-	void init(RouterRequest request, ProxyStreamHandle handler);
 }

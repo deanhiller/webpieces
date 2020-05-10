@@ -41,22 +41,17 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	@Override
 	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RouteInfoForInternalError routeData = (RouteInfoForInternalError) data;
-		ResponseStreamer proxyResponse = proxyProvider.get();
-		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler());
 
 		ResponseProcessorAppError processor = new ResponseProcessorAppError(
-				invokeInfo.getRequestCtx(), dynamicInfo.getLoadedController(), proxyResponse);
+				invokeInfo.getRequestCtx(), dynamicInfo.getLoadedController(), invokeInfo.getHandler());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor, routeData.isForceEndOfStream());
 	}
 	
 	@Override
 	public CompletableFuture<StreamWriter> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		ResponseStreamer proxyResponse = proxyProvider.get();
-		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler());
-
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
 				invokeInfo.getRequestCtx(), reverseRoutes, 
-				dynamicInfo.getLoadedController(), proxyResponse, invokeInfo.getHandler());
+				dynamicInfo.getLoadedController(), invokeInfo.getHandler());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor, false);
 	}
 	

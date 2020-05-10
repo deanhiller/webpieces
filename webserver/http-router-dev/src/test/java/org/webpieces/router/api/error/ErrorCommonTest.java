@@ -44,7 +44,6 @@ public class ErrorCommonTest {
 	private static final Logger log = LoggerFactory.getLogger(ErrorCommonTest.class);
 	private boolean isProdTest;
 	private MockResponseStream mockResponseStream;
-	private RouterStreamHandle nullStream = new MockStreamHandle();
 
 	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters
@@ -112,7 +111,7 @@ public class ErrorCommonTest {
 		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "500");
 		Assert.assertTrue(contents.contains("This website had a bug, then when rendering the page explaining the bug, well, they hit another bug"));
 		
-		//We did not send a keep alive so it should close
+		//We did send a keep alive so it should close
 		Assert.assertFalse(mockStream.isWasClosed());
 	}
 	
@@ -126,15 +125,21 @@ public class ErrorCommonTest {
 		
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 		
-		server.incomingRequest(req, nullStream);
+		MockStreamHandle mockStream = new MockStreamHandle();
+		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 
-		verifyNotFoundRendered(mockResponseStream);
+		Http2Response response = mockStream.getLastResponse();
+		String contents = mockStream.getResponseBody();
+		verifyNotFoundRendered(response, contents);
+
+		//We did not send a keep alive so it should close
+		Assert.assertTrue(mockStream.isWasClosed());
 	}
 
-	private void verifyNotFoundRendered(MockResponseStream mockResponseStream) {
-		List<RenderResponse> responses = mockResponseStream.getSendRenderHtmlList();
-		Assert.assertEquals(1, responses.size());
-		Assert.assertEquals(RouteType.NOT_FOUND, responses.get(0).routeType);
+	private void verifyNotFoundRendered(Http2Response response, String contents) {
+		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "404");
+		Assert.assertEquals(contents, ""); //no templating engine installed
 	}
 	
 	@Test
@@ -147,11 +152,18 @@ public class ErrorCommonTest {
 		
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/postroute");
 
-		server.incomingRequest(req, nullStream);
+		MockStreamHandle mockStream = new MockStreamHandle();
+		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 
-		verifyNotFoundRendered(mockResponseStream);
+		Http2Response response = mockStream.getLastResponse();
+		String contents = mockStream.getResponseBody();
+		verifyNotFoundRendered(response, contents);
+
+		//We did not send a keep alive so it should close
+		Assert.assertTrue(mockStream.isWasClosed());
 	}
-	
+
 	public static RouterService createServer(boolean isProdTest, String moduleFileContents, ResponseStreamer mock) {
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();

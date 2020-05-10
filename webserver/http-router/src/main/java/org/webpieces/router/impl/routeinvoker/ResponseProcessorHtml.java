@@ -10,7 +10,6 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.HttpPort;
-import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.ReverseRoutes;
@@ -21,7 +20,6 @@ import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.dto.RedirectResponse;
-import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
@@ -34,19 +32,16 @@ public class ResponseProcessorHtml implements Processor {
 	private ReverseRoutes reverseRoutes;
 	private LoadedController loadedController;
 	private ProxyStreamHandle responseCb;
-	private ResponseStreamer oldResponseCb;
 
 	public ResponseProcessorHtml(
 			RequestContext ctx, 
 			ReverseRoutes reverseRoutes,
 			LoadedController loadedController, 
-			ResponseStreamer oldResponseCb,
 			ProxyStreamHandle responseCb 
 	) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.loadedController = loadedController;
-		this.oldResponseCb = oldResponseCb;
 		this.responseCb = responseCb;
 	}
 
@@ -129,10 +124,10 @@ public class ResponseProcessorHtml implements Processor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.HTML);
 		
-		return ContextWrap.wrap(ctx, () -> oldResponseCb.sendRenderHtml(resp));
+		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
 	}
 
-	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> continueProcessing(Action controllerResponse) {
 		if(controllerResponse instanceof RedirectImpl) {
 			return createFullRedirect((RedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof PortRedirect) {

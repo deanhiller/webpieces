@@ -56,8 +56,6 @@ public class RouteInvokerStatic {
 			resp.setFileAndRelativePath(fullPath, relativeUrl);
 		}
 
-		ResponseStreamer proxyResponse = proxyProvider.get();
-		proxyResponse.init(ctx.getRequest(), handler);
 		ResponseStaticProcessor processor = new ResponseStaticProcessor(reader, pool, futureUtil, ctx, handler);
 
 		return processor.renderStaticResponse(resp).thenApply(s -> new NullWriter());

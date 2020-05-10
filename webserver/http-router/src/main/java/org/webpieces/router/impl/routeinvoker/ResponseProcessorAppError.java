@@ -11,14 +11,15 @@ import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.loader.LoadedController;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 public class ResponseProcessorAppError implements Processor {
 
 	private RequestContext ctx;
 	private LoadedController loadedController;
-	private ResponseStreamer responseCb;
+	private ProxyStreamHandle responseCb;
 
-	public ResponseProcessorAppError(RequestContext ctx, LoadedController loadedController, ResponseStreamer responseCb) {
+	public ResponseProcessorAppError(RequestContext ctx, LoadedController loadedController, ProxyStreamHandle responseCb) {
 		this.ctx = ctx;
 		this.loadedController = loadedController;
 		this.responseCb = responseCb;
@@ -47,7 +48,7 @@ public class ResponseProcessorAppError implements Processor {
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
 	}
 
-	public CompletableFuture<Void> continueProcessing(Action controllerResponse, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> continueProcessing(Action controllerResponse) {
 		if(!(controllerResponse instanceof RenderImpl)) {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
 					+ "precondition check on error routes to assert the correct return types in ControllerLoader which is called from the RouteBuilders");

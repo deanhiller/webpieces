@@ -125,9 +125,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			Current.setContext(null);
 		}
 
-		ResponseStreamer responseCb = proxyProvider.get();
-		responseCb.init(requestCtx.getRequest(), handler);
-		return response.thenCompose(resp -> processor.continueProcessing(resp, responseCb));
+		return response.thenCompose(resp -> processor.continueProcessing(resp));
 	}
 	public CompletableFuture<Action> invokeService(Service<MethodMeta, Action> service, MethodMeta methodMeta) {
 		return service.invoke(methodMeta);
@@ -145,12 +143,9 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
 
-		ResponseStreamer responseCb = proxyProvider.get();
-		responseCb.init(requestCtx.getRequest(), invokeInfo.getHandler());
-
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
 				invokeInfo.getRequestCtx(), reverseRoutes, 
-				loadedController, responseCb, invokeInfo.getHandler());
+				loadedController, invokeInfo.getHandler());
 		return invokeAny(invokeInfo, loadedController, service, data, processor, false);
 	}
 	
