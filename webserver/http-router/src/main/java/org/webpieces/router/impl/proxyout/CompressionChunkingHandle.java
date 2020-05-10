@@ -44,7 +44,6 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 	private boolean compressionOff;
 	private RouterRequest routerRequest;
 	private WebSettings webSettings;
-	private boolean handleKeepAlive = true; //must be turned off by legacy code that we need to move over so we can remove this field and do ALL closes in one section
 	
 	@Inject
     public CompressionChunkingHandle(
@@ -90,7 +89,7 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 		}
 		
 		boolean closeAfterResponding = false;
-		if(handleKeepAlive && closeAfterResponding(routerRequest.originalRequest))
+		if(closeAfterResponding(routerRequest.originalRequest))
 			closeAfterResponding = true;
 		
 		boolean shouldClose = closeAfterResponding;
@@ -268,14 +267,6 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 
 	public void turnCompressionOff() {
 		this.compressionOff = true;
-	}
-
-	public boolean isHandleKeepAlive() {
-		return handleKeepAlive;
-	}
-
-	public void setHandleKeepAlive(boolean handleKeepAlive) {
-		this.handleKeepAlive = handleKeepAlive;
 	}
 
 }

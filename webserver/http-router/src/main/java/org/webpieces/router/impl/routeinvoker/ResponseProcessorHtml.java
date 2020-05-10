@@ -61,8 +61,6 @@ public class ResponseProcessorHtml implements Processor {
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(redirectResponse));
 	}
 	
-
-	
 	public CompletableFuture<Void> createAjaxRedirect(AjaxRedirectImpl action) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();

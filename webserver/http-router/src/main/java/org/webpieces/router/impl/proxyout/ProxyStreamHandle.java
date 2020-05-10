@@ -63,20 +63,6 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		handle.turnCompressionOff();
 	}
     
-	public StreamWriter closeIfNeeded(Http2Headers request, StreamWriter w) {
-		String connHeader = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
-		boolean close = false;
-		if(!"keep-alive".equals(connHeader)) {
-			close = true;
-		} else
-			close = false;
-		
-		if(close)
-			closeIfNeeded();
-		
-		return w;
-	}
-	
     @Override
     public CompletableFuture<StreamWriter> process(Http2Response response) {
     	return handle.process(response);
@@ -123,8 +109,6 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	}
 
     public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
-    	handle.setHandleKeepAlive(false);
-    	
         RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
         Http2Response response = responseCreator.createRedirect(req.originalRequest, httpResponse);
 
@@ -132,23 +116,17 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 
         log.info("sending REDIRECT(due to bad cookie) response responseSender="+ this);
 
-        return process(response)
-        		.thenApply((w) -> closeIfNeeded(req.originalRequest, w));
+        return process(response);
     }
 	
 	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
-    	handle.setHandleKeepAlive(false);
-
 		Http2Request request = handle.getRouterRequest().originalRequest;
 		if(log.isDebugEnabled())
 			log.debug("Sending redirect response. req="+request);
 		Http2Response response = responseCreator.createRedirect(request, httpResponse);
 		
 		log.info("sending REDIRECT response responseSender="+ this);
-		return process(response).thenApply(w -> {
-			closeIfNeeded(request, w);
-			return null;
-		});
+		return process(response).thenApply(s -> null);
 	}
 	
 	public CompletableFuture<StreamWriter> finalFailure(Throwable e, RequestContext requestCtx) {
