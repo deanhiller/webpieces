@@ -7,9 +7,14 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.dto.RedirectResponse;
+import org.webpieces.router.impl.routeinvoker.ContextWrap;
+import org.webpieces.router.impl.routers.ExceptionWrap;
+import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -26,15 +31,19 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 
 	private ChannelCloser channelCloser;
 
+	private FutureHelper futureUtil;
+
 	@Inject
     public ProxyStreamHandle(
     	CompressionChunkingHandle handle,
     	ResponseCreator responseCreator,
-    	ChannelCloser channelCloser
+    	ChannelCloser channelCloser,
+    	FutureHelper futureUtil
     ) {
 		this.handle = handle;
 		this.responseCreator = responseCreator;
 		this.channelCloser = channelCloser;
+		this.futureUtil = futureUtil;
     }
 
 	public void setRouterRequest(RouterRequest routerRequest) {
@@ -122,6 +131,26 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return handle.hasSentResponseAlready();
 	}
 
+	public Throwable finalFailure(Throwable e, RequestContext requestCtx, ResponseStreamer proxy) {
+		if(ExceptionWrap.isChannelClosed(e))
+			return e;
+
+		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
+
+		CompletableFuture<Void> future = futureUtil.syncToAsyncException(
+				() -> failureRenderingInternalServerErrorPage(requestCtx, e, proxy)
+		);
+		
+		future.exceptionally((t) -> {
+			log.error("Webpieces failed at rendering it's internal error page since webapps internal erorr app page failed", t);
+			return null;
+		});
+		return e;
+	}
+
+    public CompletableFuture<Void> failureRenderingInternalServerErrorPage(RequestContext ctx, Throwable e, ResponseStreamer proxyResponse) {
+        return ContextWrap.wrap(ctx, () -> proxyResponse.failureRenderingInternalServerErrorPage(e));
+    }
 
 
 }

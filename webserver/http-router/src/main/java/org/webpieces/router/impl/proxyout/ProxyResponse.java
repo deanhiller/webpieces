@@ -19,10 +19,8 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
-import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.MimeTypes;
-import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
@@ -39,7 +37,6 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.StatusCode;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 //MUST NOT BE @Singleton!!! since this is created per request
 public class ProxyResponse implements ResponseStreamer {
@@ -233,13 +230,10 @@ public class ProxyResponse implements ResponseStreamer {
 			return stream.process(resp).thenApply(w -> null);
 		}
 		
-		MimeTypeResult mimeType = mimeTypes.createMimeType(resp.getSingleHeaderValue(Http2HeaderName.CONTENT_TYPE));
-		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, mimeType);
-		
-		return sendChunkedResponse(resp, bytes, compression);
+		return sendChunkedResponse(resp, bytes);
 	}
 
-	private CompletableFuture<Void> sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
+	private CompletableFuture<Void> sendChunkedResponse(Http2Response resp, byte[] bytes) {
 
 		log.info("sending RENDERHTML response. size="+bytes.length+" code="+resp+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ stream);
 

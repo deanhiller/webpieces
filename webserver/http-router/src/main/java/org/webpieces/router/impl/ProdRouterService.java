@@ -32,7 +32,6 @@ public class ProdRouterService extends AbstractRouterService {
 	
 	@Inject
 	public ProdRouterService(
-			FailureResponder failureResponder,
 			RouteLoader routeLoader, 
 			CookieTranslator cookieTranslator, 
 			ObjectTranslator translator, 
@@ -42,7 +41,7 @@ public class ProdRouterService extends AbstractRouterService {
 			FutureHelper futureUtil,
 			Provider<ResponseStreamer> proxyProvider
 	) {
-		super(failureResponder, futureUtil, webInjector, routeLoader, cookieTranslator, translator, proxyProvider);
+		super(futureUtil, webInjector, routeLoader, cookieTranslator, translator, proxyProvider);
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 		this.router = router;

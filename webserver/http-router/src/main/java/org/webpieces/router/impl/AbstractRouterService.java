@@ -23,7 +23,6 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
-import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 
@@ -41,11 +40,9 @@ public abstract class AbstractRouterService {
 	private Provider<ResponseStreamer> proxyProvider;
 	private CookieTranslator cookieTranslator;
 	private WebInjector webInjector;
-	private FailureResponder failureResponder;
 	private FutureHelper futureUtil;
 	
 	public AbstractRouterService(
-			FailureResponder failureResponder,
 			FutureHelper futureUtil,
 			WebInjector webInjector,
 			RouteLoader routeLoader,
@@ -53,7 +50,6 @@ public abstract class AbstractRouterService {
 			ObjectTranslator translator,
 			Provider<ResponseStreamer> proxyProvider
 	) {
-		this.failureResponder = failureResponder;
 		this.futureUtil = futureUtil;
 		this.webInjector = webInjector;
 		this.routeLoader = routeLoader;
@@ -85,25 +81,8 @@ public abstract class AbstractRouterService {
 		proxy.init(requestCtx.getRequest(), handler);
 		return futureUtil.catchBlockWrap(
 				() -> incomingRequestImpl(requestCtx, handler),
-				(t) -> finalFailure(handler, t, requestCtx, proxy)
+				(t) -> handler.finalFailure(t, requestCtx, proxy)
 		);
-	}
-
-	public Throwable finalFailure(ProxyStreamHandle handler, Throwable e, RequestContext requestCtx, ResponseStreamer proxy) {
-		if(ExceptionWrap.isChannelClosed(e))
-			return e;
-
-		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
-
-		CompletableFuture<Void> future = futureUtil.syncToAsyncException(
-				() -> failureResponder.failureRenderingInternalServerErrorPage(requestCtx, e, proxy)
-		);
-		
-		future.exceptionally((t) -> {
-			log.error("Webpieces failed at rendering it's internal error page since webapps internal erorr app page failed", t);
-			return null;
-		});
-		return e;
 	}
 	
 	protected abstract CompletableFuture<StreamWriter> incomingRequestImpl(RequestContext req, ProxyStreamHandle handler);

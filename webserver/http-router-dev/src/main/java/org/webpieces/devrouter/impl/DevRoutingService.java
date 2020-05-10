@@ -13,7 +13,6 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
 import org.webpieces.router.impl.CookieTranslator;
-import org.webpieces.router.impl.FailureResponder;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.WebInjector;
 import org.webpieces.router.impl.params.ObjectTranslator;
@@ -42,7 +41,6 @@ public class DevRoutingService extends AbstractRouterService {
 
 	@Inject
 	public DevRoutingService(
-			FailureResponder failureResponder,
 			RouteLoader routeConfig, 
 			RouterConfig config, 
 			ARouter router, 
@@ -53,7 +51,7 @@ public class DevRoutingService extends AbstractRouterService {
 			FutureHelper futureUtil,
 			Provider<ResponseStreamer> proxyProvider
 	) {
-		super(failureResponder, futureUtil, webInjector, routeConfig, cookieTranslator, objTranslator, proxyProvider);
+		super(futureUtil, webInjector, routeConfig, cookieTranslator, objTranslator, proxyProvider);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.router = router;
