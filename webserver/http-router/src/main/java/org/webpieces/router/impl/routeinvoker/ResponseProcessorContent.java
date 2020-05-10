@@ -7,14 +7,15 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.impl.dto.RenderContentResponse;
+import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 public class ResponseProcessorContent implements Processor {
 	
-	private ResponseStreamer responseCb;
+	private ProxyStreamHandle responseCb;
 
 	private RequestContext ctx;
 
-	public ResponseProcessorContent(RequestContext ctx, ResponseStreamer responseCb) {
+	public ResponseProcessorContent(RequestContext ctx, ProxyStreamHandle responseCb) {
 		this.ctx = ctx;
 		this.responseCb = responseCb;
 	}

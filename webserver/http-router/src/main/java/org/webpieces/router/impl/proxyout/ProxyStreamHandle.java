@@ -15,12 +15,12 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.impl.dto.RedirectResponse;
+import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
 import org.webpieces.router.impl.routeinvoker.ContextWrap;
 import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.futures.FutureHelper;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
@@ -28,7 +28,6 @@ import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.StatusCode;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class ProxyStreamHandle implements RouterStreamHandle {
 	private static final Logger log = LoggerFactory.getLogger(ProxyStreamHandle.class);
@@ -108,6 +107,12 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return handle.hasSentResponseAlready();
 	}
 
+	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
+		Http2Request request = handle.getRouterRequest().originalRequest;
+		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
+		return maybeCompressAndSend(null, tuple, resp.getPayload()); 
+	}
+	
     public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
         RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
         Http2Response response = responseCreator.createRedirect(req.originalRequest, httpResponse);

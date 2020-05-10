@@ -12,9 +12,7 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.dto.RedirectResponse;
-import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
-import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 public class MockResponseStream extends MockSuperclass implements ResponseStreamer{
@@ -41,11 +39,6 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 
 	}
 
-	@Override
-	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
-		throw new UnsupportedOperationException("not implemented yet");
-	}
-	
 	public List<RedirectResponse> getSendRedirectCalledList() {
 		Stream<ParametersPassedIn> params = super.getCalledMethods(MockMethod.SEND_REDIRECT);
 		Stream<RedirectResponse> responseStr = params.map(p -> (RedirectResponse)p.getArgs()[0]);

@@ -10,15 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.MissingPropException;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.data.api.BufferPool;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
-import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.View;
-import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
 
@@ -31,7 +28,6 @@ public class ProxyResponse implements ResponseStreamer {
 	private static final Logger log = LoggerFactory.getLogger(ProxyResponse.class);
 	
 	private final TemplateApi templatingService;
-	private final ResponseCreator responseCreator;
 	
 	private ProxyStreamHandle stream;
 	private Http2Request request;
@@ -41,13 +37,10 @@ public class ProxyResponse implements ResponseStreamer {
 	@Inject
 	public ProxyResponse(
 		TemplateApi templatingService, 
-		ResponseCreator responseCreator, 
-		BufferPool pool,
 		FutureHelper futureUtil
 	) {
 		super();
 		this.templatingService = templatingService;
-		this.responseCreator = responseCreator;
 		this.futureUtil = futureUtil;
 	}
 
@@ -143,11 +136,7 @@ public class ProxyResponse implements ResponseStreamer {
 		return templatingService.convertTemplateClassToPath(className);
 	}
 
-	@Override
-	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
-		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
-		return stream.maybeCompressAndSend(null, tuple, resp.getPayload()); 
-	}
+
 
 }
 

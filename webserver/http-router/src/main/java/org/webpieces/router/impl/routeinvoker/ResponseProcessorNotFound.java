@@ -69,7 +69,7 @@ public class ResponseProcessorNotFound implements Processor {
 
 	public CompletableFuture<Void> createContentResponse(RenderContent r) {
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
-		return ContextWrap.wrap(ctx, () -> oldResponseCb.sendRenderContent(resp));
+		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
 	}
 	
 	public CompletableFuture<Void> createFullRedirect(RedirectImpl action) {

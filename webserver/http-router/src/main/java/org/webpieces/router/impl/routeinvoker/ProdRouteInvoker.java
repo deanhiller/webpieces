@@ -62,13 +62,10 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	
 	@Override
 	public CompletableFuture<StreamWriter> invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		ResponseStreamer proxyResponse = proxyProvider.get();
-		proxyResponse.init(invokeInfo.getRequestCtx().getRequest(), invokeInfo.getHandler());
-
 		RouteInfoForContent content = (RouteInfoForContent) data;
 		if(content.getBodyContentBinder() == null)
 			throw new IllegalArgumentException("bodyContentBinder is required for these routes yet it is null here.  bug");
-		ResponseProcessorContent processor = new ResponseProcessorContent(invokeInfo.getRequestCtx(), proxyResponse);
+		ResponseProcessorContent processor = new ResponseProcessorContent(invokeInfo.getRequestCtx(), invokeInfo.getHandler());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor, false);
 	}
 	
