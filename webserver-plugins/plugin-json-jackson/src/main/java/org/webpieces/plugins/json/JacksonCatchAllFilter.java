@@ -111,7 +111,7 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	protected byte[] translateAuthenticationError(AuthenticationException t) {
 		JsonError error = new JsonError();
-		error.setError("403 Forbidden: "+t.getMessage());
+		error.setError("Forbidden: "+t.getMessage());
 		error.setCode(403);
 
 		return translateJson(mapper, error);
@@ -119,7 +119,7 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	protected byte[] translateAuthorizationError(AuthorizationException t) {
 		JsonError error = new JsonError();
-		error.setError("401 Not Authorized : "+t.getMessage());
+		error.setError("Not Authorized : "+t.getMessage());
 		error.setCode(401);
 
 		return translateJson(mapper, error);
@@ -127,7 +127,7 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	protected byte[] translateClientError(ClientDataError t) {
 		JsonError error = new JsonError();
-		error.setError("400 bad request: "+t.getMessage());
+		error.setError("bad request: "+t.getMessage());
 		error.setCode(400);
 
 		return translateJson(mapper, error);
@@ -135,7 +135,7 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	protected byte[] createNotFoundJsonResponse() {
 		JsonError error = new JsonError();
-		error.setError("404 This url does not exist.  try another url");
+		error.setError("This url does not exist.  try another url");
 		error.setCode(404);
 		return translateJson(mapper, error);
 	}
