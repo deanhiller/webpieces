@@ -16,6 +16,8 @@ import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class DScopedRouter extends EScopedRouter {
 
@@ -70,6 +72,15 @@ public class DScopedRouter extends EScopedRouter {
 		SupressedExceptionLog.log(log, t);
 
 
+		//If it is a streaming, controller AND response has already been sent, we cannot render the web apps error controller
+		//page so in that case, fail, and cancel the stream
+		if(handler.hasSentResponseAlready()) {
+			RstStreamFrame frame = new RstStreamFrame();
+			frame.setKnownErrorCode(Http2ErrorCode.CANCEL);
+			handler.cancel(frame);
+			return CompletableFuture.completedFuture(new NullStream());
+		}
+		
 		return invokeWebAppErrorController(t, ctx, handler, failedRoute, forceEndOfStream);
 	}
 

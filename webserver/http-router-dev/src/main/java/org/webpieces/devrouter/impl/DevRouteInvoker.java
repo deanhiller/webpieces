@@ -34,6 +34,7 @@ import org.webpieces.router.impl.services.RouteInfoForContent;
 import org.webpieces.router.impl.services.RouteInfoForHtml;
 import org.webpieces.router.impl.services.RouteInfoForNotFound;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
+import org.webpieces.router.impl.services.RouteInfoForStream;
 import org.webpieces.router.impl.services.ServiceInvoker;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
@@ -128,6 +129,22 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 			data = new RouteInfoForContent(binderAndLoader.getBinder());
 		}
 		return super.invokeContentController(invokeInfo, newInfo, data);
+	}
+
+	@Override
+	public CompletableFuture<StreamWriter> invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+		DynamicInfo newInfo = info;
+		//If we haven't loaded it already, load it now
+		if(info.getLoadedController() == null) {
+			BaseRouteInfo route = invokeInfo.getRoute();
+			MethodMetaAndController metaAndController = controllerFinder.loadGenericController(route.getInjector(), route.getRouteInfo(), false);
+			//no filters on streaming yet AND they would be different filters anyways
+			//Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route, false);
+			LoadedController loadedController = metaAndController.getLoadedController();
+			newInfo = new DynamicInfo(loadedController, null);
+			data = new RouteInfoForStream();
+		}		
+		return super.invokeStreamingController(invokeInfo, newInfo, data);
 	}
 
 	private CompletableFuture<StreamWriter> invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {

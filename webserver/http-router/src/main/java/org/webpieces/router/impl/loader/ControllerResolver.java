@@ -17,6 +17,8 @@ public class ControllerResolver {
 		RouteModuleInfo moduleInfo = base.getRouteModuleInfo();
 		String controllerAndMethod = base.getControllerMethodString();
 		int index = controllerAndMethod.lastIndexOf(".");
+		if(index < 0)
+			throw new IllegalArgumentException("Your Controller.method='"+controllerAndMethod+"' forgot the . to separate controller and method");
 		String methodStr = controllerAndMethod.substring(index+1);
 		String controllerStr = controllerAndMethod.substring(0, index);
 		if(countMatches(controllerAndMethod) > 1) {

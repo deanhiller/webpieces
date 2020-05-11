@@ -306,4 +306,11 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		
 		return templatingService.convertTemplateClassToPath(className);
 	}
+
+	@Override
+	public Http2Response createBaseResponse(Http2Request req, String mimeType, int statusCode, String statusReason) {
+		Http2Response response = responseCreator.addCommonHeaders2(req, mimeType, statusCode, statusReason);
+		response.setEndOfStream(false); //This is for streaming so set eos=false;
+		return response;
+	}
 }

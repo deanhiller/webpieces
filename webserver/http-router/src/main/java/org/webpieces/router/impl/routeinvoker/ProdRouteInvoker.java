@@ -60,6 +60,12 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 		ResponseProcessorContent processor = new ResponseProcessorContent(invokeInfo.getRequestCtx(), invokeInfo.getHandler());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor, false);
 	}
+
+	@Override
+	public CompletableFuture<StreamWriter> invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		return super.invokeStreamingController(invokeInfo, dynamicInfo, data);
+		
+	}
 	
 	@Override
 	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {

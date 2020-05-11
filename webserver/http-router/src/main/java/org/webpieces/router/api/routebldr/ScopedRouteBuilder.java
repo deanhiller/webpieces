@@ -29,6 +29,17 @@ public interface ScopedRouteBuilder {
 	 */
 	void addContentRoute(Port port, HttpMethod method, String urlPath, String controllerMethod, RouteId routeId);
 
+	/**
+	 * Adds a streaming route where the method in the controller should be of the form
+	 * 
+	 * public CompletableFuture<StreamWriter> processRequest(RouterRequest request, RouteStreamHandle stream);
+	 * 
+	 * You can do bi-directional communication in http1.1 or http2 with this route.  Just keep writing to the
+	 * RouteStreamHandle and the client will keep writing to the StreamWriter that you return.
+	 */
+	void addStreamRoute(Port both, HttpMethod get, String path, String controllerMethod);
+	
+
 	void addCrud(Port port, String entity, String controller, CrudRouteIds routeIds);
 
 	/**

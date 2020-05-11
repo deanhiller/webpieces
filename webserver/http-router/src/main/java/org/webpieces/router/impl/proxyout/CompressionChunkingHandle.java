@@ -272,4 +272,10 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 		this.compressionOff = true;
 	}
 
+	@Override
+	public Http2Response createBaseResponse(Http2Request req, String mimeType, int statusCode, String statusReason) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

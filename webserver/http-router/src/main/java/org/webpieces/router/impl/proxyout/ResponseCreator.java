@@ -82,30 +82,24 @@ public class ResponseCreator {
 			boolean isDynamicPartOfWebsite, 
 			MimeTypeResult mimeType) {
 
-		Http2Response response = new Http2Response();
+		Http2Response response = addCommonHeaders(request, mimeType.mime, isDynamicPartOfWebsite, statusCode, reason);
+
 		response.setEndOfStream(false);
 
-		response.addHeader(new Http2Header(Http2HeaderName.STATUS, statusCode+""));
 		response.addHeader(new Http2Header("reason", reason));
-		response.addHeader(new Http2Header(Http2HeaderName.CONTENT_TYPE, mimeType.mime));
 
-		boolean isInternalError = false;
-		if(statusCode == 500)
-			isInternalError = true;
-		
-		addCommonHeaders(request, response, isInternalError, isDynamicPartOfWebsite);
 		return new ResponseEncodingTuple(response, mimeType);
 	}
 
 	public Http2Response createRedirect(Http2Request request, RedirectResponse httpResponse) {
-		Http2Response response = new Http2Response();
+		Http2Response response;
 
 		if(httpResponse.isAjaxRedirect) {
-			response.addHeader(new Http2Header(Http2HeaderName.STATUS, Constants.AJAX_REDIRECT_CODE+""));
-			response.addHeader(new Http2Header("reason", "Ajax Redirect"));
+			response = addCommonHeaders(request, null, true, 
+					Constants.AJAX_REDIRECT_CODE, "Ajax Redirect");
 		} else {
-			response.addHeader(new Http2Header(Http2HeaderName.STATUS, StatusCode.HTTP_303_SEEOTHER.getCodeString()));
-			response.addHeader(new Http2Header("reason", StatusCode.HTTP_303_SEEOTHER.getReason()));
+			response = addCommonHeaders(request, null, true, 
+					StatusCode.HTTP_303_SEEOTHER.getCode(), StatusCode.HTTP_303_SEEOTHER.getReason());
 		}
 
 		String url = httpResponse.redirectToPath;
@@ -132,8 +126,6 @@ public class ResponseCreator {
 		Http2Header location = new Http2Header(Http2HeaderName.LOCATION, url);
 		response.addHeader(location );
 
-		addCommonHeaders(request, response, false, true);
-
 		//Firefox requires a content length of 0 on redirect(chrome doesn't)!!!...
 		response.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, 0+""));
 		return response;
@@ -148,8 +140,30 @@ public class ResponseCreator {
 			this.mimeType = mimeType;
 		}	
 	}
+
+	public Http2Response addCommonHeaders(Http2Request request, String responseMimeType, boolean isDynamicPartOfWebsite, int statusCode, String statusReason) {
+		Http2Response response = addCommonHeaders2(request, responseMimeType, statusCode, statusReason);
+
+		boolean isInternalError = statusCode >= 500 && statusCode < 600;
+		
+		if(isDynamicPartOfWebsite) {
+			List<RouterCookie> cookies = createCookies(isInternalError);
+			for(RouterCookie c : cookies) {
+				Http2Header cookieHeader = create(c);
+				response.addHeader(cookieHeader);
+			}
+		}
+		
+		return response;
+	}
 	
-	public void addCommonHeaders(Http2Request request, Http2Response response, boolean isInternalError, boolean isDynamicPartOfWebsite) {
+	public Http2Response addCommonHeaders2(Http2Request request, String responseMimeType, int statusCode, String statusReason) {
+		Http2Response response = new Http2Response();
+		
+		response.addHeader(new Http2Header(Http2HeaderName.STATUS, statusCode+""));
+		if(statusReason != null)
+			response.addHeader(new Http2Header("reason", statusReason));
+		
 		String connHeader = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
 		
 		DateTime now = DateTime.now().toDateTime(DateTimeZone.UTC);
@@ -163,16 +177,11 @@ public class ResponseCreator {
 		Http2Header date = new Http2Header(Http2HeaderName.DATE, dateStr);
 		response.addHeader(date);
 
+		if(responseMimeType != null)
+			response.addHeader(new Http2Header(Http2HeaderName.CONTENT_TYPE, responseMimeType));
+
 //		Header xFrame = new Header("X-Frame-Options", "SAMEORIGIN");
 //		response.addHeader(xFrame);
-		
-		if(isDynamicPartOfWebsite) {
-			List<RouterCookie> cookies = createCookies(isInternalError);
-			for(RouterCookie c : cookies) {
-				Http2Header cookieHeader = create(c);
-				response.addHeader(cookieHeader);
-			}
-		}
 		
 		//X-XSS-Protection: 1; mode=block
 		//X-Frame-Options: SAMEORIGIN
@@ -182,12 +191,13 @@ public class ResponseCreator {
 		//X-Content-Type-Options: nosniff\r\n
 		
 		if(connHeader == null)
-			return;
+			return response;
 		else if(!"keep-alive".equals(connHeader))
-			return;
+			return response;
 
 		//just re-use the connHeader from the request...
 		response.addHeader(request.getHeaderLookupStruct().getHeader(Http2HeaderName.CONNECTION));
+		return response;
 	}
 	
 	private List<RouterCookie> createCookies(boolean isInternalError) {

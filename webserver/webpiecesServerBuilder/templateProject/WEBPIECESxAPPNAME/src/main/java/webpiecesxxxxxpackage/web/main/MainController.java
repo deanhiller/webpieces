@@ -6,9 +6,18 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Render;
+
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 import webpiecesxxxxxpackage.GlobalAppContext;
 import webpiecesxxxxxpackage.mgmt.SomeBean;
@@ -69,5 +78,26 @@ public class MainController {
 	
 	public Render internalError() {
 		return Actions.renderThis();
+	}
+	
+	public CompletableFuture<StreamWriter> myStream(RequestContext requestCtx, RouterStreamHandle handle) {
+		Http2Request req = requestCtx.getRequest().originalRequest;
+		Http2Response resp = handle.createBaseResponse(req, "application/x-ourexample", 200, "OK");
+		
+		return handle.process(resp).thenApply(s -> new RequestStreamEchoWriter(s));
+	}
+	
+	private static class RequestStreamEchoWriter implements StreamWriter {
+
+		private StreamWriter responseWriter;
+
+		public RequestStreamEchoWriter(StreamWriter responseWriter) {
+			this.responseWriter = responseWriter;
+		}
+
+		@Override
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
+			return responseWriter.processPiece(data);
+		}
 	}
 }

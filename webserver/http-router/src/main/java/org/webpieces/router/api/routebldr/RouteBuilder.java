@@ -9,6 +9,8 @@ public interface RouteBuilder extends ScopedRouteBuilder {
 	 * Adds a filter to controllers whose 'route' matches the pathRegEx.  NOTE: This pathRegEx DOES NOT apply to the incoming request to enhance
 	 * performance BUT ONLY applies to the controller's route path of "/mypath/{username}".  In doing so, all filters are chained on startup so
 	 * when requests come in, it's very fast.
+	 * 
+	 * This only adds request/response type route filters.  addStreamRoute would need streaming filters.
 	 */
 	<T> void addFilter(String pathRegEx, Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel);
 

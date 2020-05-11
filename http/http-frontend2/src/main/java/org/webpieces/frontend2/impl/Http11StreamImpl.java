@@ -272,7 +272,7 @@ public class Http11StreamImpl implements ResponseStream {
 
 	@Override
 	public CompletableFuture<Void> cancelStream() {
-		throw new UnsupportedOperationException("not supported for http1.1 requests.  you can use getSocket().close() instead if you like");
+		return socket.getChannel().close();
 	}
 
 	@Override

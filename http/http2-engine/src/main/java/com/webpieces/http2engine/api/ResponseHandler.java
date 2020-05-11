@@ -14,6 +14,8 @@ public interface ResponseHandler {
 	CompletableFuture<StreamWriter> process(Http2Response response);
 
 	/**
+	 * This does nothing in http1.1. 
+	 * 
 	 * For Http2ClientEngine, this receives the Http2 Push and for Http2ServerEngine, you call this method
 	 * to send a push
 	 */

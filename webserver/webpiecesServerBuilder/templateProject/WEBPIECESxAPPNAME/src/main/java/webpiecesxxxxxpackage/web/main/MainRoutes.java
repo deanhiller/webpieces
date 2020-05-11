@@ -5,6 +5,7 @@ import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.Routes;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.ctx.api.HttpMethod.POST;
 import static org.webpieces.router.api.routes.Port.BOTH;
 import static webpiecesxxxxxpackage.web.main.MainRouteId.*;
 
@@ -17,6 +18,9 @@ public class MainRoutes implements Routes {
 		//   regex a capture group for you BUT leave the rest untouched so you can do whatever regex you like
 		//   ORDER matters so the order of modules is important and the order of routes is important
 
+		
+		bldr.addStreamRoute(BOTH, POST, "/streaming", "MainController.myStream");
+		
 		//The Controller.method is a relative or absolute path with ClassName.method at the end
 		//RouteIds are used to redirect in the webapp itself and must be unique
 		bldr.addRoute(BOTH, GET, "/",              "MainController.index", MAIN_ROUTE);

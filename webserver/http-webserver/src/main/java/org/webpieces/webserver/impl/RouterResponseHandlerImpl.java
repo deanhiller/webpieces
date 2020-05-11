@@ -7,6 +7,7 @@ import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.impl.ProtocolType;
 import org.webpieces.router.api.RouterStreamHandle;
 
+import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
@@ -58,6 +59,12 @@ public class RouterResponseHandlerImpl implements RouterStreamHandle {
 	public Void closeIfNeeded() {
 		if(stream.getSocket().getProtocol() == ProtocolType.HTTP1_1)
 			stream.getSocket().close("Connection KeepAlive not set");
+		return null;
+	}
+
+	@Override
+	public Http2Response createBaseResponse(Http2Request req, String mimeType, int statusCode, String statusReason) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

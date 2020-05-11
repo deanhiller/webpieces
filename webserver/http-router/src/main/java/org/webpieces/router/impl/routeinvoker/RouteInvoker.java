@@ -25,7 +25,9 @@ public interface RouteInvoker {
 	CompletableFuture<StreamWriter> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data);
 
 	CompletableFuture<StreamWriter> invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data);
-	
+
+	CompletableFuture<StreamWriter> invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data);
+
 	CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data);
 
 	CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data);

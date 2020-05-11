@@ -32,6 +32,7 @@ import org.webpieces.router.impl.routers.EScopedRouter;
 import org.webpieces.router.impl.routers.FContentRouter;
 import org.webpieces.router.impl.routers.FHtmlRouter;
 import org.webpieces.router.impl.routers.FStaticRouter;
+import org.webpieces.router.impl.routers.FStreamingRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.router.impl.services.SvcProxyForContent;
 import org.webpieces.router.impl.services.SvcProxyForHtml;
@@ -88,6 +89,24 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 			resettingLogic.getReverseRoutes().addRoute(routeId, router);
 
 		log.info("scope:'"+routerInfo+"' added content route="+matchInfo+" method="+routeInfo.getControllerMethodString());
+	}
+	@Override
+	public void addStreamRoute(Port port, HttpMethod method, String path, String controllerMethod) {
+		UrlPath p = new UrlPath(routerInfo, path);
+		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
+
+		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
+		//he did wrong when reading the exception!!
+		MethodMetaAndController container = holder.getFinder().loadGenericController(resettingLogic.getInjector(), routeInfo, true);
+		
+		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
+		FStreamingRouter router = new FStreamingRouter(holder.getRouteInvoker2(), matchInfo);
+		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
+		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.STREAMING, container, svc);
+		
+		newDynamicRoutes.add(routerAndInfo);
+
+		log.info("scope:'"+routerInfo+"' added content route="+matchInfo+" method="+routeInfo.getControllerMethodString());		
 	}
 	
 	private MatchInfo createMatchInfo(UrlPath urlPath, Port exposedPort, HttpMethod httpMethod, Charset urlEncoding) {

@@ -1,5 +1,8 @@
 package org.webpieces.router.impl.routeinvoker;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -9,6 +12,7 @@ import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.ControllerException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
@@ -61,6 +65,57 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		return staticInvoker.invokeStatic(ctx, handler, data);
 	}
 	
+	
+	public CompletableFuture<StreamWriter> invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+		RequestContext requestCtx = invokeInfo.getRequestCtx();
+		RouterStreamHandle handler = invokeInfo.getHandler();
+		LoadedController loadedController = dynamicInfo.getLoadedController();
+		Object instance = loadedController.getControllerInstance();
+		Method controllerMethod = loadedController.getControllerMethod();
+		Parameter[] parameters = loadedController.getParameters();
+		
+		Current.setContext(requestCtx);
+
+		if(parameters.length != 2)
+			throw new IllegalArgumentException("Your method='"+controllerMethod+"' MUST take two parameters and does not.  It needs to take a RequestContext and a RouterStremHandler");
+		else if(!RequestContext.class.equals(parameters[0].getType()))
+			throw new IllegalArgumentException("The first parameter must be RequestContext and was not for this method='"+controllerMethod+"'");
+		else if(!RouterStreamHandle.class.equals(parameters[1].getType()))
+			throw new IllegalArgumentException("The second parameter must be RouterStreamHandle and was not for this method='"+controllerMethod+"'");
+		else if(!CompletableFuture.class.equals(controllerMethod.getReturnType()))
+			throw new IllegalArgumentException("The return value must be CompletableFuture<StreamWriter> and was not for this method='"+controllerMethod+"'");
+
+
+		CompletableFuture<StreamWriter> response = futureUtil.catchBlockWrap(
+				() -> invokeStream(controllerMethod, instance, requestCtx, handler),
+				(t) -> convert(loadedController, t)
+		);
+
+		//NO need for finally block
+		Current.setContext(null);
+		
+		return response;
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public CompletableFuture<StreamWriter> invokeStream(Method m, Object instance, RequestContext requestCtx, RouterStreamHandle handler) {
+		try {
+			CompletableFuture<Object> future = (CompletableFuture) m.invoke(instance, requestCtx, handler);
+			if(future == null) {
+				throw new IllegalStateException("You must return a non-null and did not from method='"+m+"'");
+			}
+			
+			return future.thenApply( resp -> {
+				if(!(resp instanceof StreamWriter)) {
+					throw new IllegalStateException("The return value must be CompletableFuture<StreamWriter> and was not for this method='"+m+"'");
+				}
+				return (StreamWriter) resp;
+			});
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			return futureUtil.failedFuture(e);
+		}
+	}
+	
 	protected CompletableFuture<StreamWriter> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
 		Service<MethodMeta, Action> service = dynamicInfo.getService();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
@@ -98,7 +153,6 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
-		ProxyStreamHandle handler = invokeInfo.getHandler();
 
 		if(service == null)
 			throw new IllegalStateException("Bug, service should never be null at this point");
