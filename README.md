@@ -57,16 +57,18 @@ One thing to note in the video is I was caught off guard by a minor bug(that is 
 
 #### 9 Steps to try the webserver (and view official documentation)
 
-1. Download the release "webpiecesServerBuilder-<version>.zip" (https://github.com/deanhiller/webpieces/releases), unzip
-2. run ./createProject.sh
-3. cd {projectDir}-all
-4. ./gradlew build # runs all the tests and verify everything is working. 
-5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
-6. cd {projectDir}-all/{projectDir}/output/distributions/
-7. unzip {projectDir} which is your whole webserver
-8. ./bin/{project} to start the production webserver
+1. Download the release "webpiecesServerBuilder-<version>.zip" (https://github.com/deanhiller/webpieces/releases), unzip and navigate to the new directory 
+"cd webpiecesServerBuilder"
+2. Run "./createProject.sh" on the command line
+3. "cd {projectDir}-all"
+4. "./gradlew build" # runs all the tests and verify everything is working. 
+5. "./gradlew assembleDist"  #creates the actual webserver distribution zip and tar files
+6. "cd {projectDir}-all/{projectDir}/output/distributions/"
+7. "unzip {projectDir}" which is your whole webserver
+8. "./bin/{project}" to start the production webserver
 9. In a browser go to http://localhost:8080
-10. To view the documentation, you need to start the development server in eclipse setup or intellij setup below
+10. To view the documentation, you need to stop the production webserver
+(a simple Ctrl + C should suffice) and you need to start the development server in eclipse setup or intellij setup below
 
 
 ### Eclipse Setup (Intellij setup below this section)

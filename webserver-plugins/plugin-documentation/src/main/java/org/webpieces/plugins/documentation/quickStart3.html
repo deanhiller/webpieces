@@ -7,18 +7,18 @@
 
 <h2>Your first Hibernate entity</h2>
 
-<p>Last updated: May 2nd, 2020</p>
+<p>Last updated: May 13th, 2020</p>
 
 <p>Before we start, let's checkout the in-memory db plugin for webpieces.  Go to http://localhost:8080/@db and for
 the JDBC URL, change it to 'jdbc:h2:mem:test' so it hits the in-memory database.  All other settings are
 fine.  Then click the Connect button.  Notice there is a few tables from the examples generated from webpieces
-template creation.  We will revisit this later in this example.  Also, notice there is no Car table as that will
-be created for us while we code ;)</p>
+template creation.  We will revisit this later in this example.  In this quickstart, we'll be creating a
+table called "CAR" that you will able to access in this in-memory database.</p>
 
 <p>Ideally however in a dynamic web application, we would like to let people persist data for a later time and
 modify that data.  A Hibernate plugin is installed by default for rapid prototyping though you can remove the
 hibernate plugin from the build files if you desire and use something else.  In the meantime, welcome to
-our first hibernate entity bean. Create a class "Cardbo.java" in the org.webpieces.helloworld.db package</p>
+our first hibernate entity bean. Create a class "CarDbo.java" in the org.webpieces.helloworld.db package</p>
 
 <p><b>It MUST be in the db package as the hibernate plugin is setup to scan from the location of DbSettingsProd.java
 all directories and subdirectories for entities.  This makes scanning 'much' faster as it only scans a subset of
@@ -107,24 +107,24 @@ public class CarDbo {
 </code>
 </pre>
 
-<p>Next, let's add our RouteIds for displaying a page to create a car, displaying a page to edit a car and
-finally for actually posting a car to the database</p>
+<p>Next, let's add our RouteIds in MyRouteId for displaying a page to create a car, displaying a page to edit a car, and
+finally for actually posting a car to the database:</p>
 
 <pre>
-<code>package org.webpieces.helloworld.myapp;
+<code>package org.webpieces.helloworld.web.myapp;
 
 import org.webpieces.router.api.routes.RouteId;
 
-public enum MyMainRouteId implements RouteId {
+public enum MyRouteId implements RouteId {
     HELLO_WORLD, DYNAMIC_HELLO_WORLD,
-    GET_CREATE_CAR_PAGE, GET_EDIT_CAR_PAGE, POST_CAR
+    <b>GET_CREATE_CAR_PAGE, GET_EDIT_CAR_PAGE, POST_CAR</b>
 }</code>
 </pre>
 
 <p>Then, let's add our new routes for the route ids we just added</p>
 
 <pre>
-<code>package org.webpieces.helloworld.myapp;
+<code>package org.webpieces.helloworld.web.myapp;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
@@ -140,15 +140,15 @@ public class MyMainRoutes implements Routes {
     public void configure(DomainRouteBuilder bldr) {
         RouteBuilder b = bldr.getAllDomainsRouteBuilder();
 
-        b.addRoute(Port.BOTH, GET, "/helloworld", "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
-        b.addRoute(Port.BOTH, GET ,"/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
+        b.addRoute(Port.BOTH, GET, "/helloworld", "MyMainController.helloWorld", MyRouteId.HELLO_WORLD);
+        b.addRoute(Port.BOTH, GET ,"/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyRouteId.DYNAMIC_HELLO_WORLD);
 
-        //route to render the page of creating a new user
-        b.addRoute(Port.BOTH, GET ,"/car/new", "MyMainController.carAddEdit", MyMainRouteId.GET_CREATE_CAR_PAGE);
+        <b>//route to render the page of creating a new user
+        b.addRoute(Port.BOTH, GET ,"/car/new", "MyMainController.carAddEdit", MyRouteId.GET_CREATE_CAR_PAGE);
         //route to render the page of editing an existing user
-        b.addRoute(Port.BOTH, GET ,"/car/edit/{name}", "MyMainController.carAddEdit", MyMainRouteId.GET_EDIT_CAR_PAGE);
+        b.addRoute(Port.BOTH, GET ,"/car/edit/{name}", "MyMainController.carAddEdit", MyRouteId.GET_EDIT_CAR_PAGE);
         //route to save a new or existing user
-        b.addRoute(Port.BOTH, POST,"/car/post", "MyMainController.postSaveCar", MyMainRouteId.POST_CAR);
+	b.addRoute(Port.BOTH, POST,"/car/post", "MyMainController.postSaveCar", MyRouteId.POST_CAR);</b>
     }
 }</code>
 </pre>
@@ -170,8 +170,9 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
 	}</code>
 </pre>
 
-<p>You will need to add two new imports as well</p>
+<p>You will need to add three new imports: </p>
 <ol>
+   <li>import org.webpieces.helloworld.db.CarDbo;</li>
    <li>import org.webpieces.plugins.hibernate.Em;</li>
    <li>import org.webpieces.router.api.exceptions.NotFoundException;</li>
 </ol>
@@ -216,7 +217,7 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
  are converted as well into the final form html element.]*</p
 
 <p>*[Hidden input - Then there is a hidden input which will have the id of the database entity if it is being edited.  This allows us to re-use the same html and java
-	controller code for adds and edits(quite nice).  This will be blank if we are doing an add]*</p>
+	controller code for adds and edits(quite nice).  This will be blank if we are doing an add.]*</p>
 	
 <p>*[FIELD tag - Next, we have the #{field}# tags which do a ton of work under the
 	covers so you can style every field in every location of your application consistently with where the error for
@@ -226,7 +227,7 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
 <p>*[	
 	Now that this is all setup, as long as you did not stop your development server, go to
 	http://localhost:8080/car/new and you should see a small form on the page with
-	a save button that will not work and will return a 5XX when you click itn displaying 'You encountered a bug in our server'.  
+	a save button that will not work and will return a 5XX when you click it displaying 'You encountered a bug in our server'.
 	Click the save button, and then
 	look at your logs and scroll up to the logs in red(YES YES!! errors and warnings are in red so they are damn
 	easy to find and are typically very detailed as to what is wrong!).  If you stopped your development
@@ -255,7 +256,7 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
         FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
         redirect.setIdFieldAndValue("id", entity.getId());
         return Actions.redirectFlashAll(
-                MyMainRouteId.GET_CREATE_CAR_PAGE, MyMainRouteId.GET_EDIT_CAR_PAGE, redirect);
+                MyRouteId.GET_CREATE_CAR_PAGE, MyRouteId.GET_EDIT_CAR_PAGE, redirect);
     }
 
     Current.flash().setMessage("User successfully saved");
@@ -264,11 +265,12 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
     Em.get().merge(entity);
     Em.get().flush();
 
-    return Actions.redirect(MyMainRouteId.HELLO_WORLD);
+    return Actions.redirect(MyRouteId.HELLO_WORLD);
 }</code>
 </pre>
 
-<p>Let the IDE add the proper imports by selecting the ones from webpieces package</p>
+<p>Add the proper imports through the IDE you are using. In the case of multiple same-named imports,
+	select the ones from webpieces package.</p>
 
 <p>We first validate each thing we need to and keep adding errors to each field that is wrong.  Then, we check if validation
 	hasErrors() and if it does, we redirect back to the edit or add page depending on if we are editing or adding the
@@ -278,10 +280,10 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
 
 <p>Follow these next steps exactly so we can demonstrate some real power of details.  
 <ol>
-  <li>To test out validation, type in http://localhost8080/car/new and do NOT type anything in and click save</li>
+  <li>To test out validation, type in http://localhost:8080/car/new and do NOT type anything in and click save</li>
   <li>Errors now popup.  </li>
   <li>Next, type in 's' and 't' in each field and save.</li>
-  <li>Different Errors popup. </li>
+  <li>Different errors popup. </li>
   <li>Next, enter 'ferrari' for the name, and enter 'junker' for the style and hit save</li>
   <li>We end up on the Hello World page!</li>
   <li>Finally, hit the back button and look at your data and hit back button again and look at the s and t data.</li>
@@ -307,7 +309,7 @@ page that will be displayed in production</p>
 
 <p>Now, this example was very crude(CRUDe? - dad jokes) so instead let's now give you a complete CRUD example with listing
 entities and everything and how little code is required in webpieces to do such a thing.  Not only that, this is
-the defacto pattern such that code generation can be added to a development plugin which is our goal since after all,
+the de-facto pattern such that code generation can be added to a development plugin which is our goal since after all,
 go through the plugin's wizard, it generates code, and you don't even restart the server</p>
 
 <a class="btn btn-primary" href="@[QUICK_START4]@" role="button">Next Basic CRUD</a>

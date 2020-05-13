@@ -9,7 +9,7 @@
 
 <h2>Introduction</h2>
 
-<p>Last updated: May 2nd, 2020</p>
+<p>Last updated: May 13th, 2020</p>
 
 <p>A very simple tutorial, that will just help you to learn the Webpieces library 
 with the famous ‘Hello World’ example.</p>
@@ -105,27 +105,27 @@ plugin)</p>
 
 <h2>Your first RouteModule</h2>
 
-<p>Now, that you have the beginnings of a webpieces webapp, lets add a new RouteModule.  In the project
-myhelloworold-all/myhelloworld create a package org.webpieces.helloworld.myapp
-    where we will put all the helloworld code.  In that package, create a RouteId file called MyRouteId.java like so</p>
+<p>Now, that you have the beginnings of a webpieces webapp, let's add a new RouteModule. In the project
+helloworld-all/helloworld/src/main/java/org.webpieces.helloworld/web, create a package called "myapp" where we
+    will put all the helloworld code.  In that package, create a java file called MyRouteId.java like so:</p>
 
 <pre>
-<code>package org.webpieces.helloworld.myapp;
+<code>package org.webpieces.helloworld.web.myapp;
 
 import org.webpieces.router.api.routes.RouteId;
 
-public enum MyMainRouteId implements RouteId {
+public enum MyRouteId implements RouteId {
     HELLO_WORLD
 }</code>
 </pre>
 
-<p>This is where we will put all the RouteIds for this package and for this RouteModule.  Notice that the enum must extend
+<p>This is where we will put all the RouteIds for this package and for this RouteModule. Notice that the enum must extend
     RouteId as webpieces only knows about RouteId and not your specific enum.  Next, let's use the RouteId and create a
-RouteModule called MyMainRoutes with a single route to our new webpage</p>
+RouteModule class in the same myapp package called "MyMainRoutes" with a single route to our new webpage.</p>
 
 
 <pre>
-<code>package org.webpieces.helloworld.myapp;
+<code>package org.webpieces.helloworld.web.myapp;
 
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routes.Port;
@@ -139,7 +139,7 @@ public class MyMainRoutes implements Routes {
     public void configure(DomainRouteBuilder bldr) {
         RouteBuilder b = bldr.getAllDomainsRouteBuilder();
 
-        b.addRoute(Port.BOTH, HttpMethod.GET, "/helloworld", "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
+        b.addRoute(Port.BOTH, HttpMethod.GET, "/helloworld", "MyMainController.helloWorld", MyRouteId.HELLO_WORLD);
     }
 }</code>
 </pre>
@@ -156,10 +156,11 @@ MyMainController.helloWorld.  <b>This won't work just YET!</b>.  We need to impl
 <p>Notice we used the getAllDomainsRouteBuilder which means these routes apply to all domains EXCEPT domains created
 with bldr.getDomainScopedRouteBuilder(String domain) which is a more advanced topic. If you have DNS domainX.com and
 domainY.com all pointing to your ip with this server, then domainX.com/hello and domainY.com/hello end up calling
-the same controller. Now that we defined a route and a Controller and method to invoke, we should create the Controller.</p>
+the same controller. Now that we defined a route and a Controller and method to invoke, we should create the Controller
+and name it "MyMainController."</p>
 
 <pre>
-<code>package org.webpieces.helloworld.myapp;
+<code>package org.webpieces.helloworld.web.myapp;
 
 import javax.inject.Singleton;
 import org.webpieces.router.api.controller.actions.Action;
@@ -174,7 +175,7 @@ public class MyMainController {
 </pre>
 
 <p>Lastly, Actions.renderThis() informs webpieces to render the html file with the same name as the method helloWorld so
-next create a file called helloWorld.html in the same directory as the Controller</p>
+next create a file called helloWorld.html in the same myapp directory as the Controller</p>
 
 <pre>
 <code>*[<html>
@@ -185,32 +186,32 @@ next create a file called helloWorld.html in the same directory as the Controlle
 </html>]*</code>
 </pre>
 
-<p>Finally, the one last step is we need to tell webpieces about this RouteModule that we created.  Inside the class
-ProdServerMeta.java, modify it to add the RouteModule to the list of RouteModules already defined.  Your new
-getRouteModules method should look like so</p>
+<p>Finally, the one last step is we need to tell webpieces about this RouteModule that we created. Inside the class
+ProdServerMeta.java (org.webpieces.helloworld.base), modify it to ADD the line "new MyMainRoutes()"
+    to the list of RouteModules already defined. Your new
+getRouteModules method should look like so (the addition in bold):</p>
 
 <pre>
 <code>*[@Override
 public List<Routes> getRouteModules() {
     return Lists.newArrayList(
-            new AppRoutes(),
             new LoginRoutes("/org/webpieces/helloworld/web/login/AppLoginController", "/secure/.*", "password"),
             new CrudRoutes(),
             new AjaxCrudRoutes(),
             new JsonRoutes(),
-            new MyMainRoutes()
+            <b>new MyMainRoutes()</b>
             );
 }]*</code>
 </pre>
 
 <p>A big note is that all the modules here should be deleted except for LoginRoutes in your production application as
 they are all examples.  While LoginRoutes is an example as well, you most likely want a way to login so you would keep
-the LoginRoutes module</p>
+the LoginRoutes module.</p>
 
 <p>Finally, boot up your DevelopmentServer.java main class and open a browser and go to http://localhost:8080/helloworld
-or go to https://localhost:8443/helloworld</p>
+or go to https://localhost:8443/helloworld to showcase both http and https traffic.</p>
 
-<p>Congratulations on your first webpieces page, next we will make our html a bit more dynamic</p>
+<p>Congratulations on your first webpieces page -- next we will make our html a bit more dynamic.</p>
 
 <a class="btn btn-primary" href="@[QUICK_START2]@" role="button">Next Dynamic Helloworld</a>
 
