@@ -62,7 +62,7 @@ public final class KeyProcessor {
 		readErrorType1Close = MetricsCreator.createCounter(metrics, id, "connectionsReadError1", true);
 		readErrorType2Close = MetricsCreator.createCounter(metrics, id, "connectionsReadError2", true);
 
-		payloadSize = MetricsCreator.createSizeDistribution(metrics, id, "unknown", "fromsocket");
+		payloadSize = MetricsCreator.createSizeDistribution(metrics, id, "rawSocket", "fromsocket");
 
 		MetricsCreator.createGauge(metrics, id+".allChannelsBackPressure", totalBackupCounter, (c) -> c.get());
 	}
