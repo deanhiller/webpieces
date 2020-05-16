@@ -33,7 +33,7 @@ public class FStreamingRouter extends AbstractDynamicRouterImpl implements Rever
 	@Override
 	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteData data = new RouteInfoForStream();
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler);
+		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, false);
 		return routeInvoker.invokeStreamingController(invokeInfo, dynamicInfo, data);	}
 
 	@Override

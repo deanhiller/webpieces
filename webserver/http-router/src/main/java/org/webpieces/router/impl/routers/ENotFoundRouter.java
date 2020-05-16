@@ -28,7 +28,7 @@ public class ENotFoundRouter {
 	}
 
 	public CompletableFuture<StreamWriter> invokeNotFoundRoute(RequestContext ctx, ProxyStreamHandle handle, NotFoundException exc) {
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handle);
+		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handle, false);
 		RouteData data = new RouteInfoForNotFound(exc);
 		return invoker.invokeNotFound(invokeInfo, loadedController, data);
 	}

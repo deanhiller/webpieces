@@ -188,7 +188,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		
 		ApplicationContext ctx = webInjector.getAppContext();
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);
-		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, handler);
+		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, handler, false);
 		return super.invokeNotFound(newInvokeInfo, newLoadedController, data);
 	}
 }

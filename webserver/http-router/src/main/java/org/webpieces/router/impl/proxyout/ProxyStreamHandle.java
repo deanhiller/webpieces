@@ -64,19 +64,19 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	private LoadedController loadedController;
 
 	@Inject
-    public ProxyStreamHandle(
-    	TemplateApi templatingService, 
-    	CompressionChunkingHandle handle,
-    	ResponseCreator responseCreator,
-    	FutureHelper futureUtil
-    ) {
+	public ProxyStreamHandle(
+			TemplateApi templatingService,
+			CompressionChunkingHandle handle,
+			ResponseCreator responseCreator,
+			FutureHelper futureUtil
+	) {
 		this.templatingService = templatingService;
 		this.handle = handle;
 		this.responseCreator = responseCreator;
 		this.futureUtil = futureUtil;
-    }
+	}
 
-    //init methods done at different phases of the stack
+	//init methods done at different phases of the stack
 	public void init(RouterResponseHandler originalHandle, Http2Request req) {
 		this.originalHttp2Request = req;
 		handle.init(originalHandle, req);
@@ -89,51 +89,51 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		this.invokeInfo = invokeInfo;
 		this.loadedController = loadedController;
 	}
-	
+
 	public void turnCompressionOff() {
 		handle.turnCompressionOff();
 	}
-    
-    @Override
-    public CompletableFuture<StreamWriter> process(Http2Response response) {
-    	return handle.process(response);
-    }
 
-    @Override
-    public Object getSocket() {
-        return handle.getSocket();
-    }
+	@Override
+	public CompletableFuture<StreamWriter> process(Http2Response response) {
+		return handle.process(response);
+	}
 
-    @Override
-    public Map<String, Object> getSession() {
-        return handle.getSession();
-    }
+	@Override
+	public Object getSocket() {
+		return handle.getSocket();
+	}
 
-    @Override
-    public boolean requestCameFromHttpsSocket() {
-        return handle.requestCameFromHttpsSocket();
-    }
+	@Override
+	public Map<String, Object> getSession() {
+		return handle.getSession();
+	}
 
-    @Override
-    public boolean requestCameFromBackendSocket() {
-        return handle.requestCameFromBackendSocket();
-    }
+	@Override
+	public boolean requestCameFromHttpsSocket() {
+		return handle.requestCameFromHttpsSocket();
+	}
 
-    @Deprecated
-    @Override
-    public Void closeIfNeeded() {
-        return handle.closeIfNeeded();
-    }
+	@Override
+	public boolean requestCameFromBackendSocket() {
+		return handle.requestCameFromBackendSocket();
+	}
 
-    @Override
-    public PushStreamHandle openPushStream() {
-        return handle.openPushStream();
-    }
+	@Deprecated
+	@Override
+	public Void closeIfNeeded() {
+		return handle.closeIfNeeded();
+	}
 
-    @Override
-    public CompletableFuture<Void> cancel(CancelReason payload) {
-        return handle.cancel(payload);
-    }
+	@Override
+	public PushStreamHandle openPushStream() {
+		return handle.openPushStream();
+	}
+
+	@Override
+	public CompletableFuture<Void> cancel(CancelReason payload) {
+		return handle.cancel(payload);
+	}
 
 	public boolean hasSentResponseAlready() {
 		return handle.hasSentResponseAlready();
@@ -150,63 +150,63 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
 		return createRedirect(port, id, argMap, false);
 	}
-	
+
 	@Override
 	public CompletableFuture<Void> createFullRedirect(RouteId id, Object ... args) {
 		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
 		return createRedirect(null, id, argMap, false);
 	}
-	
+
 	private CompletableFuture<Void> createRedirect(HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
 		if(invokeInfo == null) {
 			throw new IllegalStateException("Somehow invokeInfo is missing.  This method should only be called from filters and controllers");
 		}
 		RequestContext ctx = invokeInfo.getRequestCtx();
-		
+
 		RouterRequest request = ctx.getRequest();
 		Method method = loadedController.getControllerMethod();
-		
+
 		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, ctx, requestedPort);
 		boolean isSecure = urlInfo.isSecure();
 		int port = urlInfo.getPort();
 		String path = urlInfo.getPath();
-			
+
 		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
-		
+
 		return ContextWrap.wrap(ctx, () -> sendRedirect(redirectResponse));
 	}
-	
+
 	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
 		Http2Request request = originalHttp2Request;
 		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
-		return maybeCompressAndSend(request, null, tuple, resp.getPayload()); 
+		return maybeCompressAndSend(request, null, tuple, resp.getPayload());
 	}
-	
-    public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
-        RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
-        Http2Response response = responseCreator.createRedirect(originalHttp2Request, httpResponse);
 
-        responseCreator.addDeleteCookie(response, badCookieName);
+	public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
+		RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
+		Http2Response response = responseCreator.createRedirect(originalHttp2Request, httpResponse);
 
-        log.info("sending REDIRECT(due to bad cookie) response responseSender="+ this);
+		responseCreator.addDeleteCookie(response, badCookieName);
 
-        return process(response);
-    }
-	
+		log.info("sending REDIRECT(due to bad cookie) response responseSender="+ this);
+
+		return process(response);
+	}
+
 	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
 		Http2Request request = originalHttp2Request;
 		if(log.isDebugEnabled())
 			log.debug("Sending redirect response. req="+request);
 		Http2Response response = responseCreator.createRedirect(request, httpResponse);
-		
+
 		log.info("sending REDIRECT response responseSender="+ this);
 		return process(response).thenApply(s -> null);
 	}
-	
+
 	public CompletableFuture<StreamWriter> topLevelFailure(Http2Request req, Throwable e) {
 		if(ExceptionWrap.isChannelClosed(e))
 			return CompletableFuture.completedFuture(null);
-		
+
 		if(log.isDebugEnabled())
 			log.debug("Sending failure html response. req="+originalHttp2Request);
 
@@ -216,56 +216,57 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		//An exception is caught here for one of two reasons that we know of
 		//1. The app failed, and we called their internal error controller and that failed too!!!
 		//2. There was a bug in webpieces
-		
-		String html = 
+
+		String html =
 				"<html>"
-				+"   <head></head>"
-				+ "  <body>"
-				+ "      There was a bug in the developers application or webpieces server.  Contact website owner with a screen shot of this page."
-				+ "      <br/><br/>"
-				+ "      This page shows up for one of two reasons.  In both cases, we first ran into a bug in the webapplication typically"
-				+ "      <ol>"
-				+ "         <li>Webpieces simply had a bug where it did not call the webapp developers internal error controller OR</li>"
-				+ "         <li>The app's error controller failed</li>"
-				+ "      </ol>"
-				+ "  </body>"
-				+ "</html>";
+						+"   <head></head>"
+						+ "  <body>"
+						+ "      There was a bug in the developers application or webpieces server.  Contact website owner with a screen shot of this page."
+						+ "      <br/><br/>"
+						+ "      This page shows up for one of two reasons.  In both cases, we first ran into a bug in the webapplication typically"
+						+ "      <ol>"
+						+ "         <li>Webpieces simply had a bug where it did not call the webapp developers internal error controller OR</li>"
+						+ "         <li>The app's error controller failed</li>"
+						+ "      </ol>"
+						+ "  </body>"
+						+ "</html>";
 
 		//One of two cases at this point.  Either, we got far enough that we have a bunch of request info or we did not get far enough
-		
-		
+
+
 		return createResponseAndSend(req, StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html").thenApply(voidd->null);
 	}
-	
+
 	public CompletableFuture<Void> createResponseAndSend(Http2Request request, StatusCode statusCode, String content, String extension, String defaultMime) {
 		if(content == null)
 			throw new IllegalArgumentException("content cannot be null");
-		
+
 		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, true);
-		
+
 		if(log.isDebugEnabled())
 			log.debug("content about to be sent back="+content);
-		
+
 		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
 		byte[] bytes = content.getBytes(encoding);
-		
+
 		return maybeCompressAndSend(request, extension, tuple, bytes);
 	}
-	
+
 	public CompletableFuture<Void> maybeCompressAndSend(Http2Request request, String extension, ResponseEncodingTuple tuple, byte[] bytes) {
 		Http2Response resp = tuple.response;
-		
+
 		if(bytes.length == 0) {
 			resp.setEndOfStream(true);
 			return process(resp).thenApply(w -> null);
 		}
-		
+
 		return sendChunkedResponse(request, resp, bytes);
 	}
 
 	private CompletableFuture<Void> sendChunkedResponse(Http2Request req, Http2Response resp, byte[] bytes) {
 
-		log.info("sending RENDERHTML response. size="+bytes.length+" resp="+resp+" for req="+req+" responseSender="+ this);
+		if(log.isDebugEnabled())
+			log.debug("sending response. size="+bytes.length+" resp="+resp+" for req="+req+" responseSender="+ this);
 
 		// Send the headers and get the responseid.
 		return process(resp)
@@ -276,7 +277,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		DataFrame frame = new DataFrame();
 		frame.setEndOfStream(true);
 		frame.setData(dataGen.wrapByteArray(bytes));
-		
+
 		return writer.processPiece(frame);
 	}
 
@@ -284,7 +285,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		Http2Request request = originalHttp2Request;
 		if(log.isInfoEnabled())
 			log.info("About to send render html response for request="+request+" controller="
-						+resp.view.getControllerName()+"."+resp.view.getMethodName());
+					+resp.view.getControllerName()+"."+resp.view.getMethodName());
 		View view = resp.view;
 		String packageStr = view.getPackageName();
 		//For this type of View, the template is the name of the method..
@@ -294,7 +295,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		if(lastIndexOf > 0) {
 			extension = templateClassName.substring(lastIndexOf+1);
 		}
-		
+
 		String templatePath = templateClassName;
 		if(!templatePath.startsWith("/")) {
 			//relative path so need to form absolute path...
@@ -303,10 +304,10 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 			}
 			templatePath = getTemplatePath(packageStr, templateClassName, extension);
 		}
-		
+
 		//TODO: stream this out with chunked response instead??....
 		StringWriter out = new StringWriter();
-		
+
 		try {
 			templatingService.loadAndRunTemplate(templatePath, out, resp.pageArgs);
 		} catch(MissingPropException e) {
@@ -314,27 +315,27 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"
 					+ " return enough arguments for the template ="+templatePath+".  specifically, the method\nreturned these"
 					+ " arguments="+keys+"  There is a chance in your html you forgot the '' around a variable name\n"
-							+ "such as #{set 'key'}# but you put #{set key}# which is 'usually' not the correct way\n"
-							+ "The missing properties are as follows....\n"+e.getMessage(), e);
+					+ "such as #{set 'key'}# but you put #{set key}# which is 'usually' not the correct way\n"
+					+ "The missing properties are as follows....\n"+e.getMessage(), e);
 		}
-		
+
 		String content = out.toString();
-		
+
 		StatusCode statusCode;
 		switch(resp.routeType) {
-		case HTML:
-			statusCode = StatusCode.HTTP_200_OK;
-			break;
-		case NOT_FOUND:
-			statusCode = StatusCode.HTTP_404_NOTFOUND;
-			break;
-		case INTERNAL_SERVER_ERROR:
-			statusCode = StatusCode.HTTP_500_INTERNAL_SVR_ERROR;
-			break;
-		default:
-			throw new IllegalStateException("did add case for state="+resp.routeType);
+			case HTML:
+				statusCode = StatusCode.HTTP_200_OK;
+				break;
+			case NOT_FOUND:
+				statusCode = StatusCode.HTTP_404_NOTFOUND;
+				break;
+			case INTERNAL_SERVER_ERROR:
+				statusCode = StatusCode.HTTP_500_INTERNAL_SVR_ERROR;
+				break;
+			default:
+				throw new IllegalStateException("did add case for state="+resp.routeType);
 		}
-		
+
 		//NOTE: These are ALL String templates, so default the mimeType to text/plain
 		//The real mime type is looked up based on extension so htm or html results in text/html
 		if(extension == null) {
@@ -342,12 +343,12 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		}
 
 		String finalExt = extension;
-		
+
 		return futureUtil.catchBlockWrap(
-				 () -> createResponseAndSend(request, statusCode, content, finalExt, "text/plain"), 
-				 (t) -> convert(t));
+				() -> createResponseAndSend(request, statusCode, content, finalExt, "text/plain"),
+				(t) -> convert(t));
 	}
-	
+
 	private Throwable convert(Throwable t) {
 		if(t instanceof NioClosedChannelException)
 			//router does not know about the nio layer but it knows about WebSocketClosedException
@@ -356,14 +357,14 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		else
 			return t;
 	}
-	
+
 	private String getTemplatePath(String packageStr, String templateClassName, String extension) {
 		String className = templateClassName;
 		if(!"".equals(packageStr))
 			className = packageStr+"."+className;
 		if(!"".equals(extension))
 			className = className+"_"+extension;
-		
+
 		return templatingService.convertTemplateClassToPath(className);
 	}
 
