@@ -27,9 +27,9 @@ public class ThreadConnectionListener implements ConnectionListener {
 		ThreadTCPChannel proxy = new ThreadTCPChannel((TCPChannel) channel, executor);
 
 		ThreadConnectRunnable runnable = new ThreadConnectRunnable(executor, channel, connectionListener, proxy, isReadyForWrites, future);
-		
+
 		executor.execute(proxy, runnable);
-		
+
 		return future;
 	}
 
@@ -43,13 +43,13 @@ public class ThreadConnectionListener implements ConnectionListener {
 		private SessionExecutor executor;
 
 		public ThreadConnectRunnable(SessionExecutor executor, Channel channel, ConnectionListener connectionListener, ThreadTCPChannel proxy,
-				boolean isReadyForWrites, CompletableFuture<DataListener> future) {
-					this.executor = executor;
-					this.channel = channel;
-					this.connectionListener = connectionListener;
-					this.proxy = proxy;
-					this.isReadyForWrites = isReadyForWrites;
-					this.future = future;
+									 boolean isReadyForWrites, CompletableFuture<DataListener> future) {
+			this.executor = executor;
+			this.channel = channel;
+			this.connectionListener = connectionListener;
+			this.proxy = proxy;
+			this.isReadyForWrites = isReadyForWrites;
+			this.future = future;
 		}
 
 		@Override
@@ -59,24 +59,24 @@ public class ThreadConnectionListener implements ConnectionListener {
 				CompletableFuture<DataListener> dataListener = connectionListener.connected(proxy, isReadyForWrites);
 				//transfer the listener to the future to be used
 				dataListener
-					.thenAccept(listener -> translate(proxy, future, listener))
-					.exceptionally(e -> {
-						future.completeExceptionally(e);
-						return null;
-					});
+						.thenAccept(listener -> translate(proxy, future, listener))
+						.exceptionally(e -> {
+							future.completeExceptionally(e);
+							return null;
+						});
 			} finally {
 				MDC.put("socket", null);
-			}			
+			}
 		}
-		
+
 		private void translate(ThreadTCPChannel proxy, CompletableFuture<DataListener> future, DataListener listener) {
 			DataListener wrappedDataListener = new ThreadDataListener(proxy, listener, executor);
 			future.complete(wrappedDataListener);
 		}
 	}
-	
 
-	
+
+
 	@Override
 	public void failed(RegisterableChannel channel, Throwable e) {
 		Runnable runnable = new Runnable() {
@@ -85,7 +85,7 @@ public class ThreadConnectionListener implements ConnectionListener {
 				connectionListener.failed(channel, e);
 			}
 		};
-		
+
 		executor.execute(channel, new SessionRunnable(runnable, channel));
 	}
 }

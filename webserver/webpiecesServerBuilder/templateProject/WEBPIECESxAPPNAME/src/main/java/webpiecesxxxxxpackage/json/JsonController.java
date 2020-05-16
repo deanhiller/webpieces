@@ -5,15 +5,21 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.json.Jackson;
+import org.webpieces.router.api.exceptions.AuthorizationException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import webpiecesxxxxxpackage.web.login.AppLoginController;
 
 @Singleton
 public class JsonController {
 	
+	private static final Logger log = LoggerFactory.getLogger(JsonController.class);
 
 	private Counter counter;
 
@@ -48,6 +54,20 @@ public class JsonController {
 		resp.getMatches().add("match2");
 		
 		return resp;
+	}
+	
+	public CompletableFuture<UploadResponse> postFileUpload(@Jackson FileUploadPiece piece) {
+		String token = Current.session().getOrCreateSecureToken();
+	
+		String user = Current.session().get(AppLoginController.TOKEN);
+		if(user == null)
+			throw new AuthorizationException("Not logged in");
+		else if(!token.equals(piece.getSecureToken()))
+			throw new AuthorizationException("CSRF prevention kicked in");
+	
+		log.info("piece="+piece.getFileName()+" pos="+piece.getPosition()+" size="+piece.getSliceSize());
+		return CompletableFuture.completedFuture(new UploadResponse(true));
+		
 	}
 	
 	public CompletableFuture<SearchResponse> postAsyncJson(int id, @Jackson SearchRequest request) {

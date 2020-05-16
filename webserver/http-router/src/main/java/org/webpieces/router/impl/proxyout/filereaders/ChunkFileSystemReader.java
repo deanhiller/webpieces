@@ -17,12 +17,12 @@ public class ChunkFileSystemReader implements ChunkReader {
 
 	private AsynchronousFileChannel asyncFile;
 	private Path file;
-	
+
 	public ChunkFileSystemReader(AsynchronousFileChannel asyncFile, Path file) {
 		this.asyncFile = asyncFile;
 		this.file = file;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "ChunkFileSystemReader="+file;
@@ -36,7 +36,7 @@ public class ChunkFileSystemReader implements ChunkReader {
 		private Path file;
 		private ByteBuffer buf;
 		private String filePathForLogging;
-		
+
 		public OurCompletionHandler(CompletableFuture<Integer> future, int remaining, Path file, ByteBuffer buf, String filePathForLogging) {
 			this.future = future;
 			this.remaining = remaining;
@@ -67,23 +67,23 @@ public class ChunkFileSystemReader implements ChunkReader {
 			try {
 				MDC.put("socket", socket);
 				MDC.put("txId", txId);
-				MDC.put("userId", user);				
+				MDC.put("userId", user);
 				log.error("Failed to read file="+file, exc);
 				future.completeExceptionally(new XFileReadException("Failed to read file="+filePathForLogging, exc));
 			} finally {
 				MDC.clear();
 			}
-		}		
+		}
 	}
-	
+
 	@Override
 	public CompletableFuture<Integer> read(ByteBuffer buf, String filePathForLogging, int position) {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
-		
+
 		int remaining = buf.remaining();
-    
+
 		OurCompletionHandler handler = new OurCompletionHandler(future, remaining, file, buf, filePathForLogging);
-		
+
 		asyncFile.read(buf, position, "attachment", handler);
 
 		return future;
