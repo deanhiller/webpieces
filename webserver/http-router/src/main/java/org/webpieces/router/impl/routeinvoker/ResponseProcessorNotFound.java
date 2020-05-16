@@ -1,19 +1,13 @@
 package org.webpieces.router.impl.routeinvoker;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
-import org.webpieces.router.api.routes.RouteId;
-import org.webpieces.router.impl.ReverseRoutes;
-import org.webpieces.router.impl.UrlInfo;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
-import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.RouteType;
@@ -25,17 +19,14 @@ public class ResponseProcessorNotFound implements Processor {
 
 	private RequestContext ctx;
 	private LoadedController loadedController;
-	private ReverseRoutes reverseRoutes;
 	private ProxyStreamHandle responseCb;
 
 	public ResponseProcessorNotFound(
 			RequestContext ctx, 
-			ReverseRoutes reverseRoutes, 
 			LoadedController loadedController, 
 			ProxyStreamHandle responseCb
 	) {
 		this.ctx = ctx;
-		this.reverseRoutes = reverseRoutes;
 		this.loadedController = loadedController;
 		this.responseCb = responseCb;
 	}
@@ -68,33 +59,14 @@ public class ResponseProcessorNotFound implements Processor {
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
 	}
 	
-	public CompletableFuture<Void> createFullRedirect(RedirectImpl action) {
-		RouteId id = action.getId();
-		Map<String, Object> args = action.getArgs();
-		return createRedirect(id, args, false);
-	}
-	
-	private CompletableFuture<Void> createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
-		RouterRequest request = ctx.getRequest();
-		Method method = loadedController.getControllerMethod();
-		
-		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, ctx, null);
-		boolean isSecure = urlInfo.isSecure();
-		int port = urlInfo.getPort();
-		String path = urlInfo.getPath();
-		
-		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
-		
-		return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(redirectResponse));
-	}
-	
 	public CompletableFuture<Void> continueProcessing(Action controllerResponse) {
 		if(controllerResponse instanceof RenderImpl) {
 			return createRenderResponse((RenderImpl) controllerResponse);
 		} else if(controllerResponse instanceof RenderContent) {
 			return createContentResponse((RenderContent) controllerResponse);
 		} else if(controllerResponse instanceof RedirectImpl) {
-			return createFullRedirect((RedirectImpl)controllerResponse);
+			RedirectImpl redirect = (RedirectImpl)controllerResponse;
+			return responseCb.createFullRedirect(redirect.getId(), redirect.getArgs());
 		} else {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
 					+ "precondition check on NotFound routes to assert the correct return types in "

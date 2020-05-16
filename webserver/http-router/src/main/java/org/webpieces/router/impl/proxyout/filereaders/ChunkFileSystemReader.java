@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class ChunkFileSystemReader implements ChunkReader {
 
@@ -33,19 +34,36 @@ public class ChunkFileSystemReader implements ChunkReader {
 		
 		int remaining = buf.remaining();
     
+		String socket = MDC.get("socket");
+		String txId = MDC.get("txId");
+		String user = MDC.get("userId");
 		CompletionHandler<Integer, String> handler = new CompletionHandler<Integer, String>() {
 			@Override
 			public void completed(Integer result, String attachment) {
-				if(result.intValue() == -1 && remaining != buf.remaining()) {
-					future.completeExceptionally(new XFileReadException("Async reader returned -1 but apparently wrote some data too.  buf="+buf+" remainingPrevious="+remaining));
-				} else {
-					future.complete(result);
+				try {
+					MDC.put("socket", socket);
+					MDC.put("txId", txId);
+					MDC.put("userId", user);
+					if(result.intValue() == -1 && remaining != buf.remaining()) {
+						future.completeExceptionally(new XFileReadException("Async reader returned -1 but apparently wrote some data too.  buf="+buf+" remainingPrevious="+remaining));
+					} else {
+						future.complete(result);
+					}
+				} finally {
+					MDC.clear();
 				}
 			}
 			@Override
 			public void failed(Throwable exc, String attachment) {
-				log.error("Failed to read file="+file, exc);
-				future.completeExceptionally(new XFileReadException("Failed to read file="+filePathForLogging, exc));
+				try {
+					MDC.put("socket", socket);
+					MDC.put("txId", txId);
+					MDC.put("userId", user);				
+					log.error("Failed to read file="+file, exc);
+					future.completeExceptionally(new XFileReadException("Failed to read file="+filePathForLogging, exc));
+				} finally {
+					MDC.clear();
+				}
 			}
 		};
 		asyncFile.read(buf, position, "attachment", handler);

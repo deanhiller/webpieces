@@ -116,13 +116,18 @@ public class WebServerModule implements Module {
 		return new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
 	}
 	
-	@Provides
+	@Provides 
 	@Singleton
-	public ChannelManager providesChanMgr(WebServerConfig config, BufferPool pool, MeterRegistry metrics) {
+	public Executor providesExecutor(WebServerConfig config, MeterRegistry metrics) {
 		String id = config.getId()+".tPool";
 		Executor executor = Executors.newFixedThreadPool(config.getNumFrontendServerThreads(), new NamedThreadFactory(id));
 		MetricsCreator.monitor(metrics, executor, id);
-
+		return executor;
+	}
+	
+	@Provides
+	@Singleton
+	public ChannelManager providesChanMgr(WebServerConfig config, Executor executor, BufferPool pool, MeterRegistry metrics) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(metrics);
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(config.getId(), pool, config.getBackpressureConfig(), executor);
 		

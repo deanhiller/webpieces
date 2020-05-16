@@ -6,9 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.api.RouterResponseHandler;
 
-import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
@@ -16,7 +15,7 @@ import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
-public class MockStreamHandle implements RouterStreamHandle {
+public class MockStreamHandle implements RouterResponseHandler {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
@@ -99,12 +98,6 @@ public class MockStreamHandle implements RouterStreamHandle {
 
 	public boolean isWasClosed() {
 		return wasClosed;
-	}
-
-	@Override
-	public Http2Response createBaseResponse(Http2Request req, String mimeType, int statusCode, String statusReason) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	

@@ -16,6 +16,7 @@ import javax.inject.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.ctx.api.AcceptMediaType;
 import org.webpieces.ctx.api.ContentType;
 import org.webpieces.ctx.api.HttpMethod;
@@ -23,6 +24,7 @@ import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.UriInfo;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.RouterResponseHandler;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
@@ -127,7 +129,7 @@ public class RouterServiceImpl implements RouterService {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> incomingRequest(Http2Request req, RouterStreamHandle handler) {
+	public CompletableFuture<StreamWriter> incomingRequest(Http2Request req, RouterResponseHandler handler) {
 		//******************************************************************************************
 		// DO NOT ADD CODE HERE OR ABOVE THIS METHOD in RouterService.  This is our CATCH-ALL point so
 		// ANY code above that is not protected from our catch and respond to clients
@@ -140,11 +142,16 @@ public class RouterServiceImpl implements RouterService {
 		ProxyStreamHandle proxyHandler = proxyProvider.get();
 		proxyHandler.init(handler, req);
 		
+		MDC.put("txId", txId);
 		//top level handler...
-		return futureUtil.catchBlock(
-				() -> incomingRequestImpl(req, proxyHandler).thenApply(w -> new TxStreamWriter(txId, w)),
-				(t) -> proxyHandler.topLevelFailure(req, t)
-		);
+		try {
+			return futureUtil.catchBlock(
+					() -> incomingRequestImpl(req, proxyHandler).thenApply(w -> new TxStreamWriter(txId, w)),
+					(t) -> proxyHandler.topLevelFailure(req, t)
+			);
+		} finally {
+			MDC.put("txId", null);
+		}
 	}
 
 	public String generate() {

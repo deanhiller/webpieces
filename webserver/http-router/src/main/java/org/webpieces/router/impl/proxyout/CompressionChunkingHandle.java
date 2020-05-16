@@ -12,7 +12,7 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.OverwritePlatformResponse;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.api.RouterResponseHandler;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.MimeTypes;
@@ -37,8 +37,8 @@ import com.webpieces.http2parser.api.dto.lib.StreamMsg;
  * @author dean
  *
  */
-public class CompressionChunkingHandle implements RouterStreamHandle {
-    private RouterStreamHandle handler;
+public class CompressionChunkingHandle implements RouterResponseHandler {
+    private RouterResponseHandler handler;
     private MimeTypes mimeTypes;
     private CompressionLookup compressionLookup;
     private Http2Response lastResponseSent;
@@ -58,17 +58,13 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 		this.webSettings = webSettings;
     }
 
-	public void init(RouterStreamHandle handler, Http2Request req) {
+	public void init(RouterResponseHandler handler, Http2Request req) {
 		this.handler = handler;
 		this.originalRequest = req;
 	}
 	
 	public void setRouterRequest(RouterRequest routerRequest) {
 		this.routerRequest = routerRequest;
-	}
-
-	public RouterRequest getRouterRequest() {
-		return this.routerRequest;
 	}
 	
     @Override
@@ -270,12 +266,6 @@ public class CompressionChunkingHandle implements RouterStreamHandle {
 
 	public void turnCompressionOff() {
 		this.compressionOff = true;
-	}
-
-	@Override
-	public Http2Response createBaseResponse(Http2Request req, String mimeType, int statusCode, String statusReason) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

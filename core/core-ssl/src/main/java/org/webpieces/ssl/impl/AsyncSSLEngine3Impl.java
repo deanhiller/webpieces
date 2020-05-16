@@ -45,8 +45,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	public AsyncSSLEngine3Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener, SSLMetrics metrics) {
 		if(listener == null)
 			throw new IllegalArgumentException("listener cannot be null");
-		encryptionTracker = new ByteAckTracker(metrics.getEncryptionAckMetrics());
-		decryptionTracker = new ByteAckTracker(metrics.getDecryptionAckMetrics());
+		encryptionTracker = new ByteAckTracker(metrics.getEncryptionAckMetrics(), false);
+		decryptionTracker = new ByteAckTracker(metrics.getDecryptionAckMetrics(), true);
 		this.metrics = metrics;
 		this.pool = pool;
 		this.listener = listener;
@@ -90,10 +90,14 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		//resolved and we catch up.  This prevents the server from tanking under load ;).  Yes, it's pretty
 		//fucking sick!!!  well, that's my opinion since I had fun adding shit that you'll never know about.
 		doWork(justStarted);
-		
+
 		return future;
 	}
 
+	/** 
+	 * Has to be twice the size as it may get 0.9 of a packet, then get 1.0 of a packet 
+	 * @return
+	 */
 	private ByteBuffer combine(ByteBuffer cachedToProcessLaterData, ByteBuffer encryptedData) {
 		int size = cachedToProcessLaterData.remaining()+encryptedData.remaining();
 		ByteBuffer nextBuffer = pool.nextBuffer(size);
@@ -165,6 +169,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			result = sslEngine.unwrap(encryptedData, cachedOutBuffer);
 		} catch(SSLException e) {
 			//read before the buffer is cleared released
+			//record bytes consumed...
+			int consumedBytes = remainBeforeDecrypt - encryptedData.remaining();
 			String extraInfo = createExtraInfo(encryptedData, e);
 
 			cachedOutBuffer.position(cachedOutBuffer.limit()); //simulate consuming all data
@@ -172,11 +178,14 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			encryptedData.position(encryptedData.limit()); //simulate consuming all data
 			pool.releaseBuffer(encryptedData);
 
+			mem.setCachedEncryptedData(ByteBuffer.allocate(0));
+			
 			String message = e.getMessage();
 			if(message.contains("Received fatal alert: certificate_unknown")) {
 				//This is normal for self signed certs, so just return.  Chrome closes the connection with
 				//a reason and SSLEngine throws an exception :(
 				mem.compareSet(ConnectionState.CONNECTING, ConnectionState.DISCONNECTED);
+				decryptionTracker.ackBytes(consumedBytes);
 				return true;
 			}
 			
@@ -215,7 +224,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				doHandshakeLoop().handle((v, t) -> {
 					if(t != null)
 						log.error("Exception in ssl listener", t);
-					
+
 					decryptionTracker.ackBytes(totalBytesToAck);
 					return null;
 				});
@@ -273,7 +282,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		listener.packetUnencrypted(cachedOutBuffer).handle((v, t) -> {
 			if(t != null)
 				log.error("Exception in ssl listener", t);
-			
+
 			//after the client consumes the packet(completes the future), ack the number of bytes corresponding
 			//to the packet we sent to the consumer.  NOTE: We do NOT care about how many bytes we sent the
 			//consumer BUT only how many encrypted bytes there were to ack those bytes and release our nio library to

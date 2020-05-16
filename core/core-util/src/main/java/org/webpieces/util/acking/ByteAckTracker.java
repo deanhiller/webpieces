@@ -12,21 +12,24 @@ public class ByteAckTracker {
 	private AtomicInteger totalBytesToAckOutstanding = new AtomicInteger(0);
 	private AckMetrics metrics;
 
+	private boolean fromSocket;
+
 	public ByteAckTracker() {
 	}
 	
-	public ByteAckTracker(AckMetrics metrics) {
+	public ByteAckTracker(AckMetrics metrics, boolean fromSocket) {
 		this.metrics = metrics;
+		this.fromSocket = fromSocket;
 	}
 
 	public CompletableFuture<Void> addBytesToTrack(int incomingBytes) {
 		if(metrics != null)
 			metrics.incrementTrackedBytes(incomingBytes);
-		
+
 		CompletableFuture<Void> byteFuture = new CompletableFuture<Void>();
 		records.add(new Record(incomingBytes, byteFuture));
 		totalBytesToAckOutstanding.addAndGet(incomingBytes);
-		
+
 		return byteFuture;
 	}
 

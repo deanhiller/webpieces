@@ -1,5 +1,7 @@
 # webpieces
 
+* ADD precondition to not allow developers to accidentally run a Routes file twice which adds the same routes and can fail in a confusing way.
+* investigate back pressure on file upload.....somethiing seems a bit off and I want more detail.  we may wire futures through SSL layer as well perhaps?
 * fix up TestError test case on startup so that we know respond to clients
 * ResponseOverrideSender is in wrong location...needs to be in top top level proxy of streamhandling(after chunking/compression)
 * wire futures backpressure all the way in server and test

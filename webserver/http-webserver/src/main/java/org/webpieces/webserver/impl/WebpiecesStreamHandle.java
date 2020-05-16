@@ -4,8 +4,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
+import org.webpieces.router.api.RouterResponseHandler;
 import org.webpieces.router.api.RouterService;
-import org.webpieces.router.api.RouterStreamHandle;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;
@@ -22,7 +22,7 @@ public class WebpiecesStreamHandle implements HttpStream {
 
 	@Override
 	public CompletableFuture<StreamWriter> incomingRequest(Http2Request headers, ResponseStream stream) {
-		RouterStreamHandle handler = new RouterResponseHandlerImpl(stream);
+		RouterResponseHandler handler = new RouterResponseHandlerImpl(stream);
 		future = routingService.incomingRequest(headers, handler);
 		return future;
 	}

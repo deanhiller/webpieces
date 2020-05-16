@@ -25,10 +25,10 @@ import javax.inject.Inject;
  */
 public class TwoPools implements BufferPool, TwoPoolManaged {
 
-	public static final int DEFAULT_MAX_BASE_BUFFER_SIZE = 5000;
+	public static final int DEFAULT_MAX_BASE_BUFFER_SIZE = 16_665+2048;
 	
     // Add 1024 as a room for compressed data and another 1024 for Apache Harmony compatibility.
-	public static final int DEFAULT_MAX_SSL_BUFFER_SIZE = 16_665+2048; 
+	public static final int DEFAULT_MAX_SSL_BUFFER_SIZE = 2*DEFAULT_MAX_BASE_BUFFER_SIZE; 
 
     private final BufferCreationPool smallPool;
     private final BufferCreationPool sslPool;

@@ -20,22 +20,26 @@ public class ThreadDatagramListener implements DatagramListener {
 
 	@Override
 	public void incomingData(DatagramChannel channel, InetSocketAddress fromAddr, ByteBuffer b) {
-		executor.execute(channel, new Runnable() {
+		Runnable runnable = new Runnable() {
 			@Override
 			public void run() {
 				listener.incomingData(channel, fromAddr, b);
 			}
-		});
+		};
+		
+		executor.execute(channel, new SessionRunnable(runnable, channel));
 	}
 
 	@Override
 	public void failure(DatagramChannel channel, InetSocketAddress fromAddr, ByteBuffer data, Throwable e) {
-		executor.execute(channel, new Runnable() {
+		Runnable runnable = new Runnable() {
 			@Override
 			public void run() {
 				listener.failure(channel, fromAddr, data, e);
 			}
-		});
+		};
+		
+		executor.execute(channel, new SessionRunnable(runnable, channel));
 	}
 	
 

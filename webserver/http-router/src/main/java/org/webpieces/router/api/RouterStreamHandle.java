@@ -1,34 +1,15 @@
 package org.webpieces.router.api;
 
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import org.webpieces.router.api.controller.actions.HttpPort;
+import org.webpieces.router.api.routes.RouteId;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.ResponseHandler;
 
-public interface RouterStreamHandle extends ResponseHandler {
+public interface RouterStreamHandle extends RouterResponseHandler {
 
-    /**
-     * returns FrontendSocket for webpieces or whatever socket for other implementations wire
-     * into this router
-     *
-     * The socket has a session for storing data common among all requests of the socket
-     */
-    Object getSocket();
-
-    Map<String, Object> getSession();
-
-    boolean requestCameFromHttpsSocket();
-    
-    boolean requestCameFromBackendSocket();
-
-    /**
-     * Temporary for refactoring only
-     * @return
-     * @deprecated
-     */
-    @Deprecated
-    Void closeIfNeeded();
 
     /**
      * Creates a base response off the request looking for things like keep-alive so the response
@@ -36,5 +17,11 @@ public interface RouterStreamHandle extends ResponseHandler {
      * @param statusReason TODO
      */
     Http2Response createBaseResponse(Http2Request req, String mimeType, int statusCode, String statusReason);
+
+	CompletableFuture<Void> createFullRedirect(RouteId id, Object ... args);
+
+	CompletableFuture<Void> createAjaxRedirect(RouteId id, Object ... args);
+
+	CompletableFuture<Void> createPortRedirect(HttpPort port, RouteId id, Object ... args);
 
 }

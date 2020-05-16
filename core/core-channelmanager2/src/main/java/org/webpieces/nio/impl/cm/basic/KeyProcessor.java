@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
-import java.time.Duration;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -168,6 +168,8 @@ public final class KeyProcessor {
 		BasTCPChannel channel = (BasTCPChannel)info.getChannel();
 
 		try {
+			MDC.put("socket", channel+"");
+			
 			//must change the interests to not interested in connect anymore
 			//since we are connected otherwise selector seems to keep firing over
 			//and over again with 0 keys wasting cpu like a while(true) loop
@@ -183,6 +185,8 @@ public final class KeyProcessor {
 			
             log.error(key.attachment()+"Could not open connection", e);
             callback.completeExceptionally(e);
+		} finally {
+			MDC.put("socket", null);
 		}
 	}
 
@@ -192,6 +196,7 @@ public final class KeyProcessor {
 		
 		DataListener in = info.getDataHandler();
 		BasChannelImpl channel = (BasChannelImpl)info.getChannel();
+		MDC.put("socket", channel+"");
 		
 		ByteBuffer chunk = pool.nextBuffer(1024);
 		
@@ -279,6 +284,8 @@ public final class KeyProcessor {
 				process(key, in, info, chunk, ioExc);
 			} else
 				throw e;
+		} finally {
+			MDC.put("socket", null);
 		}
 	}
 
@@ -384,6 +391,7 @@ public final class KeyProcessor {
 		AtomicReference<BackflowState1> connectionState = basicChannel.getCompareSetBackflowState();
 		boolean unregister = connectionState.compareAndSet(BackflowState1.UNREGISTERED, BackflowState1.REGISTERED);
 		if(!unregister) {
+		    log.warn("NOT catching up since connection state is already registered again");
 			//There may be 1-N calls to channel.registerForReads(() -> checkForUnregister(channel)); BUT we only need to process register ONCE 
 			return false;
 		}
@@ -398,11 +406,16 @@ public final class KeyProcessor {
 			log.trace(info.getChannel()+"writing data");
 		
 		BasChannelImpl channel = (BasChannelImpl)info.getChannel();		
+		MDC.put("socket", channel+"");
 		
 		if(log.isTraceEnabled())
 			log.trace(channel+"notifying channel of write");
 
-        channel.writeAll();  
+		try {
+			channel.writeAll();
+		} finally {
+			MDC.put("socket", null);
+		}
 	}
 	
 	void unregisterSelectableChannel(RegisterableChannelImpl channel, int ops) {

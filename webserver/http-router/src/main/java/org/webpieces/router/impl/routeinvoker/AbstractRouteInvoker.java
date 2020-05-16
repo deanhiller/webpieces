@@ -68,12 +68,14 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	public CompletableFuture<StreamWriter> invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
-		RouterStreamHandle handler = invokeInfo.getHandler();
+		ProxyStreamHandle handler = invokeInfo.getHandler();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
 		Object instance = loadedController.getControllerInstance();
 		Method controllerMethod = loadedController.getControllerMethod();
 		Parameter[] parameters = loadedController.getParameters();
 		
+		handler.initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
+
 		Current.setContext(requestCtx);
 
 		if(parameters.length != 2)
@@ -119,6 +121,8 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	protected CompletableFuture<StreamWriter> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
 		Service<MethodMeta, Action> service = dynamicInfo.getService();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
+		invokeInfo.getHandler().initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
+		
 		return invokeAny(invokeInfo, loadedController, service, data, processor, forceEndOfStream);
 	}
 
@@ -192,7 +196,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());
 
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
-				invokeInfo.getRequestCtx(), reverseRoutes, 
+				invokeInfo.getRequestCtx(), 
 				loadedController, invokeInfo.getHandler());
 		return invokeAny(invokeInfo, loadedController, service, data, processor, false);
 	}

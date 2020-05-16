@@ -8,11 +8,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.controller.actions.HttpPort;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
-import org.webpieces.router.api.routes.RouteId;
-import org.webpieces.router.impl.ReverseRoutes;
-import org.webpieces.router.impl.UrlInfo;
 import org.webpieces.router.impl.actions.AjaxRedirectImpl;
 import org.webpieces.router.impl.actions.PortRedirect;
 import org.webpieces.router.impl.actions.RawRedirect;
@@ -28,18 +24,15 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 public class ResponseProcessorHtml implements Processor {
 
 	private RequestContext ctx;
-	private ReverseRoutes reverseRoutes;
 	private LoadedController loadedController;
 	private ProxyStreamHandle responseCb;
 
 	public ResponseProcessorHtml(
 			RequestContext ctx, 
-			ReverseRoutes reverseRoutes,
 			LoadedController loadedController, 
 			ProxyStreamHandle responseCb 
 	) {
 		this.ctx = ctx;
-		this.reverseRoutes = reverseRoutes;
 		this.loadedController = loadedController;
 		this.responseCb = responseCb;
 	}
@@ -55,39 +48,8 @@ public class ResponseProcessorHtml implements Processor {
 		return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(redirectResponse));
 	}
 	
-	public CompletableFuture<Void> createAjaxRedirect(AjaxRedirectImpl action) {
-		RouteId id = action.getId();
-		Map<String, Object> args = action.getArgs();
-		return createRedirect(null, id, args, true);
-	}
 	
-	public CompletableFuture<Void> createFullRedirect(RedirectImpl action) {
-		RouteId id = action.getId();
-		Map<String, Object> args = action.getArgs();
-		return createRedirect(null, id, args, false);
-	}
 
-	public CompletableFuture<Void> createPortRedirect(PortRedirect action) {
-		RouteId id = action.getId();
-		Map<String, Object> args = action.getArgs();
-		HttpPort port = action.getPort();
-		return createRedirect(port, id, args, false);
-	}
-	
-	private CompletableFuture<Void> createRedirect(
-			HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
-		RouterRequest request = ctx.getRequest();
-		Method method = loadedController.getControllerMethod();
-		
-		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, ctx, requestedPort);
-		boolean isSecure = urlInfo.isSecure();
-		int port = urlInfo.getPort();
-		String path = urlInfo.getPath();
-			
-		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
-		
-		return ContextWrap.wrap(ctx, () -> responseCb.sendRedirect(redirectResponse));
-	}
 
 	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {
 		RouterRequest request = ctx.getRequest();
@@ -128,11 +90,14 @@ public class ResponseProcessorHtml implements Processor {
 
 	public CompletableFuture<Void> continueProcessing(Action controllerResponse) {
 		if(controllerResponse instanceof RedirectImpl) {
-			return createFullRedirect((RedirectImpl)controllerResponse);
+			RedirectImpl redirect = (RedirectImpl)controllerResponse;
+			return responseCb.createFullRedirect(redirect.getId(), redirect.getArgs());
 		} else if(controllerResponse instanceof PortRedirect) {
-			return createPortRedirect((PortRedirect)controllerResponse);
+			PortRedirect redirect = (PortRedirect)controllerResponse;
+			return responseCb.createPortRedirect(redirect.getPort(), redirect.getId(), redirect.getArgs());
 		} else if(controllerResponse instanceof AjaxRedirectImpl) {
-			return createAjaxRedirect((AjaxRedirectImpl)controllerResponse);
+			AjaxRedirectImpl redirect = (AjaxRedirectImpl)controllerResponse;
+			return responseCb.createAjaxRedirect(redirect.getId(), redirect.getArgs());
 		} else if(controllerResponse instanceof RenderImpl) {
 			return createRenderResponse((RenderImpl)controllerResponse);
 		} else if(controllerResponse instanceof RawRedirect) {

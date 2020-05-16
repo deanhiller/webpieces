@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +40,23 @@ import org.webpieces.util.metrics.MetricsCreator;
 public class BufferCreationPool implements BufferPool, BufferWebManaged {
 
 	private static final Logger log = LoggerFactory.getLogger(BufferCreationPool.class);
-	public static final int DEFAULT_MAX_BUFFER_SIZE = 5000; 
+
+	public static final int DEFAULT_MAX_BUFFER_SIZE = 16_665+2048;
 	
 	//a rough counter...doesn't need to be too accurate..
 	private AtomicInteger counter = new AtomicInteger();
 	private ConcurrentLinkedQueue<ByteBuffer> freePackets = new ConcurrentLinkedQueue<ByteBuffer>();
 	private boolean isDirect;
 	private int bufferSize;
-	private int poolSize = 4000;
+	private int poolSize = 2000;
 	private Counter checkoutCounter;
 	private Counter checkinCounter;
 	
+    @Inject
+    public BufferCreationPool(MeterRegistry metrics) {
+    	this("webpieces.bufPool", metrics);
+    }
+    
 	public BufferCreationPool(String id, MeterRegistry metrics) {
 		this(id, metrics, false, DEFAULT_MAX_BUFFER_SIZE);
 	}
@@ -74,7 +82,7 @@ public class BufferCreationPool implements BufferPool, BufferWebManaged {
 		checkoutCounter.increment();
 		
 		if(bufferSize < minSize) {
-			log.warn("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+bufferSize+".  You should reconfigure this if it happens tooo much to speed things up");
+			log.warn("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+bufferSize+".  You should reconfigure this if it happens tooo much to speed things up.  this can also cause issue with backpressure configuration");
 			return createBuffer(minSize);
 		}
 		
@@ -118,8 +126,8 @@ public class BufferCreationPool implements BufferPool, BufferWebManaged {
 
 		if(counter.incrementAndGet() > poolSize)
 			return; //we discard more than N buffers as we don't want to take up too much memory
-		else if(buffer.capacity() < bufferSize) {
-			return; //discard buffers that are released and are smaller
+		else if(buffer.capacity() != bufferSize) {
+			return; //discard buffers that are released and are smaller or bigger
 		}
 		buffer.clear();
 		freePackets.add(buffer);

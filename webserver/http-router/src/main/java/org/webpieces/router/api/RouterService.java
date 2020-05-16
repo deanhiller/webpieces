@@ -27,7 +27,7 @@ public interface RouterService {
 
 	void stop();
 
-	CompletableFuture<StreamWriter> incomingRequest(Http2Request req, RouterStreamHandle handler);
+	CompletableFuture<StreamWriter> incomingRequest(Http2Request req, RouterResponseHandler handler);
 
 	/**
 	 * This is exposed as the webserver wires router and templating engine and the templating engine needs a callback to

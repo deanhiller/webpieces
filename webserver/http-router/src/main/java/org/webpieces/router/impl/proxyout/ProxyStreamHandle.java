@@ -1,6 +1,7 @@
 package org.webpieces.router.impl.proxyout;
 
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Set;
@@ -12,18 +13,28 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.MissingPropException;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.router.api.RouterResponseHandler;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.TemplateApi;
+import org.webpieces.router.api.controller.actions.HttpPort;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
+import org.webpieces.router.api.routes.RouteId;
+import org.webpieces.router.impl.ReverseRoutes;
+import org.webpieces.router.impl.UrlInfo;
+import org.webpieces.router.impl.actions.PageArgListConverter;
 import org.webpieces.router.impl.dto.RedirectResponse;
 import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.View;
+import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
+import org.webpieces.router.impl.routeinvoker.ContextWrap;
+import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
@@ -45,6 +56,12 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	private CompressionChunkingHandle handle;
 	private ResponseCreator responseCreator;
 	private FutureHelper futureUtil;
+	private ReverseRoutes reverseRoutes;
+
+
+	private Http2Request originalHttp2Request; //loaded on construction
+	private InvokeInfo invokeInfo; //loaded just before invoking service
+	private LoadedController loadedController;
 
 	@Inject
     public ProxyStreamHandle(
@@ -59,12 +76,18 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		this.futureUtil = futureUtil;
     }
 
+    //init methods done at different phases of the stack
+	public void init(RouterResponseHandler originalHandle, Http2Request req) {
+		this.originalHttp2Request = req;
+		handle.init(originalHandle, req);
+	}
 	public void setRouterRequest(RouterRequest routerRequest) {
 		handle.setRouterRequest(routerRequest);
 	}
-
-	public void init(RouterStreamHandle originalHandle, Http2Request req) {
-		handle.init(originalHandle, req);
+	public void initJustBeforeInvoke(ReverseRoutes reverseRoutes, InvokeInfo invokeInfo, LoadedController loadedController) {
+		this.reverseRoutes = reverseRoutes;
+		this.invokeInfo = invokeInfo;
+		this.loadedController = loadedController;
 	}
 	
 	public void turnCompressionOff() {
@@ -116,15 +139,52 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return handle.hasSentResponseAlready();
 	}
 
+	@Override
+	public CompletableFuture<Void> createAjaxRedirect(RouteId id, Object ... args) {
+		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
+		return createRedirect(null, id, argMap, true);
+	}
+
+	@Override
+	public CompletableFuture<Void> createPortRedirect(HttpPort port, RouteId id, Object ... args) {
+		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
+		return createRedirect(port, id, argMap, false);
+	}
+	
+	@Override
+	public CompletableFuture<Void> createFullRedirect(RouteId id, Object ... args) {
+		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
+		return createRedirect(null, id, argMap, false);
+	}
+	
+	private CompletableFuture<Void> createRedirect(HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
+		if(invokeInfo == null) {
+			throw new IllegalStateException("Somehow invokeInfo is missing.  This method should only be called from filters and controllers");
+		}
+		RequestContext ctx = invokeInfo.getRequestCtx();
+		
+		RouterRequest request = ctx.getRequest();
+		Method method = loadedController.getControllerMethod();
+		
+		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, ctx, requestedPort);
+		boolean isSecure = urlInfo.isSecure();
+		int port = urlInfo.getPort();
+		String path = urlInfo.getPath();
+			
+		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
+		
+		return ContextWrap.wrap(ctx, () -> sendRedirect(redirectResponse));
+	}
+	
 	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
-		Http2Request request = handle.getRouterRequest().originalRequest;
+		Http2Request request = originalHttp2Request;
 		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
 		return maybeCompressAndSend(request, null, tuple, resp.getPayload()); 
 	}
 	
     public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
         RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
-        Http2Response response = responseCreator.createRedirect(req.originalRequest, httpResponse);
+        Http2Response response = responseCreator.createRedirect(originalHttp2Request, httpResponse);
 
         responseCreator.addDeleteCookie(response, badCookieName);
 
@@ -134,7 +194,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
     }
 	
 	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
-		Http2Request request = handle.getRouterRequest().originalRequest;
+		Http2Request request = originalHttp2Request;
 		if(log.isDebugEnabled())
 			log.debug("Sending redirect response. req="+request);
 		Http2Response response = responseCreator.createRedirect(request, httpResponse);
@@ -148,7 +208,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 			return CompletableFuture.completedFuture(null);
 		
 		if(log.isDebugEnabled())
-			log.debug("Sending failure html response. req="+handle.getRouterRequest());
+			log.debug("Sending failure html response. req="+originalHttp2Request);
 
 		//TODO: we should actually just render our own internalServerError.html page with styling and we could do that.
 
@@ -221,7 +281,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	}
 
 	public CompletableFuture<Void> sendRenderHtml(RenderResponse resp) {
-		Http2Request request = handle.getRouterRequest().originalRequest;
+		Http2Request request = originalHttp2Request;
 		if(log.isInfoEnabled())
 			log.info("About to send render html response for request="+request+" controller="
 						+resp.view.getControllerName()+"."+resp.view.getMethodName());

@@ -5,15 +5,15 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.impl.ProtocolType;
-import org.webpieces.router.api.RouterStreamHandle;
+import org.webpieces.router.api.RouterResponseHandler;
 
-import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
-public class RouterResponseHandlerImpl implements RouterStreamHandle {
+public class RouterResponseHandlerImpl implements RouterResponseHandler {
+	
     private ResponseStream stream;
 
     public RouterResponseHandlerImpl(ResponseStream stream) {
@@ -62,9 +62,5 @@ public class RouterResponseHandlerImpl implements RouterStreamHandle {
 		return null;
 	}
 
-	@Override
-	public Http2Response createBaseResponse(Http2Request req, String mimeType, int statusCode, String statusReason) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 }

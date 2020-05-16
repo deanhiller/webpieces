@@ -1,5 +1,7 @@
 package org.webpieces.nio.api;
 
+import org.webpieces.data.api.TwoPools;
+
 public class BackpressureConfig {
 
 	/**
@@ -10,9 +12,12 @@ public class BackpressureConfig {
 	 * 
 	 * Generally, it's bad to have a client backpressure a server and only the server will backpressure the clients
 	 */
-	private Integer maxBytes = 8_192*8;
+	private Integer maxBytes = TwoPools.DEFAULT_MAX_BASE_BUFFER_SIZE*12;
 	
 	/**
+	 * MUST BE BIGGER than your BufferPool size.  If you get warnings out of buffer pool of packets being requested larger, this
+	 * number must be bigger than that.
+	 * 
 	 * Rather than thrashing turning on and off reading (if you hit the maxBytes that is), it is better to consume for a while
 	 * and catch up and turn it back on at some lower threshold.
 	 * 
@@ -21,7 +26,7 @@ public class BackpressureConfig {
 	 * be larger than the largest message size).  Otherwise, you can set this to null and thrash.  Http/2 can set the max message
 	 * size so this should be set for http/2
 	 */
-	private Integer startReadingThreshold = 8_192*2;
+	private Integer startReadingThreshold = TwoPools.DEFAULT_MAX_BASE_BUFFER_SIZE*3;
 
 	public Integer getMaxBytes() {
 		return maxBytes;

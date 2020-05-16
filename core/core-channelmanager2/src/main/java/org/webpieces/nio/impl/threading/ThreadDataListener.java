@@ -63,7 +63,7 @@ public class ThreadDataListener implements DataListener {
 				log.error("Uncaught Exception", e);
 				future.completeExceptionally(e);
 			} finally {
-				MDC.clear();
+				MDC.put("socket", null);
 			}
 		}
 	}
@@ -79,7 +79,7 @@ public class ThreadDataListener implements DataListener {
 				} catch(RuntimeException e) {
 					throw e;
 				} finally {
-					MDC.clear();
+					MDC.put("socket", null);
 				}
 			}
 		});
@@ -96,7 +96,7 @@ public class ThreadDataListener implements DataListener {
 				} catch(RuntimeException e) {
 					throw e;
 				} finally {
-					MDC.clear();
+					MDC.put("socket", null);
 				}
 			}
 		});

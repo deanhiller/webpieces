@@ -20,7 +20,11 @@ public class TxStreamWriter implements StreamWriter {
 	@Override
 	public CompletableFuture<Void> processPiece(StreamMsg data) {
 		MDC.put("txId", txId);
-		return w.processPiece(data);
+		try {
+			return w.processPiece(data);
+		} finally {
+			MDC.put("txId", null);
+		}
 	}
 
 }

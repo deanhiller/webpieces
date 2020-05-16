@@ -47,7 +47,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	@Override
 	public CompletableFuture<StreamWriter> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
-				invokeInfo.getRequestCtx(), reverseRoutes, 
+				invokeInfo.getRequestCtx(), 
 				dynamicInfo.getLoadedController(), invokeInfo.getHandler());
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor, false);
 	}
