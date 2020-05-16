@@ -265,7 +265,8 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 
 	private CompletableFuture<Void> sendChunkedResponse(Http2Request req, Http2Response resp, byte[] bytes) {
 
-		log.info("sending RENDERHTML response. size="+bytes.length+" resp="+resp+" for req="+req+" responseSender="+ this);
+		if(log.isDebugEnabled())
+			log.debug("sending response. size="+bytes.length+" resp="+resp+" for req="+req+" responseSender="+ this);
 
 		// Send the headers and get the responseid.
 		return process(resp)

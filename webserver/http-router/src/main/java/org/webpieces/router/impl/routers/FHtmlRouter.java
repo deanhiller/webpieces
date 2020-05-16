@@ -32,7 +32,7 @@ public class FHtmlRouter extends AbstractDynamicRouterImpl implements Reversable
 	@Override
 	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteData data = new RouteInfoForHtml(isCheckSecureToken, matchInfo.getHttpMethod());
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler);
+		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, false);
 		return invoker.invokeHtmlController(invokeInfo, dynamicInfo, data);
 	}
 	

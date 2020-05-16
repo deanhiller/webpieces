@@ -8,11 +8,13 @@ public class InvokeInfo {
 	private final BaseRouteInfo route;
 	private final RequestContext requestCtx;
 	private ProxyStreamHandle handler;
+	private boolean hasBodyContentBinder;
 
-	public InvokeInfo(BaseRouteInfo route, RequestContext ctx, ProxyStreamHandle handler) {
+	public InvokeInfo(BaseRouteInfo route, RequestContext ctx, ProxyStreamHandle handler, boolean hasBodyContentBinder) {
 		this.route = route;
 		this.requestCtx = ctx;
 		this.handler = handler;
+		this.hasBodyContentBinder = hasBodyContentBinder;
 	}
 	
 	public BaseRouteInfo getRoute() {
@@ -25,5 +27,9 @@ public class InvokeInfo {
 
 	public ProxyStreamHandle getHandler() {
 		return handler;
+	}
+
+	public boolean isHasBodyContentBinder() {
+		return hasBodyContentBinder;
 	}
 }

@@ -1,5 +1,6 @@
 package webpiecesxxxxxpackage.json;
 
+import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
@@ -56,8 +57,12 @@ public class JsonController {
 		return resp;
 	}
 	
+	int totalProcessed = 0;
+	int everyNtimes = 20;
+	
+	
 	public CompletableFuture<UploadResponse> postFileUpload(@Jackson FileUploadPiece piece) {
-		String token = Current.session().getOrCreateSecureToken();
+		String token = Current.session().fetchSecureToken();
 	
 		String user = Current.session().get(AppLoginController.TOKEN);
 		if(user == null)
@@ -65,7 +70,18 @@ public class JsonController {
 		else if(!token.equals(piece.getSecureToken()))
 			throw new AuthorizationException("CSRF prevention kicked in");
 	
-		log.info("piece="+piece.getFileName()+" pos="+piece.getPosition()+" size="+piece.getSliceSize());
+		String[] pieces = piece.getFileData().split(",");
+		byte[] total = Base64.getDecoder().decode(pieces[1]);
+		totalProcessed += total.length;
+	
+		everyNtimes--;
+		if(everyNtimes <= 0) { 
+			log.info("total processed="+totalProcessed);
+			everyNtimes = 1000;
+		}
+		
+		
+		//log.info("piece="+piece.getFileName()+" pos="+piece.getPosition()+" size="+piece.getSliceSize());
 		return CompletableFuture.completedFuture(new UploadResponse(true));
 		
 	}

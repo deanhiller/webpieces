@@ -37,7 +37,7 @@ public class FContentRouter extends AbstractDynamicRouterImpl implements Reversa
 	@Override
 	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteData data = new RouteInfoForContent(bodyContentBinder);
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler);
+		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, true);
 		return routeInvoker.invokeContentController(invokeInfo, dynamicInfo, data);	}
 
 	@Override

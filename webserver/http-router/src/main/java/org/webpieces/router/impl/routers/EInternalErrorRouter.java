@@ -33,7 +33,7 @@ public class EInternalErrorRouter {
 	public CompletableFuture<StreamWriter> invokeErrorRoute(RequestContext ctx, ProxyStreamHandle handler, boolean forceEndOfStream) {
 		DynamicInfo info = new DynamicInfo(loadedController, svc);
 		RouteInfoForInternalError data = new RouteInfoForInternalError(forceEndOfStream);
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler);
+		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, false);
 		return invoker.invokeErrorController(invokeInfo, info, data);
 	}
 }

@@ -78,7 +78,7 @@ upload. This does not suffer from request/response either
 
 <script>
 
-    var slice_size = 3 * 1024;
+    var slice_size = 15000;
     var reader = {};
     var file = {};
     
@@ -99,7 +99,7 @@ upload. This does not suffer from request/response either
             		"fileType": file.type,
                     // *{   --This comment stripped from html delivered to customer --
                     //     Prevents CSRF attach since a site can't access your cookie (and we validate this on POST in controller) }*
-            		"secureToken": "${_session.secureToken}$"
+            		"secureToken": "${_session.fetchSecureToken()}$"
             }
             var json = JSON.stringify(rawJson)
             

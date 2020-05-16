@@ -35,7 +35,8 @@ public class RequestStreamWriter2 implements StreamWriter {
     private boolean cancelled;
     private CompletableFuture<Void> responseFuture = new CompletableFuture<>();
 
-    public RequestStreamWriter2(BodyParsers bodyParsers, InvokeInfo invokeInfo, Function<InvokeInfo, CompletableFuture<Void>> invoker) {
+    public RequestStreamWriter2(
+    		BodyParsers bodyParsers, InvokeInfo invokeInfo, Function<InvokeInfo, CompletableFuture<Void>> invoker) {
         this.requestBodyParsers = bodyParsers;
         this.invokeInfo = invokeInfo;
         this.invoker = invoker;
@@ -71,7 +72,12 @@ public class RequestStreamWriter2 implements StreamWriter {
     private CompletableFuture<Void> handleCompleteRequestImpl() {
 
         RouterRequest request = invokeInfo.getRequestCtx().getRequest();
-        parseBody(request.originalRequest, request);
+
+        request.body = data;
+
+        if(!invokeInfo.isHasBodyContentBinder())
+        	parseBody(request.originalRequest, request);
+        
         request.trailingHeaders = trailingHeaders;
 
         responseFuture = invoker.apply(invokeInfo);
@@ -82,8 +88,6 @@ public class RequestStreamWriter2 implements StreamWriter {
 
     private void parseBody(Http2Headers req, RouterRequest routerRequest) {
         String lengthHeader = req.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);
-
-        routerRequest.body = data;
 
         if(lengthHeader != null) {
             //Integer.parseInt(lengthHeader.getValue()); should not fail as it would have failed earlier in the parser when
