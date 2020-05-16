@@ -7,19 +7,20 @@
 
 <h2>HTML CRUD</h2>
 
-<p>Last updated: Feb 12, 2020</p>
+<p>Last updated: May 13th, 2020</p>
 
 <p>It's always best to start with basic html and keep things simple to start with when learning so this is the pure html, no javascript 
 version of list all my Accounts, create an account, edit an account, and delete an account.  The basic CRUD flow is so
 common, it deserves it's own example.  If you want the advanced AJAX version, skip to the next page</p>
 
-<p>First, let's create a new RouteId file called AccountRouteId like so</p>
+<p>First, create a new package called crudexamples in your org.webpieces.helloworld/web directory.</p>
+<p>Next, let's create a new RouteId file called ExampleRouteId like so:</p>
 <pre>
-<code>package org.webpieces.helloworld.myapp;
+<code>package org.webpieces.helloworld.web.crudexamples;
 
 import org.webpieces.router.api.routes.RouteId;
 
-public enum AccountRouteId implements RouteId {
+public enum ExampleRouteId implements RouteId {
 	//list
 	LIST_ACCOUNTS,
 	//add/edit
@@ -44,36 +45,29 @@ public enum AccountRouteId implements RouteId {
     <dd>When they click yes, on the 'are you sure' page, this is the POST route invoked</dd>
 </dl>
 
-<p>Next, there is a special method for a CRUD operation so let's add that at the end of the existing MyMainRoutes file
+<p>Next, let's create a RouteModule class called "ExampleRoutes." In here, there is a special method for a CRUD operation
 like so:</p>
 
 <pre>
-<code>package org.webpieces.helloworld.myapp;
+<code>package org.webpieces.helloworld.web.crudexamples;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+import org.webpieces.router.api.routes.Ports;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.CrudRouteIds;
 
-public class MyMainRoutes implements Routes {
+public class ExampleRoutes implements Routes {
 	@Override
-	protected void configure() {
+	protected void configure(DomainRouteBuilder bldr) {
 		RouteBuilder b = bldr.getAllDomainsRouteBuilder();
 
-		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
-		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
-
-		//route to render the page of creating a new user
-		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/car/new",         "MyMainController.carAddEdit", MyMainRouteId.GET_CREATE_CAR_PAGE);
-		//route to render the page of editing an existing user
-		b.addRoute(Port.BOTH, HttpMethod.GET ,   "/car/edit/{name}", "MyMainController.carAddEdit", MyMainRouteId.GET_EDIT_CAR_PAGE);
-		//route to save a new or existing user
-		b.addRoute(Port.BOTH, HttpMethod.POST,   "/car/post",        "MyMainController.postSaveCar", MyMainRouteId.POST_CAR);
-
 		CrudRouteIds routeIds = new CrudRouteIds(
-				AccountRouteId.LIST_ACCOUNTS, AccountRouteId.GET_ADD_ACCOUNT_FORM,
-				AccountRouteId.GET_EDIT_ACCOUNT_FORM, AccountRouteId.POST_ACCOUNT_FORM,
-				AccountRouteId.CONFIRM_DELETE_ACCOUNT, AccountRouteId.POST_DELETE_ACCOUNT);
-		addCrud("account", "CrudAccountController", routeIds);
+				ExampleRouteId.LIST_ACCOUNTS, ExampleRouteId.GET_ADD_ACCOUNT_FORM,
+				ExampleRouteId.GET_EDIT_ACCOUNT_FORM, ExampleRouteId.POST_ACCOUNT_FORM,
+				ExampleRouteId.CONFIRM_DELETE_ACCOUNT, ExampleRouteId.POST_DELETE_ACCOUNT);
+		b.addCrud(Port.BOTH, "account", "ExampleAccountController", routeIds);
 	}
 }</code>
 </pre>
@@ -83,20 +77,39 @@ public class MyMainRoutes implements Routes {
 adds all these routes for you but more importantly keeps your urls consistent for CRUD operations:</p>
 
 <ol>
-    <li>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/account/list",        "CrudAccountController.accountList", listRoute);</li>
-    <li>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/account/new",         "CrudAccountController.accountAddEdit", addRoute);</li>
-    <li>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/account/edit/{id}",   "CrudAccountController.accountAddEdit", editRoute);</li>
-    <li>b.addRoute(Port.BOTH, HttpMethod.POST,   "/account/post",        "CrudAccountController.postSaveAccount", saveRoute);</li>
-    <li>b.addRoute(Port.BOTH, HttpMethod.GET,    "/account/confirmdelete/{id}", "CrudAccountController.confirmDeleteAccount", confirmDelete);</li>
-    <li>b.addRoute(Port.BOTH, HttpMethod.POST,   "/account/delete/{id}", "CrudAccountController.postDeleteAccount", deleteRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/account/list",        "ExampleAccountController.accountList", listRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/account/new",         "ExampleAccountController.accountAddEdit", addRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/account/edit/{id}",   "ExampleAccountController.accountAddEdit", editRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.POST,   "/account/post",        "ExampleAccountController.postSaveAccount", saveRoute);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.GET,    "/account/confirmdelete/{id}", "ExampleAccountController.confirmDeleteAccount", confirmDelete);</li>
+    <li>b.addRoute(Port.BOTH, HttpMethod.POST,   "/account/delete/{id}", "ExampleAccountController.postDeleteAccount", deleteRoute);</li>
 </ol>
 
 <p>Notice, that it names the url /account/*** and the methods accountList and accountAddEdit and all post methods
     then start with postXXXX keeping consistency so every GET request invokes normal methods but POST methods always
     start with postXXX keeping your app consistent.  Next, let's create the AccountDbo.java entity bean like so:</p>
 
+<p>As with before, let's add this RouteModule file to ProdServerMeta.java (org.webpieces.helloworld.base) to make those
+	routes accessible:</p>
+
 <pre>
-<code>*[package org.webpieces.helloworld.myapp;
+<code>*[@Override
+public List<Routes> getRouteModules() {
+    return Lists.newArrayList(
+            new LoginRoutes("/org/webpieces/helloworld/web/login/AppLoginController", "/secure/.*", "password"),
+            new CrudRoutes(),
+            new AjaxCrudRoutes(),
+            new JsonRoutes(),
+            new MyMainRoutes(),
+            <b>new ExampleRoutes()</b>
+            );
+}]*</code>
+</pre>
+
+<p>Next we create the database object for our accounts inside the db package (recall that Hibernate
+only scans a portion of your code for database objects!):</p>
+<pre>
+<code>*[package org.webpieces.helloworld.db;
 
 import java.util.List;
 
@@ -170,10 +183,10 @@ public class AccountDbo {
 }]*</code>
 </pre>
 
-<p>Then, we can now create CrudAccountController.java with our first method accountList like so:</p>
+<p>Then, we can now create ExampleAccountController.java with our first method accountList like so:</p>
 
 <pre>
-<code>*[package org.webpieces.helloworld.myapp;
+<code>*[package org.webpieces.helloworld.web.crudexamples;
 
 import java.util.List;
 
@@ -181,11 +194,11 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 
 import org.webpieces.plugins.hibernate.Em;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
 
 @Singleton
-public class CrudAccountController {
+public class ExampleAccountController {
 
 	public Action accountList() {
 		EntityManager mgr = Em.get();
@@ -196,15 +209,6 @@ public class CrudAccountController {
 </pre>
 
 <p>Then, of course, we need an html page called accountList.html since renderThis is being called:</p>
-
-
-
-<p>Now, we can go to http://localhost:8080/account/list</p>
-
-<p>Finally, boot up your DevelopmentServer.java main class and open a browser and go to http://localhost:8080/helloworld
-or go to https://localhost:8443/helloworld</p>
-
-<p>Congratulations on your first webpieces page, next we will make our html a bit more dynamic</p>
 
 <pre>
 <code>*[#{extends '../mainTemplate.html'/}#
@@ -247,6 +251,10 @@ or go to https://localhost:8443/helloworld</p>
 ]*</code>
 </pre>
 
+<p>Finally, boot up your DevelopmentServer.java main class (if it's not already running!) and open a browser and go to http://localhost:8080/account/list
+or go to https://localhost:8443/account/list</p>
+
+
 <p>We can now go over this template piece by piece:</p>
 
 <ol>
@@ -260,12 +268,12 @@ or go to https://localhost:8443/helloworld</p>
     that html in between the begin and end list tag will be generated</li>
     <li>*[<a href="@[GET_EDIT_ACCOUNT_FORM, id:entity.id]@" class="btn" id="editLink_${entity_index-1}$"> &{'Edit', 'link.edit'}& </a>]*
     This defines a reverse url lookup using the account's id (entity.id).  The id of the a element is simply the index for css purposes if desired</li>
-    <li>*[#{else}#]* If there is no accounts, whatever html is in the else will be displayed</li>
+    <li>*[#{else}#]* If there are no accounts, whatever html is in the else will be displayed</li>
 </ol>
 
 <p>Now, go to http://localhost:8080/account/list to view your work of art.  You will notice you have no
-accounts so next it might be a good idea to create the controller and the form for creating one.  Let's start
-    with the controller:
+accounts so next it might be a good idea to create the controller method and the HTML form for creating some accounts.  Let's start
+    with our ExampleAccountController:
 </p>
 
 <pre>
@@ -383,7 +391,7 @@ since this post call could be from either editing or creating an account.
 </p>
 
 <p>As noted in your first hibernate entity(previous tutorial), calling Em.get().flush() is critical as no persist/delete/merge(update)
-will modify the database.  This is a special 'very' nice feature of hibernate such that you can modify tons of entities
+will modify the database.  This is a special, VERY nice feature of hibernate such that you can modify tons of entities
 and delay the decision of persisting them all or not until later</p>
 
 <p>If there were no errors in validation however, we set a global message that is rendered in mainTemplate.html so no
@@ -393,7 +401,7 @@ again using flash scope Current.flash().setMessage("Account successfully saved")
 	we redirect back to the list accounts page where your new account should show up.
 </p>
 
-<p>Now for a little awesome demonstraction of the kick-ass power of PRG: </p>
+<p>Now for a little awesome demonstration of the kick-ass power of PRG: </p>
 
 <ol>
 	<li>Go to http://localhost:8080/account/list</li>
