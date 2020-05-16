@@ -26,34 +26,56 @@ public class ThreadConnectionListener implements ConnectionListener {
 
 		ThreadTCPChannel proxy = new ThreadTCPChannel((TCPChannel) channel, executor);
 
-		Runnable runnable = new Runnable() {
-			@Override
-			public void run() {
-				MDC.put("socket", channel+"");
-				try {
-					CompletableFuture<DataListener> dataListener = connectionListener.connected(proxy, isReadyForWrites);
-					//transfer the listener to the future to be used
-					dataListener
-						.thenAccept(listener -> translate(proxy, future, listener))
-						.exceptionally(e -> {
-							future.completeExceptionally(e);
-							return null;
-						});
-				} finally {
-					MDC.put("socket", null);
-				}
-			}
-		};
+		ThreadConnectRunnable runnable = new ThreadConnectRunnable(executor, channel, connectionListener, proxy, isReadyForWrites, future);
 		
 		executor.execute(proxy, runnable);
 		
 		return future;
 	}
 
-	private void translate(ThreadTCPChannel proxy, CompletableFuture<DataListener> future, DataListener listener) {
-		DataListener wrappedDataListener = new ThreadDataListener(proxy, listener, executor);
-		future.complete(wrappedDataListener);
+	private static class ThreadConnectRunnable implements Runnable {
+
+		private Channel channel;
+		private ConnectionListener connectionListener;
+		private ThreadTCPChannel proxy;
+		private boolean isReadyForWrites;
+		private CompletableFuture<DataListener> future;
+		private SessionExecutor executor;
+
+		public ThreadConnectRunnable(SessionExecutor executor, Channel channel, ConnectionListener connectionListener, ThreadTCPChannel proxy,
+				boolean isReadyForWrites, CompletableFuture<DataListener> future) {
+					this.executor = executor;
+					this.channel = channel;
+					this.connectionListener = connectionListener;
+					this.proxy = proxy;
+					this.isReadyForWrites = isReadyForWrites;
+					this.future = future;
+		}
+
+		@Override
+		public void run() {
+			MDC.put("socket", channel+"");
+			try {
+				CompletableFuture<DataListener> dataListener = connectionListener.connected(proxy, isReadyForWrites);
+				//transfer the listener to the future to be used
+				dataListener
+					.thenAccept(listener -> translate(proxy, future, listener))
+					.exceptionally(e -> {
+						future.completeExceptionally(e);
+						return null;
+					});
+			} finally {
+				MDC.put("socket", null);
+			}			
+		}
+		
+		private void translate(ThreadTCPChannel proxy, CompletableFuture<DataListener> future, DataListener listener) {
+			DataListener wrappedDataListener = new ThreadDataListener(proxy, listener, executor);
+			future.complete(wrappedDataListener);
+		}
 	}
+	
+
 	
 	@Override
 	public void failed(RegisterableChannel channel, Throwable e) {

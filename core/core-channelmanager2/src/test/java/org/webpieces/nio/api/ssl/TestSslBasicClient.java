@@ -154,11 +154,11 @@ public class TestSslBasicClient {
 		
 		mockChannel.forceDataRead(mockJdk, encrypted);
 		
-		mockChannel.forceDataRead(mockJdk);
-
-		mockChannel.forceDataRead(mockJdk);
-
-		mockChannel.forceDataRead(mockJdk);
+//		mockChannel.forceDataRead(mockJdk);
+//
+//		mockChannel.forceDataRead(mockJdk);
+//
+//		mockChannel.forceDataRead(mockJdk);
 
 		ByteBuffer[] buffer = mockClientDataListener.getTwoBuffers();
 		
