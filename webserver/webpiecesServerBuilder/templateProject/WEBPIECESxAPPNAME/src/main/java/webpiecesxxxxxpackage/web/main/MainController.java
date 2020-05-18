@@ -1,10 +1,13 @@
 package webpiecesxxxxxpackage.web.main;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.RouterStreamHandle;
@@ -12,11 +15,8 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Render;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 import webpiecesxxxxxpackage.GlobalAppContext;
@@ -27,6 +27,7 @@ import webpiecesxxxxxpackage.service.SomeLibrary;
 @Singleton
 public class MainController {
 
+	private static final Logger log = LoggerFactory.getLogger(MainController.class);
 	private final RemoteService service;
 	private final SomeLibrary someLib;
 	
@@ -79,25 +80,68 @@ public class MainController {
 	public Render internalError() {
 		return Actions.renderThis();
 	}
-	
+
 	public CompletableFuture<StreamWriter> myStream(RequestContext requestCtx, RouterStreamHandle handle) {
-		Http2Request req = requestCtx.getRequest().originalRequest;
-		Http2Response resp = handle.createBaseResponse(req, "application/x-ourexample", 200, "OK");
-		
-		return handle.process(resp).thenApply(s -> new RequestStreamEchoWriter(s));
+		return CompletableFuture.completedFuture(new RequestStreamEchoWriter(handle));
 	}
-	
+
 	private static class RequestStreamEchoWriter implements StreamWriter {
 
-		private StreamWriter responseWriter;
+		private AtomicInteger total = new AtomicInteger();
+		private RouterStreamHandle handle;
 
-		public RequestStreamEchoWriter(StreamWriter responseWriter) {
-			this.responseWriter = responseWriter;
+		public RequestStreamEchoWriter(RouterStreamHandle handle) {
+			this.handle = handle;
 		}
 
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
-			return responseWriter.processPiece(data);
+			
+			if(data.isEndOfStream()) {
+				log.info("Upload complete");
+				return handle.createFullRedirect(MainRouteId.MAIN_ROUTE);
+			}
+			
+			DataFrame frame = (DataFrame) data;
+			int totalSoFar = total.addAndGet(frame.getData().getReadableSize());
+
+			//log.info("STEP 2. returning echo future for bytes="+frame.getData().getReadableSize()+" eos="+frame.isEndOfStream()+" totalSoFar="+totalSoFar);
+			return CompletableFuture.completedFuture(null);
 		}
 	}
+
+//	public CompletableFuture<StreamWriter> myStream(RequestContext requestCtx, RouterStreamHandle handle) {
+//
+//
+//		return CompletableFuture.<StreamWriter>completedFuture(new RequestStreamEchoWriter(requestCtx, handle));
+//	}
+//
+//	private static class RequestStreamEchoWriter implements StreamWriter {
+//
+//		private RequestContext requestCtx;
+//		private RouterStreamHandle handle;
+//
+//		public RequestStreamEchoWriter(RequestContext requestCtx, RouterStreamHandle handle) {
+//			this.requestCtx = requestCtx;
+//			this.handle = handle;
+//		}
+//
+//		@Override
+//		public CompletableFuture<Void> processPiece(StreamMsg data) {
+//			log.info("streaming in piece");
+//
+////			try {
+////				Thread.sleep(1000);
+////			} catch (InterruptedException e) {
+////			}
+//
+//			if(data.isEndOfStream()) {
+//				Http2Request req = requestCtx.getRequest().originalRequest;
+//				Http2Response redirect = handle.createRedirect(req, new RedirectResponse("/"));
+//				return handle.process(redirect).thenApply(s -> null);
+//			}
+//
+//			return CompletableFuture.completedFuture(null);
+//		}
+//	}
 }
