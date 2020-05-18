@@ -39,6 +39,7 @@ public interface ScopedRouteBuilder {
 	 */
 	void addStreamRoute(Port both, HttpMethod get, String path, String controllerMethod);
 	
+	void addStreamRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId);
 
 	void addCrud(Port port, String entity, String controller, CrudRouteIds routeIds);
 
@@ -63,4 +64,5 @@ public interface ScopedRouteBuilder {
 	 * @return
 	 */
 	ScopedRouteBuilder getScopedRouteBuilder(String path);
+
 }

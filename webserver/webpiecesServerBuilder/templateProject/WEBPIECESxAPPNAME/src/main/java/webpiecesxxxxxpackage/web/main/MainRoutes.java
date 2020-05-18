@@ -18,7 +18,7 @@ public class MainRoutes implements Routes {
 		//   regex a capture group for you BUT leave the rest untouched so you can do whatever regex you like
 		//   ORDER matters so the order of modules is important and the order of routes is important
 
-		
+		//This is the streaming route we added..
 		bldr.addStreamRoute(BOTH, POST, "/streaming", "MainController.myStream");
 		
 		//The Controller.method is a relative or absolute path with ClassName.method at the end

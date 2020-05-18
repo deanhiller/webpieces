@@ -90,8 +90,14 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 
 		log.info("scope:'"+routerInfo+"' added content route="+matchInfo+" method="+routeInfo.getControllerMethodString());
 	}
+	
 	@Override
 	public void addStreamRoute(Port port, HttpMethod method, String path, String controllerMethod) {
+		addStreamRoute(port, method, path, controllerMethod, null);
+	}
+	
+	@Override
+	public void addStreamRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		UrlPath p = new UrlPath(routerInfo, path);
 		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
 
@@ -105,7 +111,9 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.STREAMING, container, svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
-
+		if(routeId != null) //if there is a routeId, then add the reverse mapping
+			resettingLogic.getReverseRoutes().addRoute(routeId, router);
+		
 		log.info("scope:'"+routerInfo+"' added content route="+matchInfo+" method="+routeInfo.getControllerMethodString());		
 	}
 	

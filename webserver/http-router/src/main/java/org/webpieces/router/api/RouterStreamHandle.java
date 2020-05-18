@@ -13,15 +13,18 @@ public interface RouterStreamHandle extends RouterResponseHandler {
 
     /**
      * Creates a base response off the request looking for things like keep-alive so the response
-     * conforms to http specification 
+     * conforms to http specification.
+     * 
+     * This does NOT send a response so you still need to call handler.process(response) to send it back to client
+     * 
      * @param statusReason TODO
      */
     Http2Response createBaseResponse(Http2Request req, String mimeType, int statusCode, String statusReason);
 
-	CompletableFuture<Void> createFullRedirect(RouteId id, Object ... args);
+	CompletableFuture<Void> sendFullRedirect(RouteId id, Object ... args);
 
-	CompletableFuture<Void> createAjaxRedirect(RouteId id, Object ... args);
+	CompletableFuture<Void> sendAjaxRedirect(RouteId id, Object ... args);
 
-	CompletableFuture<Void> createPortRedirect(HttpPort port, RouteId id, Object ... args);
+	CompletableFuture<Void> sendPortRedirect(HttpPort port, RouteId id, Object ... args);
 
 }

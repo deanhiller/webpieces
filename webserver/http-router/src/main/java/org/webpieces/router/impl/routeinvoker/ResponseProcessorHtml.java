@@ -91,13 +91,13 @@ public class ResponseProcessorHtml implements Processor {
 	public CompletableFuture<Void> continueProcessing(Action controllerResponse) {
 		if(controllerResponse instanceof RedirectImpl) {
 			RedirectImpl redirect = (RedirectImpl)controllerResponse;
-			return responseCb.createFullRedirect(redirect.getId(), redirect.getArgs());
+			return responseCb.sendFullRedirect(redirect.getId(), redirect.getArgs());
 		} else if(controllerResponse instanceof PortRedirect) {
 			PortRedirect redirect = (PortRedirect)controllerResponse;
-			return responseCb.createPortRedirect(redirect.getPort(), redirect.getId(), redirect.getArgs());
+			return responseCb.sendPortRedirect(redirect.getPort(), redirect.getId(), redirect.getArgs());
 		} else if(controllerResponse instanceof AjaxRedirectImpl) {
 			AjaxRedirectImpl redirect = (AjaxRedirectImpl)controllerResponse;
-			return responseCb.createAjaxRedirect(redirect.getId(), redirect.getArgs());
+			return responseCb.sendAjaxRedirect(redirect.getId(), redirect.getArgs());
 		} else if(controllerResponse instanceof RenderImpl) {
 			return createRenderResponse((RenderImpl)controllerResponse);
 		} else if(controllerResponse instanceof RawRedirect) {

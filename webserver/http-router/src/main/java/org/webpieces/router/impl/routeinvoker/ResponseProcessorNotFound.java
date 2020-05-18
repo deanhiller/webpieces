@@ -66,7 +66,7 @@ public class ResponseProcessorNotFound implements Processor {
 			return createContentResponse((RenderContent) controllerResponse);
 		} else if(controllerResponse instanceof RedirectImpl) {
 			RedirectImpl redirect = (RedirectImpl)controllerResponse;
-			return responseCb.createFullRedirect(redirect.getId(), redirect.getArgs());
+			return responseCb.sendFullRedirect(redirect.getId(), redirect.getArgs());
 		} else {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
 					+ "precondition check on NotFound routes to assert the correct return types in "

@@ -50,3 +50,21 @@
         <a href="@[LIST_USERS]@" class="btn">&{'Cancel', 'link.cancel'}&</a>
     </div>
 #{/form}#
+
+*{
+
+<H2>Option 2, OLD School file BUT  our platform supports streaming</H2>
+Most platforms like wordpress have a setting they set for max up loads BECAUSE they don't support streaming and it
+will blow out their memory.  We support streaming so we can do it in pieces using max memory of about 224k per file
+upload before backpressuring client(ie. if you don't process fast enough, it stops clients from sending.
+This does not suffer from request/response either since it streams it in.  A 3rd option would be websockets
+
+<form action="/streaming" method="post" enctype="multipart/form-data">
+    <p id="dbi-upload-progress">Please select a file and click "Upload" to continue.</p>
+
+    <input id="dbi-file-upload" type="file" name="dbi_import_file" /><br><br>
+
+    <input id="dbi-file-upload-submit" class="button button-primary" type="submit" value="Upload" />
+</form>
+
+}*

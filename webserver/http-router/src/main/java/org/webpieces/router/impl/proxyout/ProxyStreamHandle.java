@@ -140,19 +140,19 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<Void> createAjaxRedirect(RouteId id, Object ... args) {
+	public CompletableFuture<Void> sendAjaxRedirect(RouteId id, Object ... args) {
 		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
 		return createRedirect(null, id, argMap, true);
 	}
 
 	@Override
-	public CompletableFuture<Void> createPortRedirect(HttpPort port, RouteId id, Object ... args) {
+	public CompletableFuture<Void> sendPortRedirect(HttpPort port, RouteId id, Object ... args) {
 		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
 		return createRedirect(port, id, argMap, false);
 	}
 
 	@Override
-	public CompletableFuture<Void> createFullRedirect(RouteId id, Object ... args) {
+	public CompletableFuture<Void> sendFullRedirect(RouteId id, Object ... args) {
 		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
 		return createRedirect(null, id, argMap, false);
 	}
