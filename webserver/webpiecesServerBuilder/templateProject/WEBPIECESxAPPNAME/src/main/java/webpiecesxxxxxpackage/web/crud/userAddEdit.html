@@ -51,18 +51,6 @@
     </div>
 #{/form}#
 
-<H2>Option 1, AJAX upload</H2>
-This option does NOT stream in the data making an upload much slower than it could be with back and forth
-request/response, request/response.  
-
-<form>
-    <p id="dbi-upload-progress">Please select a file and click "Upload" to continue.</p>
-
-    <input id="dbi-file-upload" type="file" name="dbi_import_file" /><br><br>
-
-    <input id="dbi-file-upload-submit" class="button button-primary" type="submit" value="Upload" />
-</form>
-
 <H2>Option 2, OLD School file BUT  our platform supports streaming</H2>
 Most platforms like wordpress have a setting they set for max up loads BECAUSE they don't support streaming and it
 will blow out their memory.  We support streaming so we can do it in pieces using max memory of about 10k per file
@@ -75,79 +63,3 @@ upload. This does not suffer from request/response either
 
     <input id="dbi-file-upload-submit" class="button button-primary" type="submit" value="Upload" />
 </form>
-
-<script>
-
-    var slice_size = 15000;
-    var reader = {};
-    var file = {};
-    
-    function upload_file( start ) {
-        var next_slice = start + slice_size + 1;
-        var blob = file.slice( start, next_slice );
-    
-        reader.onloadend = function( event ) {
-            if ( event.target.readyState !== FileReader.DONE ) {
-                return;
-            }
-    
-            var rawJson = { 
-            		"position": start, 
-            		"sliceSize": slice_size,
-            		"fileData": event.target.result,
-            		"fileName": file.name,
-            		"fileType": file.type,
-                    // *{   --This comment stripped from html delivered to customer --
-                    //     Prevents CSRF attach since a site can't access your cookie (and we validate this on POST in controller) }*
-            		"secureToken": "${_session.fetchSecureToken()}$"
-            }
-            var json = JSON.stringify(rawJson)
-            
-            $.ajax( {
-                url: '/json/upload',
-                type: 'POST',
-                contentType: "application/json; charset=utf-8",
-                dataType: 'json',
-                cache: false,
-                data: json,
-                error: function( jqXHR, textStatus, errorThrown ) {
-                    console.log( jqXHR, textStatus, errorThrown );
-                },
-                success: function( data ) {
-                    var size_done = start + slice_size;
-                    var percent_done = Math.floor( ( size_done / file.size ) * 100 );
-    
-                    if ( next_slice < file.size ) {
-                        // Update upload progress
-                        $( '#dbi-upload-progress' ).html( 'Uploading File - ' + percent_done + '%' );
-    
-                        // More to upload, call function recursively
-                        upload_file( next_slice );
-                    } else {
-                        // Update upload progress
-                        $( '#dbi-upload-progress' ).html( 'Upload Complete!' );
-                    }
-                }
-            } );
-        };
-    
-        reader.readAsDataURL( blob );
-    }
-    
-    
-    (function( $ ) {
-    
-        function start_upload( event ) {
-            event.preventDefault();
-    
-            reader = new FileReader();
-            file = document.querySelector( '#dbi-file-upload' ).files[0];
-    
-            upload_file( 0 );
-        }
-        $( '#dbi-file-upload-submit' ).on( 'click', start_upload );
-    
-    
-    })( jQuery );
-
-</script>
