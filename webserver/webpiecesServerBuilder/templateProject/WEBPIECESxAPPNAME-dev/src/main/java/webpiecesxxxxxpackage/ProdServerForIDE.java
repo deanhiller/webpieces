@@ -67,8 +67,7 @@ public class ProdServerForIDE {
 //		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...
-		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths)
-														.setFileEncoding(Server.ALL_FILE_ENCODINGS);
+		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths);
 		
 		Module platformOverrides = Modules.combine(
 				new SimpleMeterModule(metrics),

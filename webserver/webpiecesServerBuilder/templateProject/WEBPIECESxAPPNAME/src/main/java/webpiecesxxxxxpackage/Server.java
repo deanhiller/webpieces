@@ -1,7 +1,5 @@
 package webpiecesxxxxxpackage;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -34,8 +32,6 @@ public class Server {
 	 *******************************************************************************/
 	
 	private static final Logger log = LoggerFactory.getLogger(Server.class);
-	
-	public static final Charset ALL_FILE_ENCODINGS = StandardCharsets.UTF_8;
 	
 	/**
 	 * Welcome to YOUR main method as webpieces webserver is just a LIBRARY you use that you can

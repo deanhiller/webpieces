@@ -69,12 +69,10 @@ public class DevelopmentServer {
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 
 		//html and json template file encoding...
-		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths)
-														.setFileEncoding(Server.ALL_FILE_ENCODINGS);
+		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths);
 		
 		//java source files encoding...
-		CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getHomeCacheDir("WEBPIECESxAPPNAMECache/devserver-bytecode"))
-										.setFileEncoding(Server.ALL_FILE_ENCODINGS);
+		CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getHomeCacheDir("WEBPIECESxAPPNAMECache/devserver-bytecode"));
 		Module platformOverrides = Modules.combine(
 										new SimpleMeterModule(metrics),
 										new DevRouterModule(devConfig),
