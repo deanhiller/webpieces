@@ -234,9 +234,7 @@ public class Http11StreamImpl implements ResponseStream {
 
 	private void remove(Http2Msg data) {
 		Http11StreamImpl current = socket.getCurrentStream();
-		if(!sentFullRequest)
-			throw new IllegalStateException("Client Application cannot send endof stream message until the full request is sent(only in http1.1)");
-		else if(endingFrame.get() != null)
+		if(endingFrame.get() != null)
 			throw new IllegalStateException("You had already sent a frame with endOfStream "
 					+ "set and can't send more.  ending frame was="+endingFrame+" but you just sent="+data);
 		else if(current != this)
