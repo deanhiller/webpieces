@@ -24,8 +24,12 @@ public class JacksonRoutes implements Routes {
 		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		Pattern pattern = Pattern.compile(filterPattern);
 		
-		bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, false), FilterPortType.ALL_FILTER, config.getFilterApplyLevel());		
-		bldr.addNotFoundFilter(filter, new JsonConfig(pattern, true), FilterPortType.ALL_FILTER, config.getFilterApplyLevel());
+		int filterLevel = 1000000;
+		if(config.getFilterApplyLevel() != null)
+			filterLevel = config.getFilterApplyLevel();
+		
+		bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, false), FilterPortType.ALL_FILTER, filterLevel);		
+		bldr.addNotFoundFilter(filter, new JsonConfig(pattern, true), FilterPortType.ALL_FILTER, filterLevel);
 	}
 
 }
