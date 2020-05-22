@@ -207,6 +207,8 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		if(ExceptionWrap.isChannelClosed(e))
 			return CompletableFuture.completedFuture(null);
 
+		log.error("HUGE failure on incoming request="+req, e);
+		
 		if(log.isDebugEnabled())
 			log.debug("Sending failure html response. req="+originalHttp2Request);
 
@@ -227,6 +229,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 						+ "      <ol>"
 						+ "         <li>Webpieces simply had a bug where it did not call the webapp developers internal error controller OR</li>"
 						+ "         <li>The app's error controller failed</li>"
+						+ "         <li>IF you are running DevelopmentServer.java(hot recompile), you may have a bug in your Routers preventing loading of all plugins and controllers(compiler error, etc.)</li>"
 						+ "      </ol>"
 						+ "  </body>"
 						+ "</html>";
