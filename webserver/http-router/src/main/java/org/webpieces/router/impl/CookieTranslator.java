@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import org.webpieces.router.impl.ctx.SecureCookie;
 import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.util.security.Security;
 
+@Singleton
 public class CookieTranslator implements CookieWebManaged {
 
 	private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
