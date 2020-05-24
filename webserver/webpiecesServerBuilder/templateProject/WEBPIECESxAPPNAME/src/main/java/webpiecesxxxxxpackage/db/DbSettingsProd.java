@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
@@ -33,6 +34,7 @@ public class DbSettingsProd implements PersistenceUnitInfo {
 
 	private HikariDataSource dataSource;
 	
+	@Inject
 	public DbSettingsProd(MeterRegistry metrics) {
         //<!-- property name="javax.persistence.jdbc.driver" value="org.h2.Driver" /-->
 		//properties.setProperty("javax.persistence.jdbc.driver", "net.sf.log4jdbc.DriverSpy");
