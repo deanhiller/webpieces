@@ -42,7 +42,7 @@ public class Server {
 
 			//We typically move this to the command line so staging can have
 			//-hibernate.persistenceunit=stagingdb instead but to help people startup, we add the arg
-			String[] newArgs = addArgs(new String[] {"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsProd", "-hibernate.loadclassmeta=true"});
+			String[] newArgs = addArgs(new String[] {"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsProd"});
 
 			ServerConfig config = new ServerConfig(true);
 			Server server = new Server(null, null, config, newArgs);

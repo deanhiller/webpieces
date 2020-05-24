@@ -58,7 +58,7 @@ public class PrivateWebserverForTest {
 	}
 	
 	public PrivateWebserverForTest(PrivateTestConfig testConfig) {
-		String[] args = {"-hibernate.persistenceunit=webpieces-persistence"};
+		String[] args = {"-hibernate.persistenceunit=webpieces-persistence", "-hibernate.loadclassmeta=false"};
 		init(testConfig, args);
 	}
 

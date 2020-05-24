@@ -29,19 +29,20 @@ public class HibernatePlugin implements Plugin {
 	@Deprecated
 	public HibernatePlugin(HibernateConfig config) {
 		persistenceUnit = () -> config.getPersistenceUnit();
+		loadByClassFile = () -> false; //default to false since this is legacy using file
 	}
 	
 	public HibernatePlugin(Arguments cmdLineArgs) {
 		log.info("classloader="+getClass().getClassLoader());
 		this.persistenceUnit = cmdLineArgs.createRequiredArg(PERSISTENCE_UNIT_KEY, "The named persistence unit from the list of them inside META-INF/persistence.xml", (s) -> s);
-		this.loadByClassFile = cmdLineArgs.createOptionalArg(LOAD_CLASSMETA_KEY, "false", "If you supply a *.class for 'hibernate.persistenceunit', set this flat to true", (s) -> convertBool(s));
+		this.loadByClassFile = cmdLineArgs.createOptionalArg(LOAD_CLASSMETA_KEY, "true", "If you supply a *.class for 'hibernate.persistenceunit', set this flat to true", (s) -> convertBool(s));
 	}
 	
 	public HibernatePlugin(HibernateConfiguration config, Arguments cmdLineArgs) {
 		this.config = config;
 		log.info("classloader="+getClass().getClassLoader());
 		this.persistenceUnit = cmdLineArgs.createRequiredArg(PERSISTENCE_UNIT_KEY, "The named persistence unit from the list of them inside META-INF/persistence.xml", (s) -> s);
-		this.loadByClassFile = cmdLineArgs.createOptionalArg(LOAD_CLASSMETA_KEY, "false", "If you supply a *.class for 'hibernate.persistenceunit', set this flat to true", (s) -> convertBool(s));
+		this.loadByClassFile = cmdLineArgs.createOptionalArg(LOAD_CLASSMETA_KEY, "true", "If you supply a *.class for 'hibernate.persistenceunit', set this flat to true", (s) -> convertBool(s));
 	}
 	
 	public static Boolean convertBool(String s) {

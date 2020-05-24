@@ -2,7 +2,7 @@
 
 * Add regex for e.printStackTrace into checkstyle.  Add System.out and System.err as well to not be used and log why
 * implement this post https://github.com/diffplug/spotless to organize imports and format code?   
-* For microservice, where NotFoundRoute is not specified, it fails with bug or is it a bug..they should define simple not found route, right?  or at least throw no not found route!
+* For microservice, where NotFoundRoute is not specified, it fails with bug or is it a bug..they should define simple not found route, right?  or at least throw no not found route! We should throw NoNotFoundRouteSetException
 * ADD precondition to not allow developers to accidentally run a Routes file twice which adds the same routes and can fail in a confusing way.
 * investigate back pressure on file upload.....somethiing seems a bit off and I want more detail.  we may wire futures through SSL layer as well perhaps?
 * fix up TestError test case on startup so that we know respond to clients
