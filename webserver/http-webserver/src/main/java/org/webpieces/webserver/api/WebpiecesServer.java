@@ -143,10 +143,12 @@ public class WebpiecesServer {
 		File publicFile = FileFactory.newFile(filePath, "public");
 		if(bin.exists() && lib.exists() && config.exists() && publicFile.exists()) {
 			//For ->
+			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
 			//    MainApp | NO  | Production | N/A
 			log.info("Running in production environment");
 			return filePath;
 		} else if((projectName+"-dev").equals(name)) {
+			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}			
 			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    Test    | NO  | Gradle     | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
@@ -159,6 +161,7 @@ public class WebpiecesServer {
 			File parent = filePath.getParentFile();
 			return FileFactory.newFile(parent, projectName+"/src/dist");
 		} else if(projectName.equals(name)) {
+			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
 			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    Test    | NO  | Gradle     | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
@@ -177,6 +180,7 @@ public class WebpiecesServer {
 		} else if(locatorFile1.exists()) {
 			//DAMNIT Intellij...FIX THIS STUFF!!!
 			//For ->
+			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
 			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			if(isRunningServerMainMethod) {
@@ -191,6 +195,7 @@ public class WebpiecesServer {
 			//
 			//   This section is only for webpieces use and can safely be deleted for your project if you want to reduce clutter
 			//
+			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
 			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			if(isRunningServerMainMethod) {
