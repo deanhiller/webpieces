@@ -2,6 +2,8 @@ package org.webpieces.router.impl;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.webpieces.ctx.api.extension.HtmlTagCreator;
+import org.webpieces.router.api.PlatformInjector;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
@@ -10,6 +12,7 @@ import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
 import org.webpieces.router.impl.params.ObjectTranslator;
 
 import com.google.inject.Binder;
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
@@ -22,16 +25,19 @@ public class WebpiecesToAppBindingModule implements Module {
 	private ObjectTranslator objectTranslator;
 	private ScheduledExecutorService scheduler;
 	private MeterRegistry metrics;
+	private Injector injector;
 
 	public WebpiecesToAppBindingModule(
 			RoutingHolder routingHolder, 
 			ManagedBeanMeta managedMeta, 
+			Injector injector,
 			ObjectTranslator objectTranslator, 
 			ScheduledExecutorService scheduler, 
 			MeterRegistry metrics
 	) {
 		this.routingHolder = routingHolder;
 		this.managedMeta = managedMeta;
+		this.injector = injector;
 		this.objectTranslator = objectTranslator;
 		this.scheduler = scheduler;
 		this.metrics = metrics;
@@ -44,7 +50,8 @@ public class WebpiecesToAppBindingModule implements Module {
 		Multibinder.newSetBinder(binder, EntityLookup.class);
 		Multibinder.newSetBinder(binder, BodyContentBinder.class);
 		Multibinder.newSetBinder(binder, ObjectStringConverter.class);
-		
+		Multibinder.newSetBinder(binder, HtmlTagCreator.class);
+
 		//special case so the notFound controller can inspect and list all routes in a web page
 		//OR some client application can inject and introspect all web routes as well
 		//OR some plugin on startup can look at all routes as well
@@ -60,6 +67,8 @@ public class WebpiecesToAppBindingModule implements Module {
 		//including if you put an object into a cookie as well, so it gets written as a String
 		binder.bind(ObjectTranslator.class).toInstance(objectTranslator);
 		binder.bind(ScheduledExecutorService.class).toInstance(scheduler);
+		
+		binder.bind(PlatformInjector.class).toInstance(new PlatformInjector(injector));
 		
 		binder.bind(MeterRegistry.class).toInstance(metrics);
 	}

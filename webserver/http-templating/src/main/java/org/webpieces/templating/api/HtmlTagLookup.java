@@ -1,10 +1,15 @@
 package org.webpieces.templating.api;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+import org.webpieces.ctx.api.extension.HtmlTagCreator;
+import org.webpieces.ctx.api.extension.Tag;
 import org.webpieces.templating.impl.tags.BootstrapModalTag;
 import org.webpieces.templating.impl.tags.ExtendsTag;
 import org.webpieces.templating.impl.tags.FieldTag;
@@ -21,6 +26,7 @@ import org.webpieces.templating.impl.tags.TemplateLoaderTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class HtmlTagLookup {
 	private static final Logger log = LoggerFactory.getLogger(HtmlTagLookup.class);
 	
@@ -73,6 +79,23 @@ public class HtmlTagLookup {
 				TemplateLoaderTag fileTag = (TemplateLoaderTag) tag;
 				fileTag.initialize(templateService);
 			}
+		}
+	}
+	
+	public void install(Set<HtmlTagCreator> htmlCreators) {
+		for(HtmlTagCreator c : htmlCreators) {
+			List<Tag> tags = c.createTags();
+			addTags(c, tags);
+		}
+	}
+
+	private void addTags(HtmlTagCreator c, List<Tag> tags2) {
+		for(Tag tag: tags2) {
+			if(!(tag instanceof HtmlTag)) {
+				throw new IllegalArgumentException("HtmlTagCreator="+c.getClass().getName()+" returned a tag in the list NOT of type HtmlTag which is required.  offending tag="+tag.getClass().getName());
+			}
+			HtmlTag t = (HtmlTag) tag;
+			put(t);
 		}
 	}
 }

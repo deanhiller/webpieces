@@ -4,10 +4,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.ctx.api.extension.HtmlTagCreator;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.templating.api.Template;
@@ -96,6 +98,11 @@ public class ProdTemplateService extends AbstractTemplateService implements Temp
 			throw new RuntimeException("template failed="+superTemplateFilePath+" called from template="
 					+templatePath+" See below exception messages for more information", e);
 		}
+	}
+
+	@Override
+	public void install(Set<HtmlTagCreator> htmlCreators) {
+		lookup.install(htmlCreators);
 	}
 
 }

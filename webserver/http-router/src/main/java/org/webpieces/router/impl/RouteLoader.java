@@ -72,6 +72,7 @@ public class RouteLoader {
 	private MeterRegistry appMetricsOnly;
 	private WebInjector webInjector;
 	private FutureHelper futureUtil;
+	private Injector platformInjector;
 
 	@Inject
 	public RouteLoader(
@@ -86,6 +87,7 @@ public class RouteLoader {
 		ObjectToParamTranslator reverseTranslator,
 		@Named(RouterSvcFactory.APP_METRICS_KEY) MeterRegistry appMetricsOnly,
 		WebInjector webInjector,
+		Injector platformInjector,
 		FutureHelper futureUtil
 	) {
 		this.config = config;
@@ -99,6 +101,7 @@ public class RouteLoader {
 		this.reverseTranslator = reverseTranslator;
 		this.appMetricsOnly = appMetricsOnly;
 		this.webInjector = webInjector;
+		this.platformInjector = platformInjector;
 		this.futureUtil = futureUtil;
 	}
 	
@@ -231,7 +234,7 @@ public class RouteLoader {
 		});
 				
 		guiceModules.add(new WebpiecesToAppBindingModule(
-				routingHolder, beanMeta, objectTranslator, scheduler, appMetricsOnly));
+				routingHolder, beanMeta, platformInjector, objectTranslator, scheduler, appMetricsOnly));
 		
 		Module module = Modules.combine(guiceModules);
 		

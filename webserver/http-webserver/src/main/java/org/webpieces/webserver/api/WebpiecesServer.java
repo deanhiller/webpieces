@@ -23,6 +23,10 @@ public class WebpiecesServer {
 
 	private final boolean isRunningServerMainMethod;
 
+	/**
+	 * @param platformOverrides For QUICKLY fixing bugs in webpieces with no need to fork git.  Please do submit a bug fix though
+	 * @param appOverrides For unit testing so you can swap remote clients with mocks and simulate remote systems
+	 */
 	public WebpiecesServer(
 		String projectName,
 		String base64Key,

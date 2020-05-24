@@ -2,10 +2,12 @@ package org.webpieces.webserver.impl;
 
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.ctx.api.extension.HtmlTagCreator;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
@@ -30,4 +32,9 @@ public class WebServerTemplateProxy implements TemplateApi {
         //TODO(dhiller): Fix to not be static, we can't bug fix static code live..
         return TemplateUtil.convertTemplateClassToPath(fullClass);
     }
+
+	@Override
+	public void installCustomTags(Set<HtmlTagCreator> tagCreators) {
+		templateService.install(tagCreators);
+	}
 }

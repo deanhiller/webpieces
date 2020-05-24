@@ -11,9 +11,7 @@ import org.webpieces.webserver.api.WebpiecesServer;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
-import com.google.inject.util.Modules;
 
-import webpiecesxxxxxpackage.base.PlatformOverrides;
 import webpiecesxxxxxpackage.base.RandomInstanceId;
 
 /**
@@ -65,6 +63,10 @@ public class Server {
 
 	private final WebpiecesServer webServer;
 
+	/**
+	 * @param platformOverrides For fixing bugs in any classes by swapping them so you don't have to fork git and fix(Please do submit fixes though)
+	 * @param appOverrides For Unit testing your app so you can swap out remote clients with mocks
+	 */
 	public Server(
 		Module platformOverrides, 
 		Module appOverrides, 
@@ -72,15 +74,9 @@ public class Server {
 		String ... args
 	) {
 		String base64Key = "__SECRETKEYHERE__";  //This gets replaced with a unique key each generated project which you need to keep or replace with your own!!!
-
-		Module allOverrides = new PlatformOverrides();
-		if(platformOverrides != null) {
-			allOverrides = Modules.combine(platformOverrides, allOverrides);
-		}
-
 		
 		log.info("Constructing WebpiecesServer with args="+Arrays.asList(args));
-		webServer = new WebpiecesServer("WEBPIECESxAPPNAME", base64Key, allOverrides, appOverrides, svrConfig, args);
+		webServer = new WebpiecesServer("WEBPIECESxAPPNAME", base64Key, platformOverrides, appOverrides, svrConfig, args);
 	}
 
 	public void start() {

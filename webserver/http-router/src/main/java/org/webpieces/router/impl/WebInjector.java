@@ -11,6 +11,7 @@ import com.google.inject.Module;
 @Singleton
 public class WebInjector {
 
+	//The webapplication injector(not the webpieces platform one)
 	private Injector injector;
 
 	public Injector createInjector(Module module) {
