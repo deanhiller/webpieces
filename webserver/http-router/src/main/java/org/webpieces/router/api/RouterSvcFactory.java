@@ -4,9 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
@@ -18,15 +15,11 @@ import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.Provides;
 import com.google.inject.util.Modules;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
 public class RouterSvcFactory {
-
-	public static final String APP_METRICS_KEY = "app.metrics";
-	public static final String PLATFORM_METRICS_KEY = "platform.metrics";
 
     protected RouterSvcFactory() {}
 
@@ -71,21 +64,6 @@ public class RouterSvcFactory {
 		public ExtrasModule(MeterRegistry metrics, TemplateApi templateApi) {
 			this.metrics = metrics;
 			this.templateApi = templateApi;
-		}
-
-		@Singleton
-		@Provides
-		@Named(RouterSvcFactory.PLATFORM_METRICS_KEY)
-		public MeterRegistry providePlatformMetrics(MeterRegistry base) {
-			//install a default for platform metrics...
-			return base;
-		}
-
-		@Singleton
-		@Provides
-		@Named(RouterSvcFactory.APP_METRICS_KEY)
-		public MeterRegistry provideAppMetrics(MeterRegistry base) {
-			return base;
 		}
 
 		@Override

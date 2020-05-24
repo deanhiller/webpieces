@@ -7,7 +7,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.function.Supplier;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.webpieces.data.api.BufferPool;
@@ -17,7 +16,6 @@ import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
@@ -55,37 +53,18 @@ public class WebServerModule implements Module {
 	private final Supplier<InetSocketAddress> backendAddress;
 	private final WebServerPortInformation portLookup;
 	private final Supplier<Boolean> allowHttpsIntoHttp;
+	private boolean hasCoreModule;
 
-	public WebServerModule(WebServerConfig config, WebServerPortInformation portLookup, Arguments args) {
+	public WebServerModule(WebServerConfig config, WebServerPortInformation portLookup, boolean hasCoreModule, Arguments args) {
 		this.config = config;
 		this.portLookup = portLookup;
+		this.hasCoreModule = hasCoreModule;
 		
 		//this is too late, have to do in the Guice modules
 		httpAddress = args.createOptionalInetArg(HTTP_PORT_KEY, ":8080", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
 		allowHttpsIntoHttp = args.createOptionalArg(HTTPS_OVER_HTTP, "false", "This enables the http port to receive SSL connections.", (s) -> Boolean.parseBoolean(s));
 		httpsAddress = args.createOptionalInetArg(HTTPS_PORT_KEY, ":8443", "Http host&port.  syntax: {host}:{port} or just :{port} to bind to all NIC ips on that host");
 		backendAddress = args.createOptionalInetArg(BACKEND_PORT_KEY, null, "Http(s) host&port for backend.  syntax: {host}:{port} or just :{port}.  Also, null means put the pages on the https/http ports");
-	}
-
-	@Singleton
-	@Provides
-	public MeterRegistry provideBaseMetrics() {
-		return new SimpleMeterRegistry();
-	}
-
-	@Singleton
-	@Provides
-	@Named(RouterSvcFactory.PLATFORM_METRICS_KEY)
-	public MeterRegistry providePlatformMetrics(MeterRegistry base) {
-		//install a default for platform metrics...
-		return base;
-	}
-
-	@Singleton
-	@Provides
-	@Named(RouterSvcFactory.APP_METRICS_KEY)
-	public MeterRegistry provideAppMetrics(MeterRegistry base) {
-		return base;
 	}
 
 	@Override
@@ -108,6 +87,9 @@ public class WebServerModule implements Module {
 		//in webpieces modules, you can't read until a certain phase :( :( so we can't read them here
 		//like we can in app modules and in plugins!!
 		binder.bind(PortConfiguration.class).toInstance(new PortConfiguration(httpAddress, httpsAddress, backendAddress, allowHttpsIntoHttp));
+		
+		if(!hasCoreModule)
+			binder.bind(MeterRegistry.class).to(SimpleMeterRegistry.class);
 	}
 	
 	@Provides

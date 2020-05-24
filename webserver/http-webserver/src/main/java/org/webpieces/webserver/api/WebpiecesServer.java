@@ -23,13 +23,26 @@ public class WebpiecesServer {
 
 	private final boolean isRunningServerMainMethod;
 
+	@Deprecated
+	public WebpiecesServer(
+		String projectName,
+		String base64Key,
+		Module platformOverrides, 
+		Module appOverrides, 
+		ServerConfig svrConfig, 
+		String ... args
+	) {
+		this(projectName, base64Key, null, platformOverrides, appOverrides, svrConfig, args);
+	}
+	
 	/**
-	 * @param platformOverrides For QUICKLY fixing bugs in webpieces with no need to fork git.  Please do submit a bug fix though
+	 * @param platformOverrides For tests, DevelopmentServer to swap pieces out and for YOU so you can bug fix by just swapping a class and filing a ticket with the class you used to fix the bug!
 	 * @param appOverrides For unit testing so you can swap remote clients with mocks and simulate remote systems
 	 */
 	public WebpiecesServer(
 		String projectName,
 		String base64Key,
+		Module coreModule, //core additionalModule
 		Module platformOverrides, 
 		Module appOverrides, 
 		ServerConfig svrConfig, 
@@ -65,6 +78,7 @@ public class WebpiecesServer {
 											.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
 
 		WebServerConfig config = new WebServerConfig()
+										.setCorePlatformModule(coreModule)
 										.setPlatformOverrides(platformOverrides)
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup());
 										
@@ -218,5 +232,6 @@ public class WebpiecesServer {
 	public TCPServerChannel getUnderlyingHttpsChannel() {
 		return webServer.getUnderlyingHttpsChannel();
 	}
+
 }
 

@@ -69,7 +69,7 @@ public class RouteLoader {
 	private RoutingHolder routingHolder;
 	private Module theModule;
 	private ObjectToParamTranslator reverseTranslator;
-	private MeterRegistry appMetricsOnly;
+	private MeterRegistry metrics;
 	private WebInjector webInjector;
 	private FutureHelper futureUtil;
 	private Injector platformInjector;
@@ -85,7 +85,7 @@ public class RouteLoader {
 		RouteBuilderLogic routeBuilderLogic,
 		RedirectFormation portLookup,
 		ObjectToParamTranslator reverseTranslator,
-		@Named(RouterSvcFactory.APP_METRICS_KEY) MeterRegistry appMetricsOnly,
+		MeterRegistry appMetricsOnly,
 		WebInjector webInjector,
 		Injector platformInjector,
 		FutureHelper futureUtil
@@ -99,7 +99,7 @@ public class RouteLoader {
 		this.routeBuilderLogic = routeBuilderLogic;
 		this.redirectFormation = portLookup;
 		this.reverseTranslator = reverseTranslator;
-		this.appMetricsOnly = appMetricsOnly;
+		this.metrics = appMetricsOnly;
 		this.webInjector = webInjector;
 		this.platformInjector = platformInjector;
 		this.futureUtil = futureUtil;
@@ -234,7 +234,7 @@ public class RouteLoader {
 		});
 				
 		guiceModules.add(new WebpiecesToAppBindingModule(
-				routingHolder, beanMeta, platformInjector, objectTranslator, scheduler, appMetricsOnly));
+				routingHolder, beanMeta, platformInjector, objectTranslator, scheduler, metrics));
 		
 		Module module = Modules.combine(guiceModules);
 		

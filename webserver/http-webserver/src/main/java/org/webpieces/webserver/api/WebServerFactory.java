@@ -74,11 +74,17 @@ public abstract class WebServerFactory {
 		//PortConfigLookupImpl javadoc for more info
 		PortConfigLookupImpl portLookup = new PortConfigLookupImpl();
 		
+		boolean hasCoreModule = config.getCoreModule() != null;
 		
-		return Modules.combine(
-			new WebServerModule(config, portLookup, args),
+		Module m = Modules.combine(
+			new WebServerModule(config, portLookup, hasCoreModule, args),
 			new ProdRouterModule(routerConfig, portLookup),
 			new ProdTemplateModule(templateConfig)
 		);
+		
+		if(config.getCoreModule() != null)
+			m = Modules.combine(m, config.getCoreModule());
+		
+		return m;
 	}
 }

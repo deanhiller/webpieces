@@ -26,6 +26,7 @@ public class WebServerConfig {
 		
 	private Http2Config http2Config = new Http2Config();
 	private BackpressureConfig backpressureConfig = new BackpressureConfig();
+	private Module coreModule;
 	
 	public String getId() {
 		return id;
@@ -87,6 +88,19 @@ public class WebServerConfig {
 	public WebServerConfig setBackpressureConfig(BackpressureConfig backpressureConfig) {
 		this.backpressureConfig = backpressureConfig;
 		return this;
+	}
+
+	public WebServerConfig setCorePlatformModule(Module coreModule) {
+		this.coreModule = coreModule;
+		return this;
+	}
+
+	public Module getCoreModule() {
+		return coreModule;
+	}
+
+	public void setCoreModule(Module coreModule) {
+		this.coreModule = coreModule;
 	}
 
 }
