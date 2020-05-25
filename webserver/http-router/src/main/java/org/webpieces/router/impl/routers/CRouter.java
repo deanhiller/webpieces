@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
@@ -58,8 +59,8 @@ public class CRouter {
 		return routes;
 	}
 
-	public String buildHtml(String path, String spacing) {
-		return allOtherRequestTypes.buildHtml(path, spacing);
+	public String buildHtml(boolean isHttps, HttpMethod method, String path, String spacing) {
+		return allOtherRequestTypes.buildHtml(isHttps, method, path, spacing);
 	}
 
 }

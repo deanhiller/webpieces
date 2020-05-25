@@ -3,13 +3,18 @@ package org.webpieces.router.impl.routers;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.api.exceptions.WebpiecesException;
+import org.webpieces.router.api.routes.Port;
+import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
@@ -127,7 +132,7 @@ public class EScopedRouter {
 		return text;
 	}
 
-	public String buildHtml(String path, String spacing) {
+	public String buildHtml(boolean isHttps, HttpMethod method, String path, String spacing) {
 		String scope = null;
 		String theRest = null;
 		
@@ -141,23 +146,48 @@ public class EScopedRouter {
 		
 		String html = "";
 		
+		boolean foundScope = false;
 		for(Map.Entry<String, EScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
 			EScopedRouter childRouting = entry.getValue();
 			
 			if(entry.getKey().equals(scope)) {
+				foundScope = true;
 				//add this special one to the beginning since it's a match...
 				String newSection = spacing+"<li style=\"color:red;\">SCOPE:"+entry.getKey()+"</li>\n";
-				newSection += spacing+childRouting.buildHtml(theRest, spacing+spacing);
+				newSection += spacing+childRouting.buildHtml(isHttps, method, theRest, spacing+spacing);
 				html = newSection + html;
 			} else {
 				//add to end as it doesn't match
 				html += spacing+"<li>SCOPE:"+entry.getKey()+"</li>\n";
-				html += spacing+childRouting.buildHtml(theRest, spacing+spacing);
+				html += spacing+childRouting.buildHtml(isHttps, method, null, spacing+spacing);
 			}
 		}
 		
+		String leftOvers = "";
 		for(AbstractRouter route: routers) {
-			html += spacing+"<li>"+route.getMatchInfo().getLoggableString("&nbsp;")+"</li>\n";
+			boolean pathMatches = false;
+			boolean portMatches = false;
+			boolean methodMatches = false;
+			
+			if(!foundScope && path != null) {
+				Pattern pattern = route.getMatchInfo().getPattern();
+				Matcher matcher = pattern.matcher(path);
+				pathMatches = matcher.matches();
+				methodMatches = method == route.getMatchInfo().getHttpMethod();
+
+				if(route.getMatchInfo().getExposedPorts() == Port.BOTH)
+					portMatches = true;
+				else if(isHttps)
+					portMatches = true;
+			}
+			
+			leftOvers += spacing+"<li>"+route.getMatchInfo().getLoggableHtml(portMatches, methodMatches, pathMatches, "&nbsp;")+"</li>\n";
+		}
+		
+		if(foundScope) {
+			html = html+leftOvers;
+		} else {
+			html = leftOvers+html;
 		}
 		
 		html= "<ul>\n"+html+"</ul>\n";

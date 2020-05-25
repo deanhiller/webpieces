@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
@@ -54,7 +55,7 @@ public class NotFoundController {
 		
 		RouterRequest req = (RouterRequest) request.requestState.get(ORIGINAL_REQUEST);
 		//This is a pain but dynamically build up the html
-		String routeHtml = build(req.relativePath, router);
+		String routeHtml = build(req.isHttps, req.method, req.relativePath, router);
 		
 		
 		List<String> paths = new ArrayList<>();
@@ -68,7 +69,7 @@ public class NotFoundController {
 		return Actions.renderThis("domains", routers, "paths", paths, "routeHtml", routeHtml, "error", error, "url", url);
 	}
 
-	private String build(String path, CRouter mainRoutes) {
-		return mainRoutes.buildHtml(path, " ");
+	private String build(boolean isHttps, HttpMethod method, String path, CRouter mainRoutes) {
+		return mainRoutes.buildHtml(isHttps, method, path, " ");
 	}
 }

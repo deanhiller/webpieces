@@ -65,6 +65,39 @@ public class MatchInfo {
 		String http = isHttpsOnly ? "https" : "http";
 		return pad(httpMethod+"", 5, paddingElement)+":"+pad(http, 5, paddingElement)+" : "+fullPath;	
 	}
+
+	public String getLoggableHtml(boolean portMatches, boolean methodMatches, boolean pathMatches, String paddingElement) {
+		boolean isHttpsOnly = exposedPort == Port.HTTPS;
+		String http = isHttpsOnly ? ":https" : ":http";
+		http = paddingElement+http;
+		
+		if(portMatches) {
+			http = "<span style=\"color:red;\">"+http+"</span>";
+		}
+		
+		String method = httpMethod+"";
+		if(methodMatches) {
+			method = "<span style=\"color:red;\">"+method+"</span>";
+		}
+		
+		String thePath = fullPath;
+		if(pathMatches) {
+			thePath = "<span style=\"color:red;\">"+thePath+"</span>";
+		}
+		
+		//pad if http, but not https
+		if(!isHttpsOnly) {
+			http = http+paddingElement;
+		}
+		
+		if(httpMethod == HttpMethod.GET) {
+			method = method+paddingElement;
+		}
+		
+		
+		
+		return method+paddingElement+paddingElement+http+paddingElement+" : "+paddingElement+thePath;	
+	}
 	
 	private String pad(String msg, int n, String paddingElement) {
 		int left = n-msg.length();
