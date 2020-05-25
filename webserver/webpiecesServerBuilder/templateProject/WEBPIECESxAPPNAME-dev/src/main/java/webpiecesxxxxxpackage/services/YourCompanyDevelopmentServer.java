@@ -10,9 +10,10 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.webserver.api.ServerConfig;
 
 import com.google.inject.util.Modules;
-import com.google.inject.Module;
 
-import webpiecesxxxxxpackage.YourCompanyServer;
+import webpiecesxxxxxpackage.basesvr.YourCompanyServer;
+
+import com.google.inject.Module;
 
 /**
  * Goes in re-usable location so all your dev servers can be modified

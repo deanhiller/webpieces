@@ -1,4 +1,4 @@
-package webpiecesxxxxxpackage;
+package webpiecesxxxxxpackage.basesvr;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -7,6 +7,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
+/**
+ * Re-usable Module that is installed as a webpieces platform module rather than a WebAppModule
+ */
 public class MetricsModule implements Module {
 
 	public MetricsModule(String instanceId) {

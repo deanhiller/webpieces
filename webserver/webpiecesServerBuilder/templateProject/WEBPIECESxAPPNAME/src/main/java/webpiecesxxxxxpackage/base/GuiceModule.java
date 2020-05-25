@@ -13,7 +13,6 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
-import webpiecesxxxxxpackage.GlobalAppContext;
 import webpiecesxxxxxpackage.db.EducationEnum;
 import webpiecesxxxxxpackage.db.RoleEnum;
 import webpiecesxxxxxpackage.service.RemoteService;

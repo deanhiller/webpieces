@@ -19,7 +19,7 @@ import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
-import webpiecesxxxxxpackage.GlobalAppContext;
+import webpiecesxxxxxpackage.base.GlobalAppContext;
 import webpiecesxxxxxpackage.mgmt.SomeBean;
 import webpiecesxxxxxpackage.service.RemoteService;
 import webpiecesxxxxxpackage.service.SomeLibrary;

@@ -1,4 +1,4 @@
-package webpiecesxxxxxpackage;
+package webpiecesxxxxxpackage.basesvr;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -11,7 +11,7 @@ import org.webpieces.webserver.api.WebpiecesServer;
 
 import com.google.inject.Module;
 
-import webpiecesxxxxxpackage.base.RandomInstanceId;
+import webpiecesxxxxxpackage.Server;
 
 /**
  * We are designed for doing tons of microservices.  you would put this in a re-usable location and rename it
@@ -20,7 +20,7 @@ import webpiecesxxxxxpackage.base.RandomInstanceId;
  * @author dean
  *
  */
-public class YourCompanyServer {
+public abstract class YourCompanyServer {
 
 	private static final Logger log = LoggerFactory.getLogger(Server.class);
 

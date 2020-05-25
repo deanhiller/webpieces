@@ -1,4 +1,4 @@
-package webpiecesxxxxxpackage;
+package webpiecesxxxxxpackage.base;
 
 import org.webpieces.ctx.api.ApplicationContext;
 

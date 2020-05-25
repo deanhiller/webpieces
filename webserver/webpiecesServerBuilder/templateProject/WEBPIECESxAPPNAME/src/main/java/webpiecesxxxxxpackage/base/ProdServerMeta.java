@@ -20,6 +20,7 @@ import org.webpieces.router.api.routes.WebAppMeta;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
+import webpiecesxxxxxpackage.basesvr.YourGlobalModule;
 import webpiecesxxxxxpackage.json.JsonCatchAllFilter;
 import webpiecesxxxxxpackage.json.JsonRoutes;
 import webpiecesxxxxxpackage.web.crud.CrudRoutes;
@@ -54,7 +55,10 @@ public class ProdServerMeta implements WebAppMeta {
 	//if you have a production issue
 	@Override
     public List<Module> getGuiceModules() {
-		return Lists.newArrayList(new GuiceModule());
+		return Lists.newArrayList(
+				new GuiceModule(),
+				new YourGlobalModule()
+		);
 	}
 
 	@Override
