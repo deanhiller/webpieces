@@ -29,7 +29,7 @@ public abstract class AbstractLoginController {
 		if(user != null)
 			return Actions.redirect(getRenderAfterLoginHome());
 		
-		Current.flash().keep(); //we must keep previous data like the url
+		Current.flash().keep(true); //we must keep previous data like the url
 		
 		return fetchGetLoginPageAction(); //Actions.renderThis();
 	}
@@ -43,15 +43,19 @@ public abstract class AbstractLoginController {
 		
 		//officially makes them logged in by putting the token in the session
 		Current.session().put(getLoginSessionKey(), username);
+		RequestContext ctx = Current.getContext();
 
 		String url = Current.flash().get("url");
 		if(url != null) {
-			RequestContext ctx = Current.getContext();
 			Set<String> mySet = new HashSet<>(Arrays.asList(secureFields));
 			ctx.moveFormParamsToFlash(mySet);
-			ctx.getFlash().keep();
+			ctx.getFlash().keep(true);
+			ctx.getValidation().keep(true);
 			return Actions.redirectToUrl(url); //page the user was trying to access before logging in
 		}
+		
+		ctx.getFlash().keep(false);
+		ctx.getValidation().keep(false);
 		return Actions.redirect(getRenderAfterLoginHome()); //base page after login screen
 	}
 

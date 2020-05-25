@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Constants;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RouterCookie;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.impl.CookieTranslator;
@@ -44,9 +45,11 @@ public class ResponseCreator {
 	private final CookieTranslator cookieTranslator;
 	private final MimeTypes mimeTypes;
 	private final String version;
+	private RouterConfig config;
 
 	@Inject
-	public ResponseCreator(CookieTranslator cookieTranslator, MimeTypes mimeTypes) {
+	public ResponseCreator(RouterConfig config, CookieTranslator cookieTranslator, MimeTypes mimeTypes) {
+		this.config = config;
 		version = "webpieces/"+readVersion();
 		this.cookieTranslator = cookieTranslator;
 		this.mimeTypes = mimeTypes;

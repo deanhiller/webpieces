@@ -57,6 +57,11 @@ public class RouterRequest {
 	public Http2Headers trailingHeaders;
 
 	/**
+	 * Request state you can throw into a map to use anywhere on request path
+	 */
+	public Map<String, Object> requestState = new HashMap();
+	
+	/**
 	 * Used by router, not really needed by Controllers
 	 * 
 	 * This is true if the socket we received the request over was "secure" sort of.  If you terminate https

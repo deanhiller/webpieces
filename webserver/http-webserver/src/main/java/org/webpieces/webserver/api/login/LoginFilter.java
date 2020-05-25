@@ -65,7 +65,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 		if(request.isAjaxRequest) {
 			if(request.referrer != null) {
 				Current.flash().put("url", request.referrer);
-				Current.flash().keep();
+				Current.flash().keep(true);
 			}
 			
 			return CompletableFuture.completedFuture(Actions.ajaxRedirect(loginRoute));	
@@ -73,7 +73,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 			//store url requested in flash so after logging in, we can redirect the user
 			//back to the original page
 			Current.flash().put("url", request.relativePath);
-			Current.flash().keep();
+			Current.flash().keep(true);
 		} else if (request.method == HttpMethod.POST) {
 			//adding a validation error avoids the posting of the form so they post AFTER logging in
 			if(request.referrer != null)
@@ -84,7 +84,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 			Set<String> mySet = new HashSet<>(Arrays.asList(secureFields));
 			Current.getContext().moveFormParamsToFlash(mySet);
 			
-			Current.flash().keep();
+			Current.flash().keep(true);
 		}
 		
 		//redirect to login page..

@@ -54,6 +54,8 @@ public class RouterConfig {
 
 	private File workingDirectory;
 
+	private boolean isValidateFlash;
+
 	public RouterConfig(File workingDirectory, String name) {
 		if(!workingDirectory.isAbsolute())
 			throw new IllegalArgumentException("baseDirectory must be absolute and can typically be FileFactory.getBaseDirectory()");
@@ -185,6 +187,13 @@ public class RouterConfig {
 
 	public RouterConfig setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
 		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
+		return this;
+	}
+	public boolean isValidateFlash() {
+		return isValidateFlash;
+	}
+	public RouterConfig setValidateFlash(boolean isValidateFlash) {
+		this.isValidateFlash = isValidateFlash;
 		return this;
 	}
 }

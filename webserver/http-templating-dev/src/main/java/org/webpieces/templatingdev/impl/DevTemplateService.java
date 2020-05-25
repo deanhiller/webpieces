@@ -40,6 +40,11 @@ public class DevTemplateService extends ProdTemplateService {
 	}
 
 	@Override
+	public void initialize() {
+		lookup.initialize(this);
+	}
+	
+	@Override
 	public void loadAndRunTemplateImpl(String templatePath, StringWriter out, Map<String, Object> pageArgs) {
 		//TODO: big nit and for fun, we should look into recreating OurGroovyClassLoader ONLY when
 		//the html files have changed.  to do this, I think we would have to save a Holder object with the first 

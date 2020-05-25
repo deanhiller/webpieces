@@ -1,5 +1,6 @@
 # webpieces
 
+* Add configuration to BREAK if developer forgets to put flash or noFlash settings(MUST call one or the other on POST!!!)
 * Add regex for e.printStackTrace into checkstyle.  Add System.out and System.err as well to not be used and log why
 * implement this post https://github.com/diffplug/spotless to organize imports and format code?   
 * For microservice, where NotFoundRoute is not specified, it fails with bug or is it a bug..they should define simple not found route, right?  or at least throw no not found route! We should throw NoNotFoundRouteSetException

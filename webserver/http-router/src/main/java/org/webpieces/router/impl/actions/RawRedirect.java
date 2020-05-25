@@ -14,4 +14,9 @@ public class RawRedirect implements Redirect {
 		return url;
 	}
 
+	@Override
+	public String toString() {
+		return "RawRedirect [url=" + url + "]";
+	}
+
 }

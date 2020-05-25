@@ -17,12 +17,12 @@ public class OurDevConfig implements DevConfig {
 
 	@Override
 	public int getHttpsPort() {
-		return 8080;
+		return 8443;
 	}
 
 	@Override
 	public int getHttpPort() {
-		return 8443;
+		return 8080;
 	}
 
 }

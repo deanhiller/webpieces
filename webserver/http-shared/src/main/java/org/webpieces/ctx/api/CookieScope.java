@@ -4,6 +4,8 @@ public interface CookieScope {
 
 	String getName();
 
+	void clear();
+	
 	boolean containsKey(String key);
 	
 	/**

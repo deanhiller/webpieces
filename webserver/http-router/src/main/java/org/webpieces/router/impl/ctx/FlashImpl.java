@@ -78,4 +78,5 @@ public class FlashImpl extends FlashScopeImpl implements FlashSub {
 			return false;
 		return Boolean.parseBoolean(str);
 	}
+
 }

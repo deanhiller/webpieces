@@ -20,7 +20,7 @@ import org.webpieces.templating.api.TemplateUtil;
 @Singleton
 public class ProdTemplateService extends AbstractTemplateService implements TemplateService {
 
-	private HtmlTagLookup lookup;
+	protected HtmlTagLookup lookup;
 	private boolean isInitialized = false;
 	protected RouterLookup urlLookup;
 
@@ -50,10 +50,7 @@ public class ProdTemplateService extends AbstractTemplateService implements Temp
 		else if(templatePath.contains("_"))
 			throw new IllegalArgumentException("template names cannot contain _ in them(This is reserved for _extension in the classname).  name="+templatePath);
 		
-		if(!isInitialized) {
-			lookup.initialize(this);
-			isInitialized = true;
-		}
+		initialize();
 		
 		try {
 			String fullClassName = TemplateUtil.convertTemplatePathToClass(templatePath);
@@ -103,6 +100,13 @@ public class ProdTemplateService extends AbstractTemplateService implements Temp
 	@Override
 	public void install(Set<HtmlTagCreator> htmlCreators) {
 		lookup.install(htmlCreators);
+	}
+
+	public void initialize() {
+		if(!isInitialized) {
+			lookup.initialize(this);
+			isInitialized = true;
+		}
 	}
 
 }

@@ -77,7 +77,9 @@ public class MainController {
 		return Actions.renderThis();
 	}
 	
-	public Render internalError() {
+	public Render internalError() {		
+		Current.flash().clear();
+		Current.validation().clear();
 		return Actions.renderThis();
 	}
 

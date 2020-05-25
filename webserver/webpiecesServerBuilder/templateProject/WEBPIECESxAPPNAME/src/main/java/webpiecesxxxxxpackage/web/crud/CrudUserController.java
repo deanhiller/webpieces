@@ -89,8 +89,10 @@ public class CrudUserController {
 		}
 
 		Current.flash().setMessage("User successfully saved");
-		Current.flash().keep();
+		Current.flash().keep(true);
+		Current.validation().keep(false);
 
+		
 		List<UserRole> roles = entity.getRoles();
 		for(UserRole r : roles) {
 			Em.get().remove(r);
@@ -124,7 +126,8 @@ public class CrudUserController {
 		Em.get().remove(ref);
 		Em.get().flush();
 		Current.flash().setMessage("User deleted");
-		Current.flash().keep();
+		Current.flash().keep(true);
+		Current.validation().keep(false);
 		return Actions.redirect(CrudUserRouteId.LIST_USERS);
 	}
 }

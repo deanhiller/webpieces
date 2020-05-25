@@ -72,16 +72,16 @@ public class Actions {
 	public static Redirect redirectFlashAllSecure(RouteId routeId, RequestContext ctx, String ... secureFieldNames) {
 		Set<String> mySet = new HashSet<>(Arrays.asList(secureFieldNames));
 		ctx.moveFormParamsToFlash(mySet);
-		ctx.getFlash().keep();
-		ctx.getValidation().keep();
+		ctx.getFlash().keep(true);
+		ctx.getValidation().keep(true);
 		return redirect(routeId);
 	}
 	
 	public static Redirect redirectFlashAllSecure(RouteId routeId, RequestContext ctx, Object[] args, String ... secureFieldNames) {
 		Set<String> mySet = new HashSet<>(Arrays.asList(secureFieldNames));
 		ctx.moveFormParamsToFlash(mySet);
-		ctx.getFlash().keep();
-		ctx.getValidation().keep();
+		ctx.getFlash().keep(true);
+		ctx.getValidation().keep(true);
 		return redirect(routeId, args);
 	}
 	

@@ -127,21 +127,40 @@ public class EScopedRouter {
 		return text;
 	}
 
-	public String buildHtml(String spacing) {
+	public String buildHtml(String path, String spacing) {
+		String scope = null;
+		String theRest = null;
 		
-		String html = "<ul>\n";
-
+		if(path != null) {
+			int indexOf = path.indexOf("/",1);
+			if(indexOf > 0) {
+				scope = path.substring(0, indexOf);
+				theRest = path.substring(indexOf);
+			}
+		}
+		
+		String html = "";
+		
+		for(Map.Entry<String, EScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
+			EScopedRouter childRouting = entry.getValue();
+			
+			if(entry.getKey().equals(scope)) {
+				//add this special one to the beginning since it's a match...
+				String newSection = spacing+"<li style=\"color:red;\">SCOPE:"+entry.getKey()+"</li>\n";
+				newSection += spacing+childRouting.buildHtml(theRest, spacing+spacing);
+				html = newSection + html;
+			} else {
+				//add to end as it doesn't match
+				html += spacing+"<li>SCOPE:"+entry.getKey()+"</li>\n";
+				html += spacing+childRouting.buildHtml(theRest, spacing+spacing);
+			}
+		}
+		
 		for(AbstractRouter route: routers) {
 			html += spacing+"<li>"+route.getMatchInfo().getLoggableString("&nbsp;")+"</li>\n";
 		}
 		
-		for(Map.Entry<String, EScopedRouter> entry : pathPrefixToNextRouter.entrySet()) {
-			EScopedRouter childRouting = entry.getValue();
-			html += spacing+"<li>SCOPE:"+entry.getKey()+"</li>\n";
-			html += spacing+childRouting.buildHtml(spacing+spacing);
-		}
-		
-		html+="</ul>\n";
+		html= "<ul>\n"+html+"</ul>\n";
 		
 		return html;		
 	}

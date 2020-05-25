@@ -2,6 +2,7 @@ package org.webpieces.devrouter.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,6 +18,7 @@ import org.webpieces.router.impl.routers.CRouter;
 @Singleton
 public class NotFoundController {
 
+	public static final String ORIGINAL_REQUEST = "__originalRequest";
 	private final RoutingHolder routingHolder;
 	
 	@Inject
@@ -50,13 +52,23 @@ public class NotFoundController {
 			}
 		}
 		
+		RouterRequest req = (RouterRequest) request.requestState.get(ORIGINAL_REQUEST);
 		//This is a pain but dynamically build up the html
-		String routeHtml = build(router);
+		String routeHtml = build(req.relativePath, router);
 		
-		return Actions.renderThis("domains", routers, "routeHtml", routeHtml, "error", error, "url", url);
+		
+		List<String> paths = new ArrayList<>();
+		if(req.isHttps) {
+			paths.add(req.method+" :https : "+req.relativePath);
+		} else {
+			paths.add(req.method+" :https : "+req.relativePath);
+			paths.add(req.method+" :http : "+req.relativePath);
+		}
+		
+		return Actions.renderThis("domains", routers, "paths", paths, "routeHtml", routeHtml, "error", error, "url", url);
 	}
 
-	private String build(CRouter mainRoutes) {
-		return mainRoutes.buildHtml(" ");
+	private String build(String path, CRouter mainRoutes) {
+		return mainRoutes.buildHtml(path, " ");
 	}
 }

@@ -177,8 +177,14 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			Current.setContext(null);
 		}
 
-		return response.thenCompose(resp -> processor.continueProcessing(resp));
+		return response.thenCompose(resp -> continueProcessing(processor, requestCtx, resp));
 	}
+
+	private CompletableFuture<Void> continueProcessing(Processor processor, RequestContext requestCtx, Action resp) {
+		return processor.continueProcessing(resp);
+	}
+	
+	
 	public CompletableFuture<Action> invokeService(Service<MethodMeta, Action> service, MethodMeta methodMeta) {
 		return service.invoke(methodMeta);
 	}

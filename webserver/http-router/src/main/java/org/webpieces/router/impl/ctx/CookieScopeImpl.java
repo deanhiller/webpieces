@@ -105,4 +105,10 @@ public abstract class CookieScopeImpl implements CookieScope {
 		hasModifiedData = true;
 		return cookie.remove(key);
 	}
+	
+	@Override
+	public void clear() {
+		hasModifiedData = true;
+		cookie.clear();
+	}
 }

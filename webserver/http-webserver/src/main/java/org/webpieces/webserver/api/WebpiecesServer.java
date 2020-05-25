@@ -75,6 +75,7 @@ public class WebpiecesServer {
 											.setSecretKey(new SecretKeyInfo(fetchKey(base64Key), "HmacSHA1"))
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
 											.setTokenCheckOn(svrConfig.isTokenCheckOn())
+											.setValidateFlash(svrConfig.isValidateFlash())
 											.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
 
 		WebServerConfig config = new WebServerConfig()

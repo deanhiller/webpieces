@@ -58,8 +58,8 @@ public class CRouter {
 		return routes;
 	}
 
-	public String buildHtml(String spacing) {
-		return allOtherRequestTypes.buildHtml(spacing);
+	public String buildHtml(String path, String spacing) {
+		return allOtherRequestTypes.buildHtml(path, spacing);
 	}
 
 }

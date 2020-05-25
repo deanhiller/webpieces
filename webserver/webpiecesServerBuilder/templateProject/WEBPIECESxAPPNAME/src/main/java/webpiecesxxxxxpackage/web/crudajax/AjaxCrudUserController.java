@@ -81,7 +81,8 @@ public class AjaxCrudUserController {
 		Current.flash().setShowEditPopup(false);
 		
 		Current.flash().setMessage("User successfully saved");
-		Current.flash().keep();
+		Current.flash().keep(true);
+		Current.validation().keep(false);
 		
 		Em.get().merge(entity);
         Em.get().flush();
@@ -104,7 +105,8 @@ public class AjaxCrudUserController {
 		Em.get().remove(ref);
 		Em.get().flush();
 		Current.flash().setMessage("User deleted");
-		Current.flash().keep();
+		Current.flash().keep(true);
+		Current.validation().keep(false);
 		return Actions.redirect(AjaxCrudUserRouteId.AJAX_LIST_USERS);
 	}
 }

@@ -5,13 +5,17 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.ctx.api.Flash;
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ctx.SessionImpl;
+import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
@@ -51,7 +55,12 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 		//the transaction filter
 		List<Object> argsResult = translator.createArgs(m, meta.getCtx(), null);
 		
-		return invoker.invokeAndCoerce(meta.getLoadedController2(), argsResult.toArray());
+		return invoker.invokeAndCoerce(meta.getLoadedController2(), argsResult.toArray()).thenApply( action -> {
+			if(config.isValidateFlash()) {
+				validateKeepFlagSet(action, meta.getCtx(), meta.getLoadedController2());
+			}
+			return action;
+		});
 	}
 
 	/**
@@ -88,4 +97,26 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 				throw new BadRequestException("bad form token...someone posting form with invalid token(hacker or otherwise)");
 		}
 	}
+	
+	private void validateKeepFlagSet(Action action, RequestContext requestContext, LoadedController loadedController) {
+		if(requestContext.getRequest().method != HttpMethod.POST)
+			return; //no validation needed
+		
+		Flash flash = requestContext.getFlash();
+		Validation validation = requestContext.getValidation();
+		
+		//This is for developers as it forces them to call flash.keep() or flash.noKeep() so that they don't forget on
+		//forms.  This is only for incoming POST.  On redirect, call flash.keep() and on render call flash.noKeep() in general.
+		if(!flash.isKeepFlagSet()) {
+			throw new IllegalStateException("In your controller, you did not call flash.keep() or flash.noKeep().  "
+					+ "You must do one or the other(usually call keep() on redirects to flash user inpput so user doesn't lose his input)."
+					+ "\nOffending controller="+loadedController.getControllerMethod()
+					+ "\nResponse Action(your controller returned)="+action);
+		} else if(!validation.isKeepFlagSet()) {
+			throw new IllegalStateException("In your controller, you did not call validation.keep() or validation.noKeep().  "
+					+ "You must do one or the other(usually call keep() on redirects to flash user inpput so user doesn't lose his input)"
+					+ "\nOffending controller="+loadedController.getControllerMethod()
+					+ "\nResponse Action(your controller returned)="+action);
+		}
+	}	
 }

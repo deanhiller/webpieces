@@ -50,10 +50,20 @@ public class ServerConfig {
 	private boolean tokenCheckOn = true;
 	
 	private final boolean isRunningServerMainMethod;
+	
+	private boolean isValidateFlash = false;
 
 	public ServerConfig(File compressionCache, boolean isServerMainMethod) {
 		this.compressionCacheDir = compressionCache;
 		this.isRunningServerMainMethod = isServerMainMethod;
+		
+		if(!isServerMainMethod) {
+			//We enter here for tests, DevelopmentServer, ProdServerForIDE and should validate flashed scopes..
+			
+			//We validate this so your customers/users of the website can type in stuff and error validations, they won't
+			//lose what they typed in as you hopefully call flash.keep and validation.keep
+			isValidateFlash = true; //For tests, validate flash methods are ALWAYS invoked in post methods
+		}
 	}
 	
 	public ServerConfig(File compressionCache) {
@@ -106,5 +116,14 @@ public class ServerConfig {
 
 	public boolean isRunningServerMainMethod() {
 		return isRunningServerMainMethod;
+	}
+
+	public boolean isValidateFlash() {
+		return isValidateFlash;
+	}
+
+	public ServerConfig setValidateFlash(boolean isValidateFlash) {
+		this.isValidateFlash = isValidateFlash;
+		return this;
 	}
 }

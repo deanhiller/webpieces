@@ -24,12 +24,19 @@
         </ul>
     
     <h3 id="routes">Non Domain Routes</h3>
-    Webpieces divides url paths up into scopes for speed.  It looks up scope in a Map first and then loops over each route
+    <p>Webpieces divides url paths up into scopes for speed.  It looks up scope in a Map first and then loops over each route
     in that scopes list doing a Pattern match (so it's good to use scopes to keep code organized and LESS pattern matching).
     Static routes are not shown yet below but we always match on them last since they will be cached.  Not that you would
     have 3000 routes but if you did, you can organize into scopes so that each loop is only 10-30 things instead of looping
-    and matching with java's Pattern object 3000 times for the worst case.
-
+    and matching with java's Pattern object 3000 times for the worst case.</p>
+    
+    You are trying to match on any of these patterns...
+    <ul>
+        #{list items:paths, as:'path'}#
+            <li style="color:red;">${path}$</li>
+        #{/list}#        
+    </ul>
+    
     <pre>
     <span style="line-height: 8px;">    
     ${escOff#routeHtml}$
