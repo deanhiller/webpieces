@@ -36,12 +36,10 @@
             <li style="color:red;">${path}$</li>
         #{/list}#        
     </ul>
+
+    Matching pieces shown <span style="color:red;">in red...</span>
     
-    <pre>
-    <span style="line-height: 8px;">    
-    ${escOff#routeHtml}$
-    </span>
-    </pre>
+    <pre><span style="line-height: 8px;">${escOff#routeHtml}$</span></pre>
     
     TODO: Fill in the module we ended up using and the routes in that module that did not match here to make it
     easy for the developer to see why he got a 404
