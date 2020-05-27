@@ -17,6 +17,7 @@ public enum StatusCode {
 
 	HTTP_400_BADREQUEST(400, "Bad Request", StatusType.ClientError),
 	HTTP_401_UNAUTHORIZED(401, "Unauthorized", StatusType.ClientError),
+	HTTP_403_FORBIDDEN(403, "Forbidden", StatusType.ClientError),
 	HTTP_404_NOTFOUND(404, "Not Found", StatusType.ClientError),
 	
 	HTTP_408_REQUEST_TIMEOUT(408, "Request Timeout", StatusType.ClientError),
@@ -25,6 +26,10 @@ public enum StatusCode {
 	HTTP_431_REQUEST_HEADERS_TOO_LARGE(431, "Request Header Fields Too Large", StatusType.ClientError),
 	
 	HTTP_500_INTERNAL_SVR_ERROR(500, "Internal Server Error", StatusType.ServerError),  
+	HTTP_502_BAD_GATEWAY(502, "Bad Gateway", StatusType.ServerError),
+	HTTP_503_SERVICE_UNAVAILABLE(503, "Service Unavailable", StatusType.ServerError),
+	HTTP_504_GATEWAY_TIMEOUT(504, "Gateway Timeout", StatusType.ServerError)
+
 	
 	//TODO: Fill the rest in..
 	;

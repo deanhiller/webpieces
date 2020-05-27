@@ -2,27 +2,23 @@ package org.webpieces.router.api.exceptions;
 
 import com.webpieces.http2parser.api.dto.StatusCode;
 
-/**
- * @deprecated Use BadClientRequestException instead!!
- */
-@Deprecated
-public class ClientDataError extends HttpException {
+public class BadClientRequestException extends HttpException {
 
 	private static final long serialVersionUID = 8725117695723001888L;
 
-	public ClientDataError() {
+	public BadClientRequestException() {
 		super(StatusCode.HTTP_400_BADREQUEST);
 	}
 
-	public ClientDataError(String message, Throwable cause) {
+	public BadClientRequestException(String message, Throwable cause) {
 		super(StatusCode.HTTP_400_BADREQUEST, message, cause);
 	}
 
-	public ClientDataError(String message) {
+	public BadClientRequestException(String message) {
 		super(StatusCode.HTTP_400_BADREQUEST, message);
 	}
 
-	public ClientDataError(Throwable cause) {
+	public BadClientRequestException(Throwable cause) {
 		super(StatusCode.HTTP_400_BADREQUEST, cause);
 	}
 }

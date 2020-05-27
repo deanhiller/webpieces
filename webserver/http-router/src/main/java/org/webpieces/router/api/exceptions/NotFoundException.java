@@ -1,23 +1,25 @@
 package org.webpieces.router.api.exceptions;
 
+import com.webpieces.http2parser.api.dto.StatusCode;
+
 public class NotFoundException extends HttpException {
 
 	private static final long serialVersionUID = 7804145831639203745L;
 
 	public NotFoundException() {
-		super();
+		super(StatusCode.HTTP_404_NOTFOUND);
 	}
 
 	public NotFoundException(String message, Throwable cause) {
-		super(message, cause);
+		super(StatusCode.HTTP_404_NOTFOUND, message, cause);
 	}
 
 	public NotFoundException(String message) {
-		super(message);
+		super(StatusCode.HTTP_404_NOTFOUND, message);
 	}
 
 	public NotFoundException(Throwable cause) {
-		super(cause);
+		super(StatusCode.HTTP_404_NOTFOUND, cause);
 	}
 
 }
