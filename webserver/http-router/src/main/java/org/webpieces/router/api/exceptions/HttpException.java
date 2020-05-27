@@ -26,4 +26,8 @@ public abstract class HttpException extends WebpiecesException {
         super(cause);
 		this.code = code;
     }
+
+	public StatusCode getStatusCode() {
+		return code;
+	}
 }

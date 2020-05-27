@@ -6,13 +6,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
-import org.webpieces.router.api.exceptions.AuthenticationException;
-import org.webpieces.router.api.exceptions.AuthorizationException;
-import org.webpieces.router.api.exceptions.ClientDataError;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.api.exceptions.HttpException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
@@ -21,9 +20,7 @@ import org.webpieces.util.filters.Service;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.webpieces.http2parser.api.dto.StatusCode;
 
 public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
@@ -53,14 +50,8 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	protected Action translateFailure(Action action, Throwable t) {
 		if(t != null) {
-			if(t instanceof ClientDataError) {
-				return translate((ClientDataError) t);
-			} else if(t instanceof AuthorizationException) {
-				return translate((AuthorizationException)t);
-			} else if(t instanceof AuthenticationException) {
-				return translate((AuthenticationException) t);
-			} else if (t instanceof NotFoundException) {
-				return createNotFound();
+			if(t instanceof HttpException) {
+				return translate((HttpException)t);
 			}
 			
 			log.error("Internal Server Error", t);
@@ -70,27 +61,15 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		}
 	}
 
-	protected Action translate(AuthorizationException t) {
-		byte[] content = translateAuthorizationError(t);
-		KnownStatusCode status = KnownStatusCode.HTTP_401_UNAUTHORIZED;
-		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
-	}
-
-	protected Action translate(AuthenticationException t) {
-		byte[] content = translateAuthenticationError(t);
-		KnownStatusCode status = KnownStatusCode.HTTP_403_FORBIDDEN;
-		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
+	private Action translate(HttpException t) {
+		byte[] content = translateHttpException(t);
+		StatusCode status = t.getStatusCode();
+		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);		
 	}
 
 	protected RenderContent translateError(Throwable t) {
 		byte[] content = translateServerError(t);
 		KnownStatusCode status = KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR;
-		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
-	}
-
-	protected RenderContent translate(ClientDataError t) {
-		byte[] content = translateClientError(t);
-		KnownStatusCode status = KnownStatusCode.HTTP_400_BADREQUEST;
 		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
 
@@ -109,29 +88,14 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND.getCode(), KnownStatusCode.HTTP_404_NOTFOUND.getReason(), MIME_TYPE);
 	}
 
-	protected byte[] translateAuthenticationError(AuthenticationException t) {
+	protected byte[] translateHttpException(HttpException t) {
 		JsonError error = new JsonError();
-		error.setError("Forbidden: "+t.getMessage());
-		error.setCode(403);
+		error.setError(t.getStatusCode().getReason()+" : "+t.getMessage());
+		error.setCode(t.getStatusCode().getCode());
 
 		return translateJson(mapper, error);
 	}
 
-	protected byte[] translateAuthorizationError(AuthorizationException t) {
-		JsonError error = new JsonError();
-		error.setError("Not Authorized : "+t.getMessage());
-		error.setCode(401);
-
-		return translateJson(mapper, error);
-	}
-
-	protected byte[] translateClientError(ClientDataError t) {
-		JsonError error = new JsonError();
-		error.setError("bad request: "+t.getMessage());
-		error.setCode(400);
-
-		return translateJson(mapper, error);
-	}
 
 	protected byte[] createNotFoundJsonResponse() {
 		JsonError error = new JsonError();
