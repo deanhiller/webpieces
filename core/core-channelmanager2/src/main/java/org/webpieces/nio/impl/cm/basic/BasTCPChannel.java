@@ -88,7 +88,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		try {
 			return channel.write(b);
 		} catch (IOException e) {
-			if(e.getMessage().equals("Broken pipe"))
+			if(e.getMessage() != null && e.getMessage().equals("Broken pipe"))
 				throw new NioClosedChannelException("Remote end must have disconnected: Broken Pipe", e);
 			throw new NioException(e);
 		}
