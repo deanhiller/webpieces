@@ -3,7 +3,8 @@ package org.webpieces.webserver.json.app;
 import javax.inject.Inject;
 
 import org.webpieces.plugins.json.JacksonCatchAllFilter;
-import org.webpieces.router.api.exceptions.ClientDataError;
+import org.webpieces.router.api.exceptions.HttpException;
+import org.webpieces.router.api.exceptions.NotFoundException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,12 +18,14 @@ public class TestCatchAllFilter extends JacksonCatchAllFilter {
 		this.mapper = mapper;
 	}
 
-	@Override
-	protected byte[] translateClientError(ClientDataError t) {
+	protected byte[] translateHttpException(HttpException t) {
+		if(t instanceof NotFoundException)
+			return createNotFoundJsonResponse();
+		
 		JsonError error = new JsonError();
 		error.setError(t.getMessage());
 		error.setCode(0);
-		return translateJson(mapper, error);
+		return translateJson(mapper, error);		
 	}
 
 	@Override

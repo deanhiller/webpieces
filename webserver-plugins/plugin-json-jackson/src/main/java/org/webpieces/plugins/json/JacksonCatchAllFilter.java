@@ -61,7 +61,7 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		}
 	}
 
-	private Action translate(HttpException t) {
+	protected Action translate(HttpException t) {
 		byte[] content = translateHttpException(t);
 		StatusCode status = t.getStatusCode();
 		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);		
