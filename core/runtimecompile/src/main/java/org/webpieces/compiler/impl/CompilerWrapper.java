@@ -226,7 +226,7 @@ public class CompilerWrapper {
                     message = "Problem with class:"+className+"!  Issue:"+message;
                     if (problem.getID() == IProblem.CannotImportPackage) {
                         // Non sense !
-                        message = "Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.";
+                        message = "Problem with class:"+className+"! Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.";
                     }
                     CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
                     VirtualFile javaFile = applicationClass.javaFile;
