@@ -32,8 +32,8 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	@Override
 	public HttpServer createHttpServer(HttpSvrConfig config, StreamListener httpListener) {
 		preconditionCheck(config);
-
-		Layer1ServerListener listener = buildDatalListener(httpListener, false);
+		ProxyStreamListener proxyStreamListener = new ProxyStreamListener(httpListener);
+		Layer1ServerListener listener = buildDatalListener(proxyStreamListener, false);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 
@@ -61,8 +61,8 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createHttpsServer(HttpSvrConfig config, StreamListener httpListener,
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
-		
-		Layer1ServerListener listener = buildDatalListener(httpListener, false);
+		ProxyStreamListener proxyStreamListener = new ProxyStreamListener(httpListener);
+		Layer1ServerListener listener = buildDatalListener(proxyStreamListener, false);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 		
@@ -73,8 +73,8 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	@Override
 	public HttpServer createUpgradableServer(HttpSvrConfig config, StreamListener httpListener, SSLEngineFactory factory) {
 		preconditionCheck(config);
-		
-		Layer1ServerListener listener = buildDatalListener(httpListener, false);
+		ProxyStreamListener proxyStreamListener = new ProxyStreamListener(httpListener);
+		Layer1ServerListener listener = buildDatalListener(proxyStreamListener, false);
 		AsyncServer tcpServer = svrManager.createUpgradableServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 		
@@ -84,8 +84,8 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	@Override
 	public HttpServer createBackendHttpsServer(HttpSvrConfig config, StreamListener httpListener, SSLEngineFactory factory) {
 		preconditionCheck(config);
-		
-		Layer1ServerListener listener = buildDatalListener(httpListener, true);
+		ProxyStreamListener proxyStreamListener = new ProxyStreamListener(httpListener);
+		Layer1ServerListener listener = buildDatalListener(proxyStreamListener, true);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 		

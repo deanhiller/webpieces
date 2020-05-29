@@ -82,7 +82,7 @@ public class Http11StreamImpl implements ResponseStream {
 
 	@Override
 	public CompletableFuture<StreamWriter> sendResponse(Http2Response headers) {
-		closeCheck();
+		closeCheck(headers);
 		HttpResponse response = Http2ToHttp11.translateResponse(headers);
 		
 		if(http2Request.getKnownMethod() == Http2Method.CONNECT) {
@@ -102,9 +102,10 @@ public class Http11StreamImpl implements ResponseStream {
 		return write(response).thenApply(c -> new Http11ChunkedWriter(http1Req, http2Request));
 	}
 
-	private void closeCheck() {
+	private void closeCheck(Http2Msg msg) {
 		if(endingFrame.get() != null)
-			throw new IllegalArgumentException("You already sent a frame with endOfStream=true so cannot send more data");
+			throw new IllegalArgumentException("You already sent a frame with endOfStream=true so cannot send more data."
+					+ "  You already sent\n"+endingFrame.get()+"\n\nAnd NOW, you are trying to send=\n"+msg);
 	}
 
 	private void validateHeader(HttpResponse response) {
@@ -153,7 +154,7 @@ public class Http11StreamImpl implements ResponseStream {
 		
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
-			closeCheck();
+			closeCheck(data);
 			if(!(data instanceof DataFrame))
 				throw new UnsupportedOperationException("not supported in http1.1="+data);
 			
@@ -196,7 +197,7 @@ public class Http11StreamImpl implements ResponseStream {
 		
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
-			closeCheck();
+			closeCheck(data);
 			if(!(data instanceof DataFrame))
 				throw new UnsupportedOperationException("not supported in http1.1="+data);
 			DataFrame frame = (DataFrame) data;

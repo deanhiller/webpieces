@@ -12,7 +12,18 @@ import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 public abstract class Http2Headers implements Http2Msg {
 
 	private int streamId;
+	
+	
+	/** 
+	 * VERY VERY VERY IMPORTANT: We default to true!  If we default to false, developers forget to set this to true, and
+	 * it hangs, and the developer has tons of fun spending hours looking through millions of lines of code with no idea 
+	 * what the issue is.  IF WE SET THIS TO true however, a stack trace will ensue because typically they will accidentally
+	 * send two payloads with this set to true causing a nice exception saying, we see you are sending response X with 
+	 * endOfStream=true BUT you already sent response Y with endOfStream=true making this situation much easier to debug
+	 */
 	private boolean endOfStream = true;
+	
+	
     private PriorityDetails priorityDetails; /* optional */
 	protected List<Http2Header> headers = new ArrayList<>();
 	//Convenience structure that further morphs the headers into a Map that can
@@ -59,6 +70,13 @@ public abstract class Http2Headers implements Http2Msg {
 	 */
 	public Http2HeaderStruct getHeaderLookupStruct() {
 		return headersStruct;
+	}
+	
+	public String getSingleHeaderValue(String name) {
+		Http2Header header = getHeaderLookupStruct().getHeader(name);
+		if(header == null || header.getValue() == null)
+			return null;
+		return header.getValue().trim();
 	}
 	
 	public String getSingleHeaderValue(Http2HeaderName name) {
