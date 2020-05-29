@@ -16,7 +16,7 @@ public class SpecificRouterInvokeException extends CompletionException {
 	private final MatchInfo matchInfo;
 
 	public SpecificRouterInvokeException(MatchInfo matchInfo, Throwable e) {
-		super(e);
+		super("Exception invoking route.  See 'Caused by' Exception below", e);
 		this.matchInfo = matchInfo;
 	}
 

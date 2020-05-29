@@ -30,4 +30,5 @@ public abstract class HttpException extends WebpiecesException {
 	public StatusCode getStatusCode() {
 		return code;
 	}
+
 }

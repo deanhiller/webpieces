@@ -98,6 +98,11 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	}
 
 	public DScopedRouter buildRouter() {
+		if(pageNotFoundInfo == null)
+			throw new IllegalStateException("Client did not call setPageNotFoundRoute for router="+routerInfo+" and that's required to catch stray not founds");
+		else if(internalErrorInfo == null)
+			throw new IllegalStateException("Client did not call setInternalErrorRoute for router="+routerInfo+" and that's required to catch stray bugs in your application");
+		
 		List<AbstractRouter> routers = super.buildRoutes(routeFilters);
 
 		Map<String, EScopedRouter> pathToRouter = buildScopedRouters(routeFilters);

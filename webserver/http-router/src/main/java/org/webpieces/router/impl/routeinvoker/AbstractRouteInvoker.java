@@ -190,8 +190,11 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	private Throwable convert(LoadedController loadedController, Throwable t) {
-		if(t instanceof WebpiecesException)
-			return t; //no wrapping t so upper layers can detect
+		if(t instanceof WebpiecesException) {
+			//MUST wrap with same exact exception so upper layers can detect and route
+			WebpiecesException exc = (WebpiecesException) t;
+			return exc.clone("exception occurred trying to invoke controller method(and filters)="+loadedController.getControllerMethod()); 
+		}
 		return new ControllerException("exception occurred on controller method="+loadedController.getControllerMethod(), t);
 	}
 

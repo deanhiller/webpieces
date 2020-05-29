@@ -69,7 +69,10 @@ public abstract class CookieScopeImpl implements CookieScope {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public void put(String key, Object value) {		
+	public void put(String key, Object value) {
+//      put(key, "") is different than put(key, null) because in FieldTag, IF the field is null(from Flash cookie) then
+//      the webpage will display the default value.  If the value is "", then page will display "" assuming customer deleted the field
+		
 		hasModifiedData = true;
 		ObjectStringConverter marshaller = objectTranslator.getConverterFor(value);
 		String strValue = marshaller.objectToString(value);

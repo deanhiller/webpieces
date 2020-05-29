@@ -16,6 +16,8 @@ public class CompileConfig {
 	private VirtualFile byteCodeCacheDir;
 	private Charset fileEncoding = StandardCharsets.UTF_8;
 	
+	private String failIfNotInSourcePaths = null;
+	
 	/**
 	 * VirtualFiles can be created with new VirtualFileImpl
 	 * 
@@ -74,6 +76,15 @@ public class CompileConfig {
 
 	public CompileConfig setFileEncoding(Charset fileEncoding) {
 		this.fileEncoding = fileEncoding;
+		return this;
+	}
+
+	public String getFailIfNotInSourcePaths() {
+		return failIfNotInSourcePaths;
+	}
+
+	public CompileConfig setFailIfNotInSourcePaths(String failIfNotInSourcePaths) {
+		this.failIfNotInSourcePaths = failIfNotInSourcePaths;
 		return this;
 	}
 

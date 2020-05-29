@@ -177,7 +177,7 @@ public class EScopedRouter {
 
 				if(route.getMatchInfo().getExposedPorts() == Port.BOTH)
 					portMatches = true;
-				else if(isHttps)
+				else if(isHttps) //ok, it's not BOTH, so if isHttps, then it matches Port.HTTPS
 					portMatches = true;
 			}
 			

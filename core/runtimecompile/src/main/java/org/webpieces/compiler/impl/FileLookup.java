@@ -36,6 +36,7 @@ public class FileLookup {
                 return javaFile;
             }
         }
+
         return null;
     }
 

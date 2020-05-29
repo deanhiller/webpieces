@@ -39,7 +39,7 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		if(isNotFoundFilter)
 			return createNotFoundResponse(nextFilter, meta);
 
-		return nextFilter.invoke(meta).handle((a, t) -> translateFailure(a, t));
+		return nextFilter.invoke(meta).handle((a, t) -> translateFailure(meta, a, t));
 	}
 
 	@Override
@@ -48,13 +48,13 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		this.pattern = config.getFilterPattern();
 	}
 
-	protected Action translateFailure(Action action, Throwable t) {
+	protected Action translateFailure(MethodMeta meta, Action action, Throwable t) {
 		if(t != null) {
 			if(t instanceof HttpException) {
 				return translate((HttpException)t);
 			}
 			
-			log.error("Internal Server Error", t);
+			log.error("Internal Server Error method="+meta.getLoadedController2().getControllerMethod(), t);
 			return translateError(t);
 		} else {
 			return action;

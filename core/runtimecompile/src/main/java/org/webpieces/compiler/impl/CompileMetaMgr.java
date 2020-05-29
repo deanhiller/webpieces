@@ -54,12 +54,9 @@ public class CompileMetaMgr {
      * @return The ApplicationClass or null
      */
     public CompileClassMeta getApplicationClass(String name) {
-    	CompileClassMeta applicationClass = classes.get(name);
-    	if(applicationClass != null)
-    		return applicationClass;
-    	
-    	//the compiler looks up packages that we don't have (or classes we don't have like java.lang.Object)
-    	return null;
+        //the compiler looks up packages that we don't have (or classes we don't have like java.lang.Object)
+        //sooo, this returns null alot
+    	return classes.get(name);
     }
 
     /**

@@ -17,12 +17,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
-import org.webpieces.compiler.api.CompileConfig;
-import org.webpieces.util.file.VirtualFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.compiler.api.CompileConfig;
+import org.webpieces.util.file.VirtualFile;
 
 /*
  * Compile classes that need compiling to load them
@@ -134,6 +133,14 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         //For anonymous classes...
         if(applicationClass == null) {
         	VirtualFile file = fileLookup.getJava(name);
+        	if(file == null && config.getFailIfNotInSourcePaths() != null) {
+        		if(name.startsWith(config.getFailIfNotInSourcePaths())) {
+        	        String fileName = name.replace(".", "/") + ".java";
+        			throw new IllegalStateException("Could not find java file="+fileName+" in paths="+config.getJavaPath());
+        		}
+        		
+        	}
+        		
         	applicationClass = appClassMgr.getOrCreateApplicationClass(name, file);
         }
         

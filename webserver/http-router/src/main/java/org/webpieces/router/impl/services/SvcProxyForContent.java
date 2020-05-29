@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
+import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.model.SvcProxyLogic;
@@ -60,10 +61,21 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 			if(retVal == null)
 				throw new IllegalStateException("Your method returned a null CompletableFuture which it not allowed.  method="+method);
 			CompletableFuture<Object> future = (CompletableFuture<Object>) retVal;
-			return future.thenApply((bean) -> binder.marshal(bean));
+			return future.thenApply((bean) -> marshal(method, binder, bean));
 		} else {
-			RenderContent content = binder.marshal(retVal);
+			RenderContent content = marshal(method, binder, retVal);
+			//binder.marshal(retVal);
 			return CompletableFuture.completedFuture(content);
 		}
 	}
+
+	private RenderContent marshal(Method method, BodyContentBinder binder, Object retVal) {
+		try {
+			return binder.marshal(retVal);
+		} catch(RuntimeException e) {
+			throw new IllegalReturnValueException("Exception marshaling retVal="+retVal+" from method="+method, e);
+		}
+	}
+	
+	
 }

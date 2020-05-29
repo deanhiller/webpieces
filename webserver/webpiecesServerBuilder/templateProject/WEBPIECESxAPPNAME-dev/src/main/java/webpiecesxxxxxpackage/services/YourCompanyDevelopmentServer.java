@@ -39,6 +39,8 @@ public abstract class YourCompanyDevelopmentServer extends YourCompanyAbstractDe
 
         //java source files encoding...
         CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getHomeCacheDir("scrapersCache/devserver-bytecode"));
+        devConfig.setFailIfNotInSourcePaths("WEBPIECESxAPPNAME"); //FAIL FAST if a class with this package is not in our source directories so we can fix it!!
+        
         Module platformOverrides = Modules.combine(
                 new DevRouterModule(devConfig),
                 new DevTemplateModule(templateConfig));

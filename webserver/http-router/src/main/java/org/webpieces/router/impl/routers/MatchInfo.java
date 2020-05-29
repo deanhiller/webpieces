@@ -68,7 +68,7 @@ public class MatchInfo {
 
 	public String getLoggableHtml(boolean portMatches, boolean methodMatches, boolean pathMatches, String paddingElement) {
 		boolean isHttpsOnly = exposedPort == Port.HTTPS;
-		String http = isHttpsOnly ? ":https" : ":http";
+		String http = isHttpsOnly ? ":https" : ":both";
 		http = paddingElement+http;
 		
 		if(portMatches) {

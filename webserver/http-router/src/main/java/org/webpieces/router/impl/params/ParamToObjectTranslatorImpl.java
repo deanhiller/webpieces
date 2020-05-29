@@ -19,6 +19,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
+import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.DataMismatchException;
 import org.webpieces.router.api.exceptions.IllegalArgException;
@@ -68,7 +69,7 @@ public class ParamToObjectTranslatorImpl {
 				if(req.multiPartFields.size() > 0)
 					throw new IllegalArgException(e);
 				else //for apis that POST, this is a client error(or developer error when testing)
-					throw new ClientDataError(e);
+					throw new BadClientRequestException(e);
 			}
 		}
 	}
