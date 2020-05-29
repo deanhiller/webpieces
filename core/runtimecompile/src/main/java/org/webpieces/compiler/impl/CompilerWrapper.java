@@ -1,6 +1,8 @@
 package org.webpieces.compiler.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -22,7 +24,9 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
+import org.webpieces.compiler.api.CompilationsException;
 import org.webpieces.compiler.api.CompileConfig;
+import org.webpieces.compiler.api.CompileError;
 import org.webpieces.util.file.VirtualFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,19 +223,32 @@ public class CompilerWrapper {
         public void acceptResult(CompilationResult result) {
             // If error
             if (result.hasErrors()) {
+            	String fullMessage = "Could not compile files!!!  Each reason is below\n";
+            	List<CompileError> compileErrors = new ArrayList<>();
                 for (IProblem problem: result.getErrors()) {
                     String className = new String(problem.getOriginatingFileName()).replace("/", ".");
                     className = className.substring(0, className.length() - 5);
-                    String message = problem.getMessage();
-                    message = "Problem with class:"+className+"!  Issue:"+message;
-                    if (problem.getID() == IProblem.CannotImportPackage) {
-                        // Non sense !
-                        message = "Problem with class:"+className+"! Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.";
-                    }
+
                     CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
                     VirtualFile javaFile = applicationClass.javaFile;
-                    throw new CompilationException(javaFile, config.getFileEncoding(), message, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
+                    
+                    fullMessage += "Class could not compile:"+className+"   File="+javaFile.getCanonicalPath()+"\n";
+                    fullMessage += "Source line number:"+problem.getSourceLineNumber()+"  sourceStartColumn:"+problem.getSourceStart()+" sourceEndColumn:"+problem.getSourceEnd()+"\n";
+
+                    String message;
+                    if (problem.getID() == IProblem.CannotImportPackage) {
+                        // Non sense !
+                        message = "Problem with class:"+className+"! Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.\n";
+                        fullMessage += "Compiler Issue Import: Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.\n\n";
+                    } else {
+                    	fullMessage += "Compiler Issue:" + problem.getMessage()+"\n\n";
+                    	message = "Problem with class:"+className+"!  Issue:"+problem.getMessage()+"\n";
+                    }
+                    
+                    compileErrors.add(new CompileError(javaFile, config.getFileEncoding(), message, problem));
                 }
+                
+                throw new CompilationsException(compileErrors, fullMessage);
             }
             // Something has been compiled
             ClassFile[] clazzFiles = result.getClassFiles();
