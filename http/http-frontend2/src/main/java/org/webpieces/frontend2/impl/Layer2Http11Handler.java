@@ -20,8 +20,6 @@ import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.util.acking.AckAggregator;
-import org.webpieces.util.acking.ByteAckTracker;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.locking.PermitQueue;
 
@@ -158,6 +156,14 @@ public class Layer2Http11Handler {
 		return permitQueue.runRequest(() -> {
 			
 			Http11StreamImpl stream = socket.getCurrentStream();
+			
+			if(stream == null) {
+				//This situation occurs if we respond before the request finishes sending.
+				//stream goes null once we respond on the socket
+				permitQueue.releasePermit();
+				return CompletableFuture.completedFuture(null);
+			}
+			
 			StreamWriter requestWriter = stream.getRequestWriter();
 			if(msg.isEndOfStream())
 				stream.setSentFullRequest(true);

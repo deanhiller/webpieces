@@ -225,7 +225,7 @@ public class CompilerWrapper {
                     String message = problem.getMessage();
                     if (problem.getID() == IProblem.CannotImportPackage) {
                         // Non sense !
-                        message = problem.getArguments()[0] + " cannot be resolved";
+                        message = "Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import";
                     }
                     CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
                     VirtualFile javaFile = applicationClass.javaFile;
@@ -285,6 +285,7 @@ public class CompilerWrapper {
 
             @Override
             protected void handleInternalException(Throwable e, CompilationUnitDeclaration ud, CompilationResult result) {
+            	log.error("Internal Exception in eclipse compiler", e);
             }
         };
 
