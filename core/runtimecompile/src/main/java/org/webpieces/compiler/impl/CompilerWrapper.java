@@ -223,9 +223,10 @@ public class CompilerWrapper {
                     String className = new String(problem.getOriginatingFileName()).replace("/", ".");
                     className = className.substring(0, className.length() - 5);
                     String message = problem.getMessage();
+                    message = "Problem with class:"+className+"!  Issue:"+message;
                     if (problem.getID() == IProblem.CannotImportPackage) {
                         // Non sense !
-                        message = "Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import from class="+className;
+                        message = "Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.";
                     }
                     CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
                     VirtualFile javaFile = applicationClass.javaFile;
