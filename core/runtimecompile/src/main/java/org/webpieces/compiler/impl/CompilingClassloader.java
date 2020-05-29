@@ -133,8 +133,12 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         //For anonymous classes...
         if(applicationClass == null) {
         	VirtualFile file = fileLookup.getJava(name);
-        	if(file == null && config.getFailIfNotInSourcePaths() != null) {
-        		if(name.startsWith(config.getFailIfNotInSourcePaths())) {
+        	//Hibernate has 
+        	if(!name.endsWith("_") && file == null && config.getFailIfNotInSourcePaths() != null) {
+        		if(name.endsWith("_") || name.contains("$HibernateProxy$")) {
+        			//Avoid bytebuddy classes that hibernate creates
+        			//AND MetaModel JPA classes ending in _
+        		} else if(name.startsWith(config.getFailIfNotInSourcePaths())) {
         	        String fileName = name.replace(".", "/") + ".java";
         			throw new IllegalStateException("Could not find java file="+fileName+" in paths="+config.getJavaPath());
         		}
