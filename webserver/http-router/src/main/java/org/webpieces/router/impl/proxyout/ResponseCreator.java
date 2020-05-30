@@ -26,11 +26,11 @@ import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.router.impl.dto.RedirectResponse;
 
-import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
 import com.webpieces.hpack.api.subparsers.ResponseCookie;
+import com.webpieces.hpack.api.subparsers.SubparserFactory;
 import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -39,7 +39,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 public class ResponseCreator {
 
 	private static final Logger log = LoggerFactory.getLogger(ResponseCreator.class);
-	private static final HeaderPriorityParser httpSubParser = HpackParserFactory.createHeaderParser();
+	private static final HeaderPriorityParser httpSubParser = SubparserFactory.createHeaderParser();
 	private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, dd MMM Y HH:mm:ss");
 
 	private final CookieTranslator cookieTranslator;

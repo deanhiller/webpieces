@@ -1,6 +1,6 @@
 dependencies {
     compile deps['twitter-hpack']
-	compile project(':core:core-util')
+    compile project(':core:core-util')
     compile project(':http:http2-parser')
 }
 

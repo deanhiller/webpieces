@@ -1,6 +1,4 @@
-package com.webpieces.http2engine.api;
-
-import com.webpieces.http2engine.api.error.ConnectionCancelled;
+package com.webpieces.http2engine.api.error;
 
 public class ConnectionClosedException extends RuntimeException {
 

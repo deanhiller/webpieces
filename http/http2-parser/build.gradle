@@ -1,5 +1,6 @@
 dependencies {
     compile project(':core:core-datawrapper')
+    compile project(':http:http2-api')
     
     testCompile project(':core:core-util')
 }

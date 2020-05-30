@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Trailers;
-import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.error.ConnReset2;
 import com.webpieces.http2engine.api.error.ConnectionCancelled;
+import com.webpieces.http2engine.api.error.ConnectionClosedException;
 import com.webpieces.http2engine.api.error.ConnectionFailure;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.impl.shared.data.Stream;

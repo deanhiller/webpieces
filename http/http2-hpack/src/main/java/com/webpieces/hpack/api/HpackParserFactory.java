@@ -21,7 +21,4 @@ public class HpackParserFactory {
     	return new HpackStatefulParserImpl(parser, config);
     }
     
-	public static HeaderPriorityParser createHeaderParser() {
-		return new HeaderPriorityParserImpl();
-	}
 }
