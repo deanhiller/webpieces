@@ -12,7 +12,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
-import org.webpieces.frontend2.api.StreamSession;
 import org.webpieces.http2translations.api.Http2ToHttp11;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.common.Header;

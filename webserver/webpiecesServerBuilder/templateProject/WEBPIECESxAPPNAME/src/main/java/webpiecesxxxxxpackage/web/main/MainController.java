@@ -15,6 +15,7 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Render;
 
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
@@ -83,67 +84,41 @@ public class MainController {
 		return Actions.renderThis();
 	}
 
-	public CompletableFuture<StreamWriter> myStream(RequestContext requestCtx, RouterStreamHandle handle) {
-		return CompletableFuture.completedFuture(new RequestStreamEchoWriter(handle));
+	//Method signature cannot have RequestContext since in microservices, we implement an api as the server
+	//AND a client implements the same api AND client does not have a RequestContext!!
+	public CompletableFuture<StreamWriter> myStream(RouterStreamHandle handle) {
+		RequestContext requestCtx = Current.getContext(); 
+		
+		Http2Response response = handle.createBaseResponse(requestCtx.getRequest().originalRequest, "text/plain", 200, "Ok");
+		response.setEndOfStream(false);
+		
+		return handle.process(response).thenApply(responseWriter -> new RequestStreamEchoWriter(requestCtx, responseWriter));
 	}
 
 	private static class RequestStreamEchoWriter implements StreamWriter {
 
 		private AtomicInteger total = new AtomicInteger();
-		private RouterStreamHandle handle;
+		private StreamWriter handle;
 
-		public RequestStreamEchoWriter(RouterStreamHandle handle) {
-			this.handle = handle;
+		public RequestStreamEchoWriter(RequestContext requestCtx, StreamWriter responseWriter) {
+			this.handle = responseWriter;
 		}
 
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
+			DataFrame f = (DataFrame) data;
+			int numReceived = total.addAndGet(f.getData().getReadableSize());
+			log.info("Num bytes received so far="+numReceived);
 			
 			if(data.isEndOfStream()) {
 				log.info("Upload complete");
-				return handle.sendFullRedirect(MainRouteId.MAIN_ROUTE);
+				//usually you may do something different here at end of stream
+				return handle.processPiece(data);
 			}
-			
-			DataFrame frame = (DataFrame) data;
-			int totalSoFar = total.addAndGet(frame.getData().getReadableSize());
 
-			//log.info("STEP 2. returning echo future for bytes="+frame.getData().getReadableSize()+" eos="+frame.isEndOfStream()+" totalSoFar="+totalSoFar);
-			return CompletableFuture.completedFuture(null);
+			//We just echo data back to whatever the client sent as the client sends it...
+			return handle.processPiece(data);
 		}
 	}
 
-//	public CompletableFuture<StreamWriter> myStream(RequestContext requestCtx, RouterStreamHandle handle) {
-//
-//
-//		return CompletableFuture.<StreamWriter>completedFuture(new RequestStreamEchoWriter(requestCtx, handle));
-//	}
-//
-//	private static class RequestStreamEchoWriter implements StreamWriter {
-//
-//		private RequestContext requestCtx;
-//		private RouterStreamHandle handle;
-//
-//		public RequestStreamEchoWriter(RequestContext requestCtx, RouterStreamHandle handle) {
-//			this.requestCtx = requestCtx;
-//			this.handle = handle;
-//		}
-//
-//		@Override
-//		public CompletableFuture<Void> processPiece(StreamMsg data) {
-//			log.info("streaming in piece");
-//
-////			try {
-////				Thread.sleep(1000);
-////			} catch (InterruptedException e) {
-////			}
-//
-//			if(data.isEndOfStream()) {
-//				Http2Request req = requestCtx.getRequest().originalRequest;
-//				Http2Response redirect = handle.createRedirect(req, new RedirectResponse("/"));
-//				return handle.process(redirect).thenApply(s -> null);
-//			}
-//
-//			return CompletableFuture.completedFuture(null);
-//		}
-//	}
 }

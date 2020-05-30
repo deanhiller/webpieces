@@ -78,12 +78,10 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 
 		Current.setContext(requestCtx);
 
-		if(parameters.length != 2)
-			throw new IllegalArgumentException("Your method='"+controllerMethod+"' MUST take two parameters and does not.  It needs to take a RequestContext and a RouterStremHandler");
-		else if(!RequestContext.class.equals(parameters[0].getType()))
-			throw new IllegalArgumentException("The first parameter must be RequestContext and was not for this method='"+controllerMethod+"'");
-		else if(!RouterStreamHandle.class.equals(parameters[1].getType()))
-			throw new IllegalArgumentException("The second parameter must be RouterStreamHandle and was not for this method='"+controllerMethod+"'");
+		if(parameters.length != 1)
+			throw new IllegalArgumentException("Your method='"+controllerMethod+"' MUST one parameter and does not.  It needs to take a RouterStreamHandler");
+		else if(!RouterStreamHandle.class.equals(parameters[0].getType()))
+			throw new IllegalArgumentException("The single parameter must be RouterStreamHandle and was not for this method='"+controllerMethod+"'");
 		else if(!CompletableFuture.class.equals(controllerMethod.getReturnType()))
 			throw new IllegalArgumentException("The return value must be CompletableFuture<StreamWriter> and was not for this method='"+controllerMethod+"'");
 
@@ -102,7 +100,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public CompletableFuture<StreamWriter> invokeStream(Method m, Object instance, RequestContext requestCtx, RouterStreamHandle handler) {
 		try {
-			CompletableFuture<Object> future = (CompletableFuture) m.invoke(instance, requestCtx, handler);
+			CompletableFuture<Object> future = (CompletableFuture) m.invoke(instance, handler);
 			if(future == null) {
 				throw new IllegalStateException("You must return a non-null and did not from method='"+m+"'");
 			}
