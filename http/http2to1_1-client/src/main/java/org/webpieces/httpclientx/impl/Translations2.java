@@ -1,10 +1,5 @@
 package org.webpieces.httpclientx.impl;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2parser.api.dto.Http2Method;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
@@ -14,7 +9,18 @@ import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.*;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpRequestLine;
+import org.webpieces.httpparser.api.dto.HttpRequestMethod;
+import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.HttpResponseStatus;
+import org.webpieces.httpparser.api.dto.HttpUri;
+import org.webpieces.httpparser.api.dto.HttpVersion;
+
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class Translations2 {
 

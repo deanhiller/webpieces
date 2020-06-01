@@ -12,8 +12,8 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
@@ -26,14 +26,16 @@ public class SingleResponseListener implements ResponseStreamHandle, StreamWrite
 	private DataWrapper fullData = dataGen.emptyWrapper();
 	
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public StreamRef process(Http2Response response) {
 		this.resp = response;
 		if(resp.isEndOfStream()) {
 			responseFuture.complete(new FullResponse(resp, dataGen.emptyWrapper(), null));
-			return CompletableFuture.completedFuture(null);
+			CompletableFuture<StreamWriter> completedFuture = CompletableFuture.completedFuture(null);
+			return new Proxy2StreamRef(null, completedFuture);
 		}
-		
-		return CompletableFuture.completedFuture(this);
+				
+		CompletableFuture<StreamWriter> completedFuture = CompletableFuture.completedFuture(this);
+		return new Proxy2StreamRef(null, completedFuture);
 	}
 	
 	@Override
@@ -78,12 +80,6 @@ public class SingleResponseListener implements ResponseStreamHandle, StreamWrite
 	@Override
 	public PushStreamHandle openPushStream() {
 		throw new UnsupportedOperationException("you should either turn push promise setting off or not use single request/response since the server is sending a push_promise");
-	}
-
-	@Override
-	public CompletableFuture<Void> cancel(CancelReason frame) {
-		responseFuture.completeExceptionally(new ServerRstStreamException("The remote end reset this stream"));
-		return CompletableFuture.completedFuture(null);
 	}
 
 }

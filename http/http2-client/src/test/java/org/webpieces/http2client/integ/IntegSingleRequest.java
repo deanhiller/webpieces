@@ -16,6 +16,7 @@ import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.impl.Proxy2StreamRef;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -29,6 +30,7 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2parser.api.dto.CancelReason;
@@ -115,9 +117,10 @@ public class IntegSingleRequest {
 	
 	private static class ChunkedResponseListener implements ResponseStreamHandle, PushPromiseListener, PushStreamHandle {
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Response response) {
+		public StreamRef process(Http2Response response) {
 			log.info("incoming part of response="+response);
-			return CompletableFuture.completedFuture(null);
+			CompletableFuture<StreamWriter> writer = CompletableFuture.completedFuture(null);
+			return new Proxy2StreamRef(null, writer);
 		}
 
 		@Override
@@ -128,11 +131,6 @@ public class IntegSingleRequest {
 		@Override
 		public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
 			log.info("incoming push promise. response="+response);
-			return CompletableFuture.completedFuture(null);
-		}
-
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason frame) {
 			return CompletableFuture.completedFuture(null);
 		}
 

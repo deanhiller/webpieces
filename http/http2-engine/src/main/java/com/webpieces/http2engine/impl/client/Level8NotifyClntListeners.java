@@ -11,6 +11,7 @@ import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
@@ -71,8 +72,8 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	public CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
-			ResponseStreamHandle handler = str.getResponseListener();
-			return handler.cancel(payload);
+			StreamRef responseStreamRef = str.getResponseStreamRef();
+			return responseStreamRef.cancel(payload);
 		}
 		
 		ClientPushStream str = (ClientPushStream) stream;
@@ -83,14 +84,14 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	@Override
 	public CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
 		ClientStream str = (ClientStream) stream;
-		CompletableFuture<StreamWriter> writer = str.getResponseWriter();
+		CompletableFuture<StreamWriter> writer = str.getResponseStreamRef().getWriter();
 		return writer.thenCompose(w -> w.processPiece(payload));
 	}
 
 	@Override
 	public CompletableFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload) {
 		ClientStream str = (ClientStream) stream;
-		CompletableFuture<StreamWriter> writer = str.getResponseWriter();
+		CompletableFuture<StreamWriter> writer = str.getResponseStreamRef().getWriter();
 		return writer.thenCompose(w -> w.processPiece(payload));
 	}
 
@@ -98,11 +99,11 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
 			ResponseStreamHandle listener = str.getResponseListener();
-			return listener.process(response)
-					.thenApply( w -> {
-						str.setResponseWriter(w);
-						return null;
-					});
+			
+			StreamRef ref = listener.process(response);
+			str.setResponseStreamRef(ref);
+			
+			return ref.getWriter().thenApply(w -> null);
 		}
 		
 		ClientPushStream str = (ClientPushStream) stream;

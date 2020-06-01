@@ -9,6 +9,7 @@ import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.http2translations.api.Http2ToHttp11;
 import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpSocket;
+import org.webpieces.httpclient11.api.HttpStreamRef;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
 import com.webpieces.hpack.api.dto.Http2Request;
@@ -41,15 +42,10 @@ public class Http2SocketImpl implements Http2Socket {
 		@Override
 		public StreamRef process(Http2Request request, ResponseStreamHandle responseListener) {
 			HttpRequest req = Http2ToHttp11.translateRequest(request);
-			String value = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
-			boolean closeConnection = true;
-			if("keep-alive".equals(value))
-				closeConnection = false;
 			
-			CompletableFuture<StreamWriter> send = socket11.send(req, new ResponseListener(socket11+"", responseListener))
-					.thenApply(s -> new StreamWriterImpl(s, req));
-			return new MyStreamRef(send, closeConnection);
-					
+			HttpStreamRef streamRef = socket11.send(req, new ResponseListener(socket11+"", responseListener));
+			CompletableFuture<StreamWriter> newWriter = streamRef.getWriter().thenApply(s -> new StreamWriterImpl(s, req));
+			return new MyStreamRef(newWriter, request);
 		}
 
 	}
@@ -57,11 +53,11 @@ public class Http2SocketImpl implements Http2Socket {
 	public class MyStreamRef implements StreamRef {
 
 		private CompletableFuture<StreamWriter> writer;
-		private boolean closeConnection;
+		private Http2Request request;
 
-		public MyStreamRef(CompletableFuture<StreamWriter> writer, boolean closeConnection) {
+		public MyStreamRef(CompletableFuture<StreamWriter> writer, Http2Request request) {
 			this.writer = writer;
-			this.closeConnection = closeConnection;
+			this.request = request;
 		}
 
 		@Override
@@ -71,7 +67,8 @@ public class Http2SocketImpl implements Http2Socket {
 
 		@Override
 		public CompletableFuture<Void> cancel(CancelReason reason) {
-			if(!closeConnection) //do nothing as keep-alive was set so we can't really cancel in http1.1 for this case
+			String value = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
+			if("keep-alive".equals(value)) //do nothing as keep-alive was set so we can't really cancel in http1.1 for this case
 				return CompletableFuture.completedFuture(null);
 			
 			//keep alive not set so close the socket for http1.1

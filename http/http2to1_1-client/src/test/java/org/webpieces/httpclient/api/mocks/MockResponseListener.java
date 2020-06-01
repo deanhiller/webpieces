@@ -3,7 +3,6 @@ package org.webpieces.httpclient.api.mocks;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2parser.api.dto.CancelReason;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;

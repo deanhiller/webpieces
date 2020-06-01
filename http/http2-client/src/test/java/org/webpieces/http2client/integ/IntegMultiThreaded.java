@@ -13,6 +13,7 @@ import com.webpieces.http2engine.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.impl.Proxy2StreamRef;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.dto.Http2Push;
@@ -130,7 +131,7 @@ public class IntegMultiThreaded {
 	private static class ChunkedResponseListener implements ResponseStreamHandle, PushPromiseListener, PushStreamHandle {
 
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Response response) {
+		public StreamRef process(Http2Response response) {
 			log.info("incoming part of response="+response);
 			
 			if(response.isEndOfStream()) {
@@ -140,7 +141,8 @@ public class IntegMultiThreaded {
 				log.info("completed="+completed.size()+" completedPus="+completedPush.size()+" sent="+sent.size()+" list="+completed);
 			}
 			
-			return CompletableFuture.completedFuture(null);
+			CompletableFuture<StreamWriter> writer = CompletableFuture.completedFuture(null);
+			return new Proxy2StreamRef(null, writer);
 		}
 
 		@Override
@@ -160,10 +162,6 @@ public class IntegMultiThreaded {
 			return CompletableFuture.completedFuture(null);
 		}
 
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason frame) {
-			return CompletableFuture.completedFuture(null);
-		}
 		@Override
 		public CompletableFuture<Void> cancelPush(CancelReason payload) {
 			return CompletableFuture.completedFuture(null);

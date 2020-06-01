@@ -21,6 +21,7 @@ import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Injector;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class DevRoutingService extends AbstractRouterService {
@@ -68,7 +69,7 @@ public class DevRoutingService extends AbstractRouterService {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
+	public StreamRef incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		

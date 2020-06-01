@@ -10,6 +10,7 @@ import org.webpieces.router.api.RouterResponseHandler;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -27,11 +28,34 @@ public class MockStreamHandle implements RouterResponseHandler {
 	private boolean wasClosed;
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public StreamRef process(Http2Response response) {
 		if(this.lastResponse != null)
 			tooManyResponses = true;
 		this.lastResponse = response;
-		return CompletableFuture.completedFuture(new MockStreamWriter());
+		
+		CompletableFuture<StreamWriter> writer = CompletableFuture.completedFuture(new MockStreamWriter());
+		
+		return new MockStreamRef(writer);
+	}
+	
+	private class MockStreamRef implements StreamRef {
+
+		private CompletableFuture<StreamWriter> writer;
+
+		public MockStreamRef(CompletableFuture<StreamWriter> writer) {
+			this.writer = writer;
+		}
+
+		@Override
+		public CompletableFuture<StreamWriter> getWriter() {
+			return writer;
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason reason) {
+			throw new UnsupportedOperationException("not supported in mock yet");
+		}
+		
 	}
 
 	private class MockStreamWriter implements StreamWriter {
@@ -48,11 +72,6 @@ public class MockStreamHandle implements RouterResponseHandler {
 	
 	@Override
 	public PushStreamHandle openPushStream() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public CompletableFuture<Void> cancel(CancelReason payload) {
 		throw new UnsupportedOperationException();
 	}
 

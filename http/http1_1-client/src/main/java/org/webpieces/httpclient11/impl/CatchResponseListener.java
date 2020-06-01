@@ -4,8 +4,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.httpclient11.api.DataWriter;
+import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
+import org.webpieces.httpclient11.api.HttpStreamRef;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -20,28 +21,31 @@ public class CatchResponseListener implements HttpResponseListener {
 	}
 
 	@Override
-	public CompletableFuture<DataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
+	public HttpStreamRef incomingResponse(HttpResponse resp, boolean isComplete) {
 		try {
-			return listener.incomingResponse(resp, isComplete)
-					.thenApply(w -> new CatchDataWriter(w));
+			
+			HttpStreamRef ref = listener.incomingResponse(resp, isComplete);
+			
+			CompletableFuture<HttpDataWriter> newWriter = ref.getWriter().thenApply(w -> new CatchDataWriter(w));
+			return new ProxyStreamRef(ref, newWriter);
 		} catch(Throwable e) {
 			log.error("exception", e);
-			CompletableFuture<DataWriter> future = new CompletableFuture<DataWriter>();
+			CompletableFuture<HttpDataWriter> future = new CompletableFuture<HttpDataWriter>();
 			future.completeExceptionally(e);
-			return future;
+			return new ProxyStreamRef(null, future);
 		}
 	}
 
-	private class CatchDataWriter implements DataWriter {
-		private DataWriter writer;
-		public CatchDataWriter(DataWriter writer) {
+	private class CatchDataWriter implements HttpDataWriter {
+		private HttpDataWriter writer;
+		public CatchDataWriter(HttpDataWriter writer) {
 			this.writer = writer;
 		}
 
 		@Override
-		public CompletableFuture<Void> incomingData(HttpData chunk) {
+		public CompletableFuture<Void> send(HttpData chunk) {
 			try {
-				return writer.incomingData(chunk);
+				return writer.send(chunk);
 			} catch(Throwable e) {
 				log.error("exception", e);
 				CompletableFuture<Void> future = new CompletableFuture<Void>();
