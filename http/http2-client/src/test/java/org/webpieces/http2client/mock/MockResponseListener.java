@@ -22,6 +22,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 
 	enum Method implements MethodEnum {
 		INCOMING_RESPONSE,
+		CANCEL,
 		INCOMING_PUSH,
 		CANCEL_PUSH
 	}
@@ -30,7 +31,6 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 		setDefaultReturnValue(Method.CANCEL_PUSH, CompletableFuture.completedFuture(null));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public StreamRef process(Http2Response response) {
 		return (StreamRef) super.calledMethod(Method.INCOMING_RESPONSE, response);
@@ -41,8 +41,8 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 		return new MockPushStreamHandle();
 	}
 
-	public void addReturnValueIncomingResponse(StreamRef future) {
-		super.addValueToReturn(Method.INCOMING_RESPONSE, future);
+	public void addReturnValueIncomingResponse(CompletableFuture<StreamWriter> future) {
+		super.addValueToReturn(Method.INCOMING_RESPONSE, new MyStreamRef(future));
 	}
 	
 	public Http2Response getSingleReturnValueIncomingResponse() {
@@ -59,9 +59,44 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 	}
 
 	public void setIncomingRespDefault(CompletableFuture<StreamWriter> retVal) {
-		super.setDefaultReturnValue(Method.INCOMING_RESPONSE, retVal);
+		super.setDefaultReturnValue(Method.INCOMING_RESPONSE, new MyStreamRef(retVal));
 	}
 
+	private class MyStreamRef implements StreamRef {
+
+		private CompletableFuture<StreamWriter> writer;
+
+		public MyStreamRef(CompletableFuture<StreamWriter> writer) {
+			this.writer = writer;
+		}
+
+		@Override
+		public CompletableFuture<StreamWriter> getWriter() {
+			return writer;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason reason) {
+			return (CompletableFuture<Void>) calledMethod(Method.CANCEL, reason);
+		}
+		
+	}
+	
+	public List<CancelReason> getRstStreams() {
+		Stream<ParametersPassedIn> calledMethodList = super.getCalledMethods(Method.CANCEL);
+		Stream<CancelReason> retVal = calledMethodList.map(p -> (CancelReason)p.getArgs()[0]);
+		return retVal.collect(Collectors.toList());
+		}
+
+	public CancelReason getSingleRstStream() {
+		List<CancelReason> rstStreams = getRstStreams();
+		if(rstStreams.size() != 1)
+			throw new IllegalStateException("There is not exactly one return value like expected.  num times method called="+rstStreams.size());
+		return rstStreams.get(0);
+		}
+
+	
 	private class MockPushStreamHandle implements PushStreamHandle {
 
 		@SuppressWarnings("unchecked")
