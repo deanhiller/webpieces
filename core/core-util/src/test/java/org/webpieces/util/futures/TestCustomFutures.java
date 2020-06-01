@@ -46,7 +46,7 @@ public class TestCustomFutures {
 		
 		Assert.assertEquals(0,  nums.size()); //cancel has not been called so this is 0 right now
 		//Test a POST cance as well
-		f6.cancel("Reason for cancel");
+		f6.cancelChain("Reason for cancel");
 		
 		Assert.assertEquals(1, nums.size()); //cancel function above fills in the nums
 	}

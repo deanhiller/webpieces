@@ -3,18 +3,14 @@ package org.webpieces.util.futures;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class XFuture<T> extends CompletableFuture<T> {
 
 	private Function<Object, Boolean> cancelFunction;
-
-    static final AltResult NIL = new AltResult(null);
-
-    static final class AltResult { // See above
-        final Throwable ex;        // null only for NIL
-        AltResult(Throwable x) { this.ex = x; }
-    }
     
 	public XFuture() {}
 	
@@ -22,6 +18,37 @@ public class XFuture<T> extends CompletableFuture<T> {
 		this.cancelFunction = cancelFunction;
 	}
 	
+    public XFuture<Void> thenAccept(Consumer<? super T> originalFunction) {
+		Map<String, Object> state = FutureLocal.fetchState();
+    	
+    	Consumer<? super T> c2 = (s) -> {
+			Map<String, Object> prevState = FutureLocal.fetchState();
+			try {
+				FutureLocal.restoreState(state);
+				
+				originalFunction.accept(s);
+				
+			} finally {
+				FutureLocal.restoreState(prevState);
+			}
+    	};
+
+    	return (XFuture<Void>) super.thenAccept(c2);
+    }
+
+	public T join() {
+		return super.join();
+	}
+
+    @SuppressWarnings("unchecked")
+	public <U> XFuture<U> thenApplyAsync(
+            Function<? super T,? extends U> fn, Executor executor) {
+		Map<String, Object> state = FutureLocal.fetchState();
+		MyFunction f = new MyFunction(state, fn);		
+		
+		return (XFuture<U>) super.thenApplyAsync(f, executor);    	
+    }
+    
 	@SuppressWarnings("unchecked")
 	@Override
 	public <U> XFuture<U> thenApply(Function<? super T, ? extends U> fn) {
@@ -40,9 +67,17 @@ public class XFuture<T> extends CompletableFuture<T> {
 		return (XFuture<U>) super.thenCompose(f);
 	}
 
+    @SuppressWarnings("unchecked")
+	public XFuture<T> exceptionally(
+            Function<Throwable, ? extends T> fn) {
+		Map<String, Object> state = FutureLocal.fetchState();
+		MyFunction f = new MyFunction(state, fn);
+
+		return (XFuture<T>) super.exceptionally(f);
+    }
 	
-	@Override
-	public <U> CompletableFuture<U> newIncompleteFuture() {
+    @Override
+	public <U> XFuture<U> newIncompleteFuture() {
 		return new XFuture<U>(cancelFunction);
 	}
 
@@ -89,7 +124,14 @@ public class XFuture<T> extends CompletableFuture<T> {
     	return f;
     }
 
-    public static <U> XFuture<U> failedFuture(Throwable t, Function<Object, Boolean> cancelFunction) {
+    
+    @SuppressWarnings("unchecked")
+	@Override
+	public <U> XFuture<U> handle(BiFunction<? super T, Throwable, ? extends U> fn) {
+		return (XFuture<U>) super.handle(fn);
+	}
+
+	public static <U> XFuture<U> failedFuture(Throwable t, Function<Object, Boolean> cancelFunction) {
     	XFuture<U> f = new XFuture<U>(cancelFunction);
     	f.completeExceptionally(t);
     	return f;    	
@@ -106,11 +148,53 @@ public class XFuture<T> extends CompletableFuture<T> {
 		return super.cancel(mayInterruptIfRunning);
 	}
 
-	public boolean cancel(Object reason) {
+	/**
+	 * A special cancel that regardless of futures completing or not, this one sends cancels through the
+	 * chain of futures unless the chain is broken by constructing a middle man future with no
+	 * cancelFunction.  This can be used to cancel streaming apis after they have started
+	 */
+	public boolean cancelChain(Object reason) {
 		if(cancelFunction != null)
 			return cancelFunction.apply(reason);
 	
 		return false;
 	}
 	
+	public static XFuture<Void> allOf(XFuture<?> ... cfs) {
+    	CompletableFuture<Void> allOf = CompletableFuture.allOf(cfs);
+    	
+    	Function<Object, Boolean> cancelFunc = (s) -> {
+    		boolean allCancelled = true;
+    		for(XFuture<?> f: cfs) {
+    			boolean wasCancelled = f.cancelChain(s);
+    			if(!wasCancelled)
+    				allCancelled = false;
+    		}
+    		return allCancelled;
+    		
+    	};
+    	
+
+    	return convert(allOf, cancelFunc);
+    }
+
+	public static <T> XFuture<T> convert(CompletableFuture<T> future1) {
+		return convert(future1, null);
+	}
+	
+	public static <T> XFuture<T> convert(CompletableFuture<T> future1, Function<Object, Boolean> cancelFunc) {
+		
+    	
+    	XFuture<T> xFuture = new XFuture<T>(cancelFunc);
+    	future1.handle( (resp, t) -> {
+    		if(t != null)
+    			xFuture.completeExceptionally(t);
+    		else
+    			xFuture.complete(resp);
+    		
+    		return null;
+    	});
+		
+		return xFuture;
+	}
 }
