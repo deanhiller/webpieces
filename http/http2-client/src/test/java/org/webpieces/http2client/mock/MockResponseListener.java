@@ -13,11 +13,11 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
-public class MockResponseListener extends MockSuperclass implements ResponseHandler {
+public class MockResponseListener extends MockSuperclass implements ResponseStreamHandle {
 
 	enum Method implements MethodEnum {
 		INCOMING_RESPONSE,
@@ -80,7 +80,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 		return rstStreams.get(0);
 	}
 
-	
+
 	private class MockPushStreamHandle implements PushStreamHandle {
 
 		@SuppressWarnings("unchecked")

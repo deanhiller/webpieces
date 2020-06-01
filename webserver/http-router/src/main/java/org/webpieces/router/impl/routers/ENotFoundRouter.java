@@ -12,6 +12,7 @@ import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForNotFound;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class ENotFoundRouter {
@@ -27,7 +28,7 @@ public class ENotFoundRouter {
 		this.loadedController = loadedController;
 	}
 
-	public CompletableFuture<StreamWriter> invokeNotFoundRoute(RequestContext ctx, ProxyStreamHandle handle, NotFoundException exc) {
+	public StreamRef invokeNotFoundRoute(RequestContext ctx, ProxyStreamHandle handle, NotFoundException exc) {
 		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handle, false);
 		RouteData data = new RouteInfoForNotFound(exc);
 		return invoker.invokeNotFound(invokeInfo, loadedController, data);

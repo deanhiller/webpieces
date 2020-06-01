@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 /**
@@ -31,7 +32,7 @@ public class BRouter {
 		this.domainToRouter = domainToRouter;
 	}
 
-	public CompletableFuture<StreamWriter> invokeRoute(RequestContext ctx, ProxyStreamHandle handler) {
+	public StreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler) {
 		if(ctx.getRequest().isBackendRequest) {
 			return backendRouter.invokeRoute(ctx, handler);
 		}

@@ -21,7 +21,7 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.api.dto.Http2Trailers;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.Level5CStateMachine;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
@@ -101,12 +101,12 @@ public class Level5ClientStateMachine extends Level5CStateMachine {
 			});
 	}
 
-	public CompletableFuture<Stream> createStreamAndSend(Http2Request frame, ResponseHandler responseListener) {
+	public CompletableFuture<Stream> createStreamAndSend(Http2Request frame, ResponseStreamHandle responseListener) {
 		Stream stream = createStream(frame.getStreamId(), responseListener);
 		return fireToSocket(stream, frame).thenApply(v -> stream);
 	}
 	
-	private ClientStream createStream(int streamId, ResponseHandler responseListener) {
+	private ClientStream createStream(int streamId, ResponseStreamHandle responseListener) {
 		Memento initialState = createStateMachine("stream" + streamId);
 		long localWindowSize = localSettings.getInitialWindowSize();
 		long remoteWindowSize = remoteSettings.getInitialWindowSize();
@@ -128,7 +128,7 @@ public class Level5ClientStateMachine extends Level5CStateMachine {
 		return firePushToClient(stream, fullPromise);
 	}
 
-	private ClientPushStream createPushStream(int streamId, ResponseHandler responseListener) {
+	private ClientPushStream createPushStream(int streamId, ResponseStreamHandle responseListener) {
 		Memento initialState = createStateMachine("stream" + streamId);
 		long localWindowSize = localSettings.getInitialWindowSize();
 		long remoteWindowSize = remoteSettings.getInitialWindowSize();

@@ -17,7 +17,7 @@ public class JsonRoutes implements Routes {
 		bldr.addContentRoute(BOTH, GET , "/json/read",         "JsonController.readOnly");
 
 		bldr.addContentRoute(BOTH, GET , "/json/{id}",         "JsonController.jsonRequest");
-		bldr.addContentRoute(BOTH, POST , "/json/{id}",        "JsonController.postJson");
+		bldr.addContentRoute(BOTH, POST , "/json",        "JsonController.postJson");
 
 		bldr.addContentRoute(BOTH, GET , "/json/async/{id}",   "JsonController.asyncJsonRequest");
 		bldr.addContentRoute(BOTH, POST, "/json/async/{id}",   "JsonController.postAsyncJson");

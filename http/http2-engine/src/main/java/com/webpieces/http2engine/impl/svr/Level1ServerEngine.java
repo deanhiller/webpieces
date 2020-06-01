@@ -154,7 +154,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 			return outgoingSync.sendDataToSocket(stream, data);
 		}
 	}
-	
+
 	public CompletableFuture<Void> sendCancel(Stream stream, RstStreamFrame frame) {
 		int streamId = frame.getStreamId();
 		if(streamId <= 0)

@@ -5,12 +5,13 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.webpieces.http2parser.api.dto.CancelReason;
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.ResponseStream;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
@@ -19,18 +20,18 @@ public class Http2StreamImpl implements ResponseStream {
 
 	private FrontendSocketImpl socket;
 	private AtomicBoolean sentResponseHeaders = new AtomicBoolean(false);
-	private ResponseHandler responseHandler;
+	private ResponseStreamHandle responseHandler;
 	private Map<String, Object> session = new HashMap<String, Object>();
 	private int streamId;
 
-	public Http2StreamImpl(FrontendSocketImpl socket, ResponseHandler responseHandler, int streamId) {
+	public Http2StreamImpl(FrontendSocketImpl socket, ResponseStreamHandle responseHandler, int streamId) {
 		this.socket = socket;
 		this.responseHandler = responseHandler;
 		this.streamId = streamId;
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> sendResponse(Http2Response resp) {
+	public CompletableFuture<StreamWriter> process(Http2Response resp) {
 		sentResponseHeaders.set(true);
 		return responseHandler.process(resp);
 	}
@@ -42,7 +43,7 @@ public class Http2StreamImpl implements ResponseStream {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancelStream() {
+	public CompletableFuture<Void> cancel(CancelReason reason) {
 		RstStreamFrame frame = new RstStreamFrame(streamId, Http2ErrorCode.CANCEL);
 		return responseHandler.cancel(frame);
 	}

@@ -17,6 +17,7 @@ import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.StreamRef;
 
 public class ResponseStaticProcessor {
 	private static final Logger log = LoggerFactory.getLogger(ResponseStaticProcessor.class);
@@ -47,7 +48,7 @@ public class ResponseStaticProcessor {
 		this.handler = handler;
 		
 	}
-	public CompletableFuture<Void> renderStaticResponse(RenderStaticResponse renderStatic) {
+	public StreamRef renderStaticResponse(RenderStaticResponse renderStatic) {
 		boolean wasSet = Current.isContextSet();
 		if(!wasSet)
 			Current.setContext(ctx); //Allow html tags to use the contexts

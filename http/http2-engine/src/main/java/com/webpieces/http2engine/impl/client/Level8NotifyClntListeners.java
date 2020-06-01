@@ -10,7 +10,7 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
@@ -71,7 +71,7 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	public CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
-			ResponseHandler handler = str.getResponseListener();
+			ResponseStreamHandle handler = str.getResponseListener();
 			return handler.cancel(payload);
 		}
 		
@@ -83,23 +83,21 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	@Override
 	public CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
 		ClientStream str = (ClientStream) stream;
-		StreamWriter writer = str.getResponseWriter();
-		return writer.processPiece(payload)
-				.thenApply( s -> null);
+		CompletableFuture<StreamWriter> writer = str.getResponseWriter();
+		return writer.thenCompose(w -> w.processPiece(payload));
 	}
 
 	@Override
 	public CompletableFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload) {
 		ClientStream str = (ClientStream) stream;
-		StreamWriter writer = str.getResponseWriter();
-		return writer.processPiece(payload)
-				.thenApply(null);
+		CompletableFuture<StreamWriter> writer = str.getResponseWriter();
+		return writer.thenCompose(w -> w.processPiece(payload));
 	}
 
 	public CompletableFuture<Void> sendResponseToApp(Stream stream, Http2Response response) {
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
-			ResponseHandler listener = str.getResponseListener();
+			ResponseStreamHandle listener = str.getResponseListener();
 			return listener.process(response)
 					.thenApply( w -> {
 						str.setResponseWriter(w);
@@ -117,7 +115,7 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	}
 
 	public CompletableFuture<Void> sendPushToApp(ClientPushStream stream, Http2Push fullPromise) {
-		ResponseHandler listener = stream.getOriginalResponseListener();
+		ResponseStreamHandle listener = stream.getOriginalResponseListener();
 		PushStreamHandle pushHandle = listener.openPushStream();
 		stream.setPushStreamHandle(pushHandle);
 		return pushHandle.process(fullPromise)

@@ -42,6 +42,7 @@ import org.webpieces.util.futures.FutureHelper;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -95,7 +96,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public StreamRef process(Http2Response response) {
 		return handle.process(response);
 	}
 
@@ -182,7 +183,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return maybeCompressAndSend(request, null, tuple, resp.getPayload());
 	}
 
-	public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
+	public StreamRef sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
 		RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
 		Http2Response response = responseCreator.createRedirect(originalHttp2Request, httpResponse);
 

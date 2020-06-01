@@ -15,9 +15,8 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class DScopedRouter extends EScopedRouter {
 
@@ -42,7 +41,11 @@ public class DScopedRouter extends EScopedRouter {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+	public StreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+		
+		
+		
+		
 		return futureUtil.catchBlock(
 				() -> invokeRouteCatchNotFound(ctx, handler, subPath),
 				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t, false)
@@ -59,7 +62,7 @@ public class DScopedRouter extends EScopedRouter {
 			//if the socket was closed before we responded, do not log a failure
 			if(log.isTraceEnabled())
 				log.trace("async exception due to socket being closed", t);
-			return CompletableFuture.<StreamWriter>completedFuture(new NullStream());
+			return CompletableFuture.<StreamWriter>completedFuture(new NullStreamWriter());
 		}
 
 		String failedRoute = "<Unknown Route>";
@@ -75,10 +78,7 @@ public class DScopedRouter extends EScopedRouter {
 		//If it is a streaming, controller AND response has already been sent, we cannot render the web apps error controller
 		//page so in that case, fail, and cancel the stream
 		if(handler.hasSentResponseAlready()) {
-			RstStreamFrame frame = new RstStreamFrame();
-			frame.setKnownErrorCode(Http2ErrorCode.CANCEL);
-			handler.cancel(frame);
-			return CompletableFuture.completedFuture(new NullStream());
+			return CompletableFuture.completedFuture(new NullStreamWriter());
 		}
 		
 		return invokeWebAppErrorController(t, ctx, handler, failedRoute, forceEndOfStream);
@@ -88,7 +88,7 @@ public class DScopedRouter extends EScopedRouter {
 	 * NOTE: We have to catch any exception from the method processNotFound so we can't catch and call internalServerError in this
 	 * method without nesting even more!!! UGH, more nesting sucks
 	 */
-	private CompletableFuture<StreamWriter> invokeRouteCatchNotFound(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+	private StreamRef invokeRouteCatchNotFound(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
 		return futureUtil.catchBlock(
 				() -> super.invokeRoute(ctx, handler, subPath),
 				(t) -> {

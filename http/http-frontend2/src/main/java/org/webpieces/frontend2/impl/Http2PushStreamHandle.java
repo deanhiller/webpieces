@@ -23,7 +23,7 @@ public class Http2PushStreamHandle implements PushStreamHandle {
 	public CompletableFuture<PushPromiseListener> process(Http2Push headers) {
 		if(isResponseSent.get())
 			throw new IllegalStateException("You must call openPushStream AND send just the Http2Push "
-					+ "before sendResponse, but after "
+					+ "before process, but after "
 					+ "that can send both datastreams back at the "
 					+ "same time(see http2 spec for why).  it also helps memory pressure this way");
 		else if(isPushSent)

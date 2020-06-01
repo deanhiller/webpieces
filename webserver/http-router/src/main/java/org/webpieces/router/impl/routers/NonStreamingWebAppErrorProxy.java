@@ -7,6 +7,7 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class NonStreamingWebAppErrorProxy implements StreamWriter {

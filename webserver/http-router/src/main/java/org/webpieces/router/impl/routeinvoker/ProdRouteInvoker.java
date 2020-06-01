@@ -10,12 +10,14 @@ import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routers.DynamicInfo;
+import org.webpieces.router.impl.routers.NullStreamWriter;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
 import org.webpieces.router.impl.services.RouteInfoForInternalError;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.futures.FutureHelper;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class ProdRouteInvoker extends AbstractRouteInvoker {
@@ -31,12 +33,12 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, ProxyStreamHandle handle, RouteInfoForStatic data) {
-		return super.invokeStatic(ctx, handle, data).thenApply(s -> new NullWriter());
+	public StreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handle, RouteInfoForStatic data) {
+		return super.invokeStatic(ctx, handle, data);
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public StreamRef invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RouteInfoForInternalError routeData = (RouteInfoForInternalError) data;
 
 		ResponseProcessorAppError processor = new ResponseProcessorAppError(
@@ -45,7 +47,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public StreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
 				invokeInfo.getRequestCtx(), 
 				dynamicInfo.getLoadedController(), invokeInfo.getHandler());
@@ -53,7 +55,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public StreamRef invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RouteInfoForContent content = (RouteInfoForContent) data;
 		if(content.getBodyContentBinder() == null)
 			throw new IllegalArgumentException("bodyContentBinder is required for these routes yet it is null here.  bug");
@@ -62,13 +64,13 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public StreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		return super.invokeStreamingController(invokeInfo, dynamicInfo, data);
 		
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public StreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		return super.invokeNotFound(invokeInfo, loadedController, data);
 	}
 

@@ -30,6 +30,7 @@ import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public abstract class AbstractRouteInvoker implements RouteInvoker {
@@ -61,12 +62,12 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
+	public StreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
 		return staticInvoker.invokeStatic(ctx, handler, data);
 	}
 	
 	
-	public CompletableFuture<StreamWriter> invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public StreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
@@ -83,10 +84,10 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		else if(!RouterStreamHandle.class.equals(parameters[0].getType()))
 			throw new IllegalArgumentException("The single parameter must be RouterStreamHandle and was not for this method='"+controllerMethod+"'");
 		else if(!CompletableFuture.class.equals(controllerMethod.getReturnType()))
-			throw new IllegalArgumentException("The return value must be CompletableFuture<StreamWriter> and was not for this method='"+controllerMethod+"'");
+			throw new IllegalArgumentException("The return value must be StreamRef and was not for this method='"+controllerMethod+"'");
 
 
-		CompletableFuture<StreamWriter> response = futureUtil.catchBlockWrap(
+		StreamRef response = futureUtil.catchBlockWrap(
 				() -> invokeStream(controllerMethod, instance, requestCtx, handler),
 				(t) -> convert(loadedController, t)
 		);
@@ -98,16 +99,16 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public CompletableFuture<StreamWriter> invokeStream(Method m, Object instance, RequestContext requestCtx, RouterStreamHandle handler) {
+	public StreamRef invokeStream(Method m, Object instance, RequestContext requestCtx, RouterStreamHandle handler) {
 		try {
-			CompletableFuture<Object> future = (CompletableFuture) m.invoke(instance, handler);
+			StreamRef future = (StreamRef) m.invoke(instance, handler);
 			if(future == null) {
 				throw new IllegalStateException("You must return a non-null and did not from method='"+m+"'");
 			}
 			
 			return future.thenApply( resp -> {
 				if(!(resp instanceof StreamWriter)) {
-					throw new IllegalStateException("The return value must be CompletableFuture<StreamWriter> and was not for this method='"+m+"'");
+					throw new IllegalStateException("The return value must be StreamRef and was not for this method='"+m+"'");
 				}
 				return (StreamWriter) resp;
 			});
@@ -116,7 +117,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		}
 	}
 	
-	protected CompletableFuture<StreamWriter> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
+	protected StreamRef invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
 		Service<MethodMeta, Action> service = dynamicInfo.getService();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
 		invokeInfo.getHandler().initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
@@ -124,7 +125,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		return invokeAny(invokeInfo, loadedController, service, data, processor, forceEndOfStream);
 	}
 
-	private CompletableFuture<StreamWriter> invokeAny(
+	private StreamRef invokeAny(
 			InvokeInfo invokeInfo,
 			LoadedController loadedController,
 			Service<MethodMeta, Action> service,
@@ -197,7 +198,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public StreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());

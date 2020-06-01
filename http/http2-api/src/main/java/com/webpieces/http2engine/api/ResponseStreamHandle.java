@@ -1,17 +1,14 @@
 package com.webpieces.http2engine.api;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2parser.api.dto.CancelReason;
 
-public interface ResponseHandler {
+public interface ResponseStreamHandle {
 
 	/**
 	 * For Http2ClientEngine, this receives the Http2 Response and for Http2ServerEngine, you call this method
 	 * to send a response
 	 */
-	CompletableFuture<StreamWriter> process(Http2Response response);
+	StreamRef process(Http2Response response);
 
 	/**
 	 * This does nothing in http1.1. 
@@ -21,7 +18,4 @@ public interface ResponseHandler {
 	 */
 	PushStreamHandle openPushStream();
 	
-	CompletableFuture<Void> cancel(CancelReason payload);
-
-
 }

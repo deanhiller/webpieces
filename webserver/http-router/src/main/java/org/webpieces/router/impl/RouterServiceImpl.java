@@ -41,6 +41,7 @@ import com.webpieces.hpack.api.subparsers.AcceptType;
 import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
 import com.webpieces.hpack.api.subparsers.ParsedContentType;
 import com.webpieces.hpack.impl.subparsers.HeaderPriorityParserImpl;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -129,7 +130,7 @@ public class RouterServiceImpl implements RouterService {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> incomingRequest(Http2Request req, RouterResponseHandler handler) {
+	public StreamRef incomingRequest(Http2Request req, RouterResponseHandler handler) {
 		//******************************************************************************************
 		// DO NOT ADD CODE HERE OR ABOVE THIS METHOD in RouterService.  This is our CATCH-ALL point so
 		// ANY code above that is not protected from our catch and respond to clients
@@ -164,7 +165,7 @@ public class RouterServiceImpl implements RouterService {
 		return s1+"-"+s2; //human readable instance id
 	}
 
-	public CompletableFuture<StreamWriter> incomingRequestImpl(Http2Request req, ProxyStreamHandle handler) {
+	public StreamRef incomingRequestImpl(Http2Request req, ProxyStreamHandle handler) {
 		if(!started)
 			throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 

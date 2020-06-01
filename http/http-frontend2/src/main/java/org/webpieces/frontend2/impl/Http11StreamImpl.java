@@ -28,6 +28,7 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.Http2Method;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -80,7 +81,7 @@ public class Http11StreamImpl implements ResponseStream {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> sendResponse(Http2Response headers) {
+	public CompletableFuture<StreamWriter> process(Http2Response headers) {
 		closeCheck(headers);
 		HttpResponse response = Http2ToHttp11.translateResponse(headers);
 		
@@ -140,6 +141,7 @@ public class Http11StreamImpl implements ResponseStream {
 			future.completeExceptionally(new IllegalStateException("You already sent a response with endStream==true"));
 			return future;
 		}
+
 	}
 	
 	private class ContentLengthResponseWriter implements StreamWriter {
@@ -269,7 +271,7 @@ public class Http11StreamImpl implements ResponseStream {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancelStream() {
+	public CompletableFuture<Void> cancel(CancelReason reason) {
 		return socket.getChannel().close();
 	}
 

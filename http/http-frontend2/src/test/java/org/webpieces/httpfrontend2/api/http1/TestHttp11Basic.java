@@ -58,7 +58,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp = Requests.createResponse();
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 		Http2Response headers = Http11ToHttp2.responseToHeaders(resp);
-		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers);
+		CompletableFuture<StreamWriter> future = in1.stream.process(headers);
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, respToClient);
 		
@@ -132,7 +132,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		
 		HttpResponse resp = Requests.createNobodyResponse();
 		Http2Response http2Resp = Http11ToHttp2.responseToHeaders(resp);
-		CompletableFuture<StreamWriter> fut = in1.stream.sendResponse(http2Resp);
+		CompletableFuture<StreamWriter> fut = in1.stream.process(http2Resp);
 		fut.get(2, TimeUnit.SECONDS);
 		
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
@@ -156,7 +156,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
 
 		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
-		in1.stream.sendResponse(headers1);
+		in1.stream.process(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
 		future.get(2, TimeUnit.SECONDS);
@@ -165,7 +165,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp2 = Requests.createResponse(2);
 		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
 		Http2Response headers2 = Http11ToHttp2.responseToHeaders(resp2);
-		in2.stream.sendResponse(headers2);
+		in2.stream.process(headers2);
 		
 		HttpPayload payload2 = mockChannel.getFrameAndClear();		
 		Assert.assertEquals(resp2, payload2);
@@ -200,7 +200,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
 		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
-		in1.stream.sendResponse(headers1);
+		in1.stream.process(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
 
@@ -210,7 +210,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp2 = Requests.createResponse(2);
 		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
 		Http2Response headers2 = Http11ToHttp2.responseToHeaders(resp2);
-		in2.stream.sendResponse(headers2);
+		in2.stream.process(headers2);
 		
 		HttpPayload payload2 = mockChannel.getFrameAndClear();		
 		Assert.assertEquals(resp2, payload2);
@@ -248,7 +248,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
 		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
-		in1.stream.sendResponse(headers1);
+		in1.stream.process(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
 
@@ -260,7 +260,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp2 = Requests.createResponse(2);
 		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
 		Http2Response headers2 = Http11ToHttp2.responseToHeaders(resp2);
-		in2.stream.sendResponse(headers2);
+		in2.stream.process(headers2);
 		
 		HttpPayload payload2 = mockChannel.getFrameAndClear();		
 		Assert.assertEquals(resp2, payload2);
@@ -281,7 +281,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "10"));
 		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
-		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers1);
+		CompletableFuture<StreamWriter> future = in1.stream.process(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
 		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
@@ -304,7 +304,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp2 = Requests.createResponse(2);
 		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
 		Http2Response headers2 = Http11ToHttp2.responseToHeaders(resp2);
-		in2.stream.sendResponse(headers2);
+		in2.stream.process(headers2);
 		
 		HttpPayload payload2 = mockChannel.getFrameAndClear();		
 		Assert.assertEquals(resp2, payload2);

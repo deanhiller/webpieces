@@ -12,10 +12,12 @@ import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseHandler;
-import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class Http2SocketImpl implements Http2Socket {
 
@@ -31,22 +33,51 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public StreamHandle openStream() {
+	public RequestStreamHandle openStream() {
 		return new StreamImpl();
 	}
 	
-	private class StreamImpl implements StreamHandle {
+	private class StreamImpl implements RequestStreamHandle {
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Request request, ResponseHandler responseListener) {
+		public StreamRef process(Http2Request request, ResponseStreamHandle responseListener) {
 			HttpRequest req = Http2ToHttp11.translateRequest(request);
-			return socket11.send(req, new ResponseListener(socket11+"", responseListener))
+			String value = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
+			boolean closeConnection = true;
+			if("keep-alive".equals(value))
+				closeConnection = false;
+			
+			CompletableFuture<StreamWriter> send = socket11.send(req, new ResponseListener(socket11+"", responseListener))
 					.thenApply(s -> new StreamWriterImpl(s, req));
+			return new MyStreamRef(send, closeConnection);
+					
+		}
+
+	}
+	
+	public class MyStreamRef implements StreamRef {
+
+		private CompletableFuture<StreamWriter> writer;
+		private boolean closeConnection;
+
+		public MyStreamRef(CompletableFuture<StreamWriter> writer, boolean closeConnection) {
+			this.writer = writer;
+			this.closeConnection = closeConnection;
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason payload) {
-			throw new UnsupportedOperationException("In http1_1, you can only just close the socket.  call socket.close instead to cancel all requests");
+		public CompletableFuture<StreamWriter> getWriter() {
+			return writer;
 		}
+
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason reason) {
+			if(!closeConnection) //do nothing as keep-alive was set so we can't really cancel in http1.1 for this case
+				return CompletableFuture.completedFuture(null);
+			
+			//keep alive not set so close the socket for http1.1
+			return socket11.close();
+		}
+		
 	}
 	
 	@Override

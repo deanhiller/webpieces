@@ -3,35 +3,30 @@ package org.webpieces.httpclient.api.mocks;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.dto.CancelReason;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
 
-public class MockResponseListener extends MockSuperclass implements ResponseHandler {
+public class MockResponseListener extends MockSuperclass implements ResponseStreamHandle {
 
 	private enum Method implements MethodEnum {
 		PROCESS
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
-		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.PROCESS, response);
+	public StreamRef process(Http2Response response) {
+		return (StreamRef) super.calledMethod(Method.PROCESS, response);
 	}
 
 	@Override
 	public PushStreamHandle openPushStream() {
-		return null;
-	}
-
-	@Override
-	public CompletableFuture<Void> cancel(CancelReason payload) {
 		return null;
 	}
 

@@ -5,12 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
-public class SvrSideResponseHandler implements ResponseHandler {
+public class SvrSideResponseHandler implements ResponseStreamHandle {
 
 	private Level1ServerEngine level1ServerEngine;
 	private ServerStream stream;

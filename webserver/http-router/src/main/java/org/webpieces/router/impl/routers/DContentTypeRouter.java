@@ -9,6 +9,8 @@ import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.futures.FutureHelper;
 
+import com.webpieces.http2engine.api.MyStreamRef;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class DContentTypeRouter {
@@ -33,7 +35,7 @@ public class DContentTypeRouter {
 		return text;
 	}
 
-	public CompletableFuture<StreamWriter> invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String relativePath) {
+	public StreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String relativePath) {
 		for(AbstractRouter router : routers) {
 			MatchResult2 result = router.matches(ctx.getRequest(), relativePath);
 			if(result.isMatches()) {
@@ -43,7 +45,7 @@ public class DContentTypeRouter {
 			}
 		}
 
-		return futureUtil.<StreamWriter>failedFuture(new NotFoundException("route not found"));
+		return new MyStreamRef(futureUtil.<StreamWriter>failedFuture(new NotFoundException("route not found")));
 	}
 
 }

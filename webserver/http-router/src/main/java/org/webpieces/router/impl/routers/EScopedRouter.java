@@ -20,6 +20,8 @@ import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.futures.FutureHelper;
 
+import com.webpieces.http2engine.api.MyStreamRef;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class EScopedRouter {
@@ -37,7 +39,7 @@ public class EScopedRouter {
 		this.routers = routers;
 	}
 	
-	public CompletableFuture<StreamWriter> invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+	public StreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
 		if("".equals(subPath))
 			return findAndInvokeRoute(ctx, handler, subPath);
 		else if(!subPath.startsWith("/"))
@@ -48,7 +50,7 @@ public class EScopedRouter {
 		if(index == 1) {
 			CompletableFuture<StreamWriter> future = new CompletableFuture<>();
 			future.completeExceptionally(new NotFoundException("Bad path="+ctx.getRequest().relativePath+" request="+ctx.getRequest()));
-			return future;
+			return new MyStreamRef(future);
 		} else if(index > 1) {
 			prefix = subPath.substring(0, index);
 		}
@@ -65,7 +67,7 @@ public class EScopedRouter {
 		return findAndInvokeRoute(ctx, handler, subPath);
 	}
 	
-	private CompletableFuture<StreamWriter> findAndInvokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+	private StreamRef findAndInvokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
 		for(AbstractRouter router : routers) {
 			MatchResult2 result = router.matches(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
@@ -75,10 +77,11 @@ public class EScopedRouter {
 			}
 		}
 
-		return futureUtil.<StreamWriter>failedFuture(new NotFoundException("route not found"));
+		CompletableFuture<StreamWriter> failedFuture = futureUtil.<StreamWriter>failedFuture(new NotFoundException("route not found"));
+		return new MyStreamRef(failedFuture);
 	}
 	
-	private CompletableFuture<StreamWriter> invokeRouter(AbstractRouter router, RequestContext ctx,
+	private StreamRef invokeRouter(AbstractRouter router, RequestContext ctx,
 												 ProxyStreamHandle handler) {
 		//We re-use this method to avoid chaining when it's a NotFoundException
 		return futureUtil.catchBlockWrap(

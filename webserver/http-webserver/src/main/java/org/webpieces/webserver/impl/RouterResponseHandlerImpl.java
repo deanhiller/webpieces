@@ -3,14 +3,15 @@ package org.webpieces.webserver.impl;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.dto.CancelReason;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.impl.ProtocolType;
 import org.webpieces.router.api.RouterResponseHandler;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class RouterResponseHandlerImpl implements RouterResponseHandler {
 	
@@ -21,18 +22,13 @@ public class RouterResponseHandlerImpl implements RouterResponseHandler {
     }
 
     @Override
-    public CompletableFuture<StreamWriter> process(Http2Response response) {
-        return stream.sendResponse(response);
+    public StreamRef process(Http2Response response) {
+        return stream.process(response);
     }
 
     @Override
     public PushStreamHandle openPushStream() {
         return stream.openPushStream();
-    }
-
-    @Override
-    public CompletableFuture<Void> cancel(CancelReason payload) {
-        return stream.cancelStream();
     }
 
     @Override

@@ -31,7 +31,7 @@ public class EchoListener implements StreamListener {
 			
 			//automatically transfers backpressure back to the writer so if the reader of responses(the client in this case) 
 			//slows down, the writer(the client as well in this case) also is forced to slow down sending requests
-			return stream.sendResponse(resp);
+			return stream.process(resp);
 		}
 
 		@Override

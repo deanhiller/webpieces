@@ -79,7 +79,7 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 		
 		HttpResponse resp1 = Requests.createResponse(1);
 		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
-		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers1);
+		CompletableFuture<StreamWriter> future = in1.stream.process(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		
 		//server should add content-length 0 for firefox

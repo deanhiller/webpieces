@@ -17,8 +17,9 @@ import org.webpieces.throughput.AsyncConfig;
 import org.webpieces.throughput.RequestCreator;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseHandler;
-import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2engine.api.RequestStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class ClientAsync {
@@ -35,7 +36,7 @@ public class ClientAsync {
 	}
 
 	public void runAsyncClient(InetSocketAddress svrAddress) {
-		ResponseHandler responseListener = new ResponseCounterListener();
+		ResponseStreamHandle responseListener = new ResponseCounterListener();
     	log.error("ASYNC "+protocol+" CLIENT: logging will log every 10 seconds as ERROR so it shows up in red");
     	log.info("info messages automatically show up in black");
     	
@@ -58,7 +59,7 @@ public class ClientAsync {
 		}
 	}
 	
-	private Void startWriteThread(Http2Socket socket, int i, ResponseHandler handler) {
+	private Void startWriteThread(Http2Socket socket, int i, ResponseStreamHandle handler) {
 
 		Thread t = new Thread(new Writer(socket, handler));
 		t.setName("clientWriter"+i);
@@ -70,9 +71,9 @@ public class ClientAsync {
 	private class Writer implements Runnable {
 
 		private Http2Socket socket;
-		private ResponseHandler handler;
+		private ResponseStreamHandle handler;
 
-		public Writer(Http2Socket socket, ResponseHandler handler) {
+		public Writer(Http2Socket socket, ResponseStreamHandle handler) {
 			this.socket = socket;
 			this.handler = handler;
 		}
@@ -90,8 +91,9 @@ public class ClientAsync {
 			while(true) {
 				Http2Request request = RequestCreator.createHttp2Request();
 				
-				StreamHandle stream = socket.openStream();
-				CompletableFuture<StreamWriter> future = stream.process(request, handler);
+				RequestStreamHandle stream = socket.openStream();
+				StreamRef process = stream.process(request, handler);
+				CompletableFuture<StreamWriter> future = process.getWriter();
 				
 				//the future puts the perfect amount of backpressure or performance will tank
 				//(ie. comment out this line and watch performance tank)

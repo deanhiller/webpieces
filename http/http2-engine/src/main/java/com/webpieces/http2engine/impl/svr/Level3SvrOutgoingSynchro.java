@@ -51,6 +51,19 @@ public class Level3SvrOutgoingSynchro extends Level3OutgoingSynchro {
 			data.setStreamId(stream.getStreamId());
 			return streams.sendDataToSocket(stream, data);
 		}
+		
+		public CompletableFuture<Void> cancel(CancelReason frame) {
+			if(!(frame instanceof RstStreamFrame))
+				throw new IllegalArgumentException("App can only pass in RstStreamFrame object here to be sent to clients.  The api is for consistency and shared with client");
+			
+			int streamId = frame.getStreamId();
+			if(streamId <= 0)
+				throw new IllegalArgumentException("frames for requests must have a streamId > 0");
+			else if(streamId % 2 == 0)
+				throw new IllegalArgumentException("Server cannot send response frames with even stream ids to client per http/2 spec");
+			
+			return sendRstToSocket(stream, (RstStreamFrame)frame);
+		}
 	}
 	
 	public CompletableFuture<Void> sendRstToSocket(Stream stream, RstStreamFrame frame) {

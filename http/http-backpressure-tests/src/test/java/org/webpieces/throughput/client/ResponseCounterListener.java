@@ -6,11 +6,11 @@ import org.webpieces.util.time.RateRecorder;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
-public class ResponseCounterListener implements ResponseHandler {
+public class ResponseCounterListener implements ResponseStreamHandle {
 
 	private RateRecorder recorder = new RateRecorder(10);
 

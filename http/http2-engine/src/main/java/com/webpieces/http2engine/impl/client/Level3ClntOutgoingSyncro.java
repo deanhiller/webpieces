@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.impl.shared.Level3OutgoingSynchro;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
@@ -54,7 +54,7 @@ public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements S
 				.thenCompose( v -> super.sendSettingsToSocket());
 	}
 	
-	public CompletableFuture<Stream> sendRequestToSocket(Http2Request headers, ResponseHandler responseListener) {
+	public CompletableFuture<Stream> sendRequestToSocket(Http2Request headers, ResponseStreamHandle responseListener) {
 		//This gets tricky, BUT must use the maxConcurrent permit queue first, THEN the serializer permit queue
 		return maxConcurrentQueue.runRequest( () -> {
 			int val = acquiredCnt.incrementAndGet();

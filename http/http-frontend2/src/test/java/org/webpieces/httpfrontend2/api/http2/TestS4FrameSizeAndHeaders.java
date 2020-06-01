@@ -75,7 +75,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 
 		//send response with request not complete but failed as well anyways
 		Http2Response response = Http2Requests.createResponse(request.getStreamId());
-		CompletableFuture<StreamWriter> future = stream.sendResponse(response);
+		CompletableFuture<StreamWriter> future = stream.process(response);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));

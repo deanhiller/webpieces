@@ -40,6 +40,7 @@ import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class DevRouteInvoker extends ProdRouteInvoker {
@@ -103,7 +104,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public StreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		RouteInfoForHtml htmlRoute = (RouteInfoForHtml) data;
 		//If we haven't loaded it already, load it now		
 		DynamicInfo newInfo = info;
@@ -117,7 +118,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeContentController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public StreamRef invokeContentController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		DynamicInfo newInfo = info;
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
@@ -132,7 +133,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public StreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		DynamicInfo newInfo = info;
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {

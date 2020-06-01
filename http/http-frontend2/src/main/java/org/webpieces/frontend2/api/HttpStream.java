@@ -3,24 +3,16 @@ package org.webpieces.frontend2.api;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2engine.api.error.ShutdownStream;
 
+//nearly one to one with RequestStreamHandle.java on purpose.  rename to HttpStreamHandle or FrontendStreamHandle?
 public interface HttpStream {
 
-	CompletableFuture<StreamWriter> incomingRequest(Http2Request request, ResponseStream stream);
 	
-	/**
-	 * Because the app may return a completed future from process, we must have a cancel that the
-	 * platform invokes such that an app can clean up any state with that request stream.  On the other hand,
-	 * if the app returned an unresolved future, we do not have the StreamWriter to call cancel on so cancel canNOT
-	 * be put on the StreamWriter(though we could cancel the future if that was the case).  We could make the api
-	 * confusing by cancelling the future and if it resulted in being cancelled properly, we could call this method
-	 * but then the app developer would have to program up handling two different cancels(annoying).  Instead, this
-	 * is the ONLY cancel that will be called
-	 * 
-	 * @param frame
-	 * @return 
-	 */
-	CompletableFuture<Void> incomingCancel(CancelReason payload); 
+	StreamRef incomingRequest(Http2Request request, ResponseStream stream);
+
+	//void incomingCancel(ShutdownStream shutdown);
+	
 }

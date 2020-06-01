@@ -31,7 +31,7 @@ public class TestSBasicRequestResponse extends AbstractHttp2Test {
 		
 		Http2Response resp = Http2Requests.createResponse(request1.getStreamId(), true);
 		
-		incoming.stream.sendResponse(resp);
+		incoming.stream.process(resp);
 		
 		Http2Msg response = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, response);
@@ -58,7 +58,7 @@ public class TestSBasicRequestResponse extends AbstractHttp2Test {
 		Assert.assertEquals(2, mockChannel.getFramesAndClear().size());
 
 		Http2Response resp = Http2Requests.createResponse(request1.getStreamId(), false);
-		CompletableFuture<StreamWriter> future = incoming1.stream.sendResponse(resp);
+		CompletableFuture<StreamWriter> future = incoming1.stream.process(resp);
 		
 		Http2Msg response = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, response);
@@ -97,7 +97,7 @@ public class TestSBasicRequestResponse extends AbstractHttp2Test {
 		Assert.assertEquals(trailing, incoming);		
 		
 		Http2Response resp = Http2Requests.createResponse(request1.getStreamId(), false);
-		CompletableFuture<StreamWriter> future = incoming1.stream.sendResponse(resp);
+		CompletableFuture<StreamWriter> future = incoming1.stream.process(resp);
 		
 		Http2Msg response = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, response);
@@ -137,7 +137,7 @@ public class TestSBasicRequestResponse extends AbstractHttp2Test {
 		Assert.assertEquals(preEmptive, preEmptRecv);
 		
 		Http2Response response = Http2Requests.createResponse(request1.getStreamId());
-		incoming.stream.sendResponse(response);
+		incoming.stream.process(response);
 		
 		Http2Headers responseRecv = (Http2Headers) mockChannel.getFrameAndClear();
 		Assert.assertEquals(response, responseRecv);

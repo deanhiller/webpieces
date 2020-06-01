@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.webpieces.http2engine.api.StreamRef;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +21,7 @@ import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.RequestStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -49,18 +50,22 @@ public class TestWriteReads {
 	@Test
 	public void testBasicReadWrite() throws InterruptedException, ExecutionException, TimeoutException {
 		MockResponseListener listener = new MockResponseListener();
-		StreamHandle handle = socket.openStream();
+		RequestStreamHandle handle = socket.openStream();
 
 		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
 		Http2Request request = Requests.createRequest();
-		CompletableFuture<StreamWriter> writer = handle.process(request, listener);
+		StreamRef streamRef = handle.process(request, listener);
+		CompletableFuture<StreamWriter> writer = streamRef.getWriter();
+
 		Assert.assertTrue(writer.isDone());
 		Assert.assertEquals(request, mockChannel.getLastWriteParam());
 
 		MockResponseListener listener2 = new MockResponseListener();
 		request.getHeaderLookupStruct().getHeader("serverid").setValue("2");
 		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
-		CompletableFuture<StreamWriter> writer2 = handle.process(request, listener2);
+		StreamRef streamRef1 = handle.process(request, listener2);
+		CompletableFuture<StreamWriter> writer2 = streamRef1.getWriter();
+
 		Assert.assertTrue(writer2.isDone());
 		Assert.assertEquals(request, mockChannel.getLastWriteParam());
 

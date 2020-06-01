@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.RequestStreamHandle;
 
 public interface Http2ClientEngine {
 
@@ -14,7 +14,7 @@ public interface Http2ClientEngine {
 	 * Future completes one the data is SENT! not when there is a response which allows to backpressure the socket and
 	 * deregister from reading if clients do not keep up
 	 */
-	StreamHandle openStream();
+	RequestStreamHandle openStream();
 
 	CompletableFuture<Void> sendPing();
 	

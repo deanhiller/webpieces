@@ -10,9 +10,11 @@ import org.webpieces.http2client.api.Http2Socket;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.MyStreamRef;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
@@ -49,11 +51,11 @@ public class IntegColoradoEdu {
 		return null;
 	}
 	
-	private static class ChunkedResponseListener implements ResponseHandler, PushPromiseListener, PushStreamHandle {
+	private static class ChunkedResponseListener implements ResponseStreamHandle, PushPromiseListener, PushStreamHandle {
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Response response) {
+		public StreamRef process(Http2Response response) {
 			log.info("incoming part of response="+response);
-			return CompletableFuture.completedFuture(null);
+			return new MyStreamRef(null);
 		}
 
 		@Override
@@ -66,12 +68,7 @@ public class IntegColoradoEdu {
 			log.info("incoming push promise. response="+response);
 			return CompletableFuture.completedFuture(null);
 		}
-
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason frame) {
-			return CompletableFuture.completedFuture(null);
-		}
-
+		
 		@Override
 		public CompletableFuture<Void> cancelPush(CancelReason payload) {
 			return CompletableFuture.completedFuture(null);

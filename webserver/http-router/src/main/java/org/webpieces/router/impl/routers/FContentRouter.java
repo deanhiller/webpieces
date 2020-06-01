@@ -12,6 +12,7 @@ import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class FContentRouter extends AbstractDynamicRouterImpl implements ReversableRouter {
@@ -35,7 +36,7 @@ public class FContentRouter extends AbstractDynamicRouterImpl implements Reversa
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, ProxyStreamHandle handler) {
+	public StreamRef invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteData data = new RouteInfoForContent(bodyContentBinder);
 		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, true);
 		return routeInvoker.invokeContentController(invokeInfo, dynamicInfo, data);	}

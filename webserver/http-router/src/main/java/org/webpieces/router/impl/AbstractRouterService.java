@@ -27,6 +27,7 @@ import org.webpieces.util.cmdline2.Arguments;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public abstract class AbstractRouterService {
@@ -49,7 +50,7 @@ public abstract class AbstractRouterService {
 		this.translator = translator;
 	}
 
-	public CompletableFuture<StreamWriter> incomingRequest(RouterRequest routerRequest, ProxyStreamHandle handler) {
+	public StreamRef incomingRequest(RouterRequest routerRequest, ProxyStreamHandle handler) {
 		try {
 			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(translator));
 			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(translator));
@@ -68,7 +69,7 @@ public abstract class AbstractRouterService {
 		}
 	}
 	
-	protected abstract CompletableFuture<StreamWriter> incomingRequestImpl(RequestContext req, ProxyStreamHandle handler);
+	protected abstract StreamRef incomingRequestImpl(RequestContext req, ProxyStreamHandle handler);
 	
 	public String convertToUrl(String routeId, Map<String, Object> args, boolean isValidating) {
 		return routeLoader.convertToUrl(routeId, args, isValidating);

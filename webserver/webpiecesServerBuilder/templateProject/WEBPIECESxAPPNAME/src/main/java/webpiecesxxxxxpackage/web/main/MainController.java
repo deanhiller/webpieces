@@ -1,7 +1,6 @@
 package webpiecesxxxxxpackage.web.main;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -9,16 +8,9 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
-import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Render;
-
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 import webpiecesxxxxxpackage.base.GlobalAppContext;
 import webpiecesxxxxxpackage.mgmt.SomeBean;
@@ -82,43 +74,6 @@ public class MainController {
 		Current.flash().clear();
 		Current.validation().clear();
 		return Actions.renderThis();
-	}
-
-	//Method signature cannot have RequestContext since in microservices, we implement an api as the server
-	//AND a client implements the same api AND client does not have a RequestContext!!
-	public CompletableFuture<StreamWriter> myStream(RouterStreamHandle handle) {
-		RequestContext requestCtx = Current.getContext(); 
-		
-		Http2Response response = handle.createBaseResponse(requestCtx.getRequest().originalRequest, "text/plain", 200, "Ok");
-		response.setEndOfStream(false);
-		
-		return handle.process(response).thenApply(responseWriter -> new RequestStreamEchoWriter(requestCtx, responseWriter));
-	}
-
-	private static class RequestStreamEchoWriter implements StreamWriter {
-
-		private AtomicInteger total = new AtomicInteger();
-		private StreamWriter handle;
-
-		public RequestStreamEchoWriter(RequestContext requestCtx, StreamWriter responseWriter) {
-			this.handle = responseWriter;
-		}
-
-		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
-			DataFrame f = (DataFrame) data;
-			int numReceived = total.addAndGet(f.getData().getReadableSize());
-			log.info("Num bytes received so far="+numReceived);
-			
-			if(data.isEndOfStream()) {
-				log.info("Upload complete");
-				//usually you may do something different here at end of stream
-				return handle.processPiece(data);
-			}
-
-			//We just echo data back to whatever the client sent as the client sends it...
-			return handle.processPiece(data);
-		}
 	}
 
 }

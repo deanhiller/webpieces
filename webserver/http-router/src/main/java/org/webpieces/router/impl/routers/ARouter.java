@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 @Singleton
@@ -20,7 +21,7 @@ public class ARouter {
 		
 	}
 	
-	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, ProxyStreamHandle handler) {
+	public StreamRef invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		return domainRouter.invokeRoute(ctx, handler);
 	}
 

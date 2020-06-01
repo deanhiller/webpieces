@@ -29,7 +29,7 @@ public class ProxyHttpStream implements HttpStream {
 			continueResponse.setEndOfStream(false);
 			continueResponse.addHeader(new Http2Header(Http2HeaderName.STATUS, "100"));
 			
-			future = stream.sendResponse(continueResponse);
+			future = stream.process(continueResponse);
 		}
 		
 		return future.thenCompose(s -> openStream.incomingRequest(request, stream));

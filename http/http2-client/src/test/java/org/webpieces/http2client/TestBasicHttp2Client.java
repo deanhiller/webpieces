@@ -3,6 +3,7 @@ package org.webpieces.http2client;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import com.webpieces.http2engine.api.StreamRef;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.http2client.api.dto.FullRequest;
@@ -27,9 +28,11 @@ public class TestBasicHttp2Client extends AbstractTest {
 		MockResponseListener respListener1 = new MockResponseListener();
 		respListener1.setIncomingRespDefault(CompletableFuture.completedFuture(writer1));
 		MockResponseListener respListener2 = new MockResponseListener();
-		CompletableFuture<StreamWriter> future = httpSocket.openStream().process(request1, respListener1);
-		CompletableFuture<StreamWriter> future2 = httpSocket.openStream().process(request2, respListener2);
-		
+		StreamRef streamRef1 = httpSocket.openStream().process(request1, respListener1);
+		CompletableFuture<StreamWriter> future =streamRef1.getWriter();
+		StreamRef streamRef2 = httpSocket.openStream().process(request2, respListener2);
+		CompletableFuture<StreamWriter> future2 = streamRef2.getWriter();
+
 		//max concurrent only 1 so only get 1
 		Http2Request req = (Http2Request) mockChannel.getFrameAndClear();
 		Assert.assertEquals(1, req.getStreamId());

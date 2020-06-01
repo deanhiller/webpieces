@@ -1,19 +1,34 @@
 package webpiecesxxxxxpackage.json;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.plugins.json.Jackson;
+import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.NotFoundException;
+
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 
 @Singleton
-public class JsonController {
+public class JsonController implements ClientApi {
 	
+	private static final Logger log = LoggerFactory.getLogger(JsonController.class);
 
 	private Counter counter;
 
@@ -41,7 +56,8 @@ public class JsonController {
 		return resp;
 	}
 	
-	public SearchResponse postJson(int id, @Jackson SearchRequest request) {
+	@Override
+	public SearchResponse postJson(@Jackson SearchRequest request) {
 		SearchResponse resp = new SearchResponse();
 		resp.setSearchTime(99);
 		resp.getMatches().add("match1");
@@ -68,5 +84,63 @@ public class JsonController {
 	
 	public SearchResponse throwNotFound(int id, @Jackson SearchRequest request) {
 		throw new NotFoundException("to test it out");
+	}
+	
+	//Method signature cannot have RequestContext since in microservices, we implement an api as the server
+	//AND a client implements the same api AND client does not have a RequestContext!!
+	@Override
+	public StreamRef myStream(ResponseStreamHandle handle2) {
+		RouterStreamHandle handle  = (RouterStreamHandle) handle2;
+		RequestContext requestCtx = Current.getContext(); 
+		
+		Http2Response response = handle.createBaseResponse(requestCtx.getRequest().originalRequest, "text/plain", 200, "Ok");
+		response.setEndOfStream(false);
+		
+		StreamRef responseStream = handle.process(response);
+		return new RequestStreamEchoWriter(requestCtx, responseStream);
+	}
+
+	private static class RequestStreamEchoWriter implements StreamWriter, StreamRef {
+
+		private AtomicInteger total = new AtomicInteger();
+		private StreamRef responseStream;
+		private CompletableFuture<StreamWriter> responseWriter;
+
+		public RequestStreamEchoWriter(RequestContext requestCtx, StreamRef responseStream) {
+			this.responseStream = responseStream;
+			responseWriter = responseStream.getWriter();
+		}
+
+		@Override
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
+			DataFrame f = (DataFrame) data;
+			int numReceived = total.addAndGet(f.getData().getReadableSize());
+			log.info("Num bytes received so far="+numReceived);
+			
+			if(data.isEndOfStream()) {
+				log.info("Upload complete");
+				return responseWriter.thenCompose(w -> w.processPiece(data));
+			}
+
+			//We just echo data back to whatever the client sent as the client sends it...
+			return responseWriter.thenCompose(w -> w.processPiece(data));
+		}
+
+		@Override
+		public CompletableFuture<StreamWriter> getWriter() {
+			//let's make it wait for our response to be written by 
+			//chaining with responseWriter future here
+			return responseWriter.thenApply(s -> this);
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason reason) {
+			//here if using http client, we may forward to next stream like so
+			//responseStream.cancel(reason);
+			//but since the responseStream and request is the same, we can just stop sending instead
+			//which happens automatically since they stopped sending(ie. nothing to do here
+			return CompletableFuture.completedFuture(null);
+		}
+
 	}
 }

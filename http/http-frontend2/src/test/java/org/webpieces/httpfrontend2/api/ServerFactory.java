@@ -78,10 +78,17 @@ class ServerFactory {
 			
 		}
 
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason payload) {
+			return CompletableFuture.completedFuture(null);
+		}
+
     }
     
     private static class StreamHandleImpl implements HttpStream {
 
+    	private CompletableFuture<StreamWriter> streamWriter = new CompletableFuture<StreamWriter>();
+    	
 		@Override
 		public CompletableFuture<StreamWriter> incomingRequest(Http2Request headers, ResponseStream stream) {
 			log.info(stream+"request="+headers);
@@ -91,35 +98,43 @@ class ServerFactory {
 					log.error("they sent bad headers and we missed it in the engine?");
 				response.setEndOfStream(true);
 				log.info(stream+"HEAD request creating response from request.  endStream="+response.isEndOfStream());
-				return stream.sendResponse(response).thenApply(s -> new NullStreamWriter(stream));
+				return stream.process(response).thenApply(s -> new NullStreamWriter(stream, s));
 			} else if(headers.isEndOfStream()) {
 				log.info(stream+"EOS creating response from request.  endStream="+response.isEndOfStream());
-				return stream.sendResponse(response).thenApply(s -> new NullStreamWriter(stream));
+				return stream.process(response).thenApply(s -> new NullStreamWriter(stream, s));
 			}			
 			
 			log.info(stream+"NOT EOS delaying response.");			
 
-			return CompletableFuture.completedFuture(new CachedResponseWriter(stream, response));
+			streamWriter.complete(new CachedResponseWriter(stream, response));
+			return streamWriter;
 		}
 
 		@Override
 		public CompletableFuture<Void> incomingCancel(CancelReason reset) {
-			return CompletableFuture.completedFuture(null);
+			return streamWriter.thenCompose(w -> w.cancel(reset));
 		}
     }
 
     private static class NullStreamWriter implements StreamWriter {
 
 		private ResponseStream stream;
+		private StreamWriter writer;
 
-		public NullStreamWriter(ResponseStream stream) {
+		public NullStreamWriter(ResponseStream stream, StreamWriter writer) {
 			this.stream = stream;
+			this.writer = writer;
 		}
 
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			log.error(stream+"receiving data="+data);
 			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason payload) {
+			return writer.cancel(payload);
 		}
     }
 
@@ -147,6 +162,7 @@ class ServerFactory {
 		private ResponseStream stream;
 		private Http2Response response;
 		private List<StreamMsg> datas = new ArrayList<>();
+		private CompletableFuture<StreamWriter> futureWriter = new CompletableFuture<StreamWriter>();
 
 		public CachedResponseWriter(ResponseStream stream, Http2Response response) {
 			this.stream = stream;
@@ -161,7 +177,9 @@ class ServerFactory {
 				return CompletableFuture.completedFuture(null);
 			}
 			
-			CompletableFuture<StreamWriter> future = stream.sendResponse(response);
+			CompletableFuture<StreamWriter> future = stream.process(response);
+			future.thenApply(w -> futureWriter.complete(w));
+			
 			return future.thenCompose(w -> sendAllDatas(w, datas));
 		}
 		
@@ -172,5 +190,10 @@ class ServerFactory {
     		}
     		return fut;
     	}
+
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason payload) {
+			return futureWriter.thenCompose(w -> w.cancel(payload));
+		}
     }
 }

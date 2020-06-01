@@ -8,8 +8,9 @@ import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseHandler;
-import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2engine.api.RequestStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
@@ -28,7 +29,7 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	}
 
 	@Override
-	public StreamHandle openStream() {
+	public RequestStreamHandle openStream() {
 		HttpStream handle2 = httpListener.openStream(socket);
 		return new FrontendStreamProxy(handle2);
 	}
@@ -38,7 +39,7 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 		socket.internalClose();
 	}
 	
-	private class FrontendStreamProxy implements StreamHandle {
+	private class FrontendStreamProxy implements RequestStreamHandle {
 
 		private HttpStream handle2;
 
@@ -47,9 +48,11 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Request request, ResponseHandler responseListener) {
+		public StreamRef process(Http2Request request, ResponseStreamHandle responseListener) {
 			Http2StreamImpl stream = new Http2StreamImpl(socket, responseListener, request.getStreamId());
-			return handle2.incomingRequest(request, stream);
+			CompletableFuture<StreamWriter> writer =  handle2.incomingRequest(request, stream);
+			
+			return new MyStreamRef(writer);
 		}
 
 		@Override
@@ -57,6 +60,27 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 			return handle2.incomingCancel(payload);
 		}
 	}
+	
+	private class MyStreamRef implements StreamRef {
+
+		private CompletableFuture<StreamWriter> writer;
+
+		public MyStreamRef(CompletableFuture<StreamWriter> writer) {
+			this.writer = writer;
+		}
+
+		@Override
+		public CompletableFuture<StreamWriter> getWriter() {
+			return writer;
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason reason) {
+			return null;
+		}
+		
+	}
+	
 	
 	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer newData) {

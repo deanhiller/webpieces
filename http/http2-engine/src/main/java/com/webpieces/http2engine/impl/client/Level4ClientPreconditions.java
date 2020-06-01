@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.api.error.ConnectionCancelled;
 import com.webpieces.http2engine.impl.shared.Level4PreconditionChecks;
 import com.webpieces.http2engine.impl.shared.data.Stream;
@@ -25,7 +25,7 @@ public class Level4ClientPreconditions extends Level4PreconditionChecks<ClientSt
 		this.clientSm = clientSm;
 	}
 
-	public CompletableFuture<Stream> createStreamAndSend(Http2Request frame, ResponseHandler responseListener) {
+	public CompletableFuture<Stream> createStreamAndSend(Http2Request frame, ResponseStreamHandle responseListener) {
 		ConnectionCancelled closedReason = clientSm.getClosedReason();
 		if(closedReason != null) {
 			return createExcepted(frame, "sending request", closedReason).thenApply((s) -> null);
