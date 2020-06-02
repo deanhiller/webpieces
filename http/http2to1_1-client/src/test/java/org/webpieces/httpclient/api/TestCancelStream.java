@@ -91,7 +91,6 @@ public class TestCancelStream {
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 
-	//TODO(dhiller): Write test
 	@Test
 	public void testServerCloseSocket() {
 		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
@@ -102,8 +101,10 @@ public class TestCancelStream {
 		RequestStreamHandle requestStream = httpSocket.openStream();
 		StreamRef ref = requestStream.process(req, mockListener);
 		
-		throw new UnsupportedOperationException("not done yet");
+		Assert.assertFalse(mockListener.isCancelled());
 		
+		mockChannel.simulateClose();
 		
+		Assert.assertTrue(mockListener.isCancelled());
 	}
 }

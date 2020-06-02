@@ -166,5 +166,8 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 		return listener.incomingData(this, buffer);
 	}
 
+	public void simulateClose() {
+		listener.farEndClosed(this);
+	}
 	
 }

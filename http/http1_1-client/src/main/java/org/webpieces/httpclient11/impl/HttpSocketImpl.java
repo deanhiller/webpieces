@@ -18,6 +18,7 @@ import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpclient11.api.HttpStreamRef;
+import org.webpieces.httpclient11.api.SocketClosedException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
@@ -261,7 +262,8 @@ public class HttpSocketImpl implements HttpSocket {
 			log.info("far end closed");
 			isClosed = true;
 
-			//TODO(dhiller): rework a little to notify client of any outstanding requests being cancelled? or http1.1 is dead really for clients? so leave alone?
+			SocketClosedException exc = new SocketClosedException("The remote end closed the socket");
+			failure(channel, null, exc);
 		}
 
 		@Override

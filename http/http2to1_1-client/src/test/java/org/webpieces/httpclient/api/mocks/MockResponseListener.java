@@ -18,6 +18,8 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 	private enum Method implements MethodEnum {
 		PROCESS
 	}
+
+	private boolean isCancelled;
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -32,7 +34,8 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 
 	@Override
 	public CompletableFuture<Void> cancel(CancelReason payload) {
-		return null;
+		isCancelled = true;
+		return CompletableFuture.completedFuture(null);
 	}
 
 	public Http2Response getIncomingMsg() {
@@ -44,6 +47,10 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 
 	public void addProcessResponse(CompletableFuture<StreamWriter> future) {
 		super.addValueToReturn(Method.PROCESS, future);
+	}
+
+	public boolean isCancelled() {
+		return isCancelled;
 	}
 
 }

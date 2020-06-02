@@ -2,6 +2,9 @@ package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,6 +17,7 @@ import org.webpieces.httpclient11.api.HttpClient;
 import org.webpieces.httpclient11.api.HttpClientFactory;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpclient11.api.HttpStreamRef;
+import org.webpieces.httpclient11.api.SocketClosedException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -87,17 +91,21 @@ public class TestCancelStream {
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 
-	//TODO(dhiller): Write test
 	@Test
-	public void testServerCloseSocket() {
-		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(85555));
+	public void testServerCloseSocket() throws InterruptedException, ExecutionException, TimeoutException {
+		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home", false);
-		
+
+		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
 		httpSocket.send(req, mockListener);
+
+		mockChannel.simulateClose();
 		
+		Throwable failre = mockListener.getSingleFailure();
 		
+		Assert.assertEquals(SocketClosedException.class, failre.getClass());
 		
 	}
 }
