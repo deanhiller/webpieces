@@ -85,5 +85,4 @@ public class TestWriteReads {
 		Assert.assertEquals(response2, msg2);
 	}
 
-	
 }
