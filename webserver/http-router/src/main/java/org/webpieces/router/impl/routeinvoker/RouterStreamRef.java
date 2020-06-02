@@ -24,6 +24,12 @@ public class RouterStreamRef implements StreamRef, Function<CancelReason, Comple
 		this.writer = CompletableFuture.completedFuture(new NullWriter());
 	}
 	
+	public RouterStreamRef(String id, Throwable e) {
+		this.id = id;
+		this.writer = new CompletableFuture<StreamWriter>();
+		this.writer.completeExceptionally(e);
+	}
+
 	@Override
 	public CompletableFuture<StreamWriter> getWriter() {
 		return writer;

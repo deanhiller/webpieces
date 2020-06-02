@@ -1,9 +1,11 @@
 package org.webpieces.devrouter.impl;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
+import com.webpieces.http2engine.api.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ApplicationContext;
@@ -73,7 +75,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	 * This one is definitely special
 	 */
 	@Override
-	public RouterStreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		if(loadedController == null) {
 			loadedController = controllerFinder.loadNotFoundController(route.getInjector(), route.getRouteInfo(), false);
@@ -88,7 +90,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 
 	@Override
-	public RouterStreamRef invokeErrorController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		DynamicInfo newInfo = info;
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
@@ -145,7 +147,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		return super.invokeStreamingController(invokeInfo, newInfo, data);
 	}
 
-	private RouterStreamRef invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	private CompletableFuture<StreamWriter> invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();

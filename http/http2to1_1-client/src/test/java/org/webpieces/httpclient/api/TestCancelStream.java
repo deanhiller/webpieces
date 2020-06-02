@@ -43,15 +43,15 @@ public class TestCancelStream {
 		httpSocket = httpClient.createHttpSocket();
 	}
 
-	@Test
-	public void testRequestResponseCompletableFutureCancelNoKeepAlive() {
-		throw new UnsupportedOperationException("not done yet");
-	}
-
-	@Test
-	public void testRequestResponseCompletableFutureCancelWithKeepAlive() {
-		throw new UnsupportedOperationException("not done yet");
-	}
+//	@Test
+//	public void testRequestResponseCompletableFutureCancelNoKeepAlive() {
+//		throw new UnsupportedOperationException("not done yet");
+//	}
+//
+//	@Test
+//	public void testRequestResponseCompletableFutureCancelWithKeepAlive() {
+//		throw new UnsupportedOperationException("not done yet");
+//	}
 
 	@Test
 	public void testClientCancelWithKeepAlive() {

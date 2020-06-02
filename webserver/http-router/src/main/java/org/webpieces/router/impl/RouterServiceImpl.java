@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -42,6 +43,7 @@ import com.webpieces.hpack.api.subparsers.AcceptType;
 import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
 import com.webpieces.hpack.api.subparsers.ParsedContentType;
 import com.webpieces.hpack.impl.subparsers.HeaderPriorityParserImpl;
+import com.webpieces.http2engine.api.MyStreamRef;
 import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -148,10 +150,19 @@ public class RouterServiceImpl implements RouterService {
 		//top level handler...
 		try {
 			
-			return futureUtil.catchBlock(
-					() -> incomingRequestImpl(req, proxyHandler).thenApply("topLevel", w -> new TxStreamWriter(txId, w)),
-					(t) -> proxyHandler.topLevelFailure(req, t)
-			);
+
+			RouterStreamRef streamRef = incomingRequestProtected(req, proxyHandler);
+			CompletableFuture<StreamWriter> writer = streamRef.getWriter().thenApply(w -> new TxStreamWriter(txId, w));
+
+			CompletableFuture<StreamWriter> finalWriter = writer.handle( (r, t) -> {
+				if(t == null)
+					return CompletableFuture.completedFuture(r);
+	
+				CompletableFuture<StreamWriter> fut = proxyHandler.topLevelFailure(req, t);
+				return fut; 
+			}).thenCompose(Function.identity());
+			
+			return new RouterStreamRef("routerSevcTop", finalWriter, streamRef);
 		} finally {
 			MDC.put("txId", null);
 		}
@@ -167,7 +178,15 @@ public class RouterServiceImpl implements RouterService {
 		return s1+"-"+s2; //human readable instance id
 	}
 
-	public RouterStreamRef incomingRequestImpl(Http2Request req, ProxyStreamHandle handler) {
+	private RouterStreamRef incomingRequestProtected(Http2Request req, ProxyStreamHandle handler) {
+		try {
+			return incomingRequestImpl(req, handler);
+		} catch(Throwable e) {
+			return new RouterStreamRef("protectedTop", e);
+		}
+	}
+	
+	private RouterStreamRef incomingRequestImpl(Http2Request req, ProxyStreamHandle handler) {
 		if(!started)
 			throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 

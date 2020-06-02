@@ -70,11 +70,6 @@ public class HttpParserImpl implements HttpParser {
 	
 	@Override
 	public ByteBuffer marshalToByteBuffer(MarshalState state, HttpPayload request) {
-		if(request.getClass() == HttpData.class)
-			throw new IllegalArgumentException("HttpChunk should be passed into this method instead of HttpData");
-		else if(request.getClass() == HttpLastData.class)
-			throw new IllegalArgumentException("HttpLastChunk should be passed into this method instead HttpLastData");
-			
 		//modify later to go from String straight to ByteBuffer instead...
 		byte[] data = marshalToBytes(state, request);
 		outPayloadSize.record(data.length);

@@ -205,10 +205,9 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return process(response).thenApply(s -> null);
 	}
 
-	public RouterStreamRef topLevelFailure(Http2Request req, Throwable e) {
-		if(ExceptionWrap.isChannelClosed(e)) {
-			return new RouterStreamRef("topLevelChannelClosed");
-		}
+	public CompletableFuture<StreamWriter> topLevelFailure(Http2Request req, Throwable e) {
+		if(ExceptionWrap.isChannelClosed(e))
+			return CompletableFuture.completedFuture(null);
 
 		log.error("HUGE failure on incoming request="+req, e);
 		
@@ -240,9 +239,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		//One of two cases at this point.  Either, we got far enough that we have a bunch of request info or we did not get far enough
 
 
-		CompletableFuture<StreamWriter> future = createResponseAndSend(req, StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html").thenApply(voidd -> new NullWriter());
-		
-		return new RouterStreamRef("topLevelError", future, null);
+		return createResponseAndSend(req, StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html").thenApply(voidd->null);
 	}
 
 	public CompletableFuture<Void> createResponseAndSend(Http2Request request, StatusCode statusCode, String content, String extension, String defaultMime) {

@@ -226,7 +226,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 
 	@Override
-	public RouterStreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());

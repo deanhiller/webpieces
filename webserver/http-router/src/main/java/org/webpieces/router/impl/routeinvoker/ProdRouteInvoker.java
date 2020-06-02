@@ -38,7 +38,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 	
 	@Override
-	public RouterStreamRef invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RouteInfoForInternalError routeData = (RouteInfoForInternalError) data;
 
 		ResponseProcessorAppError processor = new ResponseProcessorAppError(
@@ -70,7 +70,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 	
 	@Override
-	public RouterStreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		return super.invokeNotFound(invokeInfo, loadedController, data);
 	}
 
