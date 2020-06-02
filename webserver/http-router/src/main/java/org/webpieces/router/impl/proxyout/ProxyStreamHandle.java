@@ -35,6 +35,8 @@ import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
 import org.webpieces.router.impl.routeinvoker.ContextWrap;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
+import org.webpieces.router.impl.routeinvoker.NullWriter;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
@@ -203,9 +205,10 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return process(response).thenApply(s -> null);
 	}
 
-	public CompletableFuture<StreamWriter> topLevelFailure(Http2Request req, Throwable e) {
-		if(ExceptionWrap.isChannelClosed(e))
-			return CompletableFuture.completedFuture(null);
+	public RouterStreamRef topLevelFailure(Http2Request req, Throwable e) {
+		if(ExceptionWrap.isChannelClosed(e)) {
+			return new RouterStreamRef("topLevelChannelClosed");
+		}
 
 		log.error("HUGE failure on incoming request="+req, e);
 		
@@ -237,7 +240,9 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		//One of two cases at this point.  Either, we got far enough that we have a bunch of request info or we did not get far enough
 
 
-		return createResponseAndSend(req, StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html").thenApply(voidd->null);
+		CompletableFuture<StreamWriter> future = createResponseAndSend(req, StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html").thenApply(voidd -> new NullWriter());
+		
+		return new RouterStreamRef("topLevelError", future, null);
 	}
 
 	public CompletableFuture<Void> createResponseAndSend(Http2Request request, StatusCode statusCode, String content, String extension, String defaultMime) {

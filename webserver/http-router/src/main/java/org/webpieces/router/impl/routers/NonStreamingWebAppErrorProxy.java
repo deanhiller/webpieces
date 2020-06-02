@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.http2engine.api.StreamWriter;
@@ -14,13 +15,13 @@ public class NonStreamingWebAppErrorProxy implements StreamWriter {
     private FutureHelper futureUtil;
     private final StreamWriter strWriter;
     private ProxyStreamHandle handler;
-    private final Function<Throwable, CompletableFuture<StreamWriter>> failHandler;
+    private final Function<Throwable, RouterStreamRef> failHandler;
 
     public NonStreamingWebAppErrorProxy(
         FutureHelper futureUtil,
         StreamWriter strWriter,
         ProxyStreamHandle handler,
-        Function<Throwable, CompletableFuture<StreamWriter>> failHandler
+        Function<Throwable, RouterStreamRef> failHandler
     ) {
         this.futureUtil = futureUtil;
         this.strWriter = strWriter;
@@ -45,7 +46,8 @@ public class NonStreamingWebAppErrorProxy implements StreamWriter {
             return futureUtil.failedFuture(t);
         }
 
-        return failHandler.apply(t).thenApply(s -> null);
+        RouterStreamRef ref = failHandler.apply(t);
+        return ref.getWriter().thenApply(s -> null);
     }
 
 }

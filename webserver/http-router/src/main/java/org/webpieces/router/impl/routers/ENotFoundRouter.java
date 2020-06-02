@@ -9,6 +9,7 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForNotFound;
 
@@ -28,7 +29,7 @@ public class ENotFoundRouter {
 		this.loadedController = loadedController;
 	}
 
-	public StreamRef invokeNotFoundRoute(RequestContext ctx, ProxyStreamHandle handle, NotFoundException exc) {
+	public RouterStreamRef invokeNotFoundRoute(RequestContext ctx, ProxyStreamHandle handle, NotFoundException exc) {
 		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handle, false);
 		RouteData data = new RouteInfoForNotFound(exc);
 		return invoker.invokeNotFound(invokeInfo, loadedController, data);

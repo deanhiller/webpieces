@@ -48,14 +48,14 @@ public class DScopedRouter extends EScopedRouter {
 
 	@Override
 	public RouterStreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
-		
-		
-		
-		
-		return futureUtil.catchBlock(
+		RouterStreamRef streamRef = futureUtil.catchBlock(
 				() -> invokeRouteCatchNotFound(ctx, handler, subPath),
 				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t, false)
-		).thenApply( strWriter -> createProxy(strWriter, ctx, handler));
+		);
+		
+		CompletableFuture<StreamWriter> newWriter = streamRef.getWriter().thenApply(w -> createProxy(w, ctx, handler));
+		
+		return new RouterStreamRef("dScopedRouter", newWriter, streamRef);
 	}
 
 	private StreamWriter createProxy(StreamWriter strWriter, RequestContext ctx, ProxyStreamHandle handler) {
@@ -63,12 +63,12 @@ public class DScopedRouter extends EScopedRouter {
 				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t, true));
 	}
 
-	private CompletableFuture<StreamWriter> tryRenderWebAppErrorControllerResult(RequestContext ctx, ProxyStreamHandle handler, Throwable t, boolean forceEndOfStream) {
+	private RouterStreamRef tryRenderWebAppErrorControllerResult(RequestContext ctx, ProxyStreamHandle handler, Throwable t, boolean forceEndOfStream) {
 		if(ExceptionWrap.isChannelClosed(t)) {
 			//if the socket was closed before we responded, do not log a failure
 			if(log.isTraceEnabled())
 				log.trace("async exception due to socket being closed", t);
-			return CompletableFuture.<StreamWriter>completedFuture(new NullStreamWriter());
+			return new RouterStreamRef("channelClosed");
 		}
 
 		String failedRoute = "<Unknown Route>";
@@ -84,7 +84,7 @@ public class DScopedRouter extends EScopedRouter {
 		//If it is a streaming, controller AND response has already been sent, we cannot render the web apps error controller
 		//page so in that case, fail, and cancel the stream
 		if(handler.hasSentResponseAlready()) {
-			return CompletableFuture.completedFuture(new NullStreamWriter());
+			return new RouterStreamRef("responseAlreadySent");
 		}
 		
 		return invokeWebAppErrorController(t, ctx, handler, failedRoute, forceEndOfStream);
@@ -100,12 +100,13 @@ public class DScopedRouter extends EScopedRouter {
 				(t) -> {
 					if (t instanceof NotFoundException)
 						return notFound((NotFoundException) t, ctx, handler);
-					return futureUtil.<StreamWriter>failedFuture(t);
+					
+					return null; //return original StreamRef
 				}
 		);
 	}
 
-	private CompletableFuture<StreamWriter> invokeWebAppErrorController(
+	private RouterStreamRef invokeWebAppErrorController(
 			Throwable exc, RequestContext requestCtx, ProxyStreamHandle handler, Object failedRoute, boolean forceEndOfStream) {
 		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
 		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
@@ -119,7 +120,7 @@ public class DScopedRouter extends EScopedRouter {
 		return new InternalErrorRouteFailedException(t, failedRoute);
 	}
 	
-	private CompletableFuture<StreamWriter> notFound(NotFoundException exc, RequestContext requestCtx, ProxyStreamHandle handler) {
+	private RouterStreamRef notFound(NotFoundException exc, RequestContext requestCtx, ProxyStreamHandle handler) {
 		return futureUtil.catchBlockWrap(
 			() -> pageNotFoundRouter.invokeNotFoundRoute(requestCtx, handler, exc),
 			(e) -> new RuntimeException("NotFound Route had an exception", e)

@@ -33,9 +33,9 @@ public class RouterFutureUtil {
 	 *			(t) -> runCatchBlock(t) //can return success if recovering OR failure if not
 	 *	    );
 	 */
-	public <T> RouterStreamRef catchBlock(
+	public RouterStreamRef catchBlock(
 		Callable<RouterStreamRef> function,
-		Function<Throwable, CompletableFuture<T>> catchBlock
+		Function<Throwable, RouterStreamRef> catchBlock
 	) {
 //		//convert sync exceptions into async exceptions so we can re-use same exception handling logic.. 
 //		CompletableFuture<T> future = syncToAsyncException(function);
@@ -62,7 +62,15 @@ public class RouterFutureUtil {
 		return null;
 	}
 
+	public RouterStreamRef catchBlockWrap(
+			Callable<RouterStreamRef> function, 
+			Function<Throwable, Throwable> wrapException
+	) {
+		return null;
+	}
+	
 	public CompletableFuture<StreamWriter> failedFuture(Throwable e) {
 		return futureUtil.failedFuture(e);
 	}
+
 }
