@@ -18,6 +18,7 @@ import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class ResponseStaticProcessor {
 	private static final Logger log = LoggerFactory.getLogger(ResponseStaticProcessor.class);
@@ -56,10 +57,17 @@ public class ResponseStaticProcessor {
 			if(log.isDebugEnabled())
 				log.debug("Sending render static html response. req="+request);
 			RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, handler);
-			return futureUtil.catchBlockWrap(
+			
+			
+			CompletableFuture<StreamWriter> writer = futureUtil.catchBlockWrap(
 				() -> reader.sendRenderStatic(requestInfo, renderStatic, handler), 
 				(t) -> convert(t)
 			);
+			
+			//TODO(dhiller): if socket closed or request cancelled, we should implement cancel function to stop reading
+			//the file an pushing it back...
+			return new RouterStreamRef(writer, null);
+			
 			//return responseCb.sendRenderStatic(renderStatic, handler);
 		} finally {
 			if(!wasSet) //then reset

@@ -30,6 +30,7 @@ import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.urlparse.UrlEncodedParser;
@@ -83,7 +84,7 @@ public class RouterServiceImpl implements RouterService {
 	private final AbstractRouterService service;
 	private final HeaderPriorityParser headerParser;
 	private final UrlEncodedParser urlEncodedParser;
-	private final FutureHelper futureUtil;
+	private final RouterFutureUtil futureUtil;
 	private final RouterConfig config;
 	private final Random random;
 	private final Provider<ProxyStreamHandle> proxyProvider;
@@ -98,7 +99,7 @@ public class RouterServiceImpl implements RouterService {
 		HeaderPriorityParserImpl headerParser,
 		UrlEncodedParser urlEncodedParser,
 		Provider<ProxyStreamHandle> proxyProvider,
-		FutureHelper futureUtil,
+		RouterFutureUtil futureUtil, 
 		Random random
 	) {
 		this.config = config;
@@ -165,7 +166,7 @@ public class RouterServiceImpl implements RouterService {
 		return s1+"-"+s2; //human readable instance id
 	}
 
-	public StreamRef incomingRequestImpl(Http2Request req, ProxyStreamHandle handler) {
+	public RouterStreamRef incomingRequestImpl(Http2Request req, ProxyStreamHandle handler) {
 		if(!started)
 			throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 

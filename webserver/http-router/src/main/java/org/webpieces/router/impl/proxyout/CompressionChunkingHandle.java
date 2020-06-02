@@ -22,7 +22,6 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -69,7 +68,7 @@ public class CompressionChunkingHandle implements RouterResponseHandler {
 	}
 	
     @Override
-    public StreamRef process(Http2Response response) {
+    public CompletableFuture<StreamWriter> process(Http2Response response) {
         if(lastResponseSent != null)
             throw new IllegalStateException("You already sent a response.  "
                     + "do not call Actions.redirect or Actions.render more than once.  previous response="

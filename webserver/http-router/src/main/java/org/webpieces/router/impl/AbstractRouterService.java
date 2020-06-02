@@ -22,6 +22,7 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.cmdline2.Arguments;
 
 import com.google.inject.Injector;
@@ -50,7 +51,7 @@ public abstract class AbstractRouterService {
 		this.translator = translator;
 	}
 
-	public StreamRef incomingRequest(RouterRequest routerRequest, ProxyStreamHandle handler) {
+	public RouterStreamRef incomingRequest(RouterRequest routerRequest, ProxyStreamHandle handler) {
 		try {
 			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(translator));
 			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(translator));
@@ -65,11 +66,12 @@ public abstract class AbstractRouterService {
 		} catch(BadCookieException e) {
 			//CHEAT: we know this is syncrhonous exception from the translateCookieToScope
 			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
-			return handler.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
+			CompletableFuture<StreamWriter> writer = handler.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
+			return new RouterStreamRef(writer, null);
 		}
 	}
 	
-	protected abstract StreamRef incomingRequestImpl(RequestContext req, ProxyStreamHandle handler);
+	protected abstract RouterStreamRef incomingRequestImpl(RequestContext req, ProxyStreamHandle handler);
 	
 	public String convertToUrl(String routeId, Map<String, Object> args, boolean isValidating) {
 		return routeLoader.convertToUrl(routeId, args, isValidating);

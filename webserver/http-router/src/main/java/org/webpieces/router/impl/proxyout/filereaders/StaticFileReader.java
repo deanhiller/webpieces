@@ -1,6 +1,5 @@
 package org.webpieces.router.impl.proxyout.filereaders;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
@@ -8,6 +7,9 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.NullWriter;
+
+import com.webpieces.http2engine.api.StreamWriter;
 
 @Singleton
 public class StaticFileReader {
@@ -23,13 +25,15 @@ public class StaticFileReader {
 	}
 
 
-	public CompletableFuture<Void> sendRenderStatic(RequestInfo info, RenderStaticResponse renderStatic, ProxyStreamHandle handle) {
+	public CompletableFuture<StreamWriter> sendRenderStatic(RequestInfo info, RenderStaticResponse renderStatic, ProxyStreamHandle handle) {
 		try {
 			if(renderStatic.isOnClassPath())
-				return classPathFileReader.runFileRead(info, renderStatic, handle);
-			return fileSystemReader.runFileRead(info, renderStatic, handle);
-		} catch(IOException e) {
-			throw new RuntimeException(e);
+				return classPathFileReader.runFileRead(info, renderStatic, handle).thenApply(s -> new NullWriter());
+			return fileSystemReader.runFileRead(info, renderStatic, handle).thenApply(s -> new NullWriter());
+		} catch(Throwable e) {
+			CompletableFuture<StreamWriter> failed = new CompletableFuture<StreamWriter>();
+			failed.completeExceptionally(e);
+			return failed;
 		}
 	}
 

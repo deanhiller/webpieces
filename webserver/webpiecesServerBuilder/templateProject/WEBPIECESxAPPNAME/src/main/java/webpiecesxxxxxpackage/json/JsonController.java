@@ -96,19 +96,20 @@ public class JsonController implements ClientApi {
 		Http2Response response = handle.createBaseResponse(requestCtx.getRequest().originalRequest, "text/plain", 200, "Ok");
 		response.setEndOfStream(false);
 		
-		StreamRef responseStream = handle.process(response);
-		return new RequestStreamEchoWriter(requestCtx, responseStream);
+		CompletableFuture<StreamWriter> responseWriter = handle.process(response);
+		return new RequestStreamEchoWriter(requestCtx, handle, responseWriter);
 	}
 
 	private static class RequestStreamEchoWriter implements StreamWriter, StreamRef {
 
 		private AtomicInteger total = new AtomicInteger();
-		private StreamRef responseStream;
 		private CompletableFuture<StreamWriter> responseWriter;
+		private RouterStreamHandle handle; // in case you want to cancel the request
 
-		public RequestStreamEchoWriter(RequestContext requestCtx, StreamRef responseStream) {
-			this.responseStream = responseStream;
-			responseWriter = responseStream.getWriter();
+		public RequestStreamEchoWriter(RequestContext requestCtx, RouterStreamHandle handle,
+				CompletableFuture<StreamWriter> responseWriter2) {
+			this.responseWriter = responseWriter2;
+			this.handle = handle;
 		}
 
 		@Override

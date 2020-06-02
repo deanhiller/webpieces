@@ -16,6 +16,7 @@ import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.WebInjector;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
@@ -69,7 +70,7 @@ public class DevRoutingService extends AbstractRouterService {
 	}
 
 	@Override
-	public StreamRef incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
+	public RouterStreamRef incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		

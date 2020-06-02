@@ -1,11 +1,11 @@
 package org.webpieces.router.impl.routeinvoker;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Messages;
@@ -32,6 +32,7 @@ import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 
 public abstract class AbstractRouteInvoker implements RouteInvoker {
 
@@ -86,34 +87,43 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		else if(!CompletableFuture.class.equals(controllerMethod.getReturnType()))
 			throw new IllegalArgumentException("The return value must be StreamRef and was not for this method='"+controllerMethod+"'");
 
-
-		StreamRef response = futureUtil.catchBlockWrap(
-				() -> invokeStream(controllerMethod, instance, requestCtx, handler),
+		
+		StreamRef streamRef = invokeStream(controllerMethod, instance, requestCtx, handler);
+		CompletableFuture<StreamWriter> writer = streamRef.getWriter();
+		
+		CompletableFuture<StreamWriter> newFuture = futureUtil.catchBlockWrap(
+				() -> writer,
 				(t) -> convert(loadedController, t)
-		);
+		); 
 
 		//NO need for finally block
 		Current.setContext(null);
 		
-		return response;
+		Function<CancelReason, CompletableFuture<Void>> cancelFunc = (reason) -> streamRef.cancel(reason);		
+		return new RouterStreamRef(newFuture, cancelFunc);
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public StreamRef invokeStream(Method m, Object instance, RequestContext requestCtx, RouterStreamHandle handler) {
 		try {
-			StreamRef future = (StreamRef) m.invoke(instance, handler);
-			if(future == null) {
+			StreamRef streamRef = (StreamRef) m.invoke(instance, handler);
+			if(streamRef == null) {
 				throw new IllegalStateException("You must return a non-null and did not from method='"+m+"'");
 			}
 			
-			return future.thenApply( resp -> {
+			
+			CompletableFuture<StreamWriter> newFuture = streamRef.getWriter().thenApply( resp -> {
 				if(!(resp instanceof StreamWriter)) {
 					throw new IllegalStateException("The return value must be StreamRef and was not for this method='"+m+"'");
 				}
 				return (StreamWriter) resp;
 			});
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			return futureUtil.failedFuture(e);
+			
+			Function<CancelReason, CompletableFuture<Void>> cancelFunc = (reason) -> streamRef.cancel(reason);
+			return new RouterStreamRef(newFuture, cancelFunc);
+			
+		} catch (Throwable e) {
+			CompletableFuture<StreamWriter> failedFuture = futureUtil.failedFuture(e);
+			return new RouterStreamRef(failedFuture, null);
 		}
 	}
 	
@@ -132,27 +142,43 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			RouteData data,
 			Processor processor,
 			boolean forceEndOfStream) {
+		
+		CancelHolder cancelFunc = new CancelHolder();
+		
+		CompletableFuture<StreamWriter> writer = invokeAnyImpl1(invokeInfo, loadedController, service, data, processor, cancelFunc, forceEndOfStream);
+		return new RouterStreamRef(writer, cancelFunc);
+	}
+	 
+	private  CompletableFuture<StreamWriter> invokeAnyImpl1(
+			InvokeInfo invokeInfo,
+			LoadedController loadedController,
+			Service<MethodMeta, Action> service,
+			RouteData data,
+			Processor processor,
+			CancelHolder cancelHolder,
+			boolean forceEndOfStream) {
 		boolean endOfStream = invokeInfo.getRequestCtx().getRequest().originalRequest.isEndOfStream();
 		if(forceEndOfStream || endOfStream) {
 			//If there is no body, just invoke to process
 			invokeInfo.getRequestCtx().getRequest().body = DataWrapperGeneratorFactory.EMPTY;
-			return invokeAnyImpl(invokeInfo, loadedController, service, data, processor).thenApply(voidd -> null);
+			return invokeAnyImpl2(invokeInfo, loadedController, service, data, processor, cancelHolder).thenApply(voidd -> null);
 		}
 
 		//At this point, we don't have the end of the stream
 		RequestStreamWriter2 writer = new RequestStreamWriter2(requestBodyParsers, invokeInfo,
-				(newInfo) -> invokeAnyImpl(newInfo, loadedController, service, data, processor)
+				(newInfo) -> invokeAnyImpl2(newInfo, loadedController, service, data, processor, cancelHolder)
 		);
 
 		return CompletableFuture.completedFuture(writer);
 	}
 
-	private CompletableFuture<Void> invokeAnyImpl(
+	private CompletableFuture<Void> invokeAnyImpl2(
 		InvokeInfo invokeInfo, 
 		LoadedController loadedController, 
 		Service<MethodMeta, Action> service,
 		RouteData data, 
-		Processor processor
+		Processor processor,
+		CancelHolder cancelHolder
 	) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
@@ -176,6 +202,8 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			Current.setContext(null);
 		}
 
+		cancelHolder.setControllerFutureResponse(response);
+		
 		return response.thenCompose(resp -> continueProcessing(processor, requestCtx, resp));
 	}
 
