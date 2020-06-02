@@ -2,8 +2,6 @@ package org.webpieces.httpfrontend2.api.mock2;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
@@ -20,6 +18,8 @@ import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class MockHttp2RequestListener extends MockSuperclass implements StreamListener {
 
+	private boolean isClosed;
+	
 	private enum Method implements MethodEnum {
 		PROCESS, CANCEL_PUSH
 	}
@@ -88,6 +88,11 @@ public class MockHttp2RequestListener extends MockSuperclass implements StreamLi
 
 	@Override
 	public void fireIsClosed(FrontendSocket socketThatClosed) {
+		isClosed = true;
+	}
+
+	public boolean isClosed() {
+		return isClosed;
 	}
 
 }

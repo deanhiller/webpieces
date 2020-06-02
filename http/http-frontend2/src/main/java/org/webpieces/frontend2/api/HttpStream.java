@@ -9,6 +9,4 @@ public interface HttpStream {
 	
 	StreamRef incomingRequest(Http2Request request, ResponseStream stream);
 
-	//void incomingCancel(ShutdownStream shutdown);
-	
 }

@@ -10,8 +10,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.api.ResponseStream;
-import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.Cancel;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
+import org.webpieces.httpfrontend2.api.mock2.MockStreamRef;
+import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 import org.webpieces.httpfrontend2.api.mock2.TestAssert;
 
 import com.twitter.hpack.Encoder;
@@ -21,6 +22,7 @@ import com.webpieces.hpack.impl.HeaderEncoding;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.error.ConnectionClosedException;
 import com.webpieces.http2engine.api.error.ShutdownStream;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
@@ -50,10 +52,17 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 	 */
 	@Test
 	public void testSection4_2FrameTooLarge() throws InterruptedException, ExecutionException, TimeoutException {
+		MockStreamWriter mockWriter = new MockStreamWriter();
+		CompletableFuture<StreamWriter> futA = CompletableFuture.completedFuture(mockWriter);
+		MockStreamRef mockStream = new MockStreamRef(futA );
+		mockListener.addMockStreamToReturn(mockStream);
+		
 		int streamId = 1;
 		PassedIn info = sendRequestToServer(streamId, false);
 		ResponseStream stream = info.stream;
 		Http2Request request = info.request;
+
+		Assert.assertFalse(mockStream.isCancelled());
 
 		//send data that goes with request
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
@@ -61,6 +70,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		dataFrame.setData(DATA_GEN.wrapByteArray(buf));
 		mockChannel.send(dataFrame); //endOfStream=false
 
+		
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, goAway.getKnownErrorCode());
@@ -69,12 +79,13 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		Assert.assertEquals("ConnectionException: stream1:(EXCEEDED_MAX_FRAME_SIZE) Frame size=16389 was greater than max=16385", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 
-		if(true)
-			throw new UnsupportedOperationException("fix this test");
-//
-//		Cancel failResp = mockListener.getCancelInfo();
-//		ShutdownStream reset = (ShutdownStream) failResp.reset;
-//		Assert.assertEquals(CancelReasonCode.EXCEEDED_MAX_FRAME_SIZE, reset.getCause().getReasonCode());
+		Assert.assertTrue(mockListener.isClosed());
+
+		Assert.assertTrue(mockStream.isCancelled());
+		CancelReason failResp = mockStream.getCancelInfo();
+
+		ShutdownStream reset = (ShutdownStream) failResp;
+		Assert.assertEquals(CancelReasonCode.EXCEEDED_MAX_FRAME_SIZE, reset.getCause().getReasonCode());
 
 		//send response with request not complete but failed as well anyways
 		Http2Response response = Http2Requests.createResponse(request.getStreamId());
@@ -102,10 +113,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 
-		if(true)
-			throw new UnsupportedOperationException("fix this test");
-//		//no cancels
-//		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		Assert.assertTrue(mockListener.isClosed());
 		
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -135,10 +143,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 		
-		if(true)
-			throw new UnsupportedOperationException("fix this test");
-//		//no cancels
-//		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		Assert.assertTrue(mockListener.isClosed());
 		
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -176,11 +181,8 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 		
-		if(true)
-			throw new UnsupportedOperationException("fix this test");
-//		//no cancels
-//		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
-		
+		Assert.assertTrue(mockListener.isClosed());
+
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
