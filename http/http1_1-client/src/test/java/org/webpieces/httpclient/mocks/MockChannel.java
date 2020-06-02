@@ -27,6 +27,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpStatefulParser parser;
 	private DataListener listener;
+	private boolean isClosed;
 
 	private enum Method implements MethodEnum {
 		CONNECT, WRITE
@@ -58,8 +59,12 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 
 	@Override
 	public CompletableFuture<Void> close() {
-		
-		return null;
+		isClosed = true;
+		return CompletableFuture.completedFuture(null);
+	}
+
+	public boolean isClosed() {
+		return isClosed;
 	}
 
 	@Override
@@ -106,12 +111,6 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 
 	@Override
 	public boolean isBlocking() {
-		
-		return false;
-	}
-
-	@Override
-	public boolean isClosed() {
 		
 		return false;
 	}

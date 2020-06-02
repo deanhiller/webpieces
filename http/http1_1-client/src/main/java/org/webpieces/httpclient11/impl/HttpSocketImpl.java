@@ -148,7 +148,7 @@ public class HttpSocketImpl implements HttpSocket {
 
 		@Override
 		public CompletableFuture<Void> cancel(Object reason) {
-			if(isKeepAliveRequest(request)) {
+			if(!isKeepAliveRequest(request)) {
 				return close();
 			}
 			

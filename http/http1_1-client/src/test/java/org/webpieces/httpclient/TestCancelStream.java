@@ -3,9 +3,11 @@ package org.webpieces.httpclient;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.data.api.TwoPools;
+import org.webpieces.httpclient.mocks.MockChannel;
 import org.webpieces.httpclient.mocks.MockChannelMgr;
 import org.webpieces.httpclient.mocks.MockResponseListener;
 import org.webpieces.httpclient11.api.HttpClient;
@@ -24,6 +26,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 public class TestCancelStream {
 
 	private MockChannelMgr mockChanMgr = new MockChannelMgr();
+	private MockChannel mockChannel = new MockChannel();
 	private HttpClient httpClient;
 	private HttpSocket httpSocket;
 	
@@ -33,51 +36,55 @@ public class TestCancelStream {
 		TwoPools pool = new TwoPools("client.bufferpool", metrics);
 		HttpParser parser = HttpParserFactory.createParser("testParser", metrics, pool);
 		httpClient = HttpClientFactory.createHttpClient("testClient", mockChanMgr, parser);
-		
-		httpSocket = httpClient.createHttpSocket();
 
+		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
+
+		mockChanMgr.addTCPChannelToReturn(mockChannel);
+		httpSocket = httpClient.createHttpSocket();
 	}
 
-	//TODO(dhiller): Write test
 	@Test
 	public void testRequestResponseCompletableFutureCancelNoKeepAlive() {
-		
+		throw new UnsupportedOperationException("not done yet");
 	}
 
-	//TODO(dhiller): Write test
 	@Test
 	public void testRequestResponseCompletableFutureCancelWithKeepAlive() {
-		
+		throw new UnsupportedOperationException("not done yet");
 	}
 
-	//TODO(dhiller): Write test
 	@Test
 	public void testClientCancelWithKeepAlive() {
-		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(85555));
+		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home", false);
 		req.addHeader(new Header(KnownHeaderName.CONNECTION, "keep-alive"));
+
+		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
 		HttpStreamRef ref = httpSocket.send(req, mockListener);
 		
-		ref.cancel("some reason");
+		CompletableFuture<Void> cancelDone = ref.cancel("some reason");
+		Assert.assertTrue(cancelDone.isDone());
 		
 		//Assert the socket is NOT closed
-		
+		Assert.assertFalse(mockChannel.isClosed());
 	}
 
-	//TODO(dhiller): Write test
 	@Test
 	public void testClientCancelNoKeepAlive() {
-		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(85555));
+		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home", false);
+		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
 		HttpStreamRef ref = httpSocket.send(req, mockListener);
 		
-		ref.cancel("some reason");
+		CompletableFuture<Void> cancelDone = ref.cancel("some reason");
+		Assert.assertTrue(cancelDone.isDone());
 		
-		//Assert the socket is closed
+		//Assert the socket is NOT closed
+		Assert.assertTrue(mockChannel.isClosed());
 	}
 
 	//TODO(dhiller): Write test
@@ -87,6 +94,7 @@ public class TestCancelStream {
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home", false);
+		
 		httpSocket.send(req, mockListener);
 		
 		
