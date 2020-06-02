@@ -76,7 +76,7 @@ public class XFuture<T> extends CompletableFuture<T> {
 		return (XFuture<T>) super.exceptionally(f);
     }
 	
-    @Override
+    //@Override
 	public <U> XFuture<U> newIncompleteFuture() {
 		return new XFuture<U>(cancelFunction);
 	}
