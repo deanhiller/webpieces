@@ -28,12 +28,19 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 	}
 
 	public MockResponseListener() {
+		setDefaultReturnValue(Method.CANCEL, CompletableFuture.completedFuture(null));
 		setDefaultReturnValue(Method.CANCEL_PUSH, CompletableFuture.completedFuture(null));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public StreamRef process(Http2Response response) {
-		return (StreamRef) super.calledMethod(Method.INCOMING_RESPONSE, response);
+	public CompletableFuture<StreamWriter> process(Http2Response response) {
+		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.INCOMING_RESPONSE, response);
+	}
+	@SuppressWarnings("unchecked")
+	@Override
+	public CompletableFuture<Void> cancel(CancelReason frame) {
+		return (CompletableFuture<Void>) super.calledMethod(Method.CANCEL, frame);
 	}
 	
 	@Override
@@ -42,7 +49,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 	}
 
 	public void addReturnValueIncomingResponse(CompletableFuture<StreamWriter> future) {
-		super.addValueToReturn(Method.INCOMING_RESPONSE, new MyStreamRef(future));
+		super.addValueToReturn(Method.INCOMING_RESPONSE, future);
 	}
 	
 	public Http2Response getSingleReturnValueIncomingResponse() {
@@ -59,28 +66,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 	}
 
 	public void setIncomingRespDefault(CompletableFuture<StreamWriter> retVal) {
-		super.setDefaultReturnValue(Method.INCOMING_RESPONSE, new MyStreamRef(retVal));
-	}
-
-	private class MyStreamRef implements StreamRef {
-
-		private CompletableFuture<StreamWriter> writer;
-
-		public MyStreamRef(CompletableFuture<StreamWriter> writer) {
-			this.writer = writer;
-		}
-
-		@Override
-		public CompletableFuture<StreamWriter> getWriter() {
-			return writer;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason reason) {
-			return (CompletableFuture<Void>) calledMethod(Method.CANCEL, reason);
-		}
-		
+		super.setDefaultReturnValue(Method.INCOMING_RESPONSE, retVal);
 	}
 	
 	public List<CancelReason> getRstStreams() {

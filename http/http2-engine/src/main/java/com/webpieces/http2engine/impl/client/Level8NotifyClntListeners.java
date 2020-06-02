@@ -72,8 +72,8 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	public CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
-			StreamRef responseStreamRef = str.getResponseStreamRef();
-			return responseStreamRef.cancel(payload);
+			ResponseStreamHandle handler = str.getResponseListener();
+			return handler.cancel(payload);
 		}
 		
 		ClientPushStream str = (ClientPushStream) stream;
@@ -84,26 +84,28 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	@Override
 	public CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
 		ClientStream str = (ClientStream) stream;
-		CompletableFuture<StreamWriter> writer = str.getResponseStreamRef().getWriter();
-		return writer.thenCompose(w -> w.processPiece(payload));
+		StreamWriter writer = str.getResponseWriter();
+		return writer.processPiece(payload)
+				.thenApply( s -> null);
 	}
 
 	@Override
 	public CompletableFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload) {
 		ClientStream str = (ClientStream) stream;
-		CompletableFuture<StreamWriter> writer = str.getResponseStreamRef().getWriter();
-		return writer.thenCompose(w -> w.processPiece(payload));
+		StreamWriter writer = str.getResponseWriter();
+		return writer.processPiece(payload)
+				.thenApply(null);
 	}
 
 	public CompletableFuture<Void> sendResponseToApp(Stream stream, Http2Response response) {
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
 			ResponseStreamHandle listener = str.getResponseListener();
-			
-			StreamRef ref = listener.process(response);
-			str.setResponseStreamRef(ref);
-			
-			return ref.getWriter().thenApply(w -> null);
+			return listener.process(response)
+					.thenApply( w -> {
+						str.setResponseWriter(w);
+						return null;
+					});
 		}
 		
 		ClientPushStream str = (ClientPushStream) stream;

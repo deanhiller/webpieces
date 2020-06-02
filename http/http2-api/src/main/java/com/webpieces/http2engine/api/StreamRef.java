@@ -12,8 +12,21 @@ import com.webpieces.http2parser.api.dto.CancelReason;
  */
 public interface StreamRef {
 
-	public CompletableFuture<StreamWriter> getWriter();
+	/**
+	 * for backpressure so you can return a future to backpressure a client AND can asynchronously connect to 
+	 * a remote host.  ie. you can do something like this
+	 * 
+	 *  1. CompletableFuture<Void> connectFuture = httpSocket.connect(host);
+	 *  2. CompletableFuture<Response> responseFut = connectFuture.thenCompose(voidd -> httpSocket.send(authenticationRequest));
+	 *  3. CompletableFuture<StreamWriter> writerFut = responseFut.thenCompose(resp -> createWriter(resp));
+	 *  4. Return a StreamRef with CompletableFuture<StreamWriter>
+	 *  
+	 *  This ensures we only start writing (or backpressure until your app code is ready to consume) once you give us the stream
+	 *  writer by completing the future in step 3.
+	 *  
+	 * @return
+	 */
+	CompletableFuture<StreamWriter> getWriter();
 
-	public abstract CompletableFuture<Void> cancel(CancelReason reason);	
-	
+	CompletableFuture<Void> cancel(CancelReason reason);
 }

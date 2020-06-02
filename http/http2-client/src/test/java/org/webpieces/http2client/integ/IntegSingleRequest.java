@@ -117,10 +117,9 @@ public class IntegSingleRequest {
 	
 	private static class ChunkedResponseListener implements ResponseStreamHandle, PushPromiseListener, PushStreamHandle {
 		@Override
-		public StreamRef process(Http2Response response) {
+		public CompletableFuture<StreamWriter> process(Http2Response response) {
 			log.info("incoming part of response="+response);
-			CompletableFuture<StreamWriter> writer = CompletableFuture.completedFuture(null);
-			return new Proxy2StreamRef(null, writer);
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
@@ -131,6 +130,11 @@ public class IntegSingleRequest {
 		@Override
 		public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
 			log.info("incoming push promise. response="+response);
+			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason frame) {
 			return CompletableFuture.completedFuture(null);
 		}
 

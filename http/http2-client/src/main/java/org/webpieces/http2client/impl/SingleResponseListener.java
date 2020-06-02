@@ -2,6 +2,7 @@ package org.webpieces.http2client.impl;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.dto.CancelReason;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -26,16 +27,14 @@ public class SingleResponseListener implements ResponseStreamHandle, StreamWrite
 	private DataWrapper fullData = dataGen.emptyWrapper();
 	
 	@Override
-	public StreamRef process(Http2Response response) {
+	public CompletableFuture<StreamWriter> process(Http2Response response) {
 		this.resp = response;
 		if(resp.isEndOfStream()) {
 			responseFuture.complete(new FullResponse(resp, dataGen.emptyWrapper(), null));
-			CompletableFuture<StreamWriter> completedFuture = CompletableFuture.completedFuture(null);
-			return new Proxy2StreamRef(null, completedFuture);
+			return CompletableFuture.completedFuture(null);
 		}
 				
-		CompletableFuture<StreamWriter> completedFuture = CompletableFuture.completedFuture(this);
-		return new Proxy2StreamRef(null, completedFuture);
+		return CompletableFuture.completedFuture(this);
 	}
 	
 	@Override
@@ -80,6 +79,12 @@ public class SingleResponseListener implements ResponseStreamHandle, StreamWrite
 	@Override
 	public PushStreamHandle openPushStream() {
 		throw new UnsupportedOperationException("you should either turn push promise setting off or not use single request/response since the server is sending a push_promise");
+	}
+
+	@Override
+	public CompletableFuture<Void> cancel(CancelReason frame) {
+		responseFuture.completeExceptionally(new ServerRstStreamException("The remote end reset this stream"));
+		return CompletableFuture.completedFuture(null);
 	}
 
 }
