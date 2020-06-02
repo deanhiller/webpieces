@@ -36,11 +36,11 @@ public class HttpChunkWriterImpl implements HttpDataWriter {
 			return channel.write(buffer);
 		}
 		
-		if(!canSendChunks) {
-			CompletableFuture<Void> failure = new CompletableFuture<Void>();
-			failure.completeExceptionally(new IllegalStateException("Header "+KnownHeaderName.TRANSFER_ENCODING.getHeaderName()+" was not set with 'chunked' so you can't send chunks"));
-			return failure;
-		}
+//		if(!canSendChunks) {
+//			CompletableFuture<Void> failure = new CompletableFuture<Void>();
+//			failure.completeExceptionally(new IllegalStateException("Header "+KnownHeaderName.TRANSFER_ENCODING.getHeaderName()+" was not set with 'chunked' so you can't send chunks"));
+//			return failure;
+//		}
 		
 		ByteBuffer buffer = parser.marshalToByteBuffer(state, chunk);
 		return channel.write(buffer);
