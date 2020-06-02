@@ -43,7 +43,9 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 
 		ResponseProcessorAppError processor = new ResponseProcessorAppError(
 				invokeInfo.getRequestCtx(), dynamicInfo.getLoadedController(), invokeInfo.getHandler());
-		return invokeImpl(invokeInfo, dynamicInfo, data, processor, routeData.isForceEndOfStream());
+		
+		CancelHolder cancelFunc = new CancelHolder(); //useless since not tied to RouterStreamRef but invoke error routes are quick anyways so no need to cancel
+		return invokeImpl(invokeInfo, dynamicInfo, data, processor, cancelFunc, routeData.isForceEndOfStream());
 	}
 	
 	@Override
@@ -51,7 +53,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
 				invokeInfo.getRequestCtx(), 
 				dynamicInfo.getLoadedController(), invokeInfo.getHandler());
-		return invokeImpl(invokeInfo, dynamicInfo, data, processor, false);
+		return invokeRealRoute(invokeInfo, dynamicInfo, data, processor, false);
 	}
 	
 	@Override
@@ -60,7 +62,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 		if(content.getBodyContentBinder() == null)
 			throw new IllegalArgumentException("bodyContentBinder is required for these routes yet it is null here.  bug");
 		ResponseProcessorContent processor = new ResponseProcessorContent(invokeInfo.getRequestCtx(), invokeInfo.getHandler());
-		return invokeImpl(invokeInfo, dynamicInfo, data, processor, false);
+		return invokeRealRoute(invokeInfo, dynamicInfo, data, processor, false);
 	}
 
 	@Override

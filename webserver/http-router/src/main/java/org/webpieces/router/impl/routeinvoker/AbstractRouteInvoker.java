@@ -126,27 +126,36 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			return new RouterStreamRef("controllerFailed", failedFuture, null);
 		}
 	}
-	
-	protected RouterStreamRef invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
+
+	protected RouterStreamRef invokeRealRoute(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
 		Service<MethodMeta, Action> service = dynamicInfo.getService();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
 		invokeInfo.getHandler().initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
-		
-		return invokeAny(invokeInfo, loadedController, service, data, processor, forceEndOfStream);
+
+		CancelHolder cancelFunc = new CancelHolder();
+		CompletableFuture<StreamWriter> writer =  invokeAny(invokeInfo, loadedController, service, data, processor, cancelFunc, forceEndOfStream);
+	
+		return new RouterStreamRef("invokeAny", writer, cancelFunc);		
+	}
+	
+	protected CompletableFuture<StreamWriter> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, CancelHolder cancelFunc, boolean forceEndOfStream) {
+		Service<MethodMeta, Action> service = dynamicInfo.getService();
+		LoadedController loadedController = dynamicInfo.getLoadedController();
+		invokeInfo.getHandler().initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
+
+		return invokeAny(invokeInfo, loadedController, service, data, processor, cancelFunc, forceEndOfStream);
 	}
 
-	private RouterStreamRef invokeAny(
+	private CompletableFuture<StreamWriter> invokeAny(
 			InvokeInfo invokeInfo,
 			LoadedController loadedController,
 			Service<MethodMeta, Action> service,
 			RouteData data,
 			Processor processor,
+			CancelHolder cancelFunc,
 			boolean forceEndOfStream) {
 		
-		CancelHolder cancelFunc = new CancelHolder();
-		
-		CompletableFuture<StreamWriter> writer = invokeAnyImpl1(invokeInfo, loadedController, service, data, processor, cancelFunc, forceEndOfStream);
-		return new RouterStreamRef("invokeAny", writer, cancelFunc);
+		return invokeAnyImpl1(invokeInfo, loadedController, service, data, processor, cancelFunc, forceEndOfStream);
 	}
 	 
 	private  CompletableFuture<StreamWriter> invokeAnyImpl1(
@@ -236,7 +245,9 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
 				invokeInfo.getRequestCtx(), 
 				loadedController, invokeInfo.getHandler());
-		return invokeAny(invokeInfo, loadedController, service, data, processor, false);
+		
+		CancelHolder cancelFunc = new CancelHolder();//useless since not tied to streamref but notfound is quick anyways so no need to cancel it
+		return invokeAny(invokeInfo, loadedController, service, data, processor, cancelFunc, false);
 	}
 	
 	private  Service<MethodMeta, Action> createNotFoundService(BaseRouteInfo route, RouterRequest req) {
