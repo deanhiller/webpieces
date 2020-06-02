@@ -7,13 +7,3 @@ dependencies {
 
 publishing.publications.mavenJava.pom.description='A re-usable asynchronous http2 parser'
 
-println("Java Version="+ System.getProperty("java.version"))
-if(!System.getProperty("java.version").startsWith("1.8")) {
-  compileTestJava {
-        options.compilerArgs += ["--add-modules", "java.xml.bind"]
-    }
-
-  test {
-    jvmArgs += ["--add-modules", "java.xml.bind"]
-  }
-}

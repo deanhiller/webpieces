@@ -2,9 +2,9 @@ package org.webpieces.router.api;
 
 import java.util.Map;
 
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 
-public interface RouterResponseHandler extends ResponseHandler {
+public interface RouterResponseHandler extends ResponseStreamHandle {
 
     /**
      * returns FrontendSocket for webpieces or whatever socket for other implementations wire

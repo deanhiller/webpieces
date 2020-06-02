@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -30,6 +31,7 @@ import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.urlparse.UrlEncodedParser;
@@ -41,6 +43,8 @@ import com.webpieces.hpack.api.subparsers.AcceptType;
 import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
 import com.webpieces.hpack.api.subparsers.ParsedContentType;
 import com.webpieces.hpack.impl.subparsers.HeaderPriorityParserImpl;
+import com.webpieces.http2engine.api.MyStreamRef;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -82,7 +86,7 @@ public class RouterServiceImpl implements RouterService {
 	private final AbstractRouterService service;
 	private final HeaderPriorityParser headerParser;
 	private final UrlEncodedParser urlEncodedParser;
-	private final FutureHelper futureUtil;
+	private final RouterFutureUtil futureUtil;
 	private final RouterConfig config;
 	private final Random random;
 	private final Provider<ProxyStreamHandle> proxyProvider;
@@ -97,7 +101,7 @@ public class RouterServiceImpl implements RouterService {
 		HeaderPriorityParserImpl headerParser,
 		UrlEncodedParser urlEncodedParser,
 		Provider<ProxyStreamHandle> proxyProvider,
-		FutureHelper futureUtil,
+		RouterFutureUtil futureUtil, 
 		Random random
 	) {
 		this.config = config;
@@ -129,7 +133,7 @@ public class RouterServiceImpl implements RouterService {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> incomingRequest(Http2Request req, RouterResponseHandler handler) {
+	public StreamRef incomingRequest(Http2Request req, RouterResponseHandler handler) {
 		//******************************************************************************************
 		// DO NOT ADD CODE HERE OR ABOVE THIS METHOD in RouterService.  This is our CATCH-ALL point so
 		// ANY code above that is not protected from our catch and respond to clients
@@ -145,10 +149,20 @@ public class RouterServiceImpl implements RouterService {
 		MDC.put("txId", txId);
 		//top level handler...
 		try {
-			return futureUtil.catchBlock(
-					() -> incomingRequestImpl(req, proxyHandler).thenApply(w -> new TxStreamWriter(txId, w)),
-					(t) -> proxyHandler.topLevelFailure(req, t)
-			);
+			
+
+			RouterStreamRef streamRef = incomingRequestProtected(req, proxyHandler);
+			CompletableFuture<StreamWriter> writer = streamRef.getWriter().thenApply(w -> new TxStreamWriter(txId, w));
+
+			CompletableFuture<StreamWriter> finalWriter = writer.handle( (r, t) -> {
+				if(t == null)
+					return CompletableFuture.completedFuture(r);
+	
+				CompletableFuture<StreamWriter> fut = proxyHandler.topLevelFailure(req, t);
+				return fut; 
+			}).thenCompose(Function.identity());
+			
+			return new RouterStreamRef("routerSevcTop", finalWriter, streamRef);
 		} finally {
 			MDC.put("txId", null);
 		}
@@ -164,7 +178,15 @@ public class RouterServiceImpl implements RouterService {
 		return s1+"-"+s2; //human readable instance id
 	}
 
-	public CompletableFuture<StreamWriter> incomingRequestImpl(Http2Request req, ProxyStreamHandle handler) {
+	private RouterStreamRef incomingRequestProtected(Http2Request req, ProxyStreamHandle handler) {
+		try {
+			return incomingRequestImpl(req, handler);
+		} catch(Throwable e) {
+			return new RouterStreamRef("protectedTop", e);
+		}
+	}
+	
+	private RouterStreamRef incomingRequestImpl(Http2Request req, ProxyStreamHandle handler) {
 		if(!started)
 			throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 

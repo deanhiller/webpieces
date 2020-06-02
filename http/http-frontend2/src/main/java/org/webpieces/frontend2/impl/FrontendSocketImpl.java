@@ -13,6 +13,7 @@ import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.locking.PermitQueue;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.error.FarEndClosedConnection;
 import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
@@ -99,7 +100,9 @@ public class FrontendSocketImpl implements FrontendSocket {
 			return;
 		
 		ShutdownStream shutdown = new ShutdownStream(stream.getStreamId(), f);
-		stream.getStreamHandle().incomingCancel(shutdown);
+		
+		StreamRef streamRef = stream.getStreamRef();
+		streamRef.cancel(shutdown);
 	}
 
 	@Override

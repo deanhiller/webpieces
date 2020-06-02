@@ -2,6 +2,7 @@ package org.webpieces.http2client.impl;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.dto.CancelReason;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -11,14 +12,14 @@ import org.webpieces.http2client.api.exception.ServerRstStreamException;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
-public class SingleResponseListener implements ResponseHandler, StreamWriter {
+public class SingleResponseListener implements ResponseStreamHandle, StreamWriter {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private CompletableFuture<FullResponse> responseFuture = new CompletableFuture<FullResponse>();
@@ -32,7 +33,7 @@ public class SingleResponseListener implements ResponseHandler, StreamWriter {
 			responseFuture.complete(new FullResponse(resp, dataGen.emptyWrapper(), null));
 			return CompletableFuture.completedFuture(null);
 		}
-		
+				
 		return CompletableFuture.completedFuture(this);
 	}
 	

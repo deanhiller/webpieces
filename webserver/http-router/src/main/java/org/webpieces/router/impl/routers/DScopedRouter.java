@@ -3,6 +3,7 @@ package org.webpieces.router.impl.routers;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +11,14 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
+import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
@@ -25,7 +29,9 @@ public class DScopedRouter extends EScopedRouter {
 
 	private ENotFoundRouter pageNotFoundRouter;
 	private EInternalErrorRouter internalSvrErrorRouter;
-	private FutureHelper futureUtil;
+	private RouterFutureUtil futureUtil;
+
+	private FutureHelper futureHelper;
 
 	public DScopedRouter(
 			RouterInfo routerInfo, 
@@ -33,24 +39,36 @@ public class DScopedRouter extends EScopedRouter {
 			List<AbstractRouter> routers, 
 			ENotFoundRouter notFoundRouter, 
 			EInternalErrorRouter internalErrorRouter,
-			FutureHelper futureUtil
+			RouterFutureUtil futureUtil,
+			FutureHelper futureHelper
 	) {
 		super(futureUtil, routerInfo, pathPrefixToNextRouter, routers);
 		this.pageNotFoundRouter = notFoundRouter;
 		this.internalSvrErrorRouter = internalErrorRouter;
 		this.futureUtil = futureUtil;
+		this.futureHelper = futureHelper;
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
-		return futureUtil.catchBlock(
-				() -> invokeRouteCatchNotFound(ctx, handler, subPath),
-				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t, false)
-		).thenApply( strWriter -> createProxy(strWriter, ctx, handler));
+	public RouterStreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+		
+		RouterStreamRef streamRef = invokeRouteCatchNotFound(ctx, handler, subPath);
+		
+		CompletableFuture<StreamWriter> writer = streamRef.getWriter()
+				.handle( (r, t) -> {
+					if(t == null)
+						return CompletableFuture.completedFuture(r);
+		
+					return tryRenderWebAppErrorControllerResult(ctx, handler, t, false);
+				}).thenCompose(Function.identity());
+		
+		CompletableFuture<StreamWriter> proxyWriter = writer.thenApply(w -> createProxy(w, ctx, handler));
+		
+		return new RouterStreamRef("dScopedRouter", proxyWriter, streamRef);
 	}
 
 	private StreamWriter createProxy(StreamWriter strWriter, RequestContext ctx, ProxyStreamHandle handler) {
-		return new NonStreamingWebAppErrorProxy(futureUtil, strWriter, handler,
+		return new NonStreamingWebAppErrorProxy(futureHelper, strWriter, handler,
 				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t, true));
 	}
 
@@ -59,7 +77,7 @@ public class DScopedRouter extends EScopedRouter {
 			//if the socket was closed before we responded, do not log a failure
 			if(log.isTraceEnabled())
 				log.trace("async exception due to socket being closed", t);
-			return CompletableFuture.<StreamWriter>completedFuture(new NullStream());
+			return CompletableFuture.<StreamWriter>completedFuture(new NullStreamWriter());
 		}
 
 		String failedRoute = "<Unknown Route>";
@@ -78,7 +96,7 @@ public class DScopedRouter extends EScopedRouter {
 			RstStreamFrame frame = new RstStreamFrame();
 			frame.setKnownErrorCode(Http2ErrorCode.CANCEL);
 			handler.cancel(frame);
-			return CompletableFuture.completedFuture(new NullStream());
+			return CompletableFuture.completedFuture(new NullStreamWriter());
 		}
 		
 		return invokeWebAppErrorController(t, ctx, handler, failedRoute, forceEndOfStream);
@@ -88,22 +106,27 @@ public class DScopedRouter extends EScopedRouter {
 	 * NOTE: We have to catch any exception from the method processNotFound so we can't catch and call internalServerError in this
 	 * method without nesting even more!!! UGH, more nesting sucks
 	 */
-	private CompletableFuture<StreamWriter> invokeRouteCatchNotFound(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
-		return futureUtil.catchBlock(
-				() -> super.invokeRoute(ctx, handler, subPath),
-				(t) -> {
+	private RouterStreamRef invokeRouteCatchNotFound(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+		RouterStreamRef streamRef = super.invokeRoute(ctx, handler, subPath);
+
+		CompletableFuture<StreamWriter> writer = streamRef.getWriter()
+				.handle( (r, t) -> {
+					if(t == null)
+						return CompletableFuture.completedFuture(r);
+
 					if (t instanceof NotFoundException)
 						return notFound((NotFoundException) t, ctx, handler);
 					return futureUtil.<StreamWriter>failedFuture(t);
-				}
-		);
+				}).thenCompose(Function.identity());
+
+		return new RouterStreamRef("DScopedNotFoundCheck", writer, streamRef);
 	}
 
 	private CompletableFuture<StreamWriter> invokeWebAppErrorController(
 			Throwable exc, RequestContext requestCtx, ProxyStreamHandle handler, Object failedRoute, boolean forceEndOfStream) {
 		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
 		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
-		return futureUtil.catchBlockWrap(
+		return futureHelper.catchBlockWrap(
 			() -> internalSvrErrorRouter.invokeErrorRoute(requestCtx, handler, forceEndOfStream),
 			(t) -> convert(failedRoute, t)
 		);
@@ -114,7 +137,7 @@ public class DScopedRouter extends EScopedRouter {
 	}
 	
 	private CompletableFuture<StreamWriter> notFound(NotFoundException exc, RequestContext requestCtx, ProxyStreamHandle handler) {
-		return futureUtil.catchBlockWrap(
+		return futureHelper.catchBlockWrap(
 			() -> pageNotFoundRouter.invokeNotFoundRoute(requestCtx, handler, exc),
 			(e) -> new RuntimeException("NotFound Route had an exception", e)
 		);

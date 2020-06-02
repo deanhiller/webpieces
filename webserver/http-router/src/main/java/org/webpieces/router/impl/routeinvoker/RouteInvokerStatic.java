@@ -9,10 +9,12 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.proxyout.filereaders.StaticFileReader;
+import org.webpieces.router.impl.routers.NullStreamWriter;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.futures.FutureHelper;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class RouteInvokerStatic {
@@ -34,7 +36,7 @@ public class RouteInvokerStatic {
 	}
 
 
-	public CompletableFuture<StreamWriter> invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
+	public RouterStreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
 		
 		boolean isOnClassPath = data.isOnClassPath();
 
@@ -53,6 +55,6 @@ public class RouteInvokerStatic {
 
 		ResponseStaticProcessor processor = new ResponseStaticProcessor(reader, pool, futureUtil, ctx, handler);
 
-		return processor.renderStaticResponse(resp).thenApply(s -> new NullWriter());
+		return processor.renderStaticResponse(resp);
 	}
 }

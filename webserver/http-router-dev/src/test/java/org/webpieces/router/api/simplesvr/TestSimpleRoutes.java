@@ -34,6 +34,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
@@ -108,7 +109,8 @@ public class TestSimpleRoutes {
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 		
 		MockStreamHandle mockStream = new MockStreamHandle();
-		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		StreamRef ref = server.incomingRequest(req, mockStream);
+		CompletableFuture<StreamWriter> future = ref.getWriter(); 
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
 		Http2Response resp = mockStream.getLastResponse();
@@ -120,7 +122,8 @@ public class TestSimpleRoutes {
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.POST, "/meeting");
 		
 		MockStreamHandle mockStream = new MockStreamHandle();
-		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		StreamRef ref = server.incomingRequest(req, mockStream);
+		CompletableFuture<StreamWriter> future = ref.getWriter(); 
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
 		Http2Response resp = mockStream.getLastResponse();

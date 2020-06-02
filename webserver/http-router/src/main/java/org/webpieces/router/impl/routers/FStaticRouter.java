@@ -10,9 +10,11 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class FStaticRouter extends AbstractRouterImpl {
@@ -43,7 +45,7 @@ public class FStaticRouter extends AbstractRouterImpl {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, ProxyStreamHandle handler) {
+	public RouterStreamRef invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteInfoForStatic routeInfo = new RouteInfoForStatic(isOnClassPath, targetCacheLocation, fileSystemPath, isFile);
 		return invoker.invokeStatic(ctx, handler, routeInfo);
 	}

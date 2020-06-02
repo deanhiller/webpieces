@@ -13,11 +13,12 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
-public class MockResponseListener extends MockSuperclass implements ResponseHandler {
+public class MockResponseListener extends MockSuperclass implements ResponseStreamHandle {
 
 	enum Method implements MethodEnum {
 		INCOMING_RESPONSE,
@@ -41,6 +42,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 	public CompletableFuture<Void> cancel(CancelReason frame) {
 		return (CompletableFuture<Void>) super.calledMethod(Method.CANCEL, frame);
 	}
+	
 	@Override
 	public PushStreamHandle openPushStream() {
 		return new MockPushStreamHandle();
@@ -66,19 +68,19 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 	public void setIncomingRespDefault(CompletableFuture<StreamWriter> retVal) {
 		super.setDefaultReturnValue(Method.INCOMING_RESPONSE, retVal);
 	}
-
+	
 	public List<CancelReason> getRstStreams() {
 		Stream<ParametersPassedIn> calledMethodList = super.getCalledMethods(Method.CANCEL);
 		Stream<CancelReason> retVal = calledMethodList.map(p -> (CancelReason)p.getArgs()[0]);
 		return retVal.collect(Collectors.toList());
-	}
+		}
 
 	public CancelReason getSingleRstStream() {
 		List<CancelReason> rstStreams = getRstStreams();
 		if(rstStreams.size() != 1)
 			throw new IllegalStateException("There is not exactly one return value like expected.  num times method called="+rstStreams.size());
 		return rstStreams.get(0);
-	}
+		}
 
 	
 	private class MockPushStreamHandle implements PushStreamHandle {
@@ -128,5 +130,6 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 		Stream<CancelReason> map = super.getCalledMethods(Method.CANCEL_PUSH).map(s -> (CancelReason)s.getArgs()[0]);
 		return map.collect(Collectors.toList());
 	}
+
 
 }

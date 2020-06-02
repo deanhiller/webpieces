@@ -8,6 +8,7 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class MockStreamWriter extends MockSuperclass implements StreamWriter {
@@ -37,4 +38,5 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 	public void addProcessResponse(CompletableFuture<Void> future) {
 		super.addValueToReturn(Method.SEND_MORE, future);
 	}
+
 }

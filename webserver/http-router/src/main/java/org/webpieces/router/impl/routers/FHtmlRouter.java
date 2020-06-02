@@ -8,9 +8,11 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForHtml;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class FHtmlRouter extends AbstractDynamicRouterImpl implements ReversableRouter {
@@ -30,7 +32,7 @@ public class FHtmlRouter extends AbstractDynamicRouterImpl implements Reversable
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invoke(RequestContext ctx, ProxyStreamHandle handler) {
+	public RouterStreamRef invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteData data = new RouteInfoForHtml(isCheckSecureToken, matchInfo.getHttpMethod());
 		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, false);
 		return invoker.invokeHtmlController(invokeInfo, dynamicInfo, data);

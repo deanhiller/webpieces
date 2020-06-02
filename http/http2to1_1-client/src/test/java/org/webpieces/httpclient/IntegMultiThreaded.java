@@ -19,7 +19,8 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -64,7 +65,8 @@ public class IntegMultiThreaded {
             Http2Request request = new Http2Request(req);
             request.setEndOfStream(true);
 
-            socket.openStream().process(request, listener)
+			StreamRef streamRef = socket.openStream().process(request, listener);
+			streamRef.getWriter()
     				.exceptionally(e -> {
     					reportException(socket, e);
     					return null;
@@ -130,7 +132,7 @@ public class IntegMultiThreaded {
         return null;
     }
 	
-	private static class ChunkedResponseListener implements ResponseHandler, PushPromiseListener, PushStreamHandle {
+	private static class ChunkedResponseListener implements ResponseStreamHandle, PushPromiseListener, PushStreamHandle {
 
 		@Override
 		public CompletableFuture<StreamWriter> process(Http2Response response) {

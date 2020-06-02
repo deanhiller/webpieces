@@ -1,9 +1,14 @@
 package org.webpieces.http2client;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
+import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.http2client.mock.MockResponseListener;
@@ -12,14 +17,9 @@ import org.webpieces.http2client.util.RequestHolder;
 import org.webpieces.http2client.util.Requests;
 import org.webpieces.http2client.util.RequestsSent;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class TestCMaxConcurrentSetting extends AbstractTest {
 	
@@ -91,9 +91,11 @@ public class TestCMaxConcurrentSetting extends AbstractTest {
 		//do not set default incoming response as we want to delay the resolution of the future
 		MockResponseListener listener2 = new MockResponseListener();
 
-		CompletableFuture<StreamWriter> future = httpSocket.openStream().process(request1, listener1);
-		CompletableFuture<StreamWriter> future2 = httpSocket.openStream().process(request2, listener2);
-		
+		StreamRef streamRef1 = httpSocket.openStream().process(request1, listener1);
+		CompletableFuture<StreamWriter> future = streamRef1.getWriter();
+		StreamRef streamRef2 = httpSocket.openStream().process(request2, listener2);
+		CompletableFuture<StreamWriter> future2 = streamRef2.getWriter();
+
 		RequestHolder r1 = new RequestHolder(request1, listener1, writer1, future);
 		RequestHolder r2 = new RequestHolder(request2, listener2, writer2, future2);		
 		RequestsSent requests = new RequestsSent(r1, r2);

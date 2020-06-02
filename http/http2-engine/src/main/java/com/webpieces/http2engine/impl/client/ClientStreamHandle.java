@@ -4,15 +4,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseHandler;
-import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.impl.EngineStreamWriter;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
-public class ClientStreamHandle implements StreamHandle {
+public class ClientStreamHandle implements RequestStreamHandle {
 
 	private AtomicInteger nextAvailableStreamId;
 	private Level3ClntOutgoingSyncro outgoingSyncro;
@@ -30,7 +31,7 @@ public class ClientStreamHandle implements StreamHandle {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Request request, ResponseHandler responseListener) {
+	public StreamRef process(Http2Request request, ResponseStreamHandle responseListener) {
 		if(request == null)
 			throw new IllegalStateException("request cannot be null");
 		else if(request.getStreamId() != 0)
@@ -41,21 +42,36 @@ public class ClientStreamHandle implements StreamHandle {
 			
 		int streamId = getNextAvailableStreamId();
 		request.setStreamId(streamId);
-		
-		return outgoingSyncro.sendRequestToSocket(request, responseListener)
+
+		CompletableFuture<StreamWriter> future = outgoingSyncro.sendRequestToSocket(request, responseListener)
 				.thenApply(s -> {
 					stream = s;
 					return new EngineStreamWriter(s, outgoingSyncro);
 				});
-	}
 
-	@Override
-	public CompletableFuture<Void> cancel(CancelReason reset) {
-		if(stream == null)
-			throw new IllegalStateException("You have not sent a request yet so there is nothing to cancel");
-		else if(!(reset instanceof RstStreamFrame))
-			throw new IllegalArgumentException("This api is re-used on the server to force consistency but client can only pass in RstStreamFrame object to be sent to server here");
-		return outgoingSyncro.sendRstToSocket(stream, (RstStreamFrame) reset);
-	}
+		return new MyStreamRef(future);
+ 	}
 
+	public class MyStreamRef implements StreamRef {
+
+		private CompletableFuture<StreamWriter> future;
+
+		public MyStreamRef(CompletableFuture<StreamWriter> future) {
+			this.future = future;
+		}
+
+		@Override
+		public CompletableFuture<StreamWriter> getWriter() {
+			return future;
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason reset) {
+			if (stream == null)
+				throw new IllegalStateException("You have not sent a request yet so there is nothing to cancel");
+			else if (!(reset instanceof RstStreamFrame))
+				throw new IllegalArgumentException("This api is re-used on the server to force consistency but client can only pass in RstStreamFrame object to be sent to server here");
+			return outgoingSyncro.sendRstToSocket(stream, (RstStreamFrame) reset);
+		}
+	}
 }

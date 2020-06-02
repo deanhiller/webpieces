@@ -26,6 +26,7 @@ import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.Http2Method;
@@ -77,13 +78,19 @@ class ServerFactory {
 		public void fireIsClosed(FrontendSocket socketThatClosed) {
 			
 		}
-
     }
     
     private static class StreamHandleImpl implements HttpStream {
 
+    	private CompletableFuture<StreamWriter> streamWriter = new CompletableFuture<StreamWriter>();
+    	
 		@Override
-		public CompletableFuture<StreamWriter> incomingRequest(Http2Request headers, ResponseStream stream) {
+		public StreamRef incomingRequest(Http2Request headers, ResponseStream stream) {
+			CompletableFuture<StreamWriter> writer = incomingRequestImpl(headers, stream);
+			return new MyStremRef(writer);
+		}
+		
+		public CompletableFuture<StreamWriter> incomingRequestImpl(Http2Request headers, ResponseStream stream) {
 			log.info(stream+"request="+headers);
 			Http2Response response = Http2Requests.createResponse(headers.getStreamId());
 			if(headers.getKnownMethod() == Http2Method.HEAD) {
@@ -91,29 +98,47 @@ class ServerFactory {
 					log.error("they sent bad headers and we missed it in the engine?");
 				response.setEndOfStream(true);
 				log.info(stream+"HEAD request creating response from request.  endStream="+response.isEndOfStream());
-				return stream.sendResponse(response).thenApply(s -> new NullStreamWriter(stream));
+				return stream.process(response).thenApply(s -> new NullStreamWriter(stream, s));
 			} else if(headers.isEndOfStream()) {
 				log.info(stream+"EOS creating response from request.  endStream="+response.isEndOfStream());
-				return stream.sendResponse(response).thenApply(s -> new NullStreamWriter(stream));
+				return stream.process(response).thenApply(s -> new NullStreamWriter(stream, s));
 			}			
 			
 			log.info(stream+"NOT EOS delaying response.");			
 
-			return CompletableFuture.completedFuture(new CachedResponseWriter(stream, response));
+			streamWriter.complete(new CachedResponseWriter(stream, response));
+			return streamWriter;
+		}
+
+    }
+
+    private static class MyStremRef implements StreamRef {
+
+		private CompletableFuture<StreamWriter> writer;
+
+		public MyStremRef(CompletableFuture<StreamWriter> writer) {
+			this.writer = writer;
 		}
 
 		@Override
-		public CompletableFuture<Void> incomingCancel(CancelReason reset) {
-			return CompletableFuture.completedFuture(null);
+		public CompletableFuture<StreamWriter> getWriter() {
+			return writer;
 		}
-    }
 
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason reason) {
+			return CompletableFuture.completedFuture(null); //nothing really to do on cancel
+		}
+    	
+    }
     private static class NullStreamWriter implements StreamWriter {
 
 		private ResponseStream stream;
+		private StreamWriter writer;
 
-		public NullStreamWriter(ResponseStream stream) {
+		public NullStreamWriter(ResponseStream stream, StreamWriter writer) {
 			this.stream = stream;
+			this.writer = writer;
 		}
 
 		@Override
@@ -121,6 +146,7 @@ class ServerFactory {
 			log.error(stream+"receiving data="+data);
 			return CompletableFuture.completedFuture(null);
 		}
+
     }
 
 //    private static class AppStreamWriter implements StreamWriter {
@@ -147,6 +173,7 @@ class ServerFactory {
 		private ResponseStream stream;
 		private Http2Response response;
 		private List<StreamMsg> datas = new ArrayList<>();
+		private CompletableFuture<StreamWriter> futureWriter = new CompletableFuture<StreamWriter>();
 
 		public CachedResponseWriter(ResponseStream stream, Http2Response response) {
 			this.stream = stream;
@@ -161,7 +188,9 @@ class ServerFactory {
 				return CompletableFuture.completedFuture(null);
 			}
 			
-			CompletableFuture<StreamWriter> future = stream.sendResponse(response);
+			CompletableFuture<StreamWriter> future = stream.process(response);
+			future.thenApply(w -> futureWriter.complete(w));
+			
 			return future.thenCompose(w -> sendAllDatas(w, datas));
 		}
 		
@@ -172,5 +201,6 @@ class ServerFactory {
     		}
     		return fut;
     	}
+
     }
 }

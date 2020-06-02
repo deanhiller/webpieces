@@ -1,5 +1,6 @@
 package org.webpieces.httpfrontend2.api.http2;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -7,11 +8,15 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.api.ResponseStream;
+import org.webpieces.httpfrontend2.api.mock2.MockStreamRef;
+import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.Cancel;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
@@ -35,8 +40,8 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 		
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
-		//no cancels
-		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		
+		Assert.assertTrue(mockListener.isClosed());
 		
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -58,6 +63,11 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 	 */
 	@Test
 	public void testSection5_1BadFrameReceivedInReservedRemoteState() {
+		MockStreamWriter mockWriter = new MockStreamWriter();
+		CompletableFuture<StreamWriter> futA = CompletableFuture.completedFuture(mockWriter);
+		MockStreamRef mockStream = new MockStreamRef(futA );
+		mockListener.addMockStreamToReturn(mockStream);
+		
 		Http2Request request = Http2Requests.createRequest(1, true);
 		mockChannel.send(request);
 		
@@ -74,8 +84,7 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 		DataFrame data = Http2Requests.createData1(push.getPromisedStreamId(), false);
 		mockChannel.send(data);
 		
-		Cancel info = mockListener.getCancelInfo();
-		Assert.assertEquals(stream, info.stream);
+		Assert.assertTrue(mockStream.isCancelled());
 
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -240,8 +249,8 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 		
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
-		//no cancels
-		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		
+		Assert.assertTrue(mockListener.isClosed());
 		
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -271,6 +280,11 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 	 */
 	@Test
 	public void testSection5_1_1TooLowStreamIdAfterHighStreamId() {
+		MockStreamWriter mockWriter = new MockStreamWriter();
+		CompletableFuture<StreamWriter> futA = CompletableFuture.completedFuture(mockWriter);
+		MockStreamRef mockStream = new MockStreamRef(futA );
+		mockListener.addMockStreamToReturn(mockStream);
+		
 		Http2Request request1 = Http2Requests.createRequest(5, true);
 		mockChannel.send(request1);
 		mockListener.getSingleRequest();
@@ -295,8 +309,10 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 		
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
-		//no cancels(since we already cancelled it)
-		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		
+		Assert.assertFalse(mockListener.isClosed()); //we do not close the channel
+
+		Assert.assertFalse(mockStream.isCancelled()); //our existing streams stays valid and open
 
 		//remote receives goAway
 		RstStreamFrame frame = (RstStreamFrame) mockChannel.getFrameAndClear();

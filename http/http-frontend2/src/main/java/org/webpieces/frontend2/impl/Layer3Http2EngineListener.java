@@ -8,12 +8,11 @@ import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseHandler;
-import com.webpieces.http2engine.api.StreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
-import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class Layer3Http2EngineListener implements ServerEngineListener {
 
@@ -28,7 +27,7 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	}
 
 	@Override
-	public StreamHandle openStream() {
+	public RequestStreamHandle openStream() {
 		HttpStream handle2 = httpListener.openStream(socket);
 		return new FrontendStreamProxy(handle2);
 	}
@@ -38,7 +37,7 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 		socket.internalClose();
 	}
 	
-	private class FrontendStreamProxy implements StreamHandle {
+	private class FrontendStreamProxy implements RequestStreamHandle {
 
 		private HttpStream handle2;
 
@@ -47,14 +46,9 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Request request, ResponseHandler responseListener) {
+		public StreamRef process(Http2Request request, ResponseStreamHandle responseListener) {
 			Http2StreamImpl stream = new Http2StreamImpl(socket, responseListener, request.getStreamId());
 			return handle2.incomingRequest(request, stream);
-		}
-
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason payload) {
-			return handle2.incomingCancel(payload);
 		}
 	}
 	

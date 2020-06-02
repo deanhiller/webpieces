@@ -6,7 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Trailers;
-import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
@@ -54,8 +55,8 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 	public CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
 		if(stream instanceof ServerStream) {
 			ServerStream str = (ServerStream) stream;
-			StreamHandle handle = str.getStreamHandle();
-			return handle.cancel(payload);
+			StreamRef streamRef = str.getStreamRef();
+			return streamRef.cancel(payload);
 		}
 
 		//since the stream is closed, any writes to the push streams will automatically close and be cancelled
@@ -65,26 +66,25 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 	@Override
 	public CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
 		ServerStream s = (ServerStream) stream;
-		StreamWriter writer = s.getStreamWriter();
-		return writer.processPiece(payload).thenApply(v -> null);
+		CompletableFuture<StreamWriter> writer = s.getStreamWriter();
+	
+		return writer.thenCompose(w -> w.processPiece(payload));
 	}
 
 	@Override
 	public CompletableFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload) {
 		ServerStream s = (ServerStream) stream;
-		StreamWriter writer = s.getStreamWriter();
-		return writer.processPiece(payload).thenApply(w->null);
+		CompletableFuture<StreamWriter> writer = s.getStreamWriter();
+		return writer.thenCompose(w -> w.processPiece(payload));
 	}
 
 	public CompletableFuture<Void> fireRequestToApp(ServerStream stream, Http2Request payload) {
 		SvrSideResponseHandler handler = new SvrSideResponseHandler(level1ServerEngine, stream, pushIdGenerator);
-		StreamHandle streamHandle = listener.openStream();
-		stream.setStreamHandle(streamHandle);
-		return streamHandle.process(payload, handler)
-				.thenApply( w -> {
-					stream.setStreamWriter(w);				
-					return null;
-				});
+		RequestStreamHandle streamHandle = listener.openStream();
+		StreamRef streamRef = streamHandle.process(payload, handler);
+		stream.setStreamHandle(streamHandle, streamRef);
+
+		return streamRef.getWriter().thenApply(w -> null);
 	}
 
 }

@@ -1,11 +1,11 @@
 package com.webpieces.http2engine.impl;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.impl.shared.Synchro;
+import com.webpieces.http2engine.impl.client.Level3ClntOutgoingSyncro;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Request or Response StreamWriter
@@ -13,10 +13,10 @@ import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 public class EngineStreamWriter implements StreamWriter {
 
 	private Stream stream;
-	private Synchro synchroLayer;
+	private Level3ClntOutgoingSyncro synchroLayer;
 	private boolean streamEnded;
 
-	public EngineStreamWriter(Stream stream, Synchro level1) {
+	public EngineStreamWriter(Stream stream, Level3ClntOutgoingSyncro level1) {
 		this.stream = stream;
 		this.synchroLayer = level1;
 	}

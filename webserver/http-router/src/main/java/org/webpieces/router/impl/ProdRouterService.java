@@ -12,11 +12,13 @@ import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.google.inject.Injector;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 @Singleton
@@ -59,7 +61,7 @@ public class ProdRouterService extends AbstractRouterService {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
+	public RouterStreamRef incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
 		if(log.isDebugEnabled())
 			router.printAllRoutes();
 	

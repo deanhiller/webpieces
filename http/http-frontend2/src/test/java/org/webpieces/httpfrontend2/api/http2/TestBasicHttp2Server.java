@@ -38,14 +38,14 @@ public class TestBasicHttp2Server extends AbstractHttp2Test {
 		Assert.assertEquals(3, request2.getStreamId());
 		
 		Http2Response resp2 = Http2Requests.createResponse(request2.getStreamId());
-		CompletableFuture<StreamWriter> future = requestAndStream2.stream.sendResponse(resp2);
+		CompletableFuture<StreamWriter> future = requestAndStream2.stream.process(resp2);
 		Assert.assertTrue(future.isDone());
 
 		Http2Response frame2 = (Http2Response) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp2, frame2);
 
 		Http2Response resp1 = Http2Requests.createResponse(request1.getStreamId());
-		CompletableFuture<StreamWriter> future1 = requestAndStream1.stream.sendResponse(resp1);
+		CompletableFuture<StreamWriter> future1 = requestAndStream1.stream.process(resp1);
 		Assert.assertTrue(future1.isDone());
 
 		Http2Response frame1 = (Http2Response) mockChannel.getFrameAndClear();

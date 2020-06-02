@@ -3,6 +3,7 @@ package org.webpieces.httpclient11.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -11,15 +12,18 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient11.api.DataWriter;
 import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpclient11.api.HttpSocket;
+import org.webpieces.httpclient11.api.HttpStreamRef;
+import org.webpieces.httpclient11.api.SocketClosedException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -78,8 +82,19 @@ public class HttpSocketImpl implements HttpSocket {
 		CompletableFuture<HttpFullResponse> future = new CompletableFuture<HttpFullResponse>();
 		HttpResponseListener l = new CompletableListener(future);
 		HttpData data = new HttpData(request.getData(), true);
-		send(request.getRequest(), l).thenCompose(w -> {
+		
+		HttpStreamRef streamRef = send(request.getRequest(), l);
+
+		streamRef.getWriter().thenCompose(w -> {
 			return w.send(data);
+		});
+		
+		future.exceptionally( t -> {
+			//we can only cancel if it is NOT keepalive or else we have to keep socket open
+			if(t instanceof CancellationException && !isKeepAliveRequest(request.getRequest())) {
+				streamRef.cancel("CompletableFuture cancelled by client, so cancel request");
+			}
+			return null;
 		});
 		return future;
 	}
@@ -90,14 +105,14 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	@Override
-	public CompletableFuture<HttpDataWriter> send(HttpRequest request, HttpResponseListener listener) {
+	public HttpStreamRef send(HttpRequest request, HttpResponseListener listener) {
 		if(!connected)
 			throw new IllegalStateException("The socket is not yet connected");
 
 		return actuallySendRequest(request, listener);
 	}
 
-	private CompletableFuture<HttpDataWriter> actuallySendRequest(HttpRequest request, HttpResponseListener listener) {
+	private HttpStreamRef actuallySendRequest(HttpRequest request, HttpResponseListener listener) {
 		HttpResponseListener l = new CatchResponseListener(listener);
 		ByteBuffer wrap = parser.marshalToByteBuffer(state, request);
 		
@@ -108,7 +123,53 @@ public class HttpSocketImpl implements HttpSocket {
 		//put this on the queue before the write to be completed from the listener below
 		responsesToComplete.offer(l);
 		
-		return channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect));
+		boolean canSendChunks = false;
+		Header header = request.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING);
+		if(header != null && "chunked".equals(header.getValue()))
+			canSendChunks = true;
+		
+		boolean canSendTheChunks = canSendChunks;
+		
+		CompletableFuture<HttpDataWriter> writer = channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect, canSendTheChunks));
+		return new MyStreamRefImpl(writer, request);
+		
+	}
+	
+	private class MyStreamRefImpl implements HttpStreamRef {
+
+		private CompletableFuture<HttpDataWriter> writer;
+		private HttpRequest request;
+
+		public MyStreamRefImpl(CompletableFuture<HttpDataWriter> writer, HttpRequest request) {
+			this.writer = writer;
+			this.request = request;
+		}
+
+		@Override
+		public CompletableFuture<HttpDataWriter> getWriter() {
+			return writer;
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(Object reason) {
+			if(!isKeepAliveRequest(request)) {
+				return close();
+			}
+			
+			//nothing we can do in http1.1 since keep alive was sent and cancel means to cancel the 
+			//previous request.  TODO(dhiller): we should probably start disccarding the response coming back but alas
+			//clients can do that too (and http1.1 is going away)
+			return CompletableFuture.completedFuture(null);
+		}
+		
+	}
+	
+	private boolean isKeepAliveRequest(HttpRequest req) {
+		Header header = req.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
+		if(header != null && "keep-alive".equals(header.getValue())) {
+			return true;
+		}
+		return false;
 	}
 	
 	@Override
@@ -125,7 +186,7 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	private class MyDataListener implements DataListener {
-		private CompletableFuture<DataWriter> dataWriterFuture;
+		private CompletableFuture<HttpDataWriter> dataWriterFuture;
 		private boolean connectResponseReceived;
 
 		@Override
@@ -136,7 +197,7 @@ public class HttpSocketImpl implements HttpSocket {
 				//special case of just sending data through as we are doing proxying SSL stuff
 				HttpData data = new HttpData(wrapper, false);
 				return dataWriterFuture.thenCompose(w -> {
-					return w.incomingData(data);
+					return w.send(data);
 				});
 			}
 			
@@ -164,7 +225,7 @@ public class HttpSocketImpl implements HttpSocket {
 					//and just slam incomingData in BUT tie all those newFutures that are unresolved into the allFutures
 					//allFutures should complete when ALL dataWriterFuture plus the array of 'newFuture' resolves
 					CompletableFuture<Void> newFuture = dataWriterFuture.thenCompose(w -> {
-						return w.incomingData(data);
+						return w.send(data);
 					});
 
 
@@ -184,7 +245,7 @@ public class HttpSocketImpl implements HttpSocket {
 			return allFutures;
 		}
 
-		private CompletableFuture<DataWriter> processResponse(HttpResponse msg) {
+		private CompletableFuture<HttpDataWriter> processResponse(HttpResponse msg) {
 			if(msg.isHasChunkedTransferHeader() || msg.isHasNonZeroContentLength()) {					
 				HttpResponse resp = (HttpResponse) msg;
 				HttpResponseListener listener = responsesToComplete.peek();
@@ -200,6 +261,9 @@ public class HttpSocketImpl implements HttpSocket {
 		public void farEndClosed(Channel channel) {
 			log.info("far end closed");
 			isClosed = true;
+
+			SocketClosedException exc = new SocketClosedException("The remote end closed the socket");
+			failure(channel, null, exc);
 		}
 
 		@Override

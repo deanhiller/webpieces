@@ -10,6 +10,7 @@ import org.webpieces.router.api.routebldr.AllContentTypesBuilder;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.impl.ResettingLogic;
+import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.routers.BRouter;
 import org.webpieces.router.impl.routers.CRouter;
@@ -32,13 +33,16 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 
 	private FutureHelper futureUtil;
 
-	public DomainRouteBuilderImpl(FutureHelper futureUtil, RouteBuilderLogic holder, ResettingLogic resettingLogic, boolean useUniqueBackendRouter) {
+	private RouterFutureUtil routerFutures;
+
+	public DomainRouteBuilderImpl(RouterFutureUtil routerFutures, FutureHelper futureUtil, RouteBuilderLogic holder, ResettingLogic resettingLogic, boolean useUniqueBackendRouter) {
+		this.routerFutures = routerFutures;
 		this.futureUtil = futureUtil;
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
-		this.leftOverDomainsBuilder2 = new AllContentTypesBuilderImpl("<any>", holder, resettingLogic, futureUtil);
+		this.leftOverDomainsBuilder2 = new AllContentTypesBuilderImpl("<any>", holder, resettingLogic, futureUtil, routerFutures);
 		if(useUniqueBackendRouter)
-			this.backendRouteBuilder2 = new AllContentTypesBuilderImpl("<backend>", holder, resettingLogic, futureUtil);
+			this.backendRouteBuilder2 = new AllContentTypesBuilderImpl("<backend>", holder, resettingLogic, futureUtil, routerFutures);
 		else {
 			this.backendRouteBuilder2 = this.leftOverDomainsBuilder2;
 		}
@@ -83,7 +87,7 @@ public class DomainRouteBuilderImpl implements DomainRouteBuilder {
 		if(builder != null)
 			return builder;
 		
-		builder = new AllContentTypesBuilderImpl(domainRegEx, holder, resettingLogic, futureUtil);
+		builder = new AllContentTypesBuilderImpl(domainRegEx, holder, resettingLogic, futureUtil, routerFutures);
 		domainToRouteBuilder2.put(domainRegEx, builder);
 		return builder;
 	}

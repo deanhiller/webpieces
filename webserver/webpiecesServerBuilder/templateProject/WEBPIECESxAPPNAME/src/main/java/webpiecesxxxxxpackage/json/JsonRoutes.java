@@ -14,10 +14,13 @@ public class JsonRoutes implements Routes {
 	public void configure(DomainRouteBuilder domainRouteBldr) {
 		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		
+		
+		bldr.addStreamRoute(BOTH, POST, "/json/streaming", "JsonController.myStream", JsonRouteId.STREAMING_ROUTE);
+		
 		bldr.addContentRoute(BOTH, GET , "/json/read",         "JsonController.readOnly");
 
-		bldr.addContentRoute(BOTH, GET , "/json/{id}",         "JsonController.jsonRequest");
-		bldr.addContentRoute(BOTH, POST , "/json/{id}",        "JsonController.postJson");
+		bldr.addContentRoute(BOTH, GET , "/json/{id}",         "JsonController.jsonRequest", JsonRouteId.READ);
+		bldr.addContentRoute(BOTH, POST , "/json",        "JsonController.postJson");
 
 		bldr.addContentRoute(BOTH, GET , "/json/async/{id}",   "JsonController.asyncJsonRequest");
 		bldr.addContentRoute(BOTH, POST, "/json/async/{id}",   "JsonController.postAsyncJson");

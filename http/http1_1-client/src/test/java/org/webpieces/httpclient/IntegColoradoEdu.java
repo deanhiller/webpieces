@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.httpclient11.api.DataWriter;
+import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
@@ -52,14 +52,14 @@ public class IntegColoradoEdu {
 	private static class ChunkedResponseListener implements HttpResponseListener {
 
 		@Override
-		public CompletableFuture<DataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
+		public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 			log.info("received resp="+resp+" iscomplete="+isComplete);
 			return CompletableFuture.completedFuture(new Writer());
 		}
 
-		private class Writer implements DataWriter {
+		private class Writer implements HttpDataWriter {
 			@Override
-			public CompletableFuture<Void> incomingData(HttpData chunk) {
+			public CompletableFuture<Void> send(HttpData chunk) {
 				log.info("received resp="+chunk+" last="+chunk.isEndOfData());
 				return CompletableFuture.completedFuture(null);
 			}

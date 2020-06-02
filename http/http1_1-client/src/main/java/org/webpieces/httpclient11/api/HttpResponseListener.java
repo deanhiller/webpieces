@@ -28,7 +28,7 @@ public interface HttpResponseListener {
 	 * @param isComplete false if the transfer encoding is chunked in which case incomingChunk will
 	 * be called for each chunk coming
 	 */
-	public CompletableFuture<DataWriter> incomingResponse(HttpResponse resp, boolean isComplete);
+	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete);
 	
 	public void failure(Throwable e);
 

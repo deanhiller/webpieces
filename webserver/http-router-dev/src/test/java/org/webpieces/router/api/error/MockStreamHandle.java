@@ -31,9 +31,10 @@ public class MockStreamHandle implements RouterResponseHandler {
 		if(this.lastResponse != null)
 			tooManyResponses = true;
 		this.lastResponse = response;
+		
 		return CompletableFuture.completedFuture(new MockStreamWriter());
 	}
-
+	
 	private class MockStreamWriter implements StreamWriter {
 
 		@Override

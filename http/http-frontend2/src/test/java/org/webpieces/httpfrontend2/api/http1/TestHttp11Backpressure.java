@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2translations.api.Http11ToHttp2;
+import org.webpieces.httpfrontend2.api.mock2.MockStreamRef;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.HttpStatefulParser;
@@ -45,7 +46,8 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 		Assert.assertTrue(ackBytePayload1.isDone());//not enough data.  parser consumes and acks future for more data(no client ack needed right now)
 		
 		CompletableFuture<StreamWriter> ackRequest = new CompletableFuture<StreamWriter>();
-		mockListener.addMockStreamToReturn(ackRequest);
+		mockListener.addMockStreamToReturn(new MockStreamRef(ackRequest));
+
 		CompletableFuture<Void> ackBytePayload2 = mockChannel.sendToSvr(buffers.get(1));
 		Assert.assertFalse(ackBytePayload2.isDone());
 
@@ -79,7 +81,7 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 		
 		HttpResponse resp1 = Requests.createResponse(1);
 		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
-		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers1);
+		CompletableFuture<StreamWriter> future = in1.stream.process(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		
 		//server should add content-length 0 for firefox
@@ -96,7 +98,8 @@ public class TestHttp11Backpressure extends AbstractHttp1Test {
 		ackBytePayload1.get(2, TimeUnit.SECONDS);
 		
 		CompletableFuture<StreamWriter> ackRequest = new CompletableFuture<StreamWriter>();
-		mockListener.addMockStreamToReturn(ackRequest);
+		
+		mockListener.addMockStreamToReturn(new MockStreamRef(ackRequest));
 		CompletableFuture<Void> ackBytePayload2 = mockChannel.sendToSvr(buffers.get(1));
 		//have to ack TWO...the stream writer AND the first HttpData fed in
 		Assert.assertFalse(ackBytePayload2.isDone()); 

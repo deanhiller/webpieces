@@ -32,7 +32,8 @@ import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -61,11 +62,13 @@ public class TestHttp1Backpressure {
 	@Test
 	public void testBasicBackpressure() throws InterruptedException, ExecutionException, TimeoutException {
 		MockResponseListener listener = new MockResponseListener();
-		StreamHandle handle = socket.openStream();
+		RequestStreamHandle handle = socket.openStream();
 
 		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
 		Http2Request request = Requests.createRequest();
-		CompletableFuture<StreamWriter> writer = handle.process(request, listener);
+		StreamRef streamRef = handle.process(request, listener);
+		CompletableFuture<StreamWriter> writer = streamRef.getWriter();
+
 		Assert.assertTrue(writer.isDone());
 		Assert.assertEquals(request, mockChannel.getLastWriteParam());
 
@@ -134,11 +137,13 @@ public class TestHttp1Backpressure {
 	@Test
 	public void testBasicBackpressureChunked() throws InterruptedException, ExecutionException, TimeoutException {
 		MockResponseListener listener = new MockResponseListener();
-		StreamHandle handle = socket.openStream();
+		RequestStreamHandle handle = socket.openStream();
 
 		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
 		Http2Request request = Requests.createRequest();
-		CompletableFuture<StreamWriter> writer = handle.process(request, listener);
+		StreamRef streamRef = handle.process(request, listener);
+		CompletableFuture<StreamWriter> writer = streamRef.getWriter();
+
 		Assert.assertTrue(writer.isDone());
 		Assert.assertEquals(request, mockChannel.getLastWriteParam());
 

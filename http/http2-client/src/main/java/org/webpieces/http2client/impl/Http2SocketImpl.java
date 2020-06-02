@@ -3,6 +3,7 @@ package org.webpieces.http2client.impl;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2engine.api.StreamRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
@@ -13,7 +14,7 @@ import org.webpieces.nio.api.channels.TCPChannel;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Trailers;
-import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.RequestStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
@@ -60,7 +61,7 @@ public class Http2SocketImpl implements Http2Socket {
 	public CompletableFuture<FullResponse> send(FullRequest request) {
 		SingleResponseListener responseListener = new SingleResponseListener();
 		
-		StreamHandle streamHandle = openStream();
+		RequestStreamHandle streamHandle = openStream();
 		
 		Http2Request req = request.getHeaders();
 		
@@ -71,8 +72,10 @@ public class Http2SocketImpl implements Http2Socket {
 		} else if(request.getTrailingHeaders() == null) {
 			request.getHeaders().setEndOfStream(false);
 			DataFrame data = createData(request, true);
-			
-			return streamHandle.process(request.getHeaders(), responseListener)
+
+			StreamRef streamRef = streamHandle.process(request.getHeaders(), responseListener);
+
+			return streamRef.getWriter()
 						.thenCompose(writer -> {
 							data.setStreamId(req.getStreamId());
 							return writer.processPiece(data);
@@ -84,10 +87,12 @@ public class Http2SocketImpl implements Http2Socket {
 		DataFrame data = createData(request, false);
 		Http2Trailers trailers = request.getTrailingHeaders();
 		trailers.setEndOfStream(true);
-		
-		return streamHandle.process(request.getHeaders(), responseListener)
-				.thenCompose(writer -> writeStuff(writer, req, data, trailers, responseListener));
 
+
+		StreamRef streamRef = streamHandle.process(request.getHeaders(), responseListener);
+
+		return streamRef.getWriter()
+				.thenCompose(writer -> writeStuff(writer, req, data, trailers, responseListener));
 	}
 	
 	private CompletableFuture<FullResponse> writeStuff(
@@ -111,7 +116,7 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public StreamHandle openStream() {
+	public RequestStreamHandle openStream() {
 		return incoming.openStream();
 	}
 

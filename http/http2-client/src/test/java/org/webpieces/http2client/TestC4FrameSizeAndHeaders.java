@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2engine.api.StreamRef;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
@@ -70,8 +71,9 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 
 		//send new request on closed connection
 		Http2Request request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.openStream().process(request1, listener1);
-		
+		StreamRef streamRef = httpSocket.openStream().process(request1, listener1);
+		CompletableFuture<StreamWriter> future = streamRef.getWriter();
+
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
 		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
@@ -97,12 +99,12 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		Assert.assertEquals(localSettings.getMaxFrameSize(), fr.getData().getReadableSize());
 	}
 
-	/**
-	 *  A decoding error in a header block MUST be treated as a connection error (Section 5.4.1) of type COMPRESSION_ERROR.
-	 *  
-	 */
+//	/**
+//	 *  A decoding error in a header block MUST be treated as a connection error (Section 5.4.1) of type COMPRESSION_ERROR.
+//	 *  
+//	 */
 	@Test
-	public void testSection4_3BadDecompression() {		
+	public void testSection4_3BadDecompression() {
 		MockResponseListener listener1 = new MockResponseListener();
 		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
 		Http2Request request = sendRequestToServer(listener1);

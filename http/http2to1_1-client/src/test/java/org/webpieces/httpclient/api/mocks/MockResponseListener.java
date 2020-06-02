@@ -9,15 +9,17 @@ import org.webpieces.mock.ParametersPassedIn;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
-public class MockResponseListener extends MockSuperclass implements ResponseHandler {
+public class MockResponseListener extends MockSuperclass implements ResponseStreamHandle {
 
 	private enum Method implements MethodEnum {
 		PROCESS
 	}
+
+	private boolean isCancelled;
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -32,7 +34,8 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 
 	@Override
 	public CompletableFuture<Void> cancel(CancelReason payload) {
-		return null;
+		isCancelled = true;
+		return CompletableFuture.completedFuture(null);
 	}
 
 	public Http2Response getIncomingMsg() {
@@ -44,6 +47,10 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 
 	public void addProcessResponse(CompletableFuture<StreamWriter> future) {
 		super.addValueToReturn(Method.PROCESS, future);
+	}
+
+	public boolean isCancelled() {
+		return isCancelled;
 	}
 
 }

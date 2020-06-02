@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class FutureLocal {
 	
-	public final static ThreadLocal<Map<String, Object>> local = new ThreadLocal<>();
+	public final static ThreadLocal<Map<String, Object>> LOCAL = new ThreadLocal<>();
 
 	public static void put(String key, Object value) {
 		Map<String, Object> map = fetchMap();
@@ -18,10 +18,10 @@ public class FutureLocal {
 	}
 	
 	private static Map<String, Object> fetchMap() {
-		Map<String, Object> map = local.get();
+		Map<String, Object> map = LOCAL.get();
 		if(map == null) {
 			map = new HashMap<String, Object>();
-			local.set(map);
+			LOCAL.set(map);
 		}
 	
 		return map;
@@ -33,6 +33,6 @@ public class FutureLocal {
 	}
 	
 	protected static void restoreState(Map<String, Object> map) {
-		local.set(map);
+		LOCAL.set(map);
 	}
 }

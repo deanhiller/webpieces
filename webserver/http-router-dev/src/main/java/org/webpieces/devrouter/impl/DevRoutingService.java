@@ -1,6 +1,5 @@
 package org.webpieces.devrouter.impl;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -16,12 +15,12 @@ import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.WebInjector;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.routers.ARouter;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Injector;
-import com.webpieces.http2engine.api.StreamWriter;
 
 public class DevRoutingService extends AbstractRouterService {
 
@@ -68,7 +67,7 @@ public class DevRoutingService extends AbstractRouterService {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
+	public RouterStreamRef incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		

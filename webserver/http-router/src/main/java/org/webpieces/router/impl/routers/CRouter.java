@@ -7,7 +7,9 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 /**
@@ -31,7 +33,7 @@ public class CRouter {
 		this.requestContentTypeToRouter = requestContentTypeToRouter;
 	}
 
-	public CompletableFuture<StreamWriter> invokeRoute(RequestContext ctx, ProxyStreamHandle handler) {
+	public RouterStreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler) {
 		String relativePath = ctx.getRequest().relativePath;
 
 		DContentTypeRouter requestTypeRouter = getRequestContentTypeToRouter().get(ctx.getRequest().domain);

@@ -15,6 +15,7 @@ import org.webpieces.router.api.error.dev.NoMethodRouterModules;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.StatusCode;
 
@@ -38,7 +39,8 @@ public class ErrorTest {
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 
 		MockStreamHandle mockStream = new MockStreamHandle();
-		CompletableFuture<StreamWriter> future = server.incomingRequest(req, mockStream);
+		StreamRef ref = server.incomingRequest(req, mockStream);
+		CompletableFuture<StreamWriter> future = ref.getWriter(); 
 		
 		//done and no exception SINCE we responded to client successfully
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally()); 
