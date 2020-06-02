@@ -61,7 +61,8 @@ public class MockHttp2RequestListener extends MockSuperclass implements StreamLi
 	
 	public void setDefaultRetVal(StreamWriter writer) {
 		CompletableFuture<StreamWriter> writerFuture = CompletableFuture.completedFuture(writer);
-		super.setDefaultReturnValue(Method.PROCESS, writerFuture);
+		MockStreamRef ref = new MockStreamRef(writerFuture );		
+		super.setDefaultReturnValue(Method.PROCESS, ref);
 	}
 
 	public void addMockStreamToReturn(StreamWriter mockSw) {
