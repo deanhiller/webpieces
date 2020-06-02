@@ -24,6 +24,7 @@ import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.locking.PermitQueue;
 
 import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
@@ -97,9 +98,11 @@ public class Layer2Http11Handler {
 			DataFrame dataFrame = new DataFrame();
 			DataWrapper wrapper = dataGen.wrapByteBuffer(buf);
 			dataFrame.setData(wrapper);
-			StreamWriter requestWriter = currentStream.getRequestWriter();
+			
+			CompletableFuture<StreamWriter> writer = currentStream.getStreamRef().getWriter();
+			
 			//We skip permit queue because this is chunking now in SSL that we can't read;
-			return requestWriter.processPiece(dataFrame);
+			return writer.thenCompose(w -> w.processPiece(dataFrame));
 		}
 		
 		Memento state = socket.getHttp11ParseState();
@@ -164,17 +167,22 @@ public class Layer2Http11Handler {
 				return CompletableFuture.completedFuture(null);
 			}
 			
-			StreamWriter requestWriter = stream.getRequestWriter();
 			if(msg.isEndOfStream())
 				stream.setSentFullRequest(true);
 
 			return futureUtil.finallyBlock(
-					() -> requestWriter.processPiece(msg),
+					() -> processPiece(stream, msg),
 					() -> possiblyReleaseeQueue(msg, permitQueue)
 			);
 
 		});
 
+	}
+	
+	public CompletableFuture<Void> processPiece(Http11StreamImpl stream, DataFrame msg) {
+		CompletableFuture<StreamWriter> writer = stream.getStreamRef().getWriter();
+
+		return writer.thenCompose(w -> w.processPiece(msg));
 	}
 
 	private void possiblyReleaseeQueue(DataFrame msg, PermitQueue permitQueue) {
@@ -202,21 +210,24 @@ public class Layer2Http11Handler {
 				//in this case, we are NOT at the end of the request so we must let the next piece of
 				//data run right after the request
 				//TODO(dhiller): Replace this section with futureUtil.trySuccessFinally
-				return streamHandle.incomingRequest(headers, currentStream).thenApply(w -> {
-					currentStream.setRequestWriter(w);
+				StreamRef streamRef = streamHandle.incomingRequest(headers, currentStream);
+				currentStream.setStreamRef(streamRef);
+				return streamRef.getWriter().thenApply( w -> {
+					
 					//must release the permit so the next data piece(which may be cached) can come in
 					permitQueue.releasePermit();
 					return null;
 				});
+				
 			} else {
 				//in this case, since this is the END of the request, we cannot release the permit in the
 				//permit queue as we do not want to let the next request to start until the full response is
 				//sent back to the client
 				currentStream.setSentFullRequest(true);
-				return streamHandle.incomingRequest(headers, currentStream).thenApply(w -> {
-					currentStream.setRequestWriter(w);
-					return null;
-				});
+	
+				StreamRef streamRef = streamHandle.incomingRequest(headers, currentStream);
+				currentStream.setStreamRef(streamRef);
+				return streamRef.getWriter().thenApply(w -> null);
 			}
 		});
 	}

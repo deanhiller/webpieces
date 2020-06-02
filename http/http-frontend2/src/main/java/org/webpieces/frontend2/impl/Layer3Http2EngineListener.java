@@ -8,13 +8,11 @@ import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 
 import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.RequestStreamHandle;
 import com.webpieces.http2engine.api.ResponseStreamHandle;
 import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.RequestStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
-import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class Layer3Http2EngineListener implements ServerEngineListener {
 
@@ -50,37 +48,9 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 		@Override
 		public StreamRef process(Http2Request request, ResponseStreamHandle responseListener) {
 			Http2StreamImpl stream = new Http2StreamImpl(socket, responseListener, request.getStreamId());
-			CompletableFuture<StreamWriter> writer =  handle2.incomingRequest(request, stream);
-			
-			return new MyStreamRef(writer);
-		}
-
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason payload) {
-			return handle2.incomingCancel(payload);
+			return handle2.incomingRequest(request, stream);
 		}
 	}
-	
-	private class MyStreamRef implements StreamRef {
-
-		private CompletableFuture<StreamWriter> writer;
-
-		public MyStreamRef(CompletableFuture<StreamWriter> writer) {
-			this.writer = writer;
-		}
-
-		@Override
-		public CompletableFuture<StreamWriter> getWriter() {
-			return writer;
-		}
-
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason reason) {
-			return null;
-		}
-		
-	}
-	
 	
 	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer newData) {

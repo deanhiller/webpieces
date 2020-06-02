@@ -31,7 +31,8 @@ public class TestHttp11Errors extends AbstractHttp1Test {
 		
 		mockChannel.simulateClose();
 		
-		List<Cancel> cancels = mockListener.getCancels();
-		Assert.assertEquals(in1.stream, cancels.get(0).stream);
+		throw new UnsupportedOperationException("fix to validate comment below");
+//		List<Cancel> cancels = mockListener.getCancels();
+//		Assert.assertEquals(in1.stream, cancels.get(0).stream);
 	}
 }

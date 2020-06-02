@@ -27,6 +27,7 @@ import org.webpieces.util.locking.PermitQueue;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -49,8 +50,6 @@ public class Http11StreamImpl implements ResponseStream {
 
 	private int streamId;
 
-	private StreamWriter requestWriter;
-
 	private PermitQueue permitQueue;
 
 	private boolean sentFullRequest;
@@ -61,6 +60,7 @@ public class Http11StreamImpl implements ResponseStream {
 
 	private boolean isForConnectRequeest;
 	private boolean hasRespondedToConnect;
+	private StreamRef streamRef;
 
 	public Http11StreamImpl(
 			int streamId, 
@@ -297,14 +297,6 @@ public class Http11StreamImpl implements ResponseStream {
 		return streamId;
 	}
 
-	public StreamWriter getRequestWriter() {
-		return requestWriter;
-	}
-
-	public void setRequestWriter(StreamWriter requestWriter) {
-		this.requestWriter = requestWriter;
-	}
-
 	public void setSentFullRequest(boolean sent) {
 		this.sentFullRequest = sent;
 	}
@@ -313,4 +305,12 @@ public class Http11StreamImpl implements ResponseStream {
 		return isForConnectRequeest;
 	}
 
+	public void setStreamRef(StreamRef streamRef) {
+		this.streamRef = streamRef;
+	}
+
+	public StreamRef getStreamRef() {
+		return streamRef;
+	}
+	
 }

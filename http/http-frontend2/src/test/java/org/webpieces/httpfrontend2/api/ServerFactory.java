@@ -26,6 +26,7 @@ import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.Http2Method;
@@ -77,12 +78,6 @@ class ServerFactory {
 		public void fireIsClosed(FrontendSocket socketThatClosed) {
 			
 		}
-
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason payload) {
-			return CompletableFuture.completedFuture(null);
-		}
-
     }
     
     private static class StreamHandleImpl implements HttpStream {
@@ -90,7 +85,12 @@ class ServerFactory {
     	private CompletableFuture<StreamWriter> streamWriter = new CompletableFuture<StreamWriter>();
     	
 		@Override
-		public CompletableFuture<StreamWriter> incomingRequest(Http2Request headers, ResponseStream stream) {
+		public StreamRef incomingRequest(Http2Request headers, ResponseStream stream) {
+			CompletableFuture<StreamWriter> writer = incomingRequestImpl(headers, stream);
+			return new MyStremRef(writer);
+		}
+		
+		public CompletableFuture<StreamWriter> incomingRequestImpl(Http2Request headers, ResponseStream stream) {
 			log.info(stream+"request="+headers);
 			Http2Response response = Http2Requests.createResponse(headers.getStreamId());
 			if(headers.getKnownMethod() == Http2Method.HEAD) {
@@ -110,12 +110,27 @@ class ServerFactory {
 			return streamWriter;
 		}
 
-		@Override
-		public CompletableFuture<Void> incomingCancel(CancelReason reset) {
-			return streamWriter.thenCompose(w -> w.cancel(reset));
-		}
     }
 
+    private static class MyStremRef implements StreamRef {
+
+		private CompletableFuture<StreamWriter> writer;
+
+		public MyStremRef(CompletableFuture<StreamWriter> writer) {
+			this.writer = writer;
+		}
+
+		@Override
+		public CompletableFuture<StreamWriter> getWriter() {
+			return writer;
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason reason) {
+			return CompletableFuture.completedFuture(null); //nothing really to do on cancel
+		}
+    	
+    }
     private static class NullStreamWriter implements StreamWriter {
 
 		private ResponseStream stream;
@@ -132,10 +147,6 @@ class ServerFactory {
 			return CompletableFuture.completedFuture(null);
 		}
 
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason payload) {
-			return writer.cancel(payload);
-		}
     }
 
 //    private static class AppStreamWriter implements StreamWriter {
@@ -191,9 +202,5 @@ class ServerFactory {
     		return fut;
     	}
 
-		@Override
-		public CompletableFuture<Void> cancel(CancelReason payload) {
-			return futureWriter.thenCompose(w -> w.cancel(payload));
-		}
     }
 }

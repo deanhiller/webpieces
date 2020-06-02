@@ -35,8 +35,11 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 		
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
-		//no cancels
-		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		
+		if(true)
+			throw new UnsupportedOperationException("fix this test");
+//		//no cancels
+//		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
 		
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -74,8 +77,10 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 		DataFrame data = Http2Requests.createData1(push.getPromisedStreamId(), false);
 		mockChannel.send(data);
 		
-		Cancel info = mockListener.getCancelInfo();
-		Assert.assertEquals(stream, info.stream);
+		if(true)
+			throw new UnsupportedOperationException("fix this test");
+//		Cancel info = mockListener.getCancelInfo();
+//		Assert.assertEquals(stream, info.stream);
 
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -240,8 +245,11 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 		
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
-		//no cancels
-		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		
+		if(true)
+			throw new UnsupportedOperationException("fix this test");
+//		//no cancels
+//		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
 		
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -295,8 +303,11 @@ public class TestS5x1StreamStates extends AbstractHttp2Test {
 		
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
-		//no cancels(since we already cancelled it)
-		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		
+		if(true)
+			throw new UnsupportedOperationException("fix this test");
+//		//no cancels(since we already cancelled it)
+//		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
 
 		//remote receives goAway
 		RstStreamFrame frame = (RstStreamFrame) mockChannel.getFrameAndClear();

@@ -39,9 +39,4 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 		super.addValueToReturn(Method.SEND_MORE, future);
 	}
 
-	@Override
-	public CompletableFuture<Void> cancel(CancelReason payload) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
