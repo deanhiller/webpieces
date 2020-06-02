@@ -22,10 +22,15 @@ public class RouterResponseHandlerImpl implements RouterResponseHandler {
     }
 
     @Override
-    public StreamRef process(Http2Response response) {
+    public CompletableFuture<StreamWriter> process(Http2Response response) {
         return stream.process(response);
     }
 
+	@Override
+	public CompletableFuture<Void> cancel(CancelReason reason) {
+		return stream.cancel(reason);
+	}
+	
     @Override
     public PushStreamHandle openPushStream() {
         return stream.openPushStream();
@@ -51,6 +56,10 @@ public class RouterResponseHandlerImpl implements RouterResponseHandler {
 		return stream.getSocket().isBackendSocket();
 	}
 
+	/**
+	 * Use cancel instead?
+	 */
+	@Deprecated 
 	@Override
 	public Void closeIfNeeded() {
 		if(stream.getSocket().getProtocol() == ProtocolType.HTTP1_1)

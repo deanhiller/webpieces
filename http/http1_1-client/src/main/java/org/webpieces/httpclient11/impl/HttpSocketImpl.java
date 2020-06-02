@@ -122,7 +122,14 @@ public class HttpSocketImpl implements HttpSocket {
 		//put this on the queue before the write to be completed from the listener below
 		responsesToComplete.offer(l);
 		
-		CompletableFuture<HttpDataWriter> writer = channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect));
+		boolean canSendChunks = false;
+		Header header = request.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING);
+		if(header != null && "chunked".equals(header.getValue()))
+			canSendChunks = true;
+		
+		boolean canSendTheChunks = canSendChunks;
+		
+		CompletableFuture<HttpDataWriter> writer = channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect, canSendTheChunks));
 		return new MyStreamRefImpl(writer, request);
 		
 	}
