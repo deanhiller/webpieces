@@ -67,7 +67,7 @@ public abstract class AbstractRouterService {
 			//CHEAT: we know this is syncrhonous exception from the translateCookieToScope
 			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
 			CompletableFuture<StreamWriter> writer = handler.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
-			return new RouterStreamRef(writer, null);
+			return new RouterStreamRef("cookieFailed", writer, null);
 		}
 	}
 	

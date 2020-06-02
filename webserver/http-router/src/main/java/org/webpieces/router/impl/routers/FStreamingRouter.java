@@ -8,6 +8,7 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForStream;
 
@@ -32,7 +33,7 @@ public class FStreamingRouter extends AbstractDynamicRouterImpl implements Rever
 	}
 	
 	@Override
-	public StreamRef invoke(RequestContext ctx, ProxyStreamHandle handler) {
+	public RouterStreamRef invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteData data = new RouteInfoForStream();
 		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, false);
 		return routeInvoker.invokeStreamingController(invokeInfo, dynamicInfo, data);	}

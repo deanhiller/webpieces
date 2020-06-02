@@ -63,12 +63,12 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	@Override
-	public StreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
+	public RouterStreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
 		return staticInvoker.invokeStatic(ctx, handler, data);
 	}
 	
 	
-	public StreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
@@ -88,7 +88,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			throw new IllegalArgumentException("The return value must be StreamRef and was not for this method='"+controllerMethod+"'");
 
 		
-		StreamRef streamRef = invokeStream(controllerMethod, instance, requestCtx, handler);
+		RouterStreamRef streamRef = invokeStream(controllerMethod, instance, requestCtx, handler);
 		CompletableFuture<StreamWriter> writer = streamRef.getWriter();
 		
 		CompletableFuture<StreamWriter> newFuture = futureUtil.catchBlockWrap(
@@ -100,10 +100,10 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		Current.setContext(null);
 		
 		Function<CancelReason, CompletableFuture<Void>> cancelFunc = (reason) -> streamRef.cancel(reason);		
-		return new RouterStreamRef(newFuture, cancelFunc);
+		return new RouterStreamRef("invokeStreaming", newFuture, cancelFunc);
 	}
 	
-	public StreamRef invokeStream(Method m, Object instance, RequestContext requestCtx, RouterStreamHandle handler) {
+	public RouterStreamRef invokeStream(Method m, Object instance, RequestContext requestCtx, RouterStreamHandle handler) {
 		try {
 			StreamRef streamRef = (StreamRef) m.invoke(instance, handler);
 			if(streamRef == null) {
@@ -119,15 +119,15 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 			});
 			
 			Function<CancelReason, CompletableFuture<Void>> cancelFunc = (reason) -> streamRef.cancel(reason);
-			return new RouterStreamRef(newFuture, cancelFunc);
+			return new RouterStreamRef("invokeStreamController", newFuture, cancelFunc);
 			
 		} catch (Throwable e) {
 			CompletableFuture<StreamWriter> failedFuture = futureUtil.failedFuture(e);
-			return new RouterStreamRef(failedFuture, null);
+			return new RouterStreamRef("controllerFailed", failedFuture, null);
 		}
 	}
 	
-	protected StreamRef invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
+	protected RouterStreamRef invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
 		Service<MethodMeta, Action> service = dynamicInfo.getService();
 		LoadedController loadedController = dynamicInfo.getLoadedController();
 		invokeInfo.getHandler().initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
@@ -135,7 +135,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		return invokeAny(invokeInfo, loadedController, service, data, processor, forceEndOfStream);
 	}
 
-	private StreamRef invokeAny(
+	private RouterStreamRef invokeAny(
 			InvokeInfo invokeInfo,
 			LoadedController loadedController,
 			Service<MethodMeta, Action> service,
@@ -146,7 +146,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		CancelHolder cancelFunc = new CancelHolder();
 		
 		CompletableFuture<StreamWriter> writer = invokeAnyImpl1(invokeInfo, loadedController, service, data, processor, cancelFunc, forceEndOfStream);
-		return new RouterStreamRef(writer, cancelFunc);
+		return new RouterStreamRef("invokeAny", writer, cancelFunc);
 	}
 	 
 	private  CompletableFuture<StreamWriter> invokeAnyImpl1(
@@ -226,7 +226,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 
 	@Override
-	public StreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public RouterStreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		Service<MethodMeta, Action> service = createNotFoundService(route, requestCtx.getRequest());

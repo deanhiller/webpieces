@@ -33,12 +33,12 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 	
 	@Override
-	public StreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handle, RouteInfoForStatic data) {
+	public RouterStreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handle, RouteInfoForStatic data) {
 		return super.invokeStatic(ctx, handle, data);
 	}
 	
 	@Override
-	public StreamRef invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RouteInfoForInternalError routeData = (RouteInfoForInternalError) data;
 
 		ResponseProcessorAppError processor = new ResponseProcessorAppError(
@@ -47,7 +47,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 	
 	@Override
-	public StreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(
 				invokeInfo.getRequestCtx(), 
 				dynamicInfo.getLoadedController(), invokeInfo.getHandler());
@@ -55,7 +55,7 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 	
 	@Override
-	public StreamRef invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RouteInfoForContent content = (RouteInfoForContent) data;
 		if(content.getBodyContentBinder() == null)
 			throw new IllegalArgumentException("bodyContentBinder is required for these routes yet it is null here.  bug");
@@ -64,13 +64,13 @@ public class ProdRouteInvoker extends AbstractRouteInvoker {
 	}
 
 	@Override
-	public StreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		return super.invokeStreamingController(invokeInfo, dynamicInfo, data);
 		
 	}
 	
 	@Override
-	public StreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public RouterStreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		return super.invokeNotFound(invokeInfo, loadedController, data);
 	}
 

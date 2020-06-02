@@ -21,6 +21,7 @@ import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.ResettingLogic;
+import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
@@ -55,15 +56,18 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 
 	private FutureHelper futureUtil;
 
+	private RouterFutureUtil routerFutures;
+
 	//private final List<StaticRouteMeta> staticRoutes = new ArrayList<>();
 	//private List<StaticRoute> allStaticRoutes;
 	
-	public ScopedRouteBuilderImpl(RouterInfo routerInfo, RouteBuilderLogic holder, ResettingLogic resettingLogic, FutureHelper futureUtil) {
+	public ScopedRouteBuilderImpl(RouterInfo routerInfo, RouteBuilderLogic holder, ResettingLogic resettingLogic, FutureHelper futureUtil, RouterFutureUtil routerFutures) {
 		super(holder, resettingLogic);
 		this.routerInfo = routerInfo;
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
 		this.futureUtil = futureUtil;
+		this.routerFutures = routerFutures;
 	}
 
 	@Override
@@ -302,7 +306,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		
 		ScopedRouteBuilderImpl r = pathToBuilder.get(path);
 		if(r == null) {
-			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getRouterId(), routerInfo.getPath()+path), holder, resettingLogic, futureUtil);
+			r = new ScopedRouteBuilderImpl(new RouterInfo(routerInfo.getRouterId(), routerInfo.getPath()+path), holder, resettingLogic, futureUtil, routerFutures);
 			pathToBuilder.put(path, r);
 		}
 		
@@ -340,7 +344,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		
 		Map<String, EScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 		
-		return new EScopedRouter(futureUtil, routerInfo, pathToRouter, routers);
+		return new EScopedRouter(routerFutures, routerInfo, pathToRouter, routers);
 	}
 
 	protected Map<String, EScopedRouter> buildScopedRouters(List<FilterInfo<?>> routeFilters) {

@@ -1,6 +1,5 @@
 package org.webpieces.devrouter.impl;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -22,8 +21,6 @@ import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Injector;
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
 
 public class DevRoutingService extends AbstractRouterService {
 

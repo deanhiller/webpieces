@@ -1,7 +1,6 @@
 package org.webpieces.router.impl.routers;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.exceptions.NotFoundException;
@@ -10,8 +9,6 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.futures.FutureHelper;
 
-import com.webpieces.http2engine.api.MyStreamRef;
-import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class DContentTypeRouter {
@@ -46,7 +43,7 @@ public class DContentTypeRouter {
 			}
 		}
 
-		return new RouterStreamRef(futureUtil.<StreamWriter>failedFuture(new NotFoundException("route not found")), null);
+		return new RouterStreamRef("notFoundRoute", futureUtil.<StreamWriter>failedFuture(new NotFoundException("route not found")), null);
 	}
 
 }

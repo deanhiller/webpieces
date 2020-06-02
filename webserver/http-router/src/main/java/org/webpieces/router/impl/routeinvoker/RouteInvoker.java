@@ -8,7 +8,6 @@ import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 
-import com.webpieces.http2engine.api.StreamRef;
 
 public interface RouteInvoker {
 
@@ -18,16 +17,16 @@ public interface RouteInvoker {
 	//annoying.  If we were only doing ProdRouteInvoker, then they are all the same except the invokeNotFound and invokeStatic
 	//which makes this very annoying!!  I could pass in the function!!!  if I do that, all of this collapses
 	
-	StreamRef invokeErrorController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data);
+	RouterStreamRef invokeErrorController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data);
 
-	StreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data);
+	RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data);
 
-	StreamRef invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data);
+	RouterStreamRef invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data);
 
-	StreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data);
+	RouterStreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data);
 
-	StreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data);
+	RouterStreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data);
 
-	StreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data);
+	RouterStreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data);
 
 }

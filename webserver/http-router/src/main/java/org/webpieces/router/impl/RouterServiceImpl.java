@@ -147,8 +147,9 @@ public class RouterServiceImpl implements RouterService {
 		MDC.put("txId", txId);
 		//top level handler...
 		try {
+			
 			return futureUtil.catchBlock(
-					() -> incomingRequestImpl(req, proxyHandler).thenApply(w -> new TxStreamWriter(txId, w)),
+					() -> incomingRequestImpl(req, proxyHandler).thenApply("topLevel", w -> new TxStreamWriter(txId, w)),
 					(t) -> proxyHandler.topLevelFailure(req, t)
 			);
 		} finally {

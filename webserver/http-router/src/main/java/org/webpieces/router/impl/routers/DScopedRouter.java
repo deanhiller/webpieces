@@ -10,8 +10,10 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
+import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.logging.SupressedExceptionLog;
 
@@ -24,7 +26,9 @@ public class DScopedRouter extends EScopedRouter {
 
 	private ENotFoundRouter pageNotFoundRouter;
 	private EInternalErrorRouter internalSvrErrorRouter;
-	private FutureHelper futureUtil;
+	private RouterFutureUtil futureUtil;
+
+	private FutureHelper futureHelper;
 
 	public DScopedRouter(
 			RouterInfo routerInfo, 
@@ -32,16 +36,18 @@ public class DScopedRouter extends EScopedRouter {
 			List<AbstractRouter> routers, 
 			ENotFoundRouter notFoundRouter, 
 			EInternalErrorRouter internalErrorRouter,
-			FutureHelper futureUtil
+			RouterFutureUtil futureUtil,
+			FutureHelper futureHelper
 	) {
 		super(futureUtil, routerInfo, pathPrefixToNextRouter, routers);
 		this.pageNotFoundRouter = notFoundRouter;
 		this.internalSvrErrorRouter = internalErrorRouter;
 		this.futureUtil = futureUtil;
+		this.futureHelper = futureHelper;
 	}
 
 	@Override
-	public StreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+	public RouterStreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
 		
 		
 		
@@ -53,7 +59,7 @@ public class DScopedRouter extends EScopedRouter {
 	}
 
 	private StreamWriter createProxy(StreamWriter strWriter, RequestContext ctx, ProxyStreamHandle handler) {
-		return new NonStreamingWebAppErrorProxy(futureUtil, strWriter, handler,
+		return new NonStreamingWebAppErrorProxy(futureHelper, strWriter, handler,
 				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t, true));
 	}
 
@@ -88,7 +94,7 @@ public class DScopedRouter extends EScopedRouter {
 	 * NOTE: We have to catch any exception from the method processNotFound so we can't catch and call internalServerError in this
 	 * method without nesting even more!!! UGH, more nesting sucks
 	 */
-	private StreamRef invokeRouteCatchNotFound(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+	private RouterStreamRef invokeRouteCatchNotFound(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
 		return futureUtil.catchBlock(
 				() -> super.invokeRoute(ctx, handler, subPath),
 				(t) -> {

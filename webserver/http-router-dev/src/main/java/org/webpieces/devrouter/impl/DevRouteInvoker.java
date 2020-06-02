@@ -27,6 +27,7 @@ import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
 import org.webpieces.router.impl.routeinvoker.RouteInvokerStatic;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
@@ -38,8 +39,6 @@ import org.webpieces.router.impl.services.ServiceInvoker;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
-
-import com.webpieces.http2engine.api.StreamRef;
 
 public class DevRouteInvoker extends ProdRouteInvoker {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
@@ -62,7 +61,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 	
 	@Override
-	public StreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handle,
+	public RouterStreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handle,
 			RouteInfoForStatic data) {
 		//RESET the encodings to known so we don't try to go the compressed cache which doesn't
 		//exist in dev server since we want the latest files always
@@ -74,7 +73,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	 * This one is definitely special
 	 */
 	@Override
-	public StreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	public RouterStreamRef invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		if(loadedController == null) {
 			loadedController = controllerFinder.loadNotFoundController(route.getInjector(), route.getRouteInfo(), false);
@@ -89,7 +88,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 
 	@Override
-	public StreamRef invokeErrorController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public RouterStreamRef invokeErrorController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		DynamicInfo newInfo = info;
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
@@ -102,7 +101,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 
 	@Override
-	public StreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		RouteInfoForHtml htmlRoute = (RouteInfoForHtml) data;
 		//If we haven't loaded it already, load it now		
 		DynamicInfo newInfo = info;
@@ -116,7 +115,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 	
 	@Override
-	public StreamRef invokeContentController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public RouterStreamRef invokeContentController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		DynamicInfo newInfo = info;
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
@@ -131,7 +130,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	}
 
 	@Override
-	public StreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public RouterStreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		DynamicInfo newInfo = info;
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
@@ -146,7 +145,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		return super.invokeStreamingController(invokeInfo, newInfo, data);
 	}
 
-	private StreamRef invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	private RouterStreamRef invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();

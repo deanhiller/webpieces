@@ -12,6 +12,7 @@ import org.webpieces.router.api.routes.FilterPortType;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.ResettingLogic;
+import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
@@ -40,10 +41,12 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	private LoadedController internalErrorController;
 
 	private FutureHelper futureUtil;
+	private RouterFutureUtil routerFutures;
 	
-	public RouteBuilderImpl(String id, RouteBuilderLogic holder, ResettingLogic resettingLogic, FutureHelper futureUtil) {
-		super(new RouterInfo(id, ""), holder, resettingLogic, futureUtil);
+	public RouteBuilderImpl(String id, RouteBuilderLogic holder, ResettingLogic resettingLogic, FutureHelper futureUtil, RouterFutureUtil routerFutures) {
+		super(new RouterInfo(id, ""), holder, resettingLogic, futureUtil, routerFutures);
 		this.futureUtil = futureUtil;
+		this.routerFutures = routerFutures;
 	}
 
 	@Override
@@ -127,7 +130,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		//WE could turn this off and expose an addGlobalNotFoundFilter that applies always to every not found????
 		//it's faster performance due to know pattern matching every request I guess
 		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst);
-		return new DScopedRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter, futureUtil);
+		return new DScopedRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter, routerFutures, futureUtil);
 	}
 
 }

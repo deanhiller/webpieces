@@ -11,13 +11,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppConfig;
@@ -73,6 +71,7 @@ public class RouteLoader {
 	private WebInjector webInjector;
 	private FutureHelper futureUtil;
 	private Injector platformInjector;
+	private RouterFutureUtil routerFutures;
 
 	@Inject
 	public RouteLoader(
@@ -88,7 +87,8 @@ public class RouteLoader {
 		MeterRegistry appMetricsOnly,
 		WebInjector webInjector,
 		Injector platformInjector,
-		FutureHelper futureUtil
+		FutureHelper futureUtil,
+		RouterFutureUtil routerFutures
 	) {
 		this.config = config;
 		this.masterRouter = masterRouter;
@@ -103,6 +103,7 @@ public class RouteLoader {
 		this.webInjector = webInjector;
 		this.platformInjector = platformInjector;
 		this.futureUtil = futureUtil;
+		this.routerFutures = routerFutures;
 	}
 	
 	public WebAppMeta configure(ClassForName loader, Arguments arguments) {
@@ -264,7 +265,7 @@ public class RouteLoader {
 		reverseRoutes = new ReverseRoutes(config, redirectFormation, objectTranslator, reverseTranslator);
 		ResettingLogic resettingLogic = new ResettingLogic(reverseRoutes, injector);
 		Boolean enableSeparateBackend = backPortExists.get();
-		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(futureUtil, routeBuilderLogic, resettingLogic, enableSeparateBackend);
+		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(routerFutures, futureUtil, routeBuilderLogic, resettingLogic, enableSeparateBackend);
 
 		routingHolder.setReverseRouteLookup(reverseRoutes);
 		routeBuilderLogic.init(reverseRoutes);

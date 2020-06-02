@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import org.webpieces.router.api.routebldr.AllContentTypesBuilder;
 import org.webpieces.router.api.routebldr.ContentTypeRouteBuilder;
 import org.webpieces.router.impl.ResettingLogic;
+import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.CRouter;
@@ -27,12 +28,12 @@ public class AllContentTypesBuilderImpl implements AllContentTypesBuilder {
 
 	private FutureHelper futureUtil;
 	
-	public AllContentTypesBuilderImpl(String domain, RouteBuilderLogic holder, ResettingLogic resettingLogic, FutureHelper futureUtil) {
+	public AllContentTypesBuilderImpl(String domain, RouteBuilderLogic holder, ResettingLogic resettingLogic, FutureHelper futureUtil, RouterFutureUtil routerFutures) {
 		this.domain = domain;
 		this.holder = holder;
 		this.resettingLogic = resettingLogic;
 		this.futureUtil = futureUtil;
-		this.leftOverDomainsBuilder = new RouteBuilderImpl(domain+":<anycontent>", holder, resettingLogic, futureUtil);
+		this.leftOverDomainsBuilder = new RouteBuilderImpl(domain+":<anycontent>", holder, resettingLogic, futureUtil, routerFutures);
 	}
 
 	@Override

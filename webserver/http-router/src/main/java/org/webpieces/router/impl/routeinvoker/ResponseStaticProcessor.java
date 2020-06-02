@@ -17,7 +17,6 @@ import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class ResponseStaticProcessor {
@@ -49,7 +48,7 @@ public class ResponseStaticProcessor {
 		this.handler = handler;
 		
 	}
-	public StreamRef renderStaticResponse(RenderStaticResponse renderStatic) {
+	public RouterStreamRef renderStaticResponse(RenderStaticResponse renderStatic) {
 		boolean wasSet = Current.isContextSet();
 		if(!wasSet)
 			Current.setContext(ctx); //Allow html tags to use the contexts
@@ -66,7 +65,7 @@ public class ResponseStaticProcessor {
 			
 			//TODO(dhiller): if socket closed or request cancelled, we should implement cancel function to stop reading
 			//the file an pushing it back...
-			return new RouterStreamRef(writer, null);
+			return new RouterStreamRef("staticRef", writer, null);
 			
 			//return responseCb.sendRenderStatic(renderStatic, handler);
 		} finally {

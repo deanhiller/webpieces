@@ -36,7 +36,7 @@ public class RouteInvokerStatic {
 	}
 
 
-	public StreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
+	public RouterStreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data) {
 		
 		boolean isOnClassPath = data.isOnClassPath();
 

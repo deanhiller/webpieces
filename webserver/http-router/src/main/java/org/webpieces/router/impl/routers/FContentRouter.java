@@ -9,6 +9,7 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
+import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
 
@@ -36,7 +37,7 @@ public class FContentRouter extends AbstractDynamicRouterImpl implements Reversa
 	}
 	
 	@Override
-	public StreamRef invoke(RequestContext ctx, ProxyStreamHandle handler) {
+	public RouterStreamRef invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteData data = new RouteInfoForContent(bodyContentBinder);
 		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, true);
 		return routeInvoker.invokeContentController(invokeInfo, dynamicInfo, data);	}
