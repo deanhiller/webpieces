@@ -31,6 +31,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
@@ -105,21 +106,22 @@ public class TestProdRouter {
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/async");
 
 		//setup returning a response
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
-		overrides.mockService.addToReturn(future);
+		CompletableFuture<Integer> future1 = new CompletableFuture<Integer>();
+		overrides.mockService.addToReturn(future1);
 		
 		MockStreamHandle mockStream = new MockStreamHandle();
-		CompletableFuture<StreamWriter> theFuture = server.incomingRequest(req, mockStream);
-		Assert.assertFalse(theFuture.isDone());
+		StreamRef ref = server.incomingRequest(req, mockStream);
+		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+		Assert.assertFalse(future.isDone());
 
 		//no response yet...
 		Assert.assertNull(mockStream.getLastResponse());
 
 		//release controlleer
 		int id = 78888;
-		future.complete(id);
+		future1.complete(id);
 
-		Assert.assertTrue(theFuture.isDone() && !theFuture.isCompletedExceptionally());
+		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
 		Http2Response resp = mockStream.getLastResponse();
 		Assert.assertNull(resp.getSingleHeaderValue(Http2HeaderName.AUTHORITY));
