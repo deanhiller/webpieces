@@ -1,13 +1,15 @@
 package org.webpieces.httpclient.mocks;
 
+import java.util.concurrent.CompletableFuture;
+
+import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
-import org.webpieces.httpclient11.api.HttpStreamRef;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public class MockResponseListener implements HttpResponseListener {
 
 	@Override
-	public HttpStreamRef incomingResponse(HttpResponse resp, boolean isComplete) {
+	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 		return null;
 	}
 

@@ -122,10 +122,6 @@ public class HttpSocketImpl implements HttpSocket {
 		//put this on the queue before the write to be completed from the listener below
 		responsesToComplete.offer(l);
 		
-		
-
-		
-		
 		CompletableFuture<HttpDataWriter> writer = channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect));
 		return new MyStreamRefImpl(writer, request);
 		
@@ -182,12 +178,11 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	private class MyDataListener implements DataListener {
+		private CompletableFuture<HttpDataWriter> dataWriterFuture;
 		private boolean connectResponseReceived;
-		private HttpStreamRef streamRef;
 
 		@Override
 		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
-			CompletableFuture<HttpDataWriter> dataWriterFuture = streamRef.getWriter();
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 
 			if(connectResponseReceived) {
@@ -230,7 +225,7 @@ public class HttpSocketImpl implements HttpSocket {
 					allFutures = allFutures.thenCompose(s -> newFuture);
 
 				} else if(msg instanceof HttpResponse) {
-					streamRef = processResponse((HttpResponse)msg);
+					dataWriterFuture = processResponse((HttpResponse)msg);
 
 					//Need to chain all futures into allFutures
 					allFutures = allFutures.thenCompose(s -> dataWriterFuture).thenApply(s -> (Void)null);
@@ -242,7 +237,7 @@ public class HttpSocketImpl implements HttpSocket {
 			return allFutures;
 		}
 
-		private HttpStreamRef processResponse(HttpResponse msg) {
+		private CompletableFuture<HttpDataWriter> processResponse(HttpResponse msg) {
 			if(msg.isHasChunkedTransferHeader() || msg.isHasNonZeroContentLength()) {					
 				HttpResponse resp = (HttpResponse) msg;
 				HttpResponseListener listener = responsesToComplete.peek();
@@ -258,13 +253,8 @@ public class HttpSocketImpl implements HttpSocket {
 		public void farEndClosed(Channel channel) {
 			log.info("far end closed");
 			isClosed = true;
-			if(streamRef != null) {
-				streamRef.cancel("Far end closed socket")
-					.exceptionally( t -> {
-						log.error("Calling cancel on the streamRef failed.", t);
-						return null;
-					});
-			}
+
+			//TODO(dhiller): rework a little to notify client of any outstanding requests being cancelled? or http1.1 is dead really for clients? so leave alone?
 		}
 
 		@Override

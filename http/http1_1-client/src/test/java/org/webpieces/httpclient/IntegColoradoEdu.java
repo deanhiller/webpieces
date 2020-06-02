@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpclient11.api.HttpSocket;
-import org.webpieces.httpclient11.api.HttpStreamRef;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpData;
@@ -53,10 +52,9 @@ public class IntegColoradoEdu {
 	private static class ChunkedResponseListener implements HttpResponseListener {
 
 		@Override
-		public HttpStreamRef incomingResponse(HttpResponse resp, boolean isComplete) {
+		public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 			log.info("received resp="+resp+" iscomplete="+isComplete);
-			CompletableFuture<HttpDataWriter> w = CompletableFuture.completedFuture(new Writer());
-			return new MyHttpStreamRef(w);
+			return CompletableFuture.completedFuture(new Writer());
 		}
 
 		private class Writer implements HttpDataWriter {

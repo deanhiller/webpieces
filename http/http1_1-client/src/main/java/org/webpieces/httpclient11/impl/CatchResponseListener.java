@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
-import org.webpieces.httpclient11.api.HttpStreamRef;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -21,18 +20,15 @@ public class CatchResponseListener implements HttpResponseListener {
 	}
 
 	@Override
-	public HttpStreamRef incomingResponse(HttpResponse resp, boolean isComplete) {
+	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 		try {
-			
-			HttpStreamRef ref = listener.incomingResponse(resp, isComplete);
-			
-			CompletableFuture<HttpDataWriter> newWriter = ref.getWriter().thenApply(w -> new CatchDataWriter(w));
-			return new ProxyStreamRef(ref, newWriter);
+			return listener.incomingResponse(resp, isComplete)
+					.thenApply(w -> new CatchDataWriter(w));
 		} catch(Throwable e) {
 			log.error("exception", e);
 			CompletableFuture<HttpDataWriter> future = new CompletableFuture<HttpDataWriter>();
 			future.completeExceptionally(e);
-			return new ProxyStreamRef(null, future);
+			return future;
 		}
 	}
 

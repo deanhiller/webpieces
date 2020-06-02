@@ -8,7 +8,6 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpResponseListener;
-import org.webpieces.httpclient11.api.HttpStreamRef;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -23,19 +22,16 @@ public class CompletableListener implements HttpResponseListener {
 	}
 
 	@Override
-	public HttpStreamRef incomingResponse(HttpResponse resp, boolean isComplete) {
+	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 		HttpFullResponse resp1 = new HttpFullResponse(resp, dataGen.emptyWrapper());
 
 		if(isComplete) {
 			future.complete(resp1);
-			CompletableFuture<HttpDataWriter> f = CompletableFuture.completedFuture(new NullWriter());
-			return new ProxyStreamRef(null, f);
+			return CompletableFuture.completedFuture(new NullWriter());
 		}
 		
 		response = resp1;
-
-		CompletableFuture<HttpDataWriter> f = CompletableFuture.completedFuture(new DataWriterImpl());
-		return new ProxyStreamRef(null, f);
+		return CompletableFuture.completedFuture(new DataWriterImpl());
 	}
 
 	private class NullWriter implements HttpDataWriter {

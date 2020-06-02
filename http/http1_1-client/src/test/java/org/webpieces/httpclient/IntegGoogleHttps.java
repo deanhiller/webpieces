@@ -15,7 +15,6 @@ import org.webpieces.httpclient11.api.HttpClientFactory;
 import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpclient11.api.HttpSocket;
-import org.webpieces.httpclient11.api.HttpStreamRef;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -106,10 +105,9 @@ public class IntegGoogleHttps {
 
 	private static class OurListener implements HttpResponseListener {
 		@Override
-		public HttpStreamRef incomingResponse(HttpResponse resp, boolean isComplete) {
+		public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 			log.info("resp="+resp+" complete="+isComplete);
-			CompletableFuture<HttpDataWriter> w = CompletableFuture.completedFuture(new Writer());
-			return new MyHttpStreamRef(w);
+			return CompletableFuture.completedFuture(new Writer());
 		}
 
 		private class Writer implements HttpDataWriter {

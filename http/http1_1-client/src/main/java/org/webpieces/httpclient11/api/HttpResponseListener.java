@@ -1,5 +1,7 @@
 package org.webpieces.httpclient11.api;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public interface HttpResponseListener {
@@ -26,7 +28,7 @@ public interface HttpResponseListener {
 	 * @param isComplete false if the transfer encoding is chunked in which case incomingChunk will
 	 * be called for each chunk coming
 	 */
-	public HttpStreamRef incomingResponse(HttpResponse resp, boolean isComplete);
+	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete);
 	
 	public void failure(Throwable e);
 

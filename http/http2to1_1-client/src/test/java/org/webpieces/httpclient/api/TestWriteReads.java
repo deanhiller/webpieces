@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.webpieces.http2engine.api.StreamRef;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +21,7 @@ import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

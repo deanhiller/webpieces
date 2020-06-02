@@ -10,8 +10,8 @@ import org.webpieces.mock.ParametersPassedIn;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamRef;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class MockResponseListener extends MockSuperclass implements ResponseStreamHandle {
 
@@ -19,13 +19,19 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 		PROCESS
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public StreamRef process(Http2Response response) {
-		return (StreamRef) super.calledMethod(Method.PROCESS, response);
+	public CompletableFuture<StreamWriter> process(Http2Response response) {
+		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.PROCESS, response);
 	}
 
 	@Override
 	public PushStreamHandle openPushStream() {
+		return null;
+	}
+
+	@Override
+	public CompletableFuture<Void> cancel(CancelReason payload) {
 		return null;
 	}
 

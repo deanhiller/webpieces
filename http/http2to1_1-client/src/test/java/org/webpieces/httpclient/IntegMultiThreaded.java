@@ -9,7 +9,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import com.webpieces.http2engine.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.http2client.api.Http2Socket;
@@ -18,6 +17,11 @@ import org.webpieces.util.threading.NamedThreadFactory;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.PushPromiseListener;
+import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -131,7 +135,7 @@ public class IntegMultiThreaded {
 	private static class ChunkedResponseListener implements ResponseStreamHandle, PushPromiseListener, PushStreamHandle {
 
 		@Override
-		public StreamRef process(Http2Response response) {
+		public CompletableFuture<StreamWriter> process(Http2Response response) {
 			log.info("incoming part of response="+response);
 			
 			if(response.isEndOfStream()) {
@@ -141,7 +145,7 @@ public class IntegMultiThreaded {
 				log.info("completed="+completed.size()+" completedPus="+completedPush.size()+" sent="+sent.size()+" list="+completed);
 			}
 			
-			return new MyStreamRef(null);
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
@@ -161,6 +165,10 @@ public class IntegMultiThreaded {
 			return CompletableFuture.completedFuture(null);
 		}
 
+		@Override
+		public CompletableFuture<Void> cancel(CancelReason frame) {
+			return CompletableFuture.completedFuture(null);
+		}
 		@Override
 		public CompletableFuture<Void> cancelPush(CancelReason payload) {
 			return CompletableFuture.completedFuture(null);
