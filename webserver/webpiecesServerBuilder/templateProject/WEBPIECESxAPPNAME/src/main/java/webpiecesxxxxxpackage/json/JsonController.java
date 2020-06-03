@@ -114,9 +114,11 @@ public class JsonController implements ClientApi {
 
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
+			RequestContext requestCtx = Current.getContext(); 
+
 			DataFrame f = (DataFrame) data;
 			int numReceived = total.addAndGet(f.getData().getReadableSize());
-			log.info("Num bytes received so far="+numReceived);
+			log.info("Num bytes received so far="+numReceived+" for requests="+requestCtx.getRequest().relativePath);
 			
 			if(data.isEndOfStream()) {
 				log.info("Upload complete");

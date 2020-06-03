@@ -68,7 +68,7 @@ public class DScopedRouter extends EScopedRouter {
 	}
 
 	private StreamWriter createProxy(StreamWriter strWriter, RequestContext ctx, ProxyStreamHandle handler) {
-		return new NonStreamingWebAppErrorProxy(futureHelper, strWriter, handler,
+		return new NonStreamingWebAppErrorProxy(futureHelper, strWriter, handler, ctx,
 				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t, true));
 	}
 
