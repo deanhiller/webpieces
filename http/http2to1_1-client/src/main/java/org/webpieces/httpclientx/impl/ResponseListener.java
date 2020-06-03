@@ -16,6 +16,7 @@ import com.webpieces.http2.api.streaming.ResponseStreamHandle;
 import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.api.error.ConnectionCancelled;
 import com.webpieces.http2engine.api.error.ConnectionFailure;
+import com.webpieces.http2engine.api.error.ReceivedGoAway;
 import com.webpieces.http2engine.api.error.ShutdownStream;
 
 public class ResponseListener implements HttpResponseListener {
@@ -50,6 +51,12 @@ public class ResponseListener implements HttpResponseListener {
 	public void failure(Throwable e) {
 		ConnectionCancelled connCancelled = new ConnectionFailure(new ConnectionException(CancelReasonCode.BUG, logId, 0, "Failure from connection", e));
 		responseListener.cancel(new ShutdownStream(0, connCancelled));
+	}
+
+	@Override
+	public void socketClosed() {
+		ReceivedGoAway goAway = new ReceivedGoAway("Http1.1 Remote end closed socket", null);
+		responseListener.cancel(new ShutdownStream(-1, goAway));
 	}
 
 }

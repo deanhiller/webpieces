@@ -261,9 +261,12 @@ public class HttpSocketImpl implements HttpSocket {
 		public void farEndClosed(Channel channel) {
 			log.info("far end closed");
 			isClosed = true;
-
-			SocketClosedException exc = new SocketClosedException("The remote end closed the socket");
-			failure(channel, null, exc);
+			while(!responsesToComplete.isEmpty()) {
+				HttpResponseListener listener = responsesToComplete.poll();
+				if(listener != null) {
+					listener.socketClosed();
+				}
+			}
 		}
 
 		@Override

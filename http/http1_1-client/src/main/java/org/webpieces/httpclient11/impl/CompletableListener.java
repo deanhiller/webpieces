@@ -8,6 +8,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpResponseListener;
+import org.webpieces.httpclient11.api.SocketClosedException;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -59,6 +60,12 @@ public class CompletableListener implements HttpResponseListener {
 	@Override
 	public void failure(Throwable e) {
 		future.completeExceptionally(e);
+	}
+
+	@Override
+	public void socketClosed() {
+		SocketClosedException exc = new SocketClosedException("Remote end closed the socket");
+		future.completeExceptionally(exc);
 	}
 
 }

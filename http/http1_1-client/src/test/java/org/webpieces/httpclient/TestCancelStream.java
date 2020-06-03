@@ -103,9 +103,7 @@ public class TestCancelStream {
 
 		mockChannel.simulateClose();
 		
-		Throwable failre = mockListener.getSingleFailure();
-		
-		Assert.assertEquals(SocketClosedException.class, failre.getClass());
+		Assert.assertTrue(mockListener.isClosed());
 		
 	}
 }

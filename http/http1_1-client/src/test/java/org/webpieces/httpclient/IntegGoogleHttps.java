@@ -125,6 +125,11 @@ public class IntegGoogleHttps {
 		public void failure(Throwable e) {
 			log.error("exception", e);
 		}
+		
+		@Override
+		public void socketClosed() {
+			log.error("remote end closed socket");
+		}
 	}
 	
 }

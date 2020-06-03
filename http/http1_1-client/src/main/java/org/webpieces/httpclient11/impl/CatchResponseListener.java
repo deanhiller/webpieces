@@ -60,4 +60,13 @@ public class CatchResponseListener implements HttpResponseListener {
 		}
 	}
 
+	@Override
+	public void socketClosed() {
+		try {
+			listener.socketClosed();
+		} catch(Throwable e) {
+			log.error("Exception closing", e);
+		}
+	}
+
 }

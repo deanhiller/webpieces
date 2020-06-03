@@ -31,5 +31,7 @@ public interface HttpResponseListener {
 	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete);
 	
 	public void failure(Throwable e);
+	
+	public void socketClosed();
 
 }
