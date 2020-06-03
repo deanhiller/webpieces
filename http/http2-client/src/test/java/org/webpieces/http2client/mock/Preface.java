@@ -6,8 +6,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2MsgType;
 
 public class Preface implements Http2Msg {
 

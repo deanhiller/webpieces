@@ -3,14 +3,14 @@ package com.webpieces.http2engine.impl.svr;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.hpack.api.HpackParser;
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.error.ConnectionException;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.Level2ParsingAndRemoteSettings;
 import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Level2ServerParsing extends Level2ParsingAndRemoteSettings {
 

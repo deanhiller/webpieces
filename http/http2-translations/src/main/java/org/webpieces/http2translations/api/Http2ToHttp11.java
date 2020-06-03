@@ -17,12 +17,12 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2HeaderStruct;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+import com.webpieces.http2.api.dto.highlevel.Http2HeaderStruct;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 
 public class Http2ToHttp11 {
 

@@ -8,8 +8,8 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.util.futures.FutureHelper;
 
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
+import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class NonStreamingWebAppErrorProxy implements StreamWriter {
     private FutureHelper futureUtil;

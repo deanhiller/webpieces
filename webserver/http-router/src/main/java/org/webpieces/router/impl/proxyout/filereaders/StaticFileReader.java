@@ -9,7 +9,7 @@ import org.webpieces.router.impl.dto.RenderStaticResponse;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.NullWriter;
 
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 @Singleton
 public class StaticFileReader {

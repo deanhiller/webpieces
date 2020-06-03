@@ -3,9 +3,9 @@ package org.webpieces.router.impl.routeinvoker;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class RouterStreamRef implements StreamRef, Function<CancelReason, CompletableFuture<Void>> {
 

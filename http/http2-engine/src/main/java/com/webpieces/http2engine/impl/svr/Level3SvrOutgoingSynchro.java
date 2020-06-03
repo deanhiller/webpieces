@@ -6,17 +6,17 @@ import org.webpieces.util.locking.PermitQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.RstStreamFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
+import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.impl.client.Level3ClntOutgoingSyncro;
 import com.webpieces.http2engine.impl.shared.Level3OutgoingSynchro;
 import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class Level3SvrOutgoingSynchro extends Level3OutgoingSynchro {
 

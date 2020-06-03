@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
 
 public interface Http2ClientEngine {
 

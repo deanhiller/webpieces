@@ -9,7 +9,7 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.futures.FutureHelper;
 
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class DContentTypeRouter {
 

@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
-import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2Config;

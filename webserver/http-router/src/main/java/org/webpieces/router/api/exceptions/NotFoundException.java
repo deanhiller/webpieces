@@ -1,6 +1,6 @@
 package org.webpieces.router.api.exceptions;
 
-import com.webpieces.http2parser.api.dto.StatusCode;
+import com.webpieces.http2.api.dto.lowlevel.StatusCode;
 
 public class NotFoundException extends HttpException {
 

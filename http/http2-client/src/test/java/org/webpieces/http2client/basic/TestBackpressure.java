@@ -21,12 +21,12 @@ import org.webpieces.nio.api.handlers.DataListener;
 import com.webpieces.hpack.api.HpackConfig;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.HpackStatefulParser;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.RequestStreamHandle;
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

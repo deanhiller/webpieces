@@ -8,9 +8,9 @@ import org.junit.Test;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class TestBasicHttp2Server extends AbstractHttp2Test {
 	

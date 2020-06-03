@@ -7,14 +7,14 @@ import org.webpieces.util.locking.PermitQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webpieces.http2.api.dto.error.StreamException;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.RstStreamFrame;
 import com.webpieces.http2engine.api.error.ConnReset2;
 import com.webpieces.http2engine.api.error.ConnectionCancelled;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.error.StreamException;
 
 public abstract class Level5BResets extends Level5AStates {
 	private final static Logger log = LoggerFactory.getLogger(Level5BResets.class);

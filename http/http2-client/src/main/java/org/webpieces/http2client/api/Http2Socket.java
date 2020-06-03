@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 
-import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
 
 public interface Http2Socket {
 	

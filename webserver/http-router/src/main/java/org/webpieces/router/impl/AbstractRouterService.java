@@ -28,8 +28,8 @@ import org.webpieces.util.cmdline2.Arguments;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public abstract class AbstractRouterService {
 	

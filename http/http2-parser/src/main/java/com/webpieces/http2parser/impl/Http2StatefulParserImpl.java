@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Frame;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2StatefulParser;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class Http2StatefulParserImpl implements Http2StatefulParser {
 

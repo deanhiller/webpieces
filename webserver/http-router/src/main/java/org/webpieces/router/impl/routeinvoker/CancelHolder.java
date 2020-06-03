@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import org.webpieces.router.api.controller.actions.Action;
 
-import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
 
 class CancelHolder implements Function<CancelReason, CompletableFuture<Void>> {
 	private CompletableFuture<Action> controllerFuture;

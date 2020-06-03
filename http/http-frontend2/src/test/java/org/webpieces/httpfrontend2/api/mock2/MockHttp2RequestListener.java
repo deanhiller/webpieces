@@ -11,10 +11,10 @@ import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class MockHttp2RequestListener extends MockSuperclass implements StreamListener {
 

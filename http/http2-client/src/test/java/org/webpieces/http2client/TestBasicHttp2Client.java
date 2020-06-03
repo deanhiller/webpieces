@@ -3,7 +3,12 @@ package org.webpieces.http2client;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.http2client.api.dto.FullRequest;
@@ -11,11 +16,6 @@ import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.MockStreamWriter;
 import org.webpieces.http2client.util.Requests;
-
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class TestBasicHttp2Client extends AbstractTest {
 	

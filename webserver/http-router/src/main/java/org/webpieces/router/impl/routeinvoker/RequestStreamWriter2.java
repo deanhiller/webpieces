@@ -12,12 +12,12 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.impl.body.BodyParser;
 import org.webpieces.router.impl.body.BodyParsers;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
+import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class RequestStreamWriter2 implements StreamWriter {
 

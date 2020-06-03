@@ -8,15 +8,15 @@ import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.error.ConnectionException;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.api.error.ConnectionCancelled;
 import com.webpieces.http2engine.api.error.ConnectionFailure;
 import com.webpieces.http2engine.api.error.ShutdownStream;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.error.ConnectionException;
 
 public class ResponseListener implements HttpResponseListener {
 

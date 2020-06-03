@@ -6,11 +6,11 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.dto.PingFrame;
-import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.error.ConnectionException;
+import com.webpieces.http2.api.dto.lowlevel.PingFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.AbstractHttp2Frame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Frame;
 import com.webpieces.http2parser.impl.FrameHeaderData;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
 

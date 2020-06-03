@@ -30,10 +30,10 @@ import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
-import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public abstract class AbstractRouteInvoker implements RouteInvoker {
 

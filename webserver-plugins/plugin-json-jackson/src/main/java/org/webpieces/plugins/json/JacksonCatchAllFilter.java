@@ -20,7 +20,7 @@ import org.webpieces.util.filters.Service;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webpieces.http2parser.api.dto.StatusCode;
+import com.webpieces.http2.api.dto.lowlevel.StatusCode;
 
 public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 

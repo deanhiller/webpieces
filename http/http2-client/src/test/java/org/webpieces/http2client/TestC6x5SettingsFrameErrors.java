@@ -19,11 +19,11 @@ import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.util.Requests;
 import org.webpieces.mock.time.MockTime;
 
+import com.webpieces.http2.api.dto.lowlevel.GoAwayFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2ErrorCode;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
-import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

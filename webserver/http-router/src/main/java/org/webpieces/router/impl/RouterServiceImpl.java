@@ -37,17 +37,17 @@ import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.urlparse.UrlEncodedParser;
 
 import com.google.inject.Injector;
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.subparsers.AcceptType;
-import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
-import com.webpieces.hpack.api.subparsers.ParsedContentType;
-import com.webpieces.hpack.impl.subparsers.HeaderPriorityParserImpl;
-import com.webpieces.http2engine.api.MyStreamRef;
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
+import com.webpieces.http2.api.streaming.MyStreamRef;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
+import com.webpieces.http2.api.subparsers.AcceptType;
+import com.webpieces.http2.api.subparsers.HeaderPriorityParser;
+import com.webpieces.http2.api.subparsers.ParsedContentType;
+import com.webpieces.http2.impl.subparsers.HeaderPriorityParserImpl;
 
 public class RouterServiceImpl implements RouterService {
 

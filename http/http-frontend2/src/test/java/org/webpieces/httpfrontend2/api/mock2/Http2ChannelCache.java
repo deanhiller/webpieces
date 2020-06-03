@@ -25,7 +25,7 @@ import org.webpieces.nio.impl.util.ChannelSessionImpl;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.UnmarshalState;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

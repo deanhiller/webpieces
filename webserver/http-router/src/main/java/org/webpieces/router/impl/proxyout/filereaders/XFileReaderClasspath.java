@@ -13,7 +13,7 @@ import org.webpieces.router.impl.proxyout.ResponseCreator;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.futures.FutureHelper;
 
-import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
 
 public class XFileReaderClasspath extends XFileReader {
 

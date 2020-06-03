@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.hpack.api.dto.Http2Request;
 import org.webpieces.data.api.DataWrapper;
+
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
 
 /**
  * The format of this class caters to the router so it has everything the router uses and no more.  It

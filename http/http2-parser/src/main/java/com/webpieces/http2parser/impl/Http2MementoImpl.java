@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
+import com.webpieces.http2.api.dto.lowlevel.lib.AbstractHttp2Frame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Frame;
 import com.webpieces.http2parser.api.Http2Memento;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class Http2MementoImpl implements Http2Memento {
 

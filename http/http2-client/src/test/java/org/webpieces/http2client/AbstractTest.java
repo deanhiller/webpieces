@@ -20,14 +20,14 @@ import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.util.Requests;
 import org.webpieces.mock.time.MockTime;
 
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.SettingsFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

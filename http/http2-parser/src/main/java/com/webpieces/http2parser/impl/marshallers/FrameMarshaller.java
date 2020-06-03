@@ -2,8 +2,8 @@ package com.webpieces.http2parser.impl.marshallers;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2.api.dto.lowlevel.lib.AbstractHttp2Frame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Frame;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
 
 public interface FrameMarshaller {

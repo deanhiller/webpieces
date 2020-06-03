@@ -2,9 +2,9 @@ package com.webpieces.http2engine.impl;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class CachedRequest {
 

@@ -6,9 +6,9 @@ import java.util.List;
 
 import com.twitter.hpack.Decoder;
 import com.webpieces.hpack.api.UnmarshalState;
+import com.webpieces.http2.api.dto.lowlevel.lib.HasHeaderFragment;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 import com.webpieces.http2parser.api.Http2Memento;
-import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class UnmarshalStateImpl implements UnmarshalState {
 

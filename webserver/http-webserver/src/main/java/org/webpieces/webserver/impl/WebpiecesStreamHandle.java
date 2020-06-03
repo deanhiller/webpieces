@@ -5,8 +5,8 @@ import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.router.api.RouterResponseHandler;
 import org.webpieces.router.api.RouterService;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.streaming.StreamRef;
 
 public class WebpiecesStreamHandle implements HttpStream {
 

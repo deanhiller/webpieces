@@ -18,17 +18,17 @@ import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.routeinvoker.WebSettings;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2MsgType;
+import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
+import com.webpieces.http2.api.streaming.PushStreamHandle;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 /**
  * NOTE: All of these pieces SHOULD move into FrontendManager so that anyone uses frontend gets compression and keep alive stuff for

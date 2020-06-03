@@ -1,7 +1,7 @@
 package webpiecesxxxxxpackage.json;
 
-import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import com.webpieces.http2.api.streaming.StreamRef;
 
 /**
  * In our microservices architecture using webpieces

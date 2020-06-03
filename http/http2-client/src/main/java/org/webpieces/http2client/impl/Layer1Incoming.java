@@ -11,7 +11,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
-import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 
 public class Layer1Incoming implements DataListener {

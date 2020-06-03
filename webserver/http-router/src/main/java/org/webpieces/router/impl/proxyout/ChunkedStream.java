@@ -10,7 +10,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
 
 public class ChunkedStream extends OutputStream {
 

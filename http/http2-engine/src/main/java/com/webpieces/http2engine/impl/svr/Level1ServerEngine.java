@@ -8,10 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.RstStreamFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
+import com.webpieces.http2.api.streaming.PushPromiseListener;
+import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.api.error.FarEndClosedConnection;
@@ -25,9 +28,6 @@ import com.webpieces.http2engine.impl.shared.RemoteSettingsManagement;
 import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class Level1ServerEngine implements Http2ServerEngine {
 

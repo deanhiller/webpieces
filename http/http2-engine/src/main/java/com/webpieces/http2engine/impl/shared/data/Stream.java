@@ -3,8 +3,8 @@ package com.webpieces.http2engine.impl.shared.data;
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.util.locking.AsyncLock;
 
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.error.StreamException;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.error.StreamException;
 
 public abstract class Stream {
 

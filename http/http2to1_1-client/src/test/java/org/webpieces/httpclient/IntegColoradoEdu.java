@@ -7,14 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.http2client.api.Http2Socket;
 
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.streaming.PushPromiseListener;
+import com.webpieces.http2.api.streaming.PushStreamHandle;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class IntegColoradoEdu {
 

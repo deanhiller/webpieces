@@ -5,10 +5,11 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
+
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+
 import org.webpieces.httpfrontend2.api.mock2.MockStreamRef;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
-
-import com.webpieces.hpack.api.dto.Http2Request;
 
 public class TestHttp2Errors extends AbstractHttp2Test {
 	

@@ -14,12 +14,12 @@ import org.slf4j.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.lowlevel.GoAwayFrame;
+import com.webpieces.http2.api.dto.lowlevel.PingFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
-import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.PingFrame;
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Level7MarshalAndPing {
 

@@ -4,9 +4,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.Cancel;
 
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class MockStreamRef implements StreamRef {
 

@@ -23,8 +23,8 @@ import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

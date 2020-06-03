@@ -3,7 +3,6 @@ package org.webpieces.http2client.impl;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2engine.api.StreamRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
@@ -12,13 +11,14 @@ import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.nio.api.channels.TCPChannel;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Trailers;
-import com.webpieces.http2engine.api.RequestStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Trailers;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
-import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class Http2SocketImpl implements Http2Socket {
 

@@ -12,14 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.twitter.hpack.Encoder;
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2parser.api.dto.ContinuationFrame;
-import com.webpieces.http2parser.api.dto.HeadersFrame;
-import com.webpieces.http2parser.api.dto.PushPromiseFrame;
-import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.lowlevel.ContinuationFrame;
+import com.webpieces.http2.api.dto.lowlevel.HeadersFrame;
+import com.webpieces.http2.api.dto.lowlevel.PushPromiseFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.HasHeaderFragment;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Frame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 
 public class HeaderEncoding {
 	private static final Logger log = LoggerFactory.getLogger(HeaderEncoding.class);

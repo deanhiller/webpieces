@@ -9,8 +9,8 @@ import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackStatefulParser;
 import com.webpieces.hpack.api.MarshalState;
 import com.webpieces.hpack.api.UnmarshalState;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.Http2Setting;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Setting;
 
 public class HpackStatefulParserImpl implements HpackStatefulParser {
 

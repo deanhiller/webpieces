@@ -26,14 +26,14 @@ import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.router.impl.dto.RedirectResponse;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
-import com.webpieces.hpack.api.subparsers.ResponseCookie;
-import com.webpieces.hpack.api.subparsers.SubparserFactory;
-import com.webpieces.http2parser.api.dto.StatusCode;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
+import com.webpieces.http2.api.subparsers.HeaderPriorityParser;
+import com.webpieces.http2.api.subparsers.ResponseCookie;
+import com.webpieces.http2.api.subparsers.SubparserFactory;
 
 @Singleton
 public class ResponseCreator {

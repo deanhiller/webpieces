@@ -5,10 +5,10 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
 import com.webpieces.http2engine.api.error.ConnectionCancelled;
 import com.webpieces.http2engine.impl.shared.Level4PreconditionChecks;
 import com.webpieces.http2engine.impl.shared.data.Stream;

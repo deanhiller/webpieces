@@ -21,9 +21,9 @@ import com.webpieces.hpack.api.HpackConfig;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.HpackStatefulParser;
 import com.webpieces.hpack.api.UnmarshalState;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

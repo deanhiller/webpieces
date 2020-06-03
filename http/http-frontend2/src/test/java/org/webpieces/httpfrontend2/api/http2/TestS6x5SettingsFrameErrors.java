@@ -5,9 +5,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2.api.dto.lowlevel.GoAwayFrame;
+import com.webpieces.http2.api.dto.lowlevel.SettingsFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2ErrorCode;
 
 /**
  * Test this section of rfc..

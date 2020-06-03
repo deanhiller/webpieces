@@ -20,18 +20,18 @@ import org.webpieces.util.locking.PermitQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.hpack.api.dto.Http2Trailers;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.error.StreamException;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.highlevel.Http2Trailers;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
 import com.webpieces.http2engine.impl.shared.Level5CStateMachine;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.error.StreamException;
 
 public class Level5ServerStateMachine extends Level5CStateMachine {
 

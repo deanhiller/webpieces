@@ -25,11 +25,11 @@ import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 
+import com.webpieces.http2.api.dto.lowlevel.SettingsFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

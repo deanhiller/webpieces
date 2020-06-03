@@ -8,9 +8,9 @@ import java.util.stream.Stream;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.streaming.PushPromiseListener;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class MockPushListener extends MockSuperclass implements PushPromiseListener {
 

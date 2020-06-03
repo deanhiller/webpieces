@@ -2,9 +2,9 @@ package org.webpieces.http2client.mock;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class EmptyStreamRef implements StreamRef {
 

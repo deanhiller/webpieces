@@ -5,16 +5,16 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.webpieces.http2parser.api.dto.CancelReason;
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.ResponseStream;
 
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.RstStreamFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2ErrorCode;
+import com.webpieces.http2.api.streaming.PushStreamHandle;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class Http2StreamImpl implements ResponseStream {
 

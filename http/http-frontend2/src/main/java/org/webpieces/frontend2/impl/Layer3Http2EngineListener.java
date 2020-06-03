@@ -7,10 +7,10 @@ import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.RequestStreamHandle;
-import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
 

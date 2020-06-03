@@ -4,7 +4,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
-import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
 
 public class RequestInfo {
 

@@ -5,8 +5,8 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.router.api.controller.actions.HttpPort;
 import org.webpieces.router.api.routes.RouteId;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
 
 public interface RouterStreamHandle extends RouterResponseHandler {
 

@@ -1,9 +1,9 @@
 package com.webpieces.http2engine.impl;
 
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
+import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.impl.client.Level3ClntOutgoingSyncro;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 import java.util.concurrent.CompletableFuture;
 

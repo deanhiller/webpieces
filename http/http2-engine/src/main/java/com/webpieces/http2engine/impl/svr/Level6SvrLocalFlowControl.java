@@ -2,7 +2,7 @@ package com.webpieces.http2engine.impl.svr;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;

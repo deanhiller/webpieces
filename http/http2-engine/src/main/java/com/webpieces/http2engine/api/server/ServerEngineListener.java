@@ -3,7 +3,7 @@ package com.webpieces.http2engine.api.server;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2engine.api.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 
 public interface ServerEngineListener {

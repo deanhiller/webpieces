@@ -2,11 +2,11 @@ package com.webpieces.http2engine.impl.svr;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2engine.api.StreamRef;
 import org.webpieces.javasm.api.Memento;
 
-import com.webpieces.http2engine.api.RequestStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 
 public class ServerStream extends Stream {

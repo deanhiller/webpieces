@@ -12,8 +12,8 @@ import org.webpieces.util.locking.PermitQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseStreamHandle;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
 import com.webpieces.http2engine.impl.shared.Level3OutgoingSynchro;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;

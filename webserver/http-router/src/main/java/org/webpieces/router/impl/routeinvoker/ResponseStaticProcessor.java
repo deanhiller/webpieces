@@ -16,8 +16,8 @@ import org.webpieces.router.impl.proxyout.filereaders.StaticFileReader;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class ResponseStaticProcessor {
 	private static final Logger log = LoggerFactory.getLogger(ResponseStaticProcessor.class);

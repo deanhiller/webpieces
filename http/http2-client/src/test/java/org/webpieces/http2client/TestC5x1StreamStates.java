@@ -5,7 +5,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.webpieces.http2engine.api.StreamRef;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
@@ -15,21 +14,22 @@ import org.webpieces.http2client.mock.MockStreamWriter;
 import org.webpieces.http2client.mock.TestAssert;
 import org.webpieces.http2client.util.Requests;
 
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.RequestStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.dto.lowlevel.GoAwayFrame;
+import com.webpieces.http2.api.dto.lowlevel.PriorityFrame;
+import com.webpieces.http2.api.dto.lowlevel.RstStreamFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2ErrorCode;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
+import com.webpieces.http2.api.dto.lowlevel.lib.PriorityDetails;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.api.error.ConnectionClosedException;
 import com.webpieces.http2engine.api.error.ShutdownStream;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.PriorityFrame;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 /**
  * Test this section of rfc..

@@ -8,13 +8,13 @@ import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.TwoPools;
 
+import com.webpieces.http2.api.dto.lowlevel.SettingsFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Frame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Setting;
+import com.webpieces.http2.api.dto.lowlevel.lib.SettingsParameter;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2Setting;
-import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

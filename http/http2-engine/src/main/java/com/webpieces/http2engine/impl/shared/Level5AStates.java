@@ -22,20 +22,20 @@ import org.webpieces.util.locking.PermitQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.error.ConnectionException;
+import com.webpieces.http2.api.dto.error.StreamException;
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 import com.webpieces.http2engine.impl.shared.data.Http2Event;
 import com.webpieces.http2engine.impl.shared.data.Http2Event.Http2SendRecieve;
 import com.webpieces.http2engine.impl.shared.data.Http2PayloadType;
 import com.webpieces.http2engine.impl.shared.data.NoTransitionConnectionError;
 import com.webpieces.http2engine.impl.shared.data.NoTransitionStreamError;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.StreamException;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Level5AStates {
 

@@ -7,8 +7,8 @@ import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.util.cmdline2.Arguments;
 
 import com.google.inject.Injector;
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamRef;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.streaming.StreamRef;
 
 public interface RouterService {
 

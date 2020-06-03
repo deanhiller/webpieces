@@ -2,8 +2,8 @@ package org.webpieces.httpfrontend2.api.http2;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class WriterHolder {
 

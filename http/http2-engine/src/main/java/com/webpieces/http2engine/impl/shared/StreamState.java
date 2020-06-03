@@ -7,12 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.util.time.Time;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.error.ConnectionException;
+import com.webpieces.http2.api.dto.error.StreamException;
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.StreamException;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 /**
  * WAY TOOO MANY IF statements in here...need a ClientStreamState AND a ServerStreamState so we can get rid of the if statements

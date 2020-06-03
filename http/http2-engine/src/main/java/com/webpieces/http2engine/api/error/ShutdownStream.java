@@ -1,7 +1,7 @@
 package com.webpieces.http2engine.api.error;
 
-import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2MsgType;
 
 public class ShutdownStream implements CancelReason {
 

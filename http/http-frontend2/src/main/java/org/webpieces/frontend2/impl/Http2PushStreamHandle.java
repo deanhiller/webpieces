@@ -3,10 +3,10 @@ package org.webpieces.frontend2.impl;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2.api.dto.highlevel.Http2Push;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.streaming.PushPromiseListener;
+import com.webpieces.http2.api.streaming.PushStreamHandle;
 
 public class Http2PushStreamHandle implements PushStreamHandle {
 

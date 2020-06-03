@@ -6,15 +6,15 @@ import org.webpieces.util.locking.PermitQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Trailers;
+import com.webpieces.http2.api.dto.error.ConnectionException;
+import com.webpieces.http2.api.dto.highlevel.Http2Trailers;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.dto.lowlevel.PriorityFrame;
+import com.webpieces.http2.api.dto.lowlevel.UnknownFrame;
+import com.webpieces.http2.api.dto.lowlevel.WindowUpdateFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
+import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.PriorityFrame;
-import com.webpieces.http2parser.api.dto.UnknownFrame;
-import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
-import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public abstract class Level5CStateMachine extends Level5BResets {
 

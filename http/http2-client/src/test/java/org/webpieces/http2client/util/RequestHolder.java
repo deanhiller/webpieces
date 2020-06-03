@@ -5,8 +5,8 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.MockStreamWriter;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class RequestHolder {
 

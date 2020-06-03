@@ -23,9 +23,9 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.futures.FutureHelper;
 
-import com.webpieces.http2engine.api.MyStreamRef;
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.streaming.MyStreamRef;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class EScopedRouter {
 	private static final Logger log = LoggerFactory.getLogger(EScopedRouter.class);

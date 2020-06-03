@@ -3,15 +3,15 @@ package org.webpieces.webserver.impl;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2parser.api.dto.CancelReason;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.impl.ProtocolType;
 import org.webpieces.router.api.RouterResponseHandler;
 
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.CancelReason;
+import com.webpieces.http2.api.streaming.PushStreamHandle;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class RouterResponseHandlerImpl implements RouterResponseHandler {
 	

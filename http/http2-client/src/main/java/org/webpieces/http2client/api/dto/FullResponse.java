@@ -2,8 +2,8 @@ package org.webpieces.http2client.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.hpack.api.dto.Http2Trailers;
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.highlevel.Http2Trailers;
 
 public class FullResponse extends Http2Message {
 

@@ -6,9 +6,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.data.api.TwoPools;
 
-import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Setting;
-import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
+import com.webpieces.http2.api.dto.lowlevel.SettingsFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Setting;
+import com.webpieces.http2.api.dto.lowlevel.lib.SettingsParameter;
 
 public class HeaderSettings {
 

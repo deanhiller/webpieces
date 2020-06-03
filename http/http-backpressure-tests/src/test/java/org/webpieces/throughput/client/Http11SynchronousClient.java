@@ -24,7 +24,7 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.throughput.RequestCreator;
 import org.webpieces.util.time.RateRecorder;
 
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

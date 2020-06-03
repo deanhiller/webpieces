@@ -20,9 +20,9 @@ import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.util.filters.Service;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 
 public class LoginFilter extends RouteFilter<LoginInfo> {
 

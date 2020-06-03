@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.nio.api.channels.TCPChannel;
 
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Frame;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class Layer3Outgoing implements ClientEngineListener {
 	

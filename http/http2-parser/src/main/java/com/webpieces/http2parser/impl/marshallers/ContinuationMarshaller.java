@@ -4,9 +4,9 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.dto.ContinuationFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2.api.dto.lowlevel.ContinuationFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.AbstractHttp2Frame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Frame;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
 
 public class ContinuationMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {

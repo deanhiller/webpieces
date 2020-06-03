@@ -16,11 +16,11 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.throughput.AsyncConfig;
 import org.webpieces.throughput.RequestCreator;
 
-import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamRef;
-import com.webpieces.http2engine.api.RequestStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.streaming.RequestStreamHandle;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class ClientAsync {
 	private static final Logger log = LoggerFactory.getLogger(ClientAsync.class);

@@ -1,9 +1,9 @@
 package com.webpieces.http2engine.impl.shared;
 
+import com.webpieces.http2.api.dto.lowlevel.SettingsFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Setting;
+import com.webpieces.http2.api.dto.lowlevel.lib.SettingsParameter;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Setting;
-import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class RemoteSettingsManagement {
 

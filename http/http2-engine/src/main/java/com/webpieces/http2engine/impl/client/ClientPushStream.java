@@ -2,10 +2,10 @@ package com.webpieces.http2engine.impl.client;
 
 import org.webpieces.javasm.api.Memento;
 
-import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseStreamHandle;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2.api.streaming.PushPromiseListener;
+import com.webpieces.http2.api.streaming.PushStreamHandle;
+import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 
 public class ClientPushStream extends Stream {

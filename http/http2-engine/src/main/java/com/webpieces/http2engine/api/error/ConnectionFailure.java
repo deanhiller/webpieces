@@ -1,7 +1,7 @@
 package com.webpieces.http2engine.api.error;
 
-import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
-import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.http2.api.dto.error.CancelReasonCode;
+import com.webpieces.http2.api.dto.error.ConnectionException;
 
 public class ConnectionFailure implements ShutdownConnection {
 	private ConnectionException cause;
