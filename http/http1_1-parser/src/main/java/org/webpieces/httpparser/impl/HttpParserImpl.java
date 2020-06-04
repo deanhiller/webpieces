@@ -88,6 +88,11 @@ public class HttpParserImpl implements HttpParser {
 			return parseData(state, payload);
 		} else if(payload.getMessageType() == HttpMessageType.CHUNK || payload.getMessageType() == HttpMessageType.LAST_CHUNK) {
 			return chunkedBytes((HttpChunk)payload);
+		} else if(payload instanceof HttpData) {
+			//in case server just sends it's received HttpData to a client, we have to translate it back to HttpChunk
+			payload = translateData((HttpData)payload);
+		} else if(payload instanceof HttpLastData) {
+			payload = translate((HttpLastData)payload);
 		}
 		
 		HttpMessage msg = (HttpMessage) payload;
@@ -103,6 +108,23 @@ public class HttpParserImpl implements HttpParser {
 		byte[] stringPiece = result.getBytes(iso8859_1);
 		
 		return stringPiece;
+	}
+
+	private HttpPayload translate(HttpLastData payload) {
+		HttpLastChunk chunk = new HttpLastChunk();
+		chunk.setBody(payload.getBodyNonNull());
+		chunk.setExtensions(payload.getExtensions());
+		
+		for(Header header : payload.getHeaders()) {
+			chunk.addHeader(header);
+		}
+		return chunk;
+	}
+
+	private HttpPayload translateData(HttpData payload) {
+		HttpChunk chunk = new HttpChunk(payload.getBodyNonNull());
+		chunk.setExtensions(payload.getExtensions());
+		return chunk;
 	}
 
 	private byte[] parseData(MarshalStateImpl state, HttpPayload payload) {

@@ -33,4 +33,9 @@ public class Http2ChannelProxyImpl implements Http2ChannelProxy {
 		return channel.close();
 	}
 
+	@Override
+	public String toString() {
+		return channel + "";
+	}
+	
 }
