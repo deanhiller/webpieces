@@ -69,11 +69,11 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(
-				getOverrides(isRemote, metrics), new AppOverridesModule(), 
+				getOverrides(metrics), new AppOverridesModule(), 
 				new ServerConfig(JavaCache.getCacheLocation()), args);
 		
 		webserver.start();
-		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	/**

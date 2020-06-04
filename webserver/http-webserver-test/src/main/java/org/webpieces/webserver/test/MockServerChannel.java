@@ -5,12 +5,19 @@ import java.net.SocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
 
 public class MockServerChannel implements TCPServerChannel {
 
 	private InetSocketAddress addr;
+
+	public MockServerChannel() {}
+	
+	public MockServerChannel(HttpSvrConfig config) {
+		addr = config.bindAddress;
+	}
 
 	@Override
 	public void setReuseAddress(boolean b) {

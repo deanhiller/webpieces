@@ -14,21 +14,14 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient11.api.HttpFullRequest;
-import org.webpieces.httpclient11.api.HttpFullResponse;
-import org.webpieces.httpclient11.api.HttpSocket;
-import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpRequestLine;
-import org.webpieces.httpparser.api.dto.HttpUri;
-import org.webpieces.httpparser.api.dto.KnownHttpMethod;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.dto.FullRequest;
+import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.webserver.api.ServerConfig;
-import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.ResponseExtract;
-import org.webpieces.webserver.test.ResponseWrapper;
+import org.webpieces.webserver.test.http2.AbstractHttp2Test;
+import org.webpieces.webserver.test.http2.ResponseWrapperHttp2;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -36,6 +29,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.search.RequiredSearch;
@@ -53,18 +50,18 @@ import webpiecesxxxxxpackage.service.RemoteService;
  * @author dhiller
  *
  */
-public class TestLesson1Json extends AbstractWebpiecesTest {
+public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 
-	private final static Logger log = LoggerFactory.getLogger(TestLesson1Json.class);
+	private final static Logger log = LoggerFactory.getLogger(TestLesson8JsonHttp2.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
-	private HttpSocket http11Socket;
+	private Http2Socket http2Socket;
 	private ObjectMapper mapper = new ObjectMapper();
 	private SimpleMeterRegistry metrics;
 	
 	@Before
-	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
+	public void setUp() {
 		log.info("Setting up test");
 		//This line is not really needed but ensures you do not run a test without param names compiled in(which will fail).
 		Asserts.assertWasCompiledWithParamNames("test");
@@ -78,7 +75,7 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 			new ServerConfig(JavaCache.getCacheLocation()), args
 		);
 		webserver.start();
-		http11Socket = connectHttp(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http2Socket = connectHttp(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	/**
@@ -101,9 +98,9 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 	
 	private SearchResponse search(SearchRequest searchReq) {
 		try {
-			HttpFullRequest req = createHttpRequest(searchReq);
+			FullRequest req = createHttpRequest(searchReq);
 	
-			CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+			CompletableFuture<FullResponse> respFuture = http2Socket.send(req);
 			
 			return waitAndTranslateResponse(respFuture);
 		} catch (Throwable e) {
@@ -111,37 +108,35 @@ public class TestLesson1Json extends AbstractWebpiecesTest {
 		}
 	}
 
-	private SearchResponse waitAndTranslateResponse(CompletableFuture<HttpFullResponse> respFuture)
+	private SearchResponse waitAndTranslateResponse(CompletableFuture<FullResponse> respFuture)
 			throws InterruptedException, ExecutionException, TimeoutException, IOException, JsonParseException,
 			JsonMappingException {
 		
-		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
-		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		ResponseWrapperHttp2 response = ResponseExtract.waitAndWrap(respFuture);
+		response.assertStatusCode(StatusCode.HTTP_200_OK);
 		
-		HttpFullResponse fullResponse = respFuture.get(2, TimeUnit.SECONDS);
-		DataWrapper data2 = fullResponse.getData();
+		FullResponse fullResponse = respFuture.get(2, TimeUnit.SECONDS);
+		DataWrapper data2 = fullResponse.getPayload();
 		byte[] respContent = data2.createByteArray();
 		return mapper.readValue(respContent, SearchResponse.class);
 	}
 
-	private HttpFullRequest createHttpRequest(SearchRequest searchReq)
+	private FullRequest createHttpRequest(SearchRequest searchReq)
 			throws IOException, JsonGenerationException, JsonMappingException {
 		byte[] content = mapper.writeValueAsBytes(searchReq);
 		DataWrapper data = dataGen.wrapByteArray(content);
-		HttpFullRequest req = createRequest("/json/556", data);
+		FullRequest req = createRequest("/json/556", data);
 		return req;
 	}
 	
-	public static HttpFullRequest createRequest(String uri, DataWrapper body) {
-		HttpRequestLine requestLine = new HttpRequestLine();
-        requestLine.setMethod(KnownHttpMethod.GET);
-		requestLine.setUri(new HttpUri(uri));
-		HttpRequest req = new HttpRequest();
-		req.setRequestLine(requestLine );
-		req.addHeader(new Header(KnownHeaderName.HOST, "yourdomain.com"));
-		req.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
+	public static FullRequest createRequest(String uri, DataWrapper body) {
+		Http2Request req = new Http2Request();
+		req.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, "yourdomain.com"));
+		req.addHeader(new Http2Header(Http2HeaderName.METHOD, "GET"));
+		req.addHeader(new Http2Header(Http2HeaderName.PATH, uri));
+		req.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
 		
-		HttpFullRequest fullReq = new HttpFullRequest(req, body);
+		FullRequest fullReq = new FullRequest(req, body, null);
 		return fullReq;
 	}
 	

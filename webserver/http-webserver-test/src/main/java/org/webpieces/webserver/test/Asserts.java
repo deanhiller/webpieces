@@ -5,10 +5,15 @@ import java.lang.reflect.Parameter;
 
 public class Asserts {
 
-	public static void assertWasCompiledWithParamNames(String param) throws ClassNotFoundException {
+	public static void assertWasCompiledWithParamNames(String param) {
 		//This is here for those that forget to configure their IDE to compile with param names
 		//We do this on eclipse generation and need to try to do it for intellij generation too
-		Class<?> clazz = Class.forName(Asserts.class.getName());
+		Class<?> clazz;
+		try {
+			clazz = Class.forName(Asserts.class.getName());
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Class wasn't found", e);
+		}
 		Method[] method = clazz.getDeclaredMethods();
 		Method target = null;
 		for(Method m : method) {

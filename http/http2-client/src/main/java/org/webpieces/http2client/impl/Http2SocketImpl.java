@@ -5,18 +5,12 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.nio.api.channels.TCPChannel;
 
-import com.webpieces.http2.api.dto.highlevel.Http2Request;
-import com.webpieces.http2.api.dto.highlevel.Http2Trailers;
-import com.webpieces.http2.api.dto.lowlevel.DataFrame;
 import com.webpieces.http2.api.streaming.RequestStreamHandle;
-import com.webpieces.http2.api.streaming.StreamRef;
-import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 
@@ -59,60 +53,7 @@ public class Http2SocketImpl implements Http2Socket {
 	 */
 	@Override
 	public CompletableFuture<FullResponse> send(FullRequest request) {
-		SingleResponseListener responseListener = new SingleResponseListener();
-		
-		RequestStreamHandle streamHandle = openStream();
-		
-		Http2Request req = request.getHeaders();
-		
-		if(request.getPayload() == null) {
-			request.getHeaders().setEndOfStream(true);
-			streamHandle.process(req, responseListener);
-			return responseListener.fetchResponseFuture();
-		} else if(request.getTrailingHeaders() == null) {
-			request.getHeaders().setEndOfStream(false);
-			DataFrame data = createData(request, true);
-
-			StreamRef streamRef = streamHandle.process(request.getHeaders(), responseListener);
-
-			return streamRef.getWriter()
-						.thenCompose(writer -> {
-							data.setStreamId(req.getStreamId());
-							return writer.processPiece(data);
-						})
-						.thenCompose(writer -> responseListener.fetchResponseFuture());
-		}
-		
-		request.getHeaders().setEndOfStream(false);
-		DataFrame data = createData(request, false);
-		Http2Trailers trailers = request.getTrailingHeaders();
-		trailers.setEndOfStream(true);
-
-
-		StreamRef streamRef = streamHandle.process(request.getHeaders(), responseListener);
-
-		return streamRef.getWriter()
-				.thenCompose(writer -> writeStuff(writer, req, data, trailers, responseListener));
-	}
-	
-	private CompletableFuture<FullResponse> writeStuff(
-			StreamWriter writer, Http2Request req, DataFrame data, Http2Trailers trailers, SingleResponseListener responseListener) {
-		
-		data.setStreamId(req.getStreamId());
-		return writer.processPiece(data)
-						.thenCompose(v -> {
-							trailers.setStreamId(req.getStreamId());
-							return writer.processPiece(trailers);
-						})
-						.thenCompose(v -> responseListener.fetchResponseFuture());
-	}
-
-	private DataFrame createData(FullRequest request, boolean isEndOfStream) {
-		DataWrapper payload = request.getPayload();
-		DataFrame data = new DataFrame();
-		data.setEndOfStream(isEndOfStream);
-		data.setData(payload);
-		return data;
+		return new ResponseCacher(() -> openStream()).run(request);
 	}
 
 	@Override

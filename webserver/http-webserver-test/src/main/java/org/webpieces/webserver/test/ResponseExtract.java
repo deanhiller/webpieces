@@ -3,7 +3,9 @@ package org.webpieces.webserver.test;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.httpclient11.api.HttpFullResponse;
+import org.webpieces.webserver.test.http2.ResponseWrapperHttp2;
 
 
 public class ResponseExtract {
@@ -16,5 +18,14 @@ public class ResponseExtract {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public static ResponseWrapperHttp2 waitAndWrap(CompletableFuture<FullResponse> respFuture) {
+		try {
+			FullResponse resp = respFuture.get(2, TimeUnit.SECONDS);
+			return new ResponseWrapperHttp2(resp);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}	
 
 }
