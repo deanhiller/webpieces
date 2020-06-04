@@ -1,7 +1,6 @@
 package org.webpieces.httpparser.impl;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.HttpParser;
-import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParseException;
@@ -43,7 +41,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class HttpParserImpl implements HttpParser {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
-	private static final Charset iso8859_1 = HttpParserFactory.ISO8859_1;
 	private static final String TRAILER_STR = "\r\n";
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
@@ -53,6 +50,7 @@ public class HttpParserImpl implements HttpParser {
 	private DistributionSummary inPayloadSize;
 	private DistributionSummary bytesParsedDist;
 	private boolean optimizeForBufferPool;
+	private ParserUtil parserUtil = new ParserUtil();
 
 	public HttpParserImpl(String id, MeterRegistry metrics, BufferPool pool, boolean optimizeForBufferPool) {
 		this.pool = pool;
@@ -86,13 +84,15 @@ public class HttpParserImpl implements HttpParser {
 		MarshalStateImpl state = (MarshalStateImpl) s;
 		if(state.getParsingDataSize() != null) {
 			return parseData(state, payload);
-		} else if(payload.getMessageType() == HttpMessageType.CHUNK || payload.getMessageType() == HttpMessageType.LAST_CHUNK) {
-			return chunkedBytes((HttpChunk)payload);
-		} else if(payload instanceof HttpData) {
+		} else if(HttpData.class == payload.getClass()) {
 			//in case server just sends it's received HttpData to a client, we have to translate it back to HttpChunk
-			payload = translateData((HttpData)payload);
-		} else if(payload instanceof HttpLastData) {
-			payload = translate((HttpLastData)payload);
+			HttpChunk chunk = parserUtil.translateData((HttpData)payload);
+			return parserUtil.chunkedBytes(chunk);
+		} else if(HttpLastData.class == payload.getClass()) {
+			HttpLastChunk lastChunk = parserUtil.translate((HttpLastData)payload);
+			return parserUtil.chunkedBytes(lastChunk);
+		} else if(payload.getMessageType() == HttpMessageType.CHUNK || payload.getMessageType() == HttpMessageType.LAST_CHUNK) {
+			return parserUtil.chunkedBytes((HttpChunk)payload);
 		}
 		
 		HttpMessage msg = (HttpMessage) payload;
@@ -105,26 +105,9 @@ public class HttpParserImpl implements HttpParser {
 			state.setParsingDataSize(lengthOfBodyFromHeader);
 		}
 		
-		byte[] stringPiece = result.getBytes(iso8859_1);
+		byte[] stringPiece = result.getBytes(ParserUtil.ISO8859_1);
 		
 		return stringPiece;
-	}
-
-	private HttpPayload translate(HttpLastData payload) {
-		HttpLastChunk chunk = new HttpLastChunk();
-		chunk.setBody(payload.getBodyNonNull());
-		chunk.setExtensions(payload.getExtensions());
-		
-		for(Header header : payload.getHeaders()) {
-			chunk.addHeader(header);
-		}
-		return chunk;
-	}
-
-	private HttpPayload translateData(HttpData payload) {
-		HttpChunk chunk = new HttpChunk(payload.getBodyNonNull());
-		chunk.setExtensions(payload.getExtensions());
-		return chunk;
 	}
 
 	private byte[] parseData(MarshalStateImpl state, HttpPayload payload) {
@@ -141,36 +124,6 @@ public class HttpParserImpl implements HttpParser {
 			state.resetDataReading();
 		}
 		return body.createByteArray();
-	}
-
-	private void copyData(DataWrapper body, byte[] data, int offset) {
-		for(int i = 0; i < body.getReadableSize(); i++) {
-			//TODO: Think about using System.arrayCopy here(what is faster?)
-			data[offset + i] = body.readByteAt(i);
-		}
-	}
-
-	private byte[] chunkedBytes(HttpChunk request) {
-		DataWrapper dataWrapper = request.getBody();
-		int size = dataWrapper.getReadableSize();
-
-		String metaLine = request.createMetaLine();
-		String lastPart = request.createTrailer();
-		
-		byte[] hex = metaLine.getBytes(iso8859_1);
-		byte[] endData = lastPart.getBytes(iso8859_1);
-		
-		byte[] data = new byte[hex.length+size+endData.length];
-
-		//copy chunk header of <size>/r/n
-		System.arraycopy(hex, 0, data, 0, hex.length);
-		
-		copyData(dataWrapper, data, hex.length);
-
-		//copy closing /r/n (and headers if isLastChunk)
-		System.arraycopy(endData, 0, data, data.length-endData.length, endData.length);
-		
-		return data;
 	}
 
 	private Integer toInteger(String value, String line) {
@@ -594,7 +547,7 @@ public class HttpParserImpl implements HttpParser {
 		List<? extends DataWrapper> split2 = dataGen.split(splitPieces.get(1), 2);
 
 		DataWrapper trailer = split2.get(0);
-		String trailerStr = trailer.createStringFrom(0, trailer.getReadableSize(), iso8859_1);
+		String trailerStr = trailer.createStringFrom(0, trailer.getReadableSize(), ParserUtil.ISO8859_1);
 		if(!TRAILER_STR.equals(trailerStr))
 			throw new IllegalStateException("The chunk did not end with \\r\\n .  The format is invalid");
 		
@@ -627,7 +580,7 @@ public class HttpParserImpl implements HttpParser {
 	}
 
 	private int parseExtensions(DataWrapper chunkMetaData, List<HttpChunkExtension> extensions) {
-		String chunkMetaStr = chunkMetaData.createStringFrom(0, chunkMetaData.getReadableSize(), iso8859_1);
+		String chunkMetaStr = chunkMetaData.createStringFrom(0, chunkMetaData.getReadableSize(), ParserUtil.ISO8859_1);
 		String hexSize = chunkMetaStr.trim();
 		if(chunkMetaStr.contains(";")) {
 			String[] extensionsArray = chunkMetaStr.split(";");
@@ -704,7 +657,7 @@ public class HttpParserImpl implements HttpParser {
 				List<? extends DataWrapper> splitPieces = dataGen.split(data, data.getReadableSize()-2);
 				data = splitPieces.get(0);
 				DataWrapper trailer = splitPieces.get(1);
-				String trailerStr = trailer.createStringFrom(0, trailer.getReadableSize(), iso8859_1);
+				String trailerStr = trailer.createStringFrom(0, trailer.getReadableSize(), ParserUtil.ISO8859_1);
 				if(!TRAILER_STR.equals(trailerStr))
 					throw new IllegalStateException("The chunk did not end with \\r\\n .  The format is invalid");
 			}
@@ -733,7 +686,7 @@ public class HttpParserImpl implements HttpParser {
 		int offset = 0;
 		for(Integer mark : markedPositions) {
 			int len = mark - offset;
-			String line = toBeParsed.createStringFrom(offset, len, iso8859_1);
+			String line = toBeParsed.createStringFrom(offset, len, ParserUtil.ISO8859_1);
 			lines.add(line.trim());
 			offset = mark;
 		}
@@ -796,7 +749,7 @@ public class HttpParserImpl implements HttpParser {
 		HttpRequestMethod method = new HttpRequestMethod(firstLinePieces[0]);
 		HttpUri uri = new HttpUri(firstLinePieces[1]);
 		
-		HttpVersion version = parseVersion(firstLinePieces[2], firstLine);
+		HttpVersion version = parserUtil.parseVersion(firstLinePieces[2], firstLine);
 		
 		HttpRequestLine httpRequestLine = new HttpRequestLine();
 		httpRequestLine.setMethod(method);
@@ -806,44 +759,13 @@ public class HttpParserImpl implements HttpParser {
 		HttpRequest request = new HttpRequest();
 		request.setRequestLine(httpRequestLine);
 		
-		parseHeaders(lines, request);
+		parserUtil.parseHeaders(lines, request);
 		
 		memento.addMessage(request);
 		return request;
 	}
 
-	private HttpVersion parseVersion(String versionString, String firstLine) {
-		if(!versionString.startsWith("HTTP/")) {
-			throw new ParseException("Invalid version in http request first line not prefixed with HTTP/.  line="+firstLine);
-		}
-		
-		String ver = versionString.substring(5, versionString.length());
-		HttpVersion version = new HttpVersion();
-		version.setVersion(ver);
-		return version;
-	}
 
-	private void parseHeaders(List<String> lines, HttpMessage httpMessage) {
-		//TODO: one header can be multiline and we need to fix this code for that
-		//ie. the spec says you can split a head in multiple lines(ick!!!)
-		for(String line : lines) {
-			Header header = parseHeader(line);
-			httpMessage.addHeader(header);
-		}
-	}
-
-	private Header parseHeader(String line) {
-		//can't use split in case there are two ':' ...one in the value and one as the delimeter
-		int indexOf = line.indexOf(":");
-		if(indexOf < 0)
-			throw new IllegalArgumentException("bad header line="+ line);
-		String value = line.substring(indexOf+1).trim();
-		String name = line.substring(0, indexOf);
-		Header header = new Header();
-		header.setName(name.trim());
-		header.setValue(value.trim());
-		return header;
-	}
 
 	private HttpMessage parseResponse(MementoImpl memento, List<String> lines) {
 		//remove first line...
@@ -862,7 +784,7 @@ public class HttpParserImpl implements HttpParser {
 		String codeStr = tail.substring(0, indexOf2).trim();
 		String reason = tail.substring(indexOf2).trim();
 		
-		HttpVersion version2 = parseVersion(versionStr, firstLine);
+		HttpVersion version2 = parserUtil.parseVersion(versionStr, firstLine);
 
 		HttpResponseStatus status = new HttpResponseStatus();
 		Integer codeVal = toInteger(codeStr, firstLine);
@@ -878,7 +800,7 @@ public class HttpParserImpl implements HttpParser {
 		HttpResponse response = new HttpResponse();
 		response.setStatusLine(httpRequestLine);
 
-		parseHeaders(lines, response);
+		parserUtil.parseHeaders(lines, response);
 
 		memento.addMessage(response);
 		return response;
