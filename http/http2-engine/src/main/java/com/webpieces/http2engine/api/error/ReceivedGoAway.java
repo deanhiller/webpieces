@@ -25,5 +25,10 @@ public class ReceivedGoAway implements ConnReset2 {
 	public GoAwayFrame getGoAwayFrame() {
 		return goAwayFrame;
 	}
+
+	@Override
+	public String toString() {
+		return "ReceivedGoAway [message=" + message + ", goAwayFrame=" + goAwayFrame + "]";
+	}
 	
 }

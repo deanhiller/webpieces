@@ -4,6 +4,7 @@ import com.webpieces.http2.api.dto.error.CancelReasonCode;
 import com.webpieces.http2.api.dto.error.ConnectionException;
 
 public class ConnectionFailure implements ShutdownConnection {
+
 	private ConnectionException cause;
 
 	public ConnectionFailure(ConnectionException cause) {
@@ -24,5 +25,10 @@ public class ConnectionFailure implements ShutdownConnection {
 	public ConnectionException getCause() {
 		return cause;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "ConnectionFailure [cause=" + cause.getMessage() + "]";
+	}
+
 }

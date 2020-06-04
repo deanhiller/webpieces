@@ -43,6 +43,8 @@ public abstract class Level2ParsingAndRemoteSettings {
 	private HeaderSettings localSettings;
 	private ByteAckTracker tracker2 = new ByteAckTracker();
 
+	private TempTimeoutSet streamsToDiscard = new TempTimeoutSet();
+	
 	protected Level3OutgoingSynchro outSyncro;
 
 	public Level2ParsingAndRemoteSettings(
@@ -86,6 +88,10 @@ public abstract class Level2ParsingAndRemoteSettings {
 			log.error("shutting the connection down due to error", e);
 			ConnectionFailure reset = new ConnectionFailure((ConnectionException)e);
 			syncro.sendGoAwayToSvrAndResetAllToApp(reset).exceptionally( t -> logExc("connection", t)); //send GoAway
+		} else if(e instanceof StreamException) {
+			log.error("Stream had an error", e);
+			streamsToDiscard.add(((StreamException) e).getStreamId());
+			syncro.sendRstToServerAndApp((StreamException) e).exceptionally( t -> logExc("stream", t));
 		} else {
 			log.error("shutting the connection down due to error(MAKE sure your clients try..catch, exceptions)", e);
 			ConnectionException exc = new ConnectionException(CancelReasonCode.BUG, logId, 0, e.getMessage(), e);
@@ -133,6 +139,9 @@ public abstract class Level2ParsingAndRemoteSettings {
 	}
 
 	public CompletableFuture<Void> process(Http2Msg msg) {
+		if(streamsToDiscard.checkDiscard(msg.getStreamId()))
+			return CompletableFuture.completedFuture(null); //this is a stream that failed so discard frames for a bit
+		
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
 		try {
 			future = processImpl(msg);

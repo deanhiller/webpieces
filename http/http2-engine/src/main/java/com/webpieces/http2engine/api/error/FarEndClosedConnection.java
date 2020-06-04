@@ -19,4 +19,9 @@ public class FarEndClosedConnection implements ConnReset2 {
 		return message;
 	}
 
+	@Override
+	public String toString() {
+		return "FarEndClosedConnection [message=" + message + "]";
+	}
+
 }

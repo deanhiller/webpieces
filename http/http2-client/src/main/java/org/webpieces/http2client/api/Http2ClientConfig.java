@@ -8,8 +8,14 @@ public class Http2ClientConfig {
 
 	private String id = "http2Client";
 	private int numThreads = 20;
-	private Http2Config http2Config;
+	private Http2Config http2Config = new Http2Config();
 	private BackpressureConfig backpressureConfig;
+	
+	public Http2ClientConfig() {
+		backpressureConfig = new BackpressureConfig();
+		backpressureConfig.setMaxBytes(null); //turn off for clients 
+		backpressureConfig.setStartReadingThreshold(null);
+	}
 	
 	public String getId() {
 		return id;

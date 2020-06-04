@@ -1,6 +1,6 @@
 # webpieces
 
-* Add http2 testing framework ASAP
+* Add final http2 testing framework
 * send in http request with no chunked transfer but send chunks and things go nasty.  can we say something better maybe?  can we fail better?...on the client way out, we should fail sending any chunks!!!
 * Add regex for e.printStackTrace into checkstyle.  Add System.out and System.err as well to not be used and log why
 * implement this post https://github.com/diffplug/spotless to organize imports and format code?   

@@ -94,6 +94,15 @@ public class HpackParserImpl implements HpackParser {
 	}
 
 	private void processFrame(UnmarshalStateImpl state, Http2Frame frame) {
+		try {
+			processFrameImpl(state, frame);
+		} catch(RuntimeException e) {
+			state.getHeadersToCombine().clear(); //clear on any exception 
+			throw e;
+		}
+	}
+	
+	private void processFrameImpl(UnmarshalStateImpl state, Http2Frame frame) {
 		List<HasHeaderFragment> headerFragList = state.getHeadersToCombine();
 		if(frame instanceof HasHeaderFragment) {
 			HasHeaderFragment headerFrame = (HasHeaderFragment) frame;
@@ -186,7 +195,7 @@ public class HpackParserImpl implements HpackParser {
 			if(knownHeaders.containsKey(Http2HeaderName.STATUS))
 				throw new StreamException(CancelReasonCode.MALFORMED_REQUEST, logId, streamId, "Request or Response has :method and :status headers and this is not allowed");
 			else if(!knownHeaders.keySet().containsAll(requiredRequestHeaders))
-				throw new StreamException(CancelReasonCode.MALFORMED_REQUEST, logId, streamId, "Request is missing required headers.");
+				throw new StreamException(CancelReasonCode.MALFORMED_REQUEST, logId, streamId, "Request is missing one of the required headers. ="+requiredRequestHeaders);
 			
 			return new Http2Request(headers);
 		} else if(knownHeaders.containsKey(Http2HeaderName.STATUS)) {

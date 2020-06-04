@@ -83,7 +83,7 @@ public class SingleResponseListener implements ResponseStreamHandle, StreamWrite
 
 	@Override
 	public CompletableFuture<Void> cancel(CancelReason frame) {
-		responseFuture.completeExceptionally(new ServerRstStreamException("The remote end reset this stream"));
+		responseFuture.completeExceptionally(new ServerRstStreamException("The remote end reset this stream. reason="+frame));
 		return CompletableFuture.completedFuture(null);
 	}
 

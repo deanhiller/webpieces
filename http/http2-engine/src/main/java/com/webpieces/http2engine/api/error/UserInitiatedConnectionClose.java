@@ -21,6 +21,10 @@ public class UserInitiatedConnectionClose implements ShutdownConnection {
 	public CancelReasonCode getReasonCode() {
 		return failReason;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "UserInitiatedConnectionClose [reason=" + reason + "]";
+	}
 	
 }

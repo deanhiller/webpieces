@@ -37,4 +37,9 @@ public class ShutdownStream implements CancelReason {
 		this.streamId = streamId;
 	}
 
+	@Override
+	public String toString() {
+		return "ShutdownStream [streamId=" + streamId + ", cause=" + cause + "]";
+	}
+
 }

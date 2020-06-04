@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.http2client.api.Http2Client;
+import org.webpieces.http2client.api.Http2ClientConfig;
+import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
@@ -60,6 +63,24 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 	private ObjectMapper mapper = new ObjectMapper();
 	private SimpleMeterRegistry metrics;
 	
+
+	//Default runs embedded and there are 2 embedded modes.  
+	//One that is direct on feeding request objects to the server(no parsing, no http2 engine, no hpack, etc)
+	//One that is embedded and only takes out sockets and goes through entire http2 engine stuff
+	@Override
+	protected boolean isRemote() {
+		return true;
+	}
+	
+	//The default in superclass is an http2 client on top of an http1.1 protocol.
+	//by overridding here, we can use an http2 client on http2 protocol ONLY IF isRemote() returns true
+	@Override
+	protected Http2Client createRemoteClient() {
+		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+		Http2ClientConfig config = new Http2ClientConfig();
+		return Http2ClientFactory.createHttpClient(config, metrics);		
+	}
+
 	@Before
 	public void setUp() {
 		log.info("Setting up test");
@@ -132,6 +153,7 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 	public static FullRequest createRequest(String uri, DataWrapper body) {
 		Http2Request req = new Http2Request();
 		req.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, "yourdomain.com"));
+		req.addHeader(new Http2Header(Http2HeaderName.SCHEME, "https"));
 		req.addHeader(new Http2Header(Http2HeaderName.METHOD, "GET"));
 		req.addHeader(new Http2Header(Http2HeaderName.PATH, uri));
 		req.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
