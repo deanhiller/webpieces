@@ -7,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.nio.api.channels.TCPChannel;
 
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Frame;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
@@ -16,10 +15,10 @@ import com.webpieces.http2engine.api.error.ShutdownConnection;
 public class Layer3Outgoing implements ClientEngineListener {
 	
 	private static final Logger log = LoggerFactory.getLogger(Layer3Outgoing.class);
-	private TCPChannel channel;
+	private Http2ChannelProxy channel;
 	
-	public Layer3Outgoing(TCPChannel channel, Http2Socket socket) {
-		this.channel = channel;
+	public Layer3Outgoing(Http2ChannelProxy channel2, Http2Socket socket) {
+		this.channel = channel2;
 	}
 
 	@Override

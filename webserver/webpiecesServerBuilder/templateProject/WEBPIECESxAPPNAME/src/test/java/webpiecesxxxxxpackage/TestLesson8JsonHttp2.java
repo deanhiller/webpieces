@@ -25,6 +25,7 @@ import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.http2.AbstractHttp2Test;
 import org.webpieces.webserver.test.http2.ResponseWrapperHttp2;
+import org.webpieces.webserver.test.http2.TestMode;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -62,16 +63,16 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 	private Http2Socket http2Socket;
 	private ObjectMapper mapper = new ObjectMapper();
 	private SimpleMeterRegistry metrics;
-	
 
-	//Default runs embedded and there are 2 embedded modes.  
-	//One that is direct on feeding request objects to the server(no parsing, no http2 engine, no hpack, etc)
-	//One that is embedded and only takes out sockets and goes through entire http2 engine stuff
+
 	@Override
-	protected boolean isRemote() {
-		return true;
+	protected TestMode getTestMode() {
+		//This mode slows things down but you can step through client and server http2 parser/hpack/engine etc.
+		//If you are a beginner run in EMBEDDED_DIRET_NO_PARSING mode as it's faster AND you can step through 
+		//the main stuff you care about(not the http2 protocol stuff).
+		return TestMode.EMBEDDED_PARSING;
 	}
-	
+
 	//The default in superclass is an http2 client on top of an http1.1 protocol.
 	//by overridding here, we can use an http2 client on http2 protocol ONLY IF isRemote() returns true
 	@Override

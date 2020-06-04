@@ -1,4 +1,4 @@
-package org.webpieces.webserver.test.http2;
+package org.webpieces.webserver.test.http2.direct;
 
 import javax.net.ssl.SSLEngine;
 
@@ -6,6 +6,7 @@ import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.impl.Http2SocketImpl;
+import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.util.time.TimeImpl;
 import org.webpieces.webserver.test.MockChannelManager;
 import org.webpieces.webserver.test.MockTcpChannel;
@@ -28,8 +29,10 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 public class DirectHttp2Client implements Http2Client {
 
 	private Http2ClientEngineFactory factory;
+	private MockChannelManager mgr;
 
 	public DirectHttp2Client(MockChannelManager mgr) {
+		this.mgr = mgr;
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		TwoPools pool = new TwoPools("directhttp2.bufferpool", metrics);
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
@@ -39,12 +42,16 @@ public class DirectHttp2Client implements Http2Client {
 	}
 
 	public Http2Socket createHttpSocket() {
+		ConnectionListener listener = mgr.getHttpConnection();
 		MockTcpChannel channel = new MockTcpChannel(false);
-		return new Http2SocketImpl(channel, factory);
+		
+		return new Http2SocketImpl(new DelayedProxy(listener, channel), factory);
 	}
 
 	public Http2Socket createHttpsSocket(SSLEngine engine) {
+		ConnectionListener listener = mgr.getHttpConnection();
 		MockTcpChannel channel = new MockTcpChannel(true);
-		return new Http2SocketImpl(channel, factory);
+		
+		return new Http2SocketImpl(new DelayedProxy(listener, channel), factory);
 	}
 }

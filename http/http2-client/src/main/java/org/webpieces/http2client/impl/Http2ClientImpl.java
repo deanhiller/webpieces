@@ -34,7 +34,8 @@ public class Http2ClientImpl implements Http2Client {
 		int count = counter.getAndIncrement();
 		String idForLogging = id+count+"Http2";
 		TCPChannel channel = mgr.createTCPChannel(idForLogging);
-		return new Http2SocketImpl(channel, factory);
+		Http2ChannelProxy proxy = new Http2ChannelProxyImpl(channel);
+		return new Http2SocketImpl(proxy, factory);
 	}
 
 	@Override
@@ -42,7 +43,8 @@ public class Http2ClientImpl implements Http2Client {
 		int count = httpsCounter.getAndIncrement();
 		String idForLogging = id+count+"Https2";
 		TCPChannel channel = mgr.createTCPChannel(idForLogging, engine);
-		return new Http2SocketImpl(channel, factory);
+		Http2ChannelProxy proxy = new Http2ChannelProxyImpl(channel);		
+		return new Http2SocketImpl(proxy, factory);
 	}
 
 }

@@ -25,7 +25,7 @@ import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
-import org.webpieces.webserver.test.OverridesForTest;
+import org.webpieces.webserver.test.OverridesForEmbeddedSvrWithParsing;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
@@ -65,7 +65,7 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		Module platformOverrides = Modules.combine(
-				new OverridesForTest(mgr, time, mockTimer, templateConfig, metrics),
+				new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, templateConfig, metrics),
 				new ForTestingStaticDevelopmentModeModule());
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your

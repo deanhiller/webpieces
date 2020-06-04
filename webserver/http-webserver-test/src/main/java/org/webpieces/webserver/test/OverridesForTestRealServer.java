@@ -24,7 +24,7 @@ public class OverridesForTestRealServer implements Module {
 	}
 	
 	public OverridesForTestRealServer(MeterRegistry metrics) {
-		this(new TemplateCompileConfig(OverridesForTest.isGradleRunning()));
+		this(new TemplateCompileConfig(OverridesForEmbeddedSvrWithParsing.isGradleRunning()));
 		this.metrics = metrics;
 	}
 	

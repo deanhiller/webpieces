@@ -23,9 +23,9 @@ import com.google.inject.Provides;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
-public class OverridesForTest implements Module {
+public class OverridesForEmbeddedSvrWithParsing implements Module {
 	
-	private static final Logger log = LoggerFactory.getLogger(OverridesForTest.class);
+	private static final Logger log = LoggerFactory.getLogger(OverridesForEmbeddedSvrWithParsing.class);
 
 	private TemplateCompileConfig templateConfig;
 	private MockChannelManager mgr;
@@ -33,11 +33,11 @@ public class OverridesForTest implements Module {
 	private MockTimer mockTimer;
 	private MeterRegistry metrics;
 	
-	public OverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer, MeterRegistry metrics) {
+	public OverridesForEmbeddedSvrWithParsing(MockChannelManager mgr, MockTime time, MockTimer mockTimer, MeterRegistry metrics) {
 		this(mgr, time, mockTimer, new TemplateCompileConfig(isGradleRunning()), metrics);
 	}
 	
-	public OverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer, TemplateCompileConfig config, MeterRegistry metrics) {	
+	public OverridesForEmbeddedSvrWithParsing(MockChannelManager mgr, MockTime time, MockTimer mockTimer, TemplateCompileConfig config, MeterRegistry metrics) {	
 		this.mgr = mgr;
 		this.time = time;
 		this.mockTimer = mockTimer;

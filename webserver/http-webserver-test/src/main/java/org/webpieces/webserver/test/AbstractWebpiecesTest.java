@@ -86,13 +86,13 @@ public class AbstractWebpiecesTest {
 	protected Module getOverrides(boolean isFullServer, MeterRegistry metrics) {
 		if(isFullServer)
 			return new OverridesForTestRealServer(metrics);
-		return new OverridesForTest(mgr, time, mockTimer, metrics);
+		return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics);
 	}
 
 	protected Module getOverrides(MeterRegistry metrics) {
 		if(isRemote())
 			return new OverridesForTestRealServer(metrics);
-		return new OverridesForTest(mgr, time, mockTimer, metrics);
+		return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics);
 	}
 	
 	/**

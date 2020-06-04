@@ -1,4 +1,4 @@
-package org.webpieces.webserver.test.http2;
+package org.webpieces.webserver.test.http2.directfast;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,7 +16,6 @@ import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.threading.DirectExecutorService;
 import org.webpieces.util.time.Time;
-import org.webpieces.webserver.test.http2.directfast.MockFrontendManager;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -24,9 +23,9 @@ import com.google.inject.Provides;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
-public class OverridesForTestHttp2Parsing implements Module {
+public class OverridesForEmbeddedSvrNoParsing implements Module {
 
-	private static final Logger log = LoggerFactory.getLogger(OverridesForTestHttp2Parsing.class);
+	private static final Logger log = LoggerFactory.getLogger(OverridesForEmbeddedSvrNoParsing.class);
 
 	private MockFrontendManager frontEnd;
 	private MockTime time;
@@ -35,7 +34,7 @@ public class OverridesForTestHttp2Parsing implements Module {
 
 	private TemplateCompileConfig templateConfig;
 
-	public OverridesForTestHttp2Parsing(MockFrontendManager frontEnd, MockTime time, MockTimer mockTimer, MeterRegistry metrics) {
+	public OverridesForEmbeddedSvrNoParsing(MockFrontendManager frontEnd, MockTime time, MockTimer mockTimer, MeterRegistry metrics) {
 		this.frontEnd = frontEnd;
 		this.time = time;
 		this.mockTimer = mockTimer;

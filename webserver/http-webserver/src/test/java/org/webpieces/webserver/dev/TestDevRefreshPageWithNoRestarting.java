@@ -30,7 +30,7 @@ import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
-import org.webpieces.webserver.test.OverridesForTest;
+import org.webpieces.webserver.test.OverridesForEmbeddedSvrWithParsing;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
@@ -85,7 +85,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
-										new OverridesForTest(mgr, time, mockTimer, templateConfig, metrics));
+										new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, templateConfig, metrics));
 		
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();

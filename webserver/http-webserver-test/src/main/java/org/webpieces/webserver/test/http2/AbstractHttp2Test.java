@@ -15,10 +15,12 @@ import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.webserver.test.MockChannelManager;
-import org.webpieces.webserver.test.OverridesForTest;
+import org.webpieces.webserver.test.OverridesForEmbeddedSvrWithParsing;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
+import org.webpieces.webserver.test.http2.direct.DirectHttp2Client;
 import org.webpieces.webserver.test.http2.directfast.DirectFastClient;
 import org.webpieces.webserver.test.http2.directfast.MockFrontendManager;
+import org.webpieces.webserver.test.http2.directfast.OverridesForEmbeddedSvrNoParsing;
 
 import com.google.inject.Module;
 
@@ -55,18 +57,18 @@ public abstract class AbstractHttp2Test {
 	}
 
 	protected Module getOverrides(MeterRegistry metrics) {
-		if(isRemote()) //need full server
+		if(getTestMode() == TestMode.REMOTE) //need full server
 			return new OverridesForTestRealServer(metrics);
-		else if(isFast())
-			return new OverridesForTestHttp2Parsing(frontEnd, time, mockTimer, metrics);
-		else //slower with parsing BUT closer to what platform does in production!!
-			return new OverridesForTest(mgr, time, mockTimer, metrics);
+		else if(getTestMode() == TestMode.EMBEDDED_DIRET_NO_PARSING)
+			return new OverridesForEmbeddedSvrNoParsing(frontEnd, time, mockTimer, metrics);
+		else //slower with parsing BUT closer to what platform does in production with no need to bind sockets
+			return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics);
 	}
 
 	protected Http2Client getClient() {
-		if(isRemote()) {
+		if(getTestMode() == TestMode.REMOTE) {
 			return createRemoteClient();
-		} else if(isFast()) {
+		} else if(getTestMode() == TestMode.EMBEDDED_DIRET_NO_PARSING) {
 			/*
 			 * The Client that wires itself on top of the server directly such that a developer can step through the
 			 * whole webpieces server into their application to get a full picture of what is going on.  (we try to
@@ -86,12 +88,8 @@ public abstract class AbstractHttp2Test {
 		return Http2to11ClientFactory.createHttpClient("testClient", 5, new BackpressureConfig(), Metrics.globalRegistry);		
 	}
 	
-	protected boolean isRemote() {
-		return false;
-	}
-	
-	protected boolean isFast() {
-		return true;
+	protected TestMode getTestMode() {
+		return TestMode.EMBEDDED_DIRET_NO_PARSING;
 	}
 
 }
