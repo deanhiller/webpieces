@@ -1,11 +1,10 @@
 # webpieces
 
-* Add final http2 testing framework
 * send in http request with no chunked transfer but send chunks and things go nasty.  can we say something better maybe?  can we fail better?...on the client way out, we should fail sending any chunks!!!
 * Add regex for e.printStackTrace into checkstyle.  Add System.out and System.err as well to not be used and log why
 * implement this post https://github.com/diffplug/spotless to organize imports and format code?   
 * https://stackoverflow.com/questions/61714407/how-to-enforce-this-pattern-via-gradle-plugins
-* For microservice, where NotFoundRoute is not specified, it fails with bug or is it a bug..they should define simple not found route, right?  or at least throw no not found route! We should throw NoNotFoundRouteSetException
+* For microservice, where NotFoundRoute is not specified, We should throw NoNotFoundRouteSetException
 * ADD precondition to not allow developers to accidentally run a Routes file twice which adds the same routes and can fail in a confusing way.
 * investigate back pressure on file upload.....somethiing seems a bit off and I want more detail.  we may wire futures through SSL layer as well perhaps?
 * fix up TestError test case on startup so that we know respond to clients
