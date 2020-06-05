@@ -63,7 +63,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;
 		if(channel == null)
-			throw new IllegalStateException("BasTCPChannel cannot have a null channel");
+			throw new IllegalStateException(this+"BasTCPChannel cannot have a null channel");
 		
 		this.channelState = ChannelState.CONNECTED;
 		setConnectingTo(remoteAddr);
@@ -89,7 +89,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 			return channel.write(b);
 		} catch (IOException e) {
 			if(e.getMessage() != null && e.getMessage().equals("Broken pipe"))
-				throw new NioClosedChannelException("Remote end must have disconnected: Broken Pipe", e);
+				throw new NioClosedChannelException(this+"Remote end must have disconnected: Broken Pipe", e);
 			throw new NioException(e);
 		}
 	}
@@ -202,7 +202,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
     	try {
     		channel.finishConnect();
     	} catch(ConnectException e) {
-    		ConnectException exc = new ConnectException("could not connect to="+isConnectingTo);
+    		ConnectException exc = new ConnectException(this+"could not connect to="+isConnectingTo);
     		exc.initCause(e);
     		throw exc;
     		
@@ -252,7 +252,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		try {
 			return channel.register(allOps, struct);
 		} catch (ClosedChannelException e) {
-			throw new NioClosedChannelException("On registering, we received closedChannel(did remote end or local end close the socket", e);
+			throw new NioClosedChannelException(this+"On registering, we received closedChannel(did remote end or local end close the socket", e);
 		}
 	}
 

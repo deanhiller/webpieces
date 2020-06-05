@@ -359,7 +359,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			HandshakeStatus otherStatus = engine.getHandshakeStatus();
 			if (beforeWrapHandshakeStatus != HandshakeStatus.NEED_WRAP)
 				throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus=" 
-							+ beforeWrapHandshakeStatus+" otherStat="+otherStatus+" eng1="+sslEngine+" eng2="+engine);
+							+ beforeWrapHandshakeStatus+" connectionState="+mem.getConnectionState()+" otherStat="+otherStatus+" eng1="+sslEngine+" eng2="+engine);
 
 			//KEEEEEP This very small.  wrap and then listener.packetEncrypted
 			SSLEngineResult result = sslEngine.wrap(SslMementoImpl.EMPTY, engineToSocketData);

@@ -183,7 +183,9 @@ public final class KeyProcessor {
 		} catch(Exception e) {
 			connectionErrors.increment();
 			
-            log.error(key.attachment()+"Could not open connection", e);
+			//completableFuture has exception so they can log it
+            log.debug(key.attachment()+"Could not open connection", e);
+            
             callback.completeExceptionally(e);
 		} finally {
 			MDC.put("socket", null);

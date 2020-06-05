@@ -92,5 +92,10 @@ public class Http2SocketImpl implements Http2Socket {
 	public CompletableFuture<Void> sendPing() {
 		throw new UnsupportedOperationException("Http1.1 does not support ping");
 	}
+	
+	@Override
+	public String toString() {
+		return "Http1.1Socket[socket=" + socket11 + "]";
+	}
 
 }

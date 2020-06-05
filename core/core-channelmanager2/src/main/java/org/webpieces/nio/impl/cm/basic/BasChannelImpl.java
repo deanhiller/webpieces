@@ -118,7 +118,7 @@ public abstract class BasChannelImpl
     		log.info("WRITES outstanding while close was called, notifying client through his failure method of the exception");
     		//we only incur the cost of Throwable.fillInStackTrace() if we will use this exception
     		//(it's called in the Throwable constructor) so we don't do this on every close channel
-        	NioClosedChannelException closeExc = new NioClosedChannelException("There are "+promises.size()
+        	NioClosedChannelException closeExc = new NioClosedChannelException(this+"There are "+promises.size()
         			+" writes that are not complete yet(you called write but "
         			+ "they did not call success back to the client).");
         	promise.completeExceptionally(closeExc);
@@ -128,7 +128,7 @@ public abstract class BasChannelImpl
 	@Override
 	public CompletableFuture<Void> write(ByteBuffer b) {
 		if(b.remaining() == 0)
-			throw new IllegalArgumentException("buffer has no data");
+			throw new IllegalArgumentException(this+"buffer has no data");
 		else if(!selMgr.isRunning())
 			throw new IllegalStateException(this+"ChannelManager must be running and is stopped");		
 		else if(channelState == ChannelState.CLOSED) {
@@ -141,7 +141,7 @@ public abstract class BasChannelImpl
 			else
 				throw new NioClosedChannelException(this+"Your Application cannot write after YOUR Application closed the socket");
 		} else if(channelState != ChannelState.CONNECTED) {
-			throw new NioException("The Channel is not connected yet");
+			throw new NioException(this+"The Channel is not connected yet");
 		}
 		
 		if(apiLog.isTraceEnabled())
@@ -165,7 +165,7 @@ public abstract class BasChannelImpl
 				int written = writeImpl(b);
 				if(written != totalToWriteOut) {
 					if(b.remaining() + written != totalToWriteOut)
-						throw new IllegalStateException("Something went wrong.  b.remaining()="+b.remaining()+" written="+written+" total="+totalToWriteOut);
+						throw new IllegalStateException(this+"Something went wrong.  b.remaining()="+b.remaining()+" written="+written+" total="+totalToWriteOut);
 
 					registerForWrites();
 					inDelayedWriteMode = true;
@@ -221,7 +221,7 @@ public abstract class BasChannelImpl
 		List<CompletableFuture<Void>> finishedPromises = new ArrayList<>();
 		synchronized(writeLock) {
 	        if(dataToBeWritten.isEmpty())
-	        	throw new IllegalStateException("bug, I am not sure this is possible..it shouldn't be...look into");
+	        	throw new IllegalStateException(this+"bug, I am not sure this is possible..it shouldn't be...look into");
 	
 	        while(!dataToBeWritten.isEmpty()) {
 	            WriteInfo writer = dataToBeWritten.peek();
@@ -230,7 +230,7 @@ public abstract class BasChannelImpl
 	    		int wroteOut = this.writeImpl(buffer);
 	            if(buffer.hasRemaining()) {
 					if(buffer.remaining() + wroteOut != initialSize)
-						throw new IllegalStateException("Something went wrong.  b.remaining()="+buffer.remaining()+" written="+wroteOut+" total="+initialSize);
+						throw new IllegalStateException(this+"Something went wrong.  b.remaining()="+buffer.remaining()+" written="+wroteOut+" total="+initialSize);
 					
 	                if(log.isTraceEnabled())
 						log.trace(this+"Did not write all data out");
@@ -312,7 +312,7 @@ public abstract class BasChannelImpl
 		else if(channelState != ChannelState.CONNECTED) {
 			throw new IllegalStateException(this+"Must call one of the connect methods first(ie. connect THEN register for reads)");
 		} else if(isClosed())
-			throw new IllegalStateException("Channel is closed");
+			throw new IllegalStateException(this+"Channel is closed");
 
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.registerForReads called");
