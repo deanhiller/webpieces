@@ -2,13 +2,11 @@ package com.webpieces.http2engine.impl.shared;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.util.acking.AckAggregator;
-import org.webpieces.util.acking.ByteAckTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.util.acking.ByteAckTracker;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.UnmarshalState;
@@ -128,11 +126,17 @@ public abstract class Level2ParsingAndRemoteSettings {
 		
 		CompletableFuture<Void> allFutures = CompletableFuture.completedFuture((Void)null);
 		for(Http2Msg lowLevelFrame : parsedMessages) {
-			CompletableFuture<Void> messageFuture = process(lowLevelFrame);
-
-			//compose done AFTER so that process can be called N times, instead of waiting to call
-			//process as client acks each piece.  
-			allFutures = allFutures.thenCompose( f -> messageFuture);
+			//VERY IMPORTANT: Writing the code like this would slam through calling process N times
+			//BUT it doesn't give the clients a chance to seet a flag between packets
+			//Mainly done for exceptions and streaming so you can log exc, set a boolean so you
+			//don't get 100 exceptions while something is happening like socket disconnect
+			//In these 2 lines of code, processCorrectly is CALLED N times RIGHT NOW
+			//The code below this only calls them right now IF AND ONLY IF the client returns
+			//a completed future each time!!!
+//			CompletableFuture<Void> messageFuture = process(lowLevelFrame);
+//			allFutures = allFutures.thenCompose( f -> messageFuture);
+			
+			allFutures = allFutures.thenCompose( f -> process(lowLevelFrame));
 		}
 		
 		return allFutures;

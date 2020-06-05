@@ -32,6 +32,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger apiLog = LoggerFactory.getLogger(TCPChannel.class);
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	protected org.webpieces.nio.api.jdk.JdkSocketChannel channel;
+	private boolean isClosed;
 		    
 	public BasTCPChannel(
 			String id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
@@ -88,8 +89,10 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		try {
 			return channel.write(b);
 		} catch (IOException e) {
-			if(e.getMessage() != null && e.getMessage().equals("Broken pipe"))
+			if(e.getMessage() != null && e.getMessage().equals("Broken pipe")) {
+				isClosed = true; //special flag as jdk channel.isClosed in streaming can happen a FULL 1-2 seconds after this due to NIC buffer backup
 				throw new NioClosedChannelException(this+"Remote end must have disconnected: Broken Pipe", e);
+			}
 			throw new NioException(e);
 		}
 	}
@@ -119,6 +122,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
     }
 
     public boolean isClosed() {
+    	if(isClosed)
+    		return true;//special case where we know before the jdk and can discard nic buffer data
 		return channel.isClosed();
 	}
 

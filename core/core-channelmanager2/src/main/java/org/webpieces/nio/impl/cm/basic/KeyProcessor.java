@@ -21,6 +21,7 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
+import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.exceptions.NioException;
 import org.webpieces.util.metrics.MetricsCreator;
 
@@ -341,6 +342,13 @@ public final class KeyProcessor {
     }
 
 	private void fireIncomingRead(SelectionKey key, int bytes, DataListener in, BasChannelImpl channel, ByteBuffer b) {
+		if(channel.isClosed()) {
+			//in streaming, we still get data from nic buffer sometimes while socket is closed!  We should not process
+			//that since client (or server closed the socket).  ALSO, channel.isClosed returns false so we could 
+			log.info(channel+"Socket is closed, discarding data from nic buffer still coming in on this socket");
+			return;
+		}
+		
 		payloadSize.record(bytes);
 
 		boolean unregister = false;
@@ -386,14 +394,14 @@ public final class KeyProcessor {
 		//triggered from another thread.  We need to check the state of things to make sure we still want to register or not
 		int unackedBytes = basicChannel.getUnackedBytes().get();
 		if(!basicChannel.isUnderThreshold(unackedBytes)) {
-			log.warn("PSYCH....you thought you were caught up and are not!!!!!!   unackedBytes="+unackedBytes+" > readLevel="+basicChannel.getReadThreshold());
+			log.warn(basicChannel+" PSYCH....you thought you were caught up and are not!!!!!!   unackedBytes="+unackedBytes+" > readLevel="+basicChannel.getReadThreshold());
 			return false; //don't register, we are NOT caught up (not sure how this happens)
 		}
 
 		AtomicReference<BackflowState1> connectionState = basicChannel.getCompareSetBackflowState();
 		boolean unregister = connectionState.compareAndSet(BackflowState1.UNREGISTERED, BackflowState1.REGISTERED);
 		if(!unregister) {
-		    log.warn("NOT catching up since connection state is already registered again");
+		    log.warn(basicChannel+" NOT catching up since connection state is already registered again");
 			//There may be 1-N calls to channel.registerForReads(() -> checkForUnregister(channel)); BUT we only need to process register ONCE 
 			return false;
 		}
@@ -415,6 +423,9 @@ public final class KeyProcessor {
 
 		try {
 			channel.writeAll();
+		} catch(NioClosedChannelException e) {
+			//since it may close while someone is async writing, this is normal behavior so we swallow it and log as info
+			log.info(channel+" Channel is closed so discarding the writes");
 		} finally {
 			MDC.put("socket", null);
 		}

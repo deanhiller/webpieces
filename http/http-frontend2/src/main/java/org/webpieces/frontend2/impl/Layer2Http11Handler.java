@@ -124,12 +124,17 @@ public class Layer2Http11Handler {
 		
 		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 		for(HttpPayload payload : parsed) {
-			CompletableFuture<Void> fut = processCorrectly(socket, payload);
+			//VERY IMPORTANT: Writing the code like this would slam through calling process N times
+			//BUT it doesn't give the clients a chance to seet a flag between packets
+			//Mainly done for exceptions and streaming so you can log exc, set a boolean so you
+			//don't get 100 exceptions while something is happening like socket disconnect
+			//In these 2 lines of code, processCorrectly is CALLED N times RIGHT NOW
+			//The code below this only calls them right now IF AND ONLY IF the client returns
+			//a completed future each time!!!
+			//CompletableFuture<Void> fut = processCorrectly(socket, payload);
+			//future = future.thenCompose(s -> fut);
 			
-			//done afterwards sooo, the loop will SLAM through the payloads gathering up the
-			//futures and chaining them.  IF you chain them above, then each processCorrectly call
-			//has to wait for previous future to resolve
-			future = future.thenCompose(s -> fut);
+			future = future.thenCompose(s ->  processCorrectly(socket, payload));
 		}
 		
 		return future;

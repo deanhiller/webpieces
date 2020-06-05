@@ -221,16 +221,10 @@ public class HttpSocketImpl implements HttpSocket {
 					if(data.isEndOfData())
 						responsesToComplete.poll();
 
-					//BIG NOTE: WE WANT to LOOP super fast IF dataWriterFuture is complete with a datawriter
-					//and just slam incomingData in BUT tie all those newFutures that are unresolved into the allFutures
-					//allFutures should complete when ALL dataWriterFuture plus the array of 'newFuture' resolves
-					CompletableFuture<Void> newFuture = dataWriterFuture.thenCompose(w -> {
-						return w.send(data);
-					});
-
-
-					//Need to chain all futures into allFutures
-					allFutures = allFutures.thenCompose(s -> newFuture);
+					//w.send needs to be sent IN SEQUENCE by thenCompose with previous w.send
+					allFutures = allFutures
+							.thenCompose( voidd -> dataWriterFuture)
+							.thenCompose(w -> w.send(data));
 
 				} else if(msg instanceof HttpResponse) {
 					dataWriterFuture = processResponse((HttpResponse)msg);

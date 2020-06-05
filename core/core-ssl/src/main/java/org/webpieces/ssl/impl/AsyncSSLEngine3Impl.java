@@ -23,6 +23,7 @@ import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.ssl.api.SSLMetrics;
 import org.webpieces.ssl.api.SslListener;
 import org.webpieces.util.acking.ByteAckTracker;
+import org.webpieces.util.exceptions.NioClosedChannelException;
 
 public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private static final Logger log = LoggerFactory.getLogger(AsyncSSLEngine3Impl.class);
@@ -438,7 +439,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 	public CompletableFuture<Void> feedPlainPacketImpl(ByteBuffer buffer) throws SSLException {
 		if(mem.getConnectionState() != ConnectionState.CONNECTED)
-			throw new IllegalStateException(mem+" SSLEngine is not connected right now");
+			throw new NioClosedChannelException(mem+" SSLEngine is not connected right now");
 		else if(!buffer.hasRemaining())
 			throw new IllegalArgumentException("your buffer has no readable data");
 		
@@ -503,7 +504,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				doHandshakeLoop();
 				break;
 			case NOT_HANDSHAKING:
-				if(ConnectionState.DISCONNECTED != mem.getConnectionState())
+				if(ConnectionState.DISCONNECTED != mem.getConnectionState() && ConnectionState.DISCONNECTING != mem.getConnectionState())
 					throw new IllegalStateException("state="+mem.getConnectionState()+" hsStatus="+status+" should not be able to occur");
 				break;
 			default:
