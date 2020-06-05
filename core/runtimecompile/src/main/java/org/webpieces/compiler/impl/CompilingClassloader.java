@@ -201,12 +201,21 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         return applicationClass.javaClass;
     }
 
+    //hack to catch an issue with 
+    //Caused by: java.util.zip.ZipException: ZipFile invalid LOC header (bad signature)
+    //so we can capture more info
+    
+    private ThreadLocal<String> foundInDir = new ThreadLocal<String>();
+    
     /**
      * Search for the byte code of the given class.
      */
     @Override
     public byte[] getClassDefinition(String name) {
         name = name.replace(".", "/") + ".class";
+    
+        foundInDir.set("never.seen");
+        
         try (InputStream is = getResourceAsStream(name)) {
 	        if (is == null) {
 	            return null;
@@ -220,7 +229,9 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
             }
             return os.toByteArray();
         } catch (Exception e) {
-        	throw new IllegalArgumentException(e);
+        	throw new RuntimeException("Failure trying to get class definition="+name+" in the path="+foundInDir.get(), e);
+        } finally {
+        	foundInDir.set(null);
         }
     }
 
@@ -229,14 +240,18 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
      */
     @Override
     public InputStream getResourceAsStream(String name) {
-        for (VirtualFile vf : config.getJavaPath()) {
+		for (VirtualFile vf : config.getJavaPath()) {
             VirtualFile res = vf.child(name);
             if (res != null && res.exists()) {
+            	foundInDir.set(res.getCanonicalPath());
                 return res.openInputStream();
             }
         }
+		foundInDir.set("notFoundInOurPaths");
         return super.getResourceAsStream(name);
-    }
+	}
+    
+    
 
     /**
      * You know ...

@@ -259,7 +259,7 @@ public class HttpSocketImpl implements HttpSocket {
 
 		@Override
 		public void farEndClosed(Channel channel) {
-			log.info("far end closed");
+			log.info("far end closed. socket("+channel+")");
 			isClosed = true;
 			while(!responsesToComplete.isEmpty()) {
 				HttpResponseListener listener = responsesToComplete.poll();
