@@ -59,7 +59,7 @@ public class DScopedRouter extends EScopedRouter {
 					if(t == null)
 						return CompletableFuture.completedFuture(r);
 		
-					return tryRenderWebAppErrorControllerResult(ctx, handler, t, false);
+					return tryRenderWebAppErrorControllerResult(ctx, handler, t, true);
 				}).thenCompose(Function.identity());
 		
 		CompletableFuture<StreamWriter> proxyWriter = writer.thenApply(w -> createProxy(w, ctx, handler));

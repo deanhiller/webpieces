@@ -104,7 +104,18 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			return realChannel.close();
 		}
 		sslEngine.close();
-		return closeFuture.thenApply(v -> actuallyCloseSocket(SslTCPChannel.this, realChannel));
+		
+		//Need Unit test but basically, we could not chain like so our client would hang in the case of
+		//1. have streaming server A to http2to11client to another server B
+		//2. start streaming
+		//3. shutdown backend server B which closes socket to server A
+		//4. THEN server A 'should' close socket to client but does NOT!!!
+		//instead just close socket after 'attempting' handshake
+		//return closeFuture.thenApply(v -> actuallyCloseSocket(SslTCPChannel.this, realChannel));
+
+		actuallyCloseSocket(SslTCPChannel.this, realChannel);
+		return CompletableFuture.completedFuture(null);
+
 	}
 
 	private Void actuallyCloseSocket(Channel sslChannel, Channel realChannel) {

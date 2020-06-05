@@ -154,14 +154,14 @@ public class TestSslCloseSvr {
 	@Test
 	public void testBasicCloseFromServer() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
 		CompletableFuture<Void> future = channel.close();
-		Assert.assertFalse(future.isDone());
+		Assert.assertTrue(future.isDone());
 
 		DataWrapper payload = mockChannel.nextPayload();
 		CompletableFuture<List<SslAction>> resultFuture2 = clientSslParser.parseIncoming(payload);
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
 		Assert.assertEquals(2, result2.size());
 
-		Assert.assertFalse(future.isDone());
+		Assert.assertTrue(future.isDone());
 		
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, result2.get(0).getSslAction());
 		Assert.assertEquals(SslActionEnum.SEND_LINK_CLOSED_TO_APP, result2.get(1).getSslAction());
@@ -191,7 +191,7 @@ public class TestSslCloseSvr {
 		SslAction action = clientSslParser.close();
 		
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());
-		Assert.assertFalse(future.isDone());
+		Assert.assertTrue(future.isDone());
 		
 		mockChannel.forceDataRead(mockJdk, action.getEncryptedData());
 		future.get(2, TimeUnit.SECONDS);

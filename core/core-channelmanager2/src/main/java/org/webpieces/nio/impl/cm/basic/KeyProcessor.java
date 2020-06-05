@@ -425,7 +425,7 @@ public final class KeyProcessor {
 			channel.writeAll();
 		} catch(NioClosedChannelException e) {
 			//since it may close while someone is async writing, this is normal behavior so we swallow it and log as info
-			log.info(channel+" Channel is closed so discarding the writes");
+			log.info(channel+" Channel is closed so discarding the async writes");
 		} finally {
 			MDC.put("socket", null);
 		}
