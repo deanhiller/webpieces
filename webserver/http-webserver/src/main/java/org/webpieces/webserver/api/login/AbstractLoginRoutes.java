@@ -25,6 +25,10 @@ public abstract class AbstractLoginRoutes implements Routes {
 		this(controller, basePath, securePath, false, 10000, secureFields);
 	}
 	
+	public AbstractLoginRoutes(String controller, String packageRegEx, int filterLevel, String ... secureFields) {
+		this(controller, null, packageRegEx, true, filterLevel, secureFields);
+	}
+	
 	public AbstractLoginRoutes(String controller, String basePath, String secureRegEx, boolean regExMatchPackage, int filterLevel, String ... secureFields) {
 		this.controller = controller;
 		this.basePath = basePath;

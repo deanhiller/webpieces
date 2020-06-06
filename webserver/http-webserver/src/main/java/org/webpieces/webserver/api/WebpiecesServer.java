@@ -56,10 +56,7 @@ public class WebpiecesServer {
 		//read here and checked for correctness on last line of server construction
 		Arguments arguments = new CommandLineParser().parse(args);
 
-		String filePath = System.getProperty("user.dir");
-		log.info("original user.dir before modification="+filePath);
-
-		File baseWorkingDir = modifyUserDirForManyEnvironments(projectName, filePath);
+		File baseWorkingDir = modifyUserDirForManyEnvironments(projectName);
 
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
@@ -106,8 +103,11 @@ public class WebpiecesServer {
 		return Base64.getDecoder().decode(base64Key);
 	}
 
-	private File modifyUserDirForManyEnvironments(String projectName, String filePath) {
+	private File modifyUserDirForManyEnvironments(String projectName) {
+		String filePath = System.getProperty("user.dir");
 		File absPath = FileFactory.newAbsoluteFile(filePath);
+		log.info("original user.dir before modification="+absPath);
+		
 		File finalUserDir = modifyUserDirForManyEnvironmentsImpl(projectName, absPath);
 		log.info("RECONFIGURED working directory(based off user.dir)="+finalUserDir.getAbsolutePath()+" previous user.dir="+filePath);
 		return finalUserDir;
