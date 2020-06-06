@@ -1,5 +1,6 @@
 # webpieces
 
+* https://github.com/eclipse/buildship/issues/995
 * Need a test case for stream to server controller directly to client back to some other controller endpoint (remote test or at least test with parsing!!! as server gets HttpData and passes to client but client
 previously was not able to use HttpData)
 * send in http request with no chunked transfer but send chunks and things go nasty.  can we say something better maybe?  can we fail better?...on the client way out, we should fail sending any chunks!!!
