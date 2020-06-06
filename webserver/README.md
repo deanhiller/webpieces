@@ -1,5 +1,6 @@
 # webpieces
 
+* Have exxample app use package naming for /secure
 * https://github.com/eclipse/buildship/issues/995
 * Need a test case for stream to server controller directly to client back to some other controller endpoint (remote test or at least test with parsing!!! as server gets HttpData and passes to client but client
 previously was not able to use HttpData)

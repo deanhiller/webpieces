@@ -20,7 +20,6 @@ import com.google.inject.Module;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class AbstractWebpiecesTest {
 

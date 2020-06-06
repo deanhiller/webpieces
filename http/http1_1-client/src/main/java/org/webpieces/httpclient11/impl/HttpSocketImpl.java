@@ -81,13 +81,15 @@ public class HttpSocketImpl implements HttpSocket {
 
 		CompletableFuture<HttpFullResponse> future = new CompletableFuture<HttpFullResponse>();
 		HttpResponseListener l = new CompletableListener(future);
-		HttpData data = new HttpData(request.getData(), true);
 		
 		HttpStreamRef streamRef = send(request.getRequest(), l);
 
-		streamRef.getWriter().thenCompose(w -> {
-			return w.send(data);
-		});
+		if(request.getData() != null && request.getData().getReadableSize() > 0) {
+			HttpData data = new HttpData(request.getData(), true);
+			streamRef.getWriter().thenCompose(w -> {
+				return w.send(data);
+			});
+		}
 		
 		future.exceptionally( t -> {
 			//we can only cancel if it is NOT keepalive or else we have to keep socket open
