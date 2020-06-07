@@ -1,4 +1,4 @@
-package org.webpieces.plugin.json;
+package org.webpieces.plugin.grpcjson;
 
 @SuppressWarnings("rawtypes")
 public class ServiceMetaInfo {

@@ -1,4 +1,4 @@
-package org.webpieces.plugin.json;
+package org.webpieces.plugin.grpcjson;
 
 import org.webpieces.router.api.extensions.BodyContentBinder;
 

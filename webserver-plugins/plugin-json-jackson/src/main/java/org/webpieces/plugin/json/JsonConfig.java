@@ -5,19 +5,13 @@ import java.util.regex.Pattern;
 public class JsonConfig {
 
 	private Pattern filterPattern;
-	private boolean isNotFoundFilter;
 
-	public JsonConfig(Pattern pattern, boolean isNotFoundFilter) {
+	public JsonConfig(Pattern pattern) {
 		this.filterPattern = pattern;
-		this.isNotFoundFilter = isNotFoundFilter;
 	}
 	
 	public Pattern getFilterPattern() {
 		return filterPattern;
-	}
-
-	public boolean isNotFoundFilter() {
-		return isNotFoundFilter;
 	}
 
 }

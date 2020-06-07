@@ -8,12 +8,10 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.Current;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
-import org.webpieces.router.api.exceptions.HttpException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
@@ -22,54 +20,31 @@ import org.webpieces.util.filters.Service;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
 
-public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
+public class JacksonNotFoundFilter extends RouteFilter<JsonConfig> {
 
-	private static final Logger log = LoggerFactory.getLogger(JacksonCatchAllFilter.class);
 	public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
 	private final ObjectMapper mapper;
 
 	private Pattern pattern;
 
 	@Inject
-	public JacksonCatchAllFilter(ObjectMapper mapper) {
+	public JacksonNotFoundFilter(ObjectMapper mapper) {
 		this.mapper = mapper;
 	}
 	
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
-		return nextFilter.invoke(meta).handle((a, t) -> translateFailure(meta, a, t));
+		String path = Current.request().relativePath;
+		if(pattern.matcher(path).matches())
+			return createNotFoundResponse(nextFilter, meta);
+		
+		return nextFilter.invoke(meta);
 	}
 
 	@Override
 	public void initialize(JsonConfig config) {
 		this.pattern = config.getFilterPattern();
-	}
-
-	protected Action translateFailure(MethodMeta meta, Action action, Throwable t) {
-		if(t != null) {
-			if(t instanceof HttpException) {
-				return translate((HttpException)t);
-			}
-			
-			log.error("Internal Server Error method="+meta.getLoadedController2().getControllerMethod(), t);
-			return translateError(t);
-		} else {
-			return action;
-		}
-	}
-
-	protected Action translate(HttpException t) {
-		byte[] content = translateHttpException(t);
-		StatusCode status = t.getStatusCode();
-		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);		
-	}
-
-	protected RenderContent translateError(Throwable t) {
-		byte[] content = translateServerError(t);
-		KnownStatusCode status = KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR;
-		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
 
 	protected CompletableFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
@@ -87,15 +62,6 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND.getCode(), KnownStatusCode.HTTP_404_NOTFOUND.getReason(), MIME_TYPE);
 	}
 
-	protected byte[] translateHttpException(HttpException t) {
-		JsonError error = new JsonError();
-		error.setError(t.getStatusCode().getReason()+" : "+t.getMessage());
-		error.setCode(t.getStatusCode().getCode());
-
-		return translateJson(mapper, error);
-	}
-
-
 	protected byte[] createNotFoundJsonResponse() {
 		JsonError error = new JsonError();
 		error.setError("This url does not exist.  try another url");
@@ -103,13 +69,6 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		return translateJson(mapper, error);
 	}
 
-	protected byte[] translateServerError(Throwable t) {
-		JsonError error = new JsonError();
-		error.setError("Server ran into a bug, please report");
-		error.setCode(500);
-		return translateJson(mapper, error);
-	}
-	
 	protected byte[] translateJson(ObjectMapper mapper, Object error) {
 		try {
 			return mapper.writeValueAsBytes(error);
@@ -121,5 +80,6 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 			throw new RuntimeException(e);
 		}
 	}
+	
 	
 }

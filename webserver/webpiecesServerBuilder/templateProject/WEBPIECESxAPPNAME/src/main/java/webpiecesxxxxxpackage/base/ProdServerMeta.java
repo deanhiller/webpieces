@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
 import webpiecesxxxxxpackage.basesvr.YourGlobalModule;
-import webpiecesxxxxxpackage.json.JsonCatchAllFilter;
 import webpiecesxxxxxpackage.json.JsonRoutes;
 import webpiecesxxxxxpackage.web.login.LoginRoutes;
 import webpiecesxxxxxpackage.web.main.MainRoutes;
@@ -84,7 +83,7 @@ public class ProdServerMeta implements WebAppMeta {
 				//all the compile error code(it will remove more than half of the jar size of the web app actually due
 				//to transitive dependencies)
 				new HibernatePlugin(pluginConfig.getCmdLineArguments()),
-				new JacksonPlugin(new JacksonConfig("/json/.*", JsonCatchAllFilter.class)),
+				new JacksonPlugin(new JacksonConfig("/json/.*")),
 				new BackendPlugin(pluginConfig.getCmdLineArguments()),
 				new PropertiesPlugin(new PropertiesConfig()),
 				new InstallSslCertPlugin(new InstallSslCertConfig("acme://letsencrypt.org/staging"))

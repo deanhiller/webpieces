@@ -1,4 +1,4 @@
-package org.webpieces.plugin.json;
+package org.webpieces.plugin.grpcjson;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

@@ -1,4 +1,4 @@
-package org.webpieces.plugin.json;
+package org.webpieces.plugin.grpcjson;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;

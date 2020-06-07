@@ -1,4 +1,4 @@
-package org.webpieces.plugin.json;
+package org.webpieces.plugin.grpcjson;
 
 import static org.webpieces.ctx.api.HttpMethod.POST;
 import static org.webpieces.router.api.routes.Port.HTTPS;
