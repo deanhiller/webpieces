@@ -169,7 +169,7 @@ fi
 #Downloading https page on server
 
 #Test out a curl request to localhost to make sure basic webpage is working
-curl -kL https://localhost:8443/@backend/secure/sslsetup > downloadedhtml.txt
+curl -kL https://localhost:8443/@sslcert > downloadedhtml.txt
 
 end=`date +%s`
 runtime=$((end-start))
