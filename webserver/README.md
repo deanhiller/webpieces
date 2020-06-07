@@ -9,12 +9,13 @@ ONLY THESE BIG ITEMS LEFT
    * website CURD using all DBOs
    * JSON CRUD with DTOs and DBOs
 * GRPC
-* Client Creator
+* microservices 
+   * microsvc-client project with Client Creator project
+   * microsvc-server project with Routes file and filter
 * Travis -> Circle CI.  do not allow build breaks
+* port newline streaming lib and json lib and file upload lib into webpieces router api
 
-* Tests
-  * Test AuthenticationException from controller
-  * Test AuthenticationException from filter
+* Follow up on this post https://stackoverflow.com/questions/62246462/jacoco-not-excluding-files-and-print-not-working-in-jacocotestreport-task-to-deb
 * get rid of close connection on response handler!!
 * https://github.com/eclipse/buildship/issues/995
 * Need a test case for stream to server controller directly to client back to some other controller endpoint (remote test or at least test with parsing!!! as server gets HttpData and passes to client but client
