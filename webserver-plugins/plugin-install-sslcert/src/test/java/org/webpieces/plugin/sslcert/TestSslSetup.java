@@ -68,7 +68,7 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testAccessPageWillRedirectToLogin() {
-		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@backend/secure/sslsetup");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@sslcert");
 		
 		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
@@ -88,7 +88,7 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 		
 		mockStorage.addReadResponse(CompletableFuture.completedFuture(new HashMap<>()));
 		
-		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@backend/secure/sslsetup");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@sslcert");
 		//response from logging in taken from TestLogin in backend plugin test suite
 		//set-cookie: webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin; path=/; HttpOnly
 		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
@@ -111,7 +111,7 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 
 	@Test
 	public void testPostEmailNotLoggedInBecauseeNoCookie() {
-		HttpFullRequest req = Requests.createPostRequest( "/@backend/secure/postEmail", 
+		HttpFullRequest req = Requests.createPostRequest( "/@sslcert/postEmail", 
 				"email", "dean@gmail.com"
 			);
 		

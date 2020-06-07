@@ -21,7 +21,9 @@ public interface RouterResponseHandler extends ResponseStreamHandle {
     boolean requestCameFromBackendSocket();
 
     /**
-     * Temporary for refactoring only
+     * Use cancel instead which for http2 cancels the single stream or shutsdown the socket depending on the
+     * reason you give it.  For http1.1, cancel shutdowns the stream if the request did not have a keep alive
+     * 
      * @return
      * @deprecated
      */

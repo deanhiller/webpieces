@@ -1,1 +1,1 @@
-SslCertMeta
+org.webpieces.plugin.sslcert.SslCertMeta

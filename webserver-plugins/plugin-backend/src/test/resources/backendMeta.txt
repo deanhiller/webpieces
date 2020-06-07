@@ -1,1 +1,1 @@
-org.webpieces.plugins.backend.BackendMeta
+org.webpieces.plugin.backend.BackendMeta

@@ -1,1 +1,1 @@
-org.webpieces.plugins.documentation.DocsMeta
+org.webpieces.plugin.documentation.DocsMeta

@@ -1,6 +1,6 @@
 # webpieces
 
-* Have exxample app use package naming for /secure
+* get rid of close connection on response handler!!
 * https://github.com/eclipse/buildship/issues/995
 * Need a test case for stream to server controller directly to client back to some other controller endpoint (remote test or at least test with parsing!!! as server gets HttpData and passes to client but client
 previously was not able to use HttpData)
@@ -10,8 +10,6 @@ previously was not able to use HttpData)
 * https://stackoverflow.com/questions/61714407/how-to-enforce-this-pattern-via-gradle-plugins
 * For microservice, where NotFoundRoute is not specified, We should throw NoNotFoundRouteSetException
 * ADD precondition to not allow developers to accidentally run a Routes file twice which adds the same routes and can fail in a confusing way.
-* investigate back pressure on file upload.....somethiing seems a bit off and I want more detail.  we may wire futures through SSL layer as well perhaps?
-* fix up TestError test case on startup so that we know respond to clients
 * ResponseOverrideSender is in wrong location...needs to be in top top level proxy of streamhandling(after chunking/compression)
 * wire futures backpressure all the way in server and test
 * Document prod/staging/local development environments and properties plugin

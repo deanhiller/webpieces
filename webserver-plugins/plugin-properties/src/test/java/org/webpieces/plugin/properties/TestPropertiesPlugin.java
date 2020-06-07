@@ -55,7 +55,7 @@ public class TestPropertiesPlugin extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testListPlatformBeansToo() {
-		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@backend/secure/properties");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@properties");
 		//response from logging in taken from TestLogin in backend plugin test suite
 		//set-cookie: webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin; path=/; HttpOnly
 		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
@@ -65,7 +65,7 @@ public class TestPropertiesPlugin extends AbstractWebpiecesTest {
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//redirect to login page
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("<a href=`/@backend/secure/bean/Webpieces+Router/CookieTranslator`>CookieTranslator.class</a>".replace("`", "\""));
+		response.assertContains("<a href=`/@properties/bean/Webpieces+Router/CookieTranslator`>CookieTranslator.class</a>".replace("`", "\""));
 	}
 
 }

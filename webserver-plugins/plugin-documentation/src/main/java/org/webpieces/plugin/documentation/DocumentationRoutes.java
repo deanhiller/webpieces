@@ -46,15 +46,15 @@ public class DocumentationRoutes implements Routes {
 		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/extensionPoints", "DocumentationController.extensionPoints", DocumentationRouteId.EXTENSION_POINTS);
 		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/randomfeatures", "DocumentationController.randomFeatures", DocumentationRouteId.RANDOM_FEATURES);
 
-		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugins", "plugin/PluginController.plugins", DocumentationRouteId.PLUGINS);
-		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/jackson", "plugin/PluginController.jacksonPlugin", DocumentationRouteId.JACKSON_PLUGIN);
-		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/hibernate", "plugin/PluginController.hibernatePlugin", DocumentationRouteId.HIBERNATE_PLUGIN);
-		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/backend", "plugin/PluginController.backendPlugin", DocumentationRouteId.BACKEND_PLUGIN);
-		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/h2", "plugin/PluginController.h2Plugin", DocumentationRouteId.H2_PLUGIN);
-		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/installSsl", "plugin/PluginController.installSslPlugin", DocumentationRouteId.INSTALL_SSL_PLUGIN);
-		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/documentation", "plugin/PluginController.documentationPlugin", DocumentationRouteId.DOCUMENTATION_PLUGIN);
-		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/properties", "plugin/PluginController.propertiesPlugin", DocumentationRouteId.PROPERTIES_PLUGIN);
-		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/codeGeneration", "plugin/PluginController.codeGenPlugin", DocumentationRouteId.CODE_GEN_PLUGIN);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugins", "plugins/PluginController.plugins", DocumentationRouteId.PLUGINS);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/jackson", "plugins/PluginController.jacksonPlugin", DocumentationRouteId.JACKSON_PLUGIN);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/hibernate", "plugins/PluginController.hibernatePlugin", DocumentationRouteId.HIBERNATE_PLUGIN);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/backend", "plugins/PluginController.backendPlugin", DocumentationRouteId.BACKEND_PLUGIN);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/h2", "plugins/PluginController.h2Plugin", DocumentationRouteId.H2_PLUGIN);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/installSsl", "plugins/PluginController.installSslPlugin", DocumentationRouteId.INSTALL_SSL_PLUGIN);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/documentation", "plugins/PluginController.documentationPlugin", DocumentationRouteId.DOCUMENTATION_PLUGIN);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/properties", "plugins/PluginController.propertiesPlugin", DocumentationRouteId.PROPERTIES_PLUGIN);
+		scopedBldr.addRoute(BOTH, HttpMethod.GET, "/plugin/codeGeneration", "plugins/PluginController.codeGenPlugin", DocumentationRouteId.CODE_GEN_PLUGIN);
 
 		//Because the html hardcode the url path here, we must use baseRouter and avoid whatever path
 		//the user passed in :(

@@ -127,14 +127,14 @@ public class TestLesson7AdvancedCookiesCrud extends AbstractWebpiecesTest {
 	}
 
 	private ResponseWrapper postForm() {
-		HttpFullRequest postReq = Requests.createPostRequest("/secure/crud/user/post", 
+		HttpFullRequest postReq = Requests.createPostRequest("/crud/user/post", 
 				"entity.firstName", "D&D", 
 				"entity.lastName", "Hiller",
 				"entity.email", "dean.hiller@gmail.com",
 				"password", "555555");
 		
 		//NOTE: This sucks BUT we must manually simulate the browser referrer header.
-		postReq.addHeader(new Header(KnownHeaderName.REFERER, "https://myhost.com:8443/secure/crud/user/new"));
+		postReq.addHeader(new Header(KnownHeaderName.REFERER, "https://myhost.com:8443/crud/user/new"));
 		
 		ResponseWrapper response1 = webBrowser.send(postReq);
 		
