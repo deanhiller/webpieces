@@ -1,0 +1,35 @@
+#{extends '../../main.html'/}#
+#{set title:'Html Reference'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs '../docHome.html'/}#
+
+<h1 id="html">Checkbox Result</h1>
+
+<p>Your personal message: '${message}$'</p>
+
+<br/><br/><br/><br/>
+<h2>The Code</h2>
+
+<p>The Controller GET method for this page is:</p>
+
+<pre>
+<code>*[	public Render checkboxResult() {
+		String message = "Other webservers are just not as cool";
+		String isCool = Current.flash().get("isFun");
+		if("true".contentEquals(isCool))
+			message =  "Webpieces is so cool";
+		return Actions.renderThis(
+				"menu", menuCreator.getMenu(),
+				"message", message
+				);
+	}]*</code>
+</pre>
+	
+<p>The html for this page is simply:</p>
+
+<pre>
+<code>*[<h1 id="html">Checkbox Result</h1>
+
+<p>Your personal message: '${message}$'</p>]*</code>
+</pre>

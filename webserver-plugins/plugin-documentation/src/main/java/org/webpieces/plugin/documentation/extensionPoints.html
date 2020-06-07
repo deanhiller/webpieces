@@ -1,0 +1,66 @@
+#{extends '../main.html'/}#
+#{set title:'Webpieces QuickStart'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs 'docHome.html'/}#
+
+<h2>Extension Points</h2>
+
+<p>We call these extensions so they are not confusd with plugins.  Webpieces has specific extension points
+to help you create a seamless development experience and speed up your development.</p>
+
+<p>Webpieces leverages <a href="https://github.com/google/guice/wiki/Multibindings">Guice's amazing Multibinders</a>.
+Webpieces creates empty Multibinders in <a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-router/src/main/java/org/webpieces/router/impl/EmptyPluginModule.java">EmptyPluginModule.java</a>.
+You can see the 4 plugin points that other modules can add to the multibinder are:</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-router/src/main/java/org/webpieces/router/api/Startable.java">Startable.java</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-router/src/main/java/org/webpieces/router/api/EntityLookup.java">EntityLookup.java</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-router/src/main/java/org/webpieces/router/api/BodyContentBinder.java">BodyContentBinder.java</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-router/src/main/java/org/webpieces/router/api/ObjectStringConverter.java">ObjectStringConverter.java</a></li>
+</ol>
+
+<p>We will break down what each of these for so you can leverage these to make life easier in many cases</p>
+
+<h3>Startable.java</h3>
+
+<p>As an example, in <a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/GuiceModule.java">GuiceModule.java</a>
+in the template, you will see that we already wired in a plugin class PopulateDatabase so there is some data.  Also of note is that this is 
+a 'production' module so you may want to move it to a DevelopmentServer module instead.  This is however debatable as you 'could' do a database
+check and if there a is data do nothing and if there is no data, run it all so you could easily start up an integration database more easily
+every time.  It's up to you.</p>
+
+<p>All Startable classes are called before loading routes currently.  All Startable classes can also be injected with any of your
+application classes using Guice as well so it's easy to inject hibernate EntityManagerFactory and such for saving data to a 
+database</p>
+
+<h3>EntityLookup.java</h3>
+
+<p>This is for hibernate or other object mapping layers.  When a controller is about to be invoked and takes a bean, we know the
+Class of that bean and we ask all plugins if they are managing that bean.  If they are, we then proceed to invoke the find method
+to either lookup the entity from the database or create a brand new empty one so we can fill it in from the form that was
+just posted.  This is very specific to bean mapping layers so generally you will not need to implement this.</p>
+
+<h3>BodyContentBinder.java</h3>
+
+<p>This is great for implementing any protocol you want.  It will marshal the body into a bean or a bean into a html body.  One
+example is the <a href="https://github.com/deanhiller/webpieces/blob/master/webserver-plugins/plugin-json-jackson/src/main/java/org/webpieces/plugin/json/JacksonLookup.java">JacksonLookup.java</a>
+for the jackson plugin.  You just have to implement isManaged to tell us if this is the plugin managing that bean or not
+and the bytes to bean and bean to bytes and we do the rest.</p>
+
+<p>If you ever need a new protocol over webpieces, this is the man, google protobuf, thrift or whatever protocol you want</p>
+
+<h3>ObjectStringConverter.java</h3>
+
+<p>Now for some juicy very useful stuff.  As seen in 
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/GuiceModule.java">GuiceModule.java</a>,
+we add to ObjectStringConverters, one is EducationEnum.WebConverter.class and another is RoleEnum.WebConverter.class.  When we have forms, we need 
+to convert objects or enums to strings to display them AND when the form is posted, we need to convert Strings to objects or enums.  
+ObjectStringConverter allows you to add in conversions from joda.util.Time to string and back all so things are converted for you by the time
+they reach your controller</p>
+
+<p>One example is you may have an Account object in a controller method like postAccount(Account account) and inside that account,
+there is a EducationEnum field and a DateTime field.  Well, with the ObjectStringConverter, we will convert that stuff for you
+and then pass in a ready to use Account object</p>
+
+

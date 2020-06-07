@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.extension.HtmlTagCreator;
-import org.webpieces.plugins.backend.login.BackendLogin;
+import org.webpieces.plugin.backend.login.BackendLogin;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.extensions.Startable;

@@ -1,0 +1,23 @@
+#{extends '../../main.html'/}#
+#{set title:'Controllers'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs '../docHome.html'/}#
+
+<h3>Plugins</h3>
+
+<p>Plugins can be installed in the production XXXMeta file in the list returned from the getPlugins method
+or can be installed in the DevelopmentServer DeveloperMeta.java file.  Plugins consist of:</p>
+
+<ol>
+    <li>A Routes file defining url paths to Controller.method if desired by plugin</li>
+    <li>Controllers if desired by plugin</li>
+    <li>Guice Modules if desired by plugin helping bind to webpieces extension points</li>
+    <li>html files if desired by plugin</li>
+</ol>
+
+<p>Plugins can be a full webapp actually making them very powerful.  Many plugins however plugin to
+the backend plugin which is a plugin containing a dynamic menu system depending on the plugins installed.
+As of this writing, here are the plugins that can be used:</p>
+
+#{renderTagArgs 'listAllPlugins.html'/}#

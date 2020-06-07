@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.plugins.json.Jackson;
+import org.webpieces.plugin.json.Jackson;
 import org.webpieces.router.api.RouterStreamHandle;
 import org.webpieces.router.api.exceptions.NotFoundException;
 

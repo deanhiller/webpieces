@@ -2,7 +2,7 @@ package webpiecesxxxxxpackage.json;
 
 import javax.inject.Inject;
 
-import org.webpieces.plugins.json.JacksonCatchAllFilter;
+import org.webpieces.plugin.json.JacksonCatchAllFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

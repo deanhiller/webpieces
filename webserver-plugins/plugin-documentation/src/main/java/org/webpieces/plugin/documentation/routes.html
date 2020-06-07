@@ -1,0 +1,332 @@
+#{extends '../main.html'/}#
+#{set title:'Routing'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs 'docHome.html'/}#
+
+<ol>
+   <li><a href="#routing">Routing</a></li>
+   <li><a href="#routingSyntax">Route Module Syntax</a>
+	   <ol>
+	    <li><a href="#uriPattern">The URI Pattern</a></li>
+	    <li><a href="#actionMethod">Action method</a></li>
+	    <li><a href="#routeids">RouteId</a></li>
+	   </ol>
+   </li>
+   <li><a href="#domainScope">Domain Specific Routes</a></li>
+   <li><a href="#httpsRoutes">Http vs. Https Routes</a></li>
+   <li><a href="#staticFiles">Static File Routes</a></li>
+   <li><a href="#specialRoutes">NotFound Route and InternalError Route</a></li>
+   <li><a href="#scopedRoutes">Scoped Routes</a></li>
+   <li><a href="#order">Process of Matching URI</a></li>
+</ol>
+
+<h2 id="routing">Routing</h2>
+
+<p><b>You will want to read this page in it's entirety</b></p>
+
+<p>Routing is about taking the request and calling the correct method on the Controller along with any parameters from the
+request.  For an http POST request, the Router will convert all the form parameters into an array of javabeans to be passed
+into the action method of the Controller.  For an http GET request like /client/deanhiller where deanhiller is the name of
+the client, the Router will pass the url query parameters to the action method of the Controller(in this case, just the single 
+'deanhiller' is passed)</p>
+
+<p>All RouteModules are defined and returned in the method getRouteModules in the Meta file.  As an example, there is a 
+legacy project we have to upgrade if we ever break compatibility with webapps(you can also look at this projects commit logs
+to figure out how to upgrade your project).  The Meta file is 
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/WebpiecesExampleMeta.java">WebpiecesExampleMeta.java</a>.
+In this file, you can see an AppRoutes module, a LoginRoutes module, etc.</p>
+
+<p>Lastly, in 
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/WebpiecesExampleMeta.java">WebpiecesExampleMeta.java</a>
+you will also see a getPlugins method.  Some of these plugins return their own RouteModules with their own routes as well</p>
+
+<h2 id="routingSyntax">Route Module Syntax</h2>
+
+<p>Using 
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/AppRoutes.java">AppRoutes.java</a>
+as an example of a no scope Route Module
+</p>
+
+<pre>
+<code>addRoute(GET, "/user/{name}", "examples/ExamplesController.loadUser", ExamplesRouteId.LOAD_USER);</code>
+</pre>
+
+<p>When a GET request comes in with url /user/deanhiller, ExamplesController.loadUser(String name) will be called passing
+in 'deanhiller' as the name.  The following methods are supported</p>
+
+<ol>
+    <li>GET</li>
+    <li>POST</li>
+    <li>PUT</li>
+    <li>DELETE</li>
+</ol>
+
+<h4 id="uriPattern">The URI Pattern</h4>
+
+<p>The URI pattern defines the route’s request path. Some parts of the 
+request path can be dynamic. Any dynamic part must be specified within braces {…}.</p>
+
+<pre>
+<code>/clients/all</code>
+</pre>
+
+<p>exactly matches:</p>
+
+<pre>
+<code>/clients/all</code>
+</pre>
+
+<p>but</p> 
+
+<pre>
+<code>/clients/{id}</code>
+</pre>
+
+<p>matches both:</p>
+
+<pre>
+<code>/clients/1234
+/clients/dean</code>
+</pre>
+
+<p>A URI pattern may have more than one dynamic part:</p>
+
+<pre>
+<code>/clients/{id}/accounts/{accountId}</code>
+</pre>
+
+<p>Any valid regular expression can be used for the URI</p>
+
+<p><b>Dynamic parts are named. The Controller's method has variables of the same name such that the router passes the info to the method</b></p>
+
+<p>By default, the trailing URL slash is important.  For example, this route
+
+<pre>
+<code>addRoute(GET, "/clients", "SomeController.load", ExamplesRouteId.LOAD);</code>
+</pre>
+
+<p>will match the <b>/clients</b> URL but not <b>/clients/</b>. You can tell the Router
+that you want to match both URLs by adding a question mark 
+after the trailing slash(after all, it's a regular expression). For example:</p>
+
+<pre>
+<code>addRoute(GET, "/clients/?", "SomeController.load", ExamplesRouteId.LOAD);</code>
+</pre>
+
+<h4 id="actionMethod">Java Call Definition</h4>
+
+<p>The next piece of the route definition is the action method the router will invoke as in</p>
+
+<pre>
+<code>"SomeController.load"</code>
+</pre>
+
+<p>There are three ways to define the Controller and method.  The first is relative reference from 
+the RouteModule file to the actual Controller</p>
+
+<pre>
+<code>"../examples/ExamplesController.index"</code>
+</pre>
+
+<p>This allows each package to have a RouteModule along with many Controllers</p>
+
+<p>The second method is an absolute path from the root of the classpath as in</p>
+
+<pre>
+<code>"/org/webpieces/base/examples/ExamplesController.index"</code>
+</pre>
+
+<p>The last method may read the best however it does not support relative references 
+and is always an absolute path on the classpath but we leave
+the choice up to you</p>
+
+<pre>
+<code>"org.webpieces.base.examples.ExamplesController.index"</code>
+</pre>
+
+<h4 id="routeids">RouteId</h4>
+
+<p>By now, you have an understanding on how an http request comes in, it will be matched to the URI pattern 
+and the Controller will be invoked.  Let's say however, the page has some html like so</p> 
+
+<pre>
+<code>&lt;a href="/clients"&gt;Link to other page in my app&lt;/a&gt;</code>
+</pre>
+
+<p>Let's further say, you have many many pages that have this same link in them.  If we ever want to change the url
+from <b>/clients</b> to <b>/users</b>, we now have to go through and find and change many many references perhaps
+breaking the application as well where some locations we forget to change.  To avoid this, there are RouteIds so
+instead of the above code, this is how we link to another page</p>
+
+<pre>
+<code>&lt;a href="@ [LOAD]@"&gt;Clients Page&lt;/a&gt;</code>
+</pre>
+
+<p>Then, when this page is rendered, the route id will be reversed to</p> 
+
+<pre>
+<code>&lt;a href="/clients"&gt;Clients Page&lt;/a&gt;</code>
+</pre>
+
+<p>Let's say you have a more complicated route</p>
+
+<pre>
+<code>addRoute(GET ,   "/user/edit/{id}",   "crud/CrudUserController.userAddEdit", EDIT_ROUTE);</code>
+</pre>
+
+<p>In this case, you pass in the id as well as the route id so the url can be formed so this would be your html code</p>
+
+<pre>
+<code>&lt;a href="@ [GET_EDIT_USER_FORM, id:entity.id]@""&gt;Go to User $ {entity.name}$&lt;/a&gt;</code>
+</pre>
+
+<p>Each plugin and RouteModule gets to define it's own enum for RouteIds as long as that enum extends RouteId.  This means
+that conflicts can ensue when two RouteIds have the exact same name.  Let's say we have <b>PluginRouteId.LOAD</b> and
+<b>MyRouteId.LOAD</b>.  In this case, the following code will fail the build forcing you to fix this issue
+
+<pre>
+<code>&lt;a href="@ [LOAD]@"&gt;Clients Page&lt;/a&gt;</code>
+</pre>
+
+<p>So instead, you must qualify it further as in</p> 
+
+<pre>
+<code>&lt;a href="@ [MyRouteId.LOAD]@"&gt;Clients Page&lt;/a&gt;</code>
+</pre>
+
+<p>If there is still a conflict as perhaps a plugin named it's route enum file MyRouteId as well, then you can specify the
+fully qualified package though personally I would just rename my RouteId enum file</p>
+
+<h4 id="domainScope">Domain Specific Routes</h4>
+
+<p>Up to this point, if a request comes in for http://domain1.com/clients or http://domain2.com/clients, the domain is
+completely ignored.  For most web applications, this is fine.  Let's say however you want to server N domains on
+1 webserver all with the same routes and just using the domain as a key into the database.  Then let's further say
+you want 'one' specific domain to have it's own routes like your backend administration or signup web application and
+we will call this domain http://mybusiness.com.  In this case, you will use a special class ScopedDomainRoutes passing
+in all the routes that are only for that one domain like so</p>
+
+<pre>
+<code>Routes domainModule = new ScopedDomainRoutes("mybusiness.com", 
+    new Domain1Routes(),
+    new MoreRoutes()
+);</code>
+</pre>
+        
+<p>Now, all the routes in Domain1Routes and in MoreRoutes will only be matched when requests are coming in for the domain
+mybusiness.com.  All other requests for domain1.com and domain2.com will only match routes in the other modules not
+defined here</p>
+
+<h4 id="httpsRoutes">Http vs. Https Routes</h4>
+
+<p>Up until this point, we have been defining http routes and 100% of http routes are served over http AND https.  The reason
+for this is two fold</p>
+
+<ol>
+    <li>Chrome only does http2 over https</li>
+    <li>There is really no performance impact on modern day servers since the connection is left open for many requests</li>
+</ol>
+
+<p>Https routes on the other hand are only served over https.  One way of defining https routes is to call getScopedRouter</p>
+
+<pre>
+<code>Router httpsRouter = router.getScopedRouter(null, true);
+httpsRouter.addRoute(GET , "/secureRoute",         "HttpsController.home", HttpsRouteId.HOME);
+</code>
+</pre>
+
+<p>Now, /secureRoute will only be served over https.  A second method is to extend <b>ScopedRoutes</b> and 
+implement the isHttpsOnlyRoutes like so</p>        
+
+<pre>
+<code>@Override
+protected boolean isHttpsOnlyRoutes() {
+    return true;
+}</code>
+</pre>
+
+<p>Any routes defined in this file will all only be served over https now</p>
+
+<h4 id="staticFiles">Static File Routes</h4>
+
+<p>Again, using 
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/AppRoutes.java">AppRoutes.java</a>
+as an example, a static directory of resources can be defined like so
+</p>
+
+<pre>
+<code>addStaticDir("/assets/", "public/", false);</code>
+</pre>
+
+<p>On the filesystem, the directory in the project must be public and the url of the resource will be translated.  For example,
+a request for <b>http://domain.com/assets/somedir/somepic.jpg</b> is translated to <b>public/somedir/somepic.jpg</b>.
+Thankfully, {yourproject}-all/{yourproject}/src/dist/public ends up in the correct location when you deploy so the above line
+is all that you should need for static files.  You can add more though if you like.  The false tells webpieces it is not
+on the classpath and is on the filesystem.  All files on the filesystem that are text are precompressed for sending to the
+browser so we don't have to compress on demand and use CPU.  We put these pre-compressed files in a cache.  If you
+have just one file, that can be done as well like so(though I am not convinced this is ever needed)</p>
+
+<pre>
+<code>addStaticFile("/favicon.ico", "public/favicon.ico", false);</code>
+</pre>
+
+<p>Finally and this is for plugins mostly, you can have resources on the classpath.  Plugins are distributed as a single
+jar so they must include their resources in that jar.  Notice that it has to be an absolute path for classpath resources.
+Also of note to prevent conflicts, we use a java like directory structure for the plugin</p>
+
+<pre>
+<code>baseRouter.addStaticDir("/org/webpieces/plugin/documentation/", "/org/webpieces/plugin/documentation/", true);</code>
+</pre>
+
+<h4 id="specialRoutes">NotFound Route and InternalError Route</h4>
+
+<p>As shown in  
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/AppRoutes.java">AppRoutes.java</a>
+there needs to be a route for when a page is not found like so
+</p>
+
+<pre>
+<code>setPageNotFoundRoute("examples/ExamplesController.notFound");</code>
+</pre>
+
+<p>Notice that the development server displays a very special page showing all routes and showing the production page in an iframe
+so you still know what it does in production.  This route can only be set by ONE RouteModule and applies to all pages.  Similarly,
+the internal error route also can only be defined once and is done like so</p>
+
+<pre>
+<code>setInternalErrorRoute("examples/ExamplesController.internalError");</code>
+</pre>
+
+<h4 id="scopedRoutes">Scoped Routes</h4>
+
+<p>You can further divide routes into groups of scoped routes like so</p>
+
+<pre>
+<code>Router scope1 = router.getScopedRouter("/backend", false);
+Router scope2 = router.getScopedRouter("users", false);
+scope2.addRoute(GET , "/list",         "HttpsController.home", HttpsRouteId.HOME);</code>
+</pre>
+
+<p>Above, if a request comes in for /backend/users/list, the route is matched.  If a request for /list comes in,
+not found will be displayed as /list is only found in the scopes that were setup.  Webpieces always tries to
+find a scoped router first and loop through those matches first before falling back to the global no scoped
+router.</p>
+
+<h4 id="order">Process of Matching URI</h4>
+
+<p>The order of matching URI's is best explained by running the DevelopmentServer and hitting a page that
+does not exist which will then display this page(only in development server is this shown, not in production).  As
+you can see below, the Domain Specific Routes are listed first.  If a Domain matches and there is no routes that
+match in that domain, there is no fallback and a page not found will be displayed.  Each domain router has it's
+own not found route.  Continued below the image..</p>
+
+<img src="%[/org/webpieces/plugin/documentation/notFound.png]%"/>
+
+<p>Let's say a request comes in for GET /secure/crud/something/blah, the first router will lookup a scoped router
+'secure' and then that router will try to find a scoped router 'crud' and that router will try to find a router
+'something'.  These are all O(1) lookups on a HashMap so they are very quick.  Since it does not find a scoped 
+router called 'something', it then loops through all the routes in the 'crud' router trying to find a match.  If it
+finds none, it falls back to the 'secure' router and loops through his routes if any and finally falls back to 
+the global routes looking for a match.  If none is found, the not found route is displayed</p>
+

@@ -1,0 +1,26 @@
+#{extends '../../main.html'/}#
+#{set title:'Controllers'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs '../docHome.html'/}#
+
+<h3>Properties Plugin</h3>
+
+<p><b>Does not exist but will be Siiiiiiick when it does</b></p>
+
+<p>Ok, imagine a world where you extend any one of your Guice classes with XXXXMBean.  Then, as the
+server starts up, we add a jdk proxy to that bean which does 2 things:</p>
+
+<ol>
+    <li>It exposes a webpage exposing all set/get methods to a webpage for you to modify</li>
+    <li>The proxy saves any changes to a database</li>
+</ol>
+
+<p>Basically, any time you go into this backend plugin and submit changes, we save it to a database
+for you(in case you restart the server) AND we apply the changes to your class which may or 
+may not have an immediate effect depending on how you code it.  Then, when you restart the server,
+we also read in from the database and re-apply all your changes so they are persistent.</p>
+
+<p>Basically say goodbye to property files forever!!! They are not needed and in fact with property
+files you need an F'ing restart.  How stupid.  Let the magic that is webpieces do the work 
+for you</p>

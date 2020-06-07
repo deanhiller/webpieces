@@ -14,7 +14,7 @@ import javax.persistence.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
-import org.webpieces.plugins.hibernate.Em;
+import org.webpieces.plugin.hibernate.Em;
 import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
 import org.webpieces.plugins.hibernate.app.dbo.Role;
 import org.webpieces.plugins.hibernate.app.dbo.UserRoleDbo;

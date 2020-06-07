@@ -12,6 +12,7 @@ import org.webpieces.webserver.api.ServerConfig;
 import com.google.inject.util.Modules;
 
 import webpiecesxxxxxpackage.basesvr.YourCompanyServer;
+import webpiecesxxxxxpackage.meta.JavaCache;
 
 import com.google.inject.Module;
 
@@ -38,7 +39,7 @@ public abstract class YourCompanyDevelopmentServer extends YourCompanyAbstractDe
         TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths);
 
         //java source files encoding...
-        CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getHomeCacheDir("scrapersCache/devserver-bytecode"));
+        CompileConfig devConfig = new CompileConfig(srcPaths, JavaCache.getByteCache());
         devConfig.setFailIfNotInSourcePaths("WEBPIECESxPACKAGE"); //FAIL FAST if a class with this package is not in our source directories so we can fix it!!
         
         Module platformOverrides = Modules.combine(

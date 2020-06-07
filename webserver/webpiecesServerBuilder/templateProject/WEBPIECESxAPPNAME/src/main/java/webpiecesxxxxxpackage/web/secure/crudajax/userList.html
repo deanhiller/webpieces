@@ -1,0 +1,108 @@
+#{extends '../../mainTemplate.html'/}#
+#{set title:'Ajax User List'/}#
+#{set tab:'userlist'/}#
+
+<h4>Users</h4>
+
+*{ any changes to this modal 'if showPopup' would need to be retested in ALL browsers!!! }*
+<div id="addEditModal" class="modal hide #{if showPopup}#in#{/if}#" tabindex="-1" 
+     role="dialog" data-backdrop="true" aria-labelledby="addEditModalLabel" 
+     aria-hidden="#{if showPopup}#true#{/if}##{else}#false#{/else}#"
+    #{if showPopup}#style="display: block;"#{/if}#>
+    #{if showPopup}#
+        #{renderPageArgs 'userAddEdit.html'/}#
+        <script type="text/javascript">
+           $(document).ready(function() { 
+               $("#addEditModal").modal('show');   
+           });
+        </script>
+    #{/if}#
+</div>
+<div id="deleteModal" class="modal hide" data-backdrop="true" tabindex="-1" 
+     role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>FirstName</th>
+            <th>LastName</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        #{list items:users, as:'entity'}#
+            <tr>
+                <td>${entity.firstName}$</td>
+                <td>${entity.lastName}$</td>
+                <td>${entity.email}$</td>
+                <td>
+                   <a href="#" data-toggle="modal" class="btn" id="editLink_${entity.id}$">Edit</a>
+                   #{bootstrapModal route:@[AJAX_EDIT_USER_FORM, id:'{id}']@, modalId:'addEditModal', linkId:'editLink_'+entity.id, id:entity.id/}#
+                        
+                   <a href="#" data-toggle="modal" class="btn" id="deletePattern_${entity.id}$"> Delete </a>
+                   #{bootstrapModal route:@[AJAX_CONFIRM_DELETE_USER, id:'{id}']@, modalId:'deleteModal', linkId:'deletePattern_'+entity.id, id:entity.id/}#
+                </td>
+            </tr>
+        #{/list}#
+        #{else}#
+        <tr>
+            <td colspan="4">
+            There are no users, Add one now please.
+            </td>
+        </tr>
+        #{/else}#
+    </tbody>
+</table>
+
+<a href="#" class="btn btn-primary" id="addLink">Add User</a>
+#{bootstrapModal route:@[AJAX_ADD_USER_FORM]@, linkId:'addLink', modalId:'addEditModal'/}#
+
+
+*{ 
+THIS IS A HUGE COMMENT BLOCK SO CODE IS NOT RUN...
+
+THIS: #{bootstrapModal route:@[AJAX_ADD_USER_FORM]@, linkId:'addLink', modalId:'addEditModal'/}#
+IS THIS CODE:(in case you want to get fancier)
+
+	<script type="text/javascript">
+	var getAddRoute= #{jsAction @[AJAX_ADD_USER_FORM]@ /}#
+	$(document).ready(function() {  
+	     $("#addLink").click(function(e){
+	         $('#addEditModal').load(getAddRoute(),function(){
+	              $("#addEditModal").modal('show'); 
+	         });
+	     });
+	});
+	</script>
+
+THIS #{bootstrapModal route:@[AJAX_EDIT_USER_FORM, id:'{id}']@, modalId:'addEditModal', linkId:'editLink_'+entity.id, id:entity.id/}#
+GENERATES THIS CODE:
+
+  <script type="text/javascript">
+      var getEditRoute= #{jsAction @[AJAX_EDIT_USER_FORM, id:'{id}']@ /}#
+       $(document).ready(function() {   
+           $("#editLink_${entity.id}$").click(function(e){
+               $('#addEditModal').load(getEditRoute({id:${entity.id}$}),function(){
+                   $("#addEditModal").modal('show');    
+                });
+           });
+        });
+  </script>
+  
+THIS #{bootstrapModal route:@[AJAX_CONFIRM_DELETE_USER, id:'{id}']@, modalId:'deleteModal', linkId:'deletePattern_'+entity.id, id:entity.id/}#
+GENERATES THIS CODE:
+                   
+	<script type="text/javascript">
+	 var getConfirmDeleteRoute = #{jsAction @[AJAX_CONFIRM_DELETE_USER, id:'{id}']@ /}#
+	 $(document).ready(function() { 
+	     $("#deletePattern_${entity.id}$").click(function(e){
+	         $('#deleteDiv').load(getConfirmDeleteRoute({id:'${entity.id}$'}),function(){
+	              $("#deleteModal").modal('show');  
+	         });
+	     });
+	});
+	</script>
+                       
+}*

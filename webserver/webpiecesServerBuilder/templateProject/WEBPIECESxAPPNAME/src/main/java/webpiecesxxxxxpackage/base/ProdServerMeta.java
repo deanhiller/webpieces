@@ -4,14 +4,14 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.plugins.backend.BackendPlugin;
-import org.webpieces.plugins.hibernate.HibernatePlugin;
-import org.webpieces.plugins.json.JacksonConfig;
-import org.webpieces.plugins.json.JacksonPlugin;
-import org.webpieces.plugins.properties.PropertiesConfig;
-import org.webpieces.plugins.properties.PropertiesPlugin;
-import org.webpieces.plugins.sslcert.InstallSslCertConfig;
-import org.webpieces.plugins.sslcert.InstallSslCertPlugin;
+import org.webpieces.plugin.backend.BackendPlugin;
+import org.webpieces.plugin.hibernate.HibernatePlugin;
+import org.webpieces.plugin.json.JacksonConfig;
+import org.webpieces.plugin.json.JacksonPlugin;
+import org.webpieces.plugin.secure.properties.PropertiesConfig;
+import org.webpieces.plugin.secure.properties.PropertiesPlugin;
+import org.webpieces.plugin.secure.sslcert.InstallSslCertConfig;
+import org.webpieces.plugin.secure.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppConfig;
@@ -23,10 +23,10 @@ import com.google.inject.Module;
 import webpiecesxxxxxpackage.basesvr.YourGlobalModule;
 import webpiecesxxxxxpackage.json.JsonCatchAllFilter;
 import webpiecesxxxxxpackage.json.JsonRoutes;
-import webpiecesxxxxxpackage.web.crud.CrudRoutes;
-import webpiecesxxxxxpackage.web.crudajax.AjaxCrudRoutes;
 import webpiecesxxxxxpackage.web.login.LoginRoutes;
 import webpiecesxxxxxpackage.web.main.MainRoutes;
+import webpiecesxxxxxpackage.web.secure.crud.CrudRoutes;
+import webpiecesxxxxxpackage.web.secure.crudajax.AjaxCrudRoutes;
 
 //This is where the list of Guice Modules go as well as the list of RouterModules which is the
 //core of anything you want to plugin to your web app.  To make re-usable components, you create
@@ -65,7 +65,8 @@ public class ProdServerMeta implements WebAppMeta {
     public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
 				new MainRoutes(),
-				new LoginRoutes("/webpiecesxxxxxpackage/web/login/AppLoginController", "/secure/.*", "password"),
+				//The Controller package regex is webpiecesxxxxxpackage.web.secure\..* so that we match webpiecesxxxxxpackage.web.secure.* Controllers 
+				new LoginRoutes("/webpiecesxxxxxpackage/web/login/AppLoginController", "webpiecesxxxxxpackage.web.secure\\..*", "password"),
 				new CrudRoutes(),
 				new AjaxCrudRoutes(),
 				new JsonRoutes()

@@ -2,7 +2,7 @@ package org.webpieces.webserver.json.app;
 
 import javax.inject.Inject;
 
-import org.webpieces.plugins.json.JacksonCatchAllFilter;
+import org.webpieces.plugin.json.JacksonCatchAllFilter;
 import org.webpieces.router.api.exceptions.HttpException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 

@@ -52,12 +52,14 @@ public abstract class AbstractLoginRoutes implements Routes {
 		addLoggedInHome(bldr, scopedBldr);
 		
 		
+		LoginInfo initialConfig = new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields);
+		
 		if(regExMatchPackage) {
 			//being in a package secures all NotFound based on changing params so hackers can't probe urls of dynamic urls of /secure/{name} guessing names and such
-			bldr.addPackageFilter(secureRegEx, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);
+			bldr.addPackageFilter(secureRegEx, LoginFilter.class, initialConfig, FilterPortType.HTTPS_FILTER, filterLevel);
 			
 		} else {
-			bldr.addFilter(secureRegEx, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);
+			bldr.addFilter(secureRegEx, LoginFilter.class, initialConfig, FilterPortType.HTTPS_FILTER, filterLevel);
 			//redirects all queries for non-existent pages to a login (then the clients don't know which urls exist and don't exist which is good)
 			//ie. you can only get not found AFTER logging in
 			bldr.addNotFoundFilter(LoginFilter.class, new LoginInfo(secureRegEx, getSessionToken(), getRenderLoginRoute(), secureFields), FilterPortType.HTTPS_FILTER, filterLevel);

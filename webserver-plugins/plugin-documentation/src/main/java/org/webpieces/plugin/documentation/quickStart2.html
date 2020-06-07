@@ -1,0 +1,118 @@
+#{extends '../main.html'/}#
+#{set title:'Dynamic Hello World'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs 'docHome.html'/}#
+#{renderTagArgs 'quickStartList.html'/}#
+
+<h1>Dynamic Hello World</h1>
+
+<p>Last updated: May 13th, 2020</p>
+
+<h2>Dynamic Route</h2>
+
+<p>Next, let's add DYNAMIC_HELLO_WORLD as a new RouteId to MyRouteId like so (in bold):</p>
+
+<pre>
+<code>package org.webpieces.helloworld.web.myapp;
+
+import org.webpieces.router.api.routes.RouteId;
+
+public enum MyRouteId implements RouteId {
+    HELLO_WORLD, <b>DYNAMIC_HELLO_WORLD</b>
+}</code>
+</pre>
+
+<p>Next, let's create our first dynamic route that will capture the {name} that is typed in the url.  Modify MyMainRoutes
+to look like so:</p>
+
+
+<pre>
+<code>package org.webpieces.helloworld.web.myapp;
+
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routes.Port;
+import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+
+public class MyMainRoutes implements Routes {
+
+    @Override
+    public void configure(DomainRouteBuilder bldr) {
+        RouteBuilder b = bldr.getAllDomainsRouteBuilder();
+
+        b.addRoute(Port.BOTH, HttpMethod.GET, "/helloworld", "MyMainController.helloWorld", MyRouteId.HELLO_WORLD);
+        <b>b.addRoute(Port.BOTH, HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyRouteId.DYNAMIC_HELLO_WORLD);</b>
+    }
+}</code>
+</pre>
+
+<p>This new route will match urls like http://localhost:8080/helloworld/dean/123 and http://localhost:8080/helloworld/declan/765
+and will capture the name and id that is typed in to be stored in the name and id variables.
+Next, let's add the dynamicHelloWorld method in the MyMainController class which accepts the name and id variables. However, in this case, we will
+require the id to be an int. The resulting Controller file is then:</p>
+
+<pre>
+<code>package org.webpieces.helloworld.web.myapp;
+
+import javax.inject.Singleton;
+
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+
+@Singleton
+public class MyMainController {
+	public Action helloWorld() {
+		return Actions.renderThis();
+	}
+
+	<b>public Action dynamicHelloWorld(String name, int id) {
+		return Actions.renderThis(
+				"name", name,
+				"id", id);
+        }</b>
+}</code>
+</pre>
+
+<p>This means if someone types in the url http://localhost:8080/helloworld/dean/mary, they will get a 404 NOT_FOUND
+since there will be no page there because mary is not an integer.  Finally, let's add the html file with the same
+name as the method dynamicHelloWorld.html but this time, let's insert *[${name}$ and ${id}$]* so we echo back
+what was entered into the url:</p>
+
+<pre>
+<code>*[<html>
+    <head></head>
+    <script> //I would put real javascript here </script>
+    <body>
+        Hello ${name}$.  Your id is ${id}$
+    </body>
+</html>]*</code>
+</pre>
+
+<p>Hopefully your DevelopmentServer is still running in which case you can now go to your new route
+http://localhost:8080/helloworld/dean/892 or http://localhost:8080/helloworld/catalina/444 or any name you like</p>
+
+<p>Congratulations on your first 'dynamic' webpieces page, next we will make our app a bit more persistent so
+that we save stuff to a database (HERE, we prevent SQL injection attacks)</p>
+
+<p>FOR FUN: Let's perform a common hacker attack.  You will notice the example has a script tag with a comment
+    of 'I would put real javascript here'.  Let's try to insert html into the name to get more javascript into the page.  First, you
+    must understand urls do not allow certain characters.  If I want a '/' for instance, I have to send %2F.  Webpieces
+    will receive '/' as we decode this for you.  So, go to urlencoder.org and type in:</p>
+
+<pre>
+<code>*[<script>//My hidden javascript attack </script>]*</code>
+</pre>
+
+<p>The result is %3Cscript%3E%2F%2FMy%20hidden%20javascript%20attack%20%3C%2Fscript%3E%0A so let's create the url and
+    attack trying to insert our script into the website. You can now hit the url
+    <a href="http://localhost:8080/helloworld/%3Cscript%3E%2F%2FMy%20hidden%20javascript%20attack%20%3C%2Fscript%3E%0A/5777">http://localhost:8080/helloworld/%3Cscript%3E%2F%2FMy%20hidden%20javascript%20attack%20%3C%2Fscript%3E%0A/5777</a>
+    <b>Note that since you can see what the hacker typed into 'name', this means his script is not running</b> while the script 'you'
+    added in dynamicHelloWorld.html is running as it doesn't show on the page.  All variables from controller passed to the
+    webpage are HTML encoded which prevents the attack.  You can also decide to not escape but beware of attacks like this
+    if you do that</p>
+
+
+<a class="btn btn-primary" href="@[QUICK_START3]@" role="button">Next Persistent Helloworld</a>
+

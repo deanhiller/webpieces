@@ -1,0 +1,22 @@
+#{extends '../main.html'/}#
+#{set title:'Home'/}#
+#{set tab:'loggedinhome'/}#
+
+<ul>
+    #{list items:menu, as:'menu'}#
+      <li id="tab_${menu.menuCategory.lowerCaseMenuTitle}$">${menu.menuCategory.menuTitle}$
+
+        <ul>
+            #{list items:menu.menuItems, as:'item'}#
+            <li><a href="${item.url}$">${item.menuTitle}$</a></li>
+             #{/list}#
+             #{else}#
+             <li><a href="">Plugin missing items</a>
+             #{/else}#
+        </ul>
+      </li>
+    #{/list}#
+    #{else}#
+    <li id="tab_none"><a id="none" href="">No Backend Plugins Installed</a></li>
+    #{/else}#
+</ul>

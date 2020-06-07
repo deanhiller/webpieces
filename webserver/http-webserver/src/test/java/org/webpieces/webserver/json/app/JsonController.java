@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Singleton;
 
-import org.webpieces.plugins.json.Jackson;
+import org.webpieces.plugin.json.Jackson;
 import org.webpieces.router.api.exceptions.NotFoundException;
 
 @Singleton

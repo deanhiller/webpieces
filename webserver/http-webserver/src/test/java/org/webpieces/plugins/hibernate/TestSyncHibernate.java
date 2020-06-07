@@ -20,6 +20,7 @@ import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.plugin.hibernate.TransactionFilter;
 import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;

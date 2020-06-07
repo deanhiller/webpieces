@@ -1,0 +1,33 @@
+#{extends '../../main.html'/}#
+#{set title:'Html Reference'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs '../docHome.html'/}#
+
+<h1 id="html">Pulldown Menu Result</h1>
+
+<p>Hi, you chose the color ${selectedColor}$</p>
+
+<br/><br/>
+
+<h2>The Code</h2>
+
+<p>The Controller GET method for this page is:</p>
+
+<pre>
+<code>*[	public Render enumListResult() {
+		String selectedColor = Current.flash().get("selectedColor");
+		return Actions.renderThis(
+				"menu", menuCreator.getMenu(),
+				"selectedColor", selectedColor
+				);
+	}]*</code>
+</pre>
+	
+<p>The html for this page is simply:</p>
+
+<pre>
+<code>*[<h1 id="html">Pulldown Menu Result</h1>
+
+<p>Hi, you chose the color ${selectedColor}$</p>]*</code>
+</pre>

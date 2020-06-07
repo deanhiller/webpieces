@@ -19,6 +19,7 @@ import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.futures.FutureHelper;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Headers;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
@@ -30,9 +31,11 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 	private RouteId loginRoute;
 	private Pattern patternToMatch;
 	private String[] secureFields;
+	private FutureHelper futureUtil;
 
 	@Inject
-	public LoginFilter() {
+	public LoginFilter(FutureHelper futureUtil) {
+		this.futureUtil = futureUtil;
 	}
 
 	@Override
@@ -58,7 +61,10 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 		Session session = Current.session();
 		if(session.containsKey(token)) {
 			Current.addModifyResponse(resp -> addCacheHeaders(resp));
-			return next.invoke(meta);
+			
+			return futureUtil.finallyBlock(
+					() -> next.invoke(meta),
+					() -> clearSecureFields(meta));
 		}
 
 		RouterRequest request = Current.request();
@@ -89,6 +95,14 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 		
 		//redirect to login page..
 		return CompletableFuture.completedFuture(Actions.redirect(loginRoute));
+	}
+
+	private void clearSecureFields(MethodMeta meta) {
+		//clear out secure fields
+		for(String secureKey: secureFields) {
+			meta.getCtx().getFlash().remove(secureKey);
+		}
+		return;
 	}
 
 	private Object addCacheHeaders(Object response) {

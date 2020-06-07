@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.nio.api.SSLConfiguration;
 import org.webpieces.nio.api.SSLEngineFactory;
-import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.plugin.hibernate.HibernatePlugin;
 import org.webpieces.plugins.hibernate.app.ajax.AjaxHibernateCrudRoutes;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.plugins.Plugin;

@@ -1,0 +1,310 @@
+#{extends '../main.html'/}#
+#{set title:'Webpieces QuickStart'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs 'docHome.html'/}#
+#{renderTagArgs 'quickStartList.html'/}#
+
+<h1>Creating the Project</h1>
+
+<h2>Introduction</h2>
+
+<p>Last updated: May 13th, 2020</p>
+
+<p>A very simple tutorial, that will just help you to learn the Webpieces library 
+with the famous ‘Hello World’ example.</p>
+
+<p>We have split the tutorial into several parts.  Each part will introduce more complex features, and provide
+everything that a real project needs: validation, error handling, an automated test suite.</p>
+
+<h2>Prerequisites</h2>
+
+<p>Webpieces requires that you have a working installation of jdk11 or greater.  We do not require intellij or eclipse
+but highly recommend one of those as your editors.</p>  
+
+<p>We will assume you already have knowledge of Java and Web development(especially HTML, CSS).  However,
+you don't need to have any knowledge of JEE components except a little knowledge in JPA can help.  Webpieces
+is a 'full stack' Java framework.</p>  
+
+<p>A solid understanding of one of these two things can help</p>
+
+<ul>
+    <li>Guice</li>
+    <li>@javax.inject annotations</li>
+</ul>
+
+<h2>Installing Webpieces</h2>
+
+<p>Hah!!!  Since Webpieces webserver is a library, there is no installation as you just depend on it like
+a normal maven artifact!  However, because we don't want everyone that uses webpieces to have to create
+all the build files that builds a production server, we supply a createProject script that can be run.  It generates
+a project with gradle build files that work out of the box along with a main Server class that you can
+modify to your heart's desire.  Obviously, you could completely swap out the build system if you desire.  I will 
+warn you however though, some systems like maven are rigid and you may start pulling your hair out</p>
+
+<p>To start, download the zip that can create a shell project for you that uses the webpieces library following
+these steps</p>
+
+<ol>
+    <li>Download the release(https://github.com/deanhiller/webpieces/releases)</li>
+    <li>unzip the file you downloaded</li>
+    <li>run ./createProject.sh</li>
+    <li>IMPORTANT: Type these steps in exactly if you want to be able to cut/paste code from this tutorial</li>
+    <li>For the camel case app name, enter 'MyHelloWorld'</li>
+    <li>For the package, enter org.webpieces.helloworld</li>
+    <li>For the directory, enter '..'</li>
+    <li>cd ../myhelloworld-all</li>
+    <li>./gradlew build</li>
+</ol>
+
+<p> At this point, your build should have been successful and all tests are passing as we provide some example tests.
+Next, we want to create a production release in the form of a zip file with the logging config, html files, and jar files.</p>
+
+<ol>    
+    <li>./gradlew assembleDist #creates the actual webserver distribution zip and tar files</li>
+    <li>cd myhelloworld-all/myhelloworld/output/distributions/</li>
+    <li>unzip myhelloworld.zip which is your whole webserver</li>
+    <li>./bin/{project} to start the production webserver</li>
+    <li>In a browser go to http://localhost:8080</li>
+</ol>
+
+<p>Here, you will hit the main webpieces webpage with examples that you can click through and use tweak/copy, etc.  Eventually,
+you will just delete all the example code.  Next, when you unzipped the zip file, you may have seen 4 directories.  
+Now, if you look there are 6 directories which are</p>
+
+<dl>
+    <dt>bin</dt>
+    <dd>Where your startup scripts are located(we created these for you but you own main so you can create new ones)</dd>
+    <dt>config</dt>
+    <dd>Where any config files reside, currently only the logback.xml for logging config exists here</dd>
+    <dt>lib</dt>
+    <dd>All jar files exist here</dd>
+    <dt>logs</dt>
+    <dd>The generated directory where all log files will be put from logback unless you reconfigure logback.xml</dd>
+    <dt>public</dt>
+    <dd>The location for all *.jpg, *.css, *.js and all static resources</dd>
+    <dt>webpiecesCache</dt>
+    <dd>Webpieces pre-compresses text resources on startup to send to browsers to avoid on-demand compression speeding up performance over low bandwidth connections</dd> 
+</dl>
+
+<p>Next, view the section in the <a href="https://github.com/deanhiller/webpieces">README on github</a> on 
+Eclipse Setup or Intellij Setup.</p>
+
+<p>We mine as well do all the examples while the development server is running so shutdown the previous production server (ctrl-C).
+Follow the instructions for your IDE setup above.  <b>Then start the DevelopmentServer.java and keep it running</b>.  Also, while it's 
+running, you can view these instructions at http://localhost:8080/@documentation</p>
+
+<h4>To be 'very' clear.  You SHOULD run the Development Server for the whole tutorial without restarting.  I even run my server
+overnight and develop the next day</h4>
+
+<p>There is built in documentation at http://localhost:8080/@documentation when running the development server.  The production
+server above does not have this so you will want to run the development server in intellij or eclipse.  This is because the
+documentation plugin is only installed on the development server.  You could install it on the production server if you
+really wanted to(and just make sure to uninstall from the dev server so there is not a conflict of both installing the same
+plugin)</p>
+
+<h2>Your first RouteModule</h2>
+
+<p>Now, that you have the beginnings of a webpieces webapp, let's add a new RouteModule. In the project
+helloworld-all/helloworld/src/main/java/org.webpieces.helloworld/web, create a package called "myapp" where we
+    will put all the helloworld code.  In that package, create a java file called MyRouteId.java like so:</p>
+
+<pre>
+<code>package org.webpieces.helloworld.web.myapp;
+
+import org.webpieces.router.api.routes.RouteId;
+
+public enum MyRouteId implements RouteId {
+    HELLO_WORLD
+}</code>
+</pre>
+
+<p>This is where we will put all the RouteIds for this package and for this RouteModule. Notice that the enum must extend
+    RouteId as webpieces only knows about RouteId and not your specific enum.  Next, let's use the RouteId and create a
+RouteModule class in the same myapp package called "MyMainRoutes" with a single route to our new webpage.</p>
+
+
+<pre>
+<code>package org.webpieces.helloworld.web.myapp;
+
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routes.Port;
+import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.api.routebldr.DomainRouteBuilder;
+import org.webpieces.router.api.routebldr.RouteBuilder;
+
+public class MyMainRoutes implements Routes {
+
+    @Override
+    public void configure(DomainRouteBuilder bldr) {
+        RouteBuilder b = bldr.getAllDomainsRouteBuilder();
+
+        b.addRoute(Port.BOTH, HttpMethod.GET, "/helloworld", "MyMainController.helloWorld", MyRouteId.HELLO_WORLD);
+    }
+}</code>
+</pre>
+
+<p>Here, we are saying when the browser calls any of these urls that end up on our server, webpieces will invoke
+MyMainController.helloWorld.  <b>This won't work just YET!</b>.  We need to implement controller first</p>
+
+<ol>
+    <li>http://localhost:8080/helloworld</li>
+    <li>https://localhost:8080/helloworld</li>
+    <li>http://anydomain.com/helloworld  #As long as your DNS is setup properly and we receive the request</li>
+</ol>
+
+<p>Notice we used the getAllDomainsRouteBuilder which means these routes apply to all domains EXCEPT domains created
+with bldr.getDomainScopedRouteBuilder(String domain) which is a more advanced topic. If you have DNS domainX.com and
+domainY.com all pointing to your ip with this server, then domainX.com/hello and domainY.com/hello end up calling
+the same controller. Now that we defined a route and a Controller and method to invoke, we should create the Controller
+and name it "MyMainController."</p>
+
+<pre>
+<code>package org.webpieces.helloworld.web.myapp;
+
+import javax.inject.Singleton;
+import org.webpieces.router.api.controller.actions.Action;
+import org.webpieces.router.api.controller.actions.Actions;
+
+@Singleton
+public class MyMainController {
+    public Action helloWorld() {
+        return Actions.renderThis();
+    }
+}</code>
+</pre>
+
+<p>Lastly, Actions.renderThis() informs webpieces to render the html file with the same name as the method helloWorld so
+next create a file called helloWorld.html in the same myapp directory as the Controller</p>
+
+<pre>
+<code>*[<html>
+    <head></head>
+    <body>
+        Hello World
+    </body>
+</html>]*</code>
+</pre>
+
+<p>Finally, the one last step is we need to tell webpieces about this RouteModule that we created. Inside the class
+ProdServerMeta.java (org.webpieces.helloworld.base), modify it to ADD the line "new MyMainRoutes()"
+    to the list of RouteModules already defined. Your new
+getRouteModules method should look like so (the addition in bold):</p>
+
+<pre>
+<code>*[@Override
+public List<Routes> getRouteModules() {
+    return Lists.newArrayList(
+            new LoginRoutes("/org/webpieces/helloworld/web/login/AppLoginController", "/secure/.*", "password"),
+            new CrudRoutes(),
+            new AjaxCrudRoutes(),
+            new JsonRoutes(),
+            <b>new MyMainRoutes()</b>
+            );
+}]*</code>
+</pre>
+
+<p>A big note is that all the modules here should be deleted except for LoginRoutes in your production application as
+they are all examples.  While LoginRoutes is an example as well, you most likely want a way to login so you would keep
+the LoginRoutes module.</p>
+
+<p>Finally, boot up your DevelopmentServer.java main class and open a browser and go to http://localhost:8080/helloworld
+or go to https://localhost:8443/helloworld to showcase both http and https traffic.</p>
+
+<p>Congratulations on your first webpieces page -- next we will make our html a bit more dynamic.</p>
+
+<a class="btn btn-primary" href="@[QUICK_START2]@" role="button">Next Dynamic Helloworld</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*{
+
+<h2>A Walkthrough of the generated Server.java</h2>
+
+<p>When you start up DevelopmentServer.java, most changes to your web application will not require a restart.  Because
+webpieces is a library, however, changes to the 3 classes that startup webpieces would require a restart and they are</p>
+
+<ol>
+   <li>Server.java</li>
+   <li>ServerConfig.java</li>
+   <li>WebSSLFactory.java</li>
+</ol>
+
+<p>YOU own these classes now to modify to your heart's content.  Any changes to these classes or classes 
+that these depend on would require a development server restart to see the changes. Luckily, these
+classes pretty much do not really need to ever be touched.</p>
+
+<p>Looking closer at Server.java, you will notice 3 different configurations</p>
+
+<ol>
+   <li>WebServerConfig</li>
+   <li>RouterConfig</li>
+   <li>TemplateConfig</li>
+</ol>
+
+<p>Each config object configures that piece of the webserver making it easier to trace what different configurations do
+as well as keep each piece separate from each other.</p>  
+
+<p>We have a firm belief that nearly all properties should be in the database and not on the filesystem including 
+configuration properties.  We generate Server.java such that you could modify it and put any properties 
+you like on the filesystem but we advise against 99% of properties there as typically you want property file 
+changes to go through your test team rather than someone getting on a production server and tweaking a property.
+Of course, the 1 property that must be a command line argument or a property is the database connection such that
+your server can exist in multiple environments like development, staging, and production with different database
+connections.</p>  
+
+<p>To make it simpler for all components/plugins to read/write properties into a database, an interface SimpleStorage.java
+is provided.  The generated application implements this interface connecting it to hibernate but you could change it
+to connect to some noSQL database or whatever else you would like.</p>
+
+<p><b>NOTE: In the future, we want to add a bean plugin that exposes MBeans to a web gui for you and also 
+saves changes to the database thereby eliminating the need for property files for basically everything. It would
+do the following for you...</b></p>
+
+<ol>
+   <li>expose a web page dynamically to modify those properties(for one node or for all machines)</li>
+   <li>read in the properties from SimpleStorage on startup to set them back to what they were</li>
+   <li>write changes from the web page into the database so they are persisted</li>
+</ol>
+
+<p>This automatically managed way of doing properties is preferred over using property files</p>
+
+<h2>A walkthrough of Meta & Modules & Plugins</h2>
+
+<p>The main bootstrap file that webpieces webserver reads in is {yourproject}-all/{yourproject}/src/main/resources/appmeta.txt
+for production mode and {yourproject}-all/{yourproject}/src/main/resources/appmeta-dev.txt for Development mode.  This
+file boostraps your web application by telling us your meta file.</p>  
+
+<p>If you look closely, you will notice the appmeta-dev.txt contains DeveloperMeta.java and in that file, he just re-uses all
+the production meta stuff as well as adding 2 plugins that are only in the development server.  After all, we don't
+want to expose a SQL GUI nor webpieces documentation on our production website.</p>
+
+<p>Next, looking at {yourproject}Meta.java file, you will notice it is broken down into 3 main components</p>
+
+<ol>
+   <li>list of Guice Modules</li>
+   <li>list of Route Modules</li>
+   <li>list of Plugins</li>
+</ol>
+
+<p>I won't go in depth on plugins at this point but just note that plugins can be another fully contained web
+application with it's own guice modules, route modules, controllers, and html pages.  This allows you to plugin
+full webapplications into your webapplication.  It's what we use for all the backend plugins that could be removed
+if you desire a really thin lightweight server</p>  
+
+}*
+
