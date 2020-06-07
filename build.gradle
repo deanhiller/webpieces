@@ -252,10 +252,21 @@ subprojects {
       }
    }
 
+   
    jacocoTestReport {
       additionalSourceDirs = files(sourceSets.main.allSource.srcDirs)
       sourceDirectories = files(sourceSets.main.allSource.srcDirs)
       classDirectories =  files(sourceSets.main.output)
+/*
+      classDirectories = files(sourceSets.main.output.filter { file ->
+         if(file.getName().endsWith("Exception.class")) {
+            print("Excluded:"+file.getName());
+            return false;
+         }
+         print("Included:"+file.getName());
+         return true;
+      })
+*/
       executionData.from = fileTree(buildDir).include("/jacoco/*.exec")
       reports {
           html.enabled = true

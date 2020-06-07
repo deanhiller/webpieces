@@ -12,6 +12,9 @@ ONLY THESE BIG ITEMS LEFT
 * Client Creator
 * Travis -> Circle CI.  do not allow build breaks
 
+* Tests
+  * Test AuthenticationException from controller
+  * Test AuthenticationException from filter
 * get rid of close connection on response handler!!
 * https://github.com/eclipse/buildship/issues/995
 * Need a test case for stream to server controller directly to client back to some other controller endpoint (remote test or at least test with parsing!!! as server gets HttpData and passes to client but client
