@@ -1,5 +1,17 @@
 # webpieces
 
+ONLY THESE BIG ITEMS LEFT
+* conversations
+* ALPN
+* streaming filters?
+* code generation
+   * website CRUD using all DTOs and client(microservices)
+   * website CURD using all DBOs
+   * JSON CRUD with DTOs and DBOs
+* GRPC
+* Client Creator
+* Travis -> Circle CI.  do not allow build breaks
+
 * get rid of close connection on response handler!!
 * https://github.com/eclipse/buildship/issues/995
 * Need a test case for stream to server controller directly to client back to some other controller endpoint (remote test or at least test with parsing!!! as server gets HttpData and passes to client but client
@@ -27,7 +39,7 @@ previously was not able to use HttpData)
 * add method to reverse a URL from the controller using the Action Enum
 * Make it so AFTER you hit the route, '*Managed', works and ends up in the webpage AFTER GET request is made to that url that uses the property
 * GET request with no url params nor query params BUT controller method DOES have params results in NotFound which is just weird!!! throw a 500 bug instead and put info in exception
-* sending in json to /json/notfound sends back html??? ick, how to get it to send json every time instead of the html not found page
+* sending in json to /json/notfound sends back html??? ick, how to get it to send json every time instead of the html not found page (I think this is Dev Server ONLY!!!)
 * Need webpieces DevServer test for modifying default argument.  It turns out, arguments are not cleared on restart and something weird goes on.
 * starting ProdServerIDE creates webpiecesCache in the wrong directory...modify that to be better location like output/** BUT for BOTH IDE's
 * create a code generate GUI
