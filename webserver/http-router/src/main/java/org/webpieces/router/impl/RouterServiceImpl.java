@@ -190,11 +190,7 @@ public class RouterServiceImpl implements RouterService {
 		if(!started)
 			throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 
-		for(Http2Header h : req.getHeaders()) {
-			if (!headersSupported.contains(h.getKnownName()))
-				log.debug("This webserver has not thought about supporting header="
-						+ h.getName() + " quite yet.  value=" + h.getValue() + " Please let us know and we can quickly add support");
-		}
+		logUnsupportedHeaders(req);
 
 		RouterRequest routerRequest = new RouterRequest();
 		fillInRouterRequest(req, routerRequest, handler);
@@ -206,6 +202,14 @@ public class RouterServiceImpl implements RouterService {
 			log.debug("received request="+req+" routerRequest="+routerRequest);		
 		
 		return service.incomingRequest(routerRequest, handler);
+	}
+
+	private void logUnsupportedHeaders(Http2Request req) {
+		for(Http2Header h : req.getHeaders()) {
+			if (!headersSupported.contains(h.getKnownName()))
+				log.debug("This webserver has not thought about supporting header="
+						+ h.getName() + " quite yet.  value=" + h.getValue() + " Please let us know and we can quickly add support");
+		}
 	}
 
 	private void fillInRouterRequest(Http2Request requestHeaders, RouterRequest routerRequest, RouterStreamHandle handler) {

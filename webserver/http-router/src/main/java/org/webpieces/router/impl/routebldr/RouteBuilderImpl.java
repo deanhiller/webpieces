@@ -121,15 +121,12 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 				svcProxy, internalErrorFilters,
 				RouteType.INTERNAL_SERVER_ERROR);
 
-		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorRoute, true);
+		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorRoute.getFilterChainCreationInfo(), true);
 		EInternalErrorRouter internalErrorRouter = new EInternalErrorRouter(holder.getRouteInvoker2(), internalErrorRoute, internalErrorController, svc);
 
-		//NOTE: We do NOT create a Service<MethodMeta, Action> here with Filters
-		//Service<MethodMeta, Action> must be created on demand(it's cheap operation) because filters must pattern match
-		//on the request coming in and then we form the service per request
-		//WE could turn this off and expose an addGlobalNotFoundFilter that applies always to every not found????
-		//it's faster performance due to know pattern matching every request I guess
-		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst);
+		Service<MethodMeta, Action> notFoundSvc = holder.getFinder().loadFilters(notFoundRoute.getFilterChainCreationInfo(), true);
+		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst, notFoundSvc);
+	
 		return new DScopedRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter, routerFutures, futureUtil);
 	}
 

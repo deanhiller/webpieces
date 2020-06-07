@@ -12,28 +12,20 @@ import com.google.inject.Injector;
 
 public class BaseRouteInfo {
 
-	private final Injector injector;
-	private final List<FilterInfo<?>> filters;
 	private final RouteType routeType;
 	private final RouteInfo routeInfo;
-	private Service<MethodMeta, Action> service;
-
+	private final FilterCreationMeta filterChainCreationInfo;
+	
 	public BaseRouteInfo(Injector injector, RouteInfo routeInfo, Service<MethodMeta, Action> service, List<FilterInfo<?>> filters, RouteType routeType) {
-		this.injector = injector;
 		this.routeInfo = routeInfo;
-		this.service = service;
-		this.filters = filters;
 		this.routeType = routeType;
+		this.filterChainCreationInfo = new FilterCreationMeta(injector, filters, service);
 	}
 
 
 
 	public String getControllerMethodString() {
 		return routeInfo.getControllerMethodString();
-	}
-
-	public List<FilterInfo<?>> getFilters() {
-		return filters;
 	}
 
 	public RouteModuleInfo getRouteModuleInfo() {
@@ -44,16 +36,12 @@ public class BaseRouteInfo {
 		return routeInfo;
 	}
 
-	public Injector getInjector() {
-		return injector;
-	}
-
 	public RouteType getRouteType() {
 		return routeType;
 	}
 
-	public Service<MethodMeta, Action> getService() {
-		return service;
+	public FilterCreationMeta getFilterChainCreationInfo() {
+		return filterChainCreationInfo;
 	}
-	
+
 }

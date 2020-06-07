@@ -3,7 +3,6 @@ package org.webpieces.router.impl.loader;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
@@ -17,8 +16,7 @@ import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.hooks.ServiceCreationInfo;
 import org.webpieces.router.impl.model.BodyContentBinderChecker;
-import org.webpieces.router.impl.routebldr.BaseRouteInfo;
-import org.webpieces.router.impl.routebldr.FilterInfo;
+import org.webpieces.router.impl.routebldr.FilterCreationMeta;
 import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.util.filters.Service;
 
@@ -104,12 +102,8 @@ public class ControllerLoader {
 		return new MethodMetaAndController(method, loadedController);
 	}
 	
-	public Service<MethodMeta, Action> loadFilters(BaseRouteInfo neededData, boolean isInitializingAllFilters) {
-		return loadFilters(neededData, neededData.getFilters(), isInitializingAllFilters);
-	}
-
-	public Service<MethodMeta, Action> loadFilters(BaseRouteInfo neededData, List<FilterInfo<?>> filterInfos, boolean isInitializingAllFilters) {
-		ServiceCreationInfo info = new ServiceCreationInfo(neededData.getInjector(), neededData.getService(), filterInfos);
+	public Service<MethodMeta, Action> loadFilters(FilterCreationMeta neededData, boolean isInitializingAllFilters) {
+		ServiceCreationInfo info = new ServiceCreationInfo(neededData.getInjector(), neededData.getService(), neededData.getFilters());
 		return loader.createServiceFromFilters(info, isInitializingAllFilters);
 	}
 

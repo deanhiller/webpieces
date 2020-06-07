@@ -15,9 +15,12 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
+import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.api.routes.RouteId;
+import org.webpieces.router.impl.services.RouteInfoForInternalError;
+import org.webpieces.router.impl.services.RouteInfoForNotFound;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
@@ -50,7 +53,9 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 	
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> next) {
-		if(patternToMatch != null) {
+		if(meta.getRoute() instanceof RouteInfoForNotFound || meta.getRoute() instanceof RouteInfoForInternalError) {
+			return next.invoke(meta); //no need to login for routeinfoNotFound NOR internal error pages
+		} else if(patternToMatch != null) {
 			//If we have a securePath, we act as a NotFoundFilter so we want to redirect to Login ONLY if this is a secure path request
 			//This hides known vs. unknown pages
 			Matcher matcher = patternToMatch.matcher(meta.getCtx().getRequest().relativePath);

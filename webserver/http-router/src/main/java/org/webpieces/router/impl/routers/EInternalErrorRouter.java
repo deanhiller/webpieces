@@ -1,5 +1,7 @@
 package org.webpieces.router.impl.routers;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -8,13 +10,10 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
-import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.services.RouteInfoForInternalError;
 import org.webpieces.util.filters.Service;
 
 import com.webpieces.http2.api.streaming.StreamWriter;
-
-import java.util.concurrent.CompletableFuture;
 
 public class EInternalErrorRouter {
 
@@ -31,10 +30,10 @@ public class EInternalErrorRouter {
 		this.svc = svc;
 	}
 
-	public CompletableFuture<StreamWriter> invokeErrorRoute(RequestContext ctx, ProxyStreamHandle handler, boolean forceEndOfStream) {
+	public CompletableFuture<StreamWriter> invokeErrorRoute(RequestContext ctx, ProxyStreamHandle handle) {
 		DynamicInfo info = new DynamicInfo(loadedController, svc);
-		RouteInfoForInternalError data = new RouteInfoForInternalError(forceEndOfStream);
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, false);
+		RouteInfoForInternalError data = new RouteInfoForInternalError();
+		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handle, false);
 		return invoker.invokeErrorController(invokeInfo, info, data);
 	}
 }

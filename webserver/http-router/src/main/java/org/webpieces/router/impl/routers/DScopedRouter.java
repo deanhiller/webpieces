@@ -127,7 +127,7 @@ public class DScopedRouter extends EScopedRouter {
 		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
 		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
 		return futureHelper.catchBlockWrap(
-			() -> internalSvrErrorRouter.invokeErrorRoute(requestCtx, handler, forceEndOfStream),
+			() -> internalSvrErrorRouter.invokeErrorRoute(requestCtx, handler),
 			(t) -> convert(failedRoute, t)
 		);
 	}

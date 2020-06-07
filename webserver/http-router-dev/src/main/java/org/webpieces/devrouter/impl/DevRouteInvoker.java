@@ -25,6 +25,7 @@ import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
+import org.webpieces.router.impl.routeinvoker.AbstractRouteInvoker;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
 import org.webpieces.router.impl.routeinvoker.RouteInvokerStatic;
@@ -41,9 +42,10 @@ import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
+import com.google.inject.Injector;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
-public class DevRouteInvoker extends ProdRouteInvoker {
+public class DevRouteInvoker extends AbstractRouteInvoker {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
 
 	private final ServiceInvoker serviceInvoker;
@@ -76,18 +78,9 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 	 * This one is definitely special
 	 */
 	@Override
-	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
-		BaseRouteInfo route = invokeInfo.getRoute();
-		if(loadedController == null) {
-			loadedController = controllerFinder.loadNotFoundController(route.getInjector(), route.getRouteInfo(), false);
-		}
-		
-		RouteInfoForNotFound notFoundData = (RouteInfoForNotFound) data;
-		if(notFoundData.getNotFoundException() == null) {
-			throw new IllegalArgumentException("must have not found exception to be here");
-		}
-		
-		return invokeCorrectNotFoundRoute(invokeInfo, loadedController, data);
+	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+
+		return invokeCorrectNotFoundRoute(invokeInfo, info, data);
 	}
 
 	@Override
@@ -96,8 +89,9 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
 			BaseRouteInfo route = invokeInfo.getRoute();
-			LoadedController controllerInst = controllerFinder.loadErrorController(route.getInjector(), route.getRouteInfo(), false);
-			Service<MethodMeta, Action> service = controllerFinder.loadFilters(route, false);
+			Injector injector = route.getFilterChainCreationInfo().getInjector();
+			LoadedController controllerInst = controllerFinder.loadErrorController(injector, route.getRouteInfo(), false);
+			Service<MethodMeta, Action> service = controllerFinder.loadFilters(route.getFilterChainCreationInfo(), false);
 			newInfo = new DynamicInfo(controllerInst, service);
 		}
 		return super.invokeErrorController(invokeInfo, newInfo, data);
@@ -110,8 +104,9 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		DynamicInfo newInfo = info;
 		if(info.getLoadedController() == null) {
 			BaseRouteInfo route = invokeInfo.getRoute();
-			MethodMetaAndController controller = controllerFinder.loadHtmlController(route.getInjector(), route.getRouteInfo(), false, htmlRoute.isPostOnly());
-			Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route, false);
+			Injector injector = route.getFilterChainCreationInfo().getInjector();
+			MethodMetaAndController controller = controllerFinder.loadHtmlController(injector, route.getRouteInfo(), false, htmlRoute.isPostOnly());
+			Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route.getFilterChainCreationInfo(), false);
 			newInfo = new DynamicInfo(controller.getLoadedController(), svc);
 		}
 		return super.invokeHtmlController(invokeInfo, newInfo, data);
@@ -123,8 +118,9 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
 			BaseRouteInfo route = invokeInfo.getRoute();
-			BinderAndLoader binderAndLoader = controllerFinder.loadContentController(route.getInjector(), route.getRouteInfo(), false);
-			Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route, false);
+			Injector injector = route.getFilterChainCreationInfo().getInjector();
+			BinderAndLoader binderAndLoader = controllerFinder.loadContentController(injector, route.getRouteInfo(), false);
+			Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route.getFilterChainCreationInfo(), false);
 			LoadedController loadedController = binderAndLoader.getMetaAndController().getLoadedController();
 			newInfo = new DynamicInfo(loadedController, svc);
 			data = new RouteInfoForContent(binderAndLoader.getBinder());
@@ -138,7 +134,8 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		//If we haven't loaded it already, load it now
 		if(info.getLoadedController() == null) {
 			BaseRouteInfo route = invokeInfo.getRoute();
-			MethodMetaAndController metaAndController = controllerFinder.loadGenericController(route.getInjector(), route.getRouteInfo(), false);
+			Injector injector = route.getFilterChainCreationInfo().getInjector();
+			MethodMetaAndController metaAndController = controllerFinder.loadGenericController(injector, route.getRouteInfo(), false);
 			//no filters on streaming yet AND they would be different filters anyways
 			//Service<MethodMeta, Action> svc = controllerFinder.loadFilters(route, false);
 			LoadedController loadedController = metaAndController.getLoadedController();
@@ -148,7 +145,7 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		return super.invokeStreamingController(invokeInfo, newInfo, data);
 	}
 
-	private CompletableFuture<StreamWriter> invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, LoadedController loadedController, RouteData data) {
+	private CompletableFuture<StreamWriter> invokeCorrectNotFoundRoute(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
 		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
@@ -156,25 +153,30 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		NotFoundException notFoundExc = notFoundData.getNotFoundException();
 
 		RouterRequest req = requestCtx.getRequest();
-		//RouteMeta origMeta, NotFoundException e, RouterRequest req) {
-		if(req.queryParams.containsKey("webpiecesShowPage")) {
+		if(notFoundData.getNotFoundException() == null) {
+			throw new IllegalArgumentException("must have not found exception to be here");
+		} else if(req.queryParams.containsKey("webpiecesShowPage")) {
 			//This is a callback so render the original webapp developer's not found page into the iframe
-			return super.invokeNotFound(invokeInfo, loadedController, data);
+			return invokeRealNotFouuud(invokeInfo, info, data);
 		}
-
+		
 		//ok, in dev mode, we hijack the not found page with one with a route list AND an iframe containing the developers original
 		//notfound page
 		
 		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
 				+ " something needs a'fixin.  req="+req, notFoundExc);
-		
+
+		Injector injector = route.getFilterChainCreationInfo().getInjector();
+
 		RouteInfo routeInfo = new RouteInfo(new RouteModuleInfo("", null), "/org/webpieces/devrouter/impl/NotFoundController.notFound");
 		BaseRouteInfo webpiecesNotFoundRoute = new BaseRouteInfo(
-				route.getInjector(), routeInfo, 
+				injector, routeInfo, 
 				new SvcProxyFixedRoutes(serviceInvoker, futureUtil),
 				new ArrayList<>(), RouteType.NOT_FOUND);
 		
-		LoadedController newLoadedController = controllerFinder.loadGenericController(route.getInjector(), routeInfo, false).getLoadedController();
+		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(serviceInvoker, futureUtil);
+		LoadedController newLoadedController = controllerFinder.loadGenericController(injector, routeInfo, false).getLoadedController();
+		DynamicInfo newInfo = new DynamicInfo(newLoadedController, svcProxy);
 		
 		String reason = "Your route was not found in routes table";
 		if(notFoundExc != null)
@@ -191,6 +193,22 @@ public class DevRouteInvoker extends ProdRouteInvoker {
 		ApplicationContext ctx = webInjector.getAppContext();
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);
 		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, handler, false);
-		return super.invokeNotFound(newInvokeInfo, newLoadedController, data);
+		return super.invokeNotFound(newInvokeInfo, newInfo, data);
+	}
+
+	private CompletableFuture<StreamWriter> invokeRealNotFouuud(InvokeInfo invokeInfo, DynamicInfo info,
+			RouteData data) {
+		
+		DynamicInfo newInfo = info;
+		//If we haven't loaded it already, load it now
+		if(info.getLoadedController() == null) {
+			BaseRouteInfo route = invokeInfo.getRoute();
+			Injector injector = route.getFilterChainCreationInfo().getInjector();
+			LoadedController controllerInst = controllerFinder.loadNotFoundController(injector, route.getRouteInfo(), false);
+			Service<MethodMeta, Action> service = controllerFinder.loadFilters(route.getFilterChainCreationInfo(), false);
+			newInfo = new DynamicInfo(controllerInst, service);
+		}
+		
+		return super.invokeNotFound(invokeInfo, newInfo, data);
 	}
 }

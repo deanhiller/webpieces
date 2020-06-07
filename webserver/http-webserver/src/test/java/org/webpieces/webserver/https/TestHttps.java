@@ -122,8 +122,8 @@ public class TestHttps extends AbstractWebpiecesTest {
 		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
-		//Even though the page doesn't exist, we redirect all /secure/* to login page
-		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		//Page not exist
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
 	@Test
