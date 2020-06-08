@@ -4,11 +4,13 @@ ONLY THESE BIG ITEMS LEFT
 * conversations
 * ALPN
 * IN PROGRESS - streaming filters?
-* code generation
+* PLUGIN - Change logging levels in production/development via https://host:port/@logging
+* PLUGIN - metrics GUI plugin at https://host:port/@metrics
+* PLUGIN - code generation at https://host:port/@codegen
    * website CRUD using all DTOs and client(microservices)
    * website CURD using all DBOs
    * JSON CRUD with DTOs and DBOs
-* GRPC
+* PLUGIN - GRPC
 * microservices 
    * microsvc-client project with Client Creator project -> port work from orderly
    * microsvc-server project with Routes file and filter -> port work from orderly
