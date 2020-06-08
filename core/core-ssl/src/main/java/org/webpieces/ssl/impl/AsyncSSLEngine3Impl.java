@@ -473,8 +473,10 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			engineToSocketData.flip();
 			metrics.recordEncryptedToSocket(engineToSocketData.remaining());
 			listener.packetEncrypted(engineToSocketData).handle( (v, t) -> {
-				if(t != null)
-					log.error("Exception from ssl listener", t);
+				if(t != null) {
+					future.completeExceptionally(t);
+				}
+				
 				encryptionTracker.ackBytes(numEncrypted);
 				return null;
 			});
