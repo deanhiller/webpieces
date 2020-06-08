@@ -3,18 +3,20 @@
 ONLY THESE BIG ITEMS LEFT
 * conversations
 * ALPN
-* streaming filters?
+* IN PROGRESS - streaming filters?
 * code generation
    * website CRUD using all DTOs and client(microservices)
    * website CURD using all DBOs
    * JSON CRUD with DTOs and DBOs
 * GRPC
 * microservices 
-   * microsvc-client project with Client Creator project
-   * microsvc-server project with Routes file and filter
+   * microsvc-client project with Client Creator project -> port work from orderly
+   * microsvc-server project with Routes file and filter -> port work from orderly
 * Travis -> Circle CI.  do not allow build breaks
 * port newline streaming lib and json lib and file upload lib into webpieces router api
 
+* https://intellij-support.jetbrains.com/hc/en-us/requests/2671257?flash_digest=1cd06958f5f8678e6121ed726d13518a88a7b5aa&page=1
+* https://intellij-support.jetbrains.com/hc/en-us/community/posts/360008329760-Is-there-a-global-setting-for-Build-project-Automatically-and-JVM-args-like-parameters-
 * Follow up on this post https://stackoverflow.com/questions/62246462/jacoco-not-excluding-files-and-print-not-working-in-jacocotestreport-task-to-deb
 * get rid of close connection on response handler!!
 * https://github.com/eclipse/buildship/issues/995
@@ -27,26 +29,19 @@ previously was not able to use HttpData)
 * For microservice, where NotFoundRoute is not specified, We should throw NoNotFoundRouteSetException
 * ADD precondition to not allow developers to accidentally run a Routes file twice which adds the same routes and can fail in a confusing way.
 * ResponseOverrideSender is in wrong location...needs to be in top top level proxy of streamhandling(after chunking/compression)
-* wire futures backpressure all the way in server and test
+* wire futures backpressure all the way in server and test for async SSL engine to make it more robust!!
 * Document prod/staging/local development environments and properties plugin
 * Document more examples on the examples page stuff
 * Document the ApplicationContext
-* Add in MetricApi to hide any metric libraries and classes.  HAVE an actual API
 * http1 parser, write directly to a ByteBuffer[] from the pool with https://stackoverflow.com/questions/1252468/java-converting-string-to-and-from-bytebuffer-and-associated-problems
-* fix extra webpieces cache directory
-* simulate initial project creation and see if there is a git checkin issue...do this on a real repo
-* ADD an optional RoutId for JSON CONTENT...this is needed for #{jsAction}# calls AND add a test as well for this to webpieces
 * Figure out In what case can this ever happen in?(we need a reproducible case). In the meantime, restarting your Dev server fixes this.
 * on building up and up the Routers, we SHOULD use guice on startup since we don't need to be EXTREMELY fast on startup AND I could have more easily fixed a bug....I think the tradeoff is there
 * test converters for all cases listed in ObjectTranslator.java!!
 * test all reverse a URL paths...from redirect as well as from a page
 * add method to reverse a URL from the controller using the Action Enum
-* Make it so AFTER you hit the route, '*Managed', works and ends up in the webpage AFTER GET request is made to that url that uses the property
+* Test -> Make it so AFTER you hit the route, '*Managed', works and ends up in the webpage AFTER GET request is made to that url that uses the property
 * GET request with no url params nor query params BUT controller method DOES have params results in NotFound which is just weird!!! throw a 500 bug instead and put info in exception
-* sending in json to /json/notfound sends back html??? ick, how to get it to send json every time instead of the html not found page (I think this is Dev Server ONLY!!!)
 * Need webpieces DevServer test for modifying default argument.  It turns out, arguments are not cleared on restart and something weird goes on.
-* starting ProdServerIDE creates webpiecesCache in the wrong directory...modify that to be better location like output/** BUT for BOTH IDE's
-* create a code generate GUI
 * Do we need to file chrome ticket OR do we have cache settings wrong?  on internet outage post, user data is blown away.  we need to figure this out
 * status on https://discuss.gradle.org/t/intellij-gradle-build-vs-cmdline-build/34761 and https://intellij-support.jetbrains.com/hc/en-us/requests/2474304
 * jacoco posts upgrade to bounty...
