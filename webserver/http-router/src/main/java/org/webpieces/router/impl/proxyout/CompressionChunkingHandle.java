@@ -268,4 +268,9 @@ public class CompressionChunkingHandle implements RouterResponseHandler {
 		this.compressionOff = true;
 	}
 
+	@Override
+	public void closeSocket(String reason) {
+		handler.closeSocket(reason);
+	}
+
 }

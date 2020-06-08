@@ -3,6 +3,7 @@ package org.webpieces.webserver.impl;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.impl.ProtocolType;
 import org.webpieces.router.api.RouterResponseHandler;
@@ -65,6 +66,12 @@ public class RouterResponseHandlerImpl implements RouterResponseHandler {
 		if(stream.getSocket().getProtocol() == ProtocolType.HTTP1_1)
 			stream.getSocket().close("Connection KeepAlive not set");
 		return null;
+	}
+
+	@Override
+	public void closeSocket(String reason) {
+		FrontendSocket socket = stream.getSocket();
+		socket.close(reason);
 	}
 
 

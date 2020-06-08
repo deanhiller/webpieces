@@ -101,5 +101,10 @@ public class MockStreamHandle implements RouterResponseHandler {
 		return wasClosed;
 	}
 
+	@Override
+	public void closeSocket(String reason) {
+		throw new UnsupportedOperationException("not supported yet");
+	}
+
 	
 }

@@ -13,6 +13,12 @@ public interface RouterResponseHandler extends ResponseStreamHandle {
      * The socket has a session for storing data common among all requests of the socket
      */
     Object getSocket();
+    
+    /**
+     * Closes socket closing ALL streams that may be in process on this socket so use sparingly unless you 
+     * know what you are doing.  Prefer calling cancel to cancel the specific stream
+     */
+    public void closeSocket(String reason);
 
     Map<String, Object> getSession();
 
@@ -21,7 +27,7 @@ public interface RouterResponseHandler extends ResponseStreamHandle {
     boolean requestCameFromBackendSocket();
 
     /**
-     * Use cancel instead which for http2 cancels the single stream or shutsdown the socket depending on the
+     * Use cancel instead which for http2 cancels the single stream or closeSocket(reason) the socket depending on the
      * reason you give it.  For http1.1, cancel shutdowns the stream if the request did not have a keep alive
      * 
      * @return

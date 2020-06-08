@@ -379,4 +379,9 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		response.setEndOfStream(false); //This is for streaming so set eos=false;
 		return response;
 	}
+
+	@Override
+	public void closeSocket(String reason) {
+		handle.closeSocket(reason);
+	}
 }
