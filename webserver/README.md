@@ -16,6 +16,9 @@ ONLY THESE BIG ITEMS LEFT
    * microsvc-server project with Routes file and filter -> port work from orderly
 * Travis -> Circle CI.  do not allow build breaks
 * port newline streaming lib and json lib and file upload lib into webpieces router api
+* PLUGIN - sync with remote Docker system by linking first at https://host:port/@remote
+   * In this case, once linked, any changes to your DevServer occur in Docker container remotely in the cloud
+   * This means NO MORE 5-10 minute uploads from home
 
 * https://intellij-support.jetbrains.com/hc/en-us/requests/2671257?flash_digest=1cd06958f5f8678e6121ed726d13518a88a7b5aa&page=1
 * https://intellij-support.jetbrains.com/hc/en-us/community/posts/360008329760-Is-there-a-global-setting-for-Build-project-Automatically-and-JVM-args-like-parameters-
