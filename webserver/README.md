@@ -1,7 +1,5 @@
 # webpieces
 
-* Change red to green and then change black to red
-
 ONLY THESE BIG ITEMS LEFT
 * conversations
 * ALPN
@@ -22,6 +20,7 @@ ONLY THESE BIG ITEMS LEFT
    * In this case, once linked, any changes to your DevServer occur in Docker container remotely in the cloud
    * This means NO MORE 5-10 minute uploads from home
 
+* fix up calling Actions flash and redirect methods.  Use 'password' from the filter to ignore fields and such and make it easier.
 * https://intellij-support.jetbrains.com/hc/en-us/requests/2671257?flash_digest=1cd06958f5f8678e6121ed726d13518a88a7b5aa&page=1
 * https://intellij-support.jetbrains.com/hc/en-us/community/posts/360008329760-Is-there-a-global-setting-for-Build-project-Automatically-and-JVM-args-like-parameters-
 * Perhaps have json filter set flag for dev server to not show not found page since it's confusing?....should we return not found json?  perhaps?  Plain text would be BEST

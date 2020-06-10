@@ -132,7 +132,7 @@ public class DevelopmentController {
 			paths.add(req.method+" :https : "+req.relativePath);
 		} else {
 			paths.add(req.method+" :https : "+req.relativePath);
-			paths.add(req.method+" :http : "+req.relativePath);
+			paths.add(req.method+" :both  : "+req.relativePath);
 		}
 		
 		return Actions.renderThis("domains", routers, "paths", paths, "routeHtml", routeHtml, "error", error, "url", url);

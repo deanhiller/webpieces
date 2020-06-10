@@ -193,7 +193,7 @@ public class EScopedRouter {
 			if(entry.getKey().equals(scope)) {
 				foundScope = true;
 				//add this special one to the beginning since it's a match...
-				String newSection = spacing+"<li style=\"color:red;\">SCOPE:"+entry.getKey()+"</li>\n";
+				String newSection = spacing+"<li style=\"color:green;\">SCOPE:"+entry.getKey()+"</li>\n";
 				newSection += spacing+childRouting.buildHtml(isHttps, method, theRest, spacing+spacing);
 				html = newSection + html;
 			} else {

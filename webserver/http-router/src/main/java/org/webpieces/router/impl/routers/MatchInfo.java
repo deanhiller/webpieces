@@ -72,17 +72,17 @@ public class MatchInfo {
 		http = paddingElement+http;
 		
 		if(portMatches) {
-			http = "<span style=\"color:red;\">"+http+"</span>";
+			http = "<span style=\"color:green;\">"+http+"</span>";
 		}
 		
 		String method = httpMethod+"";
 		if(methodMatches) {
-			method = "<span style=\"color:red;\">"+method+"</span>";
+			method = "<span style=\"color:green;\">"+method+"</span>";
 		}
 		
 		String thePath = fullPath;
 		if(pathMatches) {
-			thePath = "<span style=\"color:red;\">"+thePath+"</span>";
+			thePath = "<span style=\"color:green;\">"+thePath+"</span>";
 		}
 		
 		//pad if http, but not https
