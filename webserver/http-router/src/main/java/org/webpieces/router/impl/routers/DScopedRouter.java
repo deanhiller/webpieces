@@ -84,10 +84,12 @@ public class DScopedRouter extends EScopedRouter {
 		if(t instanceof SpecificRouterInvokeException)
 			failedRoute = ((SpecificRouterInvokeException) t).getMatchInfo()+"";
 
-		log.error("There is three parts to this error message... request, route found, and the exception "
+		if(!(t instanceof SimulateInternalError)) {
+			log.error("There is three parts to this error message... request, route found, and the exception "
 				+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"
 				+ctx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", t);
-		SupressedExceptionLog.log(log, t);
+			SupressedExceptionLog.log(log, t);
+		}
 
 
 		//If it is a streaming, controller AND response has already been sent, we cannot render the web apps error controller
@@ -127,7 +129,7 @@ public class DScopedRouter extends EScopedRouter {
 		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
 		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
 		return futureHelper.catchBlockWrap(
-			() -> internalSvrErrorRouter.invokeErrorRoute(requestCtx, handler),
+			() -> internalSvrErrorRouter.invokeErrorRoute(requestCtx, handler, exc),
 			(t) -> convert(failedRoute, t)
 		);
 	}

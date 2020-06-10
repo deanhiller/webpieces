@@ -2,6 +2,8 @@
 <head>
 </head>
 <body>
+    <span style="color:red;">NOTE: This is not what users see in Production.  For that, scroll to bottom of page</span></br>
+
     You are in the WebPieces Development Server. Your request received a 404.<br/><br/>
     Your app's webpage was not found for this reason: ${error}$
     
@@ -41,11 +43,10 @@
     
     <pre><span style="line-height: 8px;">${escOff#routeHtml}$</span></pre>
     
-    TODO: Fill in the module we ended up using and the routes in that module that did not match here to make it
-    easy for the developer to see why he got a 404
     <br/>
     <br/>
-    Your app in production will look like what is in this iframe(ie. this is your production 404 page or login page if redirected due to security filter!)<br/>
+    Your app in production will look like what is in this iframe<br/>
+    (ie. this is your production 404 page!)<br/><br/>
     <iframe id="production" src="${url}$" width="100%" height="100%"></iframe>
   </body>
 </html>

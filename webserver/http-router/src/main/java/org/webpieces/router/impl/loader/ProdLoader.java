@@ -29,8 +29,7 @@ public class ProdLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 
 	@Override
-	public LoadedController loadControllerIntoMeta(Injector injector, ResolvedMethod method,
-			boolean isInitializingAllControllers) {
+	public LoadedController loadControllerIntoMeta(Injector injector, ResolvedMethod method) {
 		try {
 			return loadRouteImpl(injector, method);
 		} catch(RuntimeException e) {
@@ -41,7 +40,7 @@ public class ProdLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 
 	@Override
-	public Service<MethodMeta, Action> createServiceFromFilters(ServiceCreationInfo info, boolean isInitializingAllFilters) {
+	public Service<MethodMeta, Action> createServiceFromFilters(ServiceCreationInfo info) {
 		return super.createServiceFromFiltersImpl(info);
 	}
 

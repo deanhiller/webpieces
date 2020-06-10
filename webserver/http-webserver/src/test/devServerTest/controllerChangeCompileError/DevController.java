@@ -17,7 +17,7 @@ public class DevController {
 	}
 
 	public Action existingRoute() {
-		return Actions.renderThis();
+		return Actions.renThis();
 	}
 	
 	public Render notFound() {

@@ -56,7 +56,7 @@ public class SharedMatchUtil {
 			
 			BaseRouteInfo baseRouteInfo = new BaseRouteInfo(
 					resettingLogic.getInjector(), routerAndInfo.getRouteInfo(), routerAndInfo.getSvcProxy(), filters, routerAndInfo.getRouteType());
-			Service<MethodMeta, Action> service = holder.getFinder().loadFilters(baseRouteInfo.getFilterChainCreationInfo(), true);
+			Service<MethodMeta, Action> service = holder.getFinder().loadFilters(baseRouteInfo.getFilterChainCreationInfo());
 
 			router.setBaseRouteInfo(baseRouteInfo);
 			router.setDynamicInfo(new DynamicInfo(routerAndInfo.getMetaAndController().getLoadedController(), service));

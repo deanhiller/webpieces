@@ -120,9 +120,16 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
-		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("There was a bug in the developers application or webpieces server");
+		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture);
+		response1.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response1.assertContains("/?webpiecesShowInternalErrorPage=true"); //There should be a callback url to render what shows in production
+		
+		//callback shows the original page...
+		HttpFullRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/?webpiecesShowInternalErrorPage=true");
+		CompletableFuture<HttpFullResponse> respFuture2 = http11Socket.send(req2);
+		ResponseWrapper response2 = ResponseExtract.waitResponseAndWrap(respFuture2);
+		response2.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response2.assertContains("There was a bug in the developers application or webpieces server");
 	}
 	
 	/**
@@ -136,9 +143,17 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
-		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("There was a bug in our software...sorry about that");	
+		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture);
+		response1.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response1.assertContains("/?webpiecesShowInternalErrorPage=true"); //There should be a callback url to render what shows in production
+		
+		//callback shows the original page...
+		HttpFullRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/?webpiecesShowInternalErrorPage=true");
+		CompletableFuture<HttpFullResponse> respFuture2 = http11Socket.send(req2);
+		ResponseWrapper response2 = ResponseExtract.waitResponseAndWrap(respFuture2);
+		response2.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response2.assertContains("There was a bug in our software...sorry about that");
+		
 	}
 	
 	@Test
@@ -149,9 +164,16 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
-		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		response.assertContains("There was a bug in the developers application or webpieces server");	
+		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture);
+		response1.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response1.assertContains("/?webpiecesShowInternalErrorPage=true"); //There should be a callback url to render what shows in production
+		
+		//callback shows the original page...
+		HttpFullRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/?webpiecesShowInternalErrorPage=true");
+		CompletableFuture<HttpFullResponse> respFuture2 = http11Socket.send(req2);
+		ResponseWrapper response2 = ResponseExtract.waitResponseAndWrap(respFuture2);
+		response2.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response2.assertContains("There was a bug in the developers application or webpieces server");
 	}
 
 //	@Test

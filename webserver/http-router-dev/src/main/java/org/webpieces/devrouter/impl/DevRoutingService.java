@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.compiler.api.CompilationsException;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
@@ -71,17 +72,18 @@ public class DevRoutingService extends AbstractRouterService {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		
-		if(!reloaded)
-			reloadIfClassFilesChanged();
+		if(!reloaded) {
+			try {
+				reloadIfClassFilesChanged();
+			} catch(Throwable exc) {
+				ctx.getRequest().requestState.put(DevRouteInvoker.ERROR_KEY, exc);
+				return router.invoke(ctx, handler);
+			}
+		}
 		
 		return router.invoke(ctx, handler);
 	}
 
-	/**
-	 * Only used with DevRouterConfig which is not on classpath in prod mode
-	 * 
-	 * @return
-	 */
 	private boolean reloadIfTextFileChanged() {
 		VirtualFile metaTextFile = config.getMetaFile();
 		//if timestamp the same, no changes

@@ -1,13 +1,14 @@
 package webpiecesxxxxxpackage.web.main;
 
+import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.router.api.routes.Port.BOTH;
+import static webpiecesxxxxxpackage.web.main.MainRouteId.ASYNC_ROUTE;
+import static webpiecesxxxxxpackage.web.main.MainRouteId.MAIN_ROUTE;
+import static webpiecesxxxxxpackage.web.main.MainRouteId.SYNC_ROUTE;
+
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.Routes;
-
-import static org.webpieces.ctx.api.HttpMethod.GET;
-import static org.webpieces.ctx.api.HttpMethod.POST;
-import static org.webpieces.router.api.routes.Port.BOTH;
-import static webpiecesxxxxxpackage.web.main.MainRouteId.*;
 
 public class MainRoutes implements Routes {
 

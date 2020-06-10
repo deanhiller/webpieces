@@ -55,7 +55,7 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what
 		//he did wrong when reading the exception!!
-		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo, true);
+		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo);
 
 		MatchInfo matchInfo = createMatchInfo(p, Port.HTTPS, HttpMethod.POST, holder.getUrlEncoding());
 		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());

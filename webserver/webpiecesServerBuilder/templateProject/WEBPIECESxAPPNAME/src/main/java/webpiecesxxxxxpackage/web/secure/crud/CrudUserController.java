@@ -32,7 +32,6 @@ public class CrudUserController {
 	private static Logger log = LoggerFactory.getLogger(CrudUserController.class);
 	
 	public Action userList() {
-		
 		EntityManager mgr = Em.get();
 		Query query = mgr.createNamedQuery("findAllUsers");
 		@SuppressWarnings("unchecked")

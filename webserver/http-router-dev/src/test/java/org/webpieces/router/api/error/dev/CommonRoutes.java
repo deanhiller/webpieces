@@ -17,13 +17,13 @@ public class CommonRoutes implements Routes {
 		//We cannot do this or the compiler in dev router will compile it too early for testing
 		//String controllerName = SomeController.class.getName();
 
-		bldr.addRoute(BOTH, GET, "/user/{id}",  "org.webpieces.devrouter.api.CommonController.badRedirect", SOME_EXAMPLE);
-		bldr.addRoute(BOTH, GET, "/something",  "org.webpieces.devrouter.api.CommonController.argsMismatch", ARGS_MISMATCH);
+		bldr.addRoute(BOTH, GET, "/user/{id}",  "org.webpieces.devrouter.test.CommonController.badRedirect", SOME_EXAMPLE);
+		bldr.addRoute(BOTH, GET, "/something",  "org.webpieces.devrouter.test.CommonController.argsMismatch", ARGS_MISMATCH);
 		
 		//bldr.addRoute(BOTH, POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		
-		bldr.setPageNotFoundRoute("org.webpieces.devrouter.api.CommonController.notFound");
-		bldr.setInternalErrorRoute("org.webpieces.devrouter.api.CommonController.internalError");
+		bldr.setPageNotFoundRoute("org.webpieces.devrouter.test.CommonController.notFound");
+		bldr.setInternalErrorRoute("org.webpieces.devrouter.test.CommonController.internalError");
 	}
 
 }

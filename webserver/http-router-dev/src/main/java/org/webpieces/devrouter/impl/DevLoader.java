@@ -30,19 +30,12 @@ public class DevLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 	
 	@Override
-	public LoadedController loadControllerIntoMeta(Injector injector, ResolvedMethod method,
-			boolean isInitializingAllControllers) {
-		if(isInitializingAllControllers)
-			return null; //skip on startup
-		
+	public LoadedController loadControllerIntoMeta(Injector injector, ResolvedMethod method) {
 		return super.loadRouteImpl(injector, method);
 	}
 
 	@Override
-	public Service<MethodMeta, Action> createServiceFromFilters(ServiceCreationInfo info, boolean isInitializingAllFilters) {
-		if(isInitializingAllFilters)
-			return null; //skip on startup
-		
+	public Service<MethodMeta, Action> createServiceFromFilters(ServiceCreationInfo info) {
 		return super.createServiceFromFiltersImpl(info);
 	}
 }

@@ -1,5 +1,7 @@
 # webpieces
 
+* Change red to green and then change black to red
+
 ONLY THESE BIG ITEMS LEFT
 * conversations
 * ALPN
@@ -22,6 +24,10 @@ ONLY THESE BIG ITEMS LEFT
 
 * https://intellij-support.jetbrains.com/hc/en-us/requests/2671257?flash_digest=1cd06958f5f8678e6121ed726d13518a88a7b5aa&page=1
 * https://intellij-support.jetbrains.com/hc/en-us/community/posts/360008329760-Is-there-a-global-setting-for-Build-project-Automatically-and-JVM-args-like-parameters-
+* Perhaps have json filter set flag for dev server to not show not found page since it's confusing?....should we return not found json?  perhaps?  Plain text would be BEST
+  * OR OR we can just for ALL Content RouteType display plain text pages that tell the routes not found!!  perhaps we can ctrl escape colors and stuff too?
+* test out intellij and swapping jars....does it swap the classes in those jars or what happens?
+* refreshing DevServer internalError.html AFTER compiler error kinda sucks!! ..can we save that page somehow but it's tough in case they make changes?
 * Follow up on this post https://stackoverflow.com/questions/62246462/jacoco-not-excluding-files-and-print-not-working-in-jacocotestreport-task-to-deb
 * get rid of close connection on response handler!!
 * https://github.com/eclipse/buildship/issues/995

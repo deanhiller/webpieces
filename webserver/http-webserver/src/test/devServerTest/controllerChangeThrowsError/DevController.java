@@ -12,8 +12,7 @@ import org.webpieces.router.api.controller.actions.Render;
 public class DevController {
 
 	public Action home() {
-		String user = "CoolJeff";
-		return Actions.renderThis("user", user);
+		throw new RuntimeException("Simulated bug");
 	}
 
 	public Action existingRoute() {

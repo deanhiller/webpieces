@@ -2,8 +2,6 @@ package org.webpieces.webserver.dev.app;
 
 import javax.inject.Singleton;
 
-import javax.inject.Singleton;
-
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Render;
@@ -12,8 +10,7 @@ import org.webpieces.router.api.controller.actions.Render;
 public class DevController {
 
 	public Action home() {
-		String user = "CoolJeff";
-		return Actions.renderThis("user", user);
+		return Actions.renderThis("user", "Dean Hiller");
 	}
 
 	public Action existingRoute() {
@@ -21,7 +18,7 @@ public class DevController {
 	}
 	
 	public Render notFound() {
-		return Actions.renderThis("value", "something1");
+		return Actions.renderThis("value", "something2");
 	}
 	
 	public Action causeError() {
@@ -30,9 +27,5 @@ public class DevController {
 	
 	public Render internalError() {
 		return Actions.renderThis("error", "error1");
-	}
-	
-	public Action filter() {
-		return Actions.renderThis();
 	}
 }

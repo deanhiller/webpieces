@@ -75,7 +75,14 @@ public class ErrorCommonTest {
 		String contents = mockStream.getResponseBody();
 
 		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "500");
-		Assert.assertTrue(contents.contains("There was a bug in the developers application or webpieces server"));
+		
+		if(isProdTest) {
+			//prod template to use
+			Assert.assertTrue(contents.contains("There was a bug in the developers application or webpieces server"));
+		} else {
+			//The internalError template for DevServer should run...
+			Assert.assertTrue(contents.contains("NullTemplateApi.java is running for templatePath=org.webpieces.devrouter.impl.internalError_html"));
+		}
 		
 		//We did not send a keep alive so it should close
 		Assert.assertTrue(mockStream.isWasClosed());
@@ -104,7 +111,14 @@ public class ErrorCommonTest {
 		String contents = mockStream.getResponseBody();
 
 		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "500");
-		Assert.assertTrue(contents.contains("There was a bug in the developers application or webpieces server"));
+		
+		if(isProdTest) {
+			Assert.assertTrue(contents.contains("There was a bug in the developers application or webpieces server."));
+			
+		} else {
+			//use DevServer template
+			Assert.assertTrue(contents.contains("NullTemplateApi.java is running for templatePath=org.webpieces.devrouter.impl.internalError_html"));
+		}
 		
 		//We did send a keep alive so it should close
 		Assert.assertFalse(mockStream.isWasClosed());
@@ -135,7 +149,10 @@ public class ErrorCommonTest {
 
 	private void verifyNotFoundRendered(Http2Response response, String contents) {
 		Assert.assertEquals(response.getSingleHeaderValue(Http2HeaderName.STATUS), "404");
-		Assert.assertEquals(contents, ""); //no templating engine installed
+		if(isProdTest) //Use production notfouuud page
+			Assert.assertEquals(contents, "NullTemplateApi.java is running for templatePath=org.webpieces.devrouter.test.notFound_html"); //no templating engine installed
+		else //Use DevServer not foud page
+			Assert.assertEquals(contents, "NullTemplateApi.java is running for templatePath=org.webpieces.devrouter.impl.notFound_html"); //no templating engine installed
 	}
 	
 	@Test

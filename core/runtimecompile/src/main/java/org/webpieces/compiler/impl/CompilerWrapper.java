@@ -232,20 +232,25 @@ public class CompilerWrapper {
                     CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
                     VirtualFile javaFile = applicationClass.javaFile;
                     
-                    fullMessage += "Class could not compile:"+className+"   File="+javaFile.getCanonicalPath()+"\n";
-                    fullMessage += "Source line number:"+problem.getSourceLineNumber()+"  sourceStartColumn:"+problem.getSourceStart()+" sourceEndColumn:"+problem.getSourceEnd()+"\n";
+                    fullMessage += "\n\nClass could not compile:"+className+"\nFile="+javaFile.getCanonicalPath()+"\n";
 
                     String message;
                     if (problem.getID() == IProblem.CannotImportPackage) {
                         // Non sense !
-                        message = "Problem with class:"+className+"! Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.\n";
-                        fullMessage += "Compiler Issue Import: Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.\n\n";
+                        fullMessage += "\nCompiler Issue Import: Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.\n\n";
+                        message = "Problem with class: "+className+"! Class not on your RuntimeClasspath: "+problem.getArguments()[0] + " cannot be resolved.  Remove the import.\n";
                     } else {
-                    	fullMessage += "Compiler Issue:" + problem.getMessage()+"\n\n";
-                    	message = "Problem with class:"+className+"!  Issue:"+problem.getMessage()+"\n";
+                    	fullMessage += "\nCompiler Issue: " + problem.getMessage()+"\n\n";
+                    	message = "Problem with class:"+className+"!  Issue: "+problem.getMessage()+"\n";
                     }
                     
-                    compileErrors.add(new CompileError(javaFile, config.getFileEncoding(), message, problem));
+                    CompileError compileError = new CompileError(javaFile, className, config.getFileEncoding(), message, problem);
+                    for(String line : compileError.getBadSourceLine()) {
+                    	fullMessage += "    "+line+"\n";
+                    }
+                    fullMessage += "\n";
+                    
+                    compileErrors.add(compileError);
                 }
                 
                 throw new CompilationsException(compileErrors, fullMessage);

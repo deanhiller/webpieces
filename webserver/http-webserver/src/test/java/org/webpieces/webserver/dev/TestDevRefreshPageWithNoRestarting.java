@@ -125,6 +125,52 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	}
 
 	@Test
+	public void testJustControllerChangedToHaveBug() throws IOException {
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+		verifyPageContents(respFuture1, "user=Dean Hiller");
+		
+		simulateDeveloperMakesChanges("src/test/devServerTest/controllerChangeThrowsError");
+		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		
+		response.assertContains("You are in the WebPieces Development Server. You appear to have a bug in your application.");
+
+		//response contains exception message
+		response.assertContains("Simulated bug");
+		
+		
+		//Encountered a bug and we can show what would have been shown in production...
+		response.assertContains("Your app in production will look like what is in this iframe");
+		response.assertContains("/home?webpiecesShowInternalErrorPage=true");
+	}
+	
+	@Test
+	public void testJustControllerChangedToCompileError() throws IOException {
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+		verifyPageContents(respFuture1, "user=Dean Hiller");
+		
+		simulateDeveloperMakesChanges("src/test/devServerTest/controllerChangeCompileError");
+		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		
+		response.assertContains("You are in the WebPieces Development Server. You appear to have a bug in your application.");
+		
+		//Encountered a bug that can't happen in production as prod server won't even start...
+		response.assertContains("The above looks like an issue that cannot happen in production so we can't display a production page here");
+		
+		//showing the compile error
+		response.assertContains("<span style=\"color:red;\">renThis</span>");
+	}
+	
+	@Test
 	public void testRouteAdditionWithNewControllerPath() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/newroute");
 		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
@@ -194,6 +240,25 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	}
 
 	@Test
+	public void testNotFoundRouteModifiedAndControllerModifiedAndInvalidRoute() throws IOException {
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotfound?webpiecesShowPage=true");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+		verify404PageContents(respFuture1, "value1=something1");
+		
+		simulateDeveloperMakesChanges("src/test/devServerTest/notFoundNewInvalidRoute");
+		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		
+		response.assertContains("You are in the WebPieces Development Server. You appear to have a bug in your application.");
+		
+		//Encountered a bug that can't happen in production as prod server won't even start...
+		response.assertContains("The above looks like an issue that cannot happen in production so we can't display a production page here");
+	}
+	
+	@Test
 	public void testNotFoundFilterModified() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/enableFilter?webpiecesShowPage=true");
 		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
@@ -207,6 +272,26 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		verify303(respFuture, "http://myhost.com/filter");
 	}
 
+	@Test
+	public void testNotFoundFilterModifiedAndInvalidRoute() throws IOException {
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/enableFilter?webpiecesShowPage=true");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+
+		verify303(respFuture1, "http://myhost.com/home");
+		
+		simulateDeveloperMakesChanges("src/test/devServerTest/notFoundNewInvalidRoute");
+		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		
+		response.assertContains("You are in the WebPieces Development Server. You appear to have a bug in your application.");
+		
+		//Encountered a bug that can't happen in production as prod server won't even start...
+		response.assertContains("The above looks like an issue that cannot happen in production so we can't display a production page here");
+	}
+
 	private void verify303(CompletableFuture<HttpFullResponse> respFuture, String url) {
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -215,14 +300,30 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testInternalErrorModifiedAndControllerModified() throws IOException {
-		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/causeError");
-		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
-		verify500PageContents(respFuture1, "InternalError1=error1");
+		HttpFullRequest req1 = Requests.createRequest(KnownHttpMethod.GET, "/causeError");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
 		
+		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
+		response1.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response1.assertContains("/causeError?webpiecesShowInternalErrorPage=true"); //There should be a callback url to render what shows in production
+		
+		HttpFullRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/causeError?webpiecesShowInternalErrorPage=true");
+		CompletableFuture<HttpFullResponse> respFuture2 = http11Socket.send(req2);
+		ResponseWrapper response2 = ResponseExtract.waitResponseAndWrap(respFuture2);
+		response2.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response2.assertContains("InternalError1=error1");
+				
 		simulateDeveloperMakesChanges("src/test/devServerTest/internalError");
-		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
-		verify500PageContents(respFuture, "InternalError2=error2");		
+
+		CompletableFuture<HttpFullResponse> respFuture3 = http11Socket.send(req1);
+		ResponseWrapper response3 = ResponseExtract.waitResponseAndWrap(respFuture3);
+		response3.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response3.assertContains("/causeError?webpiecesShowInternalErrorPage=true"); //There should be a callback url to render what shows in production		
+
+		CompletableFuture<HttpFullResponse> respFuture4 = http11Socket.send(req2);
+		ResponseWrapper response4 = ResponseExtract.waitResponseAndWrap(respFuture4);
+		response4.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response4.assertContains("InternalError2=error2");
 	}
 	
 	private void simulateDeveloperMakesChanges(String directory) throws IOException {
@@ -239,12 +340,6 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	private void verify404PageContents(CompletableFuture<HttpFullResponse> respFuture, String contents) {
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		response.assertContains(contents);
-	}
-	
-	private void verify500PageContents(CompletableFuture<HttpFullResponse> respFuture, String contents) {
-		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
-		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains(contents);
 	}
 	

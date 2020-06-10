@@ -83,7 +83,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		
 		//MUST DO loadController HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		this.notFoundControllerInst = holder.getFinder().loadNotFoundController(resettingLogic.getInjector(), route, true);
+		this.notFoundControllerInst = holder.getFinder().loadNotFoundController(resettingLogic.getInjector(), route);
 		this.pageNotFoundInfo = route;
 	}
 
@@ -96,7 +96,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		
 		//MUST DO loadController HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		this.internalErrorController = holder.getFinder().loadErrorController(resettingLogic.getInjector(), route, true);
+		this.internalErrorController = holder.getFinder().loadErrorController(resettingLogic.getInjector(), route);
 		this.internalErrorInfo = route;
 	}
 
@@ -121,10 +121,10 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 				svcProxy, internalErrorFilters,
 				RouteType.INTERNAL_SERVER_ERROR);
 
-		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorRoute.getFilterChainCreationInfo(), true);
+		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorRoute.getFilterChainCreationInfo());
 		EInternalErrorRouter internalErrorRouter = new EInternalErrorRouter(holder.getRouteInvoker2(), internalErrorRoute, internalErrorController, svc);
 
-		Service<MethodMeta, Action> notFoundSvc = holder.getFinder().loadFilters(notFoundRoute.getFilterChainCreationInfo(), true);
+		Service<MethodMeta, Action> notFoundSvc = holder.getFinder().loadFilters(notFoundRoute.getFilterChainCreationInfo());
 		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst, notFoundSvc);
 	
 		return new DScopedRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter, routerFutures, futureUtil);

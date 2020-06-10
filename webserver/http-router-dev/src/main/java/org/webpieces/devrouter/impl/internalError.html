@@ -1,0 +1,45 @@
+<html>
+<head>
+</head>
+<body>
+    <span style="color:red;">NOTE: This is not what users see in Production.  For that, scroll to bottom of page</span><br/>
+
+    You are in the WebPieces Development Server. You appear to have a bug in your application.<br/>
+    
+    <ul>
+        <li><a href="#routes">Details on your bug</a></li>
+        <li><a href="#production">What your webpage looks like in Production</a></li>
+    </ul>
+
+    <h1 id="routes">Exception</h1>
+
+    #{if compileErrors}#
+    <h2>Compile Errors</h2>
+
+    Your code is currently not compiling so fix the compile errors first:
+
+    <pre><span>${escOff#compileErrors}$</span></pre>
+    
+    #{/if}#
+    
+    <h2>Stack Trace</h2>
+        
+    <pre><span>${escOff#exception}$</span></pre>
+    
+    <br/>
+    <br/>
+    
+    <h2>Production Page</h2>
+    #{if url}#
+    Your app in production will look like what is in this iframe<br/>
+    (ie. this is your production Internal Error page!)<br/><br/>
+    
+
+    <iframe id="production" src="${url}$" width="100%" height="100%"></iframe>
+    #{/if}#
+    #{else}#
+        <span id="production" style="color:red;">The above looks like an issue that cannot happen in production so we can't display a production page here</span>
+    #{/else}# 
+    
+  </body>
+</html>

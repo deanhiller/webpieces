@@ -10,7 +10,7 @@ import java.util.Set;
 public class NullTemplateApi implements TemplateApi {
     @Override
     public void loadAndRunTemplate(String templatePath, StringWriter out, Map<String, Object> pageArgs) {
-
+    	out.append("NullTemplateApi.java is running for templatePath="+templatePath);
     }
 
     @Override

@@ -81,7 +81,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo, true);
+		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
@@ -107,7 +107,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		MethodMetaAndController container = holder.getFinder().loadGenericController(resettingLogic.getInjector(), routeInfo, true);
+		MethodMetaAndController container = holder.getFinder().loadGenericController(resettingLogic.getInjector(), routeInfo);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		FStreamingRouter router = new FStreamingRouter(holder.getRouteInvoker2(), matchInfo);
@@ -148,7 +148,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 
 		//MUST DO loadControllerIntoMetat HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		MethodMetaAndController metaAndController = holder.getFinder().loadHtmlController(resettingLogic.getInjector(), routeInfo, true, isPostOnly);
+		MethodMetaAndController metaAndController = holder.getFinder().loadHtmlController(resettingLogic.getInjector(), routeInfo, isPostOnly);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		FHtmlRouter router = new FHtmlRouter(holder.getRouteInvoker2(), matchInfo, checkToken);	

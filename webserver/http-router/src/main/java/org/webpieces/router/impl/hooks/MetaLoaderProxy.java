@@ -10,9 +10,8 @@ import com.google.inject.Injector;
 
 public interface MetaLoaderProxy {
 
-	LoadedController loadControllerIntoMeta(Injector injector, ResolvedMethod method,
-			boolean isInitializingAllControllers);
+	LoadedController loadControllerIntoMeta(Injector injector, ResolvedMethod method);
 
-	Service<MethodMeta, Action> createServiceFromFilters(ServiceCreationInfo info, boolean isInitializingAllFilters);
+	Service<MethodMeta, Action> createServiceFromFilters(ServiceCreationInfo info);
 
 }

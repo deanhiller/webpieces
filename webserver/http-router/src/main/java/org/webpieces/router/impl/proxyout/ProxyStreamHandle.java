@@ -227,11 +227,11 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 						+ "  <body>"
 						+ "      There was a bug in the developers application or webpieces server.  Contact website owner with a screen shot of this page."
 						+ "      <br/><br/>"
-						+ "      This page shows up for one of two reasons.  In both cases, we first ran into a bug in the webapplication typically"
+						+ "      This page shows up for one of a few reasons.  In most cases, your app had a bug, then internal error had a bug too(you have two bugs to fix)"
 						+ "      <ol>"
-						+ "         <li>Webpieces simply had a bug where it did not call the webapp developers internal error controller OR</li>"
 						+ "         <li>The app's error controller failed</li>"
 						+ "         <li>IF you are running DevelopmentServer.java(hot recompile), you may have a bug in your Routers preventing loading of all plugins and controllers(compiler error, etc.)</li>"
+						+ "         <li>Webpieces simply had a bug where it did not call the webapp developers internal error controller OR</li>"						
 						+ "      </ol>"
 						+ "  </body>"
 						+ "</html>";

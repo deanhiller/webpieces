@@ -28,4 +28,8 @@ public class DevController {
 	public Render internalError() {
 		return Actions.renderThis("error", "error2");
 	}
+	
+	public Action filter() {
+		return Actions.renderThis();
+	}
 }

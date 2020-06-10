@@ -1,5 +1,6 @@
 package org.webpieces.router.impl.loader;
 
+
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -40,19 +41,15 @@ public class ControllerLoader {
 		this.binderChecker = binderChecker;
 	}
 
-	public LoadedController loadNotFoundController(Injector injector, RouteInfo route, boolean isInitializingAllControllers) {
-		LoadedController loadedController = loadGenericController(injector, route, isInitializingAllControllers).getLoadedController();
-		if(loadedController != null) {
-			preconditionCheckForErrorRoute(loadedController);
-		}
+	public LoadedController loadNotFoundController(Injector injector, RouteInfo route) {
+		LoadedController loadedController = loadGenericController(injector, route).getLoadedController();
+		preconditionCheckForErrorRoute(loadedController);
 		return loadedController;
 	}
 	
-	public LoadedController loadErrorController(Injector injector, RouteInfo route, boolean isInitializingAllControllers) {
-		LoadedController loadedController = loadGenericController(injector, route, isInitializingAllControllers).getLoadedController();
-		if(loadedController != null) {
-			preconditionCheckForErrorRoute(loadedController);
-		}
+	public LoadedController loadErrorController(Injector injector, RouteInfo route) {
+		LoadedController loadedController = loadGenericController(injector, route).getLoadedController();
+		preconditionCheckForErrorRoute(loadedController);
 		return loadedController;
 	}
 
@@ -75,20 +72,19 @@ public class ControllerLoader {
 			throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'CompletableFuture<Render>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 	}
 	
-	public BinderAndLoader loadContentController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers) {
-		MethodMetaAndController mAndC = loadGenericController(injector, routeInfo, isInitializingAllControllers);
+	public BinderAndLoader loadContentController(Injector injector, RouteInfo routeInfo) {
+		MethodMetaAndController mAndC = loadGenericController(injector, routeInfo);
 		BodyContentBinder binder = null;
 		LoadedController loadedController = mAndC.getLoadedController();
-		if(loadedController != null)
-			binder = binderChecker.contentPreconditionCheck(injector, routeInfo, loadedController.getControllerMethod(), loadedController.getParameters());
+		
+		binder = binderChecker.contentPreconditionCheck(injector, routeInfo, loadedController.getControllerMethod(), loadedController.getParameters());
 
 		return new BinderAndLoader(mAndC, binder);
 	}
 	
-	public MethodMetaAndController loadHtmlController(Injector injector, RouteInfo routeInfo, boolean isInitializingAllControllers, boolean isPostOnly) {
-		MethodMetaAndController mAndC = loadGenericController(injector, routeInfo, isInitializingAllControllers);
-		if(mAndC.getLoadedController() != null)
-			htmlPreconditionCheck(routeInfo, mAndC.getLoadedController().getControllerMethod(), isPostOnly);
+	public MethodMetaAndController loadHtmlController(Injector injector, RouteInfo routeInfo, boolean isPostOnly) {
+		MethodMetaAndController mAndC = loadGenericController(injector, routeInfo);
+		htmlPreconditionCheck(routeInfo, mAndC.getLoadedController().getControllerMethod(), isPostOnly);
 		return mAndC;
 	}
 	
@@ -96,15 +92,15 @@ public class ControllerLoader {
 	 * isInitializingAllControllers is true if in process of initializing ALL controllers and false if just being called to
 	 * initialize on controller(which is done only in the DevServer)
 	 */
-	public MethodMetaAndController loadGenericController(Injector injector, RouteInfo base, boolean isInitializingAllControllers) {
+	public MethodMetaAndController loadGenericController(Injector injector, RouteInfo base) {
 		ResolvedMethod method = resolver.resolveControllerClassAndMethod(base);
-		LoadedController loadedController = loader.loadControllerIntoMeta(injector, method, isInitializingAllControllers);
+		LoadedController loadedController = loader.loadControllerIntoMeta(injector, method);
 		return new MethodMetaAndController(method, loadedController);
 	}
 	
-	public Service<MethodMeta, Action> loadFilters(FilterCreationMeta neededData, boolean isInitializingAllFilters) {
+	public Service<MethodMeta, Action> loadFilters(FilterCreationMeta neededData) {
 		ServiceCreationInfo info = new ServiceCreationInfo(neededData.getInjector(), neededData.getService(), neededData.getFilters());
-		return loader.createServiceFromFilters(info, isInitializingAllFilters);
+		return loader.createServiceFromFilters(info);
 	}
 
 	private void htmlPreconditionCheck(Object meta, Method controllerMethod, boolean isPostOnly) {
