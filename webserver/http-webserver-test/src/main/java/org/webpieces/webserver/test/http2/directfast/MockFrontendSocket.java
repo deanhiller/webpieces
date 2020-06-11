@@ -8,6 +8,12 @@ import org.webpieces.nio.api.channels.ChannelSession;
 
 public class MockFrontendSocket implements FrontendSocket {
 
+	private boolean isHttps;
+
+	public MockFrontendSocket(boolean isHttps) {
+		this.isHttps = isHttps;
+	}
+	
 	@Override
 	public void close(String reason) {
 		// TODO Auto-generated method stub
@@ -28,8 +34,7 @@ public class MockFrontendSocket implements FrontendSocket {
 
 	@Override
 	public boolean isForServingHttpsPages() {
-		// TODO Auto-generated method stub
-		return false;
+		return isHttps;
 	}
 
 	@Override

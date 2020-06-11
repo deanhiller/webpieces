@@ -14,13 +14,12 @@ import com.webpieces.http2.api.streaming.RequestStreamHandle;
 
 public class MockHttp2Socket implements Http2Socket {
 
-	private boolean isHttps;
 	private StreamListener streamListener;
-	private MockFrontendSocket frontendSocket = new MockFrontendSocket();
+	private MockFrontendSocket frontendSocket;
 
 	public MockHttp2Socket(StreamListener streamListener, boolean isHttps) {
 		this.streamListener = streamListener;
-		this.isHttps = isHttps;
+		frontendSocket = new MockFrontendSocket(isHttps);
 	}
 
 	@Override
@@ -35,6 +34,13 @@ public class MockHttp2Socket implements Http2Socket {
 
 	@Override
 	public RequestStreamHandle openStream() {
+		if(streamListener == null) {
+			String protocol = "http";
+			if(frontendSocket.isForServingHttpsPages())
+				protocol = "https";
+			throw new IllegalStateException("Your arguments on webpieces startup told us not to bind a server for protocol="+protocol);
+		}
+		
 		HttpStream stream = streamListener.openStream(frontendSocket);
 		return new ProxyRequestStreamHandle(stream, frontendSocket);
 	}
