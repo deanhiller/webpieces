@@ -45,7 +45,7 @@ public class ProxyHttpStream implements HttpStream {
 		//waste CPU on a client stream coming in
 		CompletableFuture<ProxyWriter> futureWriter = new CompletableFuture<>();
 		
-		ProxyResponseStream proxy = new ProxyResponseStream(stream, futureWriter);
+		ProxyResponseStream proxy = new ProxyResponseStream(request, stream, futureWriter);
 		StreamRef streamRef = openStream.incomingRequest(request, proxy);
 
 		CompletableFuture<StreamWriter> writer = future.thenCompose(w -> {
@@ -67,8 +67,10 @@ public class ProxyHttpStream implements HttpStream {
 
 		private ResponseStream stream;
 		private CompletableFuture<ProxyWriter> futureWriter;
+		private Http2Request request;
 
-		public ProxyResponseStream(ResponseStream stream, CompletableFuture<ProxyWriter> futureWriter) {
+		public ProxyResponseStream(Http2Request request, ResponseStream stream, CompletableFuture<ProxyWriter> futureWriter) {
+			this.request = request;
 			this.stream = stream;
 			this.futureWriter = futureWriter;
 		}
@@ -83,9 +85,20 @@ public class ProxyHttpStream implements HttpStream {
 
 		public CompletableFuture<StreamWriter> process(Http2Response response) {
 			//if is end of stream, we don't need any more data from client so backpressure the client
-			if(response.isEndOfStream()) {
-				futureWriter.thenApply( p -> p.turnOnBackpressure());
-			}
+			//This did not work
+			//Need test case BUT until then orderly/java/servers/proxy-svc STOPS working on just doing
+			//curl --proxy http://localhost:3128 https://caredash.com 
+			//though I am not sure why this is the case.  I am not sure why turning off reading is not ok since response is complete and sent
+			//NOTE: It is mostly on a response of 301 Moved Permanently response with content length 0 btw!
+//			if(response.isEndOfStream()) {
+//				String conn = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
+//				if("keep-alive".equals(conn)) {
+//					log.info("response end of stream, but is a keep alive connection so no need to turn off reads");
+//				} else {
+//					log.info("response="+response+" is end of stream and keep-alive not set so turn backpressure on to not read");
+//					futureWriter.thenApply( p -> p.turnOnBackpressure());
+//				}
+//			}
 			
 			return stream.process(response);
 		}
@@ -142,7 +155,7 @@ public class ProxyHttpStream implements HttpStream {
 		@Override
 		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			if(backPressure) {
-				log.info("Backpressure on, NOT consuming this data on purpose so socket will deregister.  This is to avoid wasted CPU on data you don't plan on consuming.");
+				log.info("Backpressure on222, NOT consuming this data on purpose so socket will deregister.  This is to avoid wasted CPU on data you don't plan on consuming.");
 				return new CompletableFuture<Void>(); //unresolved future will kcik in backpressure AND CPU will stop being used on deregister socket
 			}
 			return writer.processPiece(data);
