@@ -1,18 +1,25 @@
 package org.webpieces.router.impl.routebldr;
 
+import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.FilterPortType;
 import org.webpieces.router.api.routes.MethodMeta;
+import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.RouterFutureUtil;
+import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
@@ -22,7 +29,13 @@ import org.webpieces.router.impl.routers.DScopedRouter;
 import org.webpieces.router.impl.routers.EInternalErrorRouter;
 import org.webpieces.router.impl.routers.ENotFoundRouter;
 import org.webpieces.router.impl.routers.EScopedRouter;
+import org.webpieces.router.impl.routers.FStaticRouter;
+import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
+import org.webpieces.util.file.FileFactory;
+import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
@@ -33,6 +46,8 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	private List<FilterInfo<?>> routeFilters = new ArrayList<>();
 	private List<FilterInfo<?>> notFoundFilters = new ArrayList<>();
 	private List<FilterInfo<?>> internalErrorFilters = new ArrayList<>();
+
+	private final List<FStaticRouter> staticRouters = new ArrayList<>();
 
 	private RouteInfo pageNotFoundInfo;
 	private RouteInfo internalErrorInfo;
@@ -100,6 +115,98 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		this.internalErrorInfo = route;
 	}
 
+	@Override
+	public void addStaticDir(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		if(!urlPath.endsWith("/"))
+			throw new IllegalArgumentException("Static directory so urlPath must end with a /");
+		addStaticRoute(port, urlPath, fileSystemPath, isOnClassPath);
+	}
+
+	@Override
+	public void addStaticFile(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		if(urlPath.endsWith("/"))
+			throw new IllegalArgumentException("Static file so urlPath must NOT end with a /");
+		addStaticRoute(port, urlPath, fileSystemPath, isOnClassPath);
+	}
+	
+	private void addStaticRoute(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		if(!urlPath.startsWith("/"))
+			throw new IllegalArgumentException("static resource url paths must start with / path="+urlPath);
+		
+		if(isOnClassPath)
+			addStaticClasspathFile(port, urlPath, fileSystemPath);
+		else
+			addStaticLocalFile(port, urlPath, fileSystemPath);
+	}
+	
+	private void addStaticClasspathFile(Port port, String urlSubPath, String fileSystemPath) {
+		if(!fileSystemPath.startsWith("/"))
+			throw new IllegalArgumentException("Classpath resources must start with a / and be absolute on the classpath");
+		
+		boolean isDirectory = fileSystemPath.endsWith("/");
+		VirtualFile file = new VirtualFileClasspath(fileSystemPath, getClass(), isDirectory);
+		
+		UrlPath p = new UrlPath(routerInfo, urlSubPath);
+
+		//we can only verify files, not directories :(
+		if(!isDirectory && !file.exists())
+			throw new IllegalArgumentException("Static File="+file.getCanonicalPath()+" does not exist. fileSysPath="+file+" abs="+file.getAbsolutePath());
+
+		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, true);
+	}
+	private void addStaticLocalFile(Port port, String path, String fileSystemPath) {
+		if(fileSystemPath.startsWith("/"))
+			throw new IllegalArgumentException("Absolute file system path is not supported as it is not portable across OS when done wrong.  Override the modules working directory instead");
+		
+		File workingDir = holder.getConfig().getWorkingDirectory();
+		VirtualFile file = VirtualFileFactory.newFile(workingDir, fileSystemPath);
+		UrlPath p = new UrlPath(routerInfo, path);
+		
+		if(!file.exists())
+			throw new IllegalArgumentException("Static File="+file.getCanonicalPath()+" does not exist. fileSysPath="+file+" abs="+file.getAbsolutePath());
+
+		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, false);
+	}
+	
+	private void createStaticRouter(UrlPath urlPath, Port exposedPort, HttpMethod httpMethod, Charset urlEncoding, VirtualFile file, boolean isOnClassPath) {
+
+		String urlSubPath = urlPath.getSubPath();
+		List<String> pathParamNames = new ArrayList<>();
+		Pattern patternToMatch;
+		boolean isFile;
+		if(isDirectory(urlSubPath)) {
+			if(!file.isDirectory())
+				throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
+			else if(!file.isDirectory())
+				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a directory and must be for static directories");
+			patternToMatch = Pattern.compile("^"+urlSubPath+"(?<resource>.*)$");
+			pathParamNames.add("resource");
+			isFile = false;
+		} else {
+			if(file.isDirectory())
+				throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
+			else if(!file.isFile())
+				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a file and must be for static file route");
+			patternToMatch = Pattern.compile("^"+urlSubPath+"$");
+			isFile = true;
+		}		
+		
+		MatchInfo matchInfo = new MatchInfo(urlPath, exposedPort, httpMethod, urlEncoding, patternToMatch, pathParamNames);
+		String relativePath = urlSubPath.substring(1);
+		File targetCacheLocation = FileFactory.newFile(holder.getCachedCompressedDirectory(), relativePath);
+		FStaticRouter router = new FStaticRouter(holder.getRouteInvoker2(), matchInfo, file, isOnClassPath, targetCacheLocation, isFile);
+		staticRouters.add(router);
+		log.info("scope:'"+routerInfo+"' added route="+matchInfo+" fileSystemPath="+file);
+	}
+	
+	private boolean isDirectory(String urlSubPath) {
+		return urlSubPath.endsWith("/");
+	}
+	
+	public Collection<? extends FStaticRouter> getStaticRoutes() {
+		return staticRouters;
+	}
+	
 	public DScopedRouter buildRouter() {
 		if(pageNotFoundInfo == null)
 			throw new IllegalStateException("Client did not call setPageNotFoundRoute for router="+routerInfo+" and that's required to catch stray not founds");
@@ -107,6 +214,10 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 			throw new IllegalStateException("Client did not call setInternalErrorRoute for router="+routerInfo+" and that's required to catch stray bugs in your application");
 		
 		List<AbstractRouter> routers = super.buildRoutes(routeFilters);
+		
+		//static routes get cached in browser typically so add them last so dynamic routes which are not cached are 
+		//pattern matched first and we don't waste loop matching static routes
+		routers.addAll(staticRouters);
 
 		Map<String, EScopedRouter> pathToRouter = buildScopedRouters(routeFilters);
 

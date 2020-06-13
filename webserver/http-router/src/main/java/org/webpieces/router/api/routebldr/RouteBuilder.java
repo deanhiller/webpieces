@@ -1,6 +1,7 @@
 package org.webpieces.router.api.routebldr;
 
 import org.webpieces.router.api.routes.FilterPortType;
+import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteFilter;
 
 public interface RouteBuilder extends ScopedRouteBuilder {
@@ -33,6 +34,20 @@ public interface RouteBuilder extends ScopedRouteBuilder {
 	 * controller method
 	 */
 	<T> void addInternalErrorFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, FilterPortType type, int filterApplyLevel);
+	
+	/**
+	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in
+	 * hopes that it performs better AND asyncrhonously read such that thread goes and does other 
+	 * work until the completionListener callback using AsynchronousFileChannel
+	 */
+	void addStaticDir(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath);
+
+	/**
+	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in
+	 * hopes that it performs better AND asyncrhonously read such that thread goes and does other 
+	 * work until the completionListener callback using AsynchronousFileChannel
+	 */
+	void addStaticFile(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath);
 	
 	/**
 	 * This is the controller for 404's where the path was not found AND this MUST be set

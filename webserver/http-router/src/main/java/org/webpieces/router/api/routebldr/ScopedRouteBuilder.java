@@ -42,20 +42,6 @@ public interface ScopedRouteBuilder {
 	void addStreamRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId);
 
 	void addCrud(Port port, String entity, String controller, CrudRouteIds routeIds);
-
-	/**
-	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in
-	 * hopes that it performs better AND asyncrhonously read such that thread goes and does other 
-	 * work until the completionListener callback using AsynchronousFileChannel
-	 */
-	void addStaticDir(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath);
-
-	/**
-	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in
-	 * hopes that it performs better AND asyncrhonously read such that thread goes and does other 
-	 * work until the completionListener callback using AsynchronousFileChannel
-	 */
-	void addStaticFile(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath);
 	
 	/**
 	 * Any routes added to this, first match the prefix of the url to path 
