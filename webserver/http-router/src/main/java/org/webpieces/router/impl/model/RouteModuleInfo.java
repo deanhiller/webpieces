@@ -5,15 +5,26 @@ import org.webpieces.router.api.routes.Routes;
 
 public class RouteModuleInfo {
 
-	public String packageName;
-	public String i18nBundleName;
+	private String packageName;
+	private String i18nBundleName;
 
 	public RouteModuleInfo(Class<?> moduleClazz) {
 		if(!Routes.class.isAssignableFrom(moduleClazz) &&
 				!BasicRoutes.class.isAssignableFrom(moduleClazz))
 				throw new IllegalArgumentException("Must be of type Routes.class or BasicRoutes.class");
-		this.packageName = getPackage(moduleClazz);
-		this.i18nBundleName = getI18nBundleName(moduleClazz);
+		
+		int lastIndexOf1 = moduleClazz.getName().lastIndexOf(".");
+		this.packageName = moduleClazz.getName().substring(0, lastIndexOf1);
+		
+		String name = moduleClazz.getName();
+		int lastIndexOf = name.lastIndexOf(".");
+		if(lastIndexOf < 0) {
+			packageName = "messages";
+			return;
+		}
+		
+		String packageName = name.substring(0, lastIndexOf);
+		this.i18nBundleName = packageName+".messages";
 	}
 	
 	public RouteModuleInfo(String packageName, String i18n) {
@@ -21,25 +32,12 @@ public class RouteModuleInfo {
 		this.i18nBundleName = i18n;		
 	}
 
-	/**
-	 * This is the bundle name as in something like org.webpieces.messages where
-	 * that will use org/webpieces/messages.properties on the classpath for the default
-	 * locale or another messages file for another language
-	 * @param module 
-	 */
-	public String getI18nBundleName(Class<?> clazz) {
-		String name = clazz.getName();
-		int lastIndexOf = name.lastIndexOf(".");
-		if(lastIndexOf < 0)
-			return "messages";
-		
-		String packageName = name.substring(0, lastIndexOf);
-		return packageName+".messages";
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public String getI18nBundleName() {
+		return i18nBundleName;
 	}
 	
-	private String getPackage(Class<?> clazz) {
-		int lastIndexOf = clazz.getName().lastIndexOf(".");
-		String pkgName = clazz.getName().substring(0, lastIndexOf);
-		return pkgName;
-	}
 }

@@ -8,6 +8,11 @@ public class InvokeInfo {
 	private final BaseRouteInfo route;
 	private final RequestContext requestCtx;
 	private ProxyStreamHandle handler;
+	
+	/**
+	 * @deprecated Use routeType == RouteType.CONTENT instead!!
+	 */
+	@Deprecated
 	private boolean hasBodyContentBinder;
 
 	public InvokeInfo(BaseRouteInfo route, RequestContext ctx, ProxyStreamHandle handler, boolean hasBodyContentBinder) {
@@ -29,6 +34,10 @@ public class InvokeInfo {
 		return handler;
 	}
 
+	/**
+	 * @deprecated Use routeType == RouteType.CONTENT instead!!
+	 */
+	@Deprecated
 	public boolean isHasBodyContentBinder() {
 		return hasBodyContentBinder;
 	}

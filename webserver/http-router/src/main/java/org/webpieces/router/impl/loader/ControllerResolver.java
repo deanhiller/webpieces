@@ -34,11 +34,11 @@ public class ControllerResolver {
 			controllerStr = controllerStr.substring(1);
 		} else if(controllerStr.contains("/")) {
 			//relative reference is annoying but easier for users..(and more concise..
-			controllerStr = ClassUtil.translate(moduleInfo.packageName, controllerStr);
+			controllerStr = ClassUtil.translate(moduleInfo.getPackageName(), controllerStr);
 		} else {
 			//finally for Controllers in the same package as the router, it makes the 
 			//Controller.method really concise...
-			controllerStr = moduleInfo.packageName+"."+controllerStr;
+			controllerStr = moduleInfo.getPackageName()+"."+controllerStr;
 		}
 		
 		ResolvedMethod method = new ResolvedMethod(controllerStr, methodStr);

@@ -220,7 +220,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		if(service == null)
 			throw new IllegalStateException("Bug, service should never be null at this point");
 		
-		Messages messages = new Messages(route.getRouteModuleInfo().i18nBundleName, "webpieces");
+		Messages messages = new Messages(route.getRouteModuleInfo().getI18nBundleName(), "webpieces");
 		requestCtx.setMessages(messages);
 
 		Current.setContext(requestCtx);
