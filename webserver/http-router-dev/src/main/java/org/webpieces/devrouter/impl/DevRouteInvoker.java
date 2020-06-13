@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.compiler.api.CompilationsException;
 import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
@@ -39,6 +39,7 @@ import org.webpieces.util.futures.FutureHelper;
 import com.google.inject.Injector;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
+@Singleton
 public class DevRouteInvoker extends AbstractRouteInvoker {
 	private static final Logger log = LoggerFactory.getLogger(DevRouteInvoker.class);
 

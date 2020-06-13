@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webpieces.http2.api.dto.lowlevel.StatusCode;
 
+@Singleton
 public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	private static final Logger log = LoggerFactory.getLogger(JacksonCatchAllFilter.class);

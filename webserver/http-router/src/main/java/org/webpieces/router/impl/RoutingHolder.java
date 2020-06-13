@@ -1,8 +1,11 @@
 package org.webpieces.router.impl;
 
+import javax.inject.Singleton;
+
 import org.webpieces.router.api.plugins.ReverseRouteLookup;
 import org.webpieces.router.impl.routers.BRouter;
 
+@Singleton
 public class RoutingHolder {
 
 	private ReverseRouteLookup reverseRouteLookup;

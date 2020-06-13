@@ -9,9 +9,10 @@ import org.webpieces.router.impl.routers.DynamicInfo;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 
+import com.google.inject.ImplementedBy;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
-
+@ImplementedBy(ProdRouteInvoker.class)
 public interface RouteInvoker {
 
 	void init(ReverseRoutes reverseRoutes);

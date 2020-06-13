@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 
+@Singleton
 public class ObjectToParamTranslator {
 
 	private ObjectTranslator translator;

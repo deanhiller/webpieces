@@ -9,19 +9,8 @@ import javax.inject.Singleton;
 import org.webpieces.ctx.api.Constants;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.TwoPools;
-import org.webpieces.router.impl.AbstractRouterService;
-import org.webpieces.router.impl.ProdRouterService;
-import org.webpieces.router.impl.RouterServiceImpl;
-import org.webpieces.router.impl.compression.CompressionCacheSetup;
-import org.webpieces.router.impl.compression.ProdCompressionCacheSetup;
-import org.webpieces.router.impl.hooks.ClassForName;
-import org.webpieces.router.impl.hooks.MetaLoaderProxy;
-import org.webpieces.router.impl.loader.ProdClassForName;
-import org.webpieces.router.impl.loader.ProdLoader;
 import org.webpieces.router.impl.mgmt.GuiceWebpiecesListener;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
-import org.webpieces.router.impl.routeinvoker.ProdRouteInvoker;
-import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.util.metrics.MetricsCreator;
 import org.webpieces.util.threading.NamedThreadFactory;
 
@@ -46,15 +35,16 @@ public class ProdRouterModule implements Module {
 	
 	@Override
 	public void configure(Binder binder) {
-		binder.bind(RouterService.class).to(RouterServiceImpl.class).asEagerSingleton();
-		binder.bind(AbstractRouterService.class).to(ProdRouterService.class).asEagerSingleton();;
 
 		binder.bind(BufferPool.class).to(TwoPools.class).asEagerSingleton();
 
-		binder.bind(MetaLoaderProxy.class).to(ProdLoader.class).asEagerSingleton();
-		binder.bind(RouteInvoker.class).to(ProdRouteInvoker.class).asEagerSingleton();
-		binder.bind(ClassForName.class).to(ProdClassForName.class).asEagerSingleton();
-		binder.bind(CompressionCacheSetup.class).to(ProdCompressionCacheSetup.class).asEagerSingleton();;
+		//done with annotation..
+		//binder.bind(RouterService.class).to(RouterServiceImpl.class).asEagerSingleton();
+		//binder.bind(AbstractRouterService.class).to(ProdRouterService.class).asEagerSingleton();;
+		//binder.bind(MetaLoaderProxy.class).to(ProdLoader.class).asEagerSingleton();
+		//binder.bind(RouteInvoker.class).to(ProdRouteInvoker.class).asEagerSingleton();
+		//binder.bind(ClassForName.class).to(ProdClassForName.class).asEagerSingleton();
+		//binder.bind(CompressionCacheSetup.class).to(ProdCompressionCacheSetup.class).asEagerSingleton();;
 		
 		binder.bind(RouterConfig.class).toInstance(config);
 		

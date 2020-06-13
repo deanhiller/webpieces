@@ -5,6 +5,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import javax.inject.Singleton;
+
+@Singleton
 public class FutureHelper {
 
 	/**

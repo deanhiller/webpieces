@@ -3,13 +3,16 @@ package org.webpieces.router.api;
 import java.util.Map;
 
 import org.webpieces.router.api.extensions.ObjectStringConverter;
+import org.webpieces.router.impl.RouterServiceImpl;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.util.cmdline2.Arguments;
 
+import com.google.inject.ImplementedBy;
 import com.google.inject.Injector;
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.streaming.StreamRef;
 
+@ImplementedBy(RouterServiceImpl.class)
 public interface RouterService {
 
 	/**

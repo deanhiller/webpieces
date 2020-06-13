@@ -7,7 +7,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import javax.crypto.Mac;
+import javax.inject.Singleton;
 
+@Singleton
 public class Security {
 
 	public enum Hash {

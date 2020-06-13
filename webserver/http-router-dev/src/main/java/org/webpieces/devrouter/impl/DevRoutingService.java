@@ -3,10 +3,10 @@ package org.webpieces.devrouter.impl;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.compiler.api.CompilationsException;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
@@ -23,6 +23,7 @@ import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Injector;
 
+@Singleton
 public class DevRoutingService extends AbstractRouterService {
 
 	private static final Logger log = LoggerFactory.getLogger(DevRoutingService.class);

@@ -2,12 +2,15 @@ package org.webpieces.templatingdev.api;
 
 import java.util.Map;
 
+import javax.inject.Singleton;
+
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
+@Singleton
 public class StubModule implements Module {
 	
 	@Override

@@ -1,6 +1,7 @@
 package org.webpieces.devrouter.impl;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -14,6 +15,7 @@ import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;
 
+@Singleton
 public class DevLoader extends AbstractLoader implements MetaLoaderProxy {
 
 	private DevClassForName classLoader;

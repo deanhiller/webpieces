@@ -25,12 +25,13 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.cmdline2.Arguments;
 
+import com.google.inject.ImplementedBy;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
+@ImplementedBy(ProdRouterService.class)
 public abstract class AbstractRouterService {
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractRouterService.class);

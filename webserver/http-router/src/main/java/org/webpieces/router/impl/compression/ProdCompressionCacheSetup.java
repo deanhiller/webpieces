@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.Security;
 
+@Singleton
 public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 
 	private static final Logger log = LoggerFactory.getLogger(ProdCompressionCacheSetup.class);

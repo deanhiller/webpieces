@@ -4,12 +4,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.net.URLEncoder;
 
+@Singleton
 public class RouterLookupProxy implements RouterLookup {
 
 	private RouterService router;

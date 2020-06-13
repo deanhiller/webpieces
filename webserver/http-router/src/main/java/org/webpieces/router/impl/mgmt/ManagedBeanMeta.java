@@ -3,6 +3,9 @@ package org.webpieces.router.impl.mgmt;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Singleton;
+
+@Singleton
 public class ManagedBeanMeta {
 
 	private List<CachedBean> cachedWebpiecesBeans = new ArrayList<>();

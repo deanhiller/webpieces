@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.webpieces.templating.api.HtmlTagLookup;
@@ -19,6 +20,7 @@ import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 
+@Singleton
 public class DevTemplateService extends ProdTemplateService {
 
 	private HtmlToJavaClassCompiler compiler;

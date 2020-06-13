@@ -14,6 +14,7 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,6 @@ import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.cmdline2.Arguments;
-import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.urlparse.UrlEncodedParser;
 
 import com.google.inject.Injector;
@@ -41,7 +41,6 @@ import com.webpieces.http2.api.dto.highlevel.Http2Headers;
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
-import com.webpieces.http2.api.streaming.MyStreamRef;
 import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2.api.subparsers.AcceptType;
@@ -49,6 +48,7 @@ import com.webpieces.http2.api.subparsers.HeaderPriorityParser;
 import com.webpieces.http2.api.subparsers.ParsedContentType;
 import com.webpieces.http2.impl.subparsers.HeaderPriorityParserImpl;
 
+@Singleton
 public class RouterServiceImpl implements RouterService {
 
 	private static final Logger log = LoggerFactory.getLogger(RouterServiceImpl.class);

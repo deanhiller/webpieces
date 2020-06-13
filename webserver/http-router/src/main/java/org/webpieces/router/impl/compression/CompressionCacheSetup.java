@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.webpieces.router.impl.routers.FStaticRouter;
 
+import com.google.inject.ImplementedBy;
+
+@ImplementedBy(ProdCompressionCacheSetup.class)
 public interface CompressionCacheSetup {
 
 	void setupCache(List<FStaticRouter> list);
