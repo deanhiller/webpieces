@@ -18,6 +18,11 @@ public abstract class AbstractRouterImpl implements AbstractRouter {
 		this.matchInfo = matchInfo;
 	}
 	
+	@Override
+	public MatchInfo getMatchInfo() {
+		return matchInfo;
+	}
+	
 	public boolean matchesMethod(HttpMethod method) {
 		if(matchInfo.getHttpMethod() == method)
 			return true;

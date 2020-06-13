@@ -3,7 +3,6 @@ package org.webpieces.router.impl.routers;
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
 import org.webpieces.ctx.api.RequestContext;
@@ -14,12 +13,8 @@ import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.file.VirtualFile;
 
-import com.webpieces.http2.api.streaming.StreamRef;
-import com.webpieces.http2.api.streaming.StreamWriter;
-
 public class FStaticRouter extends AbstractRouterImpl {
 
-	private final MatchInfo matchInfo;
 	private final RouteInvoker invoker;
 	private final boolean isOnClassPath;
 	private final File targetCacheLocation;
@@ -30,18 +25,12 @@ public class FStaticRouter extends AbstractRouterImpl {
 	public FStaticRouter(RouteInvoker invoker, MatchInfo matchInfo, VirtualFile fileSystemPath, boolean isOnClassPath, File targetCatchLocation, boolean isFile) {
 		super(matchInfo);
 		this.invoker = invoker;
-		this.matchInfo = matchInfo;
 		this.fileSystemPath = fileSystemPath;
 		this.isOnClassPath = isOnClassPath;
 		this.targetCacheLocation = targetCatchLocation;
 
 
 		this.isFile = isFile;
-	}
-	
-	@Override
-	public MatchInfo getMatchInfo() {
-		return matchInfo;
 	}
 
 	@Override
