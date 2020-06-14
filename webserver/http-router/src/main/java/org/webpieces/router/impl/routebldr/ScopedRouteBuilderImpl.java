@@ -25,8 +25,10 @@ import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
+import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.MethodMetaAndController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
+import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractRouter;
 import org.webpieces.router.impl.routers.EScopedRouter;
@@ -76,13 +78,15 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 	@Override
 	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		UrlPath p = new UrlPath(routerInfo, path);
-		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
+		RouteModuleInfo moduleInfo = CurrentPackage.get();
+		RouteInfo routeInfo = new RouteInfo(moduleInfo, controllerMethod);
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
 		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
-		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
+		LoadedController loadedController = container.getMetaAndController().getLoadedController();
+		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), loadedController, moduleInfo.getI18nBundleName(), matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getMetaAndController(), svc);
 		
@@ -101,14 +105,15 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 	@Override
 	public void addStreamRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		UrlPath p = new UrlPath(routerInfo, path);
-		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
+		RouteModuleInfo moduleInfo = CurrentPackage.get();
+		RouteInfo routeInfo = new RouteInfo(moduleInfo, controllerMethod);
 
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
 		MethodMetaAndController container = holder.getFinder().loadGenericController(resettingLogic.getInjector(), routeInfo);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
-		FStreamingRouter router = new FStreamingRouter(holder.getRouteInvoker2(), matchInfo);
+		FStreamingRouter router = new FStreamingRouter(holder.getRouteInvoker2(), container.getLoadedController(), moduleInfo.getI18nBundleName(), matchInfo);
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.STREAMING, container, svc);
 		
@@ -142,14 +147,16 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		UrlPath p = new UrlPath(routerInfo, path);
 
 		boolean isPostOnly = method == HttpMethod.POST;
-		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
+		RouteModuleInfo moduleInfo = CurrentPackage.get();
+		RouteInfo routeInfo = new RouteInfo(moduleInfo, controllerMethod);
 
 		//MUST DO loadControllerIntoMetat HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
 		MethodMetaAndController metaAndController = holder.getFinder().loadHtmlController(resettingLogic.getInjector(), routeInfo, isPostOnly);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
-		FHtmlRouter router = new FHtmlRouter(holder.getRouteInvoker2(), matchInfo, checkToken);	
+		LoadedController loadedController = metaAndController.getLoadedController();
+		FHtmlRouter router = new FHtmlRouter(holder.getRouteInvoker2(), loadedController, moduleInfo.getI18nBundleName(), matchInfo, checkToken);	
 		SvcProxyForHtml svc = new SvcProxyForHtml(holder.getSvcProxyLogic(), futureUtil);
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, metaAndController, svc);
 		

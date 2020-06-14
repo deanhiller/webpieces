@@ -16,7 +16,9 @@ import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
+import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
+import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.routers.AbstractRouter;
 import org.webpieces.router.impl.routers.DContentTypeRouter;
@@ -52,13 +54,15 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 			throw new IllegalArgumentException("controllerMethod must contain a . for the form Controller.method");
 		
 		UrlPath p = new UrlPath(routerInfo, path);
-		RouteInfo routeInfo = new RouteInfo(CurrentPackage.get(), controllerMethod);
+		RouteModuleInfo moduleInfo = CurrentPackage.get();
+		RouteInfo routeInfo = new RouteInfo(moduleInfo, controllerMethod);
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what
 		//he did wrong when reading the exception!!
 		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo);
 
 		MatchInfo matchInfo = createMatchInfo(p, Port.HTTPS, HttpMethod.POST, holder.getUrlEncoding());
-		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), matchInfo, container.getBinder());
+		LoadedController loadedController = container.getMetaAndController().getLoadedController();
+		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), loadedController, moduleInfo.getI18nBundleName() , matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getMetaAndController(), svc);
 		

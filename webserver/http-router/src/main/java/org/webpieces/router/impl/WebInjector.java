@@ -28,4 +28,8 @@ public class WebInjector {
 		return injector.getInstance(ApplicationContext.class);
 	}
 
+	public Injector getCurrentInjector() {
+		return injector;
+	}
+
 }

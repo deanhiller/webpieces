@@ -233,10 +233,12 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 				RouteType.INTERNAL_SERVER_ERROR);
 
 		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorRoute.getFilterChainCreationInfo());
-		EInternalErrorRouter internalErrorRouter = new EInternalErrorRouter(holder.getRouteInvoker2(), internalErrorRoute, internalErrorController, svc);
+		String i18nBundleName = internalErrorRoute.getRouteModuleInfo().getI18nBundleName();
+		EInternalErrorRouter internalErrorRouter = new EInternalErrorRouter(holder.getRouteInvoker2(), i18nBundleName, internalErrorController, svc);
 
 		Service<MethodMeta, Action> notFoundSvc = holder.getFinder().loadFilters(notFoundRoute.getFilterChainCreationInfo());
-		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundRoute, notFoundControllerInst, notFoundSvc);
+		String notFoundBundleName = notFoundRoute.getRouteModuleInfo().getI18nBundleName();
+		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundBundleName, notFoundControllerInst, notFoundSvc);
 	
 		return new DScopedRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter, routerFutures, futureUtil);
 	}

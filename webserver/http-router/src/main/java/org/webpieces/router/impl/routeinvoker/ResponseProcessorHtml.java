@@ -27,14 +27,10 @@ public class ResponseProcessorHtml implements Processor {
 	private LoadedController loadedController;
 	private ProxyStreamHandle responseCb;
 
-	public ResponseProcessorHtml(
-			RequestContext ctx, 
-			LoadedController loadedController, 
-			ProxyStreamHandle responseCb 
-	) {
-		this.ctx = ctx;
-		this.loadedController = loadedController;
-		this.responseCb = responseCb;
+	public ResponseProcessorHtml(InvokeInfo info) {
+		ctx = info.getRequestCtx();
+		loadedController = info.getLoadedController();
+		responseCb = info.getHandler();
 	}
 
 	public CompletableFuture<Void> createRawRedirect(RawRedirect controllerResponse) {

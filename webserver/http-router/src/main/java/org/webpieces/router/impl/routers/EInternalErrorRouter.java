@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
+import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
@@ -18,22 +19,22 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 public class EInternalErrorRouter {
 
 	private final RouteInvoker invoker;
-	private final BaseRouteInfo baseRouteInfo;
 	private LoadedController loadedController;
 	private Service<MethodMeta, Action> svc;
+	private String i18nBundleName;
 
-	public EInternalErrorRouter(RouteInvoker invoker, BaseRouteInfo route,
+	public EInternalErrorRouter(RouteInvoker invoker, String i18nBundleName,
 			LoadedController loadedController, Service<MethodMeta, Action> svc) {
 		this.invoker = invoker;
-		this.baseRouteInfo = route;
+		this.i18nBundleName = i18nBundleName;
 		this.loadedController = loadedController;
 		this.svc = svc;
 	}
 
 	public CompletableFuture<StreamWriter> invokeErrorRoute(RequestContext ctx, ProxyStreamHandle handle, Throwable exc) {
-		DynamicInfo info = new DynamicInfo(loadedController, svc);
+		DynamicInfo info = new DynamicInfo(svc);
 		RouteInfoForInternalError data = new RouteInfoForInternalError(exc);
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handle, false);
+		InvokeInfo invokeInfo = new InvokeInfo(ctx, handle, RouteType.INTERNAL_SERVER_ERROR, loadedController, i18nBundleName);
 		return invoker.invokeErrorController(invokeInfo, info, data);
 	}
 }

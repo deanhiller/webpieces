@@ -4,14 +4,10 @@ import java.util.regex.Matcher;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.routes.Port;
-import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 
 public abstract class AbstractDynamicRouter extends AbstractRouterImpl {
 
 	protected DynamicInfo dynamicInfo;
-	//hmmmm, this was a bit of a pain.  It is only set once but it's hard to design the code to pass in during construction
-	//without quite a bit of work
-	protected BaseRouteInfo baseRouteInfo;
 	
 	public AbstractDynamicRouter(MatchInfo matchInfo) {
 		super(matchInfo);
@@ -32,10 +28,6 @@ public abstract class AbstractDynamicRouter extends AbstractRouterImpl {
 		
 		Matcher matcher = matchInfo.getPattern().matcher(path);
 		return matcher;
-	}
-	
-	public void setBaseRouteInfo(BaseRouteInfo baseRouteInfo) {
-		this.baseRouteInfo = baseRouteInfo;
 	}
 	
 	public void setDynamicInfo(DynamicInfo dynamicInfo) {

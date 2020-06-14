@@ -18,12 +18,12 @@ public class ResponseProcessorAppError implements Processor {
 	private LoadedController loadedController;
 	private ProxyStreamHandle responseCb;
 
-	public ResponseProcessorAppError(RequestContext ctx, LoadedController loadedController, ProxyStreamHandle responseCb) {
-		this.ctx = ctx;
-		this.loadedController = loadedController;
-		this.responseCb = responseCb;
+	public ResponseProcessorAppError(InvokeInfo info) {
+		ctx = info.getRequestCtx();
+		loadedController = info.getLoadedController();
+		responseCb = info.getHandler();
 	}
-
+	
 	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {
 		String controllerName = loadedController.getControllerInstance().getClass().getName();
 		String methodName = loadedController.getControllerMethod().getName();

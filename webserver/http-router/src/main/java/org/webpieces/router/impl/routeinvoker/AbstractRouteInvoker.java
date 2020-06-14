@@ -67,8 +67,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	@Override
 	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		ResponseProcessorAppError processor = new ResponseProcessorAppError(
-				invokeInfo.getRequestCtx(), dynamicInfo.getLoadedController(), invokeInfo.getHandler());
+		ResponseProcessorAppError processor = new ResponseProcessorAppError(invokeInfo);
 		
 		CancelHolder cancelFunc = new CancelHolder(); //useless since not tied to RouterStreamRef but invoke error routes are quick anyways so no need to cancel
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor, cancelFunc, true); //true forces us to not wait and response ASAP since it's an error
@@ -76,11 +75,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	@Override
 	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(
-				invokeInfo.getRequestCtx(), 
-				dynamicInfo.getLoadedController(), 
-				invokeInfo.getHandler()
-		);
+		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(invokeInfo);
 		
 		CancelHolder cancelFunc = new CancelHolder(); //useless since not tied to RouterStreamRef but invoke error routes are quick anyways so no need to cancel
 		return invokeImpl(invokeInfo, dynamicInfo, data, processor, cancelFunc, true); //true forces us to not wait and response ASAP since it's an error
@@ -88,9 +83,8 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	@Override
 	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
-		ResponseProcessorHtml processor = new ResponseProcessorHtml(
-				invokeInfo.getRequestCtx(), 
-				dynamicInfo.getLoadedController(), invokeInfo.getHandler());
+		ResponseProcessorHtml processor = new ResponseProcessorHtml(invokeInfo);
+		
 		return invokeRealRoute(invokeInfo, dynamicInfo, data, processor, false);
 	}
 	
@@ -106,7 +100,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	public RouterStreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
-		LoadedController loadedController = dynamicInfo.getLoadedController();
+		LoadedController loadedController = invokeInfo.getLoadedController();
 		Object instance = loadedController.getControllerInstance();
 		Method controllerMethod = loadedController.getControllerMethod();
 		Parameter[] parameters = loadedController.getParameters();
@@ -164,7 +158,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 
 	protected RouterStreamRef invokeRealRoute(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
 		Service<MethodMeta, Action> service = dynamicInfo.getService();
-		LoadedController loadedController = dynamicInfo.getLoadedController();
+		LoadedController loadedController = invokeInfo.getLoadedController();
 		invokeInfo.getHandler().initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
 
 		CancelHolder cancelFunc = new CancelHolder();
@@ -175,7 +169,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	protected CompletableFuture<StreamWriter> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, CancelHolder cancelFunc, boolean forceEndOfStream) {
 		Service<MethodMeta, Action> service = dynamicInfo.getService();
-		LoadedController loadedController = dynamicInfo.getLoadedController();
+		LoadedController loadedController = invokeInfo.getLoadedController();
 		invokeInfo.getHandler().initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
 
 		return invokeOnStreamComplete(invokeInfo, loadedController, service, data, processor, cancelFunc, forceEndOfStream);
@@ -214,13 +208,12 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		Processor processor,
 		CancelHolder cancelHolder
 	) {
-		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 
 		if(service == null)
 			throw new IllegalStateException("Bug, service should never be null at this point");
 		
-		Messages messages = new Messages(route.getRouteModuleInfo().getI18nBundleName(), "webpieces");
+		Messages messages = new Messages(invokeInfo.getI18nBundleName(), "webpieces");
 		requestCtx.setMessages(messages);
 
 		Current.setContext(requestCtx);

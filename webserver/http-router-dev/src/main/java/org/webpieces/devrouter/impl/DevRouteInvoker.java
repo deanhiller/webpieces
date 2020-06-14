@@ -20,7 +20,6 @@ import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
-import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.router.impl.routeinvoker.AbstractRouteInvoker;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
@@ -100,7 +99,6 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	@Override
 	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo,
 			RouteData data) {
-		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
 		RouteInfoForInternalError error = (RouteInfoForInternalError)data;
@@ -112,17 +110,13 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 			return super.invokeErrorController(invokeInfo, dynamicInfo, data);
 		}
 		
-		Injector injector = route.getFilterChainCreationInfo().getInjector();
+		Injector webAppInjector = webInjector.getCurrentInjector();
 
 		RouteInfo routeInfo = new RouteInfo(new RouteModuleInfo("", null), "/org/webpieces/devrouter/impl/DevelopmentController.internalError");
-		BaseRouteInfo webpiecesNotFoundRoute = new BaseRouteInfo(
-				injector, routeInfo, 
-				new SvcProxyFixedRoutes(serviceInvoker, futureUtil),
-				new ArrayList<>(), RouteType.INTERNAL_SERVER_ERROR);
 		
 		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(serviceInvoker, futureUtil);
-		LoadedController newLoadedController = controllerFinder.loadGenericController(injector, routeInfo).getLoadedController();
-		DynamicInfo newInfo = new DynamicInfo(newLoadedController, svcProxy);
+		LoadedController newLoadedController = controllerFinder.loadGenericController(webAppInjector, routeInfo).getLoadedController();
+		DynamicInfo newInfo = new DynamicInfo(svcProxy);
 		
 		RouterRequest newRequest = new RouterRequest();
 		newRequest.putMultipart("url", req.relativePath);
@@ -135,7 +129,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		
 		ApplicationContext ctx = webInjector.getAppContext();
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);
-		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, handler, false);
+		InvokeInfo newInvokeInfo = new InvokeInfo(overridenCtx, handler, RouteType.INTERNAL_SERVER_ERROR, newLoadedController, null);
 		
 		return super.invokeErrorController(newInvokeInfo, newInfo, data);
 	}
@@ -153,7 +147,6 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 			return invokeErrorController(invokeInfo, info, error);
 		} 
 		
-		BaseRouteInfo route = invokeInfo.getRoute();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
 		RouteInfoForNotFound notFoundData = (RouteInfoForNotFound) data;
@@ -173,17 +166,13 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
 				+ " something needs a'fixin.  req="+req, notFoundExc);
 
-		Injector injector = route.getFilterChainCreationInfo().getInjector();
+		Injector webAppInjector = webInjector.getCurrentInjector();
 
 		RouteInfo routeInfo = new RouteInfo(new RouteModuleInfo("", null), "/org/webpieces/devrouter/impl/DevelopmentController.notFound");
-		BaseRouteInfo webpiecesNotFoundRoute = new BaseRouteInfo(
-				injector, routeInfo, 
-				new SvcProxyFixedRoutes(serviceInvoker, futureUtil),
-				new ArrayList<>(), RouteType.NOT_FOUND);
 		
 		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(serviceInvoker, futureUtil);
-		LoadedController newLoadedController = controllerFinder.loadGenericController(injector, routeInfo).getLoadedController();
-		DynamicInfo newInfo = new DynamicInfo(newLoadedController, svcProxy);
+		LoadedController newLoadedController = controllerFinder.loadGenericController(webAppInjector, routeInfo).getLoadedController();
+		DynamicInfo newInfo = new DynamicInfo(svcProxy);
 		
 		String reason = "Your route was not found in routes table";
 		if(notFoundExc != null)
@@ -199,7 +188,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		
 		ApplicationContext ctx = webInjector.getAppContext();
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);
-		InvokeInfo newInvokeInfo = new InvokeInfo(webpiecesNotFoundRoute, overridenCtx, handler, false);
+		InvokeInfo newInvokeInfo = new InvokeInfo(overridenCtx, handler, RouteType.NOT_FOUND, newLoadedController, null);
 		return super.invokeNotFound(newInvokeInfo, newInfo, data);
 	}
 }

@@ -2,7 +2,6 @@ package org.webpieces.router.impl.routers;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
-import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.util.filters.Service;
 
 /**
@@ -14,17 +13,11 @@ import org.webpieces.util.filters.Service;
  */
 public class DynamicInfo {
 
-	private final LoadedController loadedController;
 	private final Service<MethodMeta, Action> service;
 
-	public DynamicInfo(LoadedController loadedController, Service<MethodMeta, Action> service) {
+	public DynamicInfo(Service<MethodMeta, Action> service) {
 		super();
-		this.loadedController = loadedController;
 		this.service = service;
-	}
-
-	public LoadedController getLoadedController() {
-		return loadedController;
 	}
 
 	public Service<MethodMeta, Action> getService() {

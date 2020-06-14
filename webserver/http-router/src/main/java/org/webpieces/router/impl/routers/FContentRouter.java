@@ -3,6 +3,8 @@ package org.webpieces.router.impl.routers;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.impl.ReversableRouter;
+import org.webpieces.router.impl.dto.RouteType;
+import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
@@ -14,17 +16,21 @@ public class FContentRouter extends AbstractDynamicRouter implements ReversableR
 
 	private final RouteInvoker routeInvoker;
 	private final BodyContentBinder bodyContentBinder;
+	private LoadedController loadedController;
+	private String i18nBundleName;
 
-	public FContentRouter(RouteInvoker routeInvoker, MatchInfo matchInfo, BodyContentBinder bodyContentBinder) {
+	public FContentRouter(RouteInvoker routeInvoker, LoadedController loadedController, String i18nBundleName, MatchInfo matchInfo, BodyContentBinder bodyContentBinder) {
 		super(matchInfo);
 		this.routeInvoker = routeInvoker;
+		this.loadedController = loadedController;
+		this.i18nBundleName = i18nBundleName;
 		this.bodyContentBinder = bodyContentBinder;
 	}
 	
 	@Override
 	public RouterStreamRef invoke(RequestContext ctx, ProxyStreamHandle handler) {
 		RouteData data = new RouteInfoForContent(bodyContentBinder);
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handler, true);
+		InvokeInfo invokeInfo = new InvokeInfo(ctx, handler, RouteType.CONTENT, loadedController, i18nBundleName);
 		return routeInvoker.invokeContentController(invokeInfo, dynamicInfo, data);	
 	}
 	

@@ -22,13 +22,11 @@ public class ResponseProcessorNotFound implements Processor {
 	private ProxyStreamHandle responseCb;
 
 	public ResponseProcessorNotFound(
-			RequestContext ctx, 
-			LoadedController loadedController, 
-			ProxyStreamHandle responseCb
+			InvokeInfo info
 	) {
-		this.ctx = ctx;
-		this.loadedController = loadedController;
-		this.responseCb = responseCb;
+		ctx = info.getRequestCtx();
+		loadedController = info.getLoadedController();
+		responseCb = info.getHandler();
 	}
 
 	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {

@@ -11,6 +11,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.impl.body.BodyParser;
 import org.webpieces.router.impl.body.BodyParsers;
+import org.webpieces.router.impl.dto.RouteType;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Headers;
 import com.webpieces.http2.api.dto.lowlevel.CancelReason;
@@ -75,7 +76,7 @@ public class RequestStreamWriter2 implements StreamWriter {
 
         request.body = data;
 
-        if(!invokeInfo.isHasBodyContentBinder())
+        if(invokeInfo.getRouteType() != RouteType.CONTENT)
         	parseBody(request.originalRequest, request);
         
         request.trailingHeaders = trailingHeaders;

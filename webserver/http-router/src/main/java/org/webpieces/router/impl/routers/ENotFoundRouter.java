@@ -6,39 +6,35 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
+import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
-import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
-import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
-import org.webpieces.router.impl.services.RouteData;
-import org.webpieces.router.impl.services.RouteInfoForInternalError;
 import org.webpieces.router.impl.services.RouteInfoForNotFound;
 import org.webpieces.util.filters.Service;
 
-import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class ENotFoundRouter {
 
 	private final RouteInvoker invoker;
-	private final BaseRouteInfo baseRouteInfo;
 	private LoadedController loadedController;
 	private Service<MethodMeta, Action> svc;
+	private String i18nBaseBundle;
 
-	public ENotFoundRouter(RouteInvoker invoker, BaseRouteInfo route,
+	public ENotFoundRouter(RouteInvoker invoker, String i18nBaseBundle,
 			LoadedController loadedController, Service<MethodMeta, Action> svc) {
 		this.invoker = invoker;
-		this.baseRouteInfo = route;
+		this.i18nBaseBundle = i18nBaseBundle;
 		this.loadedController = loadedController;
 		this.svc = svc;
 	}
 
 	public CompletableFuture<StreamWriter> invokeNotFoundRoute(RequestContext ctx, ProxyStreamHandle handle, NotFoundException exc) {
-		DynamicInfo info = new DynamicInfo(loadedController, svc);
+		DynamicInfo info = new DynamicInfo(svc);
 		RouteInfoForNotFound data = new RouteInfoForNotFound(exc);
-		InvokeInfo invokeInfo = new InvokeInfo(baseRouteInfo, ctx, handle, false);
+		InvokeInfo invokeInfo = new InvokeInfo(ctx, handle, RouteType.NOT_FOUND, loadedController, i18nBaseBundle);
 		return invoker.invokeNotFound(invokeInfo, info, data);
 	}
 }
