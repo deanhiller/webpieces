@@ -79,7 +79,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		if(exc != null) {
 			log.error("Could not compile your code", exc);
 			RouteInfoForInternalError error = new RouteInfoForInternalError(exc); 
-			CompletableFuture<StreamWriter> writer = invokeErrorController(invokeInfo, dynamicInfo, error);
+			CompletableFuture<StreamWriter> writer = invokeDevelopmentErrorPage(invokeInfo, error);
 			return new RouterStreamRef("notCompileError", writer, null);
 		} if(invokeInfo.getRequestCtx().getRequest().queryParams.containsKey(DevelopmentController.INTERNAL_ERROR_KEY)) {
 			//special case for in DevelopmentServer when invokeErrorController was called and then it's iframe called back out again to display
@@ -97,18 +97,23 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo,
-			RouteData data) {
-		RequestContext requestCtx = invokeInfo.getRequestCtx();
-		ProxyStreamHandle handler = invokeInfo.getHandler();
+	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		RouteInfoForInternalError error = (RouteInfoForInternalError)data;
 		Throwable exception = error.getException();
-		RouterRequest req = requestCtx.getRequest();
-		
+
 		if(exception instanceof SimulateInternalError) {
 			//just use the original route at this point
 			return super.invokeErrorController(invokeInfo, dynamicInfo, data);
 		}
+		
+		return invokeDevelopmentErrorPage(invokeInfo, error);
+	}
+
+	private CompletableFuture<StreamWriter> invokeDevelopmentErrorPage(InvokeInfo invokeInfo, RouteInfoForInternalError data) {
+		RequestContext requestCtx = invokeInfo.getRequestCtx();
+		ProxyStreamHandle handler = invokeInfo.getHandler();
+		RouterRequest req = requestCtx.getRequest();
+		Throwable exception = data.getException();
 		
 		Injector webAppInjector = webInjector.getCurrentInjector();
 
