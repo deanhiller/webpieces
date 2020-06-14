@@ -5,18 +5,13 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.exceptions.ControllerException;
-import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.streams.StreamService;
-import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routers.Endpoint;
 import org.webpieces.router.impl.services.RouteData;
-import org.webpieces.router.impl.services.RouteInfoForContent;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
 import org.webpieces.util.futures.FutureHelper;
 
@@ -71,21 +66,12 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	
 	@Override
 	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, StreamService dynamicInfo, RouteData data) {
-		//ResponseProcessorHtml processor = new ResponseProcessorHtml(invokeInfo);
 		return invokeRealRoute(invokeInfo, dynamicInfo, data);
 	}
-	
 	@Override
 	public RouterStreamRef invokeContentController(InvokeInfo invokeInfo, StreamService dynamicInfo, RouteData data) {
-		RouteInfoForContent content = (RouteInfoForContent) data;
-		if(content.getBodyContentBinder() == null)
-			throw new IllegalArgumentException("bodyContentBinder is required for these routes yet it is null here.  bug");
-		
-		//ResponseProcessorContent processor = new ResponseProcessorContent(invokeInfo.getRequestCtx(), invokeInfo.getHandler());
-		
 		return invokeRealRoute(invokeInfo, dynamicInfo, data);
 	}
-	
 	@Override
 	public RouterStreamRef invokeStreamingController(InvokeInfo invokeInfo, StreamService dynamicInfo, RouteData data) {
 		return invokeRealRoute(invokeInfo, dynamicInfo, data);
@@ -104,7 +90,5 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		
 		return endpoint.openStream(methodMeta, invokeInfo.getHandler());
 	}
-
-
 	
 }
