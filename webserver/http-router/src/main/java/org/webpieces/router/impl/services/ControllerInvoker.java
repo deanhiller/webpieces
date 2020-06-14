@@ -15,12 +15,12 @@ import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.util.futures.FutureHelper;
 
 @Singleton
-public class ServiceInvoker {
+public class ControllerInvoker {
 
 	private FutureHelper futureUtil;
 
 	@Inject
-	public ServiceInvoker(FutureHelper futureUtil) {
+	public ControllerInvoker(FutureHelper futureUtil) {
 		this.futureUtil = futureUtil;
 	}
 	

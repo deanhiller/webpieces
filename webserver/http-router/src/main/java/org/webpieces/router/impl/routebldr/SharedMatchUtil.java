@@ -10,9 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.Port;
+import org.webpieces.router.api.streams.StreamService;
 import org.webpieces.router.impl.ResettingLogic;
+import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.ResolvedMethod;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
+import org.webpieces.router.impl.routeinvoker.Processor;
 import org.webpieces.router.impl.routers.AbstractDynamicRouter;
 import org.webpieces.router.impl.routers.AbstractRouter;
 import org.webpieces.router.impl.routers.Endpoint;
@@ -52,13 +55,33 @@ public class SharedMatchUtil {
 			Port port = matchInfo.getExposedPorts();
 			ResolvedMethod methodMeta = routerAndInfo.getMetaAndController().getMethodMeta();
 			
-			List<FilterInfo<?>> filters = findMatchingFilters(methodMeta, path, port, routeFilters);
+			StreamService streamSvc;
+			if(routerAndInfo.getRouteType() == RouteType.STREAMING) {
+				streamSvc = new StreamProxy(holder.getFutureUtil(), holder.getServiceInvoker());
+			} else {
+				//Wire in request/response filters at this point
+				List<FilterInfo<?>> filters = findMatchingFilters(methodMeta, path, port, routeFilters);
+				FilterCreationMeta chainInfo = new FilterCreationMeta(resettingLogic.getInjector(), filters, routerAndInfo.getSvcProxy());
+				Service<MethodMeta, Action> service = holder.getFinder().loadFilters(chainInfo);
+	
+				Processor processor;
+				if(routerAndInfo.getRouteType() == RouteType.CONTENT) {
+					processor = holder.getResponseProcessorContent();
+				} else if(routerAndInfo.getRouteType() == RouteType.HTML) {
+					processor = holder.getResponseProcessorHtml();
+				} else {
+					throw new IllegalStateException("RouteType not supported here="+routerAndInfo.getRouteType());
+				}
+				
+				String i18nBundleName = routerAndInfo.getRouteInfo().getRouteModuleInfo().getI18nBundleName();
+				
+				Endpoint svc = new Endpoint(service);
+				streamSvc = new RequestResponseStream(svc, i18nBundleName, processor, holder.getBodyParsers(), holder.getServiceInvoker());
+			}
 			
-			BaseRouteInfo baseRouteInfo = new BaseRouteInfo(
-					resettingLogic.getInjector(), routerAndInfo.getRouteInfo(), routerAndInfo.getSvcProxy(), filters, routerAndInfo.getRouteType());
-			Service<MethodMeta, Action> service = holder.getFinder().loadFilters(baseRouteInfo.getFilterChainCreationInfo());
+			//Add streaming filters at this point here...
+			router.setDynamicInfo(streamSvc);
 
-			router.setDynamicInfo(new Endpoint(service));
 			routers.add(router);
 		}
 		

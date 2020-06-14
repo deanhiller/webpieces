@@ -4,10 +4,12 @@ import java.util.regex.Matcher;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.routes.Port;
+import org.webpieces.router.api.streams.StreamService;
+import org.webpieces.router.impl.dto.RouteType;
 
 public abstract class AbstractDynamicRouter extends AbstractRouterImpl {
 
-	protected Endpoint dynamicInfo;
+	protected StreamService dynamicInfo;
 	
 	public AbstractDynamicRouter(MatchInfo matchInfo) {
 		super(matchInfo);
@@ -30,7 +32,9 @@ public abstract class AbstractDynamicRouter extends AbstractRouterImpl {
 		return matcher;
 	}
 	
-	public void setDynamicInfo(Endpoint dynamicInfo) {
+	public void setDynamicInfo(StreamService dynamicInfo) {
 		this.dynamicInfo = dynamicInfo;
 	}
+	
+	public abstract RouteType getRouteType();
 }

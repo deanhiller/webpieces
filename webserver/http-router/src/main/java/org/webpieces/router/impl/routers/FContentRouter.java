@@ -39,4 +39,9 @@ public class FContentRouter extends AbstractDynamicRouter implements ReversableR
 		return matchInfo.getFullPath();
 	}
 
+	@Override
+	public RouteType getRouteType() {
+		return RouteType.CONTENT;
+	}
+
 }

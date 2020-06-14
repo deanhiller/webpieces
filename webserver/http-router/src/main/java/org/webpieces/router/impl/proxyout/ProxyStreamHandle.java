@@ -23,6 +23,7 @@ import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.controller.actions.HttpPort;
 import org.webpieces.router.api.exceptions.ControllerPageArgsException;
 import org.webpieces.router.api.exceptions.WebSocketClosedException;
+import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.UrlInfo;
@@ -62,8 +63,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 
 
 	private Http2Request originalHttp2Request; //loaded on construction
-	private InvokeInfo invokeInfo; //loaded just before invoking service
-	private LoadedController loadedController;
+	private MethodMeta methodMeta; //loaded just before invoking service
 
 	@Inject
 	public ProxyStreamHandle(
@@ -86,10 +86,9 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	public void setRouterRequest(RouterRequest routerRequest) {
 		handle.setRouterRequest(routerRequest);
 	}
-	public void initJustBeforeInvoke(ReverseRoutes reverseRoutes, InvokeInfo invokeInfo, LoadedController loadedController) {
+	public void initJustBeforeInvoke(ReverseRoutes reverseRoutes, MethodMeta invokeInfo) {
 		this.reverseRoutes = reverseRoutes;
-		this.invokeInfo = invokeInfo;
-		this.loadedController = loadedController;
+		this.methodMeta = invokeInfo;
 	}
 
 	public void turnCompressionOff() {
@@ -160,13 +159,13 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	}
 
 	private CompletableFuture<Void> createRedirect(HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
-		if(invokeInfo == null) {
-			throw new IllegalStateException("Somehow invokeInfo is missing.  This method should only be called from filters and controllers");
+		if(methodMeta == null) {
+			throw new IllegalStateException("Somehow methodMeta is missing.  This method should only be called from filters and controllers");
 		}
-		RequestContext ctx = invokeInfo.getRequestCtx();
+		RequestContext ctx = methodMeta.getCtx();
 
 		RouterRequest request = ctx.getRequest();
-		Method method = loadedController.getControllerMethod();
+		Method method = methodMeta.getLoadedController().getControllerMethod();
 
 		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, ctx, requestedPort);
 		boolean isSecure = urlInfo.isSecure();

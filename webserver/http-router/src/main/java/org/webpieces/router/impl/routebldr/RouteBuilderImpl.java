@@ -223,21 +223,15 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 
 		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(holder.getSvcProxyLogic().getServiceInvoker(), futureUtil);
 
-		BaseRouteInfo notFoundRoute = new BaseRouteInfo(
-				resettingLogic.getInjector(), pageNotFoundInfo, 
-				svcProxy, notFoundFilters,
-				RouteType.NOT_FOUND);
-		BaseRouteInfo internalErrorRoute = new BaseRouteInfo(
-				resettingLogic.getInjector(), internalErrorInfo, 
-				svcProxy, internalErrorFilters,
-				RouteType.INTERNAL_SERVER_ERROR);
+		FilterCreationMeta notFoundChain = new FilterCreationMeta(resettingLogic.getInjector(), notFoundFilters, svcProxy);
+		FilterCreationMeta internalErrorChain = new FilterCreationMeta(resettingLogic.getInjector(), internalErrorFilters, svcProxy);
 
-		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorRoute.getFilterChainCreationInfo());
-		String i18nBundleName = internalErrorRoute.getRouteModuleInfo().getI18nBundleName();
+		Service<MethodMeta, Action> svc = holder.getFinder().loadFilters(internalErrorChain);
+		String i18nBundleName = internalErrorInfo.getRouteModuleInfo().getI18nBundleName();
 		EInternalErrorRouter internalErrorRouter = new EInternalErrorRouter(holder.getRouteInvoker2(), i18nBundleName, internalErrorController, svc);
 
-		Service<MethodMeta, Action> notFoundSvc = holder.getFinder().loadFilters(notFoundRoute.getFilterChainCreationInfo());
-		String notFoundBundleName = notFoundRoute.getRouteModuleInfo().getI18nBundleName();
+		Service<MethodMeta, Action> notFoundSvc = holder.getFinder().loadFilters(notFoundChain);
+		String notFoundBundleName = pageNotFoundInfo.getRouteModuleInfo().getI18nBundleName();
 		ENotFoundRouter notFoundRouter = new ENotFoundRouter(holder.getRouteInvoker2(), notFoundBundleName, notFoundControllerInst, notFoundSvc);
 	
 		return new DScopedRouter(routerInfo, pathToRouter, routers, notFoundRouter, internalErrorRouter, routerFutures, futureUtil);

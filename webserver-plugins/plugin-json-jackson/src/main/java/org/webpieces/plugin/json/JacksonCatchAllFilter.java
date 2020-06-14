@@ -55,7 +55,7 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 				return translate((HttpException)t);
 			}
 			
-			log.error("Internal Server Error method="+meta.getLoadedController2().getControllerMethod(), t);
+			log.error("Internal Server Error method="+meta.getLoadedController().getControllerMethod(), t);
 			return translateError(t);
 		} else {
 			return action;

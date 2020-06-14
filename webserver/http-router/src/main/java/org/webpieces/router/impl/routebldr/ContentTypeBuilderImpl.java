@@ -64,7 +64,7 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 		LoadedController loadedController = container.getMetaAndController().getLoadedController();
 		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), loadedController, moduleInfo.getI18nBundleName() , matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
-		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getMetaAndController(), svc);
+		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, container.getMetaAndController(), svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
 		

@@ -26,7 +26,8 @@ public class FutureHelper {
 	) {
 		//convert sync exceptions into async exceptions so we can re-use same exception handling logic..
 		CompletableFuture<T> future = syncToAsyncException(function);
-		CompletableFuture<T> newFuture = syncToAsyncException(successFunction);
+		CompletableFuture<T> newFuture = future.thenCompose( result -> syncToAsyncException(successFunction));
+		
 		CompletableFuture<T> lastFuture = finallyBlock(
 				() -> newFuture,
 				() -> finallyCode.run()

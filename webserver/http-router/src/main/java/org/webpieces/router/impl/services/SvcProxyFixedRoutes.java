@@ -14,10 +14,10 @@ import org.webpieces.util.futures.FutureHelper;
  */
 public class SvcProxyFixedRoutes implements Service<MethodMeta, Action> {
 
-	private ServiceInvoker invoker;
+	private ControllerInvoker invoker;
 	private FutureHelper futureUtil;
 
-	public SvcProxyFixedRoutes(ServiceInvoker invoker, FutureHelper futureUtil) {
+	public SvcProxyFixedRoutes(ControllerInvoker invoker, FutureHelper futureUtil) {
 		this.invoker = invoker;
 		this.futureUtil = futureUtil;
 	}
@@ -29,7 +29,7 @@ public class SvcProxyFixedRoutes implements Service<MethodMeta, Action> {
 	
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		return invoker.invokeAndCoerce(meta.getLoadedController2(), new Object[0]);
+		return invoker.invokeAndCoerce(meta.getLoadedController(), new Object[0]);
 	}
 
 }

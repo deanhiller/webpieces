@@ -2,15 +2,11 @@ package org.webpieces.router.impl.routers;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
-
-import com.webpieces.http2.api.streaming.StreamRef;
-import com.webpieces.http2.api.streaming.StreamWriter;
 
 /**
  * The request Content-Type header router routing to special Content-Type routers if they exist

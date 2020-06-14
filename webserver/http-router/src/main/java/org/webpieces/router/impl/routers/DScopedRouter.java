@@ -20,7 +20,6 @@ import org.webpieces.util.logging.SupressedExceptionLog;
 
 import com.webpieces.http2.api.dto.lowlevel.RstStreamFrame;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2ErrorCode;
-import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class DScopedRouter extends EScopedRouter {
@@ -59,7 +58,7 @@ public class DScopedRouter extends EScopedRouter {
 					if(t == null)
 						return CompletableFuture.completedFuture(r);
 		
-					return tryRenderWebAppErrorControllerResult(ctx, handler, t, true);
+					return tryRenderWebAppErrorControllerResult(ctx, handler, t);
 				}).thenCompose(Function.identity());
 		
 		CompletableFuture<StreamWriter> proxyWriter = writer.thenApply(w -> createProxy(w, ctx, handler));
@@ -69,10 +68,10 @@ public class DScopedRouter extends EScopedRouter {
 
 	private StreamWriter createProxy(StreamWriter strWriter, RequestContext ctx, ProxyStreamHandle handler) {
 		return new NonStreamingWebAppErrorProxy(futureHelper, strWriter, handler, ctx,
-				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t, true));
+				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t));
 	}
 
-	private CompletableFuture<StreamWriter> tryRenderWebAppErrorControllerResult(RequestContext ctx, ProxyStreamHandle handler, Throwable t, boolean forceEndOfStream) {
+	private CompletableFuture<StreamWriter> tryRenderWebAppErrorControllerResult(RequestContext ctx, ProxyStreamHandle handler, Throwable t) {
 		if(ExceptionWrap.isChannelClosed(t)) {
 			//if the socket was closed before we responded, do not log a failure
 			if(log.isTraceEnabled())
@@ -101,7 +100,7 @@ public class DScopedRouter extends EScopedRouter {
 			return CompletableFuture.completedFuture(new NullStreamWriter());
 		}
 		
-		return invokeWebAppErrorController(t, ctx, handler, failedRoute, forceEndOfStream);
+		return invokeWebAppErrorController(t, ctx, handler, failedRoute);
 	}
 
 	/**
@@ -118,14 +117,14 @@ public class DScopedRouter extends EScopedRouter {
 
 					if (t instanceof NotFoundException)
 						return notFound((NotFoundException) t, ctx, handler);
-					return futureUtil.<StreamWriter>failedFuture(t);
+					return futureUtil.failedFuture(t);
 				}).thenCompose(Function.identity());
 
 		return new RouterStreamRef("DScopedNotFoundCheck", writer, streamRef);
 	}
 
 	private CompletableFuture<StreamWriter> invokeWebAppErrorController(
-			Throwable exc, RequestContext requestCtx, ProxyStreamHandle handler, Object failedRoute, boolean forceEndOfStream) {
+			Throwable exc, RequestContext requestCtx, ProxyStreamHandle handler, Object failedRoute) {
 		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
 		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
 		return futureHelper.catchBlockWrap(

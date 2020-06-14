@@ -88,7 +88,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		LoadedController loadedController = container.getMetaAndController().getLoadedController();
 		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), loadedController, moduleInfo.getI18nBundleName(), matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
-		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, container.getMetaAndController(), svc);
+		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, container.getMetaAndController(), svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
 		if(routeId != null) //if there is a routeId, then add the reverse mapping
@@ -115,7 +115,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		FStreamingRouter router = new FStreamingRouter(holder.getRouteInvoker2(), container.getLoadedController(), moduleInfo.getI18nBundleName(), matchInfo);
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
-		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.STREAMING, container, svc);
+		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, container, svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
 		if(routeId != null) //if there is a routeId, then add the reverse mapping
@@ -158,7 +158,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		LoadedController loadedController = metaAndController.getLoadedController();
 		FHtmlRouter router = new FHtmlRouter(holder.getRouteInvoker2(), loadedController, moduleInfo.getI18nBundleName(), matchInfo, checkToken);	
 		SvcProxyForHtml svc = new SvcProxyForHtml(holder.getSvcProxyLogic(), futureUtil);
-		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, RouteType.HTML, metaAndController, svc);
+		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, metaAndController, svc);
 		
 		newDynamicRoutes.add(routerAndInfo);
 		resettingLogic.getReverseRoutes().addRoute(routeId, router);

@@ -26,7 +26,7 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 
 	private final ParamToObjectTranslatorImpl translator;
 	private final RouterConfig config;
-	private final ServiceInvoker invoker;
+	private final ControllerInvoker invoker;
 	private FutureHelper futureUtil;
 	
 	public SvcProxyForHtml(SvcProxyLogic svcProxyLogic, FutureHelper futureUtil) {
@@ -47,7 +47,7 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 		
 		tokenCheck(info, meta.getCtx());
 		
-		Method m = meta.getLoadedController2().getControllerMethod();
+		Method m = meta.getLoadedController().getControllerMethod();
 		
 		//We chose to do this here so any filters ESPECIALLY API filters 
 		//can catch and translate api errors and send customers a logical response
@@ -56,9 +56,9 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 		//the transaction filter
 		List<Object> argsResult = translator.createArgs(m, meta.getCtx(), null);
 		
-		return invoker.invokeAndCoerce(meta.getLoadedController2(), argsResult.toArray()).thenApply( action -> {
+		return invoker.invokeAndCoerce(meta.getLoadedController(), argsResult.toArray()).thenApply( action -> {
 			if(config.isValidateFlash()) {
-				validateKeepFlagSet(action, meta.getCtx(), meta.getLoadedController2());
+				validateKeepFlagSet(action, meta.getCtx(), meta.getLoadedController());
 			}
 			return action;
 		});

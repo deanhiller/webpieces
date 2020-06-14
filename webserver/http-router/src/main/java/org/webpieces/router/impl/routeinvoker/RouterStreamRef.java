@@ -53,4 +53,9 @@ public class RouterStreamRef implements StreamRef, Function<CancelReason, Comple
 		return cancel(t);
 	}
 
+	@Override
+	public String toString() {
+		return "RouterStreamRef [id=" + id + "]";
+	}
+	
 }

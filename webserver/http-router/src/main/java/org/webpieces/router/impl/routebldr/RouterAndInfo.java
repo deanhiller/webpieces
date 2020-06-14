@@ -11,14 +11,12 @@ public class RouterAndInfo {
 
 	private final AbstractDynamicRouter router;
 	private final RouteInfo routeInfo;
-	private final RouteType routeType;
 	private final MethodMetaAndController metaAndController;
 	private final Service<MethodMeta, Action>  svcProxy;
 
-	public RouterAndInfo(AbstractDynamicRouter router, RouteInfo routeInfo, RouteType routeType, MethodMetaAndController metaAndController, Service<MethodMeta, Action>  svc) {
+	public RouterAndInfo(AbstractDynamicRouter router, RouteInfo routeInfo, MethodMetaAndController metaAndController, Service<MethodMeta, Action>  svc) {
 		this.router = router;
 		this.routeInfo = routeInfo;
-		this.routeType = routeType;
 		this.metaAndController = metaAndController;
 		this.svcProxy = svc;
 	}
@@ -32,7 +30,7 @@ public class RouterAndInfo {
 	}
 
 	public RouteType getRouteType() {
-		return routeType;
+		return router.getRouteType();
 	}
 
 	public MethodMetaAndController getMetaAndController() {

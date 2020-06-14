@@ -8,7 +8,6 @@ import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
-import org.webpieces.router.impl.routebldr.BaseRouteInfo;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteInfoForInternalError;
@@ -35,6 +34,6 @@ public class EInternalErrorRouter {
 		Endpoint info = new Endpoint(svc);
 		RouteInfoForInternalError data = new RouteInfoForInternalError(exc);
 		InvokeInfo invokeInfo = new InvokeInfo(ctx, handle, RouteType.INTERNAL_SERVER_ERROR, loadedController, i18nBundleName);
-		return invoker.invokeErrorController(invokeInfo, info, data);
+		return invoker.invokeErrorController(invokeInfo, info, data).thenApply( voidd -> new NullStreamWriter());
 	}
 }

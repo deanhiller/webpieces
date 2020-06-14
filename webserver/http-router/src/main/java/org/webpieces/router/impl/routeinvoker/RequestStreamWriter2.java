@@ -9,6 +9,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.body.BodyParser;
 import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.dto.RouteType;
@@ -29,18 +30,19 @@ public class RequestStreamWriter2 implements StreamWriter {
 
     private Http2Headers trailingHeaders;
     private BodyParsers requestBodyParsers;
-    private InvokeInfo invokeInfo;
-    private Function<InvokeInfo, CompletableFuture<Void>> invoker;
     private DataWrapper data = dataGen.emptyWrapper();
 
     private boolean cancelled;
     private CompletableFuture<Void> responseFuture = new CompletableFuture<>();
 
+	private MethodMeta meta;
+	private Function<MethodMeta, CompletableFuture<Void>> invoker;
+
     public RequestStreamWriter2(
-    		BodyParsers bodyParsers, InvokeInfo invokeInfo, Function<InvokeInfo, CompletableFuture<Void>> invoker) {
-        this.requestBodyParsers = bodyParsers;
-        this.invokeInfo = invokeInfo;
-        this.invoker = invoker;
+    		BodyParsers bodyParsers, MethodMeta meta, Function<MethodMeta, CompletableFuture<Void>> invoker) {
+		this.requestBodyParsers = bodyParsers;
+		this.meta = meta;
+		this.invoker = invoker;
     }
 
     @Override
@@ -72,20 +74,19 @@ public class RequestStreamWriter2 implements StreamWriter {
 
     private CompletableFuture<Void> handleCompleteRequestImpl() {
 
-        RouterRequest request = invokeInfo.getRequestCtx().getRequest();
+        RouterRequest request = meta.getCtx().getRequest();
 
         request.body = data;
 
-        if(invokeInfo.getRouteType() != RouteType.CONTENT)
+        if(meta.getRouteType() != RouteType.CONTENT)
         	parseBody(request.originalRequest, request);
         
         request.trailingHeaders = trailingHeaders;
 
-        responseFuture = invoker.apply(invokeInfo);
+        responseFuture = invoker.apply(meta);
 
         return responseFuture;
     }
-
 
     private void parseBody(Http2Headers req, RouterRequest routerRequest) {
         String lengthHeader = req.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);

@@ -25,7 +25,7 @@ public class ChainFilters {
 
 		@Override
 		public CompletableFuture<Action> invoke(MethodMeta meta) {
-			Method method = meta.getLoadedController2().getControllerMethod();
+			Method method = meta.getLoadedController().getControllerMethod();
 			CompletableFuture<Action> resp = filter.filter(meta, svc).thenApply((r) -> responseCheck(method, r));
 			if(resp == null)
 				throw new IllegalStateException("Filter returned null CompletableFuture<Action> which is not allowed="+filter.getClass()+" after being given request with controller method="+method);

@@ -13,6 +13,7 @@ import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.api.streams.StreamService;
 import org.webpieces.router.impl.WebInjector;
 import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.dto.RouteType;
@@ -23,15 +24,17 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.RouteInfo;
 import org.webpieces.router.impl.routeinvoker.AbstractRouteInvoker;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
+import org.webpieces.router.impl.routeinvoker.NullWriter;
 import org.webpieces.router.impl.routeinvoker.RouteInvokerStatic;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
+import org.webpieces.router.impl.routeinvoker.ServiceInvoker;
 import org.webpieces.router.impl.routers.Endpoint;
 import org.webpieces.router.impl.routers.SimulateInternalError;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForInternalError;
 import org.webpieces.router.impl.services.RouteInfoForNotFound;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
-import org.webpieces.router.impl.services.ServiceInvoker;
+import org.webpieces.router.impl.services.ControllerInvoker;
 import org.webpieces.router.impl.services.SvcProxyFixedRoutes;
 import org.webpieces.util.futures.FutureHelper;
 
@@ -46,19 +49,19 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	public final static String ERROR_KEY = "__webpiecesCompileError";
 
 	
-	private final ServiceInvoker serviceInvoker;
+	private final ControllerInvoker serviceInvoker;
 	private WebInjector webInjector;
 
 	@Inject
 	public DevRouteInvoker(
 			WebInjector webInjector, 
 			ControllerLoader loader, 
-			ServiceInvoker invoker,
+			ControllerInvoker invoker,
 			FutureHelper futureUtil,
 			RouteInvokerStatic staticInvoker,
-			BodyParsers bodyParsers
+			ServiceInvoker serviceInvoker
 	) {
-		super(loader, futureUtil, staticInvoker, bodyParsers);
+		super(loader, futureUtil, staticInvoker, serviceInvoker);
 		this.webInjector = webInjector;
 		this.serviceInvoker = invoker;
 	}
@@ -73,13 +76,14 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	}
 
 	@Override
-	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, StreamService dynamicInfo, RouteData data) {
 		//special case for if stuff didn't compile and we flag it
 		Throwable exc = (Throwable) invokeInfo.getRequestCtx().getRequest().requestState.get(ERROR_KEY);
 		if(exc != null) {
 			log.error("Could not compile your code", exc);
 			RouteInfoForInternalError error = new RouteInfoForInternalError(exc); 
-			CompletableFuture<StreamWriter> writer = invokeDevelopmentErrorPage(invokeInfo, error);
+			CompletableFuture<Void> future = invokeDevelopmentErrorPage(invokeInfo, error);
+			CompletableFuture<StreamWriter> writer = future.thenApply( voidd -> new NullWriter());
 			return new RouterStreamRef("notCompileError", writer, null);
 		} if(invokeInfo.getRequestCtx().getRequest().queryParams.containsKey(DevelopmentController.INTERNAL_ERROR_KEY)) {
 			//special case for in DevelopmentServer when invokeErrorController was called and then it's iframe called back out again to display
@@ -97,7 +101,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
+	public CompletableFuture<Void> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		RouteInfoForInternalError error = (RouteInfoForInternalError)data;
 		Throwable exception = error.getException();
 
@@ -109,7 +113,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		return invokeDevelopmentErrorPage(invokeInfo, error);
 	}
 
-	private CompletableFuture<StreamWriter> invokeDevelopmentErrorPage(InvokeInfo invokeInfo, RouteInfoForInternalError data) {
+	private CompletableFuture<Void> invokeDevelopmentErrorPage(InvokeInfo invokeInfo, RouteInfoForInternalError data) {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
 		RouterRequest req = requestCtx.getRequest();
@@ -143,7 +147,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	 * This one is definitely special
 	 */
 	@Override
-	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, Endpoint info, RouteData data) {
+	public CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, Endpoint info, RouteData data) {
 		//special case for if stuff didn't compile and we flag it
 		Throwable exc = (Throwable) invokeInfo.getRequestCtx().getRequest().requestState.get(ERROR_KEY);
 		if(exc != null) {

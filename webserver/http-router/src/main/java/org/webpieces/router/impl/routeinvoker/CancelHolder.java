@@ -3,16 +3,13 @@ package org.webpieces.router.impl.routeinvoker;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import org.webpieces.router.api.controller.actions.Action;
-
 import com.webpieces.http2.api.dto.lowlevel.CancelReason;
 
 class CancelHolder implements Function<CancelReason, CompletableFuture<Void>> {
-	private CompletableFuture<Action> controllerFuture;
+	private CompletableFuture<?> controllerFuture;
 	
-	public void setControllerFutureResponse(CompletableFuture<Action> controllerFuture) {
+	public void setControllerFutureResponse(CompletableFuture<?> controllerFuture) {
 		this.controllerFuture = controllerFuture;
-		
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
+import org.webpieces.router.impl.routeinvoker.NullWriter;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.services.RouteInfoForNotFound;
 import org.webpieces.util.filters.Service;
@@ -35,6 +36,6 @@ public class ENotFoundRouter {
 		Endpoint info = new Endpoint(svc);
 		RouteInfoForNotFound data = new RouteInfoForNotFound(exc);
 		InvokeInfo invokeInfo = new InvokeInfo(ctx, handle, RouteType.NOT_FOUND, loadedController, i18nBaseBundle);
-		return invoker.invokeNotFound(invokeInfo, info, data);
+		return invoker.invokeNotFound(invokeInfo, info, data).thenApply(voidd -> new NullWriter());
 	}
 }

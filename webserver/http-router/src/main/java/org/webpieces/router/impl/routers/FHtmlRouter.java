@@ -38,4 +38,9 @@ public class FHtmlRouter extends AbstractDynamicRouter implements ReversableRout
 		return matchInfo.getFullPath();
 	}
 
+
+	@Override
+	public RouteType getRouteType() {
+		return RouteType.HTML;
+	}
 }

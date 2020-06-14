@@ -36,4 +36,9 @@ public class FStreamingRouter extends AbstractDynamicRouter implements Reversabl
 		return matchInfo.getFullPath();
 	}
 
+
+	@Override
+	public RouteType getRouteType() {
+		return RouteType.STREAMING;
+	}
 }

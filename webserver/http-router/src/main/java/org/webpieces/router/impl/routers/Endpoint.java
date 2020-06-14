@@ -13,7 +13,7 @@ import org.webpieces.util.filters.Service;
  * keeping the development server relatively fast in spite of compiling
  * 
  */
-public class Endpoint implements Service<MethodMeta, Action>{
+public class Endpoint implements Service<MethodMeta, Action> {
 
 	private final Service<MethodMeta, Action> service;
 

@@ -5,19 +5,19 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
-import org.webpieces.router.impl.services.ServiceInvoker;
+import org.webpieces.router.impl.services.ControllerInvoker;
 
 @Singleton
 public class SvcProxyLogic {
 
 	private final RouterConfig config;
-	private final ServiceInvoker serviceInvoker;
+	private final ControllerInvoker serviceInvoker;
 	private final ParamToObjectTranslatorImpl translator;
 
 	@Inject
 	public SvcProxyLogic( 
 		RouterConfig config, 
-		ServiceInvoker serviceInvoker, 
+		ControllerInvoker serviceInvoker, 
 		ParamToObjectTranslatorImpl translator
 	) {
 		this.config = config;
@@ -29,7 +29,7 @@ public class SvcProxyLogic {
 		return config;
 	}
 
-	public ServiceInvoker getServiceInvoker() {
+	public ControllerInvoker getServiceInvoker() {
 		return serviceInvoker;
 	}
 

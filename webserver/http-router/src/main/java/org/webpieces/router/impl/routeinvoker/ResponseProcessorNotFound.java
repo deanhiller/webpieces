@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
+import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.dto.RenderContentResponse;
@@ -17,19 +18,27 @@ import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 
 public class ResponseProcessorNotFound implements Processor {
 
-	private RequestContext ctx;
-	private LoadedController loadedController;
-	private ProxyStreamHandle responseCb;
-
-	public ResponseProcessorNotFound(
-			InvokeInfo info
-	) {
-		ctx = info.getRequestCtx();
-		loadedController = info.getLoadedController();
-		responseCb = info.getHandler();
+	public ResponseProcessorNotFound() {
 	}
 
-	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {
+	@Override
+	public CompletableFuture<Void> continueProcessing(MethodMeta meta, Action controllerResponse, ProxyStreamHandle handle) {
+		if(controllerResponse instanceof RenderImpl) {
+			return createRenderResponse(meta, (RenderImpl) controllerResponse, handle);
+		} else if(controllerResponse instanceof RenderContent) {
+			return createContentResponse(meta, (RenderContent) controllerResponse, handle);
+		} else if(controllerResponse instanceof RedirectImpl) {
+			RedirectImpl redirect = (RedirectImpl)controllerResponse;
+			return handle.sendFullRedirect(redirect.getId(), redirect.getArgs());
+		} else {
+			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
+					+ "precondition check on NotFound routes to assert the correct return types in "
+					+ "ControllerLoader which is called from the RouteBuilders.  response type="+controllerResponse.getClass());
+		}
+	}
+	
+	public CompletableFuture<Void> createRenderResponse(MethodMeta meta, RenderImpl controllerResponse, ProxyStreamHandle handle) {
+		LoadedController loadedController = meta.getLoadedController();
 		String controllerName = loadedController.getControllerInstance().getClass().getName();
 		String methodName = loadedController.getControllerMethod().getName();
 		
@@ -40,6 +49,7 @@ public class ResponseProcessorNotFound implements Processor {
 
 		Map<String, Object> pageArgs = controllerResponse.getPageArgs();
 
+		RequestContext ctx = meta.getCtx();
         // Add context as a page arg:
         pageArgs.put("_context", ctx);
         pageArgs.put("_session", ctx.getSession());
@@ -49,27 +59,15 @@ public class ResponseProcessorNotFound implements Processor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.NOT_FOUND);
 		
-		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderHtml(resp));
+		return ContextWrap.wrap(ctx, () -> handle.sendRenderHtml(resp));
 	}
 
-	public CompletableFuture<Void> createContentResponse(RenderContent r) {
+	public CompletableFuture<Void> createContentResponse(MethodMeta meta, RenderContent r, ProxyStreamHandle handle) {
+		RequestContext ctx = meta.getCtx();
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
-		return ContextWrap.wrap(ctx, () -> responseCb.sendRenderContent(resp));
+		return ContextWrap.wrap(ctx, () -> handle.sendRenderContent(resp));
 	}
 	
-	public CompletableFuture<Void> continueProcessing(Action controllerResponse) {
-		if(controllerResponse instanceof RenderImpl) {
-			return createRenderResponse((RenderImpl) controllerResponse);
-		} else if(controllerResponse instanceof RenderContent) {
-			return createContentResponse((RenderContent) controllerResponse);
-		} else if(controllerResponse instanceof RedirectImpl) {
-			RedirectImpl redirect = (RedirectImpl)controllerResponse;
-			return responseCb.sendFullRedirect(redirect.getId(), redirect.getArgs());
-		} else {
-			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
-					+ "precondition check on NotFound routes to assert the correct return types in "
-					+ "ControllerLoader which is called from the RouteBuilders.  response type="+controllerResponse.getClass());
-		}
-	}
+
 	
 }
