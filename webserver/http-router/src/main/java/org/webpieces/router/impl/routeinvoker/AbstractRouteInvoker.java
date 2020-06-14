@@ -20,7 +20,7 @@ import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routebldr.BaseRouteInfo;
-import org.webpieces.router.impl.routers.DynamicInfo;
+import org.webpieces.router.impl.routers.Endpoint;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForContent;
 import org.webpieces.router.impl.services.RouteInfoForStatic;
@@ -66,7 +66,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		ResponseProcessorAppError processor = new ResponseProcessorAppError(invokeInfo);
 		
 		CancelHolder cancelFunc = new CancelHolder(); //useless since not tied to RouterStreamRef but invoke error routes are quick anyways so no need to cancel
@@ -74,7 +74,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound(invokeInfo);
 		
 		CancelHolder cancelFunc = new CancelHolder(); //useless since not tied to RouterStreamRef but invoke error routes are quick anyways so no need to cancel
@@ -82,14 +82,14 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	@Override
-	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		ResponseProcessorHtml processor = new ResponseProcessorHtml(invokeInfo);
 		
 		return invokeRealRoute(invokeInfo, dynamicInfo, data, processor, false);
 	}
 	
 	@Override
-	public RouterStreamRef invokeContentController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeContentController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		RouteInfoForContent content = (RouteInfoForContent) data;
 		if(content.getBodyContentBinder() == null)
 			throw new IllegalArgumentException("bodyContentBinder is required for these routes yet it is null here.  bug");
@@ -97,7 +97,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		return invokeRealRoute(invokeInfo, dynamicInfo, data, processor, false);
 	}
 	
-	public RouterStreamRef invokeStreamingController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeStreamingController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
 		LoadedController loadedController = invokeInfo.getLoadedController();
@@ -156,29 +156,27 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		}
 	}
 
-	protected RouterStreamRef invokeRealRoute(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, boolean forceEndOfStream) {
-		Service<MethodMeta, Action> service = dynamicInfo.getService();
+	protected RouterStreamRef invokeRealRoute(InvokeInfo invokeInfo, Endpoint endpoint, RouteData data, Processor processor, boolean forceEndOfStream) {
 		LoadedController loadedController = invokeInfo.getLoadedController();
 		invokeInfo.getHandler().initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
 
 		CancelHolder cancelFunc = new CancelHolder();
-		CompletableFuture<StreamWriter> writer =  invokeOnStreamComplete(invokeInfo, loadedController, service, data, processor, cancelFunc, forceEndOfStream);
+		CompletableFuture<StreamWriter> writer =  invokeOnStreamComplete(invokeInfo, loadedController, endpoint, data, processor, cancelFunc, forceEndOfStream);
 	
 		return new RouterStreamRef("invokeAny", writer, cancelFunc);		
 	}
 	
-	protected CompletableFuture<StreamWriter> invokeImpl(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data, Processor processor, CancelHolder cancelFunc, boolean forceEndOfStream) {
-		Service<MethodMeta, Action> service = dynamicInfo.getService();
+	protected CompletableFuture<StreamWriter> invokeImpl(InvokeInfo invokeInfo, Endpoint endpoint, RouteData data, Processor processor, CancelHolder cancelFunc, boolean forceEndOfStream) {
 		LoadedController loadedController = invokeInfo.getLoadedController();
 		invokeInfo.getHandler().initJustBeforeInvoke(reverseRoutes, invokeInfo, loadedController);
 
-		return invokeOnStreamComplete(invokeInfo, loadedController, service, data, processor, cancelFunc, forceEndOfStream);
+		return invokeOnStreamComplete(invokeInfo, loadedController, endpoint, data, processor, cancelFunc, forceEndOfStream);
 	}
 
 	private CompletableFuture<StreamWriter> invokeOnStreamComplete(
 			InvokeInfo invokeInfo,
 			LoadedController loadedController,
-			Service<MethodMeta, Action> service,
+			Endpoint service,
 			RouteData data,
 			Processor processor,
 			CancelHolder cancelFunc,
@@ -187,12 +185,12 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		boolean endOfStream = invokeInfo.getRequestCtx().getRequest().originalRequest.isEndOfStream();
 		if(forceEndOfStream || endOfStream) {
 			//If there is no body, just invoke to process OR IN CASE of InternalError or NotFound, there is NO need
-			//to wait for the body and we can respond early, which stops wasting CPU of reading in their body
+			//to wait for the request body and we can respond early, which stops wasting CPU of reading in their body
 			invokeInfo.getRequestCtx().getRequest().body = DataWrapperGeneratorFactory.EMPTY;
 			return invokeAnyImpl2(invokeInfo, loadedController, service, data, processor, cancelFunc).thenApply(voidd -> null);
 		}
 		
-		//At this point, we don't have the end of the stream
+		//At this point, we don't have the end of the stream so return a request writer that calls invoke when complete
 		RequestStreamWriter2 writer = new RequestStreamWriter2(requestBodyParsers, invokeInfo,
 				(newInfo) -> invokeAnyImpl2(newInfo, loadedController, service, data, processor, cancelFunc)
 		);
@@ -203,7 +201,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	private CompletableFuture<Void> invokeAnyImpl2(
 		InvokeInfo invokeInfo, 
 		LoadedController loadedController, 
-		Service<MethodMeta, Action> service,
+		Endpoint service,
 		RouteData data, 
 		Processor processor,
 		CancelHolder cancelHolder
@@ -239,7 +237,7 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	
-	public CompletableFuture<Action> invokeService(Service<MethodMeta, Action> service, MethodMeta methodMeta) {
+	public CompletableFuture<Action> invokeService(Endpoint service, MethodMeta methodMeta) {
 		return service.invoke(methodMeta);
 	}
 	

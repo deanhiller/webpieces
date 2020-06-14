@@ -15,7 +15,7 @@ import org.webpieces.router.impl.loader.ResolvedMethod;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.routers.AbstractDynamicRouter;
 import org.webpieces.router.impl.routers.AbstractRouter;
-import org.webpieces.router.impl.routers.DynamicInfo;
+import org.webpieces.router.impl.routers.Endpoint;
 import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.util.filters.Service;
 
@@ -58,7 +58,7 @@ public class SharedMatchUtil {
 					resettingLogic.getInjector(), routerAndInfo.getRouteInfo(), routerAndInfo.getSvcProxy(), filters, routerAndInfo.getRouteType());
 			Service<MethodMeta, Action> service = holder.getFinder().loadFilters(baseRouteInfo.getFilterChainCreationInfo());
 
-			router.setDynamicInfo(new DynamicInfo(service));
+			router.setDynamicInfo(new Endpoint(service));
 			routers.add(router);
 		}
 		

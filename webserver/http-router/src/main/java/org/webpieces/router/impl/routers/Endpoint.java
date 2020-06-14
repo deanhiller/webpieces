@@ -1,5 +1,7 @@
 package org.webpieces.router.impl.routers;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.util.filters.Service;
@@ -11,17 +13,18 @@ import org.webpieces.util.filters.Service;
  * keeping the development server relatively fast in spite of compiling
  * 
  */
-public class DynamicInfo {
+public class Endpoint implements Service<MethodMeta, Action>{
 
 	private final Service<MethodMeta, Action> service;
 
-	public DynamicInfo(Service<MethodMeta, Action> service) {
+	public Endpoint(Service<MethodMeta, Action> service) {
 		super();
 		this.service = service;
 	}
 
-	public Service<MethodMeta, Action> getService() {
-		return service;
+	@Override
+	public CompletableFuture<Action> invoke(MethodMeta meta) {
+		return service.invoke(meta);
 	}
 
 }

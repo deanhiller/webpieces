@@ -7,7 +7,7 @@ import org.webpieces.router.api.routes.Port;
 
 public abstract class AbstractDynamicRouter extends AbstractRouterImpl {
 
-	protected DynamicInfo dynamicInfo;
+	protected Endpoint dynamicInfo;
 	
 	public AbstractDynamicRouter(MatchInfo matchInfo) {
 		super(matchInfo);
@@ -30,7 +30,7 @@ public abstract class AbstractDynamicRouter extends AbstractRouterImpl {
 		return matcher;
 	}
 	
-	public void setDynamicInfo(DynamicInfo dynamicInfo) {
+	public void setDynamicInfo(Endpoint dynamicInfo) {
 		this.dynamicInfo = dynamicInfo;
 	}
 }

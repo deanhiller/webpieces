@@ -25,7 +25,7 @@ import org.webpieces.router.impl.routeinvoker.AbstractRouteInvoker;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvokerStatic;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
-import org.webpieces.router.impl.routers.DynamicInfo;
+import org.webpieces.router.impl.routers.Endpoint;
 import org.webpieces.router.impl.routers.SimulateInternalError;
 import org.webpieces.router.impl.services.RouteData;
 import org.webpieces.router.impl.services.RouteInfoForInternalError;
@@ -73,7 +73,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	}
 
 	@Override
-	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo, RouteData data) {
+	public RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		//special case for if stuff didn't compile and we flag it
 		Throwable exc = (Throwable) invokeInfo.getRequestCtx().getRequest().requestState.get(ERROR_KEY);
 		if(exc != null) {
@@ -97,7 +97,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, DynamicInfo dynamicInfo,
+	public CompletableFuture<StreamWriter> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo,
 			RouteData data) {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
@@ -116,7 +116,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		
 		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(serviceInvoker, futureUtil);
 		LoadedController newLoadedController = controllerFinder.loadGenericController(webAppInjector, routeInfo).getLoadedController();
-		DynamicInfo newInfo = new DynamicInfo(svcProxy);
+		Endpoint newInfo = new Endpoint(svcProxy);
 		
 		RouterRequest newRequest = new RouterRequest();
 		newRequest.putMultipart("url", req.relativePath);
@@ -138,7 +138,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 	 * This one is definitely special
 	 */
 	@Override
-	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, DynamicInfo info, RouteData data) {
+	public CompletableFuture<StreamWriter> invokeNotFound(InvokeInfo invokeInfo, Endpoint info, RouteData data) {
 		//special case for if stuff didn't compile and we flag it
 		Throwable exc = (Throwable) invokeInfo.getRequestCtx().getRequest().requestState.get(ERROR_KEY);
 		if(exc != null) {
@@ -172,7 +172,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		
 		SvcProxyFixedRoutes svcProxy = new SvcProxyFixedRoutes(serviceInvoker, futureUtil);
 		LoadedController newLoadedController = controllerFinder.loadGenericController(webAppInjector, routeInfo).getLoadedController();
-		DynamicInfo newInfo = new DynamicInfo(svcProxy);
+		Endpoint newInfo = new Endpoint(svcProxy);
 		
 		String reason = "Your route was not found in routes table";
 		if(notFoundExc != null)

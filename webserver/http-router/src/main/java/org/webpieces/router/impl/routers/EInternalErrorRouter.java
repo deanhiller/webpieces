@@ -32,7 +32,7 @@ public class EInternalErrorRouter {
 	}
 
 	public CompletableFuture<StreamWriter> invokeErrorRoute(RequestContext ctx, ProxyStreamHandle handle, Throwable exc) {
-		DynamicInfo info = new DynamicInfo(svc);
+		Endpoint info = new Endpoint(svc);
 		RouteInfoForInternalError data = new RouteInfoForInternalError(exc);
 		InvokeInfo invokeInfo = new InvokeInfo(ctx, handle, RouteType.INTERNAL_SERVER_ERROR, loadedController, i18nBundleName);
 		return invoker.invokeErrorController(invokeInfo, info, data);
