@@ -57,11 +57,9 @@ public class GuiceModule implements Module {
 	    
 	    //Must bind a BackendLogin for the backend plugin(or remove the backend plugin)
 	    binder.bind(BackendLogin.class).to(BackendLoginImpl.class).asEagerSingleton();
-	    
-	    GlobalAppContext ctx = new GlobalAppContext();
-	    //MUST be bound to ApplicationContext to be available in webpages..
-		binder.bind(ApplicationContext.class).toInstance(ctx);
-		binder.bind(GlobalAppContext.class).toInstance(ctx);
+
+	    //since GlobalAppContext is a singleton, ApplicationContext will be to and will be the same
+		binder.bind(ApplicationContext.class).to(GlobalAppContext.class).asEagerSingleton();
 	}
 
 }
