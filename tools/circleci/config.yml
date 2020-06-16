@@ -27,6 +27,7 @@ jobs:
 
     steps:
       - checkout
+      - run: echo "$(pwd)"
       - run: echo "$(git log -1 --pretty=format:'%ae')"
       - run: echo "$(git log -1 --pretty=format:'%an')"
       - run: git config --global user.email "$(git log -1 --pretty=format:'%ae')"
@@ -74,6 +75,9 @@ jobs:
       - run: git merge --no-edit tempBranch
       - run: git push
       - run: git push origin --delete $CIRCLE_BRANCH
+      - store_artifacts:
+          path: java/servers/output
+
       #- run: git checkout deployBranch
       #- run: 
       #    name: Build & Deploy Docker Images 

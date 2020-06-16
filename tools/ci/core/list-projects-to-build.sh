@@ -45,6 +45,7 @@ log "***********************CHANGED_PATHS*******************************"
 log "$CHANGED_PATHS" 
 log "*******************************************************************"
 
+
 # Look for dependencies between projects
 PROJECT_DEPENDENCIES=$(${DIR}/list-dependencies.sh)
 
@@ -116,6 +117,9 @@ else
     log "$CHANGED_PROJECTS"
     log "------------------------------------------------------------------"
 fi
+
+mkdir ~/.webpieces
+echo ${CHANGED_PROJECTS} > ~/.webpieces/changedProjects
 
 log "testing out tools we have"
 command -v tac >&2

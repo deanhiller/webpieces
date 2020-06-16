@@ -50,9 +50,25 @@ ASYNC_REVIEW_BRANCH="asyncreview${BRANCH:6}"
 echo "Pushing the branch for review to origin/$BRANCH"
 git push -u origin "$BRANCH:$ASYNC_REVIEW_BRANCH"
 
+if [ $? -eq 0 ]
+then
+   echo "Successfully pushed $ASYNC_REVIEW_BRANCH"
+else
+   echo "FAILURE pushing!!! perhaps branch exists already"
+   exit 1
+fi
+
 #submit the $SUBMIT_BRANCH to CI to build it...
 echo "Pushing the branch to be built to remote branch origin/$SUBMIT_BRANCH"
 git push -u origin "$BRANCH:$SUBMIT_BRANCH"
+
+if [ $? -eq 0 ]
+then
+   echo "Successfully pushed $SUBMIT_BRANCH"
+else
+   echo "FAILURE pushing!!! perhaps branch exists already"
+   exit 1
+fi
 
 git checkout master
 

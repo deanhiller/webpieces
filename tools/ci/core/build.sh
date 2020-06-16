@@ -89,6 +89,16 @@ else
    exit 1
 fi
 
+read CHANGED_PROJECTS < ~/.webpieces/changedProjects
+
+echo "------------------------------------------------------------------------------"
+echo "                  PROJECTS WE HAD TO BUILD TO TEST      "
+echo "$PROJECTS_TO_BUILD"
+echo "------------------------------------------------------------------------------"
+echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+echo "                  PROJECTS YOU CHANGED             "
+echo "${CHANGED_PROJECTS}" 
+echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 echo "******************************************************************************"
 echo "******************************************************************************"
 echo "                     ALL BUILDS PASSED                             "
