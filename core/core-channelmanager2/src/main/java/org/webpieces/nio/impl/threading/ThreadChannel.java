@@ -93,4 +93,9 @@ public class ThreadChannel implements Channel {
 		return tcpChannel.isSslChannel();
 	}
 
+	@Override
+	public Boolean isServerSide() {
+		return tcpChannel.isServerSide();
+	}
+
 }

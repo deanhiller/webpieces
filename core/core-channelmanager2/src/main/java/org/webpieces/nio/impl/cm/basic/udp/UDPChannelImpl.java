@@ -34,6 +34,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	private static final Logger apiLog = LoggerFactory.getLogger(UDPChannel.class);
 	protected org.webpieces.nio.api.jdk.JdkDatagramChannel channel;
     private Calendar expires;
+	private Boolean isServerrSide;
     
 	public UDPChannelImpl(
 			String id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
@@ -49,6 +50,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
 
 	public void bindImpl2(SocketAddress addr) throws IOException {
+		isServerrSide = true;
         channel.socket().bind(addr);
 	}
 	
@@ -57,6 +59,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
 	
 	protected synchronized CompletableFuture<Channel> connectImpl(SocketAddress addr) {
+		isServerrSide = false;
 		CompletableFuture<Channel> promise = new CompletableFuture<>();
 		
 		try {
@@ -170,6 +173,11 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 		} catch (ClosedChannelException e) {
 			throw new NioClosedChannelException("Closed Channel", e);
 		}
+	}
+
+	@Override
+	public Boolean isServerSide() {
+		return isServerrSide;
 	}
 
 }

@@ -87,5 +87,9 @@ public interface Channel extends RegisterableChannel {
     public ChannelSession getSession();
 	
 	public boolean isSslChannel();
-	
+
+	/**
+	 * Returns null if UDP AND not known yet(has to wait for bind or connect call first)
+	 */
+	public Boolean isServerSide();
 }

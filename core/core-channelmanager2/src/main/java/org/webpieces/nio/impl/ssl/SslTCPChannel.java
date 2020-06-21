@@ -342,4 +342,9 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		return !isInPlainTextMode;
 	}
 
+	@Override
+	public Boolean isServerSide() {
+		return realChannel.isServerSide();
+	}
+
 }

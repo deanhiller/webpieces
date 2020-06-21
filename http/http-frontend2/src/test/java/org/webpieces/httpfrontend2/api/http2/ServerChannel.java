@@ -113,4 +113,9 @@ public class ServerChannel implements TCPChannel {
 		
 	}
 
+	@Override
+	public Boolean isServerSide() {
+		return clientChannel.isServerSide();
+	}
+
 }

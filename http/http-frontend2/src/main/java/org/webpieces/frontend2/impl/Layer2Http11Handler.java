@@ -7,6 +7,7 @@ import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -161,14 +162,20 @@ public class Layer2Http11Handler {
 	}
 	
 	private CompletableFuture<Void> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
-		Http2Msg msg = Http11ToHttp2.translate(payload, socket.isForServingHttpsPages());
-
-		if(payload instanceof HttpRequest) {
-			return processInitialPieceOfRequest(socket, (HttpRequest) payload, (Http2Request)msg);
-		} else if(msg instanceof DataFrame) {
-			return processData(socket, (DataFrame)msg);
-		} else {
-			throw new IllegalArgumentException("payload not supported="+payload);
+		try {
+			MDC.put("svrSocket", socket.getChannel().getChannelId());
+			
+			Http2Msg msg = Http11ToHttp2.translate(payload, socket.isForServingHttpsPages());
+	
+			if(payload instanceof HttpRequest) {
+				return processInitialPieceOfRequest(socket, (HttpRequest) payload, (Http2Request)msg);
+			} else if(msg instanceof DataFrame) {
+				return processData(socket, (DataFrame)msg);
+			} else {
+				throw new IllegalArgumentException("payload not supported="+payload);
+			}
+		} finally {
+			MDC.put("svrSocket", "");			
 		}
 	}
 

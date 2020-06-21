@@ -2,8 +2,8 @@ package org.webpieces.nio.impl.threading;
 
 import java.util.concurrent.Executor;
 
-import org.slf4j.MDC;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.impl.cm.basic.MDCUtil;
 import org.webpieces.util.threading.SessionExecutor;
 
 public class ProxyExecutor implements Executor {
@@ -34,7 +34,7 @@ public class ProxyExecutor implements Executor {
 		@Override
 		public void run() {
 			//VERY VERY special case because sometimes the future is complete already and
-			//sometimes not.  Looking at this stack trace when completed quickly you will see we MDC.put("socket)
+			//sometimes not.  Looking at this stack trace when completed quickly you will see we MDC.pust("socket)
 			//in ThreadDataListener$DataListenerRunable and here
 //          ProxyExecutor$ProxyRunnable.run() line: 40	
 //			SessionExecutorImpl.execute(Object, Runnable) line: 93	
@@ -58,20 +58,16 @@ public class ProxyExecutor implements Executor {
 //			ThreadPoolExecutor$Worker.run() line: 628	
 //			Thread.run() line: 834	
 
-
-			String socket = MDC.get("socket");
-
+			Boolean isServerSide = channel.isServerSide();
 			try {
-				if(socket == null)
-					MDC.put("socket", channel+"");
-				
+				MDCUtil.setMDC(isServerSide, channel.getChannelId());
+
 				runnable.run();
 			} finally {
-				if(socket == null)
-					MDC.put("socket", null);
+				MDCUtil.setMDC(isServerSide, channel.getChannelId());
 			}
 		}
-		
+
 	}
 
 }

@@ -5,9 +5,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.impl.cm.basic.MDCUtil;
 import org.webpieces.util.threading.SessionExecutor;
 
 public class ThreadDataListener implements DataListener {
@@ -48,7 +48,8 @@ public class ThreadDataListener implements DataListener {
 
 		@Override
 		public void run() {
-			MDC.put("socket", ""+proxy);
+			MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
+
 			try {
 				CompletableFuture<Void> fut = dataListener.incomingData(proxy, buffer);
 				fut.handle((v, t) -> {
@@ -63,7 +64,7 @@ public class ThreadDataListener implements DataListener {
 				log.error("Uncaught Exception", e);
 				future.completeExceptionally(e);
 			} finally {
-				MDC.put("socket", null);
+				MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
 			}
 		}
 	}
@@ -73,13 +74,13 @@ public class ThreadDataListener implements DataListener {
 		executor.execute(proxy, new Runnable() {
 			@Override
 			public void run() {
-				MDC.put("socket", ""+proxy);
+				MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
 				try {
 					dataListener.farEndClosed(proxy);
 				} catch(RuntimeException e) {
 					throw e;
 				} finally {
-					MDC.put("socket", null);
+					MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
 				}
 			}
 		});
@@ -90,13 +91,13 @@ public class ThreadDataListener implements DataListener {
 		executor.execute(proxy, new Runnable() {
 			@Override
 			public void run() {
-				MDC.put("socket", ""+proxy);
+				MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
 				try {
 					dataListener.failure(proxy, data, e);
 				} catch(RuntimeException e) {
 					throw e;
 				} finally {
-					MDC.put("socket", null);
+					MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
 				}
 			}
 		});

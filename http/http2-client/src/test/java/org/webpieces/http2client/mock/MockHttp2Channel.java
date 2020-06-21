@@ -245,5 +245,11 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	public DataListener getConnectedListener() {
 		return listener;
 	}
+
+	@Override
+	public Boolean isServerSide() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

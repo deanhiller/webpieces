@@ -177,4 +177,10 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 		return "Http2ChannelCache1";
 	}
 
+	@Override
+	public Boolean isServerSide() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

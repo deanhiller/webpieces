@@ -43,14 +43,14 @@ public class ChunkFileSystemReader implements ChunkReader {
 			this.file = file;
 			this.buf = buf;
 			this.filePathForLogging = filePathForLogging;
-			socket = MDC.get("socket");
+			socket = MDC.get("svrSocket");
 			txId = MDC.get("txId");
 			user = MDC.get("userId");
 		}
 		@Override
 		public void completed(Integer result, String attachment) {
 			try {
-				MDC.put("socket", socket);
+				MDC.put("svrSocket", socket);
 				MDC.put("txId", txId);
 				MDC.put("userId", user);
 				if(result.intValue() == -1 && remaining != buf.remaining()) {
@@ -65,7 +65,7 @@ public class ChunkFileSystemReader implements ChunkReader {
 		@Override
 		public void failed(Throwable exc, String attachment) {
 			try {
-				MDC.put("socket", socket);
+				MDC.put("svrSocket", socket);
 				MDC.put("txId", txId);
 				MDC.put("userId", user);				
 				log.error("Failed to read file="+file, exc);

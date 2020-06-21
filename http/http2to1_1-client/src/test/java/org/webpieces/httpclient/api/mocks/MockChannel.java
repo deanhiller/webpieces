@@ -178,5 +178,11 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 		listener.farEndClosed(this);
 	}
 
+	@Override
+	public Boolean isServerSide() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 }

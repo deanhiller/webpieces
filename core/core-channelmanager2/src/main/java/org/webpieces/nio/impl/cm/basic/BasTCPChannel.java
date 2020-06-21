@@ -33,11 +33,13 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	protected org.webpieces.nio.api.jdk.JdkSocketChannel channel;
 	private boolean isClosed;
+	private final boolean isServerSide;
 		    
 	public BasTCPChannel(
 			String id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
 	) {
 		super(id, selMgr, router, pool, config);
+		isServerSide = false;
 		this.channelState = ChannelState.NOT_STARTED;
 
 		try {
@@ -60,6 +62,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 			String id, JdkSocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
 	) {
 		super(id, selMgr, router, pool, config);
+		isServerSide = true;
+		
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;
@@ -259,6 +263,12 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		} catch (ClosedChannelException e) {
 			throw new NioClosedChannelException(this+"On registering, we received closedChannel(did remote end or local end close the socket", e);
 		}
+	}
+
+
+	@Override
+	public Boolean isServerSide() {
+		return isServerSide;
 	}
 
 

@@ -111,4 +111,10 @@ public class MockTcpChannel implements TCPChannel {
 		this.dataListener = dataListener;
 	}
 
+	@Override
+	public Boolean isServerSide() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

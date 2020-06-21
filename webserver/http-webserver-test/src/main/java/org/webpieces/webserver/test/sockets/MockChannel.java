@@ -108,5 +108,10 @@ public class MockChannel implements TCPChannel {
 		
 	}
 
+	@Override
+	public Boolean isServerSide() {
+		return null;
+	}
+
 
 }

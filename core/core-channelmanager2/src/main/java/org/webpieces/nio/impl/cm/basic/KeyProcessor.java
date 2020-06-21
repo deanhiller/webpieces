@@ -169,8 +169,8 @@ public final class KeyProcessor {
 		BasTCPChannel channel = (BasTCPChannel)info.getChannel();
 
 		try {
-			MDC.put("socket", channel+"");
-			
+			MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
+
 			//must change the interests to not interested in connect anymore
 			//since we are connected otherwise selector seems to keep firing over
 			//and over again with 0 keys wasting cpu like a while(true) loop
@@ -189,7 +189,7 @@ public final class KeyProcessor {
             
             callback.completeExceptionally(e);
 		} finally {
-			MDC.put("socket", null);
+			MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
 		}
 	}
 
@@ -199,8 +199,9 @@ public final class KeyProcessor {
 		
 		DataListener in = info.getDataHandler();
 		BasChannelImpl channel = (BasChannelImpl)info.getChannel();
-		MDC.put("socket", channel+"");
-		
+
+		MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
+
 		ByteBuffer chunk = pool.nextBuffer(1024);
 		
 		try {
@@ -288,7 +289,7 @@ public final class KeyProcessor {
 			} else
 				throw e;
 		} finally {
-			MDC.put("socket", null);
+			MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
 		}
 	}
 
@@ -415,9 +416,10 @@ public final class KeyProcessor {
 		if(log.isTraceEnabled())
 			log.trace(info.getChannel()+"writing data");
 		
-		BasChannelImpl channel = (BasChannelImpl)info.getChannel();		
-		MDC.put("socket", channel+"");
-		
+		BasChannelImpl channel = (BasChannelImpl)info.getChannel();
+
+		MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
+
 		if(log.isTraceEnabled())
 			log.trace(channel+"notifying channel of write");
 
@@ -427,7 +429,7 @@ public final class KeyProcessor {
 			//since it may close while someone is async writing, this is normal behavior so we swallow it and log as info
 			log.info(channel+" Channel is closed so discarding the async writes");
 		} finally {
-			MDC.put("socket", null);
+			MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
 		}
 	}
 	

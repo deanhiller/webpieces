@@ -2,12 +2,12 @@ package org.webpieces.nio.impl.threading;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.slf4j.MDC;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.impl.cm.basic.MDCUtil;
 import org.webpieces.util.threading.SessionExecutor;
 
 public class ThreadConnectionListener implements ConnectionListener {
@@ -54,7 +54,7 @@ public class ThreadConnectionListener implements ConnectionListener {
 
 		@Override
 		public void run() {
-			MDC.put("socket", channel+"");
+			MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
 			try {
 				CompletableFuture<DataListener> dataListener = connectionListener.connected(proxy, isReadyForWrites);
 				//transfer the listener to the future to be used
@@ -65,8 +65,8 @@ public class ThreadConnectionListener implements ConnectionListener {
 						return null;
 					});
 			} finally {
-				MDC.put("socket", null);
-			}			
+				MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
+			}
 		}
 		
 		private void translate(ThreadTCPChannel proxy, CompletableFuture<DataListener> future, DataListener listener) {
