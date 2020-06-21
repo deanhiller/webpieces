@@ -1,6 +1,7 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
+* XFuture so context issue is solve
 * conversations
 * ALPN
 * IN PROGRESS - streaming filters?
@@ -11,6 +12,7 @@ ONLY THESE BIG ITEMS LEFT
    * website CURD using all DBOs
    * JSON CRUD with DTOs and DBOs
 * PLUGIN - GRPC
+* swap all DataWrapper with httpok ByteBuffer pool thingy?  Optimizes stuff more
 * microservices 
    * microsvc-client project with Client Creator project -> port work from orderly
    * microsvc-server project with Routes file and filter -> port work from orderly
