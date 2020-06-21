@@ -218,7 +218,6 @@ public class HttpSocketImpl implements HttpSocket {
 
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 
-			
 			ChannelSession session = channel.getSession();
 			ResponseSession rs = (ResponseSession) session.get(FUTURE_PROCESS_KEY);
 			if(rs == null) {
@@ -226,8 +225,8 @@ public class HttpSocketImpl implements HttpSocket {
 				session.put(FUTURE_PROCESS_KEY, rs);
 			}
 				
-			
 			CompletableFuture<Void> future = rs.getProcessFuture();
+			
 			for(HttpPayload msg : parsedMessages) {
 				if(msg instanceof HttpData) {
 					HttpData data = (HttpData) msg;
@@ -240,10 +239,12 @@ public class HttpSocketImpl implements HttpSocket {
 							.thenCompose(w -> w.send(data));
 
 				} else if(msg instanceof HttpResponse) {
-					dataWriterFuture = processResponse((HttpResponse)msg);
 
-					//Need to chain all futures into allFutures
-					future = future.thenCompose(s -> dataWriterFuture).thenApply(s -> (Void)null);
+					//Need to make ALL sends serialized one after the other including previous 
+					// processResponse calls
+					future = future
+								.thenCompose(s -> processResponse((HttpResponse)msg))
+								.thenApply(s -> (Void)null);
 
 				} else
 					throw new IllegalStateException("invalid payload received="+msg);
