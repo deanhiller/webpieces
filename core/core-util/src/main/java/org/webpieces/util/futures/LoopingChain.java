@@ -5,9 +5,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+//TODO(dhiller): Use this http2engine(client/server), http1 client, http2to11client AND frontend as
+//all of them do this pattern and we should wire that all up
 public class LoopingChain<T> {
-
-	private Executor executor = Executors.newFixedThreadPool(1);
 
 	public CompletableFuture<Void> runLoop(List<T> newData, Session session, Processor<T> processFunction) {
 		
@@ -28,9 +28,8 @@ public class LoopingChain<T> {
 			//CompletableFuture<Void> temp = processFunction.process(data);
 			//future = future.thenCompose(f -> temp);
 			
-			future = future.thenComposeAsync( voidd -> processFunction.process(data), executor );
-			//future = future.thenCompose( voidd -> processFunction.process(data) );
-
+			//future = future.thenComposeAsync( voidd -> processFunction.process(data), executor );
+			future = future.thenCompose( voidd -> processFunction.process(data) );
 		}
 		
 		//comment this out and memory leak goes away of course.......

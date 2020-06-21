@@ -63,6 +63,7 @@ public class TestLoopingChainMemory {
 	        } else {
 	        	if(s.getProcessFuture() == null) {
 	        		Thread.sleep(1000);
+	        		rt.gc();
 	        		continue;
 	        	}
 	        		
