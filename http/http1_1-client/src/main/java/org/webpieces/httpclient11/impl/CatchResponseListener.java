@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpparser.api.dto.HttpData;
@@ -15,38 +16,49 @@ public class CatchResponseListener implements HttpResponseListener {
 	
 	private HttpResponseListener listener;
 
+	private String svrSocket;
+
 	public CatchResponseListener(HttpResponseListener listener) {
+		svrSocket = MDC.get("svrSocket");
 		this.listener = listener;
 	}
 
 	@Override
 	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 		try {
+			MDC.put("svrSocket", svrSocket);
 			return listener.incomingResponse(resp, isComplete)
-					.thenApply(w -> new CatchDataWriter(w));
+					.thenApply(w -> new CatchDataWriter(w, svrSocket));
 		} catch(Throwable e) {
 			log.error("exception", e);
 			CompletableFuture<HttpDataWriter> future = new CompletableFuture<HttpDataWriter>();
 			future.completeExceptionally(e);
 			return future;
+		} finally {
+			MDC.put("svrSocket", null);
 		}
 	}
 
 	private class CatchDataWriter implements HttpDataWriter {
 		private HttpDataWriter writer;
-		public CatchDataWriter(HttpDataWriter writer) {
+		private String svrSocket2;
+		public CatchDataWriter(HttpDataWriter writer, String svrSocket) {
 			this.writer = writer;
+			svrSocket2 = svrSocket;
 		}
 
 		@Override
 		public CompletableFuture<Void> send(HttpData chunk) {
 			try {
+				MDC.put("svrSocket", svrSocket2);
 				return writer.send(chunk);
 			} catch(Throwable e) {
 				log.error("exception", e);
 				CompletableFuture<Void> future = new CompletableFuture<Void>();
 				future.completeExceptionally(e);
 				return future;
+			} finally {
+				MDC.put("svrSocket", null);
 			}
 		}
 	}
@@ -54,18 +66,25 @@ public class CatchResponseListener implements HttpResponseListener {
 	@Override
 	public void failure(Throwable e) {
 		try {
+			MDC.put("svrSocket", svrSocket);			
 			listener.failure(e);
 		} catch(Throwable ee) {
 			log.error("exception", ee);
+		} finally {
+			MDC.put("svrSocket", null);			
 		}
 	}
 
 	@Override
 	public void socketClosed() {
 		try {
+			MDC.put("svrSocket", svrSocket);
+			log.info("Far end closed the client socket.");
 			listener.socketClosed();
 		} catch(Throwable e) {
 			log.error("Exception closing", e);
+		} finally {
+			MDC.put("svrSocket", null);						
 		}
 	}
 

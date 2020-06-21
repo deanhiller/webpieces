@@ -256,15 +256,19 @@ public class HttpSocketImpl implements HttpSocket {
 		}
 
 		private CompletableFuture<HttpDataWriter> processResponse(HttpResponse msg) {
+			boolean isComplete;
+			HttpResponseListener listener;
 			if(msg.isHasChunkedTransferHeader() || msg.isHasNonZeroContentLength()) {					
-				HttpResponse resp = (HttpResponse) msg;
-				HttpResponseListener listener = responsesToComplete.peek();
-				return listener.incomingResponse(resp, false);
+				listener = responsesToComplete.peek();
+				isComplete = false;
 			} else {
-				HttpResponse resp = (HttpResponse) msg;
-				HttpResponseListener listener = responsesToComplete.poll();
-				return listener.incomingResponse(resp, true);
+				isComplete = true;
+				listener = responsesToComplete.poll();
 			}
+
+			HttpResponse resp = (HttpResponse) msg;
+			dataWriterFuture = listener.incomingResponse(resp, isComplete);
+			return dataWriterFuture;
 		}
 
 		@Override
