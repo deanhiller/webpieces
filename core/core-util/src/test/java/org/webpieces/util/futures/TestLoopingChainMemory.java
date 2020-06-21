@@ -10,13 +10,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
 public class TestLoopingChainMemory {
 
 	private LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-	private Executor exec = new ThreadPoolExecutor(50,50,
+	private Executor exec = new ThreadPoolExecutor(10,10,
             0L, TimeUnit.MILLISECONDS,
             queue,
             new ThreadFactory() {
@@ -26,7 +27,10 @@ public class TestLoopingChainMemory {
 				}
 			});
 	
-	@Test
+	public static void main(String[] args) throws InterruptedException {
+		new TestLoopingChainMemory().testMemory();
+	}
+	
 	public void testMemory() throws InterruptedException {
 	    Runtime rt = Runtime.getRuntime();
 
@@ -41,6 +45,7 @@ public class TestLoopingChainMemory {
 			list.add(0);
 		}
 
+		long numProcessed = 0;
 		long prevUsed = 0;
 		for(int i = 0; i < 100_000_000; i++) {
 			long used = getUsedMemoryMB(rt);
@@ -50,14 +55,15 @@ public class TestLoopingChainMemory {
 	        }			
 			
 	        if(used > 500) {
+	        	numProcessed = i;
 	        	s.setProcessFuturee(null);
 	        	rt.gc();
-	        	System.out.println("queue size="+queue.size());
-	        	
+	        	System.out.println("queue size="+queue.size()+" numProcessed="+numProcessed);
+	        	Thread.sleep(1000);
 	        } else {
 	        	if(s.getProcessFuture() == null) {
-	        		//reinit to run again to use memory
-	        		s.setProcessFuturee(CompletableFuture.completedFuture(null));
+	        		Thread.sleep(1000);
+	        		continue;
 	        	}
 	        		
 	        		
@@ -90,8 +96,14 @@ public class TestLoopingChainMemory {
 	
 	private class MyProcessor implements Processor<Integer> {
 
+		private AtomicInteger counter = new AtomicInteger(0);
+		
 		@Override
 		public CompletableFuture<Void> process(Integer item) {
+			int count = counter.addAndGet(1);
+			if(count % 10000 == 0)
+				System.out.println("processed="+count);
+			
 			CompletableFuture<Void> future = new CompletableFuture<Void>();
 			
 			exec.execute(new Runnable() {
@@ -108,7 +120,6 @@ public class TestLoopingChainMemory {
 	
     private static Map<Integer, NewObject> map = new HashMap<Integer, NewObject>();
 
-	@Test
 	public void basicMemoryTest() {
 	    Runtime rt = Runtime.getRuntime();
 	    long prevUsed = 0;

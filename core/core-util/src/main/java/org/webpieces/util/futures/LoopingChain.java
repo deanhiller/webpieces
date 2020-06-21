@@ -2,8 +2,12 @@ package org.webpieces.util.futures;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class LoopingChain<T> {
+
+	private Executor executor = Executors.newFixedThreadPool(1);
 
 	public CompletableFuture<Void> runLoop(List<T> newData, Session session, Processor<T> processFunction) {
 		
@@ -24,7 +28,9 @@ public class LoopingChain<T> {
 			//CompletableFuture<Void> temp = processFunction.process(data);
 			//future = future.thenCompose(f -> temp);
 			
-			future = future.thenCompose( voidd -> processFunction.process(data));
+			future = future.thenComposeAsync( voidd -> processFunction.process(data), executor );
+			//future = future.thenCompose( voidd -> processFunction.process(data) );
+
 		}
 		
 		//comment this out and memory leak goes away of course.......
@@ -32,4 +38,5 @@ public class LoopingChain<T> {
 		
 		return future;
 	}
+
 }
