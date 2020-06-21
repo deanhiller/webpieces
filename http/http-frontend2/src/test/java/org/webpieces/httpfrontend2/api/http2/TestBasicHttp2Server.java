@@ -12,7 +12,7 @@ import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
-public class TestBasicHttp2Server extends AbstractHttp2Test {
+public class TestBasicHttp2Server extends AbstractFrontendHttp2Test {
 	
 	@Test
 	public void testBasicIntegration() throws InterruptedException, ExecutionException {

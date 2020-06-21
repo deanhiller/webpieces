@@ -27,7 +27,7 @@ import com.webpieces.http2.api.streaming.StreamWriter;
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#SETTINGS
  */
-public class TestS5x1StreamStates extends AbstractHttp2Test {
+public class TestS5x1StreamStates extends AbstractFrontendHttp2Test {
 	
 	/**
 	 * Receiving any frame other than HEADERS or PRIORITY on a stream in this state

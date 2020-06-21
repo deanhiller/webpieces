@@ -1,15 +1,14 @@
 package org.webpieces.webserver.test;
 
-import javax.net.ssl.SSLEngine;
-
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.SSLEngineFactory;
-import org.webpieces.nio.api.channels.DatagramChannel;
-import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.nio.api.channels.UDPChannel;
+import org.webpieces.nio.api.channels.*;
 import org.webpieces.nio.api.handlers.ConnectionListener;
+import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.DatagramListener;
+
+import javax.net.ssl.SSLEngine;
+import java.util.concurrent.CompletableFuture;
 
 public class MockChannelManager implements ChannelManager {
 
@@ -38,6 +37,14 @@ public class MockChannelManager implements ChannelManager {
 		return new MockServerChannel();
 	}
 
+	public CompletableFuture<DataListener> simulateHttpsConnect(Channel channel) {
+		return httpsConnectionListener.connected(channel, true);
+	}
+	
+	public CompletableFuture<DataListener> simulateHttpConnect(Channel channel) {
+		return httpConnectionListener.connected(channel, true);
+	}	
+	
 	@Override
 	public TCPChannel createTCPChannel(String id) {
 		return null;

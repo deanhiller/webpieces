@@ -11,7 +11,7 @@ import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamRef;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 
-public class TestHttp2Errors extends AbstractHttp2Test {
+public class TestHttp2Errors extends AbstractFrontendHttp2Test {
 	
 	@Test
 	public void testFarEndClosedSocket() throws InterruptedException, ExecutionException {

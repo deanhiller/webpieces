@@ -19,7 +19,7 @@ import com.webpieces.http2.api.streaming.PushPromiseListener;
 import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 
-public class TestSMaxConcurrentSetting extends AbstractHttp2Test {
+public class TestSMaxConcurrentSetting extends AbstractFrontendHttp2Test {
 	
 	@Test
 	public void testSend2ndPushHeadersOnlyOnCompletionOfFirst() throws InterruptedException, ExecutionException, TimeoutException {

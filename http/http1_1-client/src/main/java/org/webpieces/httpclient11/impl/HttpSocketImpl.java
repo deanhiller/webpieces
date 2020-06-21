@@ -30,6 +30,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 
@@ -188,6 +189,7 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	private class MyDataListener implements DataListener {
+		private static final String FUTURE_PROCESS_KEY = "__webpiecesFutureProcessKey";
 		private CompletableFuture<HttpDataWriter> dataWriterFuture;
 		private boolean connectResponseReceived;
 
@@ -216,7 +218,16 @@ public class HttpSocketImpl implements HttpSocket {
 
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 
-			CompletableFuture<Void> allFutures = CompletableFuture.completedFuture(null);
+			
+			ChannelSession session = channel.getSession();
+			ResponseSession rs = (ResponseSession) session.get(FUTURE_PROCESS_KEY);
+			if(rs == null) {
+				rs = new ResponseSession();
+				session.put(FUTURE_PROCESS_KEY, rs);
+			}
+				
+			
+			CompletableFuture<Void> future = rs.getProcessFuture();
 			for(HttpPayload msg : parsedMessages) {
 				if(msg instanceof HttpData) {
 					HttpData data = (HttpData) msg;
@@ -224,7 +235,7 @@ public class HttpSocketImpl implements HttpSocket {
 						responsesToComplete.poll();
 
 					//w.send needs to be sent IN SEQUENCE by thenCompose with previous w.send
-					allFutures = allFutures
+					future = future
 							.thenCompose( voidd -> dataWriterFuture)
 							.thenCompose(w -> w.send(data));
 
@@ -232,13 +243,15 @@ public class HttpSocketImpl implements HttpSocket {
 					dataWriterFuture = processResponse((HttpResponse)msg);
 
 					//Need to chain all futures into allFutures
-					allFutures = allFutures.thenCompose(s -> dataWriterFuture).thenApply(s -> (Void)null);
+					future = future.thenCompose(s -> dataWriterFuture).thenApply(s -> (Void)null);
 
 				} else
 					throw new IllegalStateException("invalid payload received="+msg);
 			}
 			
-			return allFutures;
+			rs.setProcessFuture(future);
+			
+			return future;
 		}
 
 		private CompletableFuture<HttpDataWriter> processResponse(HttpResponse msg) {

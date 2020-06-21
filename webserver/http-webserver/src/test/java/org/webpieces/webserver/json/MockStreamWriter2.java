@@ -1,4 +1,4 @@
-package org.webpieces.http2client.mock;
+package org.webpieces.webserver.json;
 
 import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
 import com.webpieces.http2.api.streaming.StreamWriter;
@@ -11,13 +11,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MockStreamWriter extends MockSuperclass implements StreamWriter {
+public class MockStreamWriter2 extends MockSuperclass implements StreamWriter {
 
 	enum Method implements MethodEnum {
 		INCOMING_DATA
 	}
 	
-	public MockStreamWriter() {
+	public MockStreamWriter2() {
 		setDefaultReturnValue(Method.INCOMING_DATA, CompletableFuture.completedFuture(null));
 	}
 	

@@ -1,11 +1,10 @@
 package org.webpieces.frontend2.impl;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.lowlevel.DataFrame;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
+import com.webpieces.http2.api.streaming.StreamRef;
+import com.webpieces.http2.api.streaming.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
@@ -17,21 +16,23 @@ import org.webpieces.http2translations.api.Http11ToHttp2;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.locking.PermitQueue;
 
-import com.webpieces.http2.api.dto.highlevel.Http2Request;
-import com.webpieces.http2.api.dto.lowlevel.DataFrame;
-import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
-import com.webpieces.http2.api.streaming.StreamRef;
-import com.webpieces.http2.api.streaming.StreamWriter;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class Layer2Http11Handler {
 	private static final Logger log = LoggerFactory.getLogger(Layer2Http11Handler.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	private static final String WEB_SESSION_KEY = "__webpiecesSession";
 	private HttpParser httpParser;
 	private StreamListener httpListener;
 	private FutureHelper futureUtil = new FutureHelper();
@@ -121,8 +122,17 @@ public class Layer2Http11Handler {
 		
 		Memento state = socket.getHttp11ParseState();
 		List<HttpPayload> parsed = state.getParsedMessages();
+
+		WebSession session = (WebSession) socket.getSession().get(WEB_SESSION_KEY);
+		if(session == null) {
+			session = new WebSession();
+			socket.getSession().put(WEB_SESSION_KEY, session);
+		}
 		
-		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
+		//ALL of the below MUST happen AFTER the previous processing happened
+		//which may not have finished so chain the below with the previous future
+		CompletableFuture<Void> future = session.getProcessFuture();
+	
 		for(HttpPayload payload : parsed) {
 			//VERY IMPORTANT: Writing the code like this would slam through calling process N times
 			//BUT it doesn't give the clients a chance to seet a flag between packets
@@ -134,8 +144,11 @@ public class Layer2Http11Handler {
 			//CompletableFuture<Void> fut = processCorrectly(socket, payload);
 			//future = future.thenCompose(s -> fut);
 			
+			
 			future = future.thenCompose(s ->  processCorrectly(socket, payload));
 		}
+		
+		session.setProcessFuture(future); //replace with new future so it blocks any future pieces if these are not processed
 		
 		return future;
 	}

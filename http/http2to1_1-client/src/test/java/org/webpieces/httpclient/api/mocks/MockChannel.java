@@ -33,6 +33,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	private HttpStatefulParser parser;
 	private DataListener listener;
 	private boolean isClosed;
+	private ChannelSession session = new MockSession();
 
 	private enum Method implements MethodEnum {
 		CONNECT, WRITE
@@ -83,8 +84,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 
 	@Override
 	public ChannelSession getSession() {
-		
-		return null;
+		return session;
 	}
 
 	@Override

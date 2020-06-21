@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestInvalidPreface extends AbstractHttp2Test {
+public class TestInvalidPreface extends AbstractFrontendHttp2Test {
 
 	protected void simulateClientSendingPrefaceAndSettings() {
 		//do in the test

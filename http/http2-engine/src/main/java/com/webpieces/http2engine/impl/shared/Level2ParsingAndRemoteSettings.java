@@ -124,7 +124,10 @@ public abstract class Level2ParsingAndRemoteSettings {
 		
 		List<Http2Msg> parsedMessages = parsingState.getParsedFrames();
 		
-		CompletableFuture<Void> allFutures = CompletableFuture.completedFuture((Void)null);
+		//All the below futures must be chained with previous ones in case previous ones are not
+		//done which will serialize it all to be in sequence
+		CompletableFuture<Void> future = parsingState.getProcessFuture();
+		
 		for(Http2Msg lowLevelFrame : parsedMessages) {
 			//VERY IMPORTANT: Writing the code like this would slam through calling process N times
 			//BUT it doesn't give the clients a chance to seet a flag between packets
@@ -136,10 +139,12 @@ public abstract class Level2ParsingAndRemoteSettings {
 //			CompletableFuture<Void> messageFuture = process(lowLevelFrame);
 //			allFutures = allFutures.thenCompose( f -> messageFuture);
 			
-			allFutures = allFutures.thenCompose( f -> process(lowLevelFrame));
+			future = future.thenCompose( f -> process(lowLevelFrame));
 		}
 		
-		return allFutures;
+		parsingState.setProcessFuturee(future);
+		
+		return future;
 	}
 
 	public CompletableFuture<Void> process(Http2Msg msg) {

@@ -13,7 +13,9 @@ public class JsonRoutes implements Routes {
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
 		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
-		
+
+		bldr.addStreamRoute(BOTH, GET , "/json/streaming",         "JsonController.streaming");
+
 		bldr.addContentRoute(BOTH, GET , "/json/read",         "JsonController.readOnly");
 		bldr.addContentRoute(BOTH, POST, "/json/write",        "JsonController.writeOnly");
 		bldr.addContentRoute(BOTH, POST, "/json/writeasync",   "JsonController.writeAsync");

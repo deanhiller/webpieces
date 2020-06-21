@@ -20,6 +20,8 @@ public class Requests {
 
 	private static DataWrapperGenerator gen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
+	public static final String JSON = "{ `query`: `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
+	
 	public static HttpFullRequest createRequest(KnownHttpMethod method, String url) {
 		return createRequest(method, url, null);
 	}
@@ -107,8 +109,8 @@ public class Requests {
 
 	public static HttpFullRequest createJsonRequest(KnownHttpMethod method, String url) {
 		HttpRequest request = createBaseRequest(method, url);
-		String json = "{ `query`: `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
-		DataWrapper body = gen.wrapByteArray(json.getBytes());
+		
+		DataWrapper body = gen.wrapByteArray(JSON.getBytes());
 
 		request.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
 		

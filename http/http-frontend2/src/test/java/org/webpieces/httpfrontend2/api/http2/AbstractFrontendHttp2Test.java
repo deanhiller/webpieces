@@ -36,7 +36,7 @@ import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
-public class AbstractHttp2Test {
+public class AbstractFrontendHttp2Test {
 	protected static final DataWrapperGenerator DATA_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	protected MockChanMgr mockChanMgr = new MockChanMgr();

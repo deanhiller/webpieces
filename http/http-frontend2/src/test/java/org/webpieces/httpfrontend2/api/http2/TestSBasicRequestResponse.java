@@ -20,7 +20,7 @@ import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 import com.webpieces.http2.api.streaming.PushPromiseListener;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
-public class TestSBasicRequestResponse extends AbstractHttp2Test {
+public class TestSBasicRequestResponse extends AbstractFrontendHttp2Test {
 
 	@Test
 	public void testWithNoData() throws InterruptedException, ExecutionException, TimeoutException {
