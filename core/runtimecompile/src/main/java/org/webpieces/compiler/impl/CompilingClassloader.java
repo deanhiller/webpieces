@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
+import com.webpieces.util.compiling.GroovyCompiling;
+
 /*
  * Compile classes that need compiling to load them
  */
@@ -140,7 +142,10 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         			//AND MetaModel JPA classes ending in _
         		} else if(name.startsWith(config.getFailIfNotInSourcePaths())) {
         	        String fileName = name.replace(".", "/") + ".java";
-        			throw new IllegalStateException("Could not find java file="+fileName+" in paths="+config.getJavaPath());
+        	        
+        	        //Groovy asks for weird paths sometimes so we have to avoid this during groovy compiles
+        	        if(!GroovyCompiling.isCompilingGroovy())
+        	        	throw new IllegalStateException("Could not find java file="+fileName+" in paths="+config.getJavaPath());
         		}
         		
         	}

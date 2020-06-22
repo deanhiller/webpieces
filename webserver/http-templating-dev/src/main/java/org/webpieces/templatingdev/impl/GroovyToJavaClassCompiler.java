@@ -8,6 +8,8 @@ import org.codehaus.groovy.tools.GroovyClass;
 import org.webpieces.templatingdev.api.CompileCallback;
 import org.webpieces.templatingdev.impl.source.ScriptOutputImpl;
 
+import com.webpieces.util.compiling.GroovyCompiling;
+
 import groovy.lang.GroovyClassLoader;
 
 public class GroovyToJavaClassCompiler {
@@ -31,15 +33,22 @@ public class GroovyToJavaClassCompiler {
 	}
 
 	private void compileImpl(GroovyClassLoader groovyCl, ScriptOutputImpl scriptCode) {
-		CompilationUnit compileUnit = new CompilationUnit();
-	    compileUnit.addSource(scriptCode.getFullClassName(), scriptCode.getScriptSourceCode());
-	    compileUnit.compile(Phases.CLASS_GENERATION);
-	    compileUnit.setClassLoader(groovyCl);
-	    
-	    for (Object compileClass : compileUnit.getClasses()) {
-	        GroovyClass groovyClass = (GroovyClass) compileClass;
-	        callbacks.compiledGroovyClass(groovyCl, groovyClass);
-	    }
+		
+		try {
+			GroovyCompiling.setCompilingGroovy(true);
+			
+			CompilationUnit compileUnit = new CompilationUnit();
+		    compileUnit.addSource(scriptCode.getFullClassName(), scriptCode.getScriptSourceCode());
+		    compileUnit.compile(Phases.CLASS_GENERATION);
+		    compileUnit.setClassLoader(groovyCl);
+		    
+		    for (Object compileClass : compileUnit.getClasses()) {
+		        GroovyClass groovyClass = (GroovyClass) compileClass;
+		        callbacks.compiledGroovyClass(groovyCl, groovyClass);
+		    }
+		} finally {
+			GroovyCompiling.setCompilingGroovy(false);			
+		}
 	}
 
 }

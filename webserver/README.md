@@ -1,6 +1,7 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
+* Dto plugin that loads entities before applying form to object
 * XFuture so context issue is solve
 * conversations
 * ALPN
