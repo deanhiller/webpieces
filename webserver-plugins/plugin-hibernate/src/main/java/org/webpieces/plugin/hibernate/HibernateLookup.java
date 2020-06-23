@@ -1,6 +1,7 @@
 package org.webpieces.plugin.hibernate;
 
 import java.lang.annotation.Annotation;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -49,10 +50,14 @@ public class HibernateLookup implements EntityLookup {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T find(Meta paramMeta, ParamTreeNode tree, 
-			Function<Class<T>, T> beanCreate) {
+	public <T> CompletableFuture<T> find(Meta paramMeta, ParamTreeNode tree, Function<Class<T>, T> beanCreate) {
+		T result = findImpl(paramMeta, tree, beanCreate);
+		return CompletableFuture.completedFuture(result);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T findImpl(Meta paramMeta, ParamTreeNode tree, Function<Class<T>, T> beanCreate) {
 		if(!(paramMeta instanceof ParamMeta))
 			throw new UnsupportedOperationException("this plugin does not support type="+paramMeta.getClass());
 		

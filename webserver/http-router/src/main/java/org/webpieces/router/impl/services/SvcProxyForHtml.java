@@ -14,6 +14,8 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.exceptions.BadRequestException;
+import org.webpieces.router.api.exceptions.HttpException;
+import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.loader.LoadedController;
@@ -54,14 +56,26 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 		//On top of that ORM plugins can have a transaction filter and then in this
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
-		List<Object> argsResult = translator.createArgs(m, meta.getCtx(), null);
+		CompletableFuture<List<Object>> future = translator.createArgs(m, meta.getCtx(), null);
 		
-		return invoker.invokeAndCoerce(meta.getLoadedController(), argsResult.toArray()).thenApply( action -> {
-			if(config.isValidateFlash()) {
-				validateKeepFlagSet(action, meta.getCtx(), meta.getLoadedController());
-			}
-			return action;
-		});
+		return future.thenCompose(argsResult -> doTheInvoke(meta, argsResult));
+	}
+
+	private CompletableFuture<Action> doTheInvoke(MethodMeta meta, List<Object> argsResult) {
+		try {
+			return invoker.invokeAndCoerce(meta.getLoadedController(), argsResult.toArray()).thenApply( action -> {
+				if(config.isValidateFlash()) {
+					validateKeepFlagSet(action, meta.getCtx(), meta.getLoadedController());
+				}
+				return action;
+			});
+		} catch (InvocationTargetException e) {
+			if(e.getCause() instanceof WebpiecesException)
+				throw (WebpiecesException)e.getCause();
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**

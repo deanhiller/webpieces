@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.model.SvcProxyLogic;
@@ -43,9 +44,23 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		//On top of that ORM plugins can have a transaction filter and then in this
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
-		List<Object> argsResult = translator.createArgs(m, meta.getCtx(), info.getBodyContentBinder());
+		CompletableFuture<List<Object>> futureArgs = translator.createArgs(m, meta.getCtx(), info.getBodyContentBinder());
 		
-		Object retVal = invoker.invokeController(meta.getLoadedController(), argsResult.toArray());
+		return futureArgs.thenCompose( argsResult -> invokeAndCoerce(meta, info, m, argsResult));
+	}
+
+	private CompletableFuture<Action> invokeAndCoerce(MethodMeta meta, RouteInfoForContent info, Method m,
+			List<Object> argsResult) {
+		Object retVal;
+		try {
+			retVal = invoker.invokeController(meta.getLoadedController(), argsResult.toArray());
+		} catch (InvocationTargetException e) {
+			if(e.getCause() instanceof WebpiecesException)
+				throw (WebpiecesException)e.getCause();
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
 		
 		if(info.getBodyContentBinder() != null)
 			return unwrapResult(m, retVal, info.getBodyContentBinder());
