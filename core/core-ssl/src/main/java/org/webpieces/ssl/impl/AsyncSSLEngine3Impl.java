@@ -364,6 +364,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 			//KEEEEEP This very small.  wrap and then listener.packetEncrypted
 			SSLEngineResult result = sslEngine.wrap(SslMementoImpl.EMPTY, engineToSocketData);
+
 			lastStatus = result.getStatus();
 			hsStatus = result.getHandshakeStatus();
 		}
@@ -377,6 +378,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 		boolean readNoData = engineToSocketData.position() == 0;
 		engineToSocketData.flip();
+
 		try {
 			CompletableFuture<Void> sentMsgFuture;
 			if(readNoData) {
@@ -392,11 +394,14 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				//just fine and sends back the close messages while jdk 11 is not doing that
 				//so this sslEngineIsFarting is covering up their bug.
 				
+				//ADDITIONAL(different day):  Every time in docker opening client to remote server caused the ssl engine to fart(ie. come into this whacky
+				//location).  This location is specifically SSLEngine tells us to WRAP, and THEN decides to wrap NOTHING!! wtf.
 				sslEngineIsFarting = true;
 				sentMsgFuture = CompletableFuture.completedFuture(null);
-			} else
+			} else {
 				metrics.recordEncryptedToSocket(engineToSocketData.remaining());
 				sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
+			}
 
 			if (lastStatus == Status.CLOSED && !clientInitiated) {
 				fireClose();
