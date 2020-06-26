@@ -194,7 +194,16 @@ public class HttpParserImpl implements HttpParser {
 	}
 	
 	@Override
+	public Memento parseOnlyHeaders(Memento state, DataWrapper moreData) {
+		return parse(state, moreData, true);
+	}
+
+	@Override
 	public Memento parse(Memento state, DataWrapper moreData) {
+		return parse(state, moreData, false);
+	}
+	
+	private Memento parse(Memento state, DataWrapper moreData, boolean isForConnectResponse) {
 		if(!(state instanceof MementoImpl)) {
 			throw new IllegalArgumentException("You must always pass in the "
 					+ "memento created in prepareToParse which we always hand back"
@@ -209,7 +218,7 @@ public class HttpParserImpl implements HttpParser {
 		memento.setLeftOverData(allData);
 		
 		int totalData = allData.getReadableSize();
-		memento = parse(memento);
+		memento = parse(memento, isForConnectResponse);
 		int bytesParsed = totalData - memento.getLeftOverData().getReadableSize();
 		
 		bytesParsedDist.record(bytesParsed);
@@ -219,7 +228,7 @@ public class HttpParserImpl implements HttpParser {
 		return memento;
 	}
 	
-	private MementoImpl parse(MementoImpl memento) {
+	private MementoImpl parse(MementoImpl memento, boolean isForConnect) {
 		if(log.isTraceEnabled())
 			log.trace("Trying to parse message");
 
@@ -242,6 +251,9 @@ public class HttpParserImpl implements HttpParser {
 			} else {
 				//not in chunk parsing mode, no half parsed chunk, no content left to read sooooo, must be an http message
 				isNeedMoreData = findCrLnCrLnAndParseMessage(memento);
+				if(isForConnect && memento.getParsedMessages().size() == 1) {
+					return memento;
+				}
 			}
 		}
 

@@ -35,5 +35,15 @@ public interface HttpParser {
 	 * 
 	 */
     Memento parse(Memento state, DataWrapper moreData);
+
+    /**
+     * Used when a response is coming for a connect so we don't parse all the data which may
+     * be SSL data anyways.  Happens rarely but we hit this scenario
+     * 1. We sent connect
+     * 2. We sent next request the browser sends before connect is done
+     * 3. We get back connect response AND data so we can't use above parse method 
+     * 
+     */
+    Memento parseOnlyHeaders(Memento state, DataWrapper moreData);
 	
 }

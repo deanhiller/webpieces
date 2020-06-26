@@ -212,20 +212,17 @@ public class HttpSocketImpl implements HttpSocket {
 		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 
+			DataWrapper leftOverData = null;
 			if(connectResponseReceived) {
-				//special case of just sending data through as we are doing proxying SSL stuff
-				HttpData data = new HttpData(wrapper, false);
-				return dataWriterFuture.thenCompose(w -> {
-					return w.send(data);
-				});
-			}
-			
-			memento = parser.parse(memento, wrapper);
-			
-			if(memento.getParsedMessages().size() == 1 && isConnect) {
+				return sendDataAfterHttpConnect(wrapper);
+			} else if(isConnect) {
 				//If it was a connect, we should get 1 response AND from then on, we need to switch to 
 				//pure data since this is an SSL tunnel through the proxy
 				connectResponseReceived = true;
+				memento = parser.parseOnlyHeaders(memento, wrapper);
+				leftOverData = memento.getLeftOverData();
+			} else {
+				memento = parser.parse(memento, wrapper);
 			}
 			
 			if(memento.getNumBytesJustParsed() == 0)
@@ -267,7 +264,19 @@ public class HttpSocketImpl implements HttpSocket {
 			
 			rs.setProcessFuture(future);
 			
+			if(connectResponseReceived && leftOverData.getReadableSize() > 0) {
+				return sendDataAfterHttpConnect(leftOverData);
+			}
+			
 			return future;
+		}
+
+		private CompletableFuture<Void> sendDataAfterHttpConnect(DataWrapper wrapper) {
+			//special case of just sending data through as we are doing proxying SSL stuff
+			HttpData data = new HttpData(wrapper, false);
+			return dataWriterFuture.thenCompose(w -> {
+				return w.send(data);
+			});
 		}
 
 		private CompletableFuture<HttpDataWriter> processResponse(HttpResponse msg) {
