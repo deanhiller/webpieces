@@ -87,6 +87,8 @@ public class Http11StreamImpl implements ResponseStream {
 		
 		if(http2Request.getKnownMethod() == Http2Method.CONNECT) {
 			//In this case, it is an upgrade to a bi-directional stream
+			//connect has no content length BUT we are basically creating a 'stream' here of
+			//bytes so we don't care about parsing anymore(ie. SSL or http)..
 			return write(response).thenApply(c -> new Http11ChunkedWriter(http1Req, http2Request));
 		} else if(headers.isEndOfStream()) {
 			validateHeader(response);

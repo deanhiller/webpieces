@@ -32,6 +32,4 @@ public interface HttpResponseListener {
 	
 	public void failure(Throwable e);
 	
-	public void socketClosed();
-
 }

@@ -95,7 +95,7 @@ public class Http2SocketImpl implements Http2Socket {
 	
 	@Override
 	public String toString() {
-		return "Http1.1Socket[socket=" + socket11 + "]";
+		return "Http2-1.1Socket[socket=" + socket11 + "]";
 	}
 
 }

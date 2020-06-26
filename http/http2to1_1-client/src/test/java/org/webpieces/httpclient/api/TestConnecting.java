@@ -10,6 +10,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.httpclient.Http2CloseListener;
 import org.webpieces.httpclient.api.mocks.MockChannel;
 import org.webpieces.httpclient.api.mocks.MockChannelMgr;
 import org.webpieces.httpclientx.api.Http2to11ClientFactory;
@@ -31,7 +32,7 @@ public class TestConnecting {
 	@Test
 	public void testConnecting() {
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
-		Http2Socket socket = httpClient.createHttpSocket();
+		Http2Socket socket = httpClient.createHttpSocket(new Http2CloseListener());
 
 		CompletableFuture<Void> future1 = new CompletableFuture<Void>();
 		mockChannel.setConnectFuture(future1);

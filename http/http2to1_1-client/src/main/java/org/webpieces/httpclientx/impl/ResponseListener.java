@@ -53,10 +53,4 @@ public class ResponseListener implements HttpResponseListener {
 		responseListener.cancel(new ShutdownStream(0, connCancelled));
 	}
 
-	@Override
-	public void socketClosed() {
-		ReceivedGoAway goAway = new ReceivedGoAway("Http1.1 Remote end closed socket", null);
-		responseListener.cancel(new ShutdownStream(-1, goAway));
-	}
-
 }

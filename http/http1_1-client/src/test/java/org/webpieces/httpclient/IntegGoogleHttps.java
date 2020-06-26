@@ -74,10 +74,10 @@ public class IntegGoogleHttps {
 		HttpClient client = createHttpClient();
 		HttpSocket socket;
 		if(isHttp)
-			socket = client.createHttpSocket();
+			socket = client.createHttpSocket(new SocketListener());
 		else {
 			ForTestSslClientEngineFactory sslFactory = new ForTestSslClientEngineFactory();
-			socket = client.createHttpsSocket(sslFactory.createSslEngine(host, port));
+			socket = client.createHttpsSocket(sslFactory.createSslEngine(host, port), new SocketListener());
 		}
 		return socket;
 	}
@@ -126,10 +126,6 @@ public class IntegGoogleHttps {
 			log.error("exception", e);
 		}
 		
-		@Override
-		public void socketClosed() {
-			log.error("remote end closed socket");
-		}
 	}
 	
 }

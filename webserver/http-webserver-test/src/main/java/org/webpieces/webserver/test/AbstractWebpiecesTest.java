@@ -11,6 +11,7 @@ import javax.net.ssl.SSLEngine;
 import org.webpieces.httpclient11.api.HttpClient;
 import org.webpieces.httpclient11.api.HttpClientFactory;
 import org.webpieces.httpclient11.api.HttpSocket;
+import org.webpieces.httpclient11.api.HttpSocketListener;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.BackpressureConfig;
@@ -27,38 +28,50 @@ public class AbstractWebpiecesTest {
 	protected MockTime time = new MockTime(true);
 	protected MockTimer mockTimer = new MockTimer();
 
-	public HttpSocket connectHttpLocal() {
-		try {
-			return connectHttp(false, null);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new RuntimeException(e);
-		}
-	}
+//	public HttpSocket connectHttpLocal() {
+//		try {
+//			return connectHttp(false, null);
+//		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+//			throw new RuntimeException(e);
+//		}
+//	}
+//
+//	public HttpSocket connectHttpsLocal() {
+//		try {
+//			return connectHttps(false, null, null);
+//		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+//			throw new RuntimeException(e);
+//		}
+//	}
 
-	public HttpSocket connectHttpsLocal() {
-		try {
-			return connectHttps(false, null, null);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 	/**
 	 * @deprecated Use connectHttp with no isRemote parameter AND override isRemote() IF you need
 	 */
 	@Deprecated
 	public HttpSocket connectHttp(boolean isRemote, InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
-		HttpSocket socket = getClient(isRemote).createHttpSocket();
+		NullHttp1CloseListener listener = new NullHttp1CloseListener();
+		HttpSocket socket = getClient(isRemote).createHttpSocket(listener);
 		CompletableFuture<Void> connect = socket.connect(addr);
 		connect.get(2, TimeUnit.SECONDS);
 		return socket;
 	}
 
-	public HttpSocket connectHttp(InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
-		HttpSocket socket = getClient().createHttpSocket();
+	public HttpSocket connectHttp(InetSocketAddress addr) {
+		return connectHttp(addr, null);
+	}
+	
+	public HttpSocket connectHttp(InetSocketAddress addr, HttpSocketListener listener) {
+		if(listener == null)
+			listener = new NullHttp1CloseListener();
+		HttpSocket socket = getClient().createHttpSocket(listener);
 		CompletableFuture<Void> connect = socket.connect(addr);
-		connect.get(2, TimeUnit.SECONDS);
-		return socket;
+		try {
+			connect.get(2, TimeUnit.SECONDS);
+
+			return socket;
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -66,17 +79,29 @@ public class AbstractWebpiecesTest {
 	 */
 	@Deprecated
 	public HttpSocket connectHttps(boolean isRemote, SSLEngine engine, InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
-		HttpSocket socket = getClient(isRemote).createHttpsSocket(engine);
+		NullHttp1CloseListener listener = new NullHttp1CloseListener();
+		HttpSocket socket = getClient(isRemote).createHttpsSocket(engine, listener);
 		CompletableFuture<Void> connect = socket.connect(addr);
 		connect.get(2, TimeUnit.SECONDS);
 		return socket;
 	}
 
-	public HttpSocket connectHttps(SSLEngine engine, InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
-		HttpSocket socket = getClient().createHttpsSocket(engine);
+	public HttpSocket connectHttps(SSLEngine engine, InetSocketAddress addr) {
+		return connectHttps(engine, addr, null);
+	}
+	
+	public HttpSocket connectHttps(SSLEngine engine, InetSocketAddress addr, HttpSocketListener listener) {
+		if(listener == null)
+			listener = new NullHttp1CloseListener();
+		
+		HttpSocket socket = getClient().createHttpsSocket(engine, listener);
 		CompletableFuture<Void> connect = socket.connect(addr);
-		connect.get(2, TimeUnit.SECONDS);
-		return socket;
+		try {
+			connect.get(2, TimeUnit.SECONDS);
+			return socket;
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	/**
 	 * @deprecated Use getOverrides(MeterRegistry) instead now AND override isRemote if you like (so you can create template tests too)

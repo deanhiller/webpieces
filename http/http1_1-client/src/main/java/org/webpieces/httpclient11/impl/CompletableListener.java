@@ -62,10 +62,10 @@ public class CompletableListener implements HttpResponseListener {
 		future.completeExceptionally(e);
 	}
 
-	@Override
-	public void socketClosed() {
-		SocketClosedException exc = new SocketClosedException("Remote end closed the socket");
-		future.completeExceptionally(exc);
-	}
+//	@Override
+//	public void socketClosed() {
+//		SocketClosedException exc = new SocketClosedException("Remote end closed the socket");
+//		future.completeExceptionally(exc);
+//	}
 
 }

@@ -70,10 +70,6 @@ public class IntegColoradoEdu {
 			log.error("failed", e);
 		}
 
-		@Override
-		public void socketClosed() {
-			log.error("remote end closed socket");
-		}
 	}
 	
 	private static HttpRequest createRequest(String host) {

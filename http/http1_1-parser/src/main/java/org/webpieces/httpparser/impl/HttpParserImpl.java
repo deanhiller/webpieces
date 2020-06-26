@@ -160,28 +160,29 @@ public class HttpParserImpl implements HttpParser {
 	private void validate(HttpResponse response) {
 		HttpResponseStatusLine statusLine = response.getStatusLine();
 		if(statusLine == null) {
-			throw new IllegalArgumentException("response.statusLine is not set(call response.setStatusLine");
+			throw new IllegalArgumentException("response.statusLine is not set(call response.setStatusLine. response="+response);
 		}
 		HttpResponseStatus status = statusLine.getStatus();
 		if(status == null) {
-			throw new IllegalArgumentException("response.statusLine.status is not set(call response.getStatusLine().setStatus())");
+			throw new IllegalArgumentException("response.statusLine.status is not set(call response.getStatusLine().setStatus()). response="+response);
 		} else if(status.getCode() == null) {
-			throw new IllegalArgumentException("response.statusLine.status.code is not set(call response.getStatusLine().getStatus().setCode())");
-		} else if(status.getReason() == null) {
-			throw new IllegalArgumentException("response.statusLine.status.reason is not set");
+			throw new IllegalArgumentException("response.statusLine.status.code is not set(call response.getStatusLine().getStatus().setCode()). response="+response);
+// 503 from squid does not have this set...			
+//		} else if(status.getReason() == null) {
+//			throw new IllegalArgumentException("response.statusLine.status.reason is not set. response="+response);
 		} else if(statusLine.getVersion() == null) {
-			throw new IllegalArgumentException("response.statusLine.version is not set");
+			throw new IllegalArgumentException("response.statusLine.version is not set. response="+response);
 		}
 	}
 
 	private void validate(HttpRequest request) {
 		HttpRequestLine requestLine = request.getRequestLine();
 		if(requestLine == null) {
-			throw new IllegalArgumentException("request.requestLine is not set(call request.setRequestLine()");
+			throw new IllegalArgumentException("request.requestLine is not set(call request.setRequestLine(). request="+request);
 		} else if(requestLine.getMethod() == null) {
-			throw new IllegalArgumentException("request.requestLine.method is not set(call request.getRequestLine().setMethod()");
+			throw new IllegalArgumentException("request.requestLine.method is not set(call request.getRequestLine().setMethod(). request="+request);
 		} else if(requestLine.getVersion() == null) {
-			throw new IllegalArgumentException("request.requestLine.version is not set(call request.getRequestLine().setVersion()");
+			throw new IllegalArgumentException("request.requestLine.version is not set(call request.getRequestLine().setVersion(). request="+request);
 		}
 	}
 

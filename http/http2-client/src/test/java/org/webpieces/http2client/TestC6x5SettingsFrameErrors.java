@@ -52,7 +52,7 @@ public class TestC6x5SettingsFrameErrors {
         Http2Client client = Http2ClientFactory.createHttpClient("test2Client", mockChanMgr, injConfig);
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
-		socket = client.createHttpSocket();
+		socket = client.createHttpSocket(new SocketListener());
 		
 		CompletableFuture<Void> connect = socket.connect(new InetSocketAddress(555));
 		connect.get(2, TimeUnit.SECONDS);

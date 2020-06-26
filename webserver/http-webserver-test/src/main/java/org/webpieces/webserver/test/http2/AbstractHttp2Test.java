@@ -10,6 +10,7 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
@@ -33,10 +34,16 @@ public abstract class AbstractHttp2Test {
 	protected MockFrontendManager frontEnd = new MockFrontendManager();
 	protected MockTime time = new MockTime(true);
 	protected MockTimer mockTimer = new MockTimer();
-	
+
 	public Http2Socket connectHttp(InetSocketAddress addr) {
+		return connectHttp(addr, null);
+	}
+	
+	public Http2Socket connectHttp(InetSocketAddress addr, Http2SocketListener listener) {
 		try {
-			Http2Socket socket = getClient().createHttpSocket();
+			if(listener == null)
+				listener = new NullCloseListener();
+			Http2Socket socket = getClient().createHttpSocket(listener);
 			CompletableFuture<Void> connect = socket.connect(addr);
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;
@@ -46,8 +53,14 @@ public abstract class AbstractHttp2Test {
 	}
 
 	public Http2Socket connectHttps(SSLEngine engine, InetSocketAddress addr) {
+		return connectHttps(engine, addr, null);
+	}
+	
+	public Http2Socket connectHttps(SSLEngine engine, InetSocketAddress addr, Http2SocketListener listener) {
 		try {
-			Http2Socket socket = getClient().createHttpsSocket(engine);
+			if(listener == null)
+				listener = new NullCloseListener();
+			Http2Socket socket = getClient().createHttpsSocket(engine, listener);
 			CompletableFuture<Void> connect = socket.connect(addr);
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;

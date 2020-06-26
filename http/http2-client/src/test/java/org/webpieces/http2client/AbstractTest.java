@@ -54,7 +54,7 @@ public class AbstractTest {
         Http2Client client = Http2ClientFactory.createHttpClient("test2Client", mockChanMgr, injConfig);
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
-		httpSocket = client.createHttpSocket();
+		httpSocket = client.createHttpSocket(new SocketListener());
 		
 		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(555));
 		connect.get(2, TimeUnit.SECONDS);

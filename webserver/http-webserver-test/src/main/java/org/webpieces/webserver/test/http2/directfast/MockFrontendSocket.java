@@ -9,15 +9,16 @@ import org.webpieces.nio.api.channels.ChannelSession;
 public class MockFrontendSocket implements FrontendSocket {
 
 	private boolean isHttps;
+	private ProxyClose proxyClose;
 
-	public MockFrontendSocket(boolean isHttps) {
+	public MockFrontendSocket(boolean isHttps, ProxyClose proxyClose) {
 		this.isHttps = isHttps;
+		this.proxyClose = proxyClose;
 	}
 	
 	@Override
 	public void close(String reason) {
-		// TODO Auto-generated method stub
-		
+		proxyClose.socketFarEndClosed();
 	}
 
 	@Override

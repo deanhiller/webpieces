@@ -9,13 +9,13 @@ public interface Http2Client {
 	 * 
 	 * @return
 	 */
-	public Http2Socket createHttpSocket();
+	public Http2Socket createHttpSocket(Http2SocketListener listener);
 
 	/**
 	 * HttpClientSocket is so you can send multiple requests.
 	 * 
 	 * @return
 	 */
-	public Http2Socket createHttpsSocket(SSLEngine factory);
+	public Http2Socket createHttpsSocket(SSLEngine factory, Http2SocketListener listener);
 	
 }

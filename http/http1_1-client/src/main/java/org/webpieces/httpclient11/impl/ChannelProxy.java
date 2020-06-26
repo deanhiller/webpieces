@@ -14,4 +14,8 @@ public interface ChannelProxy {
 
 	CompletableFuture<Void> close();
 
+	String getId();
+
+	boolean isSecure();
+
 }

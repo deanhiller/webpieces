@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.CompletableFuture;
@@ -96,6 +97,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 			if(e.getMessage() != null && e.getMessage().equals("Broken pipe")) {
 				isClosed = true; //special flag as jdk channel.isClosed in streaming can happen a FULL 1-2 seconds after this due to NIC buffer backup
 				throw new NioClosedChannelException(this+"Remote end must have disconnected: Broken Pipe", e);
+			} else if(e instanceof AsynchronousCloseException) {
+				throw new NioClosedChannelException(this+"Channel already closed", e);
 			}
 			throw new NioException(e);
 		}

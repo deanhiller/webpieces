@@ -100,9 +100,9 @@ public class IntegSingleRequest {
 		
 		Http2Socket socket;
 		if(isHttp) {
-			socket = client.createHttpSocket();
+			socket = client.createHttpSocket(new Http2CloseListener());
 		} else {
-			socket = client.createHttpsSocket(engine);
+			socket = client.createHttpsSocket(engine, new Http2CloseListener());
 		}
 		
 		return socket;

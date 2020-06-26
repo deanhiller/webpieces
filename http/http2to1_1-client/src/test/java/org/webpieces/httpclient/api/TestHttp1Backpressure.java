@@ -17,6 +17,7 @@ import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2translations.api.Http2ToHttp11;
+import org.webpieces.httpclient.Http2CloseListener;
 import org.webpieces.httpclient.api.mocks.MockChannel;
 import org.webpieces.httpclient.api.mocks.MockChannelMgr;
 import org.webpieces.httpclient.api.mocks.MockResponseListener;
@@ -51,7 +52,7 @@ public class TestHttp1Backpressure {
 		httpClient = Http2to11ClientFactory.createHttpClient("myClient3", mockChannelMgr, new SimpleMeterRegistry(), pool);
 		
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
-		socket = httpClient.createHttpSocket();
+		socket = httpClient.createHttpSocket(new Http2CloseListener());
 
 		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
 		CompletableFuture<Void> future = socket.connect(new InetSocketAddress(8080));

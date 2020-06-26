@@ -70,6 +70,7 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	
 	@Override
 	public CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
+		
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
 			ResponseStreamHandle handler = str.getResponseListener();

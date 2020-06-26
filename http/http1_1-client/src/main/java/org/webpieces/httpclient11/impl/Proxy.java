@@ -32,4 +32,15 @@ public class Proxy implements ChannelProxy {
 		return channel.close();
 	}
 
+	@Override
+	public String getId() {
+		return channel.getChannelId();
+	}
+
+	@Override
+	public boolean isSecure() {
+		return channel.isSslChannel();
+	}
+
+	
 }

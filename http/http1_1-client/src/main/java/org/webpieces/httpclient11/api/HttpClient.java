@@ -14,8 +14,8 @@ public interface HttpClient {
 	 * 
 	 * @return
 	 */
-	public HttpSocket createHttpSocket();
+	public HttpSocket createHttpSocket(HttpSocketListener listener);
 	
-	public HttpSocket createHttpsSocket(SSLEngine engine);
+	public HttpSocket createHttpsSocket(SSLEngine engine, HttpSocketListener listener);
 	
 }

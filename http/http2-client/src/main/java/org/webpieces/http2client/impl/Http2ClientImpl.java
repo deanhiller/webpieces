@@ -6,6 +6,7 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.TCPChannel;
 
@@ -30,21 +31,21 @@ public class Http2ClientImpl implements Http2Client {
 	}
 
 	@Override
-	public Http2Socket createHttpSocket() {
+	public Http2Socket createHttpSocket(Http2SocketListener listener) {
 		int count = counter.getAndIncrement();
 		String idForLogging = id+count+"Http2";
 		TCPChannel channel = mgr.createTCPChannel(idForLogging);
 		Http2ChannelProxy proxy = new Http2ChannelProxyImpl(channel);
-		return new Http2SocketImpl(proxy, factory);
+		return new Http2SocketImpl(proxy, factory, listener);
 	}
 
 	@Override
-	public Http2Socket createHttpsSocket(SSLEngine engine) {
+	public Http2Socket createHttpsSocket(SSLEngine engine, Http2SocketListener listener) {
 		int count = httpsCounter.getAndIncrement();
 		String idForLogging = id+count+"Https2";
 		TCPChannel channel = mgr.createTCPChannel(idForLogging, engine);
 		Http2ChannelProxy proxy = new Http2ChannelProxyImpl(channel);		
-		return new Http2SocketImpl(proxy, factory);
+		return new Http2SocketImpl(proxy, factory, listener);
 	}
 
 }

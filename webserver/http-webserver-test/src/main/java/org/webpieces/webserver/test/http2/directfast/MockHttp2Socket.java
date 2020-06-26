@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.http2client.impl.ResponseCacher;
@@ -17,9 +18,9 @@ public class MockHttp2Socket implements Http2Socket {
 	private StreamListener streamListener;
 	private MockFrontendSocket frontendSocket;
 
-	public MockHttp2Socket(StreamListener streamListener, boolean isHttps) {
+	public MockHttp2Socket(Http2SocketListener closeListener, StreamListener streamListener, boolean isHttps) {
 		this.streamListener = streamListener;
-		frontendSocket = new MockFrontendSocket(isHttps);
+		frontendSocket = new MockFrontendSocket(isHttps, new ProxyClose(closeListener, this));
 	}
 
 	@Override

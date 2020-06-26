@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.TwoPools;
+import org.webpieces.http2client.SocketListener;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
@@ -102,9 +103,9 @@ public class IntegSingleRequest {
 		
 		Http2Socket socket;
 		if(isHttp) {
-			socket = client.createHttpSocket();
+			socket = client.createHttpSocket(new SocketListener());
 		} else {
-			socket = client.createHttpsSocket(engine);
+			socket = client.createHttpsSocket(engine, new SocketListener());
 		}
 		
 		return socket;

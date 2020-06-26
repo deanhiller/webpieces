@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
+import org.webpieces.httpclient11.api.SocketClosedException;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public class MockResponseListener implements HttpResponseListener {
@@ -20,17 +21,14 @@ public class MockResponseListener implements HttpResponseListener {
 	@Override
 	public void failure(Throwable e) {
 		failures.add(e);
+		if(e instanceof SocketClosedException)
+			isClosed = true;
 	}
 
 	public Throwable getSingleFailure() {
 		if(failures.size() != 1)
 			throw new IllegalStateException("There was '"+failures.size()+"' not exactly 1 failure found");
 		return failures.get(0);
-	}
-
-	@Override
-	public void socketClosed() {
-		isClosed = true;
 	}
 
 	public boolean isClosed() {

@@ -40,4 +40,14 @@ public class DelayedProxy implements ChannelProxy {
 		return CompletableFuture.completedFuture(null);
 	}
 
+	@Override
+	public String getId() {
+		return channel.getChannelId();
+	}
+
+	@Override
+	public boolean isSecure() {
+		return channel.isSslChannel();
+	}
+
 }

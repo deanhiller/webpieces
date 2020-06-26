@@ -21,6 +21,7 @@ import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.nio.impl.cm.basic.MDCUtil;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.locking.PermitQueue;
 
@@ -112,9 +113,14 @@ public class Layer2Http11Handler {
 		state = parse(socket, buf);
 		
 		return processWithBackpressure(socket, newDataSize, state.getNumBytesJustParsed()).exceptionally(t -> {
-			log.error("Exception", t);
-			socket.close("Exception so closing http1.1 socket="+t.getMessage());
-			return null;
+			try {
+				MDCUtil.setMDC(true, socket+"");
+				log.error("Exception", t);
+				socket.close("Exception so closing http1.1 socket="+t.getMessage());
+				return null;
+			} finally {
+				MDCUtil.setMDC(true, null);
+			}
 		});
 	}
 	

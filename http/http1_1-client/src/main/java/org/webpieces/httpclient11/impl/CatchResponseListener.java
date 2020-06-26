@@ -18,9 +18,9 @@ public class CatchResponseListener implements HttpResponseListener {
 
 	private String svrSocket;
 
-	public CatchResponseListener(HttpResponseListener listener) {
-		svrSocket = MDC.get("svrSocket");
+	public CatchResponseListener(HttpResponseListener listener, String svrSocket) {
 		this.listener = listener;
+		this.svrSocket = svrSocket;
 	}
 
 	@Override
@@ -75,17 +75,17 @@ public class CatchResponseListener implements HttpResponseListener {
 		}
 	}
 
-	@Override
-	public void socketClosed() {
-		try {
-			MDC.put("svrSocket", svrSocket);
-			log.info("Far end closed the client socket.");
-			listener.socketClosed();
-		} catch(Throwable e) {
-			log.error("Exception closing", e);
-		} finally {
-			MDC.put("svrSocket", null);						
-		}
-	}
+//	@Override
+//	public void socketClosed() {
+//		try {
+//			MDC.put("svrSocket", svrSocket);
+//			log.info("Far end closed the client socket.");
+//			listener.socketClosed();
+//		} catch(Throwable e) {
+//			log.error("Exception closing", e);
+//		} finally {
+//			MDC.put("svrSocket", null);						
+//		}
+//	}
 
 }

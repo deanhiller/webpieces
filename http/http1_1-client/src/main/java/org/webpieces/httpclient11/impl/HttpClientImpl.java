@@ -6,6 +6,7 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.httpclient11.api.HttpClient;
 import org.webpieces.httpclient11.api.HttpSocket;
+import org.webpieces.httpclient11.api.HttpSocketListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -25,19 +26,19 @@ public class HttpClientImpl implements HttpClient {
 	}
 
 	@Override
-	public HttpSocket createHttpSocket() {
+	public HttpSocket createHttpSocket(HttpSocketListener socketListener) {
 		int count = counter.getAndIncrement();
 		String idForLogging = id+count+"Http";
 		TCPChannel channel = mgr.createTCPChannel(idForLogging);
-		return new HttpSocketImpl(new Proxy(channel), parser);
+		return new HttpSocketImpl(new Proxy(channel), parser, socketListener, false);
 	}
 	
 	@Override
-	public HttpSocket createHttpsSocket(SSLEngine engine) {
+	public HttpSocket createHttpsSocket(SSLEngine engine, HttpSocketListener socketListener) {
 		int count = httpsCounter.getAndIncrement();
 		String idForLogging = id+count+"Https";
 		TCPChannel channel = mgr.createTCPChannel(idForLogging, engine);
-		return new HttpSocketImpl(new Proxy(channel), parser);
+		return new HttpSocketImpl(new Proxy(channel), parser, socketListener, true);
 	}
 
 }

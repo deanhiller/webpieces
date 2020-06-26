@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.httpclient.Http2CloseListener;
 import org.webpieces.httpclient.api.mocks.MockChannel;
 import org.webpieces.httpclient.api.mocks.MockChannelMgr;
 import org.webpieces.httpclient.api.mocks.MockResponseListener;
@@ -40,7 +41,7 @@ public class TestCancelStream {
 		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
 
 		mockChanMgr.addTCPChannelToReturn(mockChannel);
-		httpSocket = httpClient.createHttpSocket();
+		httpSocket = httpClient.createHttpSocket(new Http2CloseListener());
 	}
 
 //	@Test

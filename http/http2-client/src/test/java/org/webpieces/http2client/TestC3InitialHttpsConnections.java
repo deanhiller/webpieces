@@ -59,7 +59,7 @@ public class TestC3InitialHttpsConnections {
 		int port = addr.getPort();
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);
-		socket = client.createHttpsSocket(engine);
+		socket = client.createHttpsSocket(engine, new SocketListener());
 		
 		CompletableFuture<Void> connect = socket.connect(addr);
 		connect.get(2, TimeUnit.SECONDS);

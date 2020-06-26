@@ -5,6 +5,7 @@ import javax.net.ssl.SSLEngine;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.impl.Http2SocketImpl;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.util.time.TimeImpl;
@@ -41,17 +42,17 @@ public class DirectHttp2Client implements Http2Client {
 		factory = new Http2ClientEngineFactory(injConfig);
 	}
 
-	public Http2Socket createHttpSocket() {
+	public Http2Socket createHttpSocket(Http2SocketListener socketListener) {
 		ConnectionListener listener = mgr.getHttpConnection();
 		MockTcpChannel channel = new MockTcpChannel(false);
 		
-		return new Http2SocketImpl(new DelayedProxy(listener, channel), factory);
+		return new Http2SocketImpl(new DelayedProxy(listener, channel), factory, socketListener);
 	}
 
-	public Http2Socket createHttpsSocket(SSLEngine engine) {
+	public Http2Socket createHttpsSocket(SSLEngine engine, Http2SocketListener socketListener) {
 		ConnectionListener listener = mgr.getHttpConnection();
 		MockTcpChannel channel = new MockTcpChannel(true);
 		
-		return new Http2SocketImpl(new DelayedProxy(listener, channel), factory);
+		return new Http2SocketImpl(new DelayedProxy(listener, channel), factory, socketListener);
 	}
 }

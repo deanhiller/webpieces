@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
@@ -19,9 +21,13 @@ public class Layer1Incoming implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(Layer1Incoming.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Http2ClientEngine layer2;
+	private Http2SocketListener socketListener;
+	private Http2Socket socket;
 
-	public Layer1Incoming(Http2ClientEngine layer2) {
+	public Layer1Incoming(Http2ClientEngine layer2, Http2SocketListener socketListener, Http2Socket socket) {
 		this.layer2 = layer2;
+		this.socketListener = socketListener;
+		this.socket = socket;
 	}
 
 	public CompletableFuture<Void> sendInitialFrames() {
@@ -47,7 +53,17 @@ public class Layer1Incoming implements DataListener {
 
 	@Override
 	public void farEndClosed(Channel channel) {
-		layer2.farEndClosed();
+		try {
+			layer2.farEndClosed();
+			socketListener.socketFarEndClosed(socket);
+		} catch(Throwable e) {
+			try {
+				socketListener.socketFarEndClosed(socket);
+			} catch(Throwable t) {
+				e.addSuppressed(t);
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	@Override

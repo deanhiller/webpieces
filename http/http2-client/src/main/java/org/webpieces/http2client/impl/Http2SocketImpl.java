@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -20,11 +21,11 @@ public class Http2SocketImpl implements Http2Socket {
 	private Layer1Incoming incoming;
 	private Layer3Outgoing outgoing;
 
-	public Http2SocketImpl(Http2ChannelProxy channel, Http2ClientEngineFactory factory) {
+	public Http2SocketImpl(Http2ChannelProxy channel, Http2ClientEngineFactory factory, Http2SocketListener socketListener) {
 		outgoing = new Layer3Outgoing(channel, this);
 		
 		Http2ClientEngine parseLayer = factory.createClientParser(""+channel, outgoing);
-		incoming = new Layer1Incoming(parseLayer);
+		incoming = new Layer1Incoming(parseLayer, socketListener, this);
 	}
 
 	@Override

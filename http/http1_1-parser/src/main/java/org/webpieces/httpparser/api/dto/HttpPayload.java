@@ -15,13 +15,13 @@ public abstract class HttpPayload {
 		throw new ClassCastException("This is not a response and is="+this);
 	}
 	public HttpChunk getHttpChunk() {
-		if(getMessageType() == HttpMessageType.CHUNK)
+		if(getMessageType() == HttpMessageType.CHUNK || getMessageType() == HttpMessageType.LAST_CHUNK)
 			return (HttpChunk)this;
 		throw new ClassCastException("This is not a HttpChunk and is="+this);
 	}	
 	
 	public HttpData getHttpData() {
-		if(getMessageType() == HttpMessageType.DATA)
+		if(getMessageType() == HttpMessageType.DATA || getMessageType() == HttpMessageType.LAST_DATA)
 			return (HttpData)this;
 		throw new ClassCastException("This is not a HttpData and is="+this);
 	}	

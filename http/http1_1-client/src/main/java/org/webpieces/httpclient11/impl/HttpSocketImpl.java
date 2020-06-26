@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -17,6 +18,7 @@ import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpclient11.api.HttpSocket;
+import org.webpieces.httpclient11.api.HttpSocketListener;
 import org.webpieces.httpclient11.api.HttpStreamRef;
 import org.webpieces.httpclient11.api.SocketClosedException;
 import org.webpieces.httpparser.api.HttpParser;
@@ -38,7 +40,8 @@ public class HttpSocketImpl implements HttpSocket {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpSocketImpl.class);
 	private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	
+	private final String svrSocket;
+
 	private ChannelProxy channel;
 
 	private boolean isClosed;
@@ -51,10 +54,22 @@ public class HttpSocketImpl implements HttpSocket {
 	private boolean isRecording = false;
 	private MarshalState state;
 	private boolean isConnect;
+	private HttpSocketListener socketListener;
+	private boolean isHttps;
 	
-	public HttpSocketImpl(ChannelProxy channel, HttpParser parser) {
+	public HttpSocketImpl(ChannelProxy channel, HttpParser parser, HttpSocketListener socketListener, boolean isHttps) {
+		this.isHttps = isHttps;
+		if(socketListener == null || channel == null || parser == null)
+			throw new IllegalArgumentException("no args can be null");
+
+		this.svrSocket = MDC.get("svrSocket");
+		if(this.svrSocket == null) {
+			log.error("Either MDC.put svrSocket yourself OR if running in webpieces, something went wrong!!", new IllegalStateException().fillInStackTrace());
+		}
+
 		this.channel = channel;
 		this.parser = parser;
+		this.socketListener = new ProxyClose(socketListener, svrSocket);
 		memento = parser.prepareToParse();
 		state = parser.prepareToMarshal();
 	}
@@ -116,7 +131,7 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	private HttpStreamRef actuallySendRequest(HttpRequest request, HttpResponseListener listener) {
-		HttpResponseListener l = new CatchResponseListener(listener);
+		HttpResponseListener l = new CatchResponseListener(listener, svrSocket);
 		ByteBuffer wrap = parser.marshalToByteBuffer(state, request);
 		
 		isConnect = false;
@@ -273,13 +288,12 @@ public class HttpSocketImpl implements HttpSocket {
 
 		@Override
 		public void farEndClosed(Channel channel) {
-			log.info("far end closed. socket("+channel+")");
 			isClosed = true;
+			socketListener.socketClosed(HttpSocketImpl.this);
+			
 			while(!responsesToComplete.isEmpty()) {
 				HttpResponseListener listener = responsesToComplete.poll();
-				if(listener != null) {
-					listener.socketClosed();
-				}
+				listener.failure(new SocketClosedException("Socket was closed by remote end"));
 			}
 		}
 
@@ -298,7 +312,7 @@ public class HttpSocketImpl implements HttpSocket {
 
 	@Override
 	public String toString() {
-		return "HttpSocketImpl [channel=" + channel + "]";
+		return "HttpSocketImpl [channel=" + channel.getId() + "isHttps="+isHttps+" tcpSecure="+channel.isSecure()+"]";
 	}
 
 	@Override

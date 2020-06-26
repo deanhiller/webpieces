@@ -49,7 +49,7 @@ public class TestChunking {
 		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
 
 		mockChanMgr.addTCPChannelToReturn(mockChannel);
-		httpSocket = httpClient.createHttpSocket();
+		httpSocket = httpClient.createHttpSocket(new SocketListener());
 	}
 
 	@Test

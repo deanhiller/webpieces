@@ -1,6 +1,7 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
+* Move ClientImp's and server connectors into webpieces
 * XFuture so context issue is solve
 * conversations
 * ALPN

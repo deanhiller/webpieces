@@ -5,6 +5,7 @@ import javax.net.ssl.SSLEngine;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.httpclient11.api.HttpClient;
 import org.webpieces.httpclient11.api.HttpSocket;
+import org.webpieces.httpclient11.api.HttpSocketListener;
 import org.webpieces.httpclient11.impl.HttpSocketImpl;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
@@ -30,24 +31,24 @@ public class DirectHttp11Client implements HttpClient {
 		this.mgr = mgr;
 	}
 
-	public HttpSocket createHttpSocket() {
+	public HttpSocket createHttpSocket(HttpSocketListener closeListener) {
 		ConnectionListener listener = mgr.getHttpConnection();
 		MockTcpChannel channel = new MockTcpChannel(false);
 
 		try {
-			return new HttpSocketImpl(new DelayedProxy(listener, channel), parser);
+			return new HttpSocketImpl(new DelayedProxy(listener, channel), parser, closeListener, false);
 			//return new Http11SocketImpl(listener, channel, parser, false);
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public HttpSocket createHttpsSocket(SSLEngine engine) {
+	public HttpSocket createHttpsSocket(SSLEngine engine, HttpSocketListener closeListener) {
 		ConnectionListener listener = mgr.getHttpsConnection();
 		MockTcpChannel channel = new MockTcpChannel(true);
 
 		try {
-			return new HttpSocketImpl(new DelayedProxy(listener, channel), parser);
+			return new HttpSocketImpl(new DelayedProxy(listener, channel), parser, closeListener, true);
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}	
