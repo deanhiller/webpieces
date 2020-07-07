@@ -11,15 +11,15 @@ public class TooManyRequestsException extends HttpException {
 	}
 
 	public TooManyRequestsException(String message, Throwable cause) {
-		super(StatusCode.HTTP_502_BAD_GATEWAY, message, cause);
+		super(StatusCode.HTTP_429_TOO_MANY_REQUESTS, message, cause);
 	}
 
 	public TooManyRequestsException(String message) {
-		super(StatusCode.HTTP_502_BAD_GATEWAY, message);
+		super(StatusCode.HTTP_429_TOO_MANY_REQUESTS, message);
 	}
 
 	public TooManyRequestsException(Throwable cause) {
-		super(StatusCode.HTTP_502_BAD_GATEWAY, cause);
+		super(StatusCode.HTTP_429_TOO_MANY_REQUESTS, cause);
 	}
 
 }

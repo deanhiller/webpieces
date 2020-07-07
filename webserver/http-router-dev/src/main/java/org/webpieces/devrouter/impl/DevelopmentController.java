@@ -49,9 +49,11 @@ public class DevelopmentController {
 //		}
 		
 		RouterRequest request = Current.request();
+		RouterRequest originalReq = (RouterRequest) request.requestState.get(ORIGINAL_REQUEST);
+
 		String url = null;
 		Object reloadError = request.requestState.get(DevRouteInvoker.ERROR_KEY);
-		if(reloadError == null && request.method == HttpMethod.GET) {
+		if(reloadError == null && originalReq.method == HttpMethod.GET) {
 			//we can only do this for GET right now.
 			
 			url = request.getSingleMultipart("url");
