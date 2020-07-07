@@ -55,6 +55,7 @@ public class RouterConfig {
 	private File workingDirectory;
 
 	private boolean isValidateFlash;
+	private int scheduledThreadPoolSize = 5;
 
 	public RouterConfig(File workingDirectory, String name) {
 		if(!workingDirectory.isAbsolute())
@@ -196,4 +197,12 @@ public class RouterConfig {
 		this.isValidateFlash = isValidateFlash;
 		return this;
 	}
+	public int getScheduledThreadPoolSize() {
+		return scheduledThreadPoolSize;
+	}
+	public RouterConfig setScheduledThreadPoolSize(int scheduledThreadPoolSize) {
+		this.scheduledThreadPoolSize = scheduledThreadPoolSize;
+		return this;
+	}
+	
 }

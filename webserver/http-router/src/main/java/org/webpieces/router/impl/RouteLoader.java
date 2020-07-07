@@ -224,7 +224,8 @@ public class RouteLoader {
 		if(guiceModules == null)
 			guiceModules = new ArrayList<>();
 		
-		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+		int corePoolSize = config.getScheduledThreadPoolSize();
+		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(corePoolSize, new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
 				//always name the threads & prevent thread death

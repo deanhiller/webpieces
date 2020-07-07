@@ -23,6 +23,7 @@ public enum StatusCode {
 	HTTP_408_REQUEST_TIMEOUT(408, "Request Timeout", StatusType.ClientError),
 
 	HTTP_413_PAYLOAD_TOO_LARGE(413, "Payload Too Large", StatusType.ClientError),
+	HTTP_429_TOO_MANY_REQUESTS(429, "Too many requests", StatusType.ClientError),
 	HTTP_431_REQUEST_HEADERS_TOO_LARGE(431, "Request Header Fields Too Large", StatusType.ClientError),
 	
 	HTTP_500_INTERNAL_SVR_ERROR(500, "Internal Server Error", StatusType.ServerError),  

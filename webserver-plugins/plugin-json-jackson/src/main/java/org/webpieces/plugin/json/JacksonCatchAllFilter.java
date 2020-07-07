@@ -65,7 +65,11 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 	protected Action translate(HttpException t) {
 		byte[] content = translateHttpException(t);
 		StatusCode status = t.getStatusCode();
-		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);		
+		String msg = "Error";
+		int code = t.getHttpCode();
+		if(status != null)
+			msg = status.getReason();
+		return new RenderContent(content, code, msg, MIME_TYPE);		
 	}
 
 	protected RenderContent translateError(Throwable t) {
@@ -91,8 +95,13 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	protected byte[] translateHttpException(HttpException t) {
 		JsonError error = new JsonError();
-		error.setError(t.getStatusCode().getReason()+" : "+t.getMessage());
-		error.setCode(t.getStatusCode().getCode());
+		StatusCode statusCode = t.getStatusCode();
+		if(statusCode != null) {
+			error.setError(t.getStatusCode().getReason()+" : "+t.getMessage());
+			error.setCode(t.getStatusCode().getCode());
+		}
+		
+		error.setCode(t.getHttpCode());
 
 		return translateJson(mapper, error);
 	}
