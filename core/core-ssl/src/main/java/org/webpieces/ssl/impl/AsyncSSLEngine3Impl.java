@@ -191,7 +191,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			}
 			
 			AsyncSSLEngineException ee = new AsyncSSLEngineException(
-					"before exception status="+status+" hsStatus="+hsStatus+" b="+encryptedData+" remaining before dycrypt="+remainBeforeDecrypt+extraInfo, e);
+					"before exception status="+status+" hsStatus="+hsStatus+" b="+encryptedData+" remaining before dycrypt="+remainBeforeDecrypt+extraInfo+" consumedBytes="+consumedBytes, e);
 			throw ee;
 		}
 		
