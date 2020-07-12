@@ -16,6 +16,8 @@ public class SslMementoImpl {
 	private AtomicReference<ConnectionState> connectionState = new AtomicReference<ConnectionState>(ConnectionState.NOT_STARTED);
 	private ByteBuffer cachedOut;
 	private ByteBuffer cacheToProcess = EMPTY;
+
+	private int numCallToUnwrap;
 	
 	public SslMementoImpl(String id, SSLEngine engine, ByteBuffer cachedOut) {
 		this.id = id;
@@ -56,6 +58,14 @@ public class SslMementoImpl {
 	
 	public ByteBuffer getCachedToProcess() {
 		return cacheToProcess;
+	}
+
+	public int getNumCallToUnwrap() {
+		return numCallToUnwrap;
+	}
+
+	public void incrementCallToUnwrap() {
+		numCallToUnwrap++;
 	}
 
 }

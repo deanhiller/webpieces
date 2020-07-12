@@ -164,14 +164,16 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		SSLEngineResult result;
 		
 		ByteBuffer cachedOutBuffer = pool.nextBuffer(sslEngine.getSession().getApplicationBufferSize());
-
+		
 		int remainBeforeDecrypt = encryptedData.remaining();
 		try {
 			result = sslEngine.unwrap(encryptedData, cachedOutBuffer);
+			mem.incrementCallToUnwrap();
 		} catch(SSLException e) {
 			//read before the buffer is cleared released
 			//record bytes consumed...
 			int consumedBytes = remainBeforeDecrypt - encryptedData.remaining();
+			int numCallToUnwrap = mem.getNumCallToUnwrap();
 			String extraInfo = createExtraInfo(encryptedData, e);
 
 			cachedOutBuffer.position(cachedOutBuffer.limit()); //simulate consuming all data
@@ -190,8 +192,11 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				return true;
 			}
 			
+			//Add a ton of info for this one for debug purposes...
 			AsyncSSLEngineException ee = new AsyncSSLEngineException(
-					"before exception status="+status+" hsStatus="+hsStatus+" b="+encryptedData+" remaining before dycrypt="+remainBeforeDecrypt+extraInfo+" consumedBytes="+consumedBytes, e);
+					"Number of call to unwrap="+numCallToUnwrap+"before exception status="
+							+status+" consumedBytes="+consumedBytes+" hsStatus="+hsStatus+" b="
+							+encryptedData+" remaining before dycrypt="+remainBeforeDecrypt+" extraInfo="+extraInfo, e);
 			throw ee;
 		}
 		
@@ -253,16 +258,26 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	}
 
 	private String createExtraInfo(ByteBuffer encryptedData, SSLException e) {
-		String extraInfo = "";
+		String extraInfo;
+		byte[] data = new byte[encryptedData.remaining()];
+		encryptedData.get(data);
 		if(e.getMessage().contains("plaintext connection?")) {
-			byte[] data = new byte[encryptedData.remaining()];
-			encryptedData.get(data);
 			String v = new String( data, StandardCharsets.UTF_8 );
 			extraInfo = " Extra Info: bytes translated to plain text are="+v;
+		} else {
+			extraInfo = byteArrayToHex(data);
 		}
+		
 		return extraInfo;
 	}
 
+	public static String byteArrayToHex(byte[] a) {
+		   StringBuilder sb = new StringBuilder(a.length * 2);
+		   for(byte b: a)
+		      sb.append(String.format("%02x", b));
+		   return sb.toString();
+		}
+	
 	private void firePlainPacketToListener(ByteBuffer cachedOutBuffer, int totalBytesToAck) {
 		cachedOutBuffer.flip();
 		metrics.recordPlainBytesToClient(cachedOutBuffer.remaining());
