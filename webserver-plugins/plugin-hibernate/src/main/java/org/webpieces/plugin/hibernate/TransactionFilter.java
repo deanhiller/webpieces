@@ -36,6 +36,14 @@ public class TransactionFilter extends RouteFilter<Void> {
 	
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+		NoTransaction annotation = meta.getLoadedController().getControllerMethod().getAnnotation(NoTransaction.class);
+		if(annotation != null) {
+			//skip doing a transaction for methods annotated with @NoTransaction.
+			//Those ones can use TransactionHelper
+			return nextFilter.invoke(meta);
+		}
+		
+		
 		state = 0;
 		if(Em.get() != null)
 			throw new IllegalStateException("Are you stacking two TransactionFilters as this Em should not be set yet.  be aware you do not need to call addFilter for this filter and should just include the HibernateRouteModule");
