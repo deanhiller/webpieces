@@ -18,7 +18,30 @@ public class TransactionHelper {
 		this.txCompleters = txCompleters;
 	}
 	
-	public <Req, Resp> Resp runTransaction(Function<EntityManager, Resp> function) {
+	public <Resp> Resp runWithEm(Function<EntityManager, Resp> function) {
+		EntityManager mgr = factory.createEntityManager();
+		
+		try {
+			Resp resp = function.apply(mgr);
+			mgr.close();	
+			return resp;
+		} catch(RuntimeException e) {
+			tryClose(mgr, e);
+			throw e;
+		}
+	}
+	
+	private void tryClose(EntityManager mgr, RuntimeException e) {
+		try {
+			mgr.close();
+		} catch(RuntimeException nextExc) {
+			//This exception needs to be added to original.
+			//The original exception is more important
+			e.addSuppressed(nextExc);
+		}
+	}
+
+	public <Resp> Resp runTransaction(Function<EntityManager, Resp> function) {
 		EntityManager mgr = factory.createEntityManager();
 		EntityTransaction tx = mgr.getTransaction();
 		tx.begin();
