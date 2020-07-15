@@ -1,6 +1,5 @@
 package org.webpieces.plugin.json;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -20,9 +19,6 @@ import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.util.filters.Service;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webpieces.http2.api.dto.lowlevel.StatusCode;
 
 @Singleton
@@ -30,12 +26,12 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	private static final Logger log = LoggerFactory.getLogger(JacksonCatchAllFilter.class);
 	public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
-	private final ObjectMapper mapper;
+	private final JacksonJsonConverter mapper;
 
 	private Pattern pattern;
 
 	@Inject
-	public JacksonCatchAllFilter(ObjectMapper mapper) {
+	public JacksonCatchAllFilter(JacksonJsonConverter mapper) {
 		this.mapper = mapper;
 	}
 	
@@ -121,16 +117,8 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		return translateJson(mapper, error);
 	}
 	
-	protected byte[] translateJson(ObjectMapper mapper, Object error) {
-		try {
-			return mapper.writeValueAsBytes(error);
-		} catch (JsonGenerationException e) {
-			throw new RuntimeException(e);
-		} catch (JsonMappingException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+	protected byte[] translateJson(JacksonJsonConverter mapper, Object error) {
+		return mapper.writeValueAsBytes(error);
 	}
 	
 }

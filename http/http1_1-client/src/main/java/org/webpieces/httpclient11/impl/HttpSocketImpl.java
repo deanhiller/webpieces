@@ -63,9 +63,6 @@ public class HttpSocketImpl implements HttpSocket {
 			throw new IllegalArgumentException("no args can be null");
 
 		this.svrSocket = MDC.get("svrSocket");
-		if(this.svrSocket == null) {
-			log.error("Either MDC.put svrSocket yourself OR if running in webpieces, something went wrong!!", new IllegalStateException().fillInStackTrace());
-		}
 
 		this.channel = channel;
 		this.parser = parser;

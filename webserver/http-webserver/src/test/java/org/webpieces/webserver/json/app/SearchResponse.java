@@ -8,6 +8,7 @@ public class SearchResponse {
 
 	private int searchTime;
 	private List<String> matches = new ArrayList<>();
+	private String summary;
 	
 	public int getSearchTime() {
 		return searchTime;
@@ -21,5 +22,13 @@ public class SearchResponse {
 	public void setMatches(List<String> matches) {
 		this.matches = matches;
 	}
+	public String getSummary() {
+		return summary;
+	}
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
+	
+	
 	
 }

@@ -23,10 +23,14 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.PrivateWebserverForTest;
+import org.webpieces.webserver.json.app.FakeAuthService;
+import org.webpieces.webserver.json.app.SearchRequest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
+
+import com.google.inject.Binder;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -35,6 +39,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(TestJson.class);
 	private HttpSocket http11Socket;
+	private MockAuthService mockSvc = new MockAuthService();
 
 	private boolean isRemote;
 
@@ -53,14 +58,67 @@ public class TestJson extends AbstractWebpiecesTest {
 		log.info("constructing test suite for client isRemote="+isRemote);
 	}
 	
+	private class TestOverrides implements com.google.inject.Module {
+
+		@Override
+		public void configure(Binder binder) {
+			binder.bind(FakeAuthService.class).toInstance(mockSvc);
+		}
+		
+	}
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("jsonMeta.txt", PrivateWebserverForTest.class.getClassLoader());
-		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(isRemote, new SimpleMeterRegistry()), null, true, metaFile);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(isRemote, new SimpleMeterRegistry()), new TestOverrides(), true, metaFile);
 		webserver.start();
 		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
+	@Test
+	public void testEmptyStringGoesToNoAttributeInJson() {
+		//test out "something":null converts to "" in java....
+		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/simple");
+		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContentType("application/json");
+		response.assertContains("{`searchTime`:99,`matches`:[`match1`,`match2`]}".replace("`", "\""));
+	}
+	
+	@Test
+	public void testNullValueInJsonGoesToEmptyString() {
+		//test out "something":null converts to "" in java....
+		String json = "{ `query`: null, `meta`: { `numResults`: 4 } }".replace("`", "\"");
+		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/simple", json);
+		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContentType("application/json");
+		
+		SearchRequest request = mockSvc.getCachedRequest();
+		Assert.assertEquals("", request.getQuery());
+	}
+
+	@Test
+	public void testNoAttributeValueInJsonGoesToEmptyString() {
+		//test out "something":null converts to "" in java....
+		String json = "{ `meta`: { `numResults`: 4 } }".replace("`", "\"");
+		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/simple", json);
+		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContentType("application/json");
+		
+		SearchRequest request = mockSvc.getCachedRequest();
+		Assert.assertEquals("", request.getQuery());
+	}
+	
 	@Test
 	public void testAsyncJsonGet() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/async/45");

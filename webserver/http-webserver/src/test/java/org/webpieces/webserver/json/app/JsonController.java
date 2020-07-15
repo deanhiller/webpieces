@@ -37,6 +37,21 @@ public class JsonController {
 		return new StreamRefProxy(writer, futureStream);
 	}
 	
+	public SearchResponse simple(@Jackson SearchRequest request) {
+		SearchResponse resp = new SearchResponse();
+		resp.setSearchTime(99);
+		resp.getMatches().add("match1");
+		resp.getMatches().add("match2");
+		//leave resp.summary null for test!!!
+		svc.saveRequest(request);
+		
+		resp.setSummary("");
+	
+		return resp;
+	}
+	
+	
+	
 	public CompletableFuture<SearchResponse> asyncJsonRequest(int id, @Jackson SearchRequest request) {
 		SearchResponse resp = new SearchResponse();
 		resp.setSearchTime(8);

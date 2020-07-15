@@ -3,6 +3,7 @@ package org.webpieces.webserver.json.app;
 import javax.inject.Inject;
 
 import org.webpieces.plugin.json.JacksonCatchAllFilter;
+import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.router.api.exceptions.HttpException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 
@@ -10,10 +11,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestCatchAllFilter extends JacksonCatchAllFilter {
 
-	private ObjectMapper mapper;
+	private JacksonJsonConverter mapper;
 
 	@Inject
-	public TestCatchAllFilter(ObjectMapper mapper) {
+	public TestCatchAllFilter(JacksonJsonConverter mapper) {
 		super(mapper);
 		this.mapper = mapper;
 	}

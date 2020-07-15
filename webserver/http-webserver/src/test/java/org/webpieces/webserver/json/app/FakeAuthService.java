@@ -7,4 +7,7 @@ public class FakeAuthService {
 	public CompletableFuture<Boolean> authenticate(String username) {
 		return CompletableFuture.completedFuture(true);
 	}
+
+	public void saveRequest(SearchRequest request) {
+	}
 }

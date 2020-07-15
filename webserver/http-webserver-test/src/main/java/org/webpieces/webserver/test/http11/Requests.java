@@ -107,6 +107,16 @@ public class Requests {
 		return new HttpFullRequest(req, body);
 	}
 
+	public static HttpFullRequest createJsonRequest(KnownHttpMethod method, String url, String json) {
+		HttpRequest request = createBaseRequest(method, url);
+		
+		DataWrapper body = gen.wrapByteArray(json.getBytes());
+
+		request.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
+		
+		return new HttpFullRequest(request, body);
+	}
+	
 	public static HttpFullRequest createJsonRequest(KnownHttpMethod method, String url) {
 		HttpRequest request = createBaseRequest(method, url);
 		

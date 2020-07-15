@@ -19,7 +19,7 @@ public class JacksonPlugin implements Plugin {
 	
 	@Override
 	public List<Module> getGuiceModules() {
-		return Lists.newArrayList(new JacksonModule());
+		return Lists.newArrayList(new JacksonModule(config));
 	}
 
 	@Override

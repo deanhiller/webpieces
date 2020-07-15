@@ -1,25 +1,22 @@
 package org.webpieces.plugin.json;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 
 import javax.inject.Inject;
 
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.RenderContent;
-import org.webpieces.router.api.exceptions.ClientDataError;
+import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JacksonLookup implements BodyContentBinder {
 
-	private ObjectMapper mapper;
+	private JacksonJsonConverter mapper;
 	
 	@Inject
-	public JacksonLookup(ObjectMapper mapper) {
+	public JacksonLookup(JacksonJsonConverter mapper) {
 		this.mapper = mapper;
 	}
 
@@ -39,31 +36,24 @@ public class JacksonLookup implements BodyContentBinder {
 	public <T> T unmarshal(Class<T> entityClass, byte[] data) {
 		try {
 			if(data.length == 0)
-				throw new ClientDataError("Client did not provide a json request in the body of the request");
-			
-			if(JsonNode.class.isAssignableFrom(entityClass))
+				throw new BadClientRequestException("Client did not provide a json request in the body of the request");		
+			else if(JsonNode.class.isAssignableFrom(entityClass))
 				return (T) mapper.readTree(data);
 			
 			return mapper.readValue(data, entityClass);
-		} catch(JsonProcessingException e) {
-			throw new ClientDataError("invalid json in client request.  "+e.getMessage(), e);
-		} catch (IOException e) {
-			throw new RuntimeException("should not occur", e);
+		} catch(JsonReadException e) {
+			throw new BadClientRequestException("invalid json in client request.  "+e.getMessage(), e);
 		}
 	}
 
 	@Override
 	public <T> RenderContent marshal(T bean) {
-		try {
-			byte[] content;
-			if(bean == null)
-				content = new byte[0];
-			else
-				content = mapper.writeValueAsBytes(bean);
-			return new RenderContent(content, KnownStatusCode.HTTP_200_OK.getCode(), KnownStatusCode.HTTP_200_OK.getReason(), JacksonCatchAllFilter.MIME_TYPE);
-		} catch (IOException e) {
-			throw new RuntimeException("should not occur", e);
-		}
+		byte[] content;
+		if(bean == null)
+			content = new byte[0];
+		else
+			content = mapper.writeValueAsBytes(bean);
+		return new RenderContent(content, KnownStatusCode.HTTP_200_OK.getCode(), KnownStatusCode.HTTP_200_OK.getReason(), JacksonCatchAllFilter.MIME_TYPE);
 	}
 
 	@Override
