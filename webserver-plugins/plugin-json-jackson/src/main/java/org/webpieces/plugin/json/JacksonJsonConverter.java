@@ -43,7 +43,7 @@ public class JacksonJsonConverter {
 				return convertStrings(obj, true);
 			return obj;
 		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
+			throw new JsonReadException(e);
 		}
 	}
 	
