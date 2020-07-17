@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -58,6 +60,12 @@ public class JacksonJsonConverter {
 				Class<?> type = parameters[0].getType();
 				if(type.equals(String.class)) {
 					convertNullToEmptyString(obj, m, toEmptyStr);
+				} else if(Map.class.isAssignableFrom(type)) {
+					Map value = (Map)callGetMethod(obj, m);
+					convert(value, toEmptyStr);
+				} else if(List.class.isAssignableFrom(type)) {
+					List value = (List)callGetMethod(obj, m);
+					convert(value, toEmptyStr);
 				} else if(Object.class.isAssignableFrom(type)) {
 					Object value = callGetMethod(obj, m);
 					if(value != null)
@@ -68,6 +76,19 @@ public class JacksonJsonConverter {
 		}
 		
 		return obj;
+	}
+
+
+	private void convert(List values, boolean toEmptyStr) {
+		for(Object obj : values) {
+			convertStrings(obj, toEmptyStr);
+		}
+	}
+
+	private void convert(Map values, boolean toEmptyStr) {
+		for(Object value : values.values()) {
+			convertStrings(value, toEmptyStr);
+		}
 	}
 
 	private void convertNullToEmptyString(Object obj, Method setMethod, boolean toEmptyStr) {
