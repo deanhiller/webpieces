@@ -53,11 +53,16 @@ public class JacksonJsonConverter {
 		for(Method m : methods) {
 			
 			Parameter[] parameters = m.getParameters();
-			if(parameters.length == 1 
-					&& parameters[0].getType().equals(String.class)
-					&& m.getName().startsWith("set")
-			) {
-				convertNullToEmptyString(obj, m, toEmptyStr);
+			if(parameters.length == 1 && m.getName().startsWith("set"))
+			{
+				Class<?> type = parameters[0].getType();
+				if(type.equals(String.class)) {
+					convertNullToEmptyString(obj, m, toEmptyStr);
+				} else if(Object.class.isAssignableFrom(type)) {
+					Object value = callGetMethod(obj, m);
+					if(value != null)
+						convertStrings(value, toEmptyStr);
+				}
 			}
 			
 		}
@@ -66,22 +71,7 @@ public class JacksonJsonConverter {
 	}
 
 	private void convertNullToEmptyString(Object obj, Method setMethod, boolean toEmptyStr) {
-		String getMethod = "get"+setMethod.getName().substring(3);
-		Method method;
-		try {
-			method = obj.getClass().getMethod(getMethod);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("Method="+getMethod+" does not exist on class="+obj.getClass().getName(), e);
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		}
-		
-		String value;
-		try {
-			value = (String)method.invoke(obj);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new RuntimeException(e);
-		}
+		String value = (String) callGetMethod(obj, setMethod);
 		
 		if(toEmptyStr) {
 			if(value == null) {
@@ -100,6 +90,31 @@ public class JacksonJsonConverter {
 				}
 			}
 		}
+	}
+
+	private Object callGetMethod(Object obj, Method setMethod) {
+		Method method = fetchGetMethod(obj, setMethod);
+		
+		Object value;
+		try {
+			value = method.invoke(obj);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+		return value;
+	}
+
+	private Method fetchGetMethod(Object obj, Method setMethod) {
+		String getMethod = "get"+setMethod.getName().substring(3);
+		Method method;
+		try {
+			method = obj.getClass().getMethod(getMethod);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Method="+getMethod+" does not exist on class="+obj.getClass().getName(), e);
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		}
+		return method;
 	}
 
 	public String writeValueAsString(Object obj) {

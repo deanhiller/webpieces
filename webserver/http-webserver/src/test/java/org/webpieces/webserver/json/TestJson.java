@@ -84,7 +84,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContentType("application/json");
-		response.assertContains("{`searchTime`:99,`matches`:[`match1`,`match2`]}".replace("`", "\""));
+		response.assertContains("{`searchTime`:99,`matches`:[`match1`,`match2`],`meta`:{`numResults`:0}}".replace("`", "\""));
 	}
 	
 	@Test
@@ -101,6 +101,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		SearchRequest request = mockSvc.getCachedRequest();
 		Assert.assertEquals("", request.getQuery());
+		Assert.assertEquals("", request.getMeta().getExtraField());
 	}
 
 	@Test
@@ -117,6 +118,8 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		SearchRequest request = mockSvc.getCachedRequest();
 		Assert.assertEquals("", request.getQuery());
+		Assert.assertEquals("", request.getMeta().getExtraField());
+
 	}
 	
 	@Test

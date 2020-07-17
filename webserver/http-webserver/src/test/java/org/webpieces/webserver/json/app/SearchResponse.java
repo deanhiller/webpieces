@@ -9,6 +9,7 @@ public class SearchResponse {
 	private int searchTime;
 	private List<String> matches = new ArrayList<>();
 	private String summary;
+	private SearchMeta meta;
 	
 	public int getSearchTime() {
 		return searchTime;
@@ -27,6 +28,12 @@ public class SearchResponse {
 	}
 	public void setSummary(String summary) {
 		this.summary = summary;
+	}
+	public SearchMeta getMeta() {
+		return meta;
+	}
+	public void setMeta(SearchMeta meta) {
+		this.meta = meta;
 	}
 	
 	

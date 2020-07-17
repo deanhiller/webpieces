@@ -38,10 +38,14 @@ public class JsonController {
 	}
 	
 	public SearchResponse simple(@Jackson SearchRequest request) {
+		SearchMeta meta = new SearchMeta();
+		meta.setExtraField("");
+		
 		SearchResponse resp = new SearchResponse();
 		resp.setSearchTime(99);
 		resp.getMatches().add("match1");
 		resp.getMatches().add("match2");
+		resp.setMeta(meta);
 		//leave resp.summary null for test!!!
 		svc.saveRequest(request);
 		
