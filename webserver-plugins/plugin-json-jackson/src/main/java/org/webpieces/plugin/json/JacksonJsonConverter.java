@@ -80,10 +80,12 @@ public class JacksonJsonConverter {
 					convertNullToEmptyString(obj, m, toEmptyStr);
 				} else if(Map.class.isAssignableFrom(type)) {
 					Map value = (Map)callGetMethod(obj, m);
-					convert(value, toEmptyStr);
+					if(value != null)
+						convert(value, toEmptyStr);
 				} else if(List.class.isAssignableFrom(type)) {
 					List value = (List)callGetMethod(obj, m);
-					convert(value, toEmptyStr);
+					if(value != null)
+						convert(value, toEmptyStr);
 				} else if(Object.class.isAssignableFrom(type)) {
 					Object value = callGetMethod(obj, m);
 					if(value != null)
