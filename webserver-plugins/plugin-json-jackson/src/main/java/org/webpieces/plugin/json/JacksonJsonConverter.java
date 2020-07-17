@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -16,13 +18,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JacksonJsonConverter {
 	
 	private ObjectMapper mapper;
+	private Set<Class> primitiveTypes = new HashSet<>();
 	private boolean convertNullToEmptyStr;
 
 	@Inject
-	public JacksonJsonConverter(ObjectMapper mapper, JacksonConfig config) {
+	public JacksonJsonConverter(ObjectMapper mapper, ConverterConfig config) {
 		this.mapper = mapper;
 		convertNullToEmptyStr = config.isConvertNullToEmptyStr();
-		
+		primitiveTypes.add(Boolean.class);
+		primitiveTypes.add(Byte.class);
+		primitiveTypes.add(Short.class);
+		primitiveTypes.add(Integer.class);
+		primitiveTypes.add(Long.class);
+		primitiveTypes.add(Float.class);
+		primitiveTypes.add(Double.class);
+		primitiveTypes.add(Boolean.TYPE);
+		primitiveTypes.add(Byte.TYPE);
+		primitiveTypes.add(Short.TYPE);
+		primitiveTypes.add(Integer.TYPE);
+		primitiveTypes.add(Long.TYPE);
+		primitiveTypes.add(Float.TYPE);
+		primitiveTypes.add(Double.TYPE);
 	}
 
 	public <T> T readValue(byte[] json, Class<T> clazz) {
@@ -58,7 +74,9 @@ public class JacksonJsonConverter {
 			if(parameters.length == 1 && m.getName().startsWith("set"))
 			{
 				Class<?> type = parameters[0].getType();
-				if(type.equals(String.class)) {
+				if(primitiveTypes.contains(type)) {
+					continue;
+				} else if(type.equals(String.class)) {
 					convertNullToEmptyString(obj, m, toEmptyStr);
 				} else if(Map.class.isAssignableFrom(type)) {
 					Map value = (Map)callGetMethod(obj, m);

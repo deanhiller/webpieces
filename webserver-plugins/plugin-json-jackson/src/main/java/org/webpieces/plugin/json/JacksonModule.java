@@ -30,8 +30,12 @@ public class JacksonModule extends AbstractModule {
 	                .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
 	    }
 	    
+	    ConverterConfig converterConfig = new ConverterConfig();
+	    converterConfig.setConvertNullToEmptyStr(config.isConvertNullToEmptyStr());
+	    
 	    bind(ObjectMapper.class).toInstance(mapper);
 	    bind(JacksonConfig.class).toInstance(config);
+	    bind(ConverterConfig.class).toInstance(converterConfig);
 	}
 
 }
