@@ -44,7 +44,7 @@ public class ListGen extends ParseTagArgs {
         s.append("      setProperty(_attrsXXX['as'], _itemXXX);\n");
         s.append("      setProperty(_attrsXXX['as']+'_index', _iXXX);\n");
         s.append("      setProperty(_attrsXXX['as']+'_isLast', !_iterXXX.hasNext());\n");
-        s.append("      setProperty(_attrsXXX['as']+'_isFirst', _iXXX == 1);\n");
+        s.append("      setProperty(_attrsXXX['as']+'_isFirst', _iXXX == 0);\n");
         s.append("      setProperty(_attrsXXX['as']+'_parity', _iXXX%2==0?'even':'odd');\n");
         
         String result = s.toString().replaceAll("XXX", ""+uniqueId);
