@@ -35,9 +35,9 @@ import com.google.inject.Binder;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 @RunWith(Parameterized.class)
-public class TestJson extends AbstractWebpiecesTest {
+public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	
-	private static final Logger log = LoggerFactory.getLogger(TestJson.class);
+	private static final Logger log = LoggerFactory.getLogger(TestJsonCustomFilter.class);
 	private HttpSocket http11Socket;
 	private MockAuthService mockSvc = new MockAuthService();
 
@@ -53,7 +53,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		return args;
 	}
 	 
-	public TestJson(boolean isRemote) {
+	public TestJsonCustomFilter(boolean isRemote) {
 		this.isRemote = isRemote;
 		log.info("constructing test suite for client isRemote="+isRemote);
 	}
@@ -90,7 +90,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	@Test
 	public void testNullValueInJsonGoesToEmptyString() {
 		//test out "something":null converts to "" in java....
-		String json = "{ `query`: null, `meta`: { `numResults`: 4 } }".replace("`", "\"");
+		String json = "{ `query`: null, `meta`: { `numResults`: 4 }, `testValidation`:`notBlank` }".replace("`", "\"");
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/simple", json);
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
@@ -107,7 +107,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	@Test
 	public void testNoAttributeValueInJsonGoesToEmptyString() {
 		//test out "something":null converts to "" in java....
-		String json = "{ `meta`: { `numResults`: 4 } }".replace("`", "\"");
+		String json = "{ `meta`: { `numResults`: 4 }, `testValidation`:`notBlank` }".replace("`", "\"");
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/simple", json);
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
@@ -157,7 +157,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		response.assertContains("{`searchTime`:98,`matches`:[`match1`,`match2`]}".replace("`", "\""));
 		response.assertContentType("application/json");
 	}
-
+	
 	@Test
 	public void testAsyncWriteOnlyPost() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/writeasync");

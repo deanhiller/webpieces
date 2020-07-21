@@ -50,12 +50,15 @@ public class HibernateModule extends AbstractModule {
 	@Provides
 	public EntityManagerFactory providesSessionFactory(MeterRegistry metrics, Injector injector) throws IOException {
 		boolean loadByClassMeta = loadByClassFile.get();
-		String pu = persistenceUnit.get();		
+		String pu = persistenceUnit.get();
+		EntityManagerFactory factory;
 		if(loadByClassMeta) {
-			return loadByClassMeta(pu, metrics, injector);
+			factory = loadByClassMeta(pu, metrics, injector);
 		} else {
-			return createEntityMgrFromPuFile(pu);
+			factory = createEntityMgrFromPuFile(pu);
 		}
+		
+		return factory;
 	}
 
 	private EntityManagerFactory createEntityMgrFromPuFile(String pu) {

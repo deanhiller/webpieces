@@ -7,13 +7,16 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.ConstraintViolation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
+import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.exceptions.HttpException;
+import org.webpieces.router.api.exceptions.Violation;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
@@ -93,15 +96,36 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		JsonError error = new JsonError();
 		StatusCode statusCode = t.getStatusCode();
 		if(statusCode != null) {
-			error.setError(t.getStatusCode().getReason()+" : "+t.getMessage());
+			String message = t.getStatusCode().getReason()+" : "+t.getMessage();
+			if(t instanceof BadClientRequestException) {
+				message = translateViolations((BadClientRequestException) t, message);
+			}
+			error.setError(message);
 			error.setCode(t.getStatusCode().getCode());
+		} else {
+			error.setCode(t.getHttpCode());
 		}
-		
-		error.setCode(t.getHttpCode());
 
 		return translateJson(mapper, error);
 	}
 
+
+	protected String translateViolations(BadClientRequestException t, String defaultMessage) {
+		if(t.getViolations() == null || t.getViolations().size() == 0) {
+			return defaultMessage;
+		}
+		
+		String failures = "Your request is bad. ";
+		int counter = 1;
+		for(Violation violation : t.getViolations()) {
+			failures += "Violation #"+counter+":'"+violation.getMessage()+"' path="+violation.getPath();
+			if(counter < t.getViolations().size()) {
+				failures += "****";
+			}
+		}
+		
+		return failures;
+	}
 
 	protected byte[] createNotFoundJsonResponse() {
 		JsonError error = new JsonError();

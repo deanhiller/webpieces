@@ -5,6 +5,8 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.validation.Validator;
+import javax.validation.executable.ExecutableValidator;
 
 import org.webpieces.ctx.api.Constants;
 import org.webpieces.data.api.BufferPool;
@@ -56,6 +58,16 @@ public class ProdRouterModule implements Module {
 		binder.bindListener(Matchers.any(), new GuiceWebpiecesListener(beanMeta));
 		
 		binder.bind(PortConfigLookup.class).toInstance(portLookup);
+		
+		
+		Validator validator = javax.validation.Validation
+		        .buildDefaultValidatorFactory()
+		        .getValidator();
+		
+		
+		ExecutableValidator execValidator = validator.forExecutables();
+		binder.bind(Validator.class).toInstance(validator);
+		binder.bind(ExecutableValidator.class).toInstance(execValidator);
 	}
 	
 	@Provides

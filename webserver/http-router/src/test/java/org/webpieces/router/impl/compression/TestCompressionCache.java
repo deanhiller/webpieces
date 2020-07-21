@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.EmptyPortConfigLookup;
 import org.webpieces.router.api.PortConfigLookup;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.RouterServiceFactory;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.UrlPath;
@@ -54,7 +54,7 @@ public class TestCompressionCache {
 
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		TemplateApi nullApi = new NullTemplateApi();
-		List<Module> modules = RouterSvcFactory.getModules(metrics, config, nullApi);
+		List<Module> modules = RouterServiceFactory.getModules(metrics, config, nullApi);
 		Module allMods = Modules.override(modules).with(new TestModule());
 		Injector injector = Guice.createInjector(allMods);
 		cache = injector.getInstance(CompressionCacheSetup.class);

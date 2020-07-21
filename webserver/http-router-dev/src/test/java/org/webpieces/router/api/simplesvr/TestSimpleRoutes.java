@@ -17,7 +17,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
-import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.RouterServiceFactory;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.error.MockStreamHandle;
 import org.webpieces.router.api.error.RequestCreation;
@@ -62,7 +62,7 @@ public class TestSimpleRoutes {
 		
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		TemplateApi nullApi = new NullTemplateApi();
-		RouterService prodSvc = RouterSvcFactory.create(metrics, config, nullApi);
+		RouterService prodSvc = RouterServiceFactory.create(metrics, config, nullApi);
 		prodSvc.configure(args);
 		args.checkConsumedCorrectly();
 

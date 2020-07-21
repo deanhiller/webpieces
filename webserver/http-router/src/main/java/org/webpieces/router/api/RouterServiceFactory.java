@@ -19,9 +19,9 @@ import com.google.inject.util.Modules;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
-public class RouterSvcFactory {
+public class RouterServiceFactory {
 
-    protected RouterSvcFactory() {}
+    protected RouterServiceFactory() {}
 
     public static RouterService create(String testName, MeterRegistry metrics, VirtualFile routersFile, TemplateApi templateApi, Module ... routerOverrides) {
     		File baseWorkingDir = FileFactory.getBaseWorkingDir();

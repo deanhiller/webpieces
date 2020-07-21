@@ -3,15 +3,21 @@ package org.webpieces.router.impl.services;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import javax.validation.ConstraintViolation;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
+import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.router.api.exceptions.Violation;
 import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.model.SvcProxyLogic;
+import org.webpieces.router.impl.params.BeanValidator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
@@ -21,11 +27,13 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 	private final ParamToObjectTranslatorImpl translator;
 	private final ControllerInvoker invoker;
 	private FutureHelper futureUtil;
+	private BeanValidator validator;
 
 	public SvcProxyForContent(SvcProxyLogic svcProxyLogic, FutureHelper futureUtil) {
 		this.futureUtil = futureUtil;
 		this.translator = svcProxyLogic.getTranslator();
 		this.invoker = svcProxyLogic.getServiceInvoker();
+		this.validator = svcProxyLogic.getValidator();
 	}
 
 	@Override
@@ -38,15 +46,27 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		RouteInfoForContent info = (RouteInfoForContent) meta.getRoute();
 		
 		Method m = meta.getLoadedController().getControllerMethod();
+		Object obj = meta.getLoadedController().getControllerInstance();
 		
 		//We chose to do this here so any filters ESPECIALLY API filters 
 		//can catch and translate api errors and send customers a logical response
 		//On top of that ORM plugins can have a transaction filter and then in this
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
-		CompletableFuture<List<Object>> futureArgs = translator.createArgs(m, meta.getCtx(), info.getBodyContentBinder());
+		CompletableFuture<List<Object>> futureArgs = translator.createArgs(m, meta.getCtx(), info.getBodyContentBinder())
+														.thenApply ( args -> validate(obj, m, args));
 		
 		return futureArgs.thenCompose( argsResult -> invokeAndCoerce(meta, info, m, argsResult));
+	}
+
+	private List<Object> validate(Object controller, Method m, List<Object> args) {
+		List<Violation> violations = validator.validate(controller, m, args);
+
+		if(violations.size() > 0) {
+			throw new BadClientRequestException(violations);
+		}
+		
+		return args;
 	}
 
 	private CompletableFuture<Action> invokeAndCoerce(MethodMeta meta, RouteInfoForContent info, Method m,

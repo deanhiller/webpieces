@@ -15,7 +15,7 @@ import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterService;
-import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.RouterServiceFactory;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.router.api.error.dev.CommonRoutesModules;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
@@ -184,7 +184,7 @@ public class ErrorCommonTest {
 
 		TemplateApi nullApi = new NullTemplateApi();
 		if(isProdTest)
-			return RouterSvcFactory.create("ErrorCommonTest", metrics, f, nullApi);
+			return RouterServiceFactory.create("ErrorCommonTest", metrics, f, nullApi);
 		
 		//otherwise create the development server
 		String filePath = System.getProperty("user.dir");

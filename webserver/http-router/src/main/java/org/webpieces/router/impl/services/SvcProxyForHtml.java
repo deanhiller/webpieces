@@ -2,8 +2,15 @@ package org.webpieces.router.impl.services;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Path;
+import javax.validation.Path.Node;
+import javax.validation.executable.ExecutableValidator;
 
 import org.webpieces.ctx.api.Flash;
 import org.webpieces.ctx.api.HttpMethod;
@@ -13,13 +20,13 @@ import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.BadClientRequestException;
-import org.webpieces.router.api.exceptions.BadRequestException;
-import org.webpieces.router.api.exceptions.HttpException;
+import org.webpieces.router.api.exceptions.Violation;
 import org.webpieces.router.api.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.SvcProxyLogic;
+import org.webpieces.router.impl.params.BeanValidator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
@@ -30,12 +37,14 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 	private final RouterConfig config;
 	private final ControllerInvoker invoker;
 	private FutureHelper futureUtil;
+	private BeanValidator validator;
 	
 	public SvcProxyForHtml(SvcProxyLogic svcProxyLogic, FutureHelper futureUtil) {
 		this.futureUtil = futureUtil;
 		this.translator = svcProxyLogic.getTranslator();
 		this.config = svcProxyLogic.getConfig();
 		this.invoker = svcProxyLogic.getServiceInvoker();
+		this.validator = svcProxyLogic.getValidator();
 	}
 
 	@Override
@@ -50,17 +59,46 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 		tokenCheck(info, meta.getCtx());
 		
 		Method m = meta.getLoadedController().getControllerMethod();
+		Object obj = meta.getLoadedController().getControllerInstance();
+		Validation validation = meta.getCtx().getValidation();
 		
 		//We chose to do this here so any filters ESPECIALLY API filters 
 		//can catch and translate api errors and send customers a logical response
 		//On top of that ORM plugins can have a transaction filter and then in this
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
-		CompletableFuture<List<Object>> future = translator.createArgs(m, meta.getCtx(), null);
+		CompletableFuture<List<Object>> future = translator.createArgs(m, meta.getCtx(), null)
+													.thenApply ( args -> validate(obj, m, meta.getCtx(), args));
 		
 		return future.thenCompose(argsResult -> doTheInvoke(meta, argsResult));
 	}
 
+	/**
+	 * This validation covers THREE cases I know of
+	 *  controller method public Action postHibernateEntity(CustomerDbo customer) //hibernate plugin validation AFTER looking up in DB
+	 *  controller method public Action postDto(@Dto SomeDto dto) //dto plugin validation AFTER looking up from remote service
+	 *  controller method public Action postSomething(@NotBlank String username) //simple validation
+	 *  
+	 *  JSON or other content validation is done in SvcProxyForContent.java and throws BadClientRequestException so that translators
+	 *  can translate to generic error message sent to clients
+	 */
+	private List<Object> validate(Object controller, Method m, RequestContext requestContext, List<Object> args) {
+		if(requestContext.getRequest().method != HttpMethod.POST)
+			return args; //ONLY validate on post requests
+		
+		Validation validation = requestContext.getValidation();
+		
+		List<Violation> violations = validator.validate(controller, m, args);
+		
+		//Since this is web, just add errors to Validation object
+		for(Violation violation : violations) {
+			//add error to list of errors for form to display
+			validation.addError(violation.getPath(), violation.getMessage());
+		}
+		
+		return args;
+	}
+	
 	private CompletableFuture<Action> doTheInvoke(MethodMeta meta, List<Object> argsResult) {
 		try {
 			return invoker.invokeAndCoerce(meta.getLoadedController(), argsResult.toArray()).thenApply( action -> {

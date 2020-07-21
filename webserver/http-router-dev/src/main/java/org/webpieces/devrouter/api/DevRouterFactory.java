@@ -5,7 +5,7 @@ import java.io.File;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
-import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.RouterServiceFactory;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
@@ -36,7 +36,7 @@ public class DevRouterFactory {
     }
     
 	public static RouterService create(MeterRegistry metrics, RouterConfig config, CompileConfig compileConfig, TemplateApi templateApi) {
-		Module devModules = Modules.override(RouterSvcFactory.getModules(metrics, config, templateApi)).with(new DevRouterModule(compileConfig));
+		Module devModules = Modules.override(RouterServiceFactory.getModules(metrics, config, templateApi)).with(new DevRouterModule(compileConfig));
 		
 		Injector injector = Guice.createInjector(devModules);
 		RouterService svc = injector.getInstance(RouterService.class);

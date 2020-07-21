@@ -4,12 +4,20 @@ import static webpiecesxxxxxpackage.web.secure.crud.CrudUserRouteId.GET_ADD_USER
 import static webpiecesxxxxxpackage.web.secure.crud.CrudUserRouteId.GET_EDIT_USER_FORM;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 
+import org.hibernate.validator.constraints.Length;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
@@ -61,21 +69,21 @@ public class CrudUserController {
 	}
 
 	public Redirect postSaveUser(@UseQuery("findByIdWithRoleJoin") UserDbo entity, 
-			List<RoleEnum> selectedRoles, String password) {
-		//TODO: if we wire in JSR303 bean validation into the platform, it could be 
-		//done there as well though would
-		//need to figure out how to do i18n for the messages in that case
-		if(password == null) {
-			Current.validation().addError("password", "password is required");
-		} else if(password.length() < 4) {
-			Current.validation().addError("password", "Value is too short");
-		}
+			List<RoleEnum> selectedRoles, @NotBlank @Length(min=4, max=20) String password) {
+//		Validation is done with JSR303 hibernate-validator so you don't need to do this BUT you could for fancier stuff...
+		
+//		//need to figure out how to do i18n for the messages in that case
+//		if(password == null) {
+//			Current.validation().addError("password", "password is required");
+//		} else if(password.length() < 4) {
+//			Current.validation().addError("password", "Value is too short");
+//		}
 
-		if(entity.getFirstName() == null) {
-			Current.validation().addError("entity.firstName", "First name is required");
-		} else if(entity.getFirstName().length() < 3) {
-			Current.validation().addError("entity.firstName", "First name must be more than 2 characters");
-		}
+//		if(entity.getFirstName() == null) {
+//			Current.validation().addError("entity.firstName", "First name is required");
+//		} else if(entity.getFirstName().length() < 3) {
+//			Current.validation().addError("entity.firstName", "First name must be more than 2 characters");
+//		}
 
 		//all errors are grouped and now if there are errors redirect AND fill in
 		//the form with what the user typed in along with errors
@@ -102,9 +110,10 @@ public class CrudUserController {
 			UserRole role = new UserRole(entity, r);
 			Em.get().persist(role);
 		}
-
+		
 		//WTF...this now can update an entity that did not exist before...fun times.
-		//Docs say it should throw "@throws EntityExistsException if the entity already exists." but that's not working!! 
+		//Docs say "@throws EntityExistsException if the entity already exists." but that's NOT true.
+		//we use this for INSERT and UPDATE and it works great!!
 		Em.get().persist(entity);
         Em.get().flush();
         

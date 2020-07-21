@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.webpieces.plugin.json.JacksonCatchAllFilter;
 import org.webpieces.plugin.json.JacksonJsonConverter;
+import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.exceptions.HttpException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 
