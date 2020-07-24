@@ -1,6 +1,7 @@
 dependencies {
     compile project(':core:core-datawrapper')
     compile project(':core:core-util')
+	compile deps['commons-collections']
 	
 	testCompile project(':core:core-mock')
 }

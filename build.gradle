@@ -92,6 +92,7 @@ ext {
 
        //look into removing and using a copied single file as we only use one thing
        'commons-lang':    'org.apache.commons:commons-lang3:3.5',
+       'commons-collections': 'org.apache.commons:commons-collections4:4.1',
        'jackson':         'com.fasterxml.jackson.core:jackson-databind:2.10.3',
        'jackson-anno':    'com.fasterxml.jackson.core:jackson-annotations:2.10.3',
 	   

@@ -109,7 +109,7 @@ public class WebpiecesServer {
 		log.info("original user.dir before modification="+absPath);
 		
 		File finalUserDir = modifyUserDirForManyEnvironmentsImpl(projectName, absPath);
-		log.info("RECONFIGURED working directory(based off user.dir)="+finalUserDir.getAbsolutePath()+" previous user.dir="+filePath);
+		log.info("RECONFIGURED 333 working directory(based off user.dir)="+finalUserDir.getAbsolutePath()+" previous user.dir="+filePath);
 		return finalUserDir;
 	}
 

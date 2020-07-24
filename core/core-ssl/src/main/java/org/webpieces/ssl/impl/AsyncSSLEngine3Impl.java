@@ -13,6 +13,7 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
 
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
@@ -42,8 +43,10 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private ByteAckTracker decryptionTracker;
 
 	private SSLMetrics metrics;
+	private CircularFifoQueue<Action> circularBuffer = new CircularFifoQueue<>(64);
 	
 	public AsyncSSLEngine3Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener, SSLMetrics metrics) {
+		log.info("CREATE async ssl engine");
 		if(listener == null)
 			throw new IllegalArgumentException("listener cannot be null");
 		encryptionTracker = new ByteAckTracker(metrics.getEncryptionAckMetrics(), false);
@@ -57,42 +60,55 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	
 	@Override
 	public CompletableFuture<Void> beginHandshake() {
-		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		SSLEngine sslEngine = mem.getEngine();
-		
-		if(log.isTraceEnabled())
-			log.trace(mem+"start handshake");
-		try {
-			sslEngine.beginHandshake();
-		} catch (SSLException e) {
-			throw new AsyncSSLEngineException(e);
+
+		circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.BEGIN_HANDSHAKE_START, sslEngine));
+		try {	
+			mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
+			
+			if(log.isTraceEnabled())
+				log.trace(mem+"start handshake");
+			try {
+				sslEngine.beginHandshake();
+			} catch (SSLException e) {
+				throw new AsyncSSLEngineException(e);
+			}
+	
+			if(sslEngine.getHandshakeStatus() != HandshakeStatus.NEED_WRAP)
+				throw new IllegalStateException("Dude, WTF, after beginHandshake, SSLEngine has to be NEED WRAP to send first hello message");
+	
+			return doHandshakeLoop();
+		} finally {
+			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.BEGIN_HANDSHAKE_END, sslEngine));
 		}
-
-		if(sslEngine.getHandshakeStatus() != HandshakeStatus.NEED_WRAP)
-			throw new IllegalStateException("Dude, WTF, after beginHandshake, SSLEngine has to be NEED WRAP to send first hello message");
-
-		return doHandshakeLoop();
 	}
 
 	@Override
 	public CompletableFuture<Void> feedEncryptedPacket(ByteBuffer encryptedInData) {
-		metrics.recordEncryptedBytesFromSocket(encryptedInData.remaining());
-		CompletableFuture<Void> future = decryptionTracker.addBytesToTrack(encryptedInData.remaining());
-
-		ByteBuffer cached = mem.getCachedToProcess();
-		ByteBuffer newEncryptedData = combine(cached, encryptedInData);
-		mem.setCachedEncryptedData(newEncryptedData);
-
-		boolean justStarted = mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
-
-
-		//This is a bit complex to allow backpressure through the SSL Layer.  If not enough CompletableFutures
-		//are resolved, the lower layers turn off the socket(deregister from selector) until quite a few are
-		//resolved and we catch up.  This prevents the server from tanking under load ;).  Yes, it's pretty
-		//fucking sick!!!  well, that's my opinion since I had fun adding shit that you'll never know about.
-		doWork(justStarted);
-
-		return future;
+		SSLEngine sslEngine = mem.getEngine();
+		circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.FEED_ENCRYPTED_START, sslEngine));
+		try {
+		
+			metrics.recordEncryptedBytesFromSocket(encryptedInData.remaining());
+			CompletableFuture<Void> future = decryptionTracker.addBytesToTrack(encryptedInData.remaining());
+	
+			ByteBuffer cached = mem.getCachedToProcess();
+			ByteBuffer newEncryptedData = combine(cached, encryptedInData);
+			mem.setCachedEncryptedData(newEncryptedData);
+	
+			boolean justStarted = mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
+	
+	
+			//This is a bit complex to allow backpressure through the SSL Layer.  If not enough CompletableFutures
+			//are resolved, the lower layers turn off the socket(deregister from selector) until quite a few are
+			//resolved and we catch up.  This prevents the server from tanking under load ;).  Yes, it's pretty
+			//fucking sick!!!  well, that's my opinion since I had fun adding shit that you'll never know about.
+			doWork(justStarted);
+	
+			return future;
+		} finally {
+			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.FEED_ENCRYPTED_END, sslEngine));
+		}
 	}
 
 	/** 
@@ -144,12 +160,32 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		SSLEngine engine = mem.getEngine();
 		HandshakeStatus hsStatus = engine.getHandshakeStatus();
 		if(hsStatus == HandshakeStatus.NEED_TASK) {
-			return createRunnable();	
+			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.NEED_TASK, engine));
+			Runnable r = engine.getDelegatedTask();
+			
+			if(r == null) {
+				circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.FAIL, engine));
+				List<String> s = createActionStr();
+
+				log.error("How can r be null. actions="+s, new RuntimeException("need task was the status but r="+r+" new state="+engine.getHandshakeStatus()));
+			} else {
+				r.run(); 
+			}
+			
+			return CompletableFuture.completedFuture(null);	
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
 			return sendHandshakeMessage(engine);
 		}
 		
 		throw new UnsupportedOperationException("need to support state="+hsStatus);
+	}
+
+	private List<String> createActionStr() {
+		List<Action> actions = new ArrayList<>();
+		circularBuffer.forEach((action) -> actions.add(action));
+		List<String> s = new ArrayList<>();
+		actions.forEach((action) -> s.add(action+"\n"));
+		return s;
 	}
 
 	private boolean unwrapPacket() {
@@ -167,7 +203,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		
 		int remainBeforeDecrypt = encryptedData.remaining();
 		try {
+			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.UNWRAP_START, sslEngine));
 			result = sslEngine.unwrap(encryptedData, cachedOutBuffer);
+			
 			mem.incrementCallToUnwrap();
 		} catch(SSLException e) {
 			//read before the buffer is cleared released
@@ -175,12 +213,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			int consumedBytes = remainBeforeDecrypt - encryptedData.remaining();
 			int numCallToUnwrap = mem.getNumCallToUnwrap();
 			String extraInfo = createExtraInfo(encryptedData, e);
-
-			cachedOutBuffer.position(cachedOutBuffer.limit()); //simulate consuming all data
-			pool.releaseBuffer(cachedOutBuffer);
-			encryptedData.position(encryptedData.limit()); //simulate consuming all data
-			pool.releaseBuffer(encryptedData);
-
+			release(encryptedData, cachedOutBuffer);
 			mem.setCachedEncryptedData(ByteBuffer.allocate(0));
 			
 			String message = e.getMessage();
@@ -192,12 +225,11 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				return true;
 			}
 			
-			//Add a ton of info for this one for debug purposes...
-			AsyncSSLEngineException ee = new AsyncSSLEngineException(
-					"Number of call to unwrap="+numCallToUnwrap+"before exception status="
-							+status+" consumedBytes="+consumedBytes+" hsStatus="+hsStatus+" b="
-							+encryptedData+" remaining before dycrypt="+remainBeforeDecrypt+" extraInfo="+extraInfo, e);
+			AsyncSSLEngineException ee = createExc(hsStatus, status, encryptedData, remainBeforeDecrypt, e,
+					consumedBytes, numCallToUnwrap, extraInfo);
 			throw ee;
+		} finally {
+			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.UNWRAP_END, sslEngine));			
 		}
 		
 		status = result.getStatus();
@@ -255,6 +287,26 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			return true;
 
 		return false;
+	}
+
+	private void release(ByteBuffer encryptedData, ByteBuffer cachedOutBuffer) {
+		cachedOutBuffer.position(cachedOutBuffer.limit()); //simulate consuming all data
+		pool.releaseBuffer(cachedOutBuffer);
+		encryptedData.position(encryptedData.limit()); //simulate consuming all data
+		pool.releaseBuffer(encryptedData);
+	}
+
+	private AsyncSSLEngineException createExc(HandshakeStatus hsStatus, Status status, ByteBuffer encryptedData,
+			int remainBeforeDecrypt, SSLException e, int consumedBytes, int numCallToUnwrap, String extraInfo) {
+		
+		List<String> s = createActionStr();
+		
+		//Add a ton of info for this one for debug purposes...
+		AsyncSSLEngineException ee = new AsyncSSLEngineException(
+				"Number of call to unwrap="+numCallToUnwrap+"before exception status="
+						+status+" consumedBytes="+consumedBytes+" hsStatus="+hsStatus+" b="
+						+encryptedData+" remaining before dycrypt="+remainBeforeDecrypt+" extraInfo="+extraInfo+"\n"+s, e);
+		return ee;
 	}
 
 	private String createExtraInfo(ByteBuffer encryptedData, SSLException e) {
@@ -335,19 +387,6 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			log.trace(mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
 	}
 
-	private CompletableFuture<Void> createRunnable() {
-		SSLEngine sslEngine = mem.getEngine();	   
-		Runnable r = sslEngine.getDelegatedTask();
-		
-		//could offload to YET another threadpool but not sure it buys us anything so KISS or YAGNI until later
-		r.run(); 
-		//after all, we run in a pretty damn nice thread pool already which is N threads to Y sockets and data
-		//coming in from any socket 'may' run in any thread without a race condition(don't ask, it's complicated
-		//but feel free to go look)
-		
-		return CompletableFuture.completedFuture(null);
-	}
-	
 	private CompletableFuture<Void> sendHandshakeMessage(SSLEngine engine) {
 		try {
 			return sendHandshakeMessageImpl(engine);
@@ -377,8 +416,11 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus=" 
 							+ beforeWrapHandshakeStatus+" connectionState="+mem.getConnectionState()+" otherStat="+otherStatus+" eng1="+sslEngine+" eng2="+engine);
 
+			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP2_START, sslEngine));
 			//KEEEEEP This very small.  wrap and then listener.packetEncrypted
 			SSLEngineResult result = sslEngine.wrap(SslMementoImpl.EMPTY, engineToSocketData);
+			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP2_END, sslEngine));
+
 
 			lastStatus = result.getStatus();
 			hsStatus = result.getHandshakeStatus();
@@ -449,15 +491,20 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	
 	@Override
 	public CompletableFuture<Void> feedPlainPacket(ByteBuffer buffer) {
+		SSLEngine engine = mem.getEngine();
+		circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.FEED_PLAIN_START, engine));
+
 		try {
 			metrics.recordPlainBytesFromClient(buffer.remaining());
 			return feedPlainPacketImpl(buffer);
 		} catch (SSLException e) {
 			throw new AsyncSSLEngineException(e);
+		} finally {
+			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.FEED_PLAIN_END, engine));			
 		}
 	}
 
-	public CompletableFuture<Void> feedPlainPacketImpl(ByteBuffer buffer) throws SSLException {
+	private CompletableFuture<Void> feedPlainPacketImpl(ByteBuffer buffer) throws SSLException {
 		if(mem.getConnectionState() != ConnectionState.CONNECTED)
 			throw new NioClosedChannelException(mem+" SSLEngine is not connected right now");
 		else if(!buffer.hasRemaining())
@@ -476,7 +523,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			int numEncrypted;
 			SSLEngineResult result;
 			synchronized(wrapLock) {
+				circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP_START, sslEngine));
 				result = sslEngine.wrap(buffer, engineToSocketData);
+				circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP_END, sslEngine));
 				numEncrypted = remainBefore - buffer.remaining();				
 			}
 			
@@ -509,6 +558,9 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	
 	@Override
 	public void close() {
+		SSLEngine sslEngine = mem.getEngine();
+		circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.CLOSE_START, sslEngine));
+
 		clientInitiated = true;
 		if(mem.getConnectionState() == ConnectionState.NOT_STARTED) {
 			listener.closed(true);
@@ -533,6 +585,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				//we WILL hit this and need to fix if other end closes...try closing both ends!!!
 				throw new RuntimeException(mem+"bug, status not handled in close="+status);
 		}
+		
+		circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.CLOSE_END, sslEngine));
 	}
 
 	@Override
