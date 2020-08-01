@@ -177,7 +177,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			return sendHandshakeMessage(engine);
 		}
 		
-		throw new UnsupportedOperationException("need to support state="+hsStatus);
+		throw new UnsupportedOperationException("need to support state="+hsStatus+" circularbuffer="+circularBuffer);
 	}
 
 	private List<String> createActionStr() {
