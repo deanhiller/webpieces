@@ -21,6 +21,7 @@ public class TransactionHelper {
 	public <Resp> Resp runWithEm(Function<EntityManager, Resp> function) {
 		EntityManager mgr = factory.createEntityManager();
 		
+		Em.set(mgr);
 		try {
 			Resp resp = function.apply(mgr);
 			mgr.close();	
@@ -45,6 +46,8 @@ public class TransactionHelper {
 		EntityManager mgr = factory.createEntityManager();
 		EntityTransaction tx = mgr.getTransaction();
 		tx.begin();
+		
+		Em.set(mgr);
 		
 		try {
 			Resp resp = function.apply(mgr);
