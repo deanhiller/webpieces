@@ -9,7 +9,10 @@ public class GroovyCompiling {
 	}
 	
 	public static boolean isCompilingGroovy() {
-		return isCompilingGroovy.get();
+		Boolean boolean1 = isCompilingGroovy.get();
+		if(boolean1 == null)
+			return false;
+		return boolean1;
 	}
 	
 	public static void setCompilingGroovy(boolean compilingGroovy) {

@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.compiler.api.ClassFileNotFoundException;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
@@ -145,7 +146,7 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         	        
         	        //Groovy asks for weird paths sometimes so we have to avoid this during groovy compiles
         	        if(!GroovyCompiling.isCompilingGroovy())
-        	        	throw new IllegalStateException("Could not find java file="+fileName+" in paths="+config.getJavaPath());
+        	        	throw new ClassFileNotFoundException("Could not find java file="+fileName+" in paths="+config.getJavaPath());
         		}
         		
         	}

@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.compiler.api.ClassFileNotFoundException;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routes.WebAppMeta;
@@ -114,7 +115,11 @@ public class DevRoutingService extends AbstractRouterService {
 
 	private Injector loadOrReload(Consumer<Injector> startupHook) {
 		routerModule = routeLoader.configure(classLoader, arguments);
-		return routeLoader.load(startupHook);
+		try {
+			return routeLoader.load(startupHook);
+		} catch ( ClassFileNotFoundException e) {
+			throw new ClassFileNotFoundException("Check your routes files as likely they are loading a non-existent controller", e);
+		}
 	}
 
 }
