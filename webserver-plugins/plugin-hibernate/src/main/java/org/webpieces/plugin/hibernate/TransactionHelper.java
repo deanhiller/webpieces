@@ -29,6 +29,8 @@ public class TransactionHelper {
 		} catch(RuntimeException e) {
 			tryClose(mgr, e);
 			throw e;
+		} finally {
+			Em.set(null);
 		}
 	}
 	
@@ -56,6 +58,8 @@ public class TransactionHelper {
 		} catch(RuntimeException e) {
 			txCompleters.rollbackCloseSuppress(e, mgr, tx);
 			throw e; //rethrow
+		} finally {
+			Em.set(null);
 		}
 	}
 

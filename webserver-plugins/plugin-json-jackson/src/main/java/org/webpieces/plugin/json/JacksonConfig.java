@@ -24,9 +24,14 @@ public class JacksonConfig {
 	}
 
 	/**
-	 * @deprecated Just use JacksonConfig(filterPattern) instead AND only set catchall filter if you are changing it
+	 * Use to remove the catchall filter in case you want to install your own or null it out so you don't install one here.
+	 * 
+	 * ONE case we ran into was installing a catchall filter for json at package name com.company.svc.json.external AND a different one
+	 * at com.company.svc.json.internal 
+	 * 
+	 * @param filterPattern
+	 * @param filterClazz
 	 */
-	@Deprecated
 	public JacksonConfig(String filterPattern, Class<? extends JacksonCatchAllFilter> filterClazz) {
 		this.filterPattern = filterPattern;
 		this.filterClazz = filterClazz;
