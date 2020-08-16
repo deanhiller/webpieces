@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.extensions.BodyContentBinder;
@@ -26,7 +27,7 @@ public class GrpcJsonLookup implements BodyContentBinder {
 
     @SuppressWarnings("unchecked")
 	@Override
-    public <T> T unmarshal(Class<T> paramTypeToCreate, byte[] data) {
+    public <T> T unmarshal(RequestContext ctx, Class<T> paramTypeToCreate, byte[] data) {
         try {
 
             String json = new String(data, Charset.forName("UTF-8"));
