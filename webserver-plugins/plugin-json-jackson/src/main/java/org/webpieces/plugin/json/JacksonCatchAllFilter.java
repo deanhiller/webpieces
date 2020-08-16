@@ -27,6 +27,7 @@ import com.webpieces.http2.api.dto.lowlevel.StatusCode;
 @Singleton
 public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
+	static final String JSON_REQUEST_KEY = "_jsonRequest";
 	private static final Logger log = LoggerFactory.getLogger(JacksonCatchAllFilter.class);
 	public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
 	private final JacksonJsonConverter mapper;
@@ -51,18 +52,20 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 	protected Action translateFailure(MethodMeta meta, Action action, Throwable t) {
 		if(t != null) {
 			if(t instanceof HttpException) {
-				return translate((HttpException)t);
+				return translate(meta, (HttpException)t);
 			}
 			
-			log.error("Internal Server Error method="+meta.getLoadedController().getControllerMethod(), t);
+			byte[] obj = (byte[]) meta.getCtx().getRequest().requestState.get(JSON_REQUEST_KEY);
+			String json = new String(obj);
+			log.error("Request failed for json="+json+"\nInternal Server Error method="+meta.getLoadedController().getControllerMethod(), t);
 			return translateError(t);
 		} else {
 			return action;
 		}
 	}
 
-	protected Action translate(HttpException t) {
-		byte[] content = translateHttpException(t);
+	protected Action translate(MethodMeta meta, HttpException t) {
+		byte[] content = translateHttpException(meta, t);
 		StatusCode status = t.getStatusCode();
 		String msg = "Error";
 		int code = t.getHttpCode();
@@ -92,7 +95,7 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND.getCode(), KnownStatusCode.HTTP_404_NOTFOUND.getReason(), MIME_TYPE);
 	}
 
-	protected byte[] translateHttpException(HttpException t) {
+	protected byte[] translateHttpException(MethodMeta meta, HttpException t) {
 		JsonError error = new JsonError();
 		StatusCode statusCode = t.getStatusCode();
 		if(statusCode != null) {
@@ -106,6 +109,12 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 			error.setCode(t.getHttpCode());
 		}
 
+		if(log.isDebugEnabled()) {
+			byte[] obj = (byte[]) meta.getCtx().getRequest().requestState.get(JSON_REQUEST_KEY);
+			String json = new String(obj);
+			log.debug("Request json failed="+json+"\n"+error.getError());
+		}
+		
 		return translateJson(mapper, error);
 	}
 

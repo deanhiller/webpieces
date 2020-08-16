@@ -102,7 +102,7 @@ public class ParamToObjectTranslatorImpl {
 			ParamNode paramNode = paramTree.get(name);
 			CompletableFuture<Object> beanFuture;
 			if(binder != null && isManagedBy(binder, fieldMeta)) {
-				Object bean = binder.unmarshal(fieldMeta.getFieldClass(), req.body.createByteArray());
+				Object bean = binder.unmarshal(ctx, fieldMeta.getFieldClass(), req.body.createByteArray());
 				beanFuture = CompletableFuture.completedFuture(bean);
 			} else {
 				beanFuture = translate(req, method, paramNode, fieldMeta, ctx.getValidation());

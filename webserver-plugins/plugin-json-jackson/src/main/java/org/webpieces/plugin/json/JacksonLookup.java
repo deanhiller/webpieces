@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 
 import javax.inject.Inject;
 
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.BadClientRequestException;
@@ -33,8 +34,9 @@ public class JacksonLookup implements BodyContentBinder {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T unmarshal(Class<T> entityClass, byte[] data) {
+	public <T> T unmarshal(RequestContext ctx, Class<T> entityClass, byte[] data) {
 		try {
+			ctx.getRequest().requestState.put(JacksonCatchAllFilter.JSON_REQUEST_KEY, data);
 			if(data.length == 0)
 				throw new BadClientRequestException("Client did not provide a json request in the body of the request");		
 			else if(JsonNode.class.isAssignableFrom(entityClass))
