@@ -7,6 +7,7 @@ import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.exceptions.HttpException;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.api.routes.MethodMeta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,7 +21,8 @@ public class TestCatchAllFilter extends JacksonCatchAllFilter {
 		this.mapper = mapper;
 	}
 
-	protected byte[] translateHttpException(HttpException t) {
+	@Override
+	protected byte[] translateHttpException(MethodMeta meta, HttpException t) {
 		if(t instanceof NotFoundException)
 			return createNotFoundJsonResponse();
 		
