@@ -7,7 +7,7 @@
 
 <h2>HTML CRUD</h2>
 
-<p>Last updated: May 13th, 2020</p>
+<p>Last updated: Sept 14th, 2020</p>
 
 <p>It's always best to start with basic html and keep things simple to start with when learning so this is the pure html, no javascript 
 version of list all my Accounts, create an account, edit an account, and delete an account.  The basic CRUD flow is so
@@ -372,7 +372,8 @@ let's create our post method in our controller like so</p>
 		}
 
 		Current.flash().setMessage("Account successfully saved");
-		Current.flash().keep();
+		Current.flash().keep(true);
+	    Current.validation().keep(true);
 
 		Em.get().merge(entity);
         Em.get().flush();
@@ -397,7 +398,7 @@ and delay the decision of persisting them all or not until later</p>
 <p>If there were no errors in validation however, we set a global message that is rendered in mainTemplate.html so no
 matter what page we land on, as long as that page extends mainTemplate.html "Account successfully saved" will be rendered
 again using flash scope Current.flash().setMessage("Account successfully saved");  Flash scope is not always saved, so
-	we need to tell webpieces to keep the flash scope for after the redirect by calling Current.flash().keep();  Finally,
+	we need to tell webpieces to keep the flash scope for after the redirect by calling Current.flash().keep(true);  Finally,
 	we redirect back to the list accounts page where your new account should show up.
 </p>
 
@@ -481,7 +482,7 @@ always seem to be exceptions since you can't do a POST from an email which we ca
 		Em.get().remove(ref);
 		Em.get().flush();
 		Current.flash().setMessage("Account deleted");
-		Current.flash().keep();
+		Current.flash().keep(true);
 		return Actions.redirect(AccountRouteId.LIST_ACCOUNTS);
 }]*</code>
 </pre>

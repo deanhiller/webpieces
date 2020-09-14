@@ -7,7 +7,7 @@
 
 <h2>Your first Hibernate entity</h2>
 
-<p>Last updated: May 13th, 2020</p>
+<p>Last updated: Sept 14th, 2020</p>
 
 <p>Before we start, let's checkout the in-memory db plugin for webpieces.  Go to http://localhost:8080/@db and for
 the JDBC URL, change it to 'jdbc:h2:mem:test' so it hits the in-memory database.  All other settings are
@@ -260,7 +260,8 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
     }
 
     Current.flash().setMessage("User successfully saved");
-    Current.flash().keep();
+    Current.flash().keep(true);
+	Current.validation().keep(true);
 
     Em.get().merge(entity);
     Em.get().flush();
