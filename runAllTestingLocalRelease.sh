@@ -51,6 +51,7 @@ fi
 
 cd ../webpiecesexample-all
 git checkout master # just in case checkout the project to master
+git pull
 
 printf "\n********** Running ./gradlew clean build assembleDist **************\n"
 ./gradlew clean build assembleDist
