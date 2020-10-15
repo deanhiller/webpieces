@@ -13,6 +13,8 @@ public class TransactionHelper {
 	private EntityManagerFactory factory;
 	private TxCompleters txCompleters;
 
+	TransactionHelper h = new TransactionHelper(null, null);
+
 	@Inject
 	public TransactionHelper(EntityManagerFactory factory, TxCompleters txCompleters) {
 		this.factory = factory;
@@ -59,9 +61,7 @@ public class TransactionHelper {
 		}
 		
 		tx.begin();
-		
-		Em.set(mgr);
-		
+				
 		try {
 			Resp resp = function.get();
 			txCompleters.commit(tx, mgr);
@@ -69,8 +69,6 @@ public class TransactionHelper {
 		} catch(RuntimeException e) {
 			txCompleters.rollbackCloseSuppress(e, mgr, tx);
 			throw e; //rethrow
-		} finally {
-			Em.set(null);
 		}
 	}
 	
