@@ -167,7 +167,9 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		response.assertContains("The above looks like an issue that cannot happen in production so we can't display a production page here");
 		
 		//showing the compile error
-		response.assertContains("<span style=\"color:red;\">renThis</span>");
+		response.assertContains("<span style=\"color:red;\">Error: cannot find symbol\n" +
+				"  symbol:   method renThis()\n" +
+				"  location: class org.webpieces.router.api.controller.actions.Actions</span>");
 	}
 	
 	@Test

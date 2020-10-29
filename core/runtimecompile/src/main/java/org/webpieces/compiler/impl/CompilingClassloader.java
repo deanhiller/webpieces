@@ -11,12 +11,8 @@ import java.security.CodeSource;
 import java.security.Permissions;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,8 +180,10 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         
         
         byte[] byteCode = applicationClass.javaByteCode;
-        if(byteCode == null)
-        	byteCode = applicationClass.compile(compiler, this);
+        if(byteCode == null) {
+            compiler.compile(new String[]{applicationClass.name}, this);
+            byteCode = applicationClass.javaByteCode;
+        }
         
         if(byteCode == null) {
         	throw new IllegalStateException("Bug, should not get here.  we could not compile and no exception thrown(should have had upstream fail fast exception");
@@ -322,8 +320,18 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         Set<CompileClassMeta> modifiedWithDependencies = new HashSet<CompileClassMeta>();
         modifiedWithDependencies.addAll(modifieds);
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
+        List<String> classNames = modifiedWithDependencies
+                .stream()
+                .map(compileClassMeta -> compileClassMeta.name)
+                .collect(Collectors.toList());
+
+        classNames.addAll(getNewFiles());
+
+        if (classNames.size() != 0) {
+            compiler.compile(classNames.toArray(new String[0]), this);
+        }
         for (CompileClassMeta applicationClass : modifiedWithDependencies) {
-            if (applicationClass.compile(compiler, this) == null) {
+            if (applicationClass.javaByteCode == null) {
                 appClassMgr.classes.remove(applicationClass.name);
                 //We are looking for a reproducible scenario here so we can write a test!!!
                 //how is the compile call return null...
@@ -375,6 +383,37 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
             return true;
         }
         return false;
+    }
+
+    private List<String> getNewFiles() {
+        List<String> classNames = new ArrayList<>();
+        for (VirtualFile virtualFile : config.getJavaPath()) {
+            List<VirtualFile> files = scan(virtualFile);
+            for (VirtualFile file : files) {
+                String classPath = file.getAbsolutePath().replaceFirst(virtualFile.getAbsolutePath(), "")
+                        .replaceFirst("/", "")
+                        .replace(".java", "")
+                        .replace("/", ".");
+                if (appClassMgr.getApplicationClass(classPath) == null) {
+                    classNames.add(classPath);
+                }
+            }
+        }
+        return classNames;
+    }
+
+    private List<VirtualFile> scan(VirtualFile current) {
+        if (!current.isDirectory()) {
+            if (current.getName().endsWith(".java")) {
+                return Collections.singletonList(current);
+            }
+        } else if (!current.getName().startsWith(".")) {
+            return current.list()
+                    .stream()
+                    .flatMap(virtualFile -> scan(virtualFile).stream())
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     @Override
