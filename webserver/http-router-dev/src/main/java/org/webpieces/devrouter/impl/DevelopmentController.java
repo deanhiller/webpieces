@@ -3,6 +3,7 @@ package org.webpieces.devrouter.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -85,7 +86,8 @@ public class DevelopmentController {
 			errors += "<br/>";
 			errors += "File: "+error.getJavaFile().getCanonicalPath()+"\n";
 			errors += "Class: "+error.getClassName()+"\n";
-			errors += "<span style=\"color:red;\">Error: "+error.getProblem().getMessage()+"</span>\n\n";
+			errors += "<span style=\"color:red;\">Error: " + error.getDiagnostic().getMessage(Locale.ENGLISH) + "</span>\n\n";
+
 			for(String line : error.getBadSourceLine()) {
 				String newLine = line.replace("\000", "<span style=\"color:red;\">")
 										.replace("\001", "</span>");
