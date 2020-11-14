@@ -15,6 +15,8 @@ import org.gradle.api.internal.classpath.ModuleRegistry;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.internal.tasks.DefaultSourceSet;
 import org.gradle.api.internal.tasks.DefaultSourceSetOutput;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
@@ -31,6 +33,8 @@ import org.gradle.api.plugins.internal.JvmPluginsHelper;
  * @author dhiller
  */
 public class TemplateCompilerPlugin implements Plugin<Project> {
+
+    private static final Logger log = Logging.getLogger(TemplateCompilerPlugin.class);
 	
     private final ObjectFactory objectFactory;
     //private final ModuleRegistry moduleRegistry;
@@ -77,7 +81,7 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
 //    }
 
     private void configureSourceSetDefaults() {
-        System.out.println("setup configure source set defaults");  
+        log.debug("setup configure source set defaults");
 
         project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(new ConfigureAction(project, objectFactory));
     }
@@ -92,7 +96,7 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
 		}
 
 		public void execute(final SourceSet sourceSet) {
-            System.out.println("executing source set default setup");  
+            log.debug("executing source set default setup");
 
             final DefaultTemplateSourceSet groovySourceSet = new DefaultTemplateSourceSet("templates", ((DefaultSourceSet) sourceSet).getDisplayName(), objectFactory);
             new DslObject(sourceSet).getConvention().getPlugins().put("templates", groovySourceSet);

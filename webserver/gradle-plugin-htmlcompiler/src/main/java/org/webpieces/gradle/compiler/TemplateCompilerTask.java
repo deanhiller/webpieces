@@ -16,6 +16,8 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.tasks.compile.CompilerForkUtils;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Nested;
@@ -37,6 +39,8 @@ import groovy.lang.GroovyClassLoader;
 
 @CacheableTask
 public class TemplateCompilerTask extends AbstractCompile {
+
+	private static final Logger log = Logging.getLogger(TemplateCompilerTask.class);
 
     private final CompileOptions compileOptions;
     //private final GroovyCompileOptions groovyCompileOptions = new GroovyCompileOptions();
@@ -86,26 +90,26 @@ public class TemplateCompilerTask extends AbstractCompile {
         File buildDir = getProject().getBuildDir();
         //need to make customizable...
         File groovySrcGen = new File(buildDir, "groovysrc"); 
-        System.out.println("groovy src directory="+groovySrcGen);
+        log.info("groovysrc: " + groovySrcGen);
 
 		Charset encoding = Charset.forName(options.getEncoding());
 		TemplateCompileConfig config = new TemplateCompileConfig(false);
 		config.setFileEncoding(encoding);
 		config.setPluginClient(true);
 		config.setGroovySrcWriteDirectory(groovySrcGen);
-		System.out.println("custom tags="+options.getCustomTags());
+		log.info("Custom tags: " + options.getCustomTags());
 		config.setCustomTagsFromPlugin(options.getCustomTags());
     	
         //LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
         
         File destinationDir = getDestinationDir();
-        System.out.println("destDir="+destinationDir);
+        log.info("destDir: " + destinationDir);
         File routeIdFile = new File(destinationDir, ProdTemplateModule.ROUTE_META_FILE);
         if(routeIdFile.exists())
         	routeIdFile.delete();
         routeIdFile.createNewFile();
         
-        System.out.println("routeId.txt file="+routeIdFile.getAbsolutePath());
+        log.info("routeId file: " + routeIdFile);
         
         FileCollection srcCollection = getSource();
         Set<File> files = srcCollection.getFiles();
@@ -125,11 +129,10 @@ public class TemplateCompilerTask extends AbstractCompile {
         	GroovyClassLoader cl = new GroovyClassLoader();
         	
 	        for(File f : files) {
-	        	System.out.println("file="+f);
-	        	
-	        	String fullName = findFullName(baseDir, f);
-	        	System.out.println("name="+fullName);
-	        	
+				String fullName = findFullName(baseDir, f);
+
+	        	log.info("name={}, file={}", fullName, f);
+
 	        	String source = readSource(f);
 	        	
 	        	compiler.compile(cl, fullName, source);
@@ -151,7 +154,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 	
 	private String findFullName(File baseDir, File f) {
 		if(f.getName().contains("_"))
-			throw new IllegalArgumentException("File name is invalid.  It cannot contain _ in the name="+f.getAbsolutePath());
+			throw new IllegalArgumentException("File name is invalid.  It cannot contain _ in the name="+f);
 		
 		String name = f.getName().replace(".", "_");
 		File current = f.getParentFile();
@@ -211,13 +214,13 @@ public class TemplateCompilerTask extends AbstractCompile {
 			if(target.exists()) {
 				//If you run ./gradle compileTemplates twice, the files will pre-exist already so we need to delete
 				//the file before we create and write to it.
-				System.out.println("found file.  deleting first to rewrite="+target);
+				log.info("Deleting {}", target);
 				if(!target.delete())
 					throw new IllegalStateException("Could not delete file="+target+"  Cannot continue");
 			}
 
 			createFile(target);
-			System.out.println("file write to="+target);
+			log.info("Writing {}", target);
 			
 			try {
 				try (FileOutputStream str = new FileOutputStream(target)) {
