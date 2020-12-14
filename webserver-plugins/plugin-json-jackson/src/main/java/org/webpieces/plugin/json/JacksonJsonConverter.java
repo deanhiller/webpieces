@@ -113,23 +113,23 @@ public class JacksonJsonConverter {
 
 	private void convertNullToEmptyString(Object obj, Method setMethod, boolean toEmptyStr) {
 		String value = (String) callGetMethod(obj, setMethod);
-		
-		if(toEmptyStr) {
-			if(value == null) {
-				try {
+
+		try {
+			if(toEmptyStr) {
+				if(value == null) {
 					setMethod.invoke(obj, "");
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					throw new RuntimeException(e);
+				} else {
+					setMethod.invoke(obj, value.trim());
 				}
-			}
-		} else {
-			if(value != null && value.trim().equals("")) {
-				try {
+			} else {
+				if(value != null && value.trim().equals("")) {
 					setMethod.invoke(obj, (String)null);
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					throw new RuntimeException(e);
+				} else if (value != null) {
+					setMethod.invoke(obj, value.trim());
 				}
 			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
