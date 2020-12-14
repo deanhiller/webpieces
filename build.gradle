@@ -118,8 +118,8 @@ buildScan {
 
 if(project.hasProperty('projVersion')) {
    println("Java Version="+ System.getProperty("java.version"))
-   if(!System.getProperty("java.version").startsWith("1.8"))
-      throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
+//   if(!System.getProperty("java.version").startsWith("1.8"))
+//      throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
 
    //This is down below in subprojects section...
    //project.version = '2.0.'+project.projVersion
