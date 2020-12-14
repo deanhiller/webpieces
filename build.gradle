@@ -165,8 +165,8 @@ subprojects {
    group = 'org.webpieces'
    if(project.hasProperty('projVersion')) {
      println("Java Version="+ System.getProperty("java.version"))
-     if(!System.getProperty("java.version").startsWith("1.8"))
-        throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
+//     if(!System.getProperty("java.version").startsWith("1.8"))
+//        throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
 
      project.version = '2.0.'+project.projVersion
      println("CREATING RELEASE VERSION "+project.version+"  jvm="+currentJvm)
