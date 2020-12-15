@@ -1,6 +1,7 @@
 dependencies {
     compile deps['jackson']
     compile deps['jackson-anno']
+    compile deps['jackson-java8']
     
     //compile deps['commons-lang'] //used in json escaping BUT jackson is doing this actually..nm
     compile project(':webserver:http-router'), project(':http:http1_1-parser')

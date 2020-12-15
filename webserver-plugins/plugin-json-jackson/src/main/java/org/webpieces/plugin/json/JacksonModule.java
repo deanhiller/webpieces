@@ -2,11 +2,14 @@ package org.webpieces.plugin.json;
 
 import org.webpieces.router.api.extensions.BodyContentBinder;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
@@ -24,7 +27,9 @@ public class JacksonModule extends AbstractModule {
 	    uriBinder.addBinding().to(JacksonLookup.class);
 
 	    ObjectMapper mapper = new ObjectMapper()
-	    	.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	    	.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+			.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+			.registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES));
 
 	    if(config.isConvertNullToEmptyStr()) {
 	        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
