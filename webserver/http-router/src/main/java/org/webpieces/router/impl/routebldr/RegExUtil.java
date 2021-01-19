@@ -7,14 +7,19 @@ import java.util.List;
 import org.webpieces.util.net.URLEncoder;
 
 public class RegExUtil {
+	private static final String SLASH_REGEX = "[/]{0,1}";
 
 	public static RegExResult parsePath(String path1) {
+		if(path1.endsWith("/")) {
+			path1 = path1.substring(0, path1.length() - 1);
+		}
+
 		String regEx = path1;
 		List<String> argNames = new ArrayList<>();
 		while(true) {
 			int index = regEx.indexOf("{");
 			if(index < 0) {
-				return new RegExResult(regEx, argNames);
+				return new RegExResult(regEx + SLASH_REGEX, argNames);
 			}
 
 			int next = regEx.indexOf("}", index);
