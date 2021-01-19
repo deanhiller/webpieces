@@ -60,8 +60,7 @@ public class TestRegEx {
 		
 		Assert.assertFalse(pattern.matcher("/something/path/myid/user").matches());
 		Assert.assertFalse(pattern.matcher("/path/myid/user/ending/asdf").matches());
-		Assert.assertFalse(pattern.matcher("/path/myid/user/asdf/").matches());
-		
+
 		Assert.assertEquals("id", parsePath.argNames.get(0));
 		Assert.assertEquals("user", parsePath.argNames.get(1));
 	}
