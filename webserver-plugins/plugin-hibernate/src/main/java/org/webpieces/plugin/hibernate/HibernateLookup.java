@@ -14,10 +14,10 @@ import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.webpieces.router.api.extensions.EntityLookup;
+import org.webpieces.router.api.extensions.Meta;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
-import org.webpieces.router.impl.params.Meta;
+import org.webpieces.router.api.extensions.ParamMeta;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.params.ParamMeta;
 import org.webpieces.router.impl.params.ParamNode;
 import org.webpieces.router.impl.params.ParamTreeNode;
 import org.webpieces.router.impl.params.ValueNode;

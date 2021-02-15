@@ -1,4 +1,4 @@
-package org.webpieces.router.impl.params;
+package org.webpieces.router.api.extensions;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

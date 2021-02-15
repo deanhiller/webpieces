@@ -4,7 +4,7 @@ import org.webpieces.router.api.extensions.BodyContentBinder;
 
 public class RouteInfoForContent implements RouteData {
 
-	private final BodyContentBinder bodyContentBinder;
+	private BodyContentBinder bodyContentBinder;
 
 	public RouteInfoForContent(BodyContentBinder bodyContentBinder) {
 		if(bodyContentBinder == null)
@@ -14,6 +14,10 @@ public class RouteInfoForContent implements RouteData {
 
 	public BodyContentBinder getBodyContentBinder() {
 		return bodyContentBinder;
+	}
+	
+	public void setBodyContentBinder(BodyContentBinder binder) {
+		this.bodyContentBinder = binder;
 	}
 
 }

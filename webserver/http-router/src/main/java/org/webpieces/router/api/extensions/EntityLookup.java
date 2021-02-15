@@ -3,7 +3,6 @@ package org.webpieces.router.api.extensions;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import org.webpieces.router.impl.params.Meta;
 import org.webpieces.router.impl.params.ParamTreeNode;
 
 public interface EntityLookup {

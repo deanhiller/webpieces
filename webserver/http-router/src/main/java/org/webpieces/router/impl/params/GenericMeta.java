@@ -2,6 +2,8 @@ package org.webpieces.router.impl.params;
 
 import java.lang.reflect.Type;
 
+import org.webpieces.router.api.extensions.Meta;
+
 public class GenericMeta<T> implements Meta {
 
 	private Class<T> type2;

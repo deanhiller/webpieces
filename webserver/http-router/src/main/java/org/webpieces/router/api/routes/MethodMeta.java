@@ -35,4 +35,20 @@ public class MethodMeta {
 		return routeType;
 	}
 
+	public void setCtx(RequestContext ctx) {
+		this.ctx = ctx;
+	}
+
+	public void setRoute(RouteData route) {
+		this.route = route;
+	}
+
+	public void setLoadedController(LoadedController loadedController) {
+		this.loadedController = loadedController;
+	}
+
+	public void setRouteType(RouteType routeType) {
+		this.routeType = routeType;
+	}
+
 }

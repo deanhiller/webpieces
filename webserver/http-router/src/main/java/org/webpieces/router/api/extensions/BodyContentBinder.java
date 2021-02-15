@@ -9,7 +9,7 @@ public interface BodyContentBinder {
 
 	<T> boolean isManaged(Class<T> entityClass, Class<? extends Annotation> paramAnnotation);
 
-	<T> T unmarshal(RequestContext ctx, Class<T> paramTypeToCreate, byte[] data);
+	<T> T unmarshal(RequestContext ctx, ParamMeta paramTypeToCreate, byte[] data);
 
 	<T> RenderContent marshal(T bean);
 

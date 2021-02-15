@@ -9,6 +9,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
+import org.webpieces.router.api.extensions.ParamMeta;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -34,8 +35,10 @@ public class JacksonLookup implements BodyContentBinder {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T unmarshal(RequestContext ctx, Class<T> entityClass, byte[] data) {
+	public <T> T unmarshal(RequestContext ctx, ParamMeta meta, byte[] data) {
 		try {
+        	Class<T> entityClass = (Class<T>) meta.getFieldClass();
+        	
 			ctx.getRequest().requestState.put(JacksonCatchAllFilter.JSON_REQUEST_KEY, data);
 			if(data.length == 0)
 				throw new BadClientRequestException("Client did not provide a json request in the body of the request");		

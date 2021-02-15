@@ -9,6 +9,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.extensions.BodyContentBinder;
+import org.webpieces.router.api.extensions.ParamMeta;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
@@ -27,9 +28,11 @@ public class GrpcJsonLookup implements BodyContentBinder {
 
     @SuppressWarnings("unchecked")
 	@Override
-    public <T> T unmarshal(RequestContext ctx, Class<T> paramTypeToCreate, byte[] data) {
+    public <T> T unmarshal(RequestContext ctx, ParamMeta meta, byte[] data) {
         try {
 
+        	Class<T> paramTypeToCreate = (Class<T>) meta.getFieldClass();
+        	
             String json = new String(data, Charset.forName("UTF-8"));
             JsonFormat.Parser parser = JsonFormat.parser();
 

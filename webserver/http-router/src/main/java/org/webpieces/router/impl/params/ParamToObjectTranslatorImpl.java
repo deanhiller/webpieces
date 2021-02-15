@@ -26,7 +26,9 @@ import org.webpieces.router.api.exceptions.IllegalArgException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.EntityLookup;
+import org.webpieces.router.api.extensions.Meta;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
+import org.webpieces.router.api.extensions.ParamMeta;
 
 @Singleton
 public class ParamToObjectTranslatorImpl {
@@ -102,7 +104,7 @@ public class ParamToObjectTranslatorImpl {
 			ParamNode paramNode = paramTree.get(name);
 			CompletableFuture<Object> beanFuture;
 			if(binder != null && isManagedBy(binder, fieldMeta)) {
-				Object bean = binder.unmarshal(ctx, fieldMeta.getFieldClass(), req.body.createByteArray());
+				Object bean = binder.unmarshal(ctx, fieldMeta, req.body.createByteArray());
 				beanFuture = CompletableFuture.completedFuture(bean);
 			} else {
 				beanFuture = translate(req, method, paramNode, fieldMeta, ctx.getValidation());
