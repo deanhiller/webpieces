@@ -1,13 +1,8 @@
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
         maven {
            url "https://dl.bintray.com/deanhiller/maven"
-        }
-        //This is PURELY for the task-tree plugin only...
-        maven {
-           url "https://plugins.gradle.org/m2/"
         }
 
         //Comment out to suck in dependencies from local repo
@@ -32,15 +27,12 @@ buildscript {
         //We use an older version of our own html compiler to pre-build html tags for clients
         //of webpieces...
         //TODO: fix this with composite builds!!!
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:2.0.49'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:2.1.0'
     }
 }
 
 //plugins loaded from special gradle plugin repo...
 plugins {
-    //google "gradle build scan" or https://github.com/gradle/gradle-build-scan-quickstart
-    // essentially, ./gradlew build -Dscan
-    id 'com.gradle.build-scan' version '2.2.1'
     id "com.dorongold.task-tree" version "1.5" //This prints out a task tree (pretty print)
 }
 
@@ -111,12 +103,14 @@ ext {
 }
 
 //Section needed by the above com.gradle.build-scan plugin that was added
+/*
 buildScan {
     termsOfServiceUrl = 'https://gradle.com/terms-of-service'
     termsOfServiceAgree = 'yes'
 
     publishAlways()
 }
+*/
 
 if(project.hasProperty('projVersion')) {
    println("Java Version="+ System.getProperty("java.version"))
@@ -144,7 +138,7 @@ allprojects {
    buildDir = file('output')
 
    repositories {
-      jcenter()
+      mavenCentral()
    }
 
    jacoco {
@@ -244,7 +238,6 @@ subprojects {
    }
 
    task javadocJar(type: Jar, dependsOn: javadoc) {
-      classifier = 'javadoc'
       archiveClassifier = 'javadoc'
       from 'build/docs/javadoc'
       manifest {
@@ -252,7 +245,7 @@ subprojects {
         def git_proc = git_cmd.execute()
         ext.revision = git_proc.text.trim()
         attributes("Implementation-Title": project.name,
-                   "Implementation-Version": version,
+                   "Implementation-Version": project.version,
                    "SCM-Revision": revision
                    )
       }
@@ -260,9 +253,9 @@ subprojects {
 
    
    jacocoTestReport {
-      additionalSourceDirs = files(sourceSets.main.allSource.srcDirs)
-      sourceDirectories = files(sourceSets.main.allSource.srcDirs)
-      classDirectories =  files(sourceSets.main.output)
+      additionalSourceDirs.setFrom files(sourceSets.main.allSource.srcDirs)
+      sourceDirectories.setFrom files(sourceSets.main.allSource.srcDirs)
+      classDirectories.setFrom  files(sourceSets.main.output)
 /*
       classDirectories = files(sourceSets.main.output.filter { file ->
          if(file.getName().endsWith("Exception.class")) {
@@ -509,10 +502,10 @@ if(project.hasProperty('projVersion')) {
 //which are based off this name
 task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     dependsOn = subprojects.test
-    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories =  files(subprojects.sourceSets.main.output)
-    executionData = files(subprojects.jacocoTestReport.executionData).filter { f -> f.exists() }
+    additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.setFrom  files(subprojects.sourceSets.main.output)
+    executionData.setFrom files(subprojects.jacocoTestReport.executionData).filter { f -> f.exists() }
     reports {
         html.enabled = true
         xml.enabled = true

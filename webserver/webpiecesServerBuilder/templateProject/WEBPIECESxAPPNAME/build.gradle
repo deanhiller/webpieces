@@ -45,7 +45,7 @@ sourceSets {
 //NOTE: jar section has to go AFTER dependencies section to read all dependencies
 jar {
     manifest.attributes(
-            "Class-Path": configurations.runtime.files.collect { it.name }.join(' '),
+            "Class-Path": configurations.runtimeClasspath.files.collect { it.name }.join(' '),
             "Main-Class": 'webpiecesxxxxxpackage.Server'
     )
 }

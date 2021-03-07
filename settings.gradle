@@ -1,3 +1,8 @@
+//google "gradle build scan" or https://github.com/gradle/gradle-build-scan-quickstart
+// essentially, ./gradlew build -Dscan
+plugins {
+    id 'com.gradle.enterprise' version '3.5.2'
+}
 include 'core:core-mock'
 include 'core:core-util'
 include 'core:core-datawrapper'

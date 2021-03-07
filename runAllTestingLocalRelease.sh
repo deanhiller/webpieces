@@ -50,7 +50,7 @@ else
 fi
 
 cd ../webpiecesexample-all
-git checkout master # just in case checkout the project to master
+git checkout 2.1 # just in case checkout the project to 2.1 branch
 git pull
 
 printf "\n********** Running ./gradlew clean build assembleDist **************\n"

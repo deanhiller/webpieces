@@ -121,6 +121,7 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
                     compile.dependsOn(sourceSet.getCompileJavaTaskName());
                     compile.setDescription("Compiles the " + sourceSet.getName() + " Groovy source.");
                     compile.setSource(groovySourceSet.getTemplateDirSet());
+                    compile.setDestinationDir(new File(project.getBuildDir(), "classes/" + groovySourceSet.getTemplateDirSet().getName() + "/" + sourceSet.getName()));
                 }
             });
 
@@ -137,19 +138,8 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
     
     public static void configureOutputDirectoryForSourceSet(final SourceSet sourceSet, final SourceDirectorySet sourceDirectorySet, final Project target) {
         final String sourceSetChildPath = "classes/" + sourceDirectorySet.getName() + "/" + sourceSet.getName();
-        sourceDirectorySet.setOutputDir(target.provider(new Callable<File>() {
-            @Override
-            public File call() {
-                return new File(target.getBuildDir(), sourceSetChildPath);
-            }
-        }));
-
+        sourceDirectorySet.setOutputDir(target.provider(() -> new File(target.getBuildDir(), sourceSetChildPath)));
         DefaultSourceSetOutput sourceSetOutput = Cast.cast(DefaultSourceSetOutput.class, sourceSet.getOutput());
-        sourceSetOutput.addClassesDir(new Callable<File>() {
-            @Override
-            public File call() {
-                return sourceDirectorySet.getOutputDir();
-            }
-        });
+        sourceSetOutput.addClassesDir(sourceDirectorySet.getClassesDirectory());
     }
 }
