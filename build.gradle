@@ -160,22 +160,18 @@ subprojects {
    apply plugin: 'maven-publish'
    apply plugin: 'com.jfrog.bintray'
 
-   def currentJvm = org.gradle.internal.jvm.Jvm.current()
-   println currentJvm
-   
    group = 'org.webpieces'
-   if(project.hasProperty('projVersion')) {
-     println("Java Version="+ System.getProperty("java.version"))
-//     if(!System.getProperty("java.version").startsWith("1.8"))
-//        throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
 
+   def currentJvm = org.gradle.internal.jvm.Jvm.current()
+
+   if(project.hasProperty('projVersion')) {
      project.version = '2.0.'+project.projVersion
-     println("CREATING RELEASE VERSION "+project.version+"  jvm="+currentJvm)
+     println("Java Version="+ System.getProperty("java.version"))
+     println("CREATING RELEASE VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
    } else {
      project.version = '2.0-developer'
-     println("CREATING DEVELOPER VERSION "+version+"  jvm="+currentJvm)
+     println("CREATING DEVELOPER VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
    }
-   version = project.version
 
    ext {
       //This is an input directory that we read jars from if they are not in a repo somewhere
