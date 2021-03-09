@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
@@ -29,6 +30,7 @@ public class JacksonModule extends AbstractModule {
 	    ObjectMapper mapper = new ObjectMapper()
 	    	.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 			.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+			.registerModule(new JavaTimeModule())
 			.registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES));
 
 	    if(config.isConvertNullToEmptyStr()) {
