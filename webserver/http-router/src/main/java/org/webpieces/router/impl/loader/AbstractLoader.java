@@ -31,7 +31,7 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 		
 		Singleton singleton = controllerInst.getClass().getAnnotation(Singleton.class);
 		if(singleton == null)
-			throw new IllegalArgumentException("EVERY controller must be marked with @javax.inject.Singleton not @com.google.inject.Singleton. bad controller="+controllerInst.getClass().getName());
+			throw new IllegalArgumentException("EVERY controller must be marked with @javax.inject.Singleton. bad controller="+controllerInst.getClass().getName());
 		
 		return loader.loadInstIntoMeta(controllerInst, methodStr);
 	}
