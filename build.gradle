@@ -167,7 +167,6 @@ subprojects {
 
    if(project.hasProperty('projVersion')) {
      project.version = '2.0.'+project.projVersion
-     println("Java Version="+ System.getProperty("java.version"))
      println("CREATING RELEASE VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
    } else {
      project.version = '2.0-developer'
