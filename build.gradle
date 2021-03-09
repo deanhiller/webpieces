@@ -95,7 +95,8 @@ ext {
        'commons-collections': 'org.apache.commons:commons-collections4:4.1',
        'jackson':         'com.fasterxml.jackson.core:jackson-databind:2.10.3',
        'jackson-anno':    'com.fasterxml.jackson.core:jackson-annotations:2.10.3',
-       'jackson-java8':   'com.fasterxml.jackson.module:jackson-module-parameter-names:2.10.3',
+       'jackson-javatime': 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.3',
+       'jackson-paramnames': 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.10.3',
 	   
        'micrometer':      'io.micrometer:micrometer-core:1.4.1',
        'elastic-search': 'org.elasticsearch.client:elasticsearch-rest-client:7.6.1',
@@ -160,22 +161,17 @@ subprojects {
    apply plugin: 'maven-publish'
    apply plugin: 'com.jfrog.bintray'
 
-   def currentJvm = org.gradle.internal.jvm.Jvm.current()
-   println currentJvm
-   
    group = 'org.webpieces'
-   if(project.hasProperty('projVersion')) {
-     println("Java Version="+ System.getProperty("java.version"))
-//     if(!System.getProperty("java.version").startsWith("1.8"))
-//        throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
 
+   def currentJvm = org.gradle.internal.jvm.Jvm.current()
+
+   if(project.hasProperty('projVersion')) {
      project.version = '2.0.'+project.projVersion
-     println("CREATING RELEASE VERSION "+project.version+"  jvm="+currentJvm)
+     println("CREATING RELEASE VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
    } else {
      project.version = '2.0-developer'
-     println("CREATING DEVELOPER VERSION "+version+"  jvm="+currentJvm)
+     println("CREATING DEVELOPER VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
    }
-   version = project.version
 
    ext {
       //This is an input directory that we read jars from if they are not in a repo somewhere
