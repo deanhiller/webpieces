@@ -30,6 +30,7 @@ public class JacksonModule extends AbstractModule {
 	    ObjectMapper mapper = new ObjectMapper()
 	    	.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 			.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+			.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 			.registerModule(new JavaTimeModule())
 			.registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES));
 
