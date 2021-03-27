@@ -7,6 +7,8 @@ import java.util.concurrent.Executors;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.locking.FuturePermitQueue;
 import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.threading.NamedThreadFactory;
@@ -127,7 +129,7 @@ public class TestPermitQueue {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 		
 		CompletableFuture<Long> future = new CompletableFuture<Long>();
@@ -135,7 +137,7 @@ public class TestPermitQueue {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			}
 			System.out.println("complete"+i);
 			future.complete(100L+i);

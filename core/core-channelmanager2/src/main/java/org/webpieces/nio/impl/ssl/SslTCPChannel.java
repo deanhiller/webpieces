@@ -27,6 +27,7 @@ import org.webpieces.ssl.api.AsyncSSLFactory;
 import org.webpieces.ssl.api.SSLMetrics;
 import org.webpieces.ssl.api.SslListener;
 import org.webpieces.util.exceptions.NioClosedChannelException;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class SslTCPChannel extends SslChannel implements TCPChannel {
 
@@ -151,7 +152,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 				try {
 					clientDataListener = new SslTryCatchListener(future.get());
 				} catch (Exception e) {
-					throw new RuntimeException(e);
+					throw SneakyThrow.sneak(e);
 				}
 			}
 		}
@@ -256,7 +257,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			try {
 				return setupSSLEngineImpl(channel, b);
 			} catch (SSLException e) {
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			}
 		}
 		
@@ -319,7 +320,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			
 			return engine;
 		} catch(Exception e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

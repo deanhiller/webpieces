@@ -35,6 +35,7 @@ import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.extensions.SimpleStorage;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
@@ -151,7 +152,7 @@ public class InstallSslCertController {
 			return acmeClient.openAccount(email, accountKeyPair)
 				.thenCompose((url) -> saveUrlAndProcessOrder(url, accountKeyPair, email, domain, organization));
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}	
 	}
 	
@@ -202,7 +203,7 @@ public class InstallSslCertController {
 		
 			return storage.save(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY, props);
 		} catch (CertificateEncodingException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

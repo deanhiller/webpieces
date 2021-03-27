@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.router.impl.routers.FStaticRouter;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.Security;
@@ -88,7 +89,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		try(FileOutputStream out = new FileOutputStream(metaFile1)) {
 			p.store(out, "file hashes for next time.  Single file format(key:urlPathOnly, value:hash), directory format(key:urlPath+relativeFilePath, value:hash)");
 		} catch(IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -101,7 +102,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 			p.load(in);
 			return p;
 		} catch(IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -186,14 +187,12 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 				
 				log.info("compressed "+src.length()+" bytes to="+destination.length()+" to file="+destination+" hash="+hash);
 				return true;
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
-	private void writeFile(File destination, Compression compression, byte[] allData, String urlPath, VirtualFile src) throws FileNotFoundException, IOException {
+	private void writeFile(File destination, Compression compression, byte[] allData, String urlPath, VirtualFile src) throws IOException {
 		FileOutputStream out = new FileOutputStream(destination);
 		try(OutputStream compressionOut = compression.createCompressionStream(out)) 
 		{

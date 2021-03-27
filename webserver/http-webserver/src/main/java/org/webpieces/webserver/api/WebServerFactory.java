@@ -10,6 +10,7 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.filters.Filter;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.webserver.impl.PortConfigLookupImpl;
@@ -46,7 +47,7 @@ public abstract class WebServerFactory {
 						+ "to do so.  See https://stackoverflow.com/questions/33289695/inetaddress-getlocalhost-slow-to-run-30-seconds/33289897#33289897 for more info");
 			
 		} catch (UnknownHostException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 		
 		Module allModules = getModules(config, routerConfig, templateConfig, args);

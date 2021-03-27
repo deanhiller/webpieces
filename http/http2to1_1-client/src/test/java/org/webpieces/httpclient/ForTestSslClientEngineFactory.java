@@ -15,6 +15,8 @@ import javax.net.ssl.X509TrustManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class ForTestSslClientEngineFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(ForTestSslClientEngineFactory.class);
@@ -23,7 +25,7 @@ public class ForTestSslClientEngineFactory {
 		try {
 			return createSslEngineImpl(host, port);
 		} catch (KeyManagementException | NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

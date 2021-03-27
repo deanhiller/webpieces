@@ -15,6 +15,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class JacksonJsonConverter {
 	
 	private ObjectMapper mapper;
@@ -47,10 +49,10 @@ public class JacksonJsonConverter {
 			if(convertNullToEmptyStr)
 				return convertStrings(obj, true);
 			return obj;
-		} catch (JsonProcessingException e) {
+		} catch(JsonProcessingException e) {
 			throw new JsonReadException(e.getMessage(), e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -129,7 +131,7 @@ public class JacksonJsonConverter {
 				}
 			}
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -140,7 +142,7 @@ public class JacksonJsonConverter {
 		try {
 			value = method.invoke(obj);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 		return value;
 	}
@@ -150,10 +152,8 @@ public class JacksonJsonConverter {
 		Method method;
 		try {
 			method = obj.getClass().getMethod(getMethod);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("Method="+getMethod+" does not exist on class="+obj.getClass().getName(), e);
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw SneakyThrow.sneak(e);
 		}
 		return method;
 	}
@@ -166,7 +166,7 @@ public class JacksonJsonConverter {
 			
 			return mapper.writeValueAsString(obj);
 		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	
@@ -178,15 +178,17 @@ public class JacksonJsonConverter {
 			
 			return mapper.writeValueAsBytes(obj);
 		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
 	public JsonNode readTree(byte[] data) {
 		try {
 			return mapper.readTree(data);
+		} catch(JsonProcessingException e) {
+			throw new JsonReadException(e.getMessage(), e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class URLEncoder {
 
 	/**
@@ -13,7 +15,7 @@ public class URLEncoder {
 		try {
 			return java.net.URLEncoder.encode(value, charset.name());
 		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -24,7 +26,7 @@ public class URLEncoder {
 		try {
 			return URLDecoder.decode(value, charset.name());
 		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 		

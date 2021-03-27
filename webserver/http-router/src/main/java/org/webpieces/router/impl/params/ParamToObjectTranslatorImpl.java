@@ -29,6 +29,7 @@ import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.router.api.extensions.Meta;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.ParamMeta;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 @Singleton
 public class ParamToObjectTranslatorImpl {
@@ -276,10 +277,8 @@ public class ParamToObjectTranslatorImpl {
 	private <T> Object createBean(Class<T> paramTypeToCreate) {
 		try {
 			return paramTypeToCreate.newInstance();
-		} catch (InstantiationException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
+		} catch (IllegalAccessException | InstantiationException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

@@ -9,6 +9,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class VirtualFileClasspath implements VirtualFile {
 
 	
@@ -61,7 +63,7 @@ public class VirtualFileClasspath implements VirtualFile {
 				return builder.toString();
 			}
 		} catch(IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -86,7 +88,7 @@ public class VirtualFileClasspath implements VirtualFile {
 		try {
 			return resource.openStream();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

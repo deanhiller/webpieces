@@ -24,6 +24,7 @@ import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
@@ -83,8 +84,8 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		CompletableFuture<Void> fut = writeAsync(msg);
 		try {
 			fut.get(2, TimeUnit.SECONDS);
-		} catch(Throwable e) {
-			throw new RuntimeException(e);
+		} catch(Exception e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

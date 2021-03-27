@@ -14,6 +14,7 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.HttpException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.filters.Service;
 
 @Singleton
@@ -71,7 +72,7 @@ public class TransactionFilter extends RouteFilter<Void> {
 			if(t instanceof HttpException)
 				throw (HttpException)t; //the platform needs the original HttpException to translate to an http code
 			else
-				throw new RuntimeException(t);
+				throw SneakyThrow.sneak(t);
 		}
 		
 		log.info("Transaction being committed");

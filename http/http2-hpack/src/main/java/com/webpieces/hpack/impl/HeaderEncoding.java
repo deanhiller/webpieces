@@ -8,6 +8,8 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.util.exceptions.SneakyThrow;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +95,7 @@ public class HeaderEncoding {
     	try {
 			return serializeHeadersImpl(encoder, headers);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
     }
     

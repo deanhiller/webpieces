@@ -12,6 +12,7 @@ import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.FilterPortType;
 import org.webpieces.router.api.routes.Routes;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import io.grpc.MethodDescriptor;
 import io.grpc.ServiceDescriptor;
@@ -73,14 +74,8 @@ public class GrpcJsonRoutes implements Routes {
 				//this plugin is EASY to copy and fork and maintain your self so you can easily do that
 				bldr.addContentRoute(HTTPS, POST, baseUrl+"/" + fullMethodName, controller + "." + javaMethodName);
 			}	
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("bug", e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException("bug", e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException("bug??", e);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("weird bug since we went from class to string to class", e);
+		} catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

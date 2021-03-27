@@ -22,6 +22,7 @@ import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.httpfrontend2.api.http2.Http2Requests;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
@@ -50,12 +51,8 @@ class ServerFactory {
         CompletableFuture<Void> fut = server.start();
         try {
 			fut.get(2, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			throw new RuntimeException("exception", e);
-		} catch (ExecutionException e) {
-			throw new RuntimeException("exception", e);
-		} catch (TimeoutException e) {
-			throw new RuntimeException("exception", e);
+		} catch (ExecutionException | InterruptedException | TimeoutException e) {
+			throw SneakyThrow.sneak(e);
 		}
         return server.getUnderlyingChannel().getLocalAddress().getPort();
     }

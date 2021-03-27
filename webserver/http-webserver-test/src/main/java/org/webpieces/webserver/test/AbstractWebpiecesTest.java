@@ -15,6 +15,7 @@ import org.webpieces.httpclient11.api.HttpSocketListener;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.BackpressureConfig;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.webserver.test.http11.DirectHttp11Client;
 
 import com.google.inject.Module;
@@ -32,7 +33,7 @@ public class AbstractWebpiecesTest {
 //		try {
 //			return connectHttp(false, null);
 //		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-//			throw new RuntimeException(e);
+//			throw SneakyThrow.sneak(e);
 //		}
 //	}
 //
@@ -40,7 +41,7 @@ public class AbstractWebpiecesTest {
 //		try {
 //			return connectHttps(false, null, null);
 //		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-//			throw new RuntimeException(e);
+//			throw SneakyThrow.sneak(e);
 //		}
 //	}
 
@@ -70,7 +71,7 @@ public class AbstractWebpiecesTest {
 
 			return socket;
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -100,7 +101,7 @@ public class AbstractWebpiecesTest {
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	/**

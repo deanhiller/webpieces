@@ -15,6 +15,7 @@ import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.filters.Service;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -72,12 +73,8 @@ public class JacksonNotFoundFilter extends RouteFilter<JsonConfig> {
 	protected byte[] translateJson(ObjectMapper mapper, Object error) {
 		try {
 			return mapper.writeValueAsBytes(error);
-		} catch (JsonGenerationException e) {
-			throw new RuntimeException(e);
-		} catch (JsonMappingException e) {
-			throw new RuntimeException(e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

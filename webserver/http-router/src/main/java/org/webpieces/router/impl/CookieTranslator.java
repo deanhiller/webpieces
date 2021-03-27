@@ -20,6 +20,7 @@ import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.impl.ctx.CookieScopeImpl;
 import org.webpieces.router.impl.ctx.SecureCookie;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.util.security.Security;
 
@@ -68,7 +69,7 @@ public class CookieTranslator implements CookieWebManaged {
 		try {
 			return scopeToCookie(data);
 		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	
@@ -141,7 +142,7 @@ public class CookieTranslator implements CookieWebManaged {
 		try {
 			return cookieToScope(req, data);
 		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

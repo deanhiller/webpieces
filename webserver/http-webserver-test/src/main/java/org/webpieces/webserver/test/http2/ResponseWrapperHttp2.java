@@ -13,6 +13,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.http2client.api.dto.ContentType;
 import org.webpieces.http2client.api.dto.FullResponse;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.lowlevel.StatusCode;
@@ -108,7 +109,7 @@ public class ResponseWrapperHttp2 {
 				out = new byte[10000];
 			}
 		} catch(IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 		
 		Charset charset = extractCharset();

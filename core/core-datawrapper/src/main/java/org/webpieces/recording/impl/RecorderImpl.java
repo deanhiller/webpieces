@@ -9,6 +9,7 @@ import java.nio.channels.WritableByteChannel;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.recording.api.Recorder;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class RecorderImpl implements Recorder {
 
@@ -32,7 +33,7 @@ public class RecorderImpl implements Recorder {
 			else
 				throw new IllegalArgumentException("version="+version+" not supported");
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

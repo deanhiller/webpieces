@@ -17,6 +17,7 @@ import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.routeinvoker.WebSettings;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Headers;
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
@@ -183,7 +184,7 @@ public class CompressionChunkingHandle implements RouterResponseHandler {
 			try {
 				chainStream.write(bytes);
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			}
 
 			if(eos) {
@@ -191,7 +192,7 @@ public class CompressionChunkingHandle implements RouterResponseHandler {
 				try {
 					chainStream.close();
 				} catch (IOException e) {
-					throw new RuntimeException(e);
+					throw SneakyThrow.sneak(e);
 				}
 			}
 			

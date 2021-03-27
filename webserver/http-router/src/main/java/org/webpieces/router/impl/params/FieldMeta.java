@@ -9,6 +9,7 @@ import java.util.function.BiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.extensions.Meta;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class FieldMeta implements Meta {
 
@@ -52,7 +53,7 @@ public class FieldMeta implements Meta {
 			log.warn("performance penalty since method="+methodName+" does not exist on class="+beanClass.getName()+" using field instead to set data");
 			return (bean, val) -> setField(field, bean, val);
 		} catch (SecurityException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -60,10 +61,8 @@ public class FieldMeta implements Meta {
 		field.setAccessible(true);
 		try {
 			field.set(bean, val);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
 		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 		return null;
 	}
@@ -71,12 +70,8 @@ public class FieldMeta implements Meta {
 	private Void invokeMethod(Method method, Object bean, Object val) {
 		try {
 			method.invoke(bean, val);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException(e);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			throw SneakyThrow.sneak(e);
 		}
 		return null;
 	}

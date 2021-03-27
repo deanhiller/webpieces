@@ -17,6 +17,7 @@ import org.webpieces.templating.api.Template;
 import org.webpieces.templating.impl.ProdTemplateService;
 import org.webpieces.templating.impl.TemplateImpl;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 
@@ -69,10 +70,8 @@ public class DevTemplateService extends ProdTemplateService {
 		//this is a recursive function.  Run TestFieldTag.java to see
 		try {
 			return loadTemplateImpl(currentCl.get(), fullTemplatePath, fullClassName);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+		} catch (ClassNotFoundException | IOException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

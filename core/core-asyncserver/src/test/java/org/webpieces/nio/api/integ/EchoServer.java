@@ -9,6 +9,8 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class EchoServer {
 
 	private static final Logger log = LoggerFactory.getLogger(EchoServer.class);
@@ -17,7 +19,7 @@ public class EchoServer {
 		try {
 			startImpl();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

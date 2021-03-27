@@ -30,6 +30,7 @@ import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.StubModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.templatingdev.impl.HtmlToJavaClassCompiler;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.net.URLEncoder;
 
 import com.google.inject.Guice;
@@ -81,7 +82,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 			TemplateCompileOptions options = getProject().getExtensions().findByType(TemplateCompileOptions.class);
 			compileImpl(options);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -148,7 +149,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 				return IOUtils.toString(in);
 			}
 		} catch(IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	
@@ -227,7 +228,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 					IOUtils.write(clazz.getBytes(), str);
 				}
 			} catch(IOException e) {
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			}
 		}
 
@@ -236,7 +237,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 			try {
 				Files.createFile(target.toPath());
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			}
 			return target;
 		}		
@@ -261,7 +262,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 			try {
 				routeOut.write(ProdTemplateModule.ROUTE_TYPE+"/"+encodedSourceLocation+"/"+encodedRouteId+":"+encodedArgs+":dummy\n");
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			}
 		}
 
@@ -276,7 +277,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 			try {
 				routeOut.write(ProdTemplateModule.PATH_TYPE+"/"+encodedSourceLocation+"/"+encodedPath+"\n");
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			}
 		}
 	}

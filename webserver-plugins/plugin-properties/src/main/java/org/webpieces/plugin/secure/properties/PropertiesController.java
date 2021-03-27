@@ -25,6 +25,7 @@ import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.SimpleStorage;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.google.common.collect.Lists;
 
@@ -150,10 +151,8 @@ public class PropertiesController {
 	private void updateProperty(PropertyInfo info, Object objectValue) {
 		try {
 			info.getSetter().invoke(info.getInjectee(), objectValue);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException(e);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 }

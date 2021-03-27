@@ -25,6 +25,7 @@ import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.router.impl.dto.RedirectResponse;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
@@ -61,7 +62,7 @@ public class ResponseCreator {
 			properties.load(stream);
 			return properties.getProperty("version");
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

@@ -17,6 +17,7 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.ContentType;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 /**
  * This ensures your test is the same rather it is a chunked download of the resource or a single HttpResponse so testing
@@ -107,7 +108,7 @@ public class ResponseWrapper {
 				out = new byte[10000];
 			}
 		} catch(IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 		
 		Charset charset = extractCharset();

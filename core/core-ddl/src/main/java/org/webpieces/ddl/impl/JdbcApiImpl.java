@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.webpieces.ddl.api.JdbcApi;
-import org.webpieces.ddl.api.SqlRuntimeException;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class JdbcApiImpl implements JdbcApi {
 
@@ -24,20 +24,17 @@ public class JdbcApiImpl implements JdbcApi {
 		try {
 			Class.forName("net.sf.log4jdbc.DriverSpy");
 			return DriverManager.getConnection(driver, username, password);
-		} catch (SQLException e) {
-			throw new SqlRuntimeException(e);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("missing class.  check chained exception", e);
+		} catch (ClassNotFoundException | SQLException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	
 	@Override
 	public void dropAllTablesFromDatabase() {
-		try (Connection connection = createConnection()) {
-			Statement statement = connection.createStatement();
+		try (Connection connection = createConnection(); Statement statement = connection.createStatement()) {
 			statement.executeUpdate("DROP ALL OBJECTS");
 		} catch (SQLException e) {
-			throw new SqlRuntimeException("could not complete", e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 }

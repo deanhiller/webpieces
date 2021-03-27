@@ -278,7 +278,7 @@ public class TestSSLEngine extends TestCase {
 //			writer.flush();
 //			encodedString = out.toByteArray();
 //		} catch(IOException e) {
-//			throw new RuntimeException("Should never happen", e);
+//			throw SneakyThrow.sneak(e);
 //		}
 //
 //		b.put(encodedString);	

@@ -30,6 +30,8 @@ import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.plugin.secure.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.router.api.extensions.SimpleStorage;
+import org.webpieces.util.exceptions.SneakyThrow;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +55,7 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 			if(keySt == null)
 				throw new IllegalStateException("keystore was not found");
 		} catch(IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -99,10 +101,8 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 
 		this.certChain = certs.toArray(new X509Certificate[0]);
 		
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (CertificateException e) {
-			throw new RuntimeException(e);
+		} catch (CertificateException | IOException e) {
+			throw SneakyThrow.sneak(e);
 		}
 		return null;
 	}
@@ -127,7 +127,7 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 			
 			return createFromSelfSignedCert();
 		} catch(Exception e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

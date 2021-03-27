@@ -15,6 +15,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.throughput.RequestCreator;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.time.RateRecorder;
 
 import com.webpieces.hpack.api.HpackConfig;
@@ -45,7 +46,7 @@ public class Http2SynchronousClient implements SynchronousClient {
 	    	
 			startImpl(svrAddress);
 		} catch (Throwable e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

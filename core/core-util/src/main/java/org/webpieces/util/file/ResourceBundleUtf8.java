@@ -14,6 +14,8 @@ import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
 import java.util.function.Supplier;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class ResourceBundleUtf8 extends Control {
 
 	/**
@@ -57,7 +59,7 @@ public class ResourceBundleUtf8 extends Control {
 		try {
 			return connection.getInputStream();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

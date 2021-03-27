@@ -7,6 +7,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 import org.webpieces.recording.api.Playback;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class PlaybackImpl implements Playback {
 
@@ -28,7 +29,7 @@ public class PlaybackImpl implements Playback {
 			else
 				throw new IllegalArgumentException("version="+version+" not supported");
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

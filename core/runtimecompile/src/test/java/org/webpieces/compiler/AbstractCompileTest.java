@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.compiler.impl.CompileOnDemandImpl;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFileImpl;
@@ -71,7 +72,7 @@ public abstract class AbstractCompileTest {
 		try {
 			return invokeMethodImpl(c, method);
 		} catch (Exception e) {
-			throw new RuntimeException("exception", e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	
@@ -80,7 +81,7 @@ public abstract class AbstractCompileTest {
 		try {
 			return (Integer) invokeMethodImpl(c, method);
 		} catch (Exception e) {
-			throw new RuntimeException("exception", e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -139,7 +140,7 @@ public abstract class AbstractCompileTest {
 				toFile.setLastModified(System.currentTimeMillis());
 			}
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

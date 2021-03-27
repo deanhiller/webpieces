@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.plugin.secure.sslcert.CertAndSigningRequest;
 import org.webpieces.plugin.secure.sslcert.ChallengeInBadStateException;
 import org.webpieces.plugin.secure.sslcert.InstallSslCertConfig;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.futures.CompletableFutureCollector;
 
 /**
@@ -64,7 +65,7 @@ public class AcmeClientProxy {
 			
 			return CompletableFuture.completedFuture(new AcmeInfo(termsOfServiceUri, website));
 		} catch(AcmeException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -85,7 +86,7 @@ public class AcmeClientProxy {
 			log.info("account location="+location);
 			return CompletableFuture.completedFuture(location);
 		} catch (AcmeException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	//TODO: Put the remote request INTO a different pool to not hold up the webserver main
@@ -114,7 +115,7 @@ public class AcmeClientProxy {
 			
 			return CompletableFuture.completedFuture(new ProxyOrder(order, auths));
 		} catch (AcmeException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	
@@ -151,12 +152,8 @@ public class AcmeClientProxy {
 			Certificate cert = order.getCertificate();
 			
 			return CompletableFuture.completedFuture(new CertAndSigningRequest(writer.toString(), cert.getCertificateChain()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		} catch (AcmeException e) {
-			throw new RuntimeException(e);
+		} catch (AcmeException | IOException | InterruptedException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -180,10 +177,8 @@ public class AcmeClientProxy {
 			}
 			
 			return null;
-		} catch (AcmeException e) {
-			throw new RuntimeException(e);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
+		} catch (AcmeException | InterruptedException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

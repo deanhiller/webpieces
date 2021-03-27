@@ -7,6 +7,7 @@ import org.codehaus.groovy.control.Phases;
 import org.codehaus.groovy.tools.GroovyClass;
 import org.webpieces.templatingdev.api.CompileCallback;
 import org.webpieces.templatingdev.impl.source.ScriptOutputImpl;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.util.compiling.GroovyCompiling;
 
@@ -26,9 +27,7 @@ public class GroovyToJavaClassCompiler {
 			compileImpl(cl, scriptCode);
 			//F'ing checked exceptions should have been runtime so I don't have all this cruft in my app...
 		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

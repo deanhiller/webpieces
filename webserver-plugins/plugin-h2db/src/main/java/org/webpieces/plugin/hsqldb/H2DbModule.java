@@ -6,6 +6,7 @@ import org.h2.tools.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.plugin.backend.spi.BackendGuiDescriptor;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
@@ -59,7 +60,7 @@ public class H2DbModule extends AbstractModule {
 			
 			return;
 		} catch(Exception e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

@@ -9,6 +9,8 @@ import java.util.Base64;
 import javax.crypto.Mac;
 import javax.inject.Singleton;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 @Singleton
 public class Security {
 
@@ -39,12 +41,8 @@ public class Security {
 			byte[] result = mac.doFinal(messageBytes);
 
 			return Base64.getEncoder().encodeToString(result);
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
-		} catch (InvalidKeyException e) {
-			throw new RuntimeException(e);
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			throw SneakyThrow.sneak(e);
 		}
 
 	}
@@ -68,7 +66,7 @@ public class Security {
 			byte[] out = m.digest(bytes);
 			return Base64.getEncoder().encodeToString(out);
 		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

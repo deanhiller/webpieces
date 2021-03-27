@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.recording.api.Recorder;
 import org.webpieces.recording.api.RecordingPlaybackFactory;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.file.FileFactory;
 
 public class RecordingDataListener implements DataListener {
@@ -47,7 +48,7 @@ public class RecordingDataListener implements DataListener {
 			FileOutputStream str = new FileOutputStream(f);
 			return RecordingPlaybackFactory.createRecorder(str, 1);
 		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

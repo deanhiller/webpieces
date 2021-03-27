@@ -6,7 +6,9 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,6 +31,7 @@ import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -64,8 +67,8 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 		CompletableFuture<Void> fut = listener.incomingData(this, buf);
 		try {
 			fut.get(2, TimeUnit.SECONDS);
-		} catch(Throwable e) {
-			throw new RuntimeException(e);
+		} catch(ExecutionException | InterruptedException | TimeoutException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	
@@ -73,8 +76,8 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 		CompletableFuture<Void> fut = sendToSvrAsync(msg);
 		try {
 			fut.get(2, TimeUnit.SECONDS);
-		} catch(Throwable e) {
-			throw new RuntimeException(e);
+		} catch(ExecutionException | InterruptedException | TimeoutException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

@@ -14,6 +14,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class VirtualFileImpl implements VirtualFile {
 
 	private File file;
@@ -51,7 +53,7 @@ public class VirtualFileImpl implements VirtualFile {
 		try {
 			return new String(Files.readAllBytes(file.toPath()), charset);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -76,7 +78,7 @@ public class VirtualFileImpl implements VirtualFile {
 		try {
 			return new FileInputStream(file);
 		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -95,7 +97,7 @@ public class VirtualFileImpl implements VirtualFile {
 		try {
 			return file.getCanonicalPath();
 		} catch (IOException e) {
-			throw new RuntimeException("exception resolving path to full form="+file.getAbsolutePath(), e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	
@@ -104,7 +106,7 @@ public class VirtualFileImpl implements VirtualFile {
 		try {
 			return file.toURI().toURL();
 		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -123,7 +125,7 @@ public class VirtualFileImpl implements VirtualFile {
 		try {
 			return new FileOutputStream(file);
 		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

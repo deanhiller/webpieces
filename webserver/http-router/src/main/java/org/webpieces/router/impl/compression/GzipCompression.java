@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class GzipCompression implements Compression {
 
 	@Override
@@ -11,7 +13,7 @@ public class GzipCompression implements Compression {
 		try {
 			return new GZIPOutputStream(resultingData);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

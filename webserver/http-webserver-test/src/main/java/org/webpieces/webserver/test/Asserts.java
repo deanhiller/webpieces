@@ -3,6 +3,8 @@ package org.webpieces.webserver.test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class Asserts {
 
 	public static void assertWasCompiledWithParamNames(String param) {
@@ -12,7 +14,7 @@ public class Asserts {
 		try {
 			clazz = Class.forName(Asserts.class.getName());
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Class wasn't found", e);
+			throw SneakyThrow.sneak(e);
 		}
 		Method[] method = clazz.getDeclaredMethods();
 		Method target = null;

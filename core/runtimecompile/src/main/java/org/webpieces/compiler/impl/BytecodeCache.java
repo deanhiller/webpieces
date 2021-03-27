@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.util.function.Supplier;
 
 import org.webpieces.compiler.api.CompileConfig;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.file.VirtualFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,7 @@ public class BytecodeCache {
 				log.trace("Cache MISS for "+name);
             return null;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyThrow.sneak(e);
         }
     }
 
@@ -92,7 +93,7 @@ public class BytecodeCache {
             if(log.isTraceEnabled())
 				log.trace(name + "cached");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyThrow.sneak(e);
         }
     }
 
@@ -116,7 +117,7 @@ public class BytecodeCache {
             }
             return builder.toString();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw SneakyThrow.sneak(e);
         }
     }
 

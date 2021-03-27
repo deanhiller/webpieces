@@ -3,6 +3,8 @@ package org.webpieces.plugin.hibernate;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class TxCompleters {
 
 	public void commit(EntityTransaction tx, EntityManager em) {
@@ -12,7 +14,7 @@ public class TxCompleters {
 			em.close();
 		} catch(Throwable e) {
 			closeEm(e, em);
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

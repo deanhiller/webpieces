@@ -16,6 +16,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.throughput.RequestCreator;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.hpack.api.HpackConfig;
 import com.webpieces.hpack.api.HpackParserFactory;
@@ -40,7 +41,7 @@ public class ServerHttp2Sync {
 		try {
 			return startImpl();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

@@ -20,6 +20,7 @@ import org.webpieces.router.api.extensions.Startable;
 import org.webpieces.router.impl.mgmt.CachedBean;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
 import org.webpieces.router.impl.params.ObjectTranslator;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 /**
  * A proxy to get around the weird circular dependency order so the guice created controller can listen
@@ -96,14 +97,8 @@ public class BeanMetaData implements Startable {
 			category = (String) method.invoke(injectee);
 		} catch (NoSuchMethodException e) {
 			//continue on..
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException(e);
+		} catch (IllegalAccessException | InvocationTargetException | SecurityException e) {
+			throw SneakyThrow.sneak(e);
 		}
 
 		Map<String, BeanMeta> list = meta.getOrDefault(category, new HashMap<>());
@@ -150,7 +145,7 @@ public class BeanMetaData implements Startable {
 		} catch (NoSuchMethodException e) {
 			//setter not exist
 		} catch (SecurityException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 
 		return new PropertyInfo(propertyName, injectee, getter, setter);

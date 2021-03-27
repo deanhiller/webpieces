@@ -32,6 +32,7 @@ import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.net.URLEncoder;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
@@ -90,7 +91,7 @@ public class WebServerImpl implements WebServer {
 			//production use the async method!
 			future.get(2, TimeUnit.SECONDS);
 		} catch (Exception e) {
-			throw new RuntimeException("exception", e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	
@@ -274,7 +275,7 @@ public class WebServerImpl implements WebServer {
 		try {
 			validateRouteIdsFromHtmlFilesImpl();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

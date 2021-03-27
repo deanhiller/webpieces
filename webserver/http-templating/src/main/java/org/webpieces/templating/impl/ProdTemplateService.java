@@ -16,6 +16,7 @@ import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateResult;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 @Singleton
 public class ProdTemplateService extends AbstractTemplateService implements TemplateService {
@@ -56,7 +57,7 @@ public class ProdTemplateService extends AbstractTemplateService implements Temp
 			String fullClassName = TemplateUtil.convertTemplatePathToClass(templatePath);
 			return loadTemplate(templatePath, fullClassName);
 		} catch(ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

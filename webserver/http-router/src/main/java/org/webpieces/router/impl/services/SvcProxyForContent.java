@@ -19,6 +19,7 @@ import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.BeanValidator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
@@ -77,9 +78,9 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		} catch (InvocationTargetException e) {
 			if(e.getCause() instanceof WebpiecesException)
 				throw (WebpiecesException)e.getCause();
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 		
 		if(info.getBodyContentBinder() != null)

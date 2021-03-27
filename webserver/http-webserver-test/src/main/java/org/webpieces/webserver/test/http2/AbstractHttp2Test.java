@@ -15,6 +15,7 @@ import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.BackpressureConfig;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.webserver.test.MockChannelManager;
 import org.webpieces.webserver.test.OverridesForEmbeddedSvrWithParsing;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
@@ -48,7 +49,7 @@ public abstract class AbstractHttp2Test {
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -65,7 +66,7 @@ public abstract class AbstractHttp2Test {
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

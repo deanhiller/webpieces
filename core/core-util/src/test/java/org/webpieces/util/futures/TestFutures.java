@@ -6,6 +6,8 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class TestFutures {
 
 	//private static final Logger log = LoggerFactory.getLogger(TestFutures.class);
@@ -111,7 +113,7 @@ public class TestFutures {
 			if(r != null)
 				return r;
 			else if(e != null)
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			else
 				throw new RuntimeException("weird");
 		});

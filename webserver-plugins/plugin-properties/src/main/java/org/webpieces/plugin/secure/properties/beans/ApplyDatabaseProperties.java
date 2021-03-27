@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.extensions.SimpleStorage;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 class ApplyDatabaseProperties implements Runnable {
 	
@@ -37,7 +38,7 @@ class ApplyDatabaseProperties implements Runnable {
 				processBean(dbProps, category, entry.getValue());
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

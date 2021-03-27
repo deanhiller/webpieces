@@ -9,6 +9,7 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.throughput.BytesRecorder;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class EchoClient {
 
@@ -19,7 +20,7 @@ public class EchoClient {
 		try {
 			startImpl(port);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

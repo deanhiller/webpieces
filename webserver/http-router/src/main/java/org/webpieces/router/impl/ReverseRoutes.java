@@ -28,6 +28,7 @@ import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routeinvoker.PortAndIsSecure;
 import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.MatchInfo;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class ReverseRoutes implements ReverseRouteLookup {
 
@@ -252,7 +253,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		try {
 			return URLEncoder.encode(value.toString(), urlEncoding.name());
 		} catch(UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

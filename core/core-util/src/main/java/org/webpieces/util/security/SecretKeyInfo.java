@@ -6,6 +6,8 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.webpieces.util.exceptions.SneakyThrow;
+
 public class SecretKeyInfo {
 
 	private byte[] keyData;
@@ -38,7 +40,7 @@ public class SecretKeyInfo {
 			byte[] encoded = key.getEncoded();
 			return new SecretKeyInfo(encoded, alg);
 		} catch(NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

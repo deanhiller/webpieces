@@ -15,6 +15,7 @@ import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.throughput.AsyncConfig;
 import org.webpieces.throughput.RequestCreator;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.streaming.RequestStreamHandle;
@@ -49,7 +50,7 @@ public class ClientAsync {
 				connect.get(2, TimeUnit.SECONDS);
 				sockets.add(socket);
 			} catch(Throwable e) {
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			}
 		}
 		

@@ -12,6 +12,7 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.http2.api.streaming.RequestStreamHandle;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
@@ -61,7 +62,7 @@ public class Layer1Incoming implements DataListener {
 				socketListener.socketFarEndClosed(socket);
 			} catch(Throwable t) {
 				e.addSuppressed(t);
-				throw new RuntimeException(e);
+				throw SneakyThrow.sneak(e);
 			}
 		}
 	}

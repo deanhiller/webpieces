@@ -9,6 +9,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.file.FileFactory;
 
 
@@ -49,7 +50,7 @@ public class SSLEngineFactoryForTest implements SSLEngineFactory {
 			
 			return engine;
 		} catch(Exception e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 
@@ -74,7 +75,7 @@ public class SSLEngineFactoryForTest implements SSLEngineFactory {
 			
 			return engine;
 		} catch(Exception e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

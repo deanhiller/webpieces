@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.templatingdev.impl.source.GroovyScriptGenerator;
 import org.webpieces.templatingdev.impl.source.ScriptOutputImpl;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.file.FileFactory;
 
 import groovy.lang.GroovyClassLoader;
@@ -52,7 +53,7 @@ public class HtmlToJavaClassCompiler {
 		try {
 			writeSourceFile2(scriptCode, fullClassName);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

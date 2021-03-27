@@ -21,6 +21,7 @@ import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.throughput.RequestCreator;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -31,7 +32,7 @@ public class ServerHttp11Sync {
 		try {
 			return startImpl();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
 	}
 	

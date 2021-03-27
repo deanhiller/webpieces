@@ -10,6 +10,7 @@ import org.webpieces.httpclient11.impl.HttpSocketImpl;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.handlers.ConnectionListener;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.webserver.test.MockChannelManager;
 import org.webpieces.webserver.test.MockTcpChannel;
 
@@ -35,22 +36,16 @@ public class DirectHttp11Client implements HttpClient {
 		ConnectionListener listener = mgr.getHttpConnection();
 		MockTcpChannel channel = new MockTcpChannel(false);
 
-		try {
-			return new HttpSocketImpl(new DelayedProxy(listener, channel), parser, closeListener, false);
-			//return new Http11SocketImpl(listener, channel, parser, false);
-		} catch (Throwable e) {
-			throw new RuntimeException(e);
-		}
+		return new HttpSocketImpl(new DelayedProxy(listener, channel), parser, closeListener, false);
+		//return new Http11SocketImpl(listener, channel, parser, false);
+
 	}
 
 	public HttpSocket createHttpsSocket(SSLEngine engine, HttpSocketListener closeListener) {
 		ConnectionListener listener = mgr.getHttpsConnection();
 		MockTcpChannel channel = new MockTcpChannel(true);
 
-		try {
-			return new HttpSocketImpl(new DelayedProxy(listener, channel), parser, closeListener, true);
-		} catch (Throwable e) {
-			throw new RuntimeException(e);
-		}	
+		return new HttpSocketImpl(new DelayedProxy(listener, channel), parser, closeListener, true);
+
 	}
 }

@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.params.ObjectTranslator;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 @Singleton
 public class PropertyInvoker {
@@ -30,12 +31,8 @@ public class PropertyInvoker {
 		Method method = p.getGetter();
 		try {
 			return method.invoke(p.getInjectee());
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException(e);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			throw SneakyThrow.sneak(e);
 		}
 	}
 

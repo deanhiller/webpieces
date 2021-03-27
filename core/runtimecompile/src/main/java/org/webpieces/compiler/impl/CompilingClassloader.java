@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.ClassFileNotFoundException;
 import org.webpieces.compiler.api.CompileConfig;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.file.VirtualFile;
 
 import com.webpieces.util.compiling.GroovyCompiling;
@@ -76,8 +77,7 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
             permissions.add(new AllPermission());
             protectionDomain = new ProtectionDomain(codeSource, permissions);
         } catch (MalformedURLException e) {
-        	throw new RuntimeException(e);
-            //throw new UnexpectedException(e);
+            throw SneakyThrow.sneak(e);
         }
         
         synchronized(CompilingClassloader.class) {

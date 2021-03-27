@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.twitter.hpack.Encoder;
 import com.webpieces.hpack.api.MarshalState;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class MarshalStateImpl implements MarshalState {
 
@@ -35,7 +36,7 @@ public class MarshalStateImpl implements MarshalState {
 		try {
 			encoding.setMaxHeaderTableSize(encoder, newSize);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw SneakyThrow.sneak(e);
 		}
     }
 

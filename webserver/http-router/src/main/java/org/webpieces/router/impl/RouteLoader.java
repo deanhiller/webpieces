@@ -195,12 +195,8 @@ public class RouteLoader {
 			//storageLoadComplete.get(3, TimeUnit.SECONDS);
 			
 			return injector;
-//		} catch (InterruptedException e) {
-//			throw new RuntimeException(e);
-//		} catch (ExecutionException e) {
-//			throw new RuntimeException(e);
-//		} catch (TimeoutException e) {
-//			throw new RuntimeException(e);
+//		} catch (ExecutionException | InterruptedException | TimeoutException e) {
+//			throw SneakyThrow.sneak(e);
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
