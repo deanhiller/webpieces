@@ -124,7 +124,7 @@ if(project.hasProperty('projVersion')) {
 //      throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
 
    //This is down below in subprojects section...
-   //project.version = '2.0.'+project.projVersion
+   //project.version = 'project.projVersion
 } else {
    //project.version = '2.0-developer'
 }
@@ -166,7 +166,10 @@ subprojects {
    def currentJvm = org.gradle.internal.jvm.Jvm.current()
 
    if(project.hasProperty('projVersion')) {
-     project.version = '2.0.'+project.projVersion
+      if(project.projVersion.replaceAll("[^.]","").length() != 2) {
+         throw new GradleException("projVersion must be the full version!")
+      }
+     project.version = project.projVersion
      println("CREATING RELEASE VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
    } else {
      project.version = '2.0-developer'

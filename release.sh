@@ -6,6 +6,15 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 cd $DIR
 
+ver=$@
+res="${ver//[^.]}"
+if [ "${#res}" -lt 2 ]; then
+  echo "##################################"
+  echo "      Version must be X.Y.Z       "
+  echo "##################################"
+  exit 1
+fi
+
 ./runAllTestingLocalRelease.sh
 test_result=$?
 if [ $test_result -eq 0 ]
