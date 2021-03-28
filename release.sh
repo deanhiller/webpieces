@@ -60,7 +60,7 @@ else
   exit $test_result
 fi 
 
-git tag v2.0.$@
+git tag v$@
 
 end=`date +%s`
 runtime=$((end-start))
