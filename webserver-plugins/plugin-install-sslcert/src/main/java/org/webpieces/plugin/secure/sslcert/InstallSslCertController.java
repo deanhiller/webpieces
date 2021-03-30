@@ -8,6 +8,8 @@ import java.security.KeyPair;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +18,6 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.jose4j.base64url.Base64;
 import org.shredzone.acme4j.util.KeyPairUtils;
 import org.slf4j.Logger;
@@ -51,7 +51,6 @@ public class InstallSslCertController {
 	private SimpleStorage storage;
 	private MenuCreator menuCreator;
 	private AcmeClientProxy acmeClient;
-	private DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 
 	@Inject
 	public InstallSslCertController(MenuCreator menuCreator, SimpleStorage storage, AcmeClientProxy acmeClient) {
@@ -175,7 +174,7 @@ public class InstallSslCertController {
 		for(ProxyAuthorization auth : authorizations) {
 			log.info("process domain="+auth.getDomain()+" expires="+auth.getExpires()+" status="+auth.getStatus()+" else="+auth.getLocation());
 			Instant expires = auth.getExpires();
-			String dateTime = fmt.print(expires.getEpochSecond());
+			String dateTime = expires.toString();
 			String domain = auth.getDomain();
 			String authContent = auth.getAuthContent();
 			String value = authContent+"---"+domain+"---"+dateTime;

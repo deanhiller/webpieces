@@ -2,6 +2,9 @@ package org.webpieces.router.impl.proxyout;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -9,10 +12,6 @@ import java.util.Properties;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Constants;
@@ -41,7 +40,7 @@ public class ResponseCreator {
 
 	private static final Logger log = LoggerFactory.getLogger(ResponseCreator.class);
 	private static final HeaderPriorityParser httpSubParser = SubparserFactory.createHeaderParser();
-	private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, dd MMM Y HH:mm:ss");
+	private static final DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
 	private final CookieTranslator cookieTranslator;
 	private final MimeTypes mimeTypes;
@@ -169,9 +168,8 @@ public class ResponseCreator {
 			response.addHeader(new Http2Header("reason", statusReason));
 		
 		String connHeader = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
-		
-		DateTime now = DateTime.now().toDateTime(DateTimeZone.UTC);
-		String dateStr = formatter.print(now)+" GMT";
+
+		String dateStr = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC));
 
 
 		Http2Header versionHeader = new Http2Header(Http2HeaderName.SERVER, version);
