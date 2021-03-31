@@ -87,11 +87,11 @@ public abstract class AbstractCompileTest {
 
 	@SuppressWarnings("rawtypes")
 	private Object invokeMethodImpl(Class c, String method)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		Method[] methods = c.getMethods();
 		for (Method m : methods) {
 			if (method.equals(m.getName())) {
-				Object obj = c.newInstance();
+				Object obj = c.getDeclaredConstructor().newInstance();
 				return m.invoke(obj);
 			}
 		}

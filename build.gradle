@@ -49,27 +49,19 @@ ext {
      * }
      */
     deps = [
-       'junit':           'junit:junit:4.11',  
-       'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
-
+       'groovy':          'org.codehaus.groovy:groovy-all',
        //We literally ONLY bring this in for one method call into PropertyUtils so we should clone that code
        //instead of bringing in an entire jar perhaps...?
        'commons-beans':   'commons-beanutils:commons-beanutils:1.9.4',
 
-       'javax-inject':    'javax.inject:javax.inject:1',
        'jaxb':            'javax.xml.bind:jaxb-api:2.3.0',
-       'slf4j-api':       'org.slf4j:slf4j-api:1.7.30',
-       //do we need this one...
-       //'logback-core':  'ch.qos.logback:logback-core:1.2.3',
-       'logback-classic': 'ch.qos.logback:logback-classic:1.2.3',
+       'slf4j-api':       'org.slf4j:slf4j-api',
+       'logback-classic': 'ch.qos.logback:logback-classic',
        'guice':           'com.google.inject:guice:4.2.2',
-       'guice-multibindings': 'com.google.inject.extensions:guice-multibindings:4.2.2',
-       'guava':           'com.google.guava:guava:19.0',
-       'eclipse-compiler':'org.eclipse.jdt.core.compiler:ecj:4.5.1',
+       'guava':           'com.google.guava:guava:30.1.1-jre',
        'apache-commons-io': 'commons-io:commons-io:2.4',
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
        'twitter-hpack':   'com.twitter:hpack:v1.0.1',
-       'jetty-hpack':     'org.eclipse.jetty.http2:http2-hpack:9.4.0.M1',
        
        'hibernate':       'org.hibernate:hibernate-core:5.4.10.Final',
        'hibernate-validator':       'org.hibernate:hibernate-validator:6.1.5.Final',
@@ -81,15 +73,13 @@ ext {
        'acme-sslcerts':   'org.shredzone.acme4j:acme4j-client:2.1',
        'acme-utils':      'org.shredzone.acme4j:acme4j-utils:2.1',
 
-       //look into removing and using a copied single file as we only use one thing
-       'commons-lang':    'org.apache.commons:commons-lang3:3.5',
-       'commons-collections': 'org.apache.commons:commons-collections4:4.1',
-       'jackson':         'com.fasterxml.jackson.core:jackson-databind:2.10.3',
-       'jackson-anno':    'com.fasterxml.jackson.core:jackson-annotations:2.10.3',
-       'jackson-javatime': 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.3',
-       'jackson-paramnames': 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.10.3',
+       'commons-lang':              'org.apache.commons:commons-lang3',
+       'jackson':                   'com.fasterxml.jackson.core:jackson-databind',
+       'jackson-annotations':       'com.fasterxml.jackson.core:jackson-annotations',
+       'jackson-java-time':         'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',
+       'jackson-parameter-names':   'com.fasterxml.jackson.module:jackson-module-parameter-names',
 	   
-       'micrometer':      'io.micrometer:micrometer-core:1.4.1',
+       'micrometer':      'io.micrometer:micrometer-core:1.6.5',
        'elastic-search': 'org.elasticsearch.client:elasticsearch-rest-client:7.6.1',
 
        'hikari-cp':       'org.hibernate:hibernate-hikaricp:5.4.10.Final',
@@ -101,25 +91,8 @@ ext {
 
 }
 
-//Section needed by the above com.gradle.build-scan plugin that was added
-/*
-buildScan {
-    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-    termsOfServiceAgree = 'yes'
-
-    publishAlways()
-}
-*/
-
 if(project.hasProperty('projVersion')) {
    println("Java Version="+ System.getProperty("java.version"))
-//   if(!System.getProperty("java.version").startsWith("1.8"))
-//      throw new IllegalStateException("Can only release on jdk 1.8 until company upgrades their jdk")
-
-   //This is down below in subprojects section...
-   //project.version = 'project.projVersion
-} else {
-   //project.version = '2.0-developer'
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
@@ -143,6 +116,7 @@ allprojects {
    jacoco {
       toolVersion = '0.8.5'
    }
+
 }
 
 subprojects {
@@ -156,7 +130,7 @@ subprojects {
 
    group = 'org.webpieces'
 
-   def currentJvm = org.gradle.internal.jvm.Jvm.current()
+   def currentJvm = System.getProperty("java.version") + " (" + System.getProperty("java.vm.vendor") + " " + System.getProperty("java.vm.version") + ")"
 
    if(project.hasProperty('projVersion')) {
       if(project.projVersion.replaceAll("[^.]","").length() != 2) {
@@ -165,7 +139,7 @@ subprojects {
      project.version = project.projVersion
      println("CREATING RELEASE VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
    } else {
-     project.version = '2.0-developer'
+     project.version = '2.1-developer'
      println("CREATING DEVELOPER VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
    }
 
@@ -188,18 +162,38 @@ subprojects {
    }
    
    dependencies {
-       testCompile deps['junit']
-       //for logging in tests
-       testCompile deps['groovy']
 
-       compile deps['javax-inject']
-       compile deps['slf4j-api']
-       //do we need this one..
-       //compile deps['logback-core']
-       compile deps['logback-classic']
+       implementation platform('com.google.guava:guava-bom:30.1.1-jre')
+       implementation platform('com.google.protobuf:protobuf-bom:3.15.6')
+       implementation platform('com.fasterxml.jackson:jackson-bom:2.12.2')
+       implementation platform('io.grpc:grpc-bom:1.36.1')
 
-       //This line includes any jars a developer drops into {project}/lib directory
+       implementation 'javax.inject:javax.inject'
+       implementation 'org.slf4j:slf4j-api'
+
+       runtimeOnly 'ch.qos.logback:logback-classic'
+
+       // Include any jars dropped into {project}/lib directory
        compile fileTree(dir: 'lib', include: '*.jar')
+
+       testCompile 'junit:junit'
+
+       constraints {
+
+           implementation 'javax.inject:javax.inject:1'
+           implementation 'ch.qos.logback:logback-classic:1.2.3'
+           implementation 'com.fasterxml.jackson.core:jackson-annotations:2.12.2'
+           implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.2'
+           implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2'
+           implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.12.2'
+           implementation 'org.apache.commons:commons-lang3:3.5'
+           implementation 'org.codehaus.groovy:groovy-all:2.4.6'
+           implementation 'org.slf4j:slf4j-api:1.7.30'
+
+           testImplementation 'junit:junit:4.12'
+
+       }
+
    }
 
 
@@ -522,5 +516,3 @@ task clean() {
       delete "${buildDir}"
    }
 }
-
-

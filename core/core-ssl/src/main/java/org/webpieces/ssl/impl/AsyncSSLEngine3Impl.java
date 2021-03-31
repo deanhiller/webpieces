@@ -13,7 +13,7 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
 
-import org.apache.commons.collections4.queue.CircularFifoQueue;
+import com.google.common.collect.EvictingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
@@ -43,7 +43,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private ByteAckTracker decryptionTracker;
 
 	private SSLMetrics metrics;
-	private CircularFifoQueue<Action> circularBuffer = new CircularFifoQueue<>(64);
+	private EvictingQueue<Action> circularBuffer = EvictingQueue.create(64);
 	
 	public AsyncSSLEngine3Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener, SSLMetrics metrics) {
 		log.info("CREATE async ssl engine");

@@ -1,7 +1,7 @@
 dependencies {
     compile project(':core:core-datawrapper')
     compile project(':core:core-util')
-	compile deps['commons-collections']
+    compile deps['guava']
 	
 	testCompile project(':core:core-mock')
 }

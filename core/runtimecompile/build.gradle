@@ -1,5 +1,4 @@
 dependencies {
-    compile deps['eclipse-compiler']
     compile project(':core:core-util')
 }
 
