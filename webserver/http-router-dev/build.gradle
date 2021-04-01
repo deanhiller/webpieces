@@ -12,6 +12,7 @@ sourceSets {
 dependencies {
     compile project(':core:runtimecompile')
     compile project(':webserver:http-router')
+    implementation deps['logback-classic']
     testCompile project(':core:core-mock')
 }
 

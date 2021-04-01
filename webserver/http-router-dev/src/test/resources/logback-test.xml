@@ -6,7 +6,7 @@
 	     in test logs from gradle, it is interleaved.
 	      HOWEVER, it works GREAT in Eclipse.  In Intellij, it can interleave for some reason
 	      -->
-	    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+	    <!--<filter class="ch.qos.logback.core.filter.EvaluatorFilter">
 	      <evaluator class="ch.qos.logback.classic.boolex.GEventEvaluator"> 
 	        <expression>
 	           e.level.toInt() &lt;= INFO.toInt()
@@ -14,7 +14,7 @@
 	      </evaluator>
 	      <OnMismatch>DENY</OnMismatch>
 	      <OnMatch>NEUTRAL</OnMatch>
-	    </filter>
+	    </filter>-->
     
 		<encoder>
 			<pattern>%date{ISO8601} [%thread] %caller{1} %-4level: %message%n</pattern>
