@@ -1,5 +1,8 @@
 package org.webpieces.plugin.json;
 
+import javax.inject.Scope;
+import javax.inject.Singleton;
+
 import org.webpieces.router.api.extensions.BodyContentBinder;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,24 +30,10 @@ public class JacksonModule extends AbstractModule {
 		Multibinder<BodyContentBinder> uriBinder = Multibinder.newSetBinder(binder(), BodyContentBinder.class);
 	    uriBinder.addBinding().to(JacksonLookup.class);
 
-	    ObjectMapper mapper = new ObjectMapper()
-	    	.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-			.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-			.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-			.registerModule(new JavaTimeModule())
-			.registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES));
-
-	    if(config.isConvertNullToEmptyStr()) {
-	        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-	        mapper.configOverride(String.class)
-	                .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
-	    }
-	    
-	    
 	    ConverterConfig converterConfig = new ConverterConfig();
 	    converterConfig.setConvertNullToEmptyStr(config.isConvertNullToEmptyStr());
 	    
-	    bind(ObjectMapper.class).toInstance(mapper);
+	    bind(ObjectMapper.class).toProvider(ObjectMapperFactory.class).in(Singleton.class);
 	    bind(JacksonConfig.class).toInstance(config);
 	    bind(ConverterConfig.class).toInstance(converterConfig);
 	}
