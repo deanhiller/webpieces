@@ -57,7 +57,7 @@ ext {
      * }
      */
     deps = [
-       'junit':           'junit:junit:4.11',  
+       'junit':           'junit:junit:4.13.2',
        'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
 
        //We literally ONLY bring this in for one method call into PropertyUtils so we should clone that code
