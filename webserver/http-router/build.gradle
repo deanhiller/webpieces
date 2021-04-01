@@ -2,7 +2,6 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 dependencies {
     compile deps['guice']
-    compile deps['guice-multibindings']
     compile project(':core:core-util')
     compile project(':core:core-datawrapper')
     compile project(':webserver:http-shared')
