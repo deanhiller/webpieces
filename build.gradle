@@ -190,7 +190,7 @@ subprojects {
            implementation 'org.codehaus.groovy:groovy-all:2.4.6'
            implementation 'org.slf4j:slf4j-api:1.7.30'
 
-           testImplementation 'junit:junit:4.12'
+           testImplementation 'junit:junit:4.13.2'
 
        }
 

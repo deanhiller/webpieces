@@ -56,7 +56,14 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 			}
 			
 			byte[] obj = (byte[]) meta.getCtx().getRequest().requestState.get(JSON_REQUEST_KEY);
-			String json = new String(obj, 0, Math.min(obj.length, 100));
+			String json;
+			if(obj == null) {
+				log.warn("obj == null ????");
+				json = "????";
+			}
+			else {
+				json = new String(obj, 0, Math.min(obj.length, 100));
+			}
 			log.error("Request failed for json="+json+"\nInternal Server Error method="+meta.getLoadedController().getControllerMethod(), t);
 			return translateError(t);
 		} else {
