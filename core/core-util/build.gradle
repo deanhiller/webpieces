@@ -6,6 +6,7 @@ dependencies {
     
     //crap but everyone is using this anyways or at least should be just like logging
     compile deps['micrometer']
+    implementation project(':core:core-logging')
     
 }
 

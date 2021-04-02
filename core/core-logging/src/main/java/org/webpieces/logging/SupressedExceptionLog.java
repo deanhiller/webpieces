@@ -1,4 +1,4 @@
-package org.webpieces.util.logging;
+package org.webpieces.logging;
 
 import java.util.ArrayList;
 import java.util.List;

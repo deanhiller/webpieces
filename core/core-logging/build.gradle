@@ -1,0 +1,17 @@
+dependencies {
+
+    api 'org.slf4j:slf4j-api'
+
+    implementation 'ch.qos.logback:logback-classic'
+
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Webpieces logging library'
+            }
+        }
+    }
+}
