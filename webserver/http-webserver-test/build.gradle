@@ -16,4 +16,12 @@ dependencies {
 
 }
 
-publishing.publications.mavenJava.pom.description='The full webpieces server AS A library'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'The full webpieces server AS A library'
+            }
+        }
+    }
+}

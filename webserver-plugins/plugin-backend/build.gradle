@@ -12,7 +12,7 @@ sourceSets {
 }
 
 dependencies {
-    compile project(':webserver:http-webserver')
+    implementation project(':webserver:http-webserver')
     
     testCompile project(':webserver:http-webserver-test')
     testCompile project(':webserver:http-fortesting-plugins')
@@ -25,4 +25,12 @@ test {
     systemProperty "gradle.running", "true"
 }
 
-publishing.publications.mavenJava.pom.description='backend pluggable plugin that all backend plugins can plugin into or not'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Backend pluggable plugin that all backend plugins can plugin into'
+            }
+        }
+    }
+}

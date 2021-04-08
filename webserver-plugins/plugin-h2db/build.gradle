@@ -1,5 +1,10 @@
 apply plugin: 'org.webpieces.templatecompiler'
 
+dependencies {
+	implementation project(':webserver-plugins:plugin-backend')
+	implementation deps['h2db']
+}
+
 sourceSets {
 	//For testing, we need to put the html files on the classpath which are co-located with the controllers
 	main {
@@ -11,9 +16,14 @@ sourceSets {
 	}
 }
 
-dependencies {
-    compile deps['h2db']
-    compile project(':webserver-plugins:plugin-backend')
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			pom {
+				description = 'Webpieces in-memory database plugin'
+			}
+		}
+	}
 }
 
 //This allows the tests to use *_html.class templates since for some reason, I was having trouble
@@ -23,4 +33,3 @@ test {
     systemProperty "gradle.running", "true"
 }
 
-publishing.publications.mavenJava.pom.description='backend plugin for in-memory database usually for development server'

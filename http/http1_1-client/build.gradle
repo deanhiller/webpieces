@@ -9,4 +9,12 @@ dependencies {
 
 }
 
-publishing.publications.mavenJava.pom.description='An http 1.1 client'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'An HTTP/1.1 client'
+            }
+        }
+    }
+}

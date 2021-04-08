@@ -1,7 +1,15 @@
 dependencies {
-    compile project(':core:core-util')
+    implementation project(':core:core-util')
 
     testCompile project(':core:core-mock')
 }
 
-publishing.publications.mavenJava.pom.description='an api to run DDL commands from java'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'A state machine API'
+            }
+        }
+    }
+}

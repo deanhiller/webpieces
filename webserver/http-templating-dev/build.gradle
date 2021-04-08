@@ -9,9 +9,24 @@ sourceSets {
 }
 
 dependencies {
-    compile deps['apache-commons-io']
-	compile deps['commons-lang']
-    compile project(':webserver:http-templating')
+
+    api project(':webserver:http-templating')
+
+    implementation project(':core:core-util')
+    implementation deps['apache-commons-io']
+	implementation deps['commons-lang']
+    implementation deps['groovy']
+    implementation deps['guice']
+
+
 }
 
-publishing.publications.mavenJava.pom.description='Library that swaps out http-templating classes to enable compiling on any incoming request if the source code has changed for development servers'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Library that swaps out http-templating classes to enable compiling on any incoming request if the source code has changed for development servers'
+            }
+        }
+    }
+}

@@ -12,10 +12,20 @@ sourceSets {
 }
 
 dependencies {
-    compile project(':webserver-plugins:plugin-backend')
+    implementation project(':webserver-plugins:plugin-backend')
     
     testCompile project(':webserver:http-webserver-test')
     testCompile project(':webserver:http-fortesting-plugins')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Webpieces documentation plugin'
+            }
+        }
+    }
 }
 
 //This allows the tests to use *_html.class templates since for some reason, I was having trouble
@@ -25,4 +35,4 @@ test {
     systemProperty "gradle.running", "true"
 }
 
-publishing.publications.mavenJava.pom.description='documentation plugin'
+

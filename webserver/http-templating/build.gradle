@@ -12,14 +12,26 @@ sourceSets {
 }
 
 dependencies {
-    compile deps['guice']
-    compile deps['groovy']
-    compile deps['commons-beans']
-    compile project(':core:core-util')
-    compile project(':webserver:http-shared')
+
+    implementation deps['guice']
+    implementation deps['groovy']
+    implementation deps['commons-beans']
+
+    implementation project(':core:core-util')
+    implementation project(':webserver:http-shared')
+
 }
 
-publishing.publications.mavenJava.pom.description='Templating library using groovy as the scripting language'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Templating library using groovy as the scripting language'
+            }
+        }
+    }
+}
+
 
 //This allows the tests to use *_html.class templates since for some reason, I was having trouble
 //getting the *.html files on the classpath WHILE compiling the templates which is needed to build the

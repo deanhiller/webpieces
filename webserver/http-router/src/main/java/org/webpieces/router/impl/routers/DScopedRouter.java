@@ -16,7 +16,7 @@ import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
 import org.webpieces.util.futures.FutureHelper;
-import org.webpieces.util.logging.SupressedExceptionLog;
+import org.webpieces.logging.SupressedExceptionLog;
 
 import com.webpieces.http2.api.dto.lowlevel.RstStreamFrame;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2ErrorCode;

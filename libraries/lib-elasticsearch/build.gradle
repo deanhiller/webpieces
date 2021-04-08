@@ -1,8 +1,18 @@
 dependencies {
-    compile deps['micrometer']
-    compile deps['elastic-search']
-    compile deps['jackson']
-    
+
+    api deps['elastic-search']
+    api deps['jackson']
+
+    implementation deps['micrometer']
+
 }
 
-publishing.publications.mavenJava.pom.description='A simple wrapper on elastic search high level client to create indexes'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'A simple wrapper on ElasticSearch high level client to create indexes'
+            }
+        }
+    }
+}

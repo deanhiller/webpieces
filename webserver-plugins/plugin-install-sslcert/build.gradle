@@ -1,5 +1,28 @@
 apply plugin: 'org.webpieces.templatecompiler'
 
+dependencies {
+
+    implementation deps['acme-sslcerts']
+    implementation deps['acme-utils']
+    implementation project(':webserver:http-router')
+    implementation project(':webserver-plugins:plugin-backend')
+    
+    testCompile project(':webserver:http-fortesting-plugins')
+    testCompile project(':webserver:http-webserver-test')
+
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Webpieces SSL certificate generation plugin'
+            }
+        }
+    }
+}
+
+
 sourceSets {
     //For testing, we need to put the html files on the classpath which are co-located with the controllers
     main {
@@ -11,18 +34,6 @@ sourceSets {
     }
 }
 
-dependencies {
-    compile deps['acme-sslcerts']    
-    compile deps['acme-utils']
-    compile project(':webserver:http-router')
-    compile project(':webserver-plugins:plugin-backend')
-    
-    testCompile project(':webserver:http-fortesting-plugins')
-    testCompile project(':webserver:http-webserver-test')
-}
-
 test {
     systemProperty "gradle.running", "true"
 }
-
-publishing.publications.mavenJava.pom.description='plugin for wizard to install an ssl cert'

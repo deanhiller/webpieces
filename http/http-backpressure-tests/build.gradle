@@ -9,4 +9,12 @@ dependencies {
 
 }
 
-publishing.publications.mavenJava.pom.description='Backpressure tests'
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			pom {
+				description = 'Backpressure tests'
+			}
+		}
+	}
+}

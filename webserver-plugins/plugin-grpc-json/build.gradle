@@ -1,15 +1,18 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.8'
+    id 'com.google.protobuf' version '0.8.15'
 }
 
 dependencies {
-    compile deps['grpc-protobuf']
-    compile deps['grpc-stub']
-    compile deps['grpc-json']
-    compile project(':webserver:http-router'), project(':http:http1_1-parser')
-}
 
-publishing.publications.mavenJava.pom.description='plugin that installs an easy method of converting between grpc protobuf objects and json and back'
+    api deps['grpc-stub']
+
+    implementation project(':http:http1_1-parser')
+    implementation project(':webserver:http-router')
+
+    implementation deps['grpc-json']
+    implementation deps['grpc-protobuf']
+
+}
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
 sourceSets {
@@ -22,17 +25,27 @@ sourceSets {
 }
 
 protobuf {
-  protoc {
-    artifact = "com.google.protobuf:protoc:3.11.0"
-  }
-  plugins {
-    grpc {
-      artifact = 'io.grpc:protoc-gen-grpc-java:1.29.0'
+    protoc {
+        artifact = 'com.google.protobuf:protoc'
     }
-  }
-  generateProtoTasks {
-    all()*.plugins {
-      grpc {}
+    plugins {
+        grpc {
+        artifact = 'io.grpc:protoc-gen-grpc-java'
+        }
     }
-  }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Webpieces plugin that converts between GRPC Protobuf and JSON'
+            }
+        }
+    }
 }

@@ -1,6 +1,14 @@
 dependencies {
-    compile deps['log4jdbc']
-    compile project(':webserver:http-router')
+    implementation project(':webserver:http-router')
+    implementation deps['log4jdbc']
 }
 
-publishing.publications.mavenJava.pom.description='DTO plugin that can be used instead of hibernate to bind dtos for html forms'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Webpieces DTO plugin that can be used instead of Hibernate to bind DTOs for HTML forms'
+            }
+        }
+    }
+}

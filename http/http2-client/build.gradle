@@ -1,10 +1,18 @@
 dependencies {
-    compile project(':core:core-channelmanager2') 
-    compile project(':http:http2-engine')
+    api project(':core:core-channelmanager2')
+    api project(':http:http2-engine')
 
     implementation project(':core:core-metrics')
 	
 	testCompile project(':core:core-mock')
 }
 
-publishing.publications.mavenJava.pom.description='Strictly an http/2 client for when you know the server does http2 keeping it KISS'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'A strictly HTTP/2 client'
+            }
+        }
+    }
+}

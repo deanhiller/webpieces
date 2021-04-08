@@ -8,9 +8,19 @@ dependencies {
     implementation project(':http:http2-translations')
 	
     testCompile project(':core:core-mock')
+
 }
 
-publishing.publications.mavenJava.pom.description='Create a webserver with this library in just 3 lines of code.  just register your HttpRequestListener and it feeds you a FrontendSocket that you write HttpResponses to'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Create a webserver with this library in just 3 lines of code. Register your HttpRequestListener and it feeds you a FrontendSocket that you write HttpResponses to'
+            }
+        }
+    }
+}
+
 
 test {
     if (!project.hasProperty('includeH2Spec')) {

@@ -1,5 +1,13 @@
 dependencies {
-	compile project(':core:core-util')
+	api project(':core:core-util')
 }
 
-publishing.publications.mavenJava.pom.description='a simple mock superclass that mock objects can use to have less code'
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			pom {
+				description = 'A simple mock superclass tat mock objects can use to have less code'
+			}
+		}
+	}
+}

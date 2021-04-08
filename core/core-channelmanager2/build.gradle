@@ -9,4 +9,12 @@ dependencies {
 	testCompile project(':core:core-mock')
 }
 
-publishing.publications.mavenJava.pom.description='NIO library that is very lightweight and very mockable/testable so you can write higher level tests for your system'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'NIO library that is very lightweight and very mockable/testable so you can write higher level tests for your system'
+            }
+        }
+    }
+}

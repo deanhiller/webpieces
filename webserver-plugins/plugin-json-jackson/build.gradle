@@ -1,11 +1,22 @@
 dependencies {
-    compile deps['jackson']
-    compile deps['jackson-annotations']
-    compile deps['jackson-java-time']
-    compile deps['jackson-parameter-names']
-    
-    //compile deps['commons-lang'] //used in json escaping BUT jackson is doing this actually..nm
-    compile project(':webserver:http-router'), project(':http:http1_1-parser')
+
+    api project(':http:http1_1-parser')
+    api project(':webserver:http-router')
+    api 'com.fasterxml.jackson.core:jackson-annotations'
+    api 'com.fasterxml.jackson.core:jackson-databind'
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
+    implementation 'jakarta.validation:jakarta.validation-api'
+
 }
 
-publishing.publications.mavenJava.pom.description='plugin that installs an easy method of converting between json and objects and back'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Plugin that installs an easy method of converting between JSON and Java objects'
+            }
+        }
+    }
+}

@@ -1,8 +1,18 @@
 dependencies {
-    compile deps['hibernate']
+
+    api deps['hibernate']
+    api 'jakarta.persistence:jakarta.persistence-api'
     
-    compile deps['log4jdbc']
-    compile project(':webserver:http-router')
+    implementation deps['log4jdbc']
+    implementation project(':webserver:http-router')
 }
 
-publishing.publications.mavenJava.pom.description='hibernate plugin if you use hibernate installing a filter and other plusses'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Webpieces Hibernate plugin'
+            }
+        }
+    }
+}

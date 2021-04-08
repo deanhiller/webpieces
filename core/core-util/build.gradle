@@ -9,4 +9,12 @@ dependencies {
     
 }
 
-publishing.publications.mavenJava.pom.description='A simple utilitiy library with special executor but rather small amount of code in here'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'A simple utility library with special Executor but rather small amount of code'
+            }
+        }
+    }
+}

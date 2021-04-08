@@ -10,4 +10,12 @@ dependencies {
 
 }
 
-publishing.publications.mavenJava.pom.description='a wrapper around SSLEngine in java to make it easier to use'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'A wrapper around SSLEngine in Java to make it easier to use'
+            }
+        }
+    }
+}

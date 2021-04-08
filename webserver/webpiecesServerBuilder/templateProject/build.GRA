@@ -1,16 +1,5 @@
-buildscript {
-    repositories {
-        //This is PURELY for the task-tree plugin only...
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-
-    dependencies {
-        classpath "gradle.plugin.com.dorongold.plugins:task-tree:1.5"
-    }
-}
-
 plugins {
-   id "com.dorongold.task-tree" version "1.5" //This prints out a task tree (pretty print)
+   id com.dorongold.task-tree' version '1.5' // This prints out a task tree (pretty print)
 }
 
 //NOTE: There is a picture on https://docs.gradle.org/current/userguide/java_plugin.html as to the default gradle targets for the java
@@ -40,9 +29,8 @@ ext {
        'plugin-webpieces-documentation': "org.webpieces:plugin-webpieces-documentation:${webpiecesVersion}",
        'plugin-jackson':     "org.webpieces:plugin-json-jackson:${webpiecesVersion}",
        'plugin-properties':  "org.webpieces:plugin-properties:${webpiecesVersion}",
-       'commons-lang':       "org.apache.commons:commons-lang3:3.5",
-       'junit':           'junit:junit:4.11',  
-       'joda-time':       'joda-time:joda-time:2.9.4',
+       'commons-lang':       'org.apache.commons:commons-lang3',
+       'junit':           'junit:junit',
        
        'plugin-h2':          "org.webpieces:plugin-h2db:${webpiecesVersion}",
        'plugin-webpieces-documentation': "org.webpieces:plugin-documentation:${webpiecesVersion}",
@@ -53,7 +41,7 @@ ext {
        //http-client or a nio library...
        //'web-channelmgr':  "org.webpieces:core-channelmanager2:${webpiecesVersion}",
        //'web-httpclient':  "org.webpieces:http-client:${webpiecesVersion}",
-       //'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
+       //'groovy':          'org.codehaus.groovy:groovy-all',
        //'guava':           'com.google.guava:guava:19.0',
        //'apache-commons-io': 'org.apache.commons:commons-io:1.3.2'
 
@@ -112,13 +100,52 @@ subprojects {
    }
 
    dependencies {
-       testCompile deps['junit']
 
        //add global dependencies for all projects here....
        //compile deps['some jar from the above map of defined jars and versions']
 
        //This line includes any jars a developer drops into {project}/lib directory
        compile fileTree(dir: 'lib', include: '*.jar')
+
+       testImplementation 'junit:junit'
+
+        constraints {
+
+            implementation 'io.micrometer:micrometer-core:1.6.5'
+            implementation 'jakarta.annotation:jakarta.annotation-api:[1.3.5,2)'
+            implementation 'jakarta.inject:jakarta.inject-api:[1.0.3,2)'
+            implementation 'jakarta.persistence:jakarta.persistence-api:[2.2.3,3)'
+            implementation 'jakarta.validation:jakarta.validation-api:[2.0.2,3)'
+            implementation 'org.apache.commons:commons-lang3:3.12.0'
+            implementation 'org.codehaus.groovy:groovy-all:3.0.7'
+
+            testImplementation 'junit:junit:4.13.2'
+
+        }
+
+   }
+
+   configurations.all {
+
+       resolutionStrategy {
+
+           dependencySubstitution {
+               substitute module('javax.annotation:javax.annotation-api') with module('jakarta.annotation:jakarta.annotation-api:1.3.5')
+               substitute module('javax.inject:javax.inject') with module('jakarta.inject:jakarta.inject-api:1.0.3')
+               substitute module('javax.persistence:javax.persistence-api') with module('jakarta.persistence:jakarta.persistence-api:2.2.3')
+               substitute module('javax.validation:validation-api') with module('jakarta.validation:jakarta.validation-api:2.0.2')
+           }
+
+           eachDependency { DependencyResolveDetails details ->
+
+               if(details.requested.group == 'com.google.guava' && details.requested.version.contains('android')) {
+                   details.useVersion details.requested.version.replace('android', 'jre')
+                   details.because 'we want the JRE version of Guava'
+               }
+
+           }
+
+       }
    }
 
    //This copies new jars over from ivy/maven and project/lib and finally our built up jar so all jars are in

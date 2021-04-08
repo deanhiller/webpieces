@@ -1,5 +1,14 @@
 dependencies {
-    compile project(':http:http2-hpack'), project(':http:http1_1-parser')
+    api project(':http:http2-hpack')
+    api project(':http:http1_1-parser')
 }
 
-publishing.publications.mavenJava.pom.description='Translations from http1_1 to http2 and back'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Translations from HTTP/1.1 to HTTP/2 and back'
+            }
+        }
+    }
+}

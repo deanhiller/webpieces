@@ -44,28 +44,35 @@ task copyPersistenceXml(type: Copy, dependsOn: 'compileTestJava') {
 test.dependsOn ("copyPersistenceXml")
 
 dependencies {
-    compile deps['guice']
+
+    api deps['guice']
     compile deps['acme-sslcerts']
     compile project(':http:http-frontend2')
-    compile project(':webserver:http-templating'), project(':webserver:http-router')
+    compile project(':webserver:http-templating')
+    compile project(':webserver:http-router')
 
     testCompile project(':core:core-mock')
     testCompile project(':core:core-ddl')
     testCompile project(':webserver:http-webserver-test')
     testCompile project(':webserver:http-router-dev')
     testCompile project(':webserver-plugins:plugin-hibernate')
-    testCompile deps['h2db']
     testCompile project(':webserver-plugins:plugin-json-jackson')
+
+    testImplementation deps['h2db']
 
     testCompile deps['selenium']
 }
-//write to properties file to easily get build properties like version
-//task writeVersion(type: WriteProperties) {
-//    property "version", project.version
-//    outputFile = file(new File(buildDir, "resources/version.properties"))
-//}
 
-publishing.publications.mavenJava.pom.description='The full webpieces server AS A library'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'The full webpieces server AS A library'
+            }
+        }
+    }
+}
+
 
 test {
     if (!project.hasProperty('includeSelenium')) {

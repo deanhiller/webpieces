@@ -1,6 +1,13 @@
 dependencies {
-    compile project(':core:core-datawrapper')
-
+    api project(':core:core-datawrapper')
 }
 
-publishing.publications.mavenJava.pom.description='Bare bones http2 dtos with no logic, just set/get methods and interfaces except one subparser utility'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Bare bones HTTP/2 DTOs with no logic, just set/get methods and interfaces except one subparser utility'
+            }
+        }
+    }
+}
