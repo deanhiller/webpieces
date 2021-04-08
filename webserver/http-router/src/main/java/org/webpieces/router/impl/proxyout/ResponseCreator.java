@@ -50,19 +50,9 @@ public class ResponseCreator {
 	@Inject
 	public ResponseCreator(RouterConfig config, CookieTranslator cookieTranslator, MimeTypes mimeTypes) {
 		this.config = config;
-		version = "webpieces/"+readVersion();
+		this.version = "webpieces/"+getClass().getPackage().getImplementationVersion();
 		this.cookieTranslator = cookieTranslator;
 		this.mimeTypes = mimeTypes;
-	}
-
-	public String readVersion() {
-		Properties properties = new Properties();
-		try (InputStream stream = this.getClass().getResourceAsStream("/webpiecesVersion.properties")) {
-			properties.load(stream);
-			return properties.getProperty("version");
-		} catch (IOException e) {
-			throw SneakyThrow.sneak(e);
-		}
 	}
 
 	public ResponseEncodingTuple createResponse(Http2Request request, StatusCode statusCode,
