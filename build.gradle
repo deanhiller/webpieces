@@ -65,7 +65,6 @@ ext {
        'commons-beans':   'commons-beanutils:commons-beanutils:1.9.4',
 
        'javax-inject':    'javax.inject:javax.inject:1',
-       'jaxb':            'javax.xml.bind:jaxb-api:2.3.0',
        'slf4j-api':       'org.slf4j:slf4j-api:1.7.30',
        //do we need this one...
        //'logback-core':  'ch.qos.logback:logback-core:1.2.3',
@@ -532,5 +531,3 @@ task clean() {
       delete "${buildDir}"
    }
 }
-
-

@@ -1,15 +1,6 @@
 dependencies {
-    compile deps['jaxb']
     compile project(':http:http2-hpack')
     compile project(':core:core-statemachine')
 }
 
 publishing.publications.mavenJava.pom.description='A re-usable asynchronous http2 parser'
-
-println("Java Version="+ System.getProperty("java.version"))
-if(!System.getProperty("java.version").startsWith("1.8")) {
-  //hack to use java.xml.bind
-  compileTestJava {
-    options.compilerArgs += ["--add-modules", "java.xml.bind"]
-  }
-}
