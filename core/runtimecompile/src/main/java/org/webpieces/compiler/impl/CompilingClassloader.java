@@ -21,7 +21,7 @@ import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.file.VirtualFile;
 
-import com.webpieces.util.compiling.GroovyCompiling;
+import org.webpieces.util.compiling.GroovyCompiling;
 
 /*
  * Compile classes that need compiling to load them
