@@ -17,8 +17,3 @@ publishing {
     }
 }
 
-if(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_1_9)) {
-    compileTestJava {
-        options.compilerArgs += ["--add-modules", "java.xml.bind"]
-    }
-}

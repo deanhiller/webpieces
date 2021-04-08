@@ -60,7 +60,7 @@ public class RouterRequest {
 	/**
 	 * Request state you can throw into a map to use anywhere on request path
 	 */
-	public Map<String, Object> requestState = new HashMap();
+	public Map<String, Object> requestState = new HashMap<>();
 	
 	/**
 	 * Used by router, not really needed by Controllers
@@ -258,6 +258,16 @@ public class RouterRequest {
 			return list.get(0);
 		return null;
 	}
+
+	public <T> T getRequestState(final Object key) {
+		return (T)requestState.get(key.toString());
+	}
+
+	public void setRequestState(final Object key, final Object value) {
+    	requestState.put(key.toString(), value);
+	}
+
+
 	
 	@Override
 	public String toString() {

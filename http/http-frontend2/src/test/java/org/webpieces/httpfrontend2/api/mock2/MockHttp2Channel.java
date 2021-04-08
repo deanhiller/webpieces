@@ -4,14 +4,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.bytes.Hex;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
@@ -75,7 +74,7 @@ public class MockHttp2Channel {
 	}
 	
 	public void sendHexBack(String hex) {
-		byte[] bytes = DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+",""));
+		byte[] bytes = Hex.parseHexBinary(hex.replaceAll("\\s+",""));
 		ByteBuffer buf = ByteBuffer.wrap(bytes);
 		listener.incomingData(mockHttp2Channel, buf);		
 	}

@@ -1,13 +1,11 @@
 package com.webpieces.http2engine.impl.client;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.util.bytes.Hex;
 import org.webpieces.util.locking.PermitQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,7 @@ public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements S
 
 	private static final Logger log = LoggerFactory.getLogger(Level3ClntOutgoingSyncro.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private static final byte[] preface = DatatypeConverter.parseHexBinary("505249202a20485454502f322e300d0a0d0a534d0d0a0d0a");
+	private static final byte[] preface = Hex.parseHexBinary("505249202a20485454502f322e300d0a0d0a534d0d0a0d0a");
 
 	private Level8NotifyClntListeners finalLayer;
 	private Level4ClientPreconditions streamInit;

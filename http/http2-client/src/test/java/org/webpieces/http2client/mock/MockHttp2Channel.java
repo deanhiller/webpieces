@@ -11,8 +11,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -24,6 +22,7 @@ import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.bytes.Hex;
 import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.hpack.api.HpackParser;
@@ -75,7 +74,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	}
 
 	public void writeHexBack(String hex) {
-		byte[] bytes = DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+",""));
+		byte[] bytes = Hex.parseHexBinary(hex.replaceAll("\\s+",""));
 		ByteBuffer buf = ByteBuffer.wrap(bytes);
 		listener.incomingData(this, buf);		
 	}

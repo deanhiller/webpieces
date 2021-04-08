@@ -12,8 +12,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -31,6 +29,7 @@ import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
+import org.webpieces.util.bytes.Hex;
 import org.webpieces.util.exceptions.SneakyThrow;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -62,7 +61,7 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 	}
 
 	public void sendHexToSvr(String hex) {
-		byte[] bytes = DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+",""));
+		byte[] bytes = Hex.parseHexBinary(hex.replaceAll("\\s+",""));
 		ByteBuffer buf = ByteBuffer.wrap(bytes);
 		CompletableFuture<Void> fut = listener.incomingData(this, buf);
 		try {

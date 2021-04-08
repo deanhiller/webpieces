@@ -1,6 +1,6 @@
 package org.webpieces.ssl.api;
 
-public class PlayWithALPN {
+class PlayWithALPN {
 
 	public void start() {
 //		SSLEngine engine = null;
