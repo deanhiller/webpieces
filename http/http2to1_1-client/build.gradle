@@ -2,6 +2,9 @@ dependencies {
     compile project(':http:http2-client'), project(':http:http1_1-client')
 	compile project(':http:http2-translations')
 	
+
+	implementation project(':core:core-metrics')
+
 	testCompile project(':core:core-mock')
 	
 	

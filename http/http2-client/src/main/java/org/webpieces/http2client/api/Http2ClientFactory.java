@@ -8,7 +8,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.impl.Http2ClientImpl;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.util.metrics.MetricsCreator;
+import org.webpieces.metrics.MetricsCreator;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.util.time.TimeImpl;
 

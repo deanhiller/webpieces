@@ -15,7 +15,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.BufferWebManaged;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.util.metrics.MetricsCreator;
+import org.webpieces.metrics.MetricsCreator;
 
 /**
  * Feel free to completely override this class but basically as ChannelManager feeds

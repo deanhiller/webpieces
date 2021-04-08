@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.util.metrics.MetricsCreator;
+import org.webpieces.metrics.MetricsCreator;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

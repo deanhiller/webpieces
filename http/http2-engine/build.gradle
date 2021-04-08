@@ -2,6 +2,8 @@ dependencies {
     compile deps['jaxb']
     compile project(':http:http2-hpack')
     compile project(':core:core-statemachine')
+    implementation project(':core:core-metrics')
+
 }
 
 publishing.publications.mavenJava.pom.description='A re-usable asynchronous http2 parser'

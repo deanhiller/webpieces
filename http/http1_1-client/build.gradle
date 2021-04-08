@@ -1,7 +1,12 @@
 dependencies {
-    compile project(':core:core-channelmanager2'), project(':http:http1_1-parser')
-    
+
+    api project(':http:http1_1-parser')
+
+    implementation project(':core:core-channelmanager2')
+    implementation project(':core:core-metrics')
+
     testCompile project(':core:core-mock')
+
 }
 
 publishing.publications.mavenJava.pom.description='An http 1.1 client'

@@ -1,4 +1,4 @@
-package org.webpieces.util.metrics;
+package org.webpieces.metrics;
 
 import java.time.Duration;
 import java.util.ArrayList;

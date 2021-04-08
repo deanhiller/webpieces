@@ -13,7 +13,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.router.impl.mgmt.GuiceWebpiecesListener;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
-import org.webpieces.util.metrics.MetricsCreator;
+import org.webpieces.metrics.MetricsCreator;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.google.inject.Binder;

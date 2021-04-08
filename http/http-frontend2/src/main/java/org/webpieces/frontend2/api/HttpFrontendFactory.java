@@ -13,7 +13,7 @@ import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.util.metrics.MetricsCreator;
+import org.webpieces.metrics.MetricsCreator;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.util.time.TimeImpl;
 

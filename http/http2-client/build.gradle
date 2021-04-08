@@ -1,6 +1,8 @@
 dependencies {
     compile project(':core:core-channelmanager2') 
     compile project(':http:http2-engine')
+
+    implementation project(':core:core-metrics')
 	
 	testCompile project(':core:core-mock')
 }

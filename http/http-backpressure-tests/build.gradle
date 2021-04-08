@@ -1,9 +1,12 @@
 dependencies {
-    compile project(':http:http2-client')
-	compile project(':http:http2to1_1-client')
-	compile project(':http:http-frontend2')
+
+	implementation project(':core:core-metrics')
+	implementation project(':http:http2-client')
+	implementation project(':http:http2to1_1-client')
+	implementation project(':http:http-frontend2')
 	
 	testCompile project(':core:core-mock')
+
 }
 
 publishing.publications.mavenJava.pom.description='Backpressure tests'

@@ -11,6 +11,9 @@ dependencies {
     //need for a generate html to class files each time (it uses the same template compiler that the
     //webpieces gradle plugin uses so it tests a bit more anyways which is good)
     compile project(':webserver:http-templating-dev')
+
+    implementation project(':core:core-metrics')
+
 }
 
 publishing.publications.mavenJava.pom.description='The full webpieces server AS A library'

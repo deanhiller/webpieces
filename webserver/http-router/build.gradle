@@ -6,6 +6,7 @@ dependencies {
     compile project(':core:core-datawrapper')
     compile project(':webserver:http-shared')
 
+    implementation project(':core:core-metrics')
     //these 2 for validation...(which don't depend on anything)
     compile deps['hibernate-validator']
     compile deps['el-for-validator']

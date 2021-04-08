@@ -9,7 +9,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.util.metrics.MetricsCreator;
+import org.webpieces.metrics.MetricsCreator;
 
 import io.micrometer.core.instrument.MeterRegistry;
 

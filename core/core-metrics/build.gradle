@@ -1,0 +1,13 @@
+dependencies {
+    api deps['micrometer']
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Webpieces metrics library'
+            }
+        }
+    }
+}

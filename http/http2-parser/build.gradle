@@ -1,9 +1,19 @@
 dependencies {
-    compile project(':core:core-datawrapper')
-    compile project(':http:http2-api')
-    
-    testCompile project(':core:core-util')
+
+    api project(':core:core-datawrapper')
+    api project(':http:http2-api')
+
+    testImplementation project(':core:core-metrics')
+
+    //testCompile project(':core:core-util')
 }
 
-publishing.publications.mavenJava.pom.description='A re-usable asynchronous http2 parser'
-
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'A re-usable asynchronous HTTP/2 parser'
+            }
+        }
+    }
+}

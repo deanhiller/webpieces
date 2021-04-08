@@ -1,9 +1,13 @@
 dependencies {
-    compile project(':core:core-datawrapper')
-    compile project(':core:core-util')
-    compile deps['guava']
-	
+
+    api project(':core:core-datawrapper')
+
+    implementation project(':core:core-metrics')
+    implementation project(':core:core-util')
+    implementation deps['guava']
+
 	testCompile project(':core:core-mock')
+
 }
 
 publishing.publications.mavenJava.pom.description='a wrapper around SSLEngine in java to make it easier to use'

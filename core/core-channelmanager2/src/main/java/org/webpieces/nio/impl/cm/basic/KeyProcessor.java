@@ -15,15 +15,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.metrics.MetricsCreator;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.exceptions.NioException;
-import org.webpieces.util.metrics.MetricsCreator;
+
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;

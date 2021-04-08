@@ -2,6 +2,8 @@ dependencies {
     compile deps['twitter-hpack']
     compile project(':core:core-util')
     compile project(':http:http2-parser')
+
+    implementation project(':core:core-metrics')
 }
 
 publishing.publications.mavenJava.pom.description='A re-usable asynchronous http2 parser WITH header deserialization/serialization(hpack)'

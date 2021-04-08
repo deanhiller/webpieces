@@ -1,7 +1,10 @@
 
 dependencies {
-    compile project(':core:core-datawrapper'), project(':core:core-ssl')
-    compile project(':core:core-util')
+    api project(':core:core-datawrapper')
+    api project(':core:core-ssl')
+    api project(':core:core-util')
+
+    implementation project(':core:core-metrics')
 	
 	testCompile project(':core:core-mock')
 }
