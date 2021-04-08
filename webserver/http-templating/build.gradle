@@ -13,8 +13,8 @@ sourceSets {
 
 dependencies {
 
+    api deps['groovy']
     implementation deps['guice']
-    implementation deps['groovy']
     implementation deps['commons-beans']
 
     implementation project(':core:core-util')

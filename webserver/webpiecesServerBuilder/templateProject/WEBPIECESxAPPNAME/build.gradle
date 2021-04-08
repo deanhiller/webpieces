@@ -34,6 +34,7 @@ sourceSets {
         compile deps['commons-lang'] //used in json escaping
         //for connection pooling: https://mvnrepository.com/artifact/org.hibernate/hibernate-hikaricp
         compile deps['hikari-cp']
+        compile 'jakarta.validation:jakarta.validation-api'
   
         testCompile project(':core:core-ddl')
         testCompile project(':core:core-mock')

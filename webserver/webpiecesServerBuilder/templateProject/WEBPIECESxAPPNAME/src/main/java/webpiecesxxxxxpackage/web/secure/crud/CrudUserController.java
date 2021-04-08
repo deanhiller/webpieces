@@ -4,20 +4,14 @@ import static webpiecesxxxxxpackage.web.secure.crud.CrudUserRouteId.GET_ADD_USER
 import static webpiecesxxxxxpackage.web.secure.crud.CrudUserRouteId.GET_EDIT_USER_FORM;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 import javax.validation.constraints.NotBlank;
 
-import org.hibernate.validator.constraints.Length;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
@@ -69,7 +63,7 @@ public class CrudUserController {
 	}
 
 	public Redirect postSaveUser(@UseQuery("findByIdWithRoleJoin") UserDbo entity, 
-			List<RoleEnum> selectedRoles, @NotBlank @Length(min=4, max=20) String password) {
+			List<RoleEnum> selectedRoles, @NotBlank @Size(min=4, max=20) String password) {
 //		Validation is done with JSR303 hibernate-validator so you don't need to do this BUT you could for fancier stuff...
 		
 //		//need to figure out how to do i18n for the messages in that case

@@ -20,7 +20,7 @@ ext {
        //We literally ONLY bring this in for one method call into PropertyUtils so we should clone that code
        //instead of bringing in an entire jar perhaps...?
        'commons-beans':             'commons-beanutils:commons-beanutils',
-       'apache-commons-io':         'commons-io:commons-io',
+       'commons-io':                'commons-io:commons-io',
        'commons-lang':              'org.apache.commons:commons-lang3',
 
        'slf4j-api':                 'org.slf4j:slf4j-api',
@@ -131,7 +131,7 @@ subprojects {
        implementation platform('com.google.guava:guava-bom:30.1.1-jre')
        implementation platform('com.google.protobuf:protobuf-bom:3.15.6')
        implementation platform('com.fasterxml.jackson:jackson-bom:2.12.2')
-       implementation platform('io.grpc:grpc-bom:1.36.1')
+       implementation platform('io.grpc:grpc-bom:1.37.0')
 
        implementation 'jakarta.inject:jakarta.inject-api'
        implementation 'org.slf4j:slf4j-api'
@@ -148,7 +148,6 @@ subprojects {
 
            implementation 'ch.qos.logback:logback-classic:1.2.3'
            implementation 'com.google.inject:guice:4.2.2'
-           implementation 'com.google.protobuf:protoc:3.15.6'
            implementation 'com.googlecode.log4jdbc:log4jdbc:1.2'
            implementation 'com.h2database:h2:1.4.200'
            implementation 'com.twitter:hpack:1.0.2'

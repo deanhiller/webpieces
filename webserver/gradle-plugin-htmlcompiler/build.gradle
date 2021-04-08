@@ -10,6 +10,9 @@ repositories {
 
 dependencies {
 
+    implementation deps['commons-io']
+    implementation deps['guice']
+    implementation project(':core:core-util')
     implementation project(':webserver:http-templating-dev') // Transitively pulling in http-templating is no longer working...
 	
     testImplementation 'junit:junit'

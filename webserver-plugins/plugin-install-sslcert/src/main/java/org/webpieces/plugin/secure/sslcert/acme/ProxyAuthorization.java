@@ -16,7 +16,7 @@ public class ProxyAuthorization {
 	}
 
 	public String getDomain() {
-		return auth.getDomain();
+		return auth.getIdentifier().getDomain();
 	}
 
 	public Instant getExpires() {

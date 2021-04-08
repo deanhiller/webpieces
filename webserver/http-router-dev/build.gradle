@@ -14,6 +14,7 @@ dependencies {
     api project(':webserver:http-router')
 
     implementation project(':core:runtimecompile')
+    implementation project(':core:core-metrics')
     implementation deps['logback-classic']
 
     testCompile project(':core:core-mock')

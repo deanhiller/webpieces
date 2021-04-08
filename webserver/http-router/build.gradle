@@ -11,7 +11,7 @@ dependencies {
     implementation deps['el-for-validator']
     implementation deps['micrometer']
     
-    testCompile deps['apache-commons-io']
+    testCompile deps['commons-io']
 }
 
 publishing {

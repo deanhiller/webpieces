@@ -1,12 +1,12 @@
 dependencies {
 
     api project(':core:core-asyncserver')
+    api project(':http:http1_1-parser')
+    api project(':http:http2-engine')
+    api project(':http:http2-translations')
 
     implementation project(':core:core-metrics')
-    implementation project(':http:http1_1-parser')
-    implementation project(':http:http2-engine')
-    implementation project(':http:http2-translations')
-	
+
     testCompile project(':core:core-mock')
 
 }

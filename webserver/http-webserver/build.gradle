@@ -47,12 +47,14 @@ dependencies {
 
     api deps['guice']
     compile deps['acme-sslcerts']
-    compile project(':http:http-frontend2')
-    compile project(':webserver:http-templating')
-    compile project(':webserver:http-router')
+    api project(':core:core-metrics')
+    api project(':http:http-frontend2')
+    api project(':webserver:http-templating')
+    api project(':webserver:http-router')
 
     testCompile project(':core:core-mock')
     testCompile project(':core:core-ddl')
+    testCompile project(':core:runtimecompile')
     testCompile project(':webserver:http-webserver-test')
     testCompile project(':webserver:http-router-dev')
     testCompile project(':webserver-plugins:plugin-hibernate')
@@ -60,6 +62,8 @@ dependencies {
 
     testImplementation deps['h2db']
 
+    testCompile 'commons-io:commons-io'
+    testCompile 'jakarta.validation:jakarta.validation-api'
     testCompile deps['selenium']
 }
 
@@ -79,4 +83,3 @@ test {
         exclude '**/*Selenium*'
     }
 }
-

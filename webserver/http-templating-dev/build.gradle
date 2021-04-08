@@ -13,7 +13,7 @@ dependencies {
     api project(':webserver:http-templating')
 
     implementation project(':core:core-util')
-    implementation deps['apache-commons-io']
+    implementation deps['commons-io']
 	implementation deps['commons-lang']
     implementation deps['groovy']
     implementation deps['guice']

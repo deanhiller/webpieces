@@ -164,7 +164,7 @@ public class AcmeClientProxy {
 			
 			Http01Challenge challenge = auth.findChallenge(Http01Challenge.TYPE);
 			
-			log.info("tell remote end to trigger a call now. status="+auth.getStatus()+" domain="+auth.getDomain()+" expires="+auth.getExpires());
+			log.info("tell remote end to trigger a call now. status="+auth.getStatus()+" domain="+auth.getIdentifier().getDomain()+" expires="+auth.getExpires());
 			challenge.trigger();
 			log.info("status after="+auth.getStatus());
 			
@@ -185,7 +185,7 @@ public class AcmeClientProxy {
 	private void checkAuthStatii(Order order) {
 		for(Authorization auth : order.getAuthorizations()) {
 			Status status = auth.getStatus();
-			log.info("checking auth="+auth.getDomain()+" status="+status+" location="+auth.getLocation()+" expires="+auth.getExpires());
+			log.info("checking auth="+auth.getIdentifier().getDomain()+" status="+status+" location="+auth.getLocation()+" expires="+auth.getExpires());
 			if(status != Status.PENDING)
 				throw new ChallengeInBadStateException("challenge in bad state="+auth.getJSON());
 		}

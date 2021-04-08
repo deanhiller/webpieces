@@ -4,6 +4,7 @@ dependencies {
     api 'jakarta.persistence:jakarta.persistence-api'
     
     implementation deps['log4jdbc']
+    implementation project(':core:core-metrics')
     implementation project(':webserver:http-router')
 }
 

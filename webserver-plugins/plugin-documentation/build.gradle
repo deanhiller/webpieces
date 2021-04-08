@@ -13,7 +13,7 @@ sourceSets {
 
 dependencies {
     implementation project(':webserver-plugins:plugin-backend')
-    
+
     testCompile project(':webserver:http-webserver-test')
     testCompile project(':webserver:http-fortesting-plugins')
 }
@@ -34,5 +34,3 @@ publishing {
 test {
     systemProperty "gradle.running", "true"
 }
-
-
