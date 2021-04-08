@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class JacksonLookup implements BodyContentBinder {
 
 	private JacksonJsonConverter mapper;
-	
+
 	@Inject
 	public JacksonLookup(JacksonJsonConverter mapper) {
 		this.mapper = mapper;
@@ -38,8 +38,7 @@ public class JacksonLookup implements BodyContentBinder {
 	public <T> T unmarshal(RequestContext ctx, ParamMeta meta, byte[] data) {
 		try {
         	Class<T> entityClass = (Class<T>) meta.getFieldClass();
-        	
-			ctx.getRequest().requestState.put(JacksonCatchAllFilter.JSON_REQUEST_KEY, data);
+
 			if(data.length == 0)
 				throw new BadClientRequestException("Client did not provide a json request in the body of the request");		
 			else if(JsonNode.class.isAssignableFrom(entityClass))

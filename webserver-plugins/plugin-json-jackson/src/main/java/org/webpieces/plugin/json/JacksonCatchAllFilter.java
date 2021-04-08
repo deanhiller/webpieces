@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.ConstraintViolation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,6 @@ import com.webpieces.http2.api.dto.lowlevel.StatusCode;
 @Singleton
 public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
-	static final String JSON_REQUEST_KEY = "_jsonRequest";
 	private static final Logger log = LoggerFactory.getLogger(JacksonCatchAllFilter.class);
 	public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
 	private final JacksonJsonConverter mapper;
@@ -55,15 +53,8 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 				return translate(meta, (HttpException)t);
 			}
 			
-			byte[] obj = (byte[]) meta.getCtx().getRequest().requestState.get(JSON_REQUEST_KEY);
-			String json;
-			if(obj == null) {
-				log.warn("obj == null ????");
-				json = "????";
-			}
-			else {
-				json = new String(obj, 0, Math.min(obj.length, 100));
-			}
+			byte[] obj = meta.getCtx().getRequest().body.createByteArray();
+			String json = new String(obj, 0, Math.min(obj.length, 100));
 			log.error("Request failed for json="+json+"\nInternal Server Error method="+meta.getLoadedController().getControllerMethod(), t);
 			return translateError(t);
 		} else {
@@ -117,7 +108,7 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		}
 
 		if(log.isDebugEnabled()) {
-			byte[] obj = (byte[]) meta.getCtx().getRequest().requestState.get(JSON_REQUEST_KEY);
+			byte[] obj = meta.getCtx().getRequest().body.createByteArray();
 			String json = new String(obj);
 			log.debug("Request json failed="+json+"\n"+error.getError());
 		}
