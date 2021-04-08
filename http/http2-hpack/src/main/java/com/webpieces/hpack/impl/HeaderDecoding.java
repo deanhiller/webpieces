@@ -11,7 +11,6 @@ import org.webpieces.data.api.DataWrapper;
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2.api.dto.error.CancelReasonCode;
 import com.webpieces.http2.api.dto.error.ConnectionException;
-import com.webpieces.http2.api.dto.error.StreamException;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 
