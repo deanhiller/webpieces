@@ -2,10 +2,7 @@ plugins {
     id 'groovy'
     id 'java-gradle-plugin'
     id 'maven-publish'
-}
-
-repositories {
-    mavenCentral()
+    id 'com.gradle.plugin-publish' version '0.14.0'
 }
 
 dependencies {
@@ -21,9 +18,24 @@ publishing.publications.mavenJava.pom.description='Gradle plugin to compile html
 
 gradlePlugin {
     plugins {
-        simplePlugin {
+        htmlCompilerPlugin {
             id = 'org.webpieces.htmlcompiler'
             implementationClass = 'org.webpieces.gradle.compiler.TemplateCompilerPlugin'
         }
     }
+}
+
+pluginBundle {
+    website = 'https://github.com/deanhiller/webpieces'
+    vcsUrl = 'https://github.com/deanhiller/webpieces'
+    description = 'Webpieces HTML template compiler'
+    tags = ['webpieces']
+
+    plugins {
+        htmlCompilerPlugin {
+            // id is captured from java-gradle-plugin configuration
+            displayName = 'Webpieces HTML Compiler'
+        }
+    }
+
 }
