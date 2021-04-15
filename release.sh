@@ -46,7 +46,7 @@ echo "##################################"
 #multiple repos which is too bad as it is REALLY fast
 #MUST turn parallel builds off for release or it fails!!!
 #We skip tests since those are done in runAllTesting.sh AND that script ALSO test legacy compatibility and building a fake project from the new release AND starting the server
-./gradlew --stacktrace -PprojVersion=$@ release -x test --scan
+./gradlew --stacktrace -PprojVersion="$@" release -x test --scan && ./gradlew --stacktrace -PprojVersion="$@" :webserver:gradle-plugin-htmlcompiler:publishPlugins
 test_result=$?
 if [ $test_result -eq 0 ]
 then
@@ -58,9 +58,7 @@ else
   echo "RELEASE FAIL, not tagging git $test_result"
   echo "##################################"
   exit $test_result
-fi 
-
-git tag v$@
+fi
 
 end=`date +%s`
 runtime=$((end-start))

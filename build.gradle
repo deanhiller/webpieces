@@ -2,10 +2,11 @@ plugins {
     id 'co.riiid.gradle' version '0.4.2'
     id 'com.dorongold.task-tree' version '1.5' // This prints out a task tree (pretty print)
     id 'com.jfrog.bintray' version '1.8.5'
-    //id 'io.codearte.nexus-staging' version '0.30.0' // This is only used in the master project to close a repo and promote with nexus..(and the plugin only allows top level usage)
+    id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
     id 'org.webpieces.templatecompiler' version '2.1.0' // We use an older version of our own html compiler to pre-build html tags for clients...
 }
 
+group = 'org.webpieces'
 ext {
     // Project constants
 
@@ -293,7 +294,7 @@ subprojects {
        into toStagingDir
    }
 
-//   processResources.dependsOn(":webserver:http-webserver:writeVersion")
+   //processResources.dependsOn(":webserver:http-webserver:writeVersion")
    assemble.dependsOn('syncJars')
 
    test {
@@ -340,8 +341,9 @@ subprojects {
       }
    }
    
-   publishing {  
+   publishing {
       repositories {
+        /*
          maven {
             name = 'sonatype'
             url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
@@ -352,6 +354,7 @@ subprojects {
                }
             }
          }
+        */
          maven {
             name = 'myTemp'
             url = "file:/tmp/myRepo/"
@@ -376,6 +379,10 @@ subprojects {
                     developer {
                         id = 'dhiller'
                         name = 'Dean Hiller'
+                    }
+                    developer {
+                       id = 'zreed'
+                       name = 'Zachary Reed'
                     }
                 }
                 scm {
@@ -408,16 +415,15 @@ subprojects {
    }
 
    //we only want to upload if the build passed first..ie. tests, etc.
-/*   uploadArchives.dependsOn('build')
-      */
-  
+   //uploadArchives.dependsOn('build')
+
    if (!project.hasProperty("projVersion")) {
      ext.bintrayUsername = "nousername"
      ext.bintrayApiKey = "nokey"
-   } 
+   }
 
-
-   //if(project.hasProperty('projVersion')) {
+   /*
+   if(project.hasProperty('projVersion')) {
       bintray {
          user = bintrayUsername
          key = bintrayApiKey
@@ -441,16 +447,17 @@ subprojects {
         dependsOn 'build', 'javadocJar', 'sourcesJar', 'generatePomFileForMavenJavaPublication'
       }
 
-/*
-    nexusStaging {  
-        packageGroup = 'org.webpieces'
-        stagingProfileId = '683f50db65952'
-        username = sonatypeUsername
-        password = sonatypePassword
-    }
-*/
-   //}
+   }*/
 
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = sonatypeUsername
+            password = sonatypePassword
+        }
+    }
 }
 
 //WE should not need this target... (it does this by default but we can't seem to depend on it...wait until we are on 5.3)
@@ -467,14 +474,6 @@ task publish {
       project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("publishMavenJavaPublicationToSonatypeRepository") }
    }
 }
-
-//closeRepository.dependsOn('publish')
-//promoteRepository.dependsOn('closeRepository')
-//promoteRepository.doFirst {
-//  println("sleeping 4 minutes after close repo and before promote or promote fails sometimes")
-//  Thread.sleep(80000)
-//  println("done sleeping go promote repo now");
-//}
 
 task printTasks {
     doLast {

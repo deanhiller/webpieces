@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.slf4j.MDC;
+
 import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Headers;
@@ -264,9 +266,15 @@ public class RouterRequest {
 	}
 
 	public void setRequestState(final Object key, final Object value) {
-    	requestState.put(key.toString(), value);
+    	setRequestState(key, value, false);
 	}
 
+	public void setRequestState(final Object key, final Object value, final boolean addToMDC) {
+		requestState.put(key.toString(), value);
+		if(addToMDC) {
+			MDC.put(key.toString(), String.valueOf(value));
+		}
+	}
 
 	
 	@Override
