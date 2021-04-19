@@ -92,11 +92,11 @@ subprojects {
    apply plugin: 'idea'
    apply plugin: 'signing'
    apply plugin: 'maven-publish'
-   apply plugin: 'com.jfrog.bintray'
+   apply plugin: 'co.riiid.gradle'
 
    group = 'org.webpieces'
 
-   def currentJvm = System.getProperty("java.version") + " (" + System.getProperty("java.vm.vendor") + " " + System.getProperty("java.vm.version") + ")"
+   def currentJvm = System.getProperty('java.version') + ' (' + System.getProperty('java.vendor') + ' ' + System.getProperty('java.runtime.version') + ')'
 
    if(project.hasProperty('projVersion')) {
       if(project.projVersion.replaceAll("[^.]","").length() != 2) {
@@ -115,9 +115,15 @@ subprojects {
       toStagingDir = file(new File(buildDir, 'alljars'))
       github_org = 'deanhiller'
       project_name = 'webpieces'
+      getCommitHash = {
+          def stdout = new ByteArrayOutputStream()
+          exec {
+              commandLine 'git', 'rev-parse', 'HEAD'
+              standardOutput = stdout
+          }
+          return stdout.toString().trim()
+      }.memoize()
    }
-   //doing this modifies the mvn artifact id and we can't seem to reset it
-   //archivesBaseName = "webpieces-${it.name}"
 
    checkstyle {
        configFile = rootProject.file('config/checkstyle.xml')
@@ -215,17 +221,19 @@ subprojects {
         options.addStringOption('Xdoclint:none', '-quiet')
      }
    }
+   if(JavaVersion.current().isJava9Compatible()) {
+        tasks.withType(Javadoc) {
+            options.addBooleanOption('html5', true)
+        }
+    }
 
    jar {
-      //TODO: Share the source and binary manifest code!!! so changes are done in one place
       manifest {
-        def git_cmd = "git rev-parse HEAD"
-        def git_proc = git_cmd.execute()
-        ext.revision = git_proc.text.trim()
-        attributes("Implementation-Title": project.name,
-                   "Implementation-Version": project.version,
-                   "SCM-Revision": revision
-                   )
+         attributes(
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'SCM-Revision': getCommitHash()
+         )
       }
    }
 
@@ -233,13 +241,11 @@ subprojects {
       archiveClassifier = 'javadoc'
       from 'build/docs/javadoc'
       manifest {
-        def git_cmd = "git rev-parse HEAD"
-        def git_proc = git_cmd.execute()
-        ext.revision = git_proc.text.trim()
-        attributes("Implementation-Title": project.name,
-                   "Implementation-Version": project.version,
-                   "SCM-Revision": revision
-                   )
+         attributes(
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'SCM-Revision': getCommitHash()
+         )
       }
    }
 
@@ -272,15 +278,13 @@ subprojects {
    task sourcesJar(type: Jar) {
       archiveClassifier = 'sources'
       from sourceSets.main.allSource
-      manifest {
-        def git_cmd = "git rev-parse HEAD"
-        def git_proc = git_cmd.execute()
-        ext.revision = git_proc.text.trim()
-        attributes("Implementation-Title": project.name,
-                   "Implementation-Version": project.version,
-                   "SCM-Revision": revision
-                   )
-      }
+       manifest {
+           attributes(
+               'Implementation-Title': project.name,
+               'Implementation-Version': project.version,
+               'SCM-Revision': getCommitHash()
+           )
+       }
    }
 
    //This is really only needed for devrouter, embeddablewebserver, http-client, and embeddablehttpproxy
@@ -343,18 +347,6 @@ subprojects {
    
    publishing {
       repositories {
-        /*
-         maven {
-            name = 'sonatype'
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            if(project.properties.sonatypeUsername && project.properties.sonatypePassword) {
-               credentials {
-                  username = sonatypeUsername
-                  password = sonatypePassword
-               }
-            }
-         }
-        */
          maven {
             name = 'myTemp'
             url = "file:/tmp/myRepo/"
@@ -414,46 +406,13 @@ subprojects {
       }
    }
 
-   //we only want to upload if the build passed first..ie. tests, etc.
-   //uploadArchives.dependsOn('build')
-
-   if (!project.hasProperty("projVersion")) {
-     ext.bintrayUsername = "nousername"
-     ext.bintrayApiKey = "nokey"
-   }
-
-   /*
-   if(project.hasProperty('projVersion')) {
-      bintray {
-         user = bintrayUsername
-         key = bintrayApiKey
-         publications = ['mavenJava'] 
-         pkg {
-             repo = 'maven'
-             name = project.name
-             licenses = ['Apache-2.0']
-             vcsUrl = "https://github.com/${github_org}/${project_name}"
-             publicDownloadNumbers = true
-             version {
-                name = project.version
-                desc = publishing.publications.mavenJava.pom.description
-                vcsTag = project.version
-                attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
-            }
-         }
-      }
-
-      bintrayUpload {
-        dependsOn 'build', 'javadocJar', 'sourcesJar', 'generatePomFileForMavenJavaPublication'
-      }
-
-   }*/
-
 }
 
 nexusPublishing {
     repositories {
         sonatype {
+            nexusUrl = uri('https://' + sonatypeDomain + '/service/local/')
+            snapshotRepositoryUrl = uri('https://' + sonatypeDomain + '/content/repositories/snapshots/')
             username = sonatypeUsername
             password = sonatypePassword
         }

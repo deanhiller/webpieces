@@ -67,8 +67,10 @@ public class CompileError {
             lines.add("linenumber " + (lineNumberWithProblem - 1) + ":" + line1);
         }
 
-        String line2 = asList.get(lineNumberWithProblem - 1);
-        lines.add("linenumber " + (lineNumberWithProblem) + ":" + line2);
+        if (lineNumberWithProblem - 1 >= 0) {
+            String line2 = asList.get(lineNumberWithProblem - 1);
+            lines.add("linenumber " + (lineNumberWithProblem) + ":" + line2);
+        }
 
         if (lineNumberWithProblem + 1 < asList.size()) {
             String line3 = asList.get(lineNumberWithProblem + 1);
