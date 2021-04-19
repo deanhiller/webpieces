@@ -470,6 +470,8 @@ subprojects {
 nexusPublishing {
     repositories {
         sonatype {
+            nexusUrl.set(uri('https://' + sonatypeDomain + '/service/local/'))
+            snapshotRepositoryUrl.set(uri('https://' + sonatypeDomain + '/content/repositories/snapshots/'))
             username = sonatypeUsername
             password = sonatypePassword
         }
