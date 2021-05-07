@@ -1,5 +1,3 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-
 apply plugin: 'jacoco' //code coverage
 apply plugin: 'idea'
 
@@ -31,9 +29,6 @@ if (System.getProperty('idea.active')) {
 //least put to the same location
 //sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
 
-//we were told to remove this line so do it and retest it all ..cmd line build, eclipse import and test, intellij import and test
-//compileJava.doLast { tasks.processResources.execute() }
-
 task copyPersistenceXml(type: Copy, dependsOn: 'compileTestJava') {
     from 'src/test/resources/META-INF'
     into 'output/classes/java/test/META-INF'
@@ -46,25 +41,25 @@ test.dependsOn ("copyPersistenceXml")
 dependencies {
 
     api deps['guice']
-    compile deps['acme-sslcerts']
+    implementation deps['acme-sslcerts']
     api project(':core:core-metrics')
     api project(':http:http-frontend2')
     api project(':webserver:http-templating')
     api project(':webserver:http-router')
 
-    testCompile project(':core:core-mock')
-    testCompile project(':core:core-ddl')
-    testCompile project(':core:runtimecompile')
-    testCompile project(':webserver:http-webserver-test')
-    testCompile project(':webserver:http-router-dev')
-    testCompile project(':webserver-plugins:plugin-hibernate')
-    testCompile project(':webserver-plugins:plugin-json-jackson')
+    testImplementation project(':core:core-mock')
+    testImplementation project(':core:core-ddl')
+    testImplementation project(':core:runtimecompile')
+    testImplementation project(':webserver:http-webserver-test')
+    testImplementation project(':webserver:http-router-dev')
+    testImplementation project(':webserver-plugins:plugin-hibernate')
+    testImplementation project(':webserver-plugins:plugin-json-jackson')
 
     testImplementation deps['h2db']
 
-    testCompile 'commons-io:commons-io'
-    testCompile 'jakarta.validation:jakarta.validation-api'
-    testCompile deps['selenium']
+    testImplementation 'commons-io:commons-io'
+    testImplementation 'jakarta.validation:jakarta.validation-api'
+    testImplementation deps['selenium']
 }
 
 publishing {

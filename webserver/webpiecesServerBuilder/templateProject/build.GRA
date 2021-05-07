@@ -1,5 +1,5 @@
 plugins {
-   id com.dorongold.task-tree' version '1.5' // This prints out a task tree (pretty print)
+   id 'org.barfuin.gradle.taskinfo' version '1.0.5' // This prints out a task tree (pretty print)
 }
 
 //NOTE: There is a picture on https://docs.gradle.org/current/userguide/java_plugin.html as to the default gradle targets for the java

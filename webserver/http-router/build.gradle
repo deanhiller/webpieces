@@ -1,5 +1,6 @@
 dependencies {
 
+    api deps['guice']
     api project(':core:core-util')
     api project(':core:core-datawrapper')
     api project(':webserver:http-shared')
@@ -11,7 +12,7 @@ dependencies {
     implementation deps['el-for-validator']
     implementation deps['micrometer']
     
-    testCompile deps['commons-io']
+    testImplementation deps['commons-io']
 }
 
 publishing {

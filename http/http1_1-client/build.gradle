@@ -5,7 +5,7 @@ dependencies {
     implementation project(':core:core-channelmanager2')
     implementation project(':core:core-metrics')
 
-    testCompile project(':core:core-mock')
+    testImplementation project(':core:core-mock')
 
 }
 

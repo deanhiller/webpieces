@@ -6,10 +6,6 @@ project.ext {
   outputStagingDir = new File(buildDir, stagingDirName)
 }
 
-//Workaround until https://issues.gradle.org/browse/GRADLE-1883 is better from
-//http://stackoverflow.com/questions/29504250/how-to-copy-hidden-resource-files-in-gradle
-org.apache.tools.ant.DirectoryScanner.removeDefaultExclude("**/.gitignore")
-
 task stageTemplate(type: Copy) {
     from '.'
     into buildDir
@@ -57,7 +53,7 @@ task copyGradleTemplate(type: Copy, dependsOn: 'stageTemplate') {
 task zipGradleTemplate(type: Zip, dependsOn: 'copyGradleTemplate') {
    from buildDir
    include stagingDirName + "/**"
-   baseName stagingDirName
+   archiveBaseName.set stagingDirName
 }
 
 assemble.dependsOn(['zipGradleTemplate'])
@@ -65,24 +61,18 @@ assemble.dependsOn(['zipGradleTemplate'])
 github {
   owner = 'deanhiller'
   repo = 'webpieces'
-  
-if(project.properties.githubToken) {
-  token = githubToken
-} else {
-  token = "fake"
-}
-
+  token = project.hasProperty("githubToken") ? githubToken : "fake"
   tagName = version
   name = 'webpiecesServerBuilder'+version
   body = 'Official Release of '+version
   assets = [
-      zipGradleTemplate.archivePath
+      zipGradleTemplate.archiveFile
   ]
 }
 
 githubRelease {
    dependsOn ':webserver:build', ':publish'
    doFirst {
-      println("releasing to github="+github.assets)
+      println("Releasing to GitHub: " + github.assets)
    }
 }

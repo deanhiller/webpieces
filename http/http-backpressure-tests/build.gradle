@@ -5,7 +5,7 @@ dependencies {
 	implementation project(':http:http2to1_1-client')
 	implementation project(':http:http-frontend2')
 	
-	testCompile project(':core:core-mock')
+	testImplementation project(':core:core-mock')
 
 }
 

@@ -1,17 +1,17 @@
 dependencies {
-    compile deps['guice']
+    api deps['guice']
     
-    compile project(':http:http2to1_1-client')
-        
-	compile project(':core:core-mock')
-	compile project(':http:http-frontend2')
-	compile project(':http:http1_1-client')
-    compile project(':webserver:http-shared')
+    api project(':http:http2to1_1-client')
+
+    api project(':core:core-mock')
+    api project(':http:http-frontend2')
+    api project(':http:http1_1-client')
+    api project(':webserver:http-shared')
 
     //For testing, swap in just templating-dev such that we can debug test failures in an IDE without some
     //need for a generate html to class files each time (it uses the same template compiler that the
     //webpieces gradle plugin uses so it tests a bit more anyways which is good)
-    compile project(':webserver:http-templating-dev')
+    api project(':webserver:http-templating-dev')
 
     implementation project(':core:core-metrics')
 

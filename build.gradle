@@ -1,7 +1,6 @@
 plugins {
     id 'co.riiid.gradle' version '0.4.2'
-    id 'com.dorongold.task-tree' version '1.5' // This prints out a task tree (pretty print)
-    id 'com.jfrog.bintray' version '1.8.5'
+    id 'org.barfuin.gradle.taskinfo' version '1.0.5' // This prints out a task tree (pretty print)
     id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
     id 'org.webpieces.templatecompiler' version '2.1.0' // We use an older version of our own html compiler to pre-build html tags for clients...
 }
@@ -13,13 +12,12 @@ ext {
     /*
      * Dependencies can be named so that sub-projects can reference consistent version of them.
      * dependencies {
-     *     compile deps['guava']
+     *     implementation deps['guava']
      * }
      */
     deps = [
        'groovy':                    'org.codehaus.groovy:groovy-all',
-       //We literally ONLY bring this in for one method call into PropertyUtils so we should clone that code
-       //instead of bringing in an entire jar perhaps...?
+
        'commons-beans':             'commons-beanutils:commons-beanutils',
        'commons-io':                'commons-io:commons-io',
        'commons-lang':              'org.apache.commons:commons-lang3',
@@ -92,7 +90,6 @@ subprojects {
    apply plugin: 'idea'
    apply plugin: 'signing'
    apply plugin: 'maven-publish'
-   apply plugin: 'co.riiid.gradle'
 
    group = 'org.webpieces'
 
@@ -292,9 +289,10 @@ subprojects {
    //let's at least copy all jars to a single directory to use in creating an application...
    //ALSO, this DELETES jars we no longer use so it has to be different directory than the dest jar we are creating as well
    task syncJars(type: Sync, dependsOn: 'jar') {
-       from(configurations.compile) {}
+       duplicatesStrategy = DuplicatesStrategy.WARN
+       from(configurations.compileClasspath)
        from(fixedLibDir) {}
-       from(libsDir) {}
+       from("${buildDir}/${libsDirName}") {}
        into toStagingDir
    }
 
@@ -406,6 +404,11 @@ subprojects {
       }
    }
 
+   if (!project.hasProperty("projVersion")) {
+     ext.sonatypeUsername = "nousername"
+     ext.sonatypePassword = "nopassword"
+   }
+
 }
 
 nexusPublishing {
@@ -448,7 +451,7 @@ if(project.hasProperty('projVersion')) {
 
 //NOTE: The task name MUST BE this (even though I wanted it to be codeCoverage) because codecov.io looks for files
 //which are based off this name
-task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+task jacocoRootReport(type: JacocoReport) {
     dependsOn = subprojects.test
     additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
     sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)

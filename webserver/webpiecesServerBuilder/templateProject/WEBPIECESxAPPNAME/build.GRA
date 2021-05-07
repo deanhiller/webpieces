@@ -1,24 +1,8 @@
-buildscript {
-    repositories {
-       jcenter()
-       mavenCentral()
-       maven {
-          url "https://dl.bintray.com/deanhiller/maven"
-       }
-
-       //For testing and to be removed...
-       maven {
-         url uri('/tmp/myRepo/')
-       }
-    }
-    dependencies {
-        classpath "org.webpieces:gradle-plugin-htmlcompiler:${webpiecesVersion}"
-    }
+plugins {
+    id 'application'
+    id 'idea'
+    id 'org.webpieces.htmlcompiler' version '2.1.0'
 }
-
-apply plugin: 'application'
-apply plugin: 'idea'
-apply plugin: 'org.webpieces.templatecompiler'
 
 //Intellij Idea has a weird quirk we need to avoid
 if (System.getProperty('idea.active')) {
@@ -42,53 +26,55 @@ if (System.getProperty('idea.active')) {
 
 dependencies {
   //add maven dependencies here
-  compile deps['web-webserver']
+  implementation deps['web-webserver']
   //optional plugin BUT required for any backend type plugins since they all plugin to this guys login
-  compile deps['plugin-backend']
+  implementation deps['plugin-backend']
   //optional plugin for EASY https cert install and auto renew
-  compile deps['plugin-install-sslcert']
+  implementation deps['plugin-install-sslcert']
   //optional plugin for if you use hibernate
-  compile deps['plugin-hibernate']
+  implementation deps['plugin-hibernate']
   //optional plugin for if you have a json api
-  compile deps['plugin-jackson']
-  compile deps['plugin-properties']
+  implementation deps['plugin-jackson']
+  implementation deps['plugin-properties']
   
-  compile deps['commons-lang'] //used in json escaping
+  implementation deps['commons-lang'] //used in json escaping
  
   //REMOVE once you are on a real database as there is a line testCompile deps['plugin-h2'] that brings this in for tests
   //AND we only use this so you work out of the box to start hacking 
-  compile deps['h2db']
+  implementation deps['h2db']
 
   //for connection pooling: https://mvnrepository.com/artifact/org.hibernate/hibernate-hikaricp
-  compile deps['hikari-cp']
+  implementation deps['hikari-cp']
  
   //IF you add dependencies on other projects locally, you need to modify WEBPIECESxCLASSDevServer.java to include those
   //SOURCE paths(ie. *.java file paths not *.class files)) or it will not recompile that code as it changes
 
   //optional plugin for H2 for testing to swap to in-memory database making things easy/fast to clear the db
-  testCompile deps['plugin-h2']
+  testImplementation deps['plugin-h2']
 
   //A library that does everything mockito does but in just one class(so therefore, way easier to debug)
-  testCompile deps['core-mock']
-  testCompile deps['core-ddl']
+  testImplementation deps['core-mock']
+  testImplementation deps['core-ddl']
 
   //For testing, we need to bring in web-webserver-test such that we can debug in the IDE as this just ensures
   //we use the htmlcompiler on-demand rather than waiting for the gradle plugin to invoke the same code. For 
   //production jars, the html files are compiled to *.class files
-  testCompile deps['web-webserver-test']
-  testCompile deps['selenium']
+  testImplementation deps['web-webserver-test']
+  testImplementation deps['selenium']
+}
+
+application {
+    mainClassName = "webpiecesxxxxxpackage.Server"
+    applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
 }
 
 //NOTE: jar section has to go AFTER dependencies section to read all dependencies
 jar {
     manifest.attributes(
-            "Class-Path": configurations.runtime.files.collect { it.name }.join(' '),
-            "Main-Class": 'webpiecesxxxxxpackage.Server'
+            "Class-Path": configurations.runtimeClasspath.files.collect { it.name }.join(' '),
+            "Main-Class": application.mainClassName
     )
 }
-
-mainClassName = "webpiecesxxxxxpackage.Server"
-applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
 
 //Here, we must modify the start scripts to set cd to user.dir correctly as setting user.dir does NOT work
 //as new File("relative") ignores user.dir and uses something else.  We do this such that user.dir IS

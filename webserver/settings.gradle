@@ -1,0 +1,3 @@
+//Workaround until https://issues.gradle.org/browse/GRADLE-1883 is better from
+//http://stackoverflow.com/questions/29504250/how-to-copy-hidden-resource-files-in-gradle
+org.apache.tools.ant.DirectoryScanner.removeDefaultExclude("**/.gitignore")

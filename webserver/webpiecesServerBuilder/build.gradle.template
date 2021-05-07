@@ -1,17 +1,10 @@
-apply plugin: 'application'
-apply plugin: 'java'
+plugins {
+    id 'application'
+}
 
 repositories {
-   jcenter()
    mavenCentral()
-   maven {
-      url "https://dl.bintray.com/deanhiller/maven"
-   }
-
-   //For testing locally...
-   maven {
-     url uri('/tmp/myRepo/')
-   }
+   maven { url uri('/tmp/myRepo/') } // For testing locally...
 }
 
 project.ext.webpiecesVersion = '${version}'

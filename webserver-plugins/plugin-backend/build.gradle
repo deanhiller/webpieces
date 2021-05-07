@@ -14,8 +14,8 @@ sourceSets {
 dependencies {
     api project(':webserver:http-webserver')
     
-    testCompile project(':webserver:http-webserver-test')
-    testCompile project(':webserver:http-fortesting-plugins')
+    testImplementation project(':webserver:http-webserver-test')
+    testImplementation project(':webserver:http-fortesting-plugins')
 }
 
 //This allows the tests to use *_html.class templates since for some reason, I was having trouble

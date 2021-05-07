@@ -5,7 +5,7 @@ dependencies {
 
     testImplementation project(':core:core-metrics')
 
-    //testCompile project(':core:core-util')
+    //testImplementation project(':core:core-util')
 }
 
 publishing {

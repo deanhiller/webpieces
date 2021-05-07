@@ -3,15 +3,15 @@
 publishing.publications.mavenJava.pom.description='project only used in testing.  ignore this jar'
 
 dependencies {
-  compile project(':webserver:http-webserver')
-  compile project(':webserver:http-router-dev')
-  compile project(':webserver:http-templating-dev')
-  compile project(':webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME')
+  implementation project(':webserver:http-webserver')
+  implementation project(':webserver:http-router-dev')
+  implementation project(':webserver:http-templating-dev')
+  implementation project(':webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME')
 
   //we start people off with h2 plugin in dev mode that they can delete later if they want(easier to delete then to setup)
   //h2 works well for in-memory testing if using jdbc.  if using nosql, just delete this and code that no longer compiles after that
-  compile project(':webserver-plugins:plugin-h2db')
+  implementation project(':webserver-plugins:plugin-h2db')
 
   //we load the documentation plugin in the development server (not the production server)
-  compile project(':webserver-plugins:plugin-documentation')
+  implementation project(':webserver-plugins:plugin-documentation')
 }

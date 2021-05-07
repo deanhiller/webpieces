@@ -1,11 +1,12 @@
 apply plugin: 'org.webpieces.templatecompiler'
 
 dependencies {
-    compile project(':webserver:http-router')
-    compile project(':webserver-plugins:plugin-backend')
 
-    testCompile project(':webserver:http-webserver-test')
-    testCompile project(':webserver:http-fortesting-plugins')
+    implementation project(':webserver:http-router')
+    implementation project(':webserver-plugins:plugin-backend')
+
+    testImplementation project(':webserver:http-webserver-test')
+    testImplementation project(':webserver:http-fortesting-plugins')
 }
 
 sourceSets {

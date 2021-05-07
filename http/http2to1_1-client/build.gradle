@@ -1,11 +1,11 @@
 dependencies {
-    compile project(':http:http2-client')
+    api project(':http:http2-client')
 	api project(':http:http1_1-client')
-	compile project(':http:http2-translations')
+	api project(':http:http2-translations')
 
 	implementation project(':core:core-metrics')
 
-	testCompile project(':core:core-mock')
+	testImplementation project(':core:core-mock')
 
 	testImplementation deps['guava']
 	testImplementation project(':webserver-plugins:plugin-json-jackson')

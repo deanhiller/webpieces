@@ -27,7 +27,6 @@ import javax.net.ssl.SSLEngine;
 import org.jose4j.base64url.Base64;
 import org.shredzone.acme4j.util.KeyPairUtils;
 import org.webpieces.nio.api.SSLEngineFactory;
-import org.webpieces.plugin.secure.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.extensions.NeedsSimpleStorage;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.util.exceptions.SneakyThrow;
@@ -174,4 +173,3 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 	}
 
 }
-

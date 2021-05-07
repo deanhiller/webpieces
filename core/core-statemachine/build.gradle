@@ -1,7 +1,7 @@
 dependencies {
     implementation project(':core:core-util')
 
-    testCompile project(':core:core-mock')
+    testImplementation project(':core:core-mock')
 }
 
 publishing {

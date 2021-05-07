@@ -6,7 +6,7 @@ dependencies {
     implementation project(':core:core-util')
     implementation deps['guava']
 
-	testCompile project(':core:core-mock')
+	testImplementation project(':core:core-mock')
 
 }
 

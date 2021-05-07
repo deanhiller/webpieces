@@ -12,36 +12,36 @@ sourceSets {
 }
 
 
-    //Intellij Idea has a weird quirk we need to avoid
-    if (System.getProperty('idea.active')) {
+//Intellij Idea has a weird quirk we need to avoid
+if (System.getProperty('idea.active')) {
 
-        // to have classes and resources in the same output directory
-        idea {
-            module {
-                outputDir file("out/production/classes")
-            }
+    // to have classes and resources in the same output directory
+    idea {
+        module {
+            outputDir file("out/production/classes")
         }
     }
+}
 
-    dependencies {
-        compile project(':webserver:http-webserver')
-        //we start people off with the hibernate plugin
-        compile project(':webserver-plugins:plugin-hibernate')
-        compile project(':webserver-plugins:plugin-json-jackson')
-        compile project(':webserver-plugins:plugin-backend')
-        compile project(':webserver-plugins:plugin-install-sslcert')
-        compile project(':webserver-plugins:plugin-properties')
-        compile deps['commons-lang'] //used in json escaping
-        //for connection pooling: https://mvnrepository.com/artifact/org.hibernate/hibernate-hikaricp
-        compile deps['hikari-cp']
-        compile 'jakarta.validation:jakarta.validation-api'
-  
-        testCompile project(':core:core-ddl')
-        testCompile project(':core:core-mock')
-        testCompile project(':webserver-plugins:plugin-h2db')
-        testCompile project(':webserver:http-webserver-test')
-        testCompile deps['selenium']
-    }
+dependencies {
+    implementation project(':webserver:http-webserver')
+    //we start people off with the hibernate plugin
+    implementation project(':webserver-plugins:plugin-hibernate')
+    implementation project(':webserver-plugins:plugin-json-jackson')
+    implementation project(':webserver-plugins:plugin-backend')
+    implementation project(':webserver-plugins:plugin-install-sslcert')
+    implementation project(':webserver-plugins:plugin-properties')
+    implementation deps['commons-lang'] //used in json escaping
+    //for connection pooling: https://mvnrepository.com/artifact/org.hibernate/hibernate-hikaricp
+    implementation deps['hikari-cp']
+    implementation 'jakarta.validation:jakarta.validation-api'
+
+    testImplementation project(':core:core-ddl')
+    testImplementation project(':core:core-mock')
+    testImplementation project(':webserver-plugins:plugin-h2db')
+    testImplementation project(':webserver:http-webserver-test')
+    testImplementation deps['selenium']
+}
 
 //NOTE: jar section has to go AFTER dependencies section to read all dependencies
 jar {
