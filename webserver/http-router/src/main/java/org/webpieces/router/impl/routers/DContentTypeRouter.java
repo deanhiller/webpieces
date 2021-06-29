@@ -3,7 +3,7 @@ package org.webpieces.router.impl.routers;
 import java.util.List;
 
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;

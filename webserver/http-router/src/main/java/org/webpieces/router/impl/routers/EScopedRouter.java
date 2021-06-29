@@ -11,20 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
-import org.webpieces.router.api.exceptions.WebpiecesException;
+import org.webpieces.util.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.RouterFutureUtil;
-import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
-import org.webpieces.util.futures.FutureHelper;
 
-import com.webpieces.http2.api.streaming.MyStreamRef;
-import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class EScopedRouter {

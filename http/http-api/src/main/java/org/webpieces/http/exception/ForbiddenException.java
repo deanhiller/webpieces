@@ -1,8 +1,8 @@
-package org.webpieces.router.api.exceptions;
+package org.webpieces.http.exception;
 
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import org.webpieces.http.StatusCode;
 
-public class ForbiddenException extends HttpException {
+public class ForbiddenException extends HttpClientErrorException {
 
 	private static final long serialVersionUID = 8725117695723001888L;
 
@@ -21,4 +21,5 @@ public class ForbiddenException extends HttpException {
 	public ForbiddenException(Throwable cause) {
 		super(StatusCode.HTTP_403_FORBIDDEN, cause);
 	}
+
 }

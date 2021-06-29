@@ -12,7 +12,7 @@ import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.exceptions.ControllerException;
-import org.webpieces.router.api.exceptions.WebpiecesException;
+import org.webpieces.util.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.loader.LoadedController;

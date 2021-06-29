@@ -1,13 +1,10 @@
 package org.webpieces.router.impl.proxyout;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,11 +21,10 @@ import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.router.impl.dto.RedirectResponse;
-import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import org.webpieces.http.StatusCode;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import com.webpieces.http2.api.subparsers.HeaderPriorityParser;
@@ -92,7 +88,7 @@ public class ResponseCreator {
 					Constants.AJAX_REDIRECT_CODE, "Ajax Redirect");
 		} else {
 			response = addCommonHeaders(request, null, true, 
-					StatusCode.HTTP_303_SEEOTHER.getCode(), StatusCode.HTTP_303_SEEOTHER.getReason());
+					StatusCode.HTTP_303_SEE_OTHER.getCode(), StatusCode.HTTP_303_SEE_OTHER.getReason());
 		}
 
 		String url = httpResponse.redirectToPath;

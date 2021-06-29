@@ -42,7 +42,7 @@ import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.lowlevel.CancelReason;
 import com.webpieces.http2.api.dto.lowlevel.DataFrame;
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import org.webpieces.http.StatusCode;
 import com.webpieces.http2.api.streaming.PushStreamHandle;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
@@ -234,7 +234,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		//One of two cases at this point.  Either, we got far enough that we have a bunch of request info or we did not get far enough
 
 
-		return createResponseAndSend(req, StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html").thenApply(voidd->null);
+		return createResponseAndSend(req, StatusCode.HTTP_500_INTERNAL_SERVER_ERROR, html, "html", "text/html").thenApply(voidd->null);
 	}
 
 	public CompletableFuture<Void> createResponseAndSend(Http2Request request, StatusCode statusCode, String content, String extension, String defaultMime) {
@@ -327,10 +327,10 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 				statusCode = StatusCode.HTTP_200_OK;
 				break;
 			case NOT_FOUND:
-				statusCode = StatusCode.HTTP_404_NOTFOUND;
+				statusCode = StatusCode.HTTP_404_NOT_FOUND;
 				break;
 			case INTERNAL_SERVER_ERROR:
-				statusCode = StatusCode.HTTP_500_INTERNAL_SVR_ERROR;
+				statusCode = StatusCode.HTTP_500_INTERNAL_SERVER_ERROR;
 				break;
 			default:
 				throw new IllegalStateException("did add case for state="+resp.routeType);

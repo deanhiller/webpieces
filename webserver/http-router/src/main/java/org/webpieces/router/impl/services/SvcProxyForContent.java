@@ -3,17 +3,14 @@ package org.webpieces.router.impl.services;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import javax.validation.ConstraintViolation;
-
+import org.webpieces.http.exception.BadRequestException;
+import org.webpieces.http.exception.Violation;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
-import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
-import org.webpieces.router.api.exceptions.Violation;
-import org.webpieces.router.api.exceptions.WebpiecesException;
+import org.webpieces.util.exceptions.WebpiecesException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.model.SvcProxyLogic;
@@ -64,7 +61,7 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		List<Violation> violations = validator.validate(controller, m, args);
 
 		if(violations.size() > 0) {
-			throw new BadClientRequestException(violations);
+			throw new BadRequestException(violations);
 		}
 		
 		return args;

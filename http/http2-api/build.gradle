@@ -1,5 +1,6 @@
 dependencies {
     api project(':core:core-datawrapper')
+    api project(':http:http-api')
 }
 
 publishing {

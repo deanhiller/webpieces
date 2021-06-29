@@ -12,7 +12,7 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.plugin.json.Jackson;
 import org.webpieces.router.api.RouterStreamHandle;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.lowlevel.CancelReason;

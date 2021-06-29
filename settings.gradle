@@ -1,7 +1,8 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { url 'https://dl.bintray.com/deanhiller/maven' }
+        mavenCentral()
+        mavenLocal()
         //maven { url uri('/tmp/myRepo/') } // For testing locally
     }
     resolutionStrategy {
@@ -30,6 +31,7 @@ include 'core:core-statemachine'
 include 'core:core-util'
 include 'core:runtimecompile'
 include 'libraries:lib-elasticsearch'
+include 'http:http-api'
 include 'http:http-backpressure-tests'
 include 'http:http-frontend2'
 include 'http:http1_1-client'
@@ -63,4 +65,3 @@ include 'webserver-plugins:plugin-hibernate'
 include 'webserver-plugins:plugin-install-sslcert'
 include 'webserver-plugins:plugin-json-jackson'
 include 'webserver-plugins:plugin-properties'
-

@@ -1,4 +1,4 @@
-package org.webpieces.router.api.exceptions;
+package org.webpieces.util.exceptions;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

@@ -1,8 +1,8 @@
-package org.webpieces.router.api.exceptions;
+package org.webpieces.http.exception;
 
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import org.webpieces.http.StatusCode;
 
-public class ServiceUnavailableException extends HttpException {
+public class ServiceUnavailableException extends HttpServerErrorException {
 
 	private static final long serialVersionUID = 7804145831639203745L;
 

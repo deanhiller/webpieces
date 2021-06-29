@@ -1,11 +1,11 @@
-package org.webpieces.router.api.exceptions;
+package org.webpieces.http.exception;
 
 public class Violation {
 
-	private String message;
-	private String path;
+	private final String message;
+	private final String path;
 
-	public Violation(String path, String message) {
+	public Violation(final String path, final String message) {
 		this.path = path;
 		this.message = message;
 	}
@@ -17,6 +17,5 @@ public class Violation {
 	public String getPath() {
 		return path;
 	}
-	
 	
 }

@@ -12,7 +12,7 @@ import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;

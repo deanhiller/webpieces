@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routers;
 
-import org.webpieces.router.api.exceptions.WebpiecesException;
+import org.webpieces.util.exceptions.WebpiecesException;
 
 public class SimulateInternalError extends WebpiecesException {
 

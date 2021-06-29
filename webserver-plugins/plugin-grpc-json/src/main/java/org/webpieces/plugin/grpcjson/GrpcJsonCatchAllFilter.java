@@ -10,13 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.grpc.ErrorResponse;
 import org.webpieces.grpc.ErrorResponse.Builder;
+import org.webpieces.http.exception.BadRequestException;
+import org.webpieces.http.exception.ForbiddenException;
+import org.webpieces.http.exception.UnauthorizedException;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
-import org.webpieces.router.api.exceptions.AuthenticationException;
-import org.webpieces.router.api.exceptions.AuthorizationException;
-import org.webpieces.router.api.exceptions.ClientDataError;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
@@ -53,12 +53,12 @@ public class GrpcJsonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	protected Action translateFailure(Action action, Throwable t) {
 		if(t != null) {
-			if(t instanceof ClientDataError) {
-				return translate((ClientDataError) t);
-			} else if(t instanceof AuthorizationException) {
-				return translate((AuthorizationException)t);
-			} else if(t instanceof AuthenticationException) {
-				return translate((AuthenticationException) t);
+			if(t instanceof BadRequestException) {
+				return translate((BadRequestException) t);
+			} else if(t instanceof ForbiddenException) {
+				return translate((ForbiddenException)t);
+			} else if(t instanceof UnauthorizedException) {
+				return translate((UnauthorizedException) t);
 			} else if (t instanceof NotFoundException) {
 				return createNotFound();
 			}
@@ -70,26 +70,38 @@ public class GrpcJsonCatchAllFilter extends RouteFilter<JsonConfig> {
 		}
 	}
 
-	protected Action translate(AuthorizationException t) {
-		byte[] content = translateAuthorizationError(t);
+	protected Action translate(ForbiddenException t) {
+		Builder builder = ErrorResponse.newBuilder();
+		builder.setError(t.getHttpCode() + " " + t.getStatusMessage() + ": " + t.getMessage());
+		builder.setCode(t.getHttpCode());
+		byte[] content = translateJson(builder);
 		KnownStatusCode status = KnownStatusCode.HTTP_401_UNAUTHORIZED;
 		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
 
-	protected Action translate(AuthenticationException t) {
-		byte[] content = translateAuthenticationError(t);
+	protected Action translate(UnauthorizedException t) {
+		Builder builder = ErrorResponse.newBuilder();
+		builder.setError(t.getHttpCode() + " " + t.getStatusMessage() + ": " + t.getMessage());
+		builder.setCode(t.getHttpCode());
+		byte[] content = translateJson(builder);
 		KnownStatusCode status = KnownStatusCode.HTTP_403_FORBIDDEN;
 		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
 
 	protected RenderContent translateError(Throwable t) {
-		byte[] content = translateServerError(t);
+		Builder builder = ErrorResponse.newBuilder();
+		builder.setError("Server ran into a bug, please report");
+		builder.setCode(500);
+		byte[] content = translateJson(builder);
 		KnownStatusCode status = KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR;
 		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
 
-	protected RenderContent translate(ClientDataError t) {
-		byte[] content = translateClientError(t);
+	protected RenderContent translate(BadRequestException t) {
+		Builder builder = ErrorResponse.newBuilder();
+		builder.setError(t.getHttpCode() + " " + t.getStatusMessage() + ": " + t.getMessage());
+		builder.setCode(t.getHttpCode());
+		byte[] content = translateJson(builder);
 		KnownStatusCode status = KnownStatusCode.HTTP_400_BADREQUEST;
 		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
@@ -105,32 +117,11 @@ public class GrpcJsonCatchAllFilter extends RouteFilter<JsonConfig> {
 	}
 
 	protected Action createNotFound() {
-		byte[] content = createNotFoundJsonResponse();		
+		Builder builder = ErrorResponse.newBuilder();
+		builder.setError("404 This url does not exist.  try another url");
+		builder.setCode(404);
+		byte[] content = translateJson(builder);
 		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND.getCode(), KnownStatusCode.HTTP_404_NOTFOUND.getReason(), MIME_TYPE);
-	}
-
-	protected byte[] translateAuthenticationError(AuthenticationException t) {
-		Builder builder = ErrorResponse.newBuilder();
-		builder.setError("403 Forbidden: "+t.getMessage());
-		builder.setCode(403);
-
-		return translateJson(builder);
-	}
-
-	protected byte[] translateAuthorizationError(AuthorizationException t) {
-		Builder builder = ErrorResponse.newBuilder();
-		builder.setError("401 Not Authorized : "+t.getMessage());
-		builder.setCode(401);
-
-		return translateJson(builder);
-	}
-
-	protected byte[] translateClientError(ClientDataError t) {
-		Builder builder = ErrorResponse.newBuilder();
-		builder.setError("400 bad request: "+t.getMessage());
-		builder.setCode(400);
-
-		return translateJson(builder);
 	}
 
 	protected byte[] createNotFoundJsonResponse() {
@@ -140,13 +131,6 @@ public class GrpcJsonCatchAllFilter extends RouteFilter<JsonConfig> {
 		return translateJson(builder);
 	}
 
-	protected byte[] translateServerError(Throwable t) {
-		Builder builder = ErrorResponse.newBuilder();
-		builder.setError("Server ran into a bug, please report");
-		builder.setCode(500);
-		return translateJson(builder);
-	}
-	
 	protected byte[] translateJson(MessageOrBuilder msg) {
 		try {
             JsonFormat.Printer jsonPrinter = JsonFormat.printer();

@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.exceptions.InternalErrorRouteFailedException;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.model.RouterInfo;

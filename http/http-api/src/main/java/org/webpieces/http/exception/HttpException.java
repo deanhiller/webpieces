@@ -1,16 +1,16 @@
-package org.webpieces.router.api.exceptions;
+package org.webpieces.http.exception;
 
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import org.webpieces.http.StatusCode;
+import org.webpieces.util.exceptions.WebpiecesException;
 
 public abstract class HttpException extends WebpiecesException {
+
 	private static final long serialVersionUID = -4338007033423601133L;
 
 	private final StatusCode statusCode;
 	private final int code;
-	
-	
+
 	public HttpException(StatusCode code) {
-		super();
 		this.statusCode = code;
 		this.code = code.getCode();
     }
@@ -24,7 +24,7 @@ public abstract class HttpException extends WebpiecesException {
     public HttpException(int code, String message) {
         super(message);
 		this.code = code;
-		this.statusCode = null;
+		this.statusCode = StatusCode.lookup(code);
     }
     
     public HttpException(StatusCode code, String message, Throwable cause) {
@@ -45,6 +45,10 @@ public abstract class HttpException extends WebpiecesException {
     
 	public StatusCode getStatusCode() {
 		return statusCode;
+	}
+
+	public String getStatusMessage() {
+		return (statusCode != null) ? statusCode.getReason() : "";
 	}
 
 }

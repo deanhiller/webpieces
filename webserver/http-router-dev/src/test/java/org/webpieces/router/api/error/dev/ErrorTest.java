@@ -1,23 +1,11 @@
 package org.webpieces.router.api.error.dev;
 
-import java.util.concurrent.CompletableFuture;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.RouterService;
-import org.webpieces.router.api.error.ErrorCommonTest;
-import org.webpieces.router.api.error.MockStreamHandle;
-import org.webpieces.router.api.error.RequestCreation;
 
-import com.webpieces.http2.api.dto.highlevel.Http2Request;
-import com.webpieces.http2.api.dto.highlevel.Http2Response;
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
-import com.webpieces.http2.api.streaming.StreamRef;
-import com.webpieces.http2.api.streaming.StreamWriter;
+import org.webpieces.http.StatusCode;
 
 public class ErrorTest {
 	

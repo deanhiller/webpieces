@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;

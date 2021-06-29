@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.services;
 
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 
 public class RouteInfoForNotFound implements RouteData {
 

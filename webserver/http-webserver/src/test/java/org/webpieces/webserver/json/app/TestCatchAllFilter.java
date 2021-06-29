@@ -2,14 +2,11 @@ package org.webpieces.webserver.json.app;
 
 import javax.inject.Inject;
 
+import org.webpieces.http.exception.HttpException;
 import org.webpieces.plugin.json.JacksonCatchAllFilter;
 import org.webpieces.plugin.json.JacksonJsonConverter;
-import org.webpieces.router.api.exceptions.BadClientRequestException;
-import org.webpieces.router.api.exceptions.HttpException;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.api.routes.MethodMeta;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestCatchAllFilter extends JacksonCatchAllFilter {
 

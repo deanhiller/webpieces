@@ -14,7 +14,7 @@ import javax.validation.Path.Node;
 import javax.validation.Validator;
 import javax.validation.executable.ExecutableValidator;
 
-import org.webpieces.router.api.exceptions.Violation;
+import org.webpieces.http.exception.Violation;
 
 public class BeanValidator {
 	

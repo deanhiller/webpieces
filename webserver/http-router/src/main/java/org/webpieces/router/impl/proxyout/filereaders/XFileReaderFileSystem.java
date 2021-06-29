@@ -16,7 +16,7 @@ import javax.inject.Named;
 
 import org.webpieces.ctx.api.Constants;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.dto.RenderStaticResponse;

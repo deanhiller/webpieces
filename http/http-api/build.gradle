@@ -1,0 +1,14 @@
+dependencies {
+    //api project(':core:core-datawrapper')
+    api project(':core:core-util')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Bare bones HTTP DTOs with no logic'
+            }
+        }
+    }
+}

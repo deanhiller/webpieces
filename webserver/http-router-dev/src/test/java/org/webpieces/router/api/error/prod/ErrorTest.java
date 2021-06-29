@@ -15,7 +15,7 @@ import org.webpieces.router.api.error.dev.NoMethodRouterModules;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import org.webpieces.http.StatusCode;
 import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
@@ -48,7 +48,7 @@ public class ErrorTest {
 		Http2Response response = mockStream.getLastResponse();
 		String body = mockStream.getResponseBody();
 		
-		Assert.assertEquals(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, response.getKnownStatusCode());
+		Assert.assertEquals(StatusCode.HTTP_500_INTERNAL_SERVER_ERROR, response.getKnownStatusCode());
 		Assert.assertTrue(body.contains("There was a bug in the developers application or webpieces server"));
 		
 	}

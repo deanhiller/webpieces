@@ -14,7 +14,7 @@ import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.highlevel.Http2Trailers;
 import com.webpieces.http2.api.dto.lowlevel.DataFrame;
 import com.webpieces.http2.api.dto.lowlevel.RstStreamFrame;
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import org.webpieces.http.StatusCode;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2ErrorCode;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
@@ -67,7 +67,7 @@ public class Requests {
 	
 	public static Http2Response createResponse(int streamId) {
 		List<Http2Header> headers = new ArrayList<>();
-		headers.add(new Http2Header(Http2HeaderName.STATUS, StatusCode.HTTP_200_OK.getCodeString()));
+		headers.add(new Http2Header(Http2HeaderName.STATUS, String.valueOf(StatusCode.HTTP_200_OK.getCode())));
 	    headers.add(new Http2Header(Http2HeaderName.SERVER, "me"));
 	    
 	    Http2Response response = new Http2Response(headers);
@@ -80,7 +80,7 @@ public class Requests {
 
 	public static Http2Response createEosResponse(int streamId) {
 		List<Http2Header> headers = new ArrayList<>();
-		headers.add(new Http2Header(Http2HeaderName.STATUS, StatusCode.HTTP_200_OK.getCodeString()));
+		headers.add(new Http2Header(Http2HeaderName.STATUS, String.valueOf(StatusCode.HTTP_200_OK.getCode())));
 	    headers.add(new Http2Header(Http2HeaderName.SERVER, "me"));
 	    
 	    Http2Response response = new Http2Response(headers);

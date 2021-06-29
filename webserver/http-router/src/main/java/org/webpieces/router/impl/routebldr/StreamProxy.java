@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.exceptions.ControllerException;
-import org.webpieces.router.api.exceptions.WebpiecesException;
+import org.webpieces.util.exceptions.WebpiecesException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.streams.StreamService;
 import org.webpieces.router.impl.loader.LoadedController;

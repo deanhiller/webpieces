@@ -2,7 +2,7 @@ package com.webpieces.http2.api.dto.highlevel;
 
 import java.util.List;
 
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import org.webpieces.http.StatusCode;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2MsgType;

@@ -5,9 +5,9 @@ import java.lang.annotation.Annotation;
 import javax.inject.Inject;
 
 import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.http.exception.BadRequestException;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.RenderContent;
-import org.webpieces.router.api.exceptions.BadClientRequestException;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.ParamMeta;
 
@@ -40,13 +40,13 @@ public class JacksonLookup implements BodyContentBinder {
         	Class<T> entityClass = (Class<T>) meta.getFieldClass();
 
 			if(data.length == 0)
-				throw new BadClientRequestException("Client did not provide a json request in the body of the request");		
+				throw new BadRequestException("Client did not provide a json request in the body of the request");
 			else if(JsonNode.class.isAssignableFrom(entityClass))
 				return (T) mapper.readTree(data);
 			
 			return mapper.readValue(data, entityClass);
 		} catch(JsonReadException e) {
-			throw new BadClientRequestException("invalid json in client request.  "+e.getMessage(), e);
+			throw new BadRequestException("invalid json in client request.  "+e.getMessage(), e);
 		}
 	}
 

@@ -10,18 +10,19 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.webpieces.http.exception.BadRequestException;
+import org.webpieces.http.exception.HttpException;
+import org.webpieces.http.exception.Violation;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
-import org.webpieces.router.api.exceptions.BadClientRequestException;
-import org.webpieces.router.api.exceptions.HttpException;
-import org.webpieces.router.api.exceptions.Violation;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.util.filters.Service;
 
-import com.webpieces.http2.api.dto.lowlevel.StatusCode;
+import org.webpieces.http.StatusCode;
 
 @Singleton
 public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
@@ -98,8 +99,8 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 		StatusCode statusCode = t.getStatusCode();
 		if(statusCode != null) {
 			String message = t.getStatusCode().getReason()+" : "+t.getMessage();
-			if(t instanceof BadClientRequestException) {
-				message = translateViolations((BadClientRequestException) t, message);
+			if(t instanceof BadRequestException) {
+				message = translateViolations((BadRequestException) t, message);
 			}
 			error.setError(message);
 			error.setCode(t.getStatusCode().getCode());
@@ -117,7 +118,7 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 	}
 
 
-	protected String translateViolations(BadClientRequestException t, String defaultMessage) {
+	protected String translateViolations(BadRequestException t, String defaultMessage) {
 		if(t.getViolations() == null || t.getViolations().size() == 0) {
 			return defaultMessage;
 		}

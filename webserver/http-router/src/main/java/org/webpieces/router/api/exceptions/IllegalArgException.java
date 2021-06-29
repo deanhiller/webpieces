@@ -1,5 +1,7 @@
 package org.webpieces.router.api.exceptions;
 
+import org.webpieces.util.exceptions.WebpiecesException;
+
 public class IllegalArgException extends WebpiecesException {
 
 	private static final long serialVersionUID = 1L;

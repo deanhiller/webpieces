@@ -469,12 +469,13 @@ task jacocoRootReport(type: JacocoReport) {
 
 //we don't do java plugin on top level on purpose as it is not a java
 //project BUT we need build and clean to work inline with the java projects
-if(project.tasks.getByName('build')) {
+if(project.tasks.findByName('build')) {
     build.dependsOn ':jacocoRootReport'
 }
 else {
     task build(dependsOn: ':jacocoRootReport')
 }
+
 clean {
    doLast {
       delete "${buildDir}"

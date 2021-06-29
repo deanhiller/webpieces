@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.plugin.json.Jackson;
-import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.http.exception.NotFoundException;
 
 import com.webpieces.http2.api.streaming.ResponseStreamHandle;
 import com.webpieces.http2.api.streaming.StreamRef;

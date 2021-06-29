@@ -10,8 +10,9 @@ import javax.persistence.EntityTransaction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.webpieces.http.exception.HttpException;
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.exceptions.HttpException;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.util.exceptions.SneakyThrow;
