@@ -1,7 +1,7 @@
 plugins {
     id 'co.riiid.gradle' version '0.4.2'
-    id 'org.barfuin.gradle.taskinfo' version '1.0.5' // This prints out a task tree (pretty print)
-    id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
+    id 'org.barfuin.gradle.taskinfo' version '1.3.0' // This prints out a task tree (pretty print)
+    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'org.webpieces.templatecompiler' version '2.1.0' // We use an older version of our own html compiler to pre-build html tags for clients...
 }
 
@@ -78,7 +78,7 @@ allprojects {
    }
 
    jacoco {
-      toolVersion = '0.8.5'
+      toolVersion = '0.8.7'
    }
 
 }
