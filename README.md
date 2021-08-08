@@ -1,6 +1,5 @@
 # webpieces
 
-
 [![Build Status](https://travis-ci.org/deanhiller/webpieces.svg?branch=master)](https://travis-ci.org/deanhiller/webpieces)
 
 Codecov.io / jacoco has two bugs, one related to aggregation reporting (so we are actually higher than this number)
