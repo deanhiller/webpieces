@@ -389,7 +389,9 @@ subprojects {
    }
 
 
-   if(project.properties.sonatypeUsername && project.properties.sonatypePassword) {
+   if(project.properties.sonatypeUsername
+           && project.properties.sonatypePassword
+           && project.properties.sonatypeDomain) {
       if (!project.hasProperty("signing.keyId")) {
          throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
       }
@@ -402,25 +404,28 @@ subprojects {
          //the *asc file is then hashed generating *.asc.md5 and *.asc.sha1 which is annoying. 
          sign publishing.publications.mavenJava
       }
+
+//       nexusPublishing {
+//           repositories {
+//               sonatype {
+//                   nexusUrl = uri('https://' + sonatypeDomain + '/service/local/')
+//                   snapshotRepositoryUrl = uri('https://' + sonatypeDomain + '/content/repositories/snapshots/')
+//                   username = sonatypeUsername
+//                   password = sonatypePassword
+//               }
+//           }
+//       }
    }
 
    if (!project.hasProperty("projVersion")) {
      ext.sonatypeUsername = "nousername"
      ext.sonatypePassword = "nopassword"
+     ext.sonatypeDomain = "nodomain"
    }
 
 }
 
-nexusPublishing {
-    repositories {
-        sonatype {
-            nexusUrl = uri('https://' + sonatypeDomain + '/service/local/')
-            snapshotRepositoryUrl = uri('https://' + sonatypeDomain + '/content/repositories/snapshots/')
-            username = sonatypeUsername
-            password = sonatypePassword
-        }
-    }
-}
+
 
 //WE should not need this target... (it does this by default but we can't seem to depend on it...wait until we are on 5.3)
 task publishMavenJavaPublicationToMyTempRepository {
