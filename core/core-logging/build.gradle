@@ -1,9 +1,20 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'com.orderlyhealth.util'
+
 dependencies {
-
     api 'org.slf4j:slf4j-api'
-
     implementation 'ch.qos.logback:logback-classic'
-
 }
 
 publishing {
