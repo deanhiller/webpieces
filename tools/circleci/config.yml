@@ -4,6 +4,17 @@
 #
 
 version: 2
+
+orbs:
+  gradle: circleci/gradle@7.1.1
+  
+workflows:
+  checkout-build:
+    jobs:
+      - webpieces/victor
+      - build-job:
+          requires:
+            - webpieces/victor
 jobs:
   build:
     branches:
