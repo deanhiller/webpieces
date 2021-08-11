@@ -1,7 +1,20 @@
-dependencies {
-    implementation project(':core:core-util')
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
 
-    testImplementation project(':core:core-mock')
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.util'
+
+dependencies {
+    api deps['core-util']
+    testImplementation deps['core-mock']
 }
 
 publishing {

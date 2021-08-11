@@ -30,6 +30,8 @@ ext {
        'core-ssl':                  'org.webpieces.util:core-ssl',
        'core-channelmanager2':      'org.webpieces.util:core-channelmanager2',
        'http1_1-parser':            'org.webpieces.http:http1_1-parser',
+       'http-api':                  'org.webpieces.http:http-api',
+       'http2-api':                 'org.webpieces.http:http2-api',
 
        'groovy':                    'org.codehaus.groovy:groovy-all',
 
