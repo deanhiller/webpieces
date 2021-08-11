@@ -24,6 +24,12 @@ ext {
     deps = [
        'core-logging':              'org.webpieces.util:core-logging',
        'core-metrics':              'org.webpieces.util:core-metrics',
+       'core-util':                 'org.webpieces.util:core-util',
+       'core-datawrapper':          'org.webpieces.util:core-datawrapper',
+       'core-mock':                 'org.webpieces.util:core-mock',
+       'core-ssl':                  'org.webpieces.util:core-ssl',
+       'core-channelmanager2':      'org.webpieces.util:core-channelmanager2',
+       'http1_1-parser':            'org.webpieces.http:http1_1-parser',
 
        'groovy':                    'org.codehaus.groovy:groovy-all',
 
