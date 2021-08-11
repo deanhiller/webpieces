@@ -317,4 +317,145 @@ gradle.taskGraph.whenReady { taskGraph ->
    }
 
 
+   publishing {
+      repositories {
+         maven {
+            name = 'myTemp'
+            url = "file:/tmp/myRepo/"
+         }
+      }
+      publications {
+         mavenJava(MavenPublication) {
+            from components.java
+            groupId group
+            pom {
+                name = project.name
+                description = "Not filled in for this project"
+                //'Someone forgot to fill this in.  See http://stackoverflow.com/questions/38272550/how-to-fail-the-gradle-build-if-subproject-is-missing-a-property'
+                url = "https://github.com/${github_org}/${project_name}"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'dhiller'
+                        name = 'Dean Hiller'
+                    }
+                    developer {
+                       id = 'zreed'
+                       name = 'Zachary Reed'
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/${github_org}/${project_name}.git"
+                    developerConnection = "scm:git:git@github.com:${github_org}/${project_name}.git"
+                    url = "https://github.com/${github_org}/${project_name}.git"
+                }
+            }
+               
+            artifact sourcesJar
+            artifact javadocJar
+         }
+      }
+   }
+
+
+   if(project.properties.sonatypeUsername
+           && project.properties.sonatypePassword
+           && project.properties.sonatypeDomain) {
+      if (!project.hasProperty("signing.keyId")) {
+         throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
+      }
+      //To upload to nexus, your key must be uploaded to https://keys.openpgp.org/ as well.
+      //generating new key is found in documentation on gradle signing plugin
+      signing {
+         //let's only sign if releasing to sonatype repo as we have to
+         //BUT even if we remove the signing section, we still end up generating *.md5 and *.sha1 so apparently things
+         //are still being signed.  This signing section only seems to make the *.asc get generated. Then on top of that,
+         //the *asc file is then hashed generating *.asc.md5 and *.asc.sha1 which is annoying. 
+         sign publishing.publications.mavenJava
+      }
+
+//       nexusPublishing {
+//           repositories {
+//               sonatype {
+//                   nexusUrl = uri('https://' + sonatypeDomain + '/service/local/')
+//                   snapshotRepositoryUrl = uri('https://' + sonatypeDomain + '/content/repositories/snapshots/')
+//                   username = sonatypeUsername
+//                   password = sonatypePassword
+//               }
+//           }
+//       }
+   }
+
+   if (!project.hasProperty("projVersion")) {
+     ext.sonatypeUsername = "nousername"
+     ext.sonatypePassword = "nopassword"
+     ext.sonatypeDomain = "nodomain"
+   }
+
+
+//WE should not need this target... (it does this by default but we can't seem to depend on it...wait until we are on 5.3)
+//task publishMavenJavaPublicationToMyTempRepository {
+//   dependsOn {
+//      project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("publishMavenJavaPublicationToMyTempRepository") }
+//   }
+//}
+
+//Gradle has publishToMavenLocal and publish by default.
+//override the publish to throw an exception if projVersion is not set
+//task publish {
+//   dependsOn {
+//      project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("publishMavenJavaPublicationToSonatypeRepository") }
+//   }
+//}
+
+task printTasks {
+    doLast {
+       project.tasks.collect { task -> println("task="+task+" dependsOn="+task.dependsOn) }
+    }
+}
+
+if(project.hasProperty('projVersion')) {
+   task release(dependsOn: ':webserver:githubRelease')
+} else {
+   task release(dependsOn: [':webserver:build', ':publishMavenJavaPublicationToMyTempRepository'])
+}
+
+//NOTE: The task name MUST BE this (even though I wanted it to be codeCoverage) because codecov.io looks for files
+//which are based off this name
+task jacocoRootReport(type: JacocoReport) {
+    dependsOn = subprojects.test
+    additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.setFrom  files(subprojects.sourceSets.main.output)
+    executionData.setFrom files(subprojects.jacocoTestReport.executionData).filter { f -> f.exists() }
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
+    }
+    onlyIf = {
+        true
+    }
+}
+
+//we don't do java plugin on top level on purpose as it is not a java
+//project BUT we need build and clean to work inline with the java projects
+if(project.tasks.findByName('build')) {
+    build.dependsOn ':jacocoRootReport'
+}
+else {
+    task build(dependsOn: ':jacocoRootReport')
+}
+
+clean {
+   doLast {
+      delete "${buildDir}"
+   }
+}
+
 
