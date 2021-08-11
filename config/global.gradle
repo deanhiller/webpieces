@@ -22,6 +22,9 @@ ext {
      * }
      */
     deps = [
+       'core-logging':              'org.webpieces.util:core-logging',
+       'core-metrics':              'org.webpieces.util:core-metrics',
+
        'groovy':                    'org.codehaus.groovy:groovy-all',
 
        'commons-beans':             'commons-beanutils:commons-beanutils',

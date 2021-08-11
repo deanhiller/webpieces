@@ -1,12 +1,26 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.util'
+
 dependencies {
     //PLEASE do NOT bring anything in here.  this is core-util and is used by many so if someone brings this in,
     //we don't want to carry baggage into the client project
     //ie. you add some apache lib and only org.webpieces.util.time uses it
     //well, MANY clients are NOT using that package and now they have to drag along extra baggage....instead, create another util or something
     //crap but everyone is using this anyways or at least should be just like logging
-    api project(':core:core-metrics')
-    api project(':core:core-logging')
-    
+
+    api deps['core-metrics']
+    api deps['core-logging']
 }
 
 publishing {
