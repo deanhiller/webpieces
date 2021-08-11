@@ -1,12 +1,8 @@
 
 dependencies {
-    api project(':core:core-datawrapper')
     api project(':core:core-ssl')
-    api project(':core:core-util')
-
-    implementation project(':core:core-metrics')
 	
-	testImplementation project(':core:core-mock')
+    testImplementation project(':core:core-mock')
 }
 
 publishing {

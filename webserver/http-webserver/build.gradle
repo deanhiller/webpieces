@@ -42,7 +42,6 @@ dependencies {
 
     api deps['guice']
     implementation deps['acme-sslcerts']
-    api project(':core:core-metrics')
     api project(':http:http-frontend2')
     api project(':webserver:http-templating')
     api project(':webserver:http-router')

@@ -2,8 +2,6 @@ dependencies {
 
     api project(':core:core-util')
 
-    implementation project(':core:core-metrics')
-
 }
 
 publishing {

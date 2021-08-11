@@ -1,6 +1,5 @@
 dependencies {
     api project(':http:http2-hpack')
-    api project(':http:http1_1-parser')
 }
 
 publishing {

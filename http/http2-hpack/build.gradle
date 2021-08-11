@@ -3,9 +3,6 @@ dependencies {
     api project(':http:http2-parser')
     api deps['twitter-hpack']
 
-    implementation project(':core:core-metrics')
-    implementation project(':core:core-util')
-
 }
 
 publishing {

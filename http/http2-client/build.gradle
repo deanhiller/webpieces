@@ -2,9 +2,7 @@ dependencies {
     api project(':core:core-channelmanager2')
     api project(':http:http2-engine')
 
-    implementation project(':core:core-metrics')
-	
-	testImplementation project(':core:core-mock')
+    testImplementation project(':core:core-mock')
 }
 
 publishing {

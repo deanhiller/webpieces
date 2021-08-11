@@ -3,7 +3,6 @@ dependencies {
     api project(':http:http1_1-parser')
 
     implementation project(':core:core-channelmanager2')
-    implementation project(':core:core-metrics')
 
     testImplementation project(':core:core-mock')
 

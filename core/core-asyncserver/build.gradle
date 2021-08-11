@@ -1,8 +1,6 @@
 dependencies {
     api project(':core:core-channelmanager2')
 
-    implementation project(':core:core-metrics')
-	
 	testImplementation project(':core:core-mock')
 }
 

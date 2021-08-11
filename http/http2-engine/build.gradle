@@ -3,8 +3,6 @@ dependencies {
     api project(':http:http2-hpack')
     api project(':core:core-statemachine')
 
-    implementation project(':core:core-metrics')
-
 }
 
 publishing {

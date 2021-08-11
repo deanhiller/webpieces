@@ -1,6 +1,5 @@
 dependencies {
 
-    api project(':core:core-datawrapper')
     api project(':http:http2-api')
 
     testImplementation project(':core:core-metrics')

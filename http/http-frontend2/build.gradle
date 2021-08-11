@@ -5,8 +5,6 @@ dependencies {
     api project(':http:http2-engine')
     api project(':http:http2-translations')
 
-    implementation project(':core:core-metrics')
-
     testImplementation project(':core:core-mock')
 
 }

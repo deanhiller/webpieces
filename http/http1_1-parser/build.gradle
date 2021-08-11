@@ -2,9 +2,6 @@ dependencies {
 
     api project(':core:core-datawrapper')
 
-    implementation project(':core:core-metrics')
-    implementation project(':core:core-util')
-
 }
 
 publishing {
