@@ -1,11 +1,24 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.plugins'
+
 dependencies {
 
     api deps['hibernate']
     api 'jakarta.persistence:jakarta.persistence-api'
     
     implementation deps['log4jdbc']
-    implementation project(':core:core-metrics')
-    implementation project(':webserver:http-router')
+    implementation deps['http-router']
 }
 
 publishing {

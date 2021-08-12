@@ -1,16 +1,26 @@
 plugins {
     id 'groovy'
     id 'java-gradle-plugin'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
     id 'maven-publish'
     id 'com.gradle.plugin-publish' version '0.14.0'
 }
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.http'
 
 dependencies {
 
     implementation deps['commons-io']
     implementation deps['guice']
-    implementation project(':core:core-util')
-    implementation project(':webserver:http-templating-dev') // Transitively pulling in http-templating is no longer working...
+    implementation deps['core-util']
+    //implementation project(':webserver:http-templating-dev') // Transitively pulling in http-templating is no longer working...
+    implementation deps['htmlcompiler']
 	
     testImplementation 'junit:junit'
 

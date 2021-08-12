@@ -1,13 +1,24 @@
 plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
     id 'com.google.protobuf' version '0.8.15'
 }
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.plugins'
 
 dependencies {
 
     api deps['grpc-stub']
 
-    implementation project(':http:http1_1-parser')
-    implementation project(':webserver:http-router')
+    implementation deps['http1_1-parser']
+    implementation deps['http-router']
 
     implementation deps['grpc-json']
     implementation deps['grpc-protobuf']

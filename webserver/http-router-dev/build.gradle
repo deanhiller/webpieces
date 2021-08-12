@@ -1,3 +1,17 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.server'
+
 sourceSets {
     //For testing, we need to put the html files on the classpath which are co-located with the controllers
     main {
@@ -11,13 +25,12 @@ sourceSets {
 
 dependencies {
 
-    api project(':webserver:http-router')
+    api deps['http-router']
 
-    api project(':core:runtimecompile')
-    implementation project(':core:core-metrics')
+    api deps['runtimecompile']
     implementation deps['logback-classic']
 
-    testImplementation project(':core:core-mock')
+    testImplementation deps['core-mock']
 
 }
 

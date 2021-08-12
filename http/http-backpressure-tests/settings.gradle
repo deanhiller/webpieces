@@ -1,0 +1,3 @@
+includeBuild '../http-frontend2'
+includeBuild '../http2to1_1-client'
+includeBuild '../../core/core-mock'

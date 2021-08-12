@@ -1,7 +1,21 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.server'
+
 dependencies {
 
     api deps['guice']
-    api project(':webserver:http-shared')
+    api deps['http-shared']
 
     //these 2 for validation...(which don't depend on anything)
     implementation deps['hibernate-validator']

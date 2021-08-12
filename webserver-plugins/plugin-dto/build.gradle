@@ -1,5 +1,19 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.plugins'
+
 dependencies {
-    implementation project(':webserver:http-router')
+    implementation deps['http-router']
     implementation deps['log4jdbc']
 }
 

@@ -1,0 +1,2 @@
+includeBuild '../htmlcompiler'
+includeBuild '../../core/core-util'
