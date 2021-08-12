@@ -1,11 +1,23 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.http'
+
 dependencies {
 
-    api project(':core:core-asyncserver')
-    api project(':http:http1_1-parser')
-    api project(':http:http2-engine')
-    api project(':http:http2-translations')
+    api deps['core-asyncserver']
+    api deps['http2-translations']
 
-    testImplementation project(':core:core-mock')
+    testImplementation deps['core-mock']
 
 }
 

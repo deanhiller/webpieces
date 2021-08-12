@@ -1,7 +1,21 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.http'
+
 dependencies {
 
-    api project(':http:http2-hpack')
-    api project(':core:core-statemachine')
+    api deps['http2-hpack']
+    api deps['core-statemachine']
 
 }
 

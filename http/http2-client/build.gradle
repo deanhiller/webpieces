@@ -1,8 +1,22 @@
-dependencies {
-    api project(':core:core-channelmanager2')
-    api project(':http:http2-engine')
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
 
-    testImplementation project(':core:core-mock')
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.http'
+
+dependencies {
+    api deps['core-channelmanager2']
+    api deps['http2-engine']
+
+    testImplementation deps['core-mock']
 }
 
 publishing {

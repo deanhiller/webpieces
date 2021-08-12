@@ -1,8 +1,20 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.http'
+
 dependencies {
-
-    api project(':http:http2-parser')
+    api deps['http2-parser']
     api deps['twitter-hpack']
-
 }
 
 publishing {

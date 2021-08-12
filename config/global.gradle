@@ -29,9 +29,15 @@ ext {
        'core-mock':                 'org.webpieces.util:core-mock',
        'core-ssl':                  'org.webpieces.util:core-ssl',
        'core-channelmanager2':      'org.webpieces.util:core-channelmanager2',
+       'core-asyncserver':          'org.webpieces.util:core-asyncserver',
+       'core-statemachine':         'org.webpieces.util:core-statemachine',
        'http1_1-parser':            'org.webpieces.http:http1_1-parser',
        'http-api':                  'org.webpieces.http:http-api',
        'http2-api':                 'org.webpieces.http:http2-api',
+       'http2-parser':              'org.webpieces.http:http2-parser',
+       'http2-hpack':               'org.webpieces.http:http2-hpack',
+       'http2-engine':              'org.webpieces.http:http2-engine',
+       'http2-translations':        'org.webpieces.http:http2-translations',
 
        'groovy':                    'org.codehaus.groovy:groovy-all',
 
