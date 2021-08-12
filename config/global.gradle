@@ -49,6 +49,7 @@ ext {
        'http-shared':               'org.webpieces:http-shared',
        'http-router':               'org.webpieces:http-router',
        'htmlcompiler':              'org.webpieces:htmlcompiler',
+       'http-templating':           'org.webpieces:http-templating',
 
        'plugin-json-jackson':       'org.webpieces:plugin-json-jackson',
 

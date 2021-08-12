@@ -1,4 +1,15 @@
-apply plugin: 'org.webpieces.templatecompiler'
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+    id 'org.webpieces.templatecompiler' version '2.1-developer'
+}
+
+apply from: '../../config/global.gradle'
 
 sourceSets {
     //For testing, we need to put the html files on the classpath which are co-located with the controllers
@@ -17,7 +28,7 @@ dependencies {
     implementation deps['guice']
     implementation deps['commons-beans']
 
-    api project(':webserver:http-shared')
+    api deps['http-shared']
 
 }
 

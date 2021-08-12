@@ -36,11 +36,10 @@ publishing {
     }
 }
 
-
 gradlePlugin {
     plugins {
         htmlCompilerPlugin {
-            id = 'org.webpieces.htmlcompiler'
+            id = 'org.webpieces.templatecompiler'
             implementationClass = 'org.webpieces.gradle.compiler.TemplateCompilerPlugin'
         }
     }
@@ -60,14 +59,4 @@ pluginBundle {
     }
 
 }
-
-//At BUILD time, we need to publish locally to allow all projects to use this plugin
-//At PUBLISH time, we need to publish remotely when all is done.
-tasks.register('publishDeps') {
-    dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
-}
-
-build.dependsOn('publishPluginMavenPublicationToWebpiecesLocal2Repository')
-build.dependsOn('publishDeps')
-
 
