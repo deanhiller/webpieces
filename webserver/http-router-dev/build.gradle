@@ -10,8 +10,6 @@ plugins {
 
 apply from: '../../config/global.gradle'
 
-group 'org.webpieces.server'
-
 sourceSets {
     //For testing, we need to put the html files on the classpath which are co-located with the controllers
     main {

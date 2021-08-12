@@ -10,8 +10,6 @@ plugins {
 
 apply from: '../../config/global.gradle'
 
-group 'org.webpieces.util'
-
 dependencies {
     implementation deps['core-util']
 }

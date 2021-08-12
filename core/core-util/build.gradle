@@ -10,8 +10,6 @@ plugins {
 
 apply from: '../../config/global.gradle'
 
-group 'org.webpieces.util'
-
 dependencies {
     //PLEASE do NOT bring anything in here.  this is core-util and is used by many so if someone brings this in,
     //we don't want to carry baggage into the client project

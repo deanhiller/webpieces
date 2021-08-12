@@ -12,8 +12,6 @@ plugins {
 
 apply from: '../../config/global.gradle'
 
-group 'org.webpieces.http'
-
 dependencies {
 
     implementation deps['commons-io']
@@ -62,3 +60,14 @@ pluginBundle {
     }
 
 }
+
+//At BUILD time, we need to publish locally to allow all projects to use this plugin
+//At PUBLISH time, we need to publish remotely when all is done.
+tasks.register('publishDeps') {
+    dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
+}
+
+build.dependsOn('publishPluginMavenPublicationToWebpiecesLocal2Repository')
+build.dependsOn('publishDeps')
+
+

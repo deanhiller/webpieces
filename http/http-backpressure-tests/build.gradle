@@ -10,8 +10,6 @@ plugins {
 
 apply from: '../../config/global.gradle'
 
-group 'org.webpieces.http'
-
 dependencies {
 
 	implementation deps['http2to1_1-client']

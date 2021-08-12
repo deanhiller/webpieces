@@ -10,8 +10,6 @@ plugins {
 
 apply from: '../../config/global.gradle'
 
-group 'org.webpieces.http'
-
 dependencies {
 
     api deps['http1_1-parser']
