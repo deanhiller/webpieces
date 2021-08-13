@@ -48,7 +48,7 @@ ext {
        'http-frontend2':            'org.webpieces:http-frontend2',
        'http-shared':               'org.webpieces:http-shared',
        'http-router':               'org.webpieces:http-router',
-       'htmlcompiler':              'org.webpieces:htmlcompiler',
+       'html-compiler':             'org.webpieces:html-compiler',
        'http-templating':           'org.webpieces:http-templating',
 
        'plugin-json-jackson':       'org.webpieces:plugin-json-jackson',

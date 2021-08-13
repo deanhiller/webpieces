@@ -1,3 +1,16 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+    id 'org.webpieces.templatecompiler' version '2.1-developer'
+}
+
+apply from: '../../config/global.gradle'
+
 sourceSets {
     test {
         resources {
@@ -10,14 +23,14 @@ sourceSets {
 
 dependencies {
 
-    api project(':webserver:http-templating')
+    api deps['http-templating']
+    api deps['html-compiler']
+    api deps['core-util']
 
-    implementation project(':core:core-util')
     implementation deps['commons-io']
-	implementation deps['commons-lang']
+    implementation deps['commons-lang']
     implementation deps['groovy']
     implementation deps['guice']
-
 
 }
 

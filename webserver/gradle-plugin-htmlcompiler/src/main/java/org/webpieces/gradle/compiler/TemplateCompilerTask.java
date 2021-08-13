@@ -173,7 +173,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 	private File findBase(File firstFile) {
 		File baseDir = recurse(firstFile.getParentFile());
 		if(baseDir == null)
-			throw new IllegalStateException("baseDir of src/main/java could not be found.  We currently dont' work outside src/main/java yet");
+			throw new IllegalStateException("A baseDir was not found in src/main/java nor src/test/java for file="+firstFile.getAbsolutePath()+".  templatecompiler doesn't currently work work outside those base directories");
 		
 		return baseDir;
 	}
@@ -187,7 +187,9 @@ public class TemplateCompilerTask extends AbstractCompile {
 		
 		if("src".equals(src) && "main".equals(main) && "java".equals(java))
 			return firstFile;
-			
+		else if("src".equals(src) && "test".equals(main) && "java".equals(java))
+			return firstFile;
+
 		return recurse(firstFile.getParentFile());
 	}
 

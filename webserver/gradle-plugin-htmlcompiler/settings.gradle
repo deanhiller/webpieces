@@ -1,4 +1,4 @@
-includeBuild '../htmlcompiler'
+includeBuild '../html-compiler'
 includeBuild '../../core/core-util'
 includeBuild '../../core/core-metrics'
 includeBuild '../../core/core-logging'
