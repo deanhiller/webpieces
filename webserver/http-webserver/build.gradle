@@ -40,7 +40,7 @@ if (System.getProperty('idea.active')) {
 
 task copyPersistenceXml(type: Copy, dependsOn: 'compileTestJava') {
     from 'src/test/resources/META-INF'
-    into 'output/classes/java/test/META-INF'
+    into 'build/classes/java/test/META-INF'
     include 'persistence.xml'
     //outputs.upToDateWhen { false }
 }
