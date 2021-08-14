@@ -10,8 +10,6 @@ plugins {
 
 apply from: '../../config/global.gradle'
 
-group 'org.webpieces.plugins'
-
 dependencies {
 
     api deps['hibernate']

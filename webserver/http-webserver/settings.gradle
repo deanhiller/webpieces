@@ -1,3 +1,5 @@
+includeBuild '../gradle-plugin-htmlcompiler'
+
 includeBuild '../http-templating'
 includeBuild '../http-router'
 includeBuild '../http-router-dev'
