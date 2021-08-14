@@ -45,22 +45,23 @@ gradlePlugin {
     }
 }
 
-pluginBundle {
-    website = 'https://github.com/deanhiller/webpieces'
-    vcsUrl = 'https://github.com/deanhiller/webpieces'
-    description = 'Webpieces HTML template compiler'
-    tags = ['webpieces']
+//pluginBundle {
+//    website = 'https://github.com/deanhiller/webpieces'
+//    vcsUrl = 'https://github.com/deanhiller/webpieces'
+//    description = 'Webpieces HTML template compiler'
+//    tags = ['webpieces']
+//
+//    plugins {
+//        htmlCompilerPlugin {
+//            // id is captured from java-gradle-plugin configuration
+//            displayName = 'Webpieces HTML Compiler'
+//        }
+//    }
+//
+//}
 
-    plugins {
-        htmlCompilerPlugin {
-            // id is captured from java-gradle-plugin configuration
-            displayName = 'Webpieces HTML Compiler'
-        }
-    }
-
-}
-
-processResources {
-    duplicatesStrategy = 'include'
-}
+//need this with pluginBundle for duplicate files
+//processResources {
+//    duplicatesStrategy = 'include'
+//}
 

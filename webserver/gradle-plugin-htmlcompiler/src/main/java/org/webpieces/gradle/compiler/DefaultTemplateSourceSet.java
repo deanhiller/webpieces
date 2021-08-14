@@ -7,11 +7,13 @@ import javax.annotation.Nullable;
 
 import org.gradle.api.Action;
 import org.gradle.api.file.SourceDirectorySet;
+import org.gradle.api.internal.tasks.DefaultGroovySourceDirectorySet;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 
 import groovy.lang.Closure;
+import org.gradle.api.tasks.GroovySourceDirectorySet;
 
 /**
  * Mimic DefaultGroovySourceSet 

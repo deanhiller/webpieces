@@ -11,15 +11,19 @@ plugins {
 
 apply from: '../../config/global.gradle'
 
-sourceSets {
-    test {
-        resources {
-            //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
-            srcDirs = ["src/test/java", "src/test/resources"]
-            excludes = ["**/*.java"]
-        }
-    }
-}
+//test {
+//    classpath = sourceSets.test.output + sourceSets.test.srcDirs
+//}
+
+//    sourceSets {
+//        test {
+//            resources {
+//                //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
+//                srcDirs = ["src/test/java", "src/test/resources"]
+//                excludes = ["**/*.java"]
+//            }
+//        }
+//    }
 
 dependencies {
 
@@ -41,5 +45,12 @@ publishing {
                 description = 'Library that swaps out http-templating classes to enable compiling on any incoming request if the source code has changed for development servers'
             }
         }
+    }
+}
+
+tasks.register('hello') {
+    doLast {
+        println 'hello'
+        println(sourceSets.test.runtimeClasspath.asPath)
     }
 }

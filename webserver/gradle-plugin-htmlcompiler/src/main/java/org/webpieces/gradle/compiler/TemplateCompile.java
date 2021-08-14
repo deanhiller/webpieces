@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.tasks.compile.CompilerForkUtils;
+import org.gradle.api.internal.tasks.compile.HasCompileOptions;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
@@ -40,14 +41,14 @@ import com.google.inject.Injector;
 import groovy.lang.GroovyClassLoader;
 
 @CacheableTask
-public class TemplateCompilerTask extends AbstractCompile {
+public class TemplateCompile extends AbstractCompile implements HasCompileOptions {
 
-	private static final Logger log = Logging.getLogger(TemplateCompilerTask.class);
+	private static final Logger log = Logging.getLogger(TemplateCompile.class);
 
     private final CompileOptions compileOptions;
     //private final GroovyCompileOptions groovyCompileOptions = new GroovyCompileOptions();
 
-    public TemplateCompilerTask() {
+    public TemplateCompile() {
         CompileOptions compileOptions = getServices().get(ObjectFactory.class).newInstance(CompileOptions.class);
         this.compileOptions = compileOptions;
         CompilerForkUtils.doNotCacheIfForkingViaExecutable(compileOptions, getOutputs());
@@ -104,8 +105,8 @@ public class TemplateCompilerTask extends AbstractCompile {
 		config.setCustomTagsFromPlugin(options.getCustomTags());
     	
         LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
-        
-        File destinationDir = getDestinationDir();
+
+        File destinationDir = getDestinationDirectory().getAsFile().get();
         log.log(LogLevel.LIFECYCLE, "destDir: " + destinationDir);
         File routeIdFile = new File(destinationDir, ProdConstants.ROUTE_META_FILE);
         if(routeIdFile.exists())
@@ -219,13 +220,13 @@ public class TemplateCompilerTask extends AbstractCompile {
 			if(target.exists()) {
 				//If you run ./gradle compileTemplates twice, the files will pre-exist already so we need to delete
 				//the file before we create and write to it.
-				log.info("Deleting {}", target);
+				log.log(LogLevel.LIFECYCLE, "Deleting {}", target);
 				if(!target.delete())
 					throw new IllegalStateException("Could not delete file="+target+"  Cannot continue");
 			}
 
 			createFile(target);
-			log.info("Writing {}", target);
+			log.log(LogLevel.LIFECYCLE, "Writing {}", target);
 			
 			try {
 				try (FileOutputStream str = new FileOutputStream(target)) {
