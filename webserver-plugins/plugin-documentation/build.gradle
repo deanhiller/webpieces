@@ -1,4 +1,15 @@
-apply plugin: 'org.webpieces.templatecompiler'
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+    id 'org.webpieces.templatecompiler' version '2.1-developer'
+}
+
+apply from: '../../config/global.gradle'
 
 sourceSets {
     //For testing, we need to put the html files on the classpath which are co-located with the controllers
@@ -12,10 +23,10 @@ sourceSets {
 }
 
 dependencies {
-    implementation project(':webserver-plugins:plugin-backend')
+    implementation deps['plugin-backend']
 
-    testImplementation project(':webserver:http-webserver-test')
-    testImplementation project(':webserver:http-fortesting-plugins')
+    testImplementation deps['http-webserver-test']
+    testImplementation deps['http-fortesting-plugins']
 }
 
 publishing {

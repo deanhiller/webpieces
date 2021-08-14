@@ -28,6 +28,7 @@ ext {
        'core-logging':              'org.webpieces:core-logging',
        'core-metrics':              'org.webpieces:core-metrics',
        'core-util':                 'org.webpieces:core-util',
+       'core-ddl':                  'org.webpieces:core-ddl',
        'runtimecompile':            'org.webpieces:runtimecompile',
        'core-datawrapper':          'org.webpieces:core-datawrapper',
        'core-mock':                 'org.webpieces:core-mock',
@@ -48,10 +49,17 @@ ext {
        'http-frontend2':            'org.webpieces:http-frontend2',
        'http-shared':               'org.webpieces:http-shared',
        'http-router':               'org.webpieces:http-router',
+       'http-router-dev':           'org.webpieces:http-router-dev',
        'html-compiler':             'org.webpieces:html-compiler',
        'http-templating':           'org.webpieces:http-templating',
+       'http-templating-dev':       'org.webpieces:http-templating-dev',
+       'http-webserver-test':       'org.webpieces:http-webserver-test',
+       'http-webserver':            'org.webpieces:http-webserver',
+       'http-fortesting-plugins':   'org.webpieces:http-fortesting-plugins',
 
+       'plugin-backend':            'org.webpieces:plugin-backend',
        'plugin-json-jackson':       'org.webpieces:plugin-json-jackson',
+       'plugin-hibernate':          'org.webpieces:plugin-hibernate',
 
        'groovy':                    'org.codehaus.groovy:groovy-all',
 

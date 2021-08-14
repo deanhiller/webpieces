@@ -1,12 +1,23 @@
-apply plugin: 'org.webpieces.templatecompiler'
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+    id 'org.webpieces.templatecompiler' version '2.1-developer'
+}
+
+apply from: '../../config/global.gradle'
 
 dependencies {
 
-    implementation project(':webserver:http-router')
-    implementation project(':webserver-plugins:plugin-backend')
+    implementation deps['http-router']
+    implementation deps['plugin-backend']
 
-    testImplementation project(':webserver:http-webserver-test')
-    testImplementation project(':webserver:http-fortesting-plugins')
+    testImplementation deps['http-webserver-test']
+    testImplementation deps['http-fortesting-plugins']
 }
 
 sourceSets {

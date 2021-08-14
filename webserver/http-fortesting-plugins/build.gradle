@@ -1,6 +1,15 @@
 plugins {
-    id 'org.webpieces.templatecompiler'
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+    id 'org.webpieces.templatecompiler' version '2.1-developer'
 }
+
+apply from: '../../config/global.gradle'
 
 sourceSets {
     //For testing, we need to put the html files on the classpath which are co-located with the controllers
@@ -15,7 +24,7 @@ sourceSets {
 
 dependencies {
     implementation deps['guice']
-    implementation project(':webserver:http-webserver')
+    api deps['http-webserver']
     //implementation project(':core:core-datawrapper')
 	
     //DO NOT DEPEND ON HTTP1.1 NOR HTTP2 here!!!!!
