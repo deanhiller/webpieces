@@ -20,6 +20,7 @@ dependencies {
     api deps['core-util']
     api deps['http-templating-lib']
 
+    testImplementation deps['http-templating-dev-lib']
 }
 
 publishing {
@@ -32,10 +33,3 @@ publishing {
     }
 }
 
-
-//This allows the tests to use *_html.class templates since for some reason, I was having trouble
-//getting the *.html files on the classpath WHILE compiling the templates which is needed to build the
-//jar.
-test {
-    systemProperty "gradle.running", "true"
-}

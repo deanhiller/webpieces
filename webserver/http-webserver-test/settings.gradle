@@ -1,5 +1,5 @@
 includeBuild '../../html-gradle-plugin/http-shared'
-includeBuild '../http-templating-dev'
+includeBuild '../../html-gradle-plugin/http-templating-dev-lib'
 includeBuild '../../http/http2to1_1-client'
 includeBuild '../../http/http1_1-client'
 includeBuild '../../http/http-frontend2'

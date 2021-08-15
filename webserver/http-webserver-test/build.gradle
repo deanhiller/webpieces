@@ -23,7 +23,7 @@ dependencies {
     //For testing, swap in just templating-dev such that we can debug test failures in an IDE without some
     //need for a generate html to class files each time (it uses the same template compiler that the
     //webpieces gradle plugin uses so it tests a bit more anyways which is good)
-    api deps['http-templating-dev']
+    api deps['http-templating-dev-lib']
 
 }
 
