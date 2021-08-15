@@ -18,7 +18,7 @@ dependencies {
     implementation deps['guice']
     api deps['core-util']
     //implementation project(':webserver:http-templating-dev') // Transitively pulling in http-templating is no longer working...
-    api deps['html-compiler']
+    api deps['http-templating-dev-lib']
 	
     testImplementation 'junit:junit'
 

@@ -1,0 +1,36 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+dependencies {
+
+    api deps['groovy']
+    implementation deps['guice']
+    implementation deps['commons-beans']
+    implementation deps['commons-io']
+    implementation deps['commons-lang']
+
+    api deps['http-shared']
+    api deps['http-templating-lib']
+
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId group
+            pom {
+                description = 'Templating library using groovy as the scripting language'
+            }
+        }
+    }
+}
+

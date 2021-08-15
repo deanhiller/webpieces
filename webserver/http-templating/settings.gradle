@@ -1,3 +1,4 @@
 includeBuild '../gradle-plugin-htmlcompiler'
-includeBuild '../html-compiler'
+includeBuild '../http-templating-lib'
+includeBuild '../http-templating-dev-lib'
 includeBuild '../../core/core-util'

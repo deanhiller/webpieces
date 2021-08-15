@@ -28,7 +28,7 @@ apply from: '../../config/global.gradle'
 dependencies {
 
     api deps['http-templating']
-    api deps['html-compiler']
+    api deps['http-templating-dev-lib']
     api deps['core-util']
 
     implementation deps['commons-io']

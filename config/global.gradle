@@ -51,6 +51,8 @@ ext {
        'http-router':               'org.webpieces:http-router',
        'http-router-dev':           'org.webpieces:http-router-dev',
        'html-compiler':             'org.webpieces:html-compiler',
+       'http-templating-lib':       'org.webpieces:http-templating-lib',
+       'http-templating-dev-lib':   'org.webpieces:http-templating-dev-lib',
        'http-templating':           'org.webpieces:http-templating',
        'http-templating-dev':       'org.webpieces:http-templating-dev',
        'http-webserver-test':       'org.webpieces:http-webserver-test',

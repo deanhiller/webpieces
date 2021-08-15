@@ -30,7 +30,7 @@ dependencies {
 
     api deps['http-shared']
     api deps['core-util']
-    api deps['html-compiler']
+    api deps['http-templating-lib']
 
 }
 
