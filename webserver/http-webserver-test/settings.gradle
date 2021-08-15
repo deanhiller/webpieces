@@ -1,0 +1,6 @@
+includeBuild '../http-templating-dev'
+includeBuild '../http-shared'
+includeBuild '../../http/http2to1_1-client'
+includeBuild '../../http/http1_1-client'
+includeBuild '../../http/http-frontend2'
+includeBuild '../../core/core-mock'

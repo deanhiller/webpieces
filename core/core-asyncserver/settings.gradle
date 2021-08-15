@@ -1,0 +1,2 @@
+includeBuild '../core-channelmanager2'
+includeBuild '../core-mock'

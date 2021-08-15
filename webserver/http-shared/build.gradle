@@ -1,18 +1,25 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
 dependencies {
 
     implementation deps['guice']
 
-    api project(':core:core-util')
-    api project(':core:core-datawrapper')
-
     //This was a tough decision as I really liked http-router not depending on http2 nor http1.1.  If it is going to depend on
-    //one of those, we pick http2 meaning if you want an http1 only server, you will drag http2 along with the router if you re-use it :(
     //BUT then again, everyone is going to be upgrading to http2 over time anyways ;)
-    api project(':http:http-api')
-    api project(':http:http2-api')
+    api deps['http2-api']
 
-	//DO NOT DEPEND ON HTTP1.1 NOR HTTP2 here!!!!!
-	//this keeps us pluggable with ANY http parser implementation...lost the battle there :(
+    //DO NOT DEPEND ON HTTP1.1 NOR HTTP2 here!!!!!
+    //this keeps us pluggable with ANY http parser implementation...lost the battle there :(
     //Feature trumps this desire
 }
 

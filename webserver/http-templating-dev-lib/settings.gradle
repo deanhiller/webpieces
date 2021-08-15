@@ -1,0 +1,3 @@
+includeBuild '../http-shared'
+includeBuild '../http-templating-lib'
+includeBuild '../../core/core-util'

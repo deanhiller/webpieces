@@ -1,0 +1,3 @@
+includeBuild '../../core/core-channelmanager2'
+includeBuild '../../core/core-mock'
+includeBuild '../http1_1-parser'

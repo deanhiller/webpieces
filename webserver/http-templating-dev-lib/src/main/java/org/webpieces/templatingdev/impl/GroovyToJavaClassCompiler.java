@@ -37,9 +37,9 @@ public class GroovyToJavaClassCompiler {
 			
 			CompilationUnit compileUnit = new CompilationUnit();
 		    compileUnit.addSource(scriptCode.getFullClassName(), scriptCode.getScriptSourceCode());
-		    compileUnit.compile(Phases.CLASS_GENERATION);
-		    compileUnit.setClassLoader(groovyCl);
-		    
+			compileUnit.setClassLoader(groovyCl);
+			compileUnit.compile(Phases.CLASS_GENERATION);
+
 		    for (Object compileClass : compileUnit.getClasses()) {
 		        GroovyClass groovyClass = (GroovyClass) compileClass;
 		        callbacks.compiledGroovyClass(groovyCl, groovyClass);

@@ -1,7 +1,20 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
 dependencies {
 
-    api project(':http:http1_1-parser')
-    api project(':webserver:http-router')
+    api deps['http1_1-parser']
+    api deps['http-router']
+
     api 'com.fasterxml.jackson.core:jackson-annotations'
     api 'com.fasterxml.jackson.core:jackson-databind'
 

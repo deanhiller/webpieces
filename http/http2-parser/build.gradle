@@ -1,11 +1,21 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
 dependencies {
 
-    api project(':core:core-datawrapper')
-    api project(':http:http2-api')
+    api deps['http2-api']
 
-    testImplementation project(':core:core-metrics')
+    testImplementation deps['core-metrics']
 
-    //testImplementation project(':core:core-util')
 }
 
 publishing {

@@ -1,15 +1,25 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
 dependencies {
-    api project(':http:http2-client')
-	api project(':http:http1_1-client')
-	api project(':http:http2-translations')
+    api deps['http2-client']
+    api deps['http1_1-client']
+    api deps['http2-translations']
 
-	implementation project(':core:core-metrics')
+    testImplementation deps['core-mock']
 
-	testImplementation project(':core:core-mock')
-
-	testImplementation deps['guava']
-	testImplementation project(':webserver-plugins:plugin-json-jackson')
-	testImplementation 'com.google.auth:google-auth-library-oauth2-http:0.25.2'
+    testImplementation deps['guava']
+    testImplementation deps['plugin-json-jackson']
+    testImplementation 'com.google.auth:google-auth-library-oauth2-http:0.25.2'
     testImplementation 'com.google.cloud:google-cloud-monitoring:2.1.0'
     testImplementation 'com.auth0:java-jwt:3.14.0'
 }

@@ -1,5 +1,14 @@
-apply plugin: 'jacoco' //code coverage
-apply plugin: 'idea'
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
 
 sourceSets {
     test {
@@ -31,7 +40,7 @@ if (System.getProperty('idea.active')) {
 
 task copyPersistenceXml(type: Copy, dependsOn: 'compileTestJava') {
     from 'src/test/resources/META-INF'
-    into 'output/classes/java/test/META-INF'
+    into 'build/classes/java/test/META-INF'
     include 'persistence.xml'
     //outputs.upToDateWhen { false }
 }
@@ -42,18 +51,17 @@ dependencies {
 
     api deps['guice']
     implementation deps['acme-sslcerts']
-    api project(':core:core-metrics')
-    api project(':http:http-frontend2')
-    api project(':webserver:http-templating')
-    api project(':webserver:http-router')
+    api deps['http-frontend2']
+    api deps['http-templating']
+    api deps['http-router']
 
-    testImplementation project(':core:core-mock')
-    testImplementation project(':core:core-ddl')
-    testImplementation project(':core:runtimecompile')
-    testImplementation project(':webserver:http-webserver-test')
-    testImplementation project(':webserver:http-router-dev')
-    testImplementation project(':webserver-plugins:plugin-hibernate')
-    testImplementation project(':webserver-plugins:plugin-json-jackson')
+    testImplementation deps['core-mock']
+    testImplementation deps['core-ddl']
+    testImplementation deps['runtimecompile']
+    testImplementation deps['http-webserver-test']
+    testImplementation deps['http-router-dev']
+    testImplementation deps['plugin-hibernate']
+    testImplementation deps['plugin-json-jackson']
 
     testImplementation deps['h2db']
 

@@ -1,0 +1,4 @@
+includeBuild '../plugin-backend'
+includeBuild '../../webserver/http-router'
+includeBuild '../../webserver/http-webserver-test'
+includeBuild '../../webserver/http-fortesting-plugins'

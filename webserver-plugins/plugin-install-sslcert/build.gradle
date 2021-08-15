@@ -1,14 +1,25 @@
-apply plugin: 'org.webpieces.templatecompiler'
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+    id 'org.webpieces.templatecompiler' version '2.1-developer'
+}
+
+apply from: '../../config/global.gradle'
 
 dependencies {
 
     implementation deps['acme-sslcerts']
     implementation deps['acme-utils']
-    implementation project(':webserver:http-router')
-    implementation project(':webserver-plugins:plugin-backend')
+    implementation deps['http-router']
+    implementation deps['plugin-backend']
     
-    testImplementation project(':webserver:http-fortesting-plugins')
-    testImplementation project(':webserver:http-webserver-test')
+    testImplementation deps['http-fortesting-plugins']
+    testImplementation deps['http-webserver-test']
 
 }
 
@@ -18,18 +29,6 @@ publishing {
             pom {
                 description = 'Webpieces SSL certificate generation plugin'
             }
-        }
-    }
-}
-
-
-sourceSets {
-    //For testing, we need to put the html files on the classpath which are co-located with the controllers
-    main {
-        resources {
-            //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
-            srcDirs = ["src/main/java", "src/main/resources"]
-            excludes = ["**/*.java"]
         }
     }
 }

@@ -1,16 +1,23 @@
 plugins {
     id 'groovy'
     id 'java-gradle-plugin'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
     id 'maven-publish'
     id 'com.gradle.plugin-publish' version '0.14.0'
 }
+
+apply from: '../../config/global.gradle'
 
 dependencies {
 
     implementation deps['commons-io']
     implementation deps['guice']
-    implementation project(':core:core-util')
-    implementation project(':webserver:http-templating-dev') // Transitively pulling in http-templating is no longer working...
+    api deps['core-util']
+    api deps['http-templating-dev-lib']
 	
     testImplementation 'junit:junit'
 
@@ -28,11 +35,10 @@ publishing {
     }
 }
 
-
 gradlePlugin {
     plugins {
         htmlCompilerPlugin {
-            id = 'org.webpieces.htmlcompiler'
+            id = 'org.webpieces.templatecompiler'
             implementationClass = 'org.webpieces.gradle.compiler.TemplateCompilerPlugin'
         }
     }
@@ -52,3 +58,9 @@ pluginBundle {
     }
 
 }
+
+//need this with pluginBundle for duplicate files
+processResources {
+    duplicatesStrategy = 'include'
+}
+

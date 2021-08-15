@@ -1,0 +1,5 @@
+includeBuild '../../webserver-plugins/plugin-json-jackson'
+includeBuild '../../core/core-mock'
+includeBuild '../http2-client'
+includeBuild '../http1_1-client'
+includeBuild '../http2-translations'

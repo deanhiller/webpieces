@@ -5,9 +5,9 @@ import com.google.inject.Module;
 
 public class ProdTemplateModule implements Module {
 
-	public static final String ROUTE_META_FILE = "org.webpieces.routeId.txt";
-	public static final String ROUTE_TYPE = "route";
-	public static final String PATH_TYPE = "path";
+	public static final String ROUTE_META_FILE = ProdConstants.ROUTE_META_FILE;
+	public static final String ROUTE_TYPE = ProdConstants.ROUTE_TYPE;
+	public static final String PATH_TYPE = ProdConstants.PATH_TYPE;
 			
 	private TemplateConfig config;
 

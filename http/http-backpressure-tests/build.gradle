@@ -1,11 +1,21 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
 dependencies {
 
-	implementation project(':core:core-metrics')
-	implementation project(':http:http2-client')
-	implementation project(':http:http2to1_1-client')
-	implementation project(':http:http-frontend2')
+	implementation deps['http2to1_1-client']
+	implementation deps['http-frontend2']
 	
-	testImplementation project(':core:core-mock')
+	testImplementation deps['core-mock']
 
 }
 

@@ -1,0 +1,5 @@
+includeBuild '../http-templating-lib'
+includeBuild '../http-templating-dev-lib'
+includeBuild '../../core/core-util'
+includeBuild '../../core/core-metrics'
+includeBuild '../../core/core-logging'

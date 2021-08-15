@@ -2,6 +2,7 @@ package org.webpieces.templating.api;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,14 @@ public class TestSimpleTemplate {
 				);
 		svc = injector.getInstance(DevTemplateService.class);
 	}
-	
+
+	@Test
+	public void testGradlesAbilitytoLoadCorrectly() {
+		URL resource = DevTemplateService.class.getResource("/mytestfile.html");
+
+		Assert.assertNotNull(resource);
+	}
+
 	@Test
 	public void testBasicTemplate() throws IOException {
 		String templateName = "/mytestfile.html";

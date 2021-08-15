@@ -1,0 +1,6 @@
+includeBuild '../gradle-plugin-htmlcompiler'
+includeBuild '../http-templating-dev-lib'
+includeBuild '../http-templating-lib'
+includeBuild '../http-templating'
+includeBuild '../http-shared'
+includeBuild '../../core/core-util'

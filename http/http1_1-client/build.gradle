@@ -1,11 +1,22 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
 dependencies {
 
-    api project(':http:http1_1-parser')
+    api deps['http1_1-parser']
 
-    implementation project(':core:core-channelmanager2')
-    implementation project(':core:core-metrics')
+    implementation deps['core-channelmanager2']
 
-    testImplementation project(':core:core-mock')
+    testImplementation deps['core-mock']
 
 }
 

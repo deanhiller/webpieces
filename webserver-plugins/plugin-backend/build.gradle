@@ -1,21 +1,21 @@
-apply plugin: 'org.webpieces.templatecompiler'
-
-sourceSets {
-    //For testing, we need to put the html files on the classpath which are co-located with the controllers
-    main {
-        resources {
-            //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
-            srcDirs = ["src/main/java", "src/main/resources"]
-            excludes = ["**/*.java"]
-        }
-    }
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+    id 'org.webpieces.templatecompiler' version '2.1-developer'
 }
 
+apply from: '../../config/global.gradle'
+
 dependencies {
-    api project(':webserver:http-webserver')
+    api deps['http-webserver']
     
-    testImplementation project(':webserver:http-webserver-test')
-    testImplementation project(':webserver:http-fortesting-plugins')
+    testImplementation deps['http-webserver-test']
+    testImplementation deps['http-fortesting-plugins']
 }
 
 //This allows the tests to use *_html.class templates since for some reason, I was having trouble

@@ -1,23 +1,26 @@
-sourceSets {
-    test {
-        resources {
-            //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
-            srcDirs = ["src/test/java", "src/test/resources"]
-            excludes = ["**/*.java"]
-        }
-    }
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+    id 'org.webpieces.templatecompiler' version '2.1-developer'
 }
+
+apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api project(':webserver:http-templating')
+    api deps['http-templating']
+    api deps['http-templating-dev-lib']
+    api deps['core-util']
 
-    implementation project(':core:core-util')
     implementation deps['commons-io']
-	implementation deps['commons-lang']
+    implementation deps['commons-lang']
     implementation deps['groovy']
     implementation deps['guice']
-
 
 }
 
@@ -28,5 +31,12 @@ publishing {
                 description = 'Library that swaps out http-templating classes to enable compiling on any incoming request if the source code has changed for development servers'
             }
         }
+    }
+}
+
+tasks.register('hello') {
+    doLast {
+        println 'hello'
+        println(sourceSets.test.runtimeClasspath.asPath)
     }
 }

@@ -16,6 +16,8 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.tasks.compile.CompilerForkUtils;
+import org.gradle.api.internal.tasks.compile.HasCompileOptions;
+import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.model.ObjectFactory;
@@ -24,7 +26,7 @@ import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.AbstractCompile;
 import org.gradle.api.tasks.compile.CompileOptions;
-import org.webpieces.templating.api.ProdTemplateModule;
+import org.webpieces.templating.api.ProdConstants;
 import org.webpieces.templatingdev.api.CompileCallback;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.StubModule;
@@ -39,14 +41,14 @@ import com.google.inject.Injector;
 import groovy.lang.GroovyClassLoader;
 
 @CacheableTask
-public class TemplateCompilerTask extends AbstractCompile {
+public class TemplateCompile extends AbstractCompile implements HasCompileOptions {
 
-	private static final Logger log = Logging.getLogger(TemplateCompilerTask.class);
+	private static final Logger log = Logging.getLogger(TemplateCompile.class);
 
     private final CompileOptions compileOptions;
     //private final GroovyCompileOptions groovyCompileOptions = new GroovyCompileOptions();
 
-    public TemplateCompilerTask() {
+    public TemplateCompile() {
         CompileOptions compileOptions = getServices().get(ObjectFactory.class).newInstance(CompileOptions.class);
         this.compileOptions = compileOptions;
         CompilerForkUtils.doNotCacheIfForkingViaExecutable(compileOptions, getOutputs());
@@ -90,27 +92,28 @@ public class TemplateCompilerTask extends AbstractCompile {
 		
         File buildDir = getProject().getBuildDir();
         //need to make customizable...
-        File groovySrcGen = new File(buildDir, "groovysrc"); 
-        log.info("groovysrc: " + groovySrcGen);
+        File groovySrcGen = new File(buildDir, "groovysrc");
+
+        log.log(LogLevel.LIFECYCLE, "groovysrc: " + groovySrcGen);
 
 		Charset encoding = Charset.forName(options.getEncoding());
 		TemplateCompileConfig config = new TemplateCompileConfig(false);
 		config.setFileEncoding(encoding);
 		config.setPluginClient(true);
 		config.setGroovySrcWriteDirectory(groovySrcGen);
-		log.info("Custom tags: " + options.getCustomTags());
+		log.log(LogLevel.LIFECYCLE, "Custom tags: " + options.getCustomTags());
 		config.setCustomTagsFromPlugin(options.getCustomTags());
     	
-        //LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
-        
-        File destinationDir = getDestinationDir();
-        log.info("destDir: " + destinationDir);
-        File routeIdFile = new File(destinationDir, ProdTemplateModule.ROUTE_META_FILE);
+        LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
+
+        File destinationDir = getDestinationDirectory().getAsFile().get();
+        log.log(LogLevel.LIFECYCLE, "destDir: " + destinationDir);
+        File routeIdFile = new File(destinationDir, ProdConstants.ROUTE_META_FILE);
         if(routeIdFile.exists())
         	routeIdFile.delete();
         routeIdFile.createNewFile();
         
-        log.info("routeId file: " + routeIdFile);
+        log.log(LogLevel.LIFECYCLE, "routeId file: " + routeIdFile);
         
         FileCollection srcCollection = getSource();
         Set<File> files = srcCollection.getFiles();
@@ -132,7 +135,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 	        for(File f : files) {
 				String fullName = findFullName(baseDir, f);
 
-	        	log.info("name={}, file={}", fullName, f);
+	        	log.log(LogLevel.LIFECYCLE, "file compile name={}, file={}", fullName, f);
 
 	        	String source = readSource(f);
 	        	
@@ -173,7 +176,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 	private File findBase(File firstFile) {
 		File baseDir = recurse(firstFile.getParentFile());
 		if(baseDir == null)
-			throw new IllegalStateException("baseDir of src/main/java could not be found.  We currently dont' work outside src/main/java yet");
+			throw new IllegalStateException("A baseDir was not found in src/main/java nor src/test/java for file="+firstFile.getAbsolutePath()+".  templatecompiler doesn't currently work work outside those base directories");
 		
 		return baseDir;
 	}
@@ -187,7 +190,9 @@ public class TemplateCompilerTask extends AbstractCompile {
 		
 		if("src".equals(src) && "main".equals(main) && "java".equals(java))
 			return firstFile;
-			
+		else if("src".equals(src) && "test".equals(main) && "java".equals(java))
+			return firstFile;
+
 		return recurse(firstFile.getParentFile());
 	}
 
@@ -215,13 +220,13 @@ public class TemplateCompilerTask extends AbstractCompile {
 			if(target.exists()) {
 				//If you run ./gradle compileTemplates twice, the files will pre-exist already so we need to delete
 				//the file before we create and write to it.
-				log.info("Deleting {}", target);
+				log.log(LogLevel.LIFECYCLE, "Deleting {}", target);
 				if(!target.delete())
 					throw new IllegalStateException("Could not delete file="+target+"  Cannot continue");
 			}
 
 			createFile(target);
-			log.info("Writing {}", target);
+			log.log(LogLevel.LIFECYCLE, "Writing {}", target);
 			
 			try {
 				try (FileOutputStream str = new FileOutputStream(target)) {
@@ -260,7 +265,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 			String encodedSourceLocation = URLEncoder.encode(sourceLocation, StandardCharsets.UTF_8);
 
 			try {
-				routeOut.write(ProdTemplateModule.ROUTE_TYPE+"/"+encodedSourceLocation+"/"+encodedRouteId+":"+encodedArgs+":dummy\n");
+				routeOut.write(ProdConstants.ROUTE_TYPE+"/"+encodedSourceLocation+"/"+encodedRouteId+":"+encodedArgs+":dummy\n");
 			} catch (IOException e) {
 				throw SneakyThrow.sneak(e);
 			}
@@ -275,7 +280,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 			String encodedSourceLocation = URLEncoder.encode(sourceLocation, StandardCharsets.UTF_8);
 			
 			try {
-				routeOut.write(ProdTemplateModule.PATH_TYPE+"/"+encodedSourceLocation+"/"+encodedPath+"\n");
+				routeOut.write(ProdConstants.PATH_TYPE+"/"+encodedSourceLocation+"/"+encodedPath+"\n");
 			} catch (IOException e) {
 				throw SneakyThrow.sneak(e);
 			}

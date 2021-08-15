@@ -1,9 +1,19 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
 dependencies {
 
-    api project(':http:http2-hpack')
-    api project(':core:core-statemachine')
-
-    implementation project(':core:core-metrics')
+    api deps['http2-hpack']
+    api deps['core-statemachine']
 
 }
 
