@@ -18,7 +18,15 @@ dependencies {
     implementation deps['commons-beans']
 
     api deps['http-webserver']
-
+    api deps['plugin-backend']
+    api deps['plugin-documentation']
+    api deps['plugin-dto']
+    api deps['plugin-grpc-json']
+    api deps['plugin-h2db']
+    api deps['plugin-hibernate']
+    api deps['plugin-install-sslcert']
+    api deps['plugin-json-jackson']
+    api deps['plugin-properties']
 }
 
 publishing {

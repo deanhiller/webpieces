@@ -1,10 +1,12 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
-* fix the tests not passing in the plugins directory for some reason
-* composite build should run tests in each module
+* Travis -> Circle CI.  do not allow build breaks
+* composite build should run tests in each module - https://discuss.gradle.org/t/gradlew-build-does-not-run-tests-of-downstream-composite-projects/40748
+* composite build clean should clean all
 * get the webpeices template generators working
 * get the publish working again so we can publish a release
+* try doing this in our template compiler plugin https://discuss.gradle.org/t/can-anyone-explain-the-javaplugin-source-code/40744 as well as copying the resources into a different directory that is NOT used by the build!!!!!!  In this way, tests work, dev server works, but the *.html files are not put in production!!
 * Move ClientImp's and server connectors into webpieces
 * XFuture so context issue is solve
 * conversations
@@ -17,11 +19,10 @@ ONLY THESE BIG ITEMS LEFT
    * website CURD using all DBOs
    * JSON CRUD with DTOs and DBOs
 * PLUGIN - GRPC
-* swap all DataWrapper with httpok ByteBuffer pool thingy?  Optimizes stuff more
+* swap all DataWrapper with 'http ok client' ByteBuffer pool thingy?  Optimizes stuff more
 * microservices 
    * microsvc-client project with Client Creator project -> port work from orderly
    * microsvc-server project with Routes file and filter -> port work from orderly
-* Travis -> Circle CI.  do not allow build breaks
 * port newline streaming lib and json lib and file upload lib into webpieces router api
 * PLUGIN - sync with remote Docker system by linking first at https://host:port/@remote
    * In this case, once linked, any changes to your DevServer occur in Docker container remotely in the cloud

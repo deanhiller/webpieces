@@ -60,8 +60,14 @@ ext {
        'http-fortesting-plugins':   'org.webpieces:http-fortesting-plugins',
 
        'plugin-backend':            'org.webpieces:plugin-backend',
-       'plugin-json-jackson':       'org.webpieces:plugin-json-jackson',
+       'plugin-documentation':      'org.webpieces:plugin-documentation',
+       'plugin-dto':                'org.webpieces:plugin-dto',
+       'plugin-grpc-json':          'org.webpieces:plugin-grpc-json',
+       'plugin-h2db':               'org.webpieces:plugin-h2db',
        'plugin-hibernate':          'org.webpieces:plugin-hibernate',
+       'plugin-install-sslcert':    'org.webpieces:plugin-install-sslcert',
+       'plugin-json-jackson':       'org.webpieces:plugin-json-jackson',
+       'plugin-properties':         'org.webpieces:plugin-properties',
 
        'groovy':                    'org.codehaus.groovy:groovy-all',
 
