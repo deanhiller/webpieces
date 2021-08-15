@@ -17,8 +17,7 @@ dependencies {
     implementation deps['guice']
     implementation deps['commons-beans']
 
-    api deps['core-util']
-    api deps['http-templating-lib']
+    api deps['http-webserver']
 
 }
 
@@ -30,12 +29,4 @@ publishing {
             }
         }
     }
-}
-
-
-//This allows the tests to use *_html.class templates since for some reason, I was having trouble
-//getting the *.html files on the classpath WHILE compiling the templates which is needed to build the
-//jar.
-test {
-    systemProperty "gradle.running", "true"
 }

@@ -17,7 +17,6 @@ dependencies {
     implementation deps['commons-io']
     implementation deps['guice']
     api deps['core-util']
-    //implementation project(':webserver:http-templating-dev') // Transitively pulling in http-templating is no longer working...
     api deps['http-templating-dev-lib']
 	
     testImplementation 'junit:junit'
@@ -45,23 +44,23 @@ gradlePlugin {
     }
 }
 
-//pluginBundle {
-//    website = 'https://github.com/deanhiller/webpieces'
-//    vcsUrl = 'https://github.com/deanhiller/webpieces'
-//    description = 'Webpieces HTML template compiler'
-//    tags = ['webpieces']
-//
-//    plugins {
-//        htmlCompilerPlugin {
-//            // id is captured from java-gradle-plugin configuration
-//            displayName = 'Webpieces HTML Compiler'
-//        }
-//    }
-//
-//}
+pluginBundle {
+    website = 'https://github.com/deanhiller/webpieces'
+    vcsUrl = 'https://github.com/deanhiller/webpieces'
+    description = 'Webpieces HTML template compiler'
+    tags = ['webpieces']
+
+    plugins {
+        htmlCompilerPlugin {
+            // id is captured from java-gradle-plugin configuration
+            displayName = 'Webpieces HTML Compiler'
+        }
+    }
+
+}
 
 //need this with pluginBundle for duplicate files
-//processResources {
-//    duplicatesStrategy = 'include'
-//}
+processResources {
+    duplicatesStrategy = 'include'
+}
 

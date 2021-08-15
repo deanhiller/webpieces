@@ -8,8 +8,9 @@ import org.webpieces.ctx.api.extension.HtmlTagCreator;
 //import org.webpieces.templating.impl.ProdTemplateService;
 
 import com.google.inject.ImplementedBy;
+import org.webpieces.templating.impl.ProdTemplateService;
 
-//@ImplementedBy(ProdTemplateService.class)
+@ImplementedBy(ProdTemplateService.class)
 public interface TemplateService {
 
 	void loadAndRunTemplate(String templatePath, StringWriter out, Map<String, Object> pageArgs);
