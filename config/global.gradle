@@ -1,4 +1,10 @@
 
+
+//Have to do this on EACH project so it will transitively pick it up
+clean.dependsOn gradle.includedBuilds*.task(':clean')
+build.dependsOn gradle.includedBuilds*.task(':build')
+test.dependsOn gradle.includedBuilds*.task(':test')
+
 repositories {
     mavenCentral()
     maven {

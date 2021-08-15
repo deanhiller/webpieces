@@ -11,10 +11,11 @@ plugins {
 
 apply from: 'config/global.gradle'
 
-//tasks.register('build') {
+//test.dependsOn gradle.includedBuilds*.task(':test')
 //
-//    dependsOn gradle.includedBuild('my-app').task(':app:run')
-//}
+//build.dependsOn gradle.includedBuilds*.task(':build')
+//
+//clean.dependsOn gradle.includedBuilds*.task(':clean')
 
 dependencies {
 
@@ -23,10 +24,13 @@ dependencies {
     implementation deps['commons-beans']
 
     api deps['http-webserver']
+    api deps['http2to1_1-client']
+
     api deps['plugin-backend']
     api deps['plugin-documentation']
     api deps['plugin-dto']
-    api deps['plugin-grpc-json']
+    //failed build right now
+    //api deps['plugin-grpc-json']
     api deps['plugin-h2db']
     api deps['plugin-hibernate']
     api deps['plugin-install-sslcert']
