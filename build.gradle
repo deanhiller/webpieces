@@ -9,7 +9,7 @@ plugins {
     id 'org.webpieces.templatecompiler' version '2.1-developer'
 }
 
-apply from: '../../config/global.gradle'
+apply from: 'config/global.gradle'
 
 dependencies {
 

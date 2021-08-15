@@ -1,3 +1,9 @@
+includeBuild '../../webserver/gradle-plugin-htmlcompiler'
+includeBuild '../../webserver/http-templating-lib'
+includeBuild '../../webserver/http-templating-dev-lib'
+
 includeBuild '../../webserver/http-webserver'
 includeBuild '../../webserver/http-webserver-test'
 includeBuild '../../webserver/http-fortesting-plugins'
+
+includeBuild '../../core/core-util'

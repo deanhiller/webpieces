@@ -183,6 +183,9 @@ public abstract class GroovyTemplateSuperclass extends Script {
     }
 	
 	public static String modifySourceLocation2(String srcLocation) {
+    	if(srcLocation == null)
+    		return null;
+
 		return "\n\n\t"+srcLocation+"\n";
 	}
 }

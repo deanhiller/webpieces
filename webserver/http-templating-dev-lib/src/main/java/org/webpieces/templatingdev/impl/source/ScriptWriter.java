@@ -60,6 +60,7 @@ public class ScriptWriter {
 		}
 		
 		sourceCode.println("import org.webpieces.ctx.api.Current", null);
+		sourceCode.println("import org.webpieces.templating.impl.source.GroovyExtensions", null);
 		sourceCode.println();
 		
         sourceCode.print("class ");
@@ -71,7 +72,7 @@ public class ScriptWriter {
         sourceCode.print(className);
         sourceCode.println(" extends org.webpieces.templating.impl.GroovyTemplateSuperclass {", null);
         sourceCode.println("  public Object run() {", null);
-        sourceCode.println("    use(org.webpieces.templating.impl.source.GroovyExtensions) {", null);
+        sourceCode.println("    use(GroovyExtensions) {", null);
         
 //        for (String n : extensionsClassnames) {
 //            println("use(_('" + n + "')) {");

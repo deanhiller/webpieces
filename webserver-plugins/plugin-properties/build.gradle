@@ -20,17 +20,6 @@ dependencies {
     testImplementation deps['http-fortesting-plugins']
 }
 
-sourceSets {
-    //For testing, we need to put the html files on the classpath which are co-located with the controllers
-    main {
-        resources {
-            //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
-            srcDirs = ["src/main/java", "src/main/resources"]
-            excludes = ["**/*.java"]
-        }
-    }
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -40,7 +29,6 @@ publishing {
         }
     }
 }
-
 
 test {
     systemProperty "gradle.running", "true"

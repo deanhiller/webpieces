@@ -1,6 +1,7 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
+* fix the tests not passing in the plugins directory for some reason
 * composite build should run tests in each module
 * get the webpeices template generators working
 * get the publish working again so we can publish a release
