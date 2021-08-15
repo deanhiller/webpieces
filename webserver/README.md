@@ -2,8 +2,6 @@
 
 ONLY THESE BIG ITEMS LEFT
 * Travis -> Circle CI.  do not allow build breaks
-* composite build should run tests in each module - https://discuss.gradle.org/t/gradlew-build-does-not-run-tests-of-downstream-composite-projects/40748
-* composite build clean should clean all
 * composite build clean should publish all
 * get the webpeices template generators working
 * get the publish working again so we can publish a release

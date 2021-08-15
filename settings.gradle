@@ -1,13 +1,52 @@
+//BIG NOTE: There is some lines like so in global.gradle...
+////Have to do this on EACH project so it will transitively pick it up
+//clean.dependsOn gradle.includedBuilds*.task(':clean')
+//build.dependsOn gradle.includedBuilds*.task(':build')
+//test.dependsOn gradle.includedBuilds*.task(':test')
+//IF we add includeBuild here, does it build the downstream projects TWICE, THREE times
+//we have to have the above code such that it will build
+
+includeBuild 'webserver/gradle-plugin-htmlcompiler'
+includeBuild 'webserver/http-templating-lib'
+includeBuild 'webserver/http-templating-dev-lib'
+includeBuild 'webserver/http-templating'
+includeBuild 'webserver/http-templating-dev'
+includeBuild 'webserver/http-router'
+includeBuild 'webserver/http-router-dev'
+includeBuild 'webserver/http-webserver-test'
 includeBuild 'webserver/http-webserver'
+includeBuild 'webserver/http-shared'
+includeBuild 'webserver/http-fortesting-plugins'
 includeBuild 'webserver/projectcreator'
+includeBuild 'http/http-frontend2'
+includeBuild 'http/http1_1-client'
+includeBuild 'http/http-api'
+includeBuild 'http/http2-engine'
+includeBuild 'http/http2-client'
+includeBuild 'http/http1_1-parser'
+includeBuild 'http/http2-api'
+includeBuild 'http/http-backpressure-tests'
+includeBuild 'http/http2-hpack'
+includeBuild 'http/http2-parser'
+includeBuild 'http/http2-translations'
 includeBuild 'http/http2to1_1-client'
 includeBuild 'webserver-plugins/plugin-backend'
 includeBuild 'webserver-plugins/plugin-documentation'
 includeBuild 'webserver-plugins/plugin-dto'
-//failure in build right now...
 //includeBuild 'webserver-plugins/plugin-grpc-json'
 includeBuild 'webserver-plugins/plugin-h2db'
 includeBuild 'webserver-plugins/plugin-hibernate'
 includeBuild 'webserver-plugins/plugin-install-sslcert'
 includeBuild 'webserver-plugins/plugin-json-jackson'
 includeBuild 'webserver-plugins/plugin-properties'
+includeBuild 'core/core-asyncserver'
+includeBuild 'core/core-channelmanager2'
+includeBuild 'core/core-datawrapper'
+includeBuild 'core/core-ddl'
+includeBuild 'core/core-logging'
+includeBuild 'core/core-metrics'
+includeBuild 'core/core-mock'
+includeBuild 'core/core-ssl'
+includeBuild 'core/core-statemachine'
+includeBuild 'core/core-util'
+includeBuild 'core/runtimecompile'
