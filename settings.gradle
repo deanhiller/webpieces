@@ -5,6 +5,7 @@
 //test.dependsOn gradle.includedBuilds*.task(':test')
 //IF we add includeBuild here, does it build the downstream projects TWICE, THREE times
 //we have to have the above code such that it will build
+// spooky settings.gradle change
 
 includeBuild 'webserver/gradle-plugin-htmlcompiler'
 includeBuild 'webserver/http-templating-lib'
