@@ -11,6 +11,11 @@ plugins {
 
 apply from: 'config/global.gradle'
 
+//tasks.register('build') {
+//
+//    dependsOn gradle.includedBuild('my-app').task(':app:run')
+//}
+
 dependencies {
 
     api deps['groovy']

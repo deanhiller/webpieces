@@ -10,7 +10,7 @@ repositories {
 project.ext.webpiecesVersion = '${version}'
 
 dependencies {
-   compile 'org.webpieces:projectcreator:${version}'
+   implementation 'org.webpieces:projectcreator:${version}'
 }
 
 

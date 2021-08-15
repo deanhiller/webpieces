@@ -1,5 +1,15 @@
-apply plugin: 'co.riiid.gradle'
-apply plugin: 'idea'
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+    id "co.riiid.gradle" version "0.4.2"
+}
+
+apply from: '../config/global.gradle'
 
 project.ext {
   stagingDirName = 'webpiecesServerBuilder'
