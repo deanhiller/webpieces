@@ -27,6 +27,8 @@ dependencies {
     api deps['plugin-install-sslcert']
     api deps['plugin-json-jackson']
     api deps['plugin-properties']
+
+    api deps['projectcreator']
 }
 
 publishing {

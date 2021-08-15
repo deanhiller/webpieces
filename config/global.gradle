@@ -69,6 +69,8 @@ ext {
        'plugin-json-jackson':       'org.webpieces:plugin-json-jackson',
        'plugin-properties':         'org.webpieces:plugin-properties',
 
+       'projectcreator':            'org.webpieces:projectcreator',
+
        'groovy':                    'org.codehaus.groovy:groovy-all',
 
        'commons-beans':             'commons-beanutils:commons-beanutils',
