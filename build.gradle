@@ -11,12 +11,6 @@ plugins {
 
 apply from: 'config/global.gradle'
 
-//test.dependsOn gradle.includedBuilds*.task(':test')
-//
-//build.dependsOn gradle.includedBuilds*.task(':build')
-//
-//clean.dependsOn gradle.includedBuilds*.task(':clean')
-
 dependencies {
 
     api deps['groovy']

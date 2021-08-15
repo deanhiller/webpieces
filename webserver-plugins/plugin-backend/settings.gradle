@@ -1,6 +1,6 @@
-includeBuild '../../webserver/gradle-plugin-htmlcompiler'
-includeBuild '../../webserver/http-templating-lib'
-includeBuild '../../webserver/http-templating-dev-lib'
+includeBuild '../../html-gradle-plugin/gradle-plugin-htmlcompiler'
+includeBuild '../../html-gradle-plugin/http-templating-dev-lib'
+includeBuild '../../html-gradle-plugin/http-templating-lib'
 
 includeBuild '../../webserver/http-webserver'
 includeBuild '../../webserver/http-webserver-test'

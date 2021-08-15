@@ -1,1 +1,1 @@
-includeBuild '../http-shared'
+includeBuild '../../html-gradle-plugin/http-shared'
