@@ -20,6 +20,8 @@ public class App {
         System.out.println(new App().getGreeting());
         System.out.println(new App().getGreeting());
 
+        int deanVar = 1;
+        System.out.println("var="+deanVar);
 
     }
 }
