@@ -2,9 +2,8 @@
 
 ONLY THESE BIG ITEMS LEFT
 * Travis -> Circle CI.  do not allow build breaks
-* composite build publish should publish all
 * get the webpeices template generators working
-* get the publish working again so we can publish a release
+* get the publish working again so we can publish a real release to remote repository
 * try doing this in our template compiler plugin https://discuss.gradle.org/t/can-anyone-explain-the-javaplugin-source-code/40744 as well as copying the resources into a different directory that is NOT used by the build!!!!!!  In this way, tests work, dev server works, but the *.html files are not put in production!!
 * Move ClientImp's and server connectors into webpieces
 * XFuture so context issue is solve

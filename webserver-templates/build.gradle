@@ -34,7 +34,7 @@ task stageTemplate(type: Copy) {
     into buildDir
     include stagingDirName + '/**'
     include stagingDirName + '/.gitignore'
-    exclude stagingDirName + '/output'
+    exclude stagingDirName + '/build'
     exclude stagingDirName + '/.classpath'
     exclude stagingDirName + '/.project'
     exclude stagingDirName + '/.settings'
@@ -44,17 +44,18 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/templateProject/.classpath'
     exclude stagingDirName + '/templateProject/.project'
     exclude stagingDirName + '/templateProject/.settings'
-    exclude stagingDirName + '/templateProject/output'
+    exclude stagingDirName + '/templateProject/build'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/build.gradle'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/output'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/build'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/out'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/bin'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/eclipse-output'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.classpath'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.project'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.settings'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.gradle'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/build.gradle'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/output'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/build'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/out'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/bin'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/webpiecesCache'
@@ -62,6 +63,7 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.classpath'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.project'
     exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.settings'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.gradle'
 }
 
 task copyGradleTemplate(type: Copy, dependsOn: 'stageTemplate') {
