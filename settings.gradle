@@ -5,7 +5,6 @@
 //test.dependsOn gradle.includedBuilds*.task(':test')
 //IF we add includeBuild here, does it build the downstream projects TWICE, THREE times
 //we have to have the above code such that it will build
-
 includeBuild 'html-gradle-plugin/gradle-plugin-htmlcompiler'
 includeBuild 'html-gradle-plugin/http-templating-dev-lib'
 includeBuild 'html-gradle-plugin/http-templating-lib'

@@ -6,11 +6,19 @@ plugins {
     id 'idea'
     id 'signing'
     id 'maven-publish'
-    id 'org.webpieces.templatecompiler' version '2.1-developer'
 }
 
 apply from: 'config/global.gradle'
 
+//if(project.hasProperty('projVersion')) {
+//    task release(dependsOn: ':webserver:githubRelease')
+//} else {
+    task release {
+        dependsOn gradle.includedBuild('webserver-templates').task(':build')
+        dependsOn gradle.includedBuild('http2to1_1-client').task(':build')
+        dependsOn('publishMavenJavaPublicationToWebpiecesLocal2Repository')
+    }
+//}
 //if(project.hasProperty('projVersion')) {
 //    //task release(dependsOn: ':webserver:githubRelease')
 //    tasks.register('release') {
@@ -25,15 +33,8 @@ apply from: 'config/global.gradle'
 ////    }
 //})
 
-//release.dependsOn('build')
-release.dependsOn gradle.includedBuild('webserver-templates').task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
 
 dependencies {
-
-    api deps['groovy']
-    implementation deps['guice']
-    implementation deps['commons-beans']
-
     api deps['http-webserver']
     api deps['webserver-templates']
     api deps['http2to1_1-client']
@@ -61,3 +62,7 @@ publishing {
         }
     }
 }
+
+//release {
+//    dependsOn('publishMavenJavaPublicationToWebpiecesLocal2Repository')
+//}

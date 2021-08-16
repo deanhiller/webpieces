@@ -4,8 +4,8 @@
 clean.dependsOn gradle.includedBuilds*.task(':clean')
 build.dependsOn gradle.includedBuilds*.task(':build')
 test.dependsOn gradle.includedBuilds*.task(':test')
-//gradle.taskGraph.whenReady { taskGraph ->
-//    publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
+
+//gradle.taskGraph. { taskGraph ->
 //}
 
 repositories {
@@ -428,6 +428,8 @@ gradle.taskGraph.whenReady { taskGraph ->
       }
    }
 
+publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
+
 
    if(project.properties.sonatypeUsername
            && project.properties.sonatypePassword
@@ -483,12 +485,6 @@ task printTasks {
     doLast {
        project.tasks.collect { task -> println("task="+task+" dependsOn="+task.dependsOn) }
     }
-}
-
-if(project.hasProperty('projVersion')) {
-   task release(dependsOn: ':webserver:githubRelease')
-} else {
-   task release(dependsOn: [':webserver:build', ':publishMavenJavaPublicationToMyTempRepository'])
 }
 
 //NOTE: The task name MUST BE this (even though I wanted it to be codeCoverage) because codecov.io looks for files

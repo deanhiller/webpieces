@@ -18,9 +18,6 @@ apply from: '../config/global.gradle'
 ////    }
 //})
 
-//clean.dependsOn gradle.includedBuild('webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME').task(':clean')
-//clean.dependsOn gradle.includedBuild('webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME-dev').task(':clean')
-
 dependencies {
     implementation deps['http-webserver']
     implementation deps['WEBPIECESxAPPNAME']
