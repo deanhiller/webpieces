@@ -17,5 +17,7 @@ public class App {
         System.out.println(new App().getGreeting());
         System.out.println(new App().getGreeting());
 
+        int deanVar = 0;
+        System.out.println("hi there="+deanVar);
     }
 }
