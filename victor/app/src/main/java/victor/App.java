@@ -10,6 +10,9 @@ public class App {
 
     public static void main(String[] args) {
 
+        int deanVar = 1;
+        System.out.println("var="+deanVar);
+
         System.out.println(new App().getGreeting());
         System.out.println(new App().getGreeting());
         System.out.println(new App().getGreeting());
