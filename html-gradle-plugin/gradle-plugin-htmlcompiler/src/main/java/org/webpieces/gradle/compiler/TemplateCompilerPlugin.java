@@ -182,64 +182,6 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
         this.createProcessResourcesTask(sourceSet, sourceSet.getJava(), project);
     }
 
-    private void defineConfigurationsForSourceSet(SourceSet sourceSet, ConfigurationContainer configurations) {
-        String implementationConfigurationName = sourceSet.getImplementationConfigurationName();
-        String runtimeOnlyConfigurationName = sourceSet.getRuntimeOnlyConfigurationName();
-        String compileOnlyConfigurationName = sourceSet.getCompileOnlyConfigurationName();
-        String compileClasspathConfigurationName = sourceSet.getCompileClasspathConfigurationName();
-        String annotationProcessorConfigurationName = sourceSet.getAnnotationProcessorConfigurationName();
-        String runtimeClasspathConfigurationName = sourceSet.getRuntimeClasspathConfigurationName();
-        String sourceSetName = sourceSet.toString();
-        Configuration implementationConfiguration = (Configuration)configurations.maybeCreate(implementationConfigurationName);
-        implementationConfiguration.setVisible(false);
-        implementationConfiguration.setDescription("Implementation only dependencies for " + sourceSetName + ".");
-        implementationConfiguration.setCanBeConsumed(false);
-        implementationConfiguration.setCanBeResolved(false);
-        DeprecatableConfiguration compileOnlyConfiguration = (DeprecatableConfiguration)configurations.maybeCreate(compileOnlyConfigurationName);
-        compileOnlyConfiguration.setVisible(false);
-        compileOnlyConfiguration.setCanBeConsumed(false);
-        compileOnlyConfiguration.setCanBeResolved(false);
-        compileOnlyConfiguration.setDescription("Compile only dependencies for " + sourceSetName + ".");
-        ConfigurationInternal compileClasspathConfiguration = (ConfigurationInternal)configurations.maybeCreate(compileClasspathConfigurationName);
-        compileClasspathConfiguration.setVisible(false);
-        compileClasspathConfiguration.extendsFrom(new Configuration[]{compileOnlyConfiguration, implementationConfiguration});
-        compileClasspathConfiguration.setDescription("Compile classpath for " + sourceSetName + ".");
-        compileClasspathConfiguration.setCanBeConsumed(false);
-        this.jvmPluginServices.configureAsCompileClasspath(compileClasspathConfiguration);
-        ConfigurationInternal annotationProcessorConfiguration = (ConfigurationInternal)configurations.maybeCreate(annotationProcessorConfigurationName);
-        annotationProcessorConfiguration.setVisible(false);
-        annotationProcessorConfiguration.setDescription("Annotation processors and their dependencies for " + sourceSetName + ".");
-        annotationProcessorConfiguration.setCanBeConsumed(false);
-        annotationProcessorConfiguration.setCanBeResolved(true);
-        this.jvmPluginServices.configureAsRuntimeClasspath(annotationProcessorConfiguration);
-        Configuration runtimeOnlyConfiguration = (Configuration)configurations.maybeCreate(runtimeOnlyConfigurationName);
-        runtimeOnlyConfiguration.setVisible(false);
-        runtimeOnlyConfiguration.setCanBeConsumed(false);
-        runtimeOnlyConfiguration.setCanBeResolved(false);
-        runtimeOnlyConfiguration.setDescription("Runtime only dependencies for " + sourceSetName + ".");
-        ConfigurationInternal runtimeClasspathConfiguration = (ConfigurationInternal)configurations.maybeCreate(runtimeClasspathConfigurationName);
-        runtimeClasspathConfiguration.setVisible(false);
-        runtimeClasspathConfiguration.setCanBeConsumed(false);
-        runtimeClasspathConfiguration.setCanBeResolved(true);
-        runtimeClasspathConfiguration.setDescription("Runtime classpath of " + sourceSetName + ".");
-        runtimeClasspathConfiguration.extendsFrom(new Configuration[]{runtimeOnlyConfiguration, implementationConfiguration});
-        this.jvmPluginServices.configureAsRuntimeClasspath(runtimeClasspathConfiguration);
-        sourceSet.setCompileClasspath(compileClasspathConfiguration);
-        sourceSet.setRuntimeClasspath(sourceSet.getOutput().plus(runtimeClasspathConfiguration));
-        sourceSet.setAnnotationProcessorPath(annotationProcessorConfiguration);
-        compileClasspathConfiguration.deprecateForDeclaration(new String[]{implementationConfigurationName, compileOnlyConfigurationName});
-        runtimeClasspathConfiguration.deprecateForDeclaration(new String[]{implementationConfigurationName, compileOnlyConfigurationName, runtimeOnlyConfigurationName});
-    }
-
-    private void definePathsForSourceSet(SourceSet sourceSet, ConventionMapping outputConventionMapping, Project project) {
-        outputConventionMapping.map("resourcesDir", () -> {
-            String classesDirName = "resources/" + sourceSet.getName()+"Templates";
-            return new File(project.getBuildDir(), classesDirName);
-        });
-        sourceSet.getJava().srcDir("src/" + sourceSet.getName() + "/java");
-        sourceSet.getResources().srcDir("src/" + sourceSet.getName() + "/java").include("**/*.html", "**/*.tag", "**/*.json");
-    }
-
     private void createProcessResourcesTask(SourceSet sourceSet, SourceDirectorySet resourceSet, Project project) {
         TaskProvider<Copy> copyTemplatesTask = project.getTasks().register(sourceSet.getProcessResourcesTaskName() + "Templates", Copy.class, (resourcesTask) -> {
             File fromDir = new File("src/"+sourceSet.getName()+"/java");

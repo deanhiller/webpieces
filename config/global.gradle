@@ -4,6 +4,9 @@
 clean.dependsOn gradle.includedBuilds*.task(':clean')
 build.dependsOn gradle.includedBuilds*.task(':build')
 test.dependsOn gradle.includedBuilds*.task(':test')
+//gradle.taskGraph.whenReady { taskGraph ->
+//    publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
+//}
 
 repositories {
     mavenCentral()
@@ -14,8 +17,13 @@ repositories {
     } 
 }
 
-checkstyle {
-    configFile = rootProject.file('../../config/checkstyle.xml')
+//Have to ignore the template projects which violate checkstyle until used to create
+//customers projects
+if(!project.name.startsWith("WEBPIECESx")) {
+    System.out.println("proj name="+project.name)
+    checkstyle {
+        configFile = rootProject.file('../../config/checkstyle.xml')
+    }
 }
 
 //MUST be defined here or every project has to override groupId in pom which is super annoying
@@ -64,6 +72,9 @@ ext {
        'http-webserver-test':       'org.webpieces:http-webserver-test',
        'http-webserver':            'org.webpieces:http-webserver',
        'http-fortesting-plugins':   'org.webpieces:http-fortesting-plugins',
+       'webserver-templates':       'org.webpieces:webserver-templates',
+       'WEBPIECESxAPPNAME':         'org.webpieces:WEBPIECESxAPPNAME',
+       'WEBPIECESxAPPNAME-dev':     'org.webpieces:WEBPIECESxAPPNAME-dev',
 
        'plugin-backend':            'org.webpieces:plugin-backend',
        'plugin-documentation':      'org.webpieces:plugin-documentation',

@@ -11,6 +11,22 @@ plugins {
 
 apply from: '../config/global.gradle'
 
+//gradle.includedBuilds.each( { build ->
+//    System.out.println("build="+build.name)
+////    tasks.create(taskName) { task ->
+////        dependsOn gradle.includedBuild(build.name).task(":$taskName")
+////    }
+//})
+
+//clean.dependsOn gradle.includedBuild('webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME').task(':clean')
+//clean.dependsOn gradle.includedBuild('webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME-dev').task(':clean')
+
+dependencies {
+    implementation deps['http-webserver']
+    implementation deps['WEBPIECESxAPPNAME']
+    implementation deps['WEBPIECESxAPPNAME-dev']
+}
+
 project.ext {
   stagingDirName = 'webpiecesServerBuilder'
   outputStagingDir = new File(buildDir, stagingDirName)
@@ -81,8 +97,13 @@ github {
 }
 
 githubRelease {
-   dependsOn ':webserver:build', ':publish'
-   doFirst {
-      println("Releasing to GitHub: " + github.assets)
-   }
+    dependsOn gradle.includedBuild('http-webserver').task(':build')
+    //, ':publish'
+
+    //Above replaces this -> (left so I can validate so delete if releases are working with versions)
+    //dependsOn ':webserver:build', ':publish'
+    doFirst {
+       println("Releasing to GitHub: " + github.assets)
+    }
 }
+

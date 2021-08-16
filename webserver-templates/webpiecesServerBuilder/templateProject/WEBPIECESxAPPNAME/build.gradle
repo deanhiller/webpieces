@@ -1,3 +1,14 @@
+plugins {
+    id 'java-library'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../../../config/global.gradle'
+
 //This file is used when we build the whole webpieces project AND is not part of template generation
 
 publishing.publications.mavenJava.pom.description='fake project used in testing.  ignore this jar'
@@ -24,22 +35,23 @@ if (System.getProperty('idea.active')) {
 }
 
 dependencies {
-    implementation project(':webserver:http-webserver')
+    api deps['http-webserver']
     //we start people off with the hibernate plugin
-    implementation project(':webserver-plugins:plugin-hibernate')
-    implementation project(':webserver-plugins:plugin-json-jackson')
-    implementation project(':webserver-plugins:plugin-backend')
-    implementation project(':webserver-plugins:plugin-install-sslcert')
-    implementation project(':webserver-plugins:plugin-properties')
+    implementation deps['plugin-hibernate']
+    implementation deps['plugin-json-jackson']
+    implementation deps['plugin-backend']
+    implementation deps['plugin-install-sslcert']
+    implementation deps['plugin-properties']
+
     implementation deps['commons-lang'] //used in json escaping
     //for connection pooling: https://mvnrepository.com/artifact/org.hibernate/hibernate-hikaricp
     implementation deps['hikari-cp']
     implementation 'jakarta.validation:jakarta.validation-api'
 
-    testImplementation project(':core:core-ddl')
-    testImplementation project(':core:core-mock')
-    testImplementation project(':webserver-plugins:plugin-h2db')
-    testImplementation project(':webserver:http-webserver-test')
+    testImplementation deps['core-ddl']
+    testImplementation deps['core-mock']
+    testImplementation deps['plugin-h2db']
+    testImplementation deps['http-webserver-test']
     testImplementation deps['selenium']
 }
 

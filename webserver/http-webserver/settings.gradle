@@ -11,5 +11,6 @@ includeBuild '../../webserver-plugins/plugin-hibernate'
 includeBuild '../../webserver-plugins/plugin-json-jackson'
 includeBuild '../../core/core-util'
 includeBuild '../../core/core-mock'
-includeBuild '../../core/core-ddl'
 includeBuild '../../core/runtimecompile'
+
+includeBuild '../../core/core-ddl'

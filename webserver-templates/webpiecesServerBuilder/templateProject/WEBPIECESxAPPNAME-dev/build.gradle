@@ -1,17 +1,32 @@
-//This file is used when we build the whole webpieces project AND is not part of template generation    
+plugins {
+  id 'java-library'
+  id 'jacoco' //code coverage
+  id 'eclipse'
+  id 'idea'
+  id 'signing'
+  id 'maven-publish'
+}
+
+apply from: '../../../../config/global.gradle'
+
+//This file is used when we build the whole webpieces project AND is not part of template generation
 
 publishing.publications.mavenJava.pom.description='project only used in testing.  ignore this jar'
 
 dependencies {
-  implementation project(':webserver:http-webserver')
-  implementation project(':webserver:http-router-dev')
-  implementation project(':webserver:http-templating-dev-lib')
-  implementation project(':webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME')
+
+  implementation deps['WEBPIECESxAPPNAME']
+  //we start people off with the hibernate plugin
+  implementation deps['http-router-dev']
+  implementation deps['http-templating-dev-lib']
+
+  implementation deps['plugin-install-sslcert']
+  implementation deps['plugin-properties']
 
   //we start people off with h2 plugin in dev mode that they can delete later if they want(easier to delete then to setup)
   //h2 works well for in-memory testing if using jdbc.  if using nosql, just delete this and code that no longer compiles after that
-  implementation project(':webserver-plugins:plugin-h2db')
+  implementation deps['plugin-h2db']
 
   //we load the documentation plugin in the development server (not the production server)
-  implementation project(':webserver-plugins:plugin-documentation')
+  implementation deps['plugin-documentation']
 }

@@ -2,7 +2,7 @@
 
 ONLY THESE BIG ITEMS LEFT
 * Travis -> Circle CI.  do not allow build breaks
-* composite build clean should publish all
+* composite build publish should publish all
 * get the webpeices template generators working
 * get the publish working again so we can publish a release
 * try doing this in our template compiler plugin https://discuss.gradle.org/t/can-anyone-explain-the-javaplugin-source-code/40744 as well as copying the resources into a different directory that is NOT used by the build!!!!!!  In this way, tests work, dev server works, but the *.html files are not put in production!!
