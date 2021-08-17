@@ -27,6 +27,7 @@ public class TestWriting {
 	private MockJdk mockJdk = new MockJdk(mockChannel);
 	private TCPChannel channel;
 
+	
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
