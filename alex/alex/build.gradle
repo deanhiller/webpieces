@@ -1,0 +1,175 @@
+//String exampleProj = "../webpiecesexample-all" // TODO Not a fan of this
+String exampleProj = System.getProperty("user.home") + "/.webpieces/webpiecesexample-all"
+
+// TODO FAILS if you use "clean" "build"
+task buildWP {
+    doLast {
+        int exitCode = exec {
+            commandLine = ["./gradlew", "build"]
+            workingDir = "../../"
+        }.exitValue
+        if (exitCode == 0) {
+            println "##################################"
+            println "SUCCESSFULLY BUILT WEBPIECES"
+            println "##################################"
+        } else {
+            println "##################################"
+            println "BUILDING WEBPIECES FAILED $exitCode"
+            println "##################################"
+            throw new GradleException("Could not build webpieces project")
+        }
+    }
+}
+
+// Test upgrading legacy code to make sure we stay backwards compatible
+task buildLegacyProject { // TODO dependsOn: buildWP ?
+    doLast {
+
+        // Clone the example project if necessary
+        File exampleDir = new File(exampleProj)
+        if (!exampleDir.exists()) {
+
+            println "Legacy project is not on disk so git cloning now so we can test backwards compatibility"
+            println "\n******* Running git clone https://github.com/deanhiller/webpiecesexample-all.git *****\n"
+
+            int exitCode = exec {
+                commandLine = ["git", "clone", "https://github.com/deanhiller/webpiecesexample-all.git", exampleProj]
+                ignoreExitValue = true
+            }.exitValue
+            if (exitCode == 0) {
+                println "##################################"
+                println "SUCCESSFULLY CLONED LEGACY REPO $exampleProj"
+                println "##################################"
+            } else {
+                println "##################################"
+                println "FAILURE IN cloning legacy repo $exitCode"
+                println "##################################"
+                throw new GradleException("Could not clone the legacy project repo to $exampleProj")
+            }
+
+        } else {
+            println "Found legacy project already checked out: $exampleProj"
+        }
+
+        // Pull the latest
+        exec {
+            workingDir = exampleDir
+            commandLine = ["git", "pull"]
+        }
+
+        // TODO FAILS here because of bintray issues
+        // Run gradle build and assembleDist on the example project
+        println "\n********** Running ./gradlew clean build assembleDist inside example project **************\n"
+        int exitCode = exec {
+            commandLine = ["./gradlew", "clean", "build", "assembleDist"]
+            ignoreExitValue = true
+            workingDir = exampleDir
+        }.exitValue
+        if (exitCode == 0) {
+            println "##################################"
+            println "SUCCESSFULLY BUILT LEGACY PROJECT $exampleProj"
+            println "##################################"
+        } else {
+            println "##################################"
+            println "BUILDING LEGACY PROJECT FAILED $exitCode"
+            println "##################################"
+            throw new GradleException("Could not build/assembleDist for legacy project")
+        }
+
+    }
+}
+
+// TODO Can't test this because I can't build the example project due to bintray issues
+// Test creation of project, build of new project and start of the server
+task testWebserver { // TODO dependsOn: buildLegacyProject ?
+    doLast {
+
+        int exitCode = exec {
+            commandLine = ["./createProject", "WebpiecesExample", "org.webpieces", ".."]
+            ignoreExitValue = true
+            workingDir = new File("webserver-templates/build/webpiecesServerbuilder")
+        }.exitValue
+        if (exitCode == 0) {
+            println "##################################"
+            println "SUCCESSFULLY CREATED PROJECT"
+            println "##################################"
+        } else {
+            println "##################################"
+            println "EXAMPLE PROJECT CREATION FAILED"
+            println "##################################"
+            throw new GradleException("Could not create example project")
+        }
+
+        // Unzip the distribution
+        exitCode = exec {
+            commandLine = ["unzip", "webpiecesexample.zip"]
+            ignoreExitValue = true
+            workingDir = new File("$exampleProj/webpiecesexample/output/distributions")
+        }.exitValue
+        if (exitCode == 0) {
+            println "##################################"
+            println "Successfully Unzipped Production Server to `pwd`"
+            println "##################################"
+        } else {
+            println "##################################"
+            println "Unzip Production server FAILED"
+            println "##################################"
+            throw new GradleException("Could not unzip production server")
+        }
+        String unzippedDir = "$exampleProj/webpiecesexample/output/distributions/webpiecesexample"
+
+        // Start the server
+        // Use a Process instead of exec { } because exec { } always waits for termination
+        Process serverProcess = new ProcessBuilder()
+                .command("./webpiecesexample")
+                .directory(new File(unzippedDir))
+                .inheritIO()
+                .start()
+
+        // From before, but no more right now at least:
+        // Logback has a 5 second pause we should go debug on jdk9 at least causing this to be 10 seconds instead of 5
+        long sleep = 5000
+        println "sleeping $sleep ms while server starts up"
+        Thread.sleep(sleep)
+
+        // TODO Is this part really necessary?
+        println "Searching logs for successful server startup ..."
+        File logFile = new File("$unzippedDir/logs/server.log")
+        if (logFile.text.contains("o.w.w.i.WebServerImpl     All servers started")) {
+            println "##################################"
+            println "11111 Server is located at: $unzippedDir"
+            println "Server Startup Succeeded within $sleep seconds!!"
+            println "##################################"
+        } else {
+            println "##################################"
+            println "11111 Server Startup Failed to be done in $sleep seconds"
+            println "##################################"
+            serverProcess.destroyForcibly().waitFor()
+            throw new GradleException("Could not startup server in time: $unzippedDir")
+        }
+
+        // Downloading https page on server
+        // Test out a curl request to localhost to make sure basic webpage is working
+        exec {
+            // TODO @Dean help please
+//            commandLine = ["curl" "-kL" "https://localhost:8443/@sslcert" > downloadedhtml.txt]
+            workingDir = new File("$unzippedDir")
+        }
+
+        File htmlFile = new File("$unzippedDir/downloadedhtml.txt")
+        if (htmlFile.text.contains("BACKEND Login")) {
+            println "###########################################################################"
+            println "Server Download Page Successful!!"
+            println "###########################################################################"
+        } else {
+            println "##################################"
+            println "Server Failed to Download Page!!"
+            println "##################################"
+            throw new GradleException("Could not download html page")
+        }
+
+        // Stop the server
+        serverProcess.destroyForcibly().waitFor()
+
+    }
+}
