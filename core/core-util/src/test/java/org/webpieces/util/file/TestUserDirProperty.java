@@ -34,5 +34,8 @@ public class TestUserDirProperty {
 		
 		//since absolute path was correct, it should exist 
 		Assert.assertFalse(f2.exists());
+
+		int deanVar = 0;
+		System.out.println("deanVar="+deanVar);
 	}
 }
