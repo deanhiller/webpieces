@@ -14,9 +14,6 @@ public class TestUserDirProperty {
 	@Test
 	public void testUserDirProp() {
 
-		int deanVar = 0;
-		System.out.println("deanVar="+deanVar);
-
 		File f = new File("src/test/resources/logback-test.xml");
 
 		//assert absolute path is correct
@@ -34,8 +31,6 @@ public class TestUserDirProperty {
 		
 		//since absolute path was correct, it should exist 
 		Assert.assertFalse(f2.exists());
-
-		int deanVar = 0;
-		System.out.println("deanVar="+deanVar);
+		
 	}
 }
