@@ -16,6 +16,10 @@
 #gradle output files
 **/output
 **/.gradle/
+#Intellij keeps creating gradle wrapper install all over the place!!  grrrr
+*/**/gradlew.bat
+*/**/gradlew
+*/**/gradle
 
 #Intellij Idea files
 *.iml
