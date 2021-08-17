@@ -27,6 +27,7 @@ public class TestReading {
 	private TCPChannel channel;
 	private MockDataListener listener;
 
+	
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);

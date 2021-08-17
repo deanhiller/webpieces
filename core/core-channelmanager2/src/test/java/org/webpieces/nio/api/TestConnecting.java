@@ -30,7 +30,6 @@ public class TestConnecting {
 	@Before
 	public void setup() {
 
-		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, Metrics.globalRegistry);
 		DirectExecutor exec = new DirectExecutor();
 		mgr = factory.createMultiThreadedChanMgr("test'n", new TwoPools("pl", new SimpleMeterRegistry()), new BackpressureConfig(), exec);
@@ -39,7 +38,8 @@ public class TestConnecting {
 	@Test
 	public void testBasicConnectingOnSelectorThread() {
 		MockDataListener listener = new MockDataListener();
-		
+
+
 		TCPChannel channel = mgr.createTCPChannel("myid");
 		
 		mockChannel.addConnectReturnValue(true);
