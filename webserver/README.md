@@ -1,10 +1,15 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
-* Travis -> Circle CI.  do not allow build breaks
+* get the runAllTestingLocalRelease.sh ported into gradle - Alex Sweeney working on
 * get the webpeices template generators working
+* fix SSL tests to use TLS1.3 or in circleCI get javax.net.ssl.SSLHandshakeException: No available authentication scheme
+* cannot run tests from core/core-channelmanager2 nore core/core-asyncserver in INTELLIJ!!!!! i
+   * switch to intellij builds and intellij run tests and I can run the test now
 * get version numbers on the plugins html compiler to be dynamic using the cmd line arg so we can release
 * get the publish working again so we can publish a real release to remote repository
+* get a new context that is portable among platforms into the repo as well
+* get GCPStorage ported as a first try according to the requirements
 * try doing this in our template compiler plugin https://discuss.gradle.org/t/can-anyone-explain-the-javaplugin-source-code/40744 as well as copying the resources into a different directory that is NOT used by the build!!!!!!  In this way, tests work, dev server works, but the *.html files are not put in production!!
 * Move ClientImp's and server connectors into webpieces
 * XFuture so context issue is solve

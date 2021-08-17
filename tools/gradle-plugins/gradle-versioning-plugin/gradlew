@@ -1,6 +1,0 @@
-#!/bin/bash
-
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-ROOT="$(git -C $DIR rev-parse --show-toplevel)"
-
-$ROOT/gradlew -p $DIR $@
