@@ -13,6 +13,7 @@ public class TestUserDirProperty {
 	 */
 	@Test
 	public void testUserDirProp() {
+
 		File f = new File("src/test/resources/logback-test.xml");
 
 		//assert absolute path is correct
