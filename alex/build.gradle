@@ -1,5 +1,5 @@
 //String exampleProj = "../webpiecesexample-all" // TODO Not a fan of this
-String exampleProj = System.getProperty("user.home") + "/.webpieces/webpiecesexample-all"
+String exampleProj = System.getProperty("user.home") + "/.junk/webpiecesexample-all"
 
 // TODO FAILS if you use "clean" "build"
 task buildWP {
@@ -57,7 +57,7 @@ task buildLegacyProject { // TODO dependsOn: buildWP ?
             commandLine = ["git", "pull"]
         }
 
-        // TODO FAILS here because of bintray issues
+        // TODO FAILS here because of > Could not find blahblahblah:2.0-developer.
         // Run gradle build and assembleDist on the example project
         println "\n********** Running ./gradlew clean build assembleDist inside example project **************\n"
         int exitCode = exec {
