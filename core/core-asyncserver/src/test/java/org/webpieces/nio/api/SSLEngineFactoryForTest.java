@@ -19,12 +19,12 @@ public class SSLEngineFactoryForTest implements SSLEngineFactory {
 	
 	private File clientKeystore;
 	private File serverKeystore;
-	private	String password = "root01";
+	private	String password = "123456";
 
 	public SSLEngineFactoryForTest() {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
-		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client.keystore");
-		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server.keystore");
+		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client2.keystore");
+		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server2.keystore");
 	}
 	
 	@Override

@@ -37,6 +37,7 @@ public class TestBasicSslClientServer {
 
 	@Before
 	public void setup() {
+		//System.setProperty("javax.net.debug", "all");
 	}
 
 	@After
