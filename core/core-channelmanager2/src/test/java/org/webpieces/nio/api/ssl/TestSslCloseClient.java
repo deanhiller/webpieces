@@ -33,7 +33,6 @@ import org.webpieces.util.threading.DirectExecutor;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
-@Ignore
 public class TestSslCloseClient {
 
 	private MockSslDataListener mockClientDataListener = new MockSslDataListener();
@@ -108,7 +107,7 @@ public class TestSslCloseClient {
 		Assert.assertEquals(17000, action.getDecryptedData().getReadableSize()+action2.getDecryptedData().getReadableSize());
 	}
 	
-	@Test
+	//@Test
 	public void testBasicCloseFromServer() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
 		SslAction action = svrSslParser.close();
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());
@@ -121,7 +120,7 @@ public class TestSslCloseClient {
 		Assert.assertEquals(SslActionEnum.LINK_SUCCESSFULLY_CLOSED, action2.getSslAction());
 	}
 	
-	@Test
+	//@Test
 	public void testBasicCloseFromClient() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
 		CompletableFuture<Void> future = channel.close();
 		Assert.assertTrue(future.isDone());
@@ -139,7 +138,7 @@ public class TestSslCloseClient {
 		future.get(2, TimeUnit.SECONDS);
 	}
 	
-	@Test
+	//@Test
 	public void testBothEndsAtSameTime() throws InterruptedException, ExecutionException, TimeoutException {
 		CompletableFuture<Void> future = channel.close();
 		SslAction action = svrSslParser.close();
@@ -157,7 +156,7 @@ public class TestSslCloseClient {
 		Assert.assertFalse(mockClientDataListener.isClosed());
 	}
 	
-	@Test
+	//@Test
 	public void testRaceFarendCloseThenClientCloses() throws InterruptedException, ExecutionException, TimeoutException {
 		SslAction action = svrSslParser.close();
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());
