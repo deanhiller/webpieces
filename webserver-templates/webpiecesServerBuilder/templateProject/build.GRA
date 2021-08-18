@@ -54,23 +54,13 @@ ext {
 allprojects {
    apply plugin: 'jacoco' //code coverage
 
-   buildDir = file('output')
-
    repositories {
-       jcenter()
        mavenCentral()
-       maven {
-          url "https://dl.bintray.com/deanhiller/maven"
-       }
-
-       //For testing locally
-       maven {
-         url uri('/tmp/myRepo/')
-       }
+       maven { url uri('/tmp/myRepo/') }
    }
 
    jacoco {
-      toolVersion = '0.8.3'
+      toolVersion = '0.8.7'
    }
 }
 
