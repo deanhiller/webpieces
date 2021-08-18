@@ -1,12 +1,16 @@
 //String exampleProj = "../webpiecesexample-all" // TODO Not a fan of this
 String exampleProj = System.getProperty("user.home") + "/.junk/webpiecesexample-all"
 
+//buildWP.dependsOn gradle.includedBuilds*.task(':build')
+
 // TODO FAILS if you use "clean" "build"
 task buildWP {
     doLast {
         int exitCode = exec {
+            // Depend on webserver-templates
+            // Depend on publishMavenJavaPublicationToWebpiecesLocal2Repository
             commandLine = ["./gradlew", "build"]
-            workingDir = "../../"
+            workingDir = "../"
         }.exitValue
         if (exitCode == 0) {
             println "##################################"
@@ -79,7 +83,7 @@ task buildLegacyProject { // TODO dependsOn: buildWP ?
     }
 }
 
-// TODO Can't test this because I can't build the example project due to bintray issues
+// TODO Can't test this because I can't build the example project due to > Could not find blahblahblah:2.0-developer.
 // Test creation of project, build of new project and start of the server
 task testWebserver { // TODO dependsOn: buildLegacyProject ?
     doLast {
