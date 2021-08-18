@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Implementation-Title: gradle-plugin-htmlcompiler
-Implementation-Version: 2.1-developer
-SCM-Revision: 3ed0f612d2cdbca72f90dc9cf4a018094853230c
-
