@@ -1,6 +1,6 @@
 //String exampleProj = "../webpiecesexample-all" // TODO Not a fan of this
 String exampleProj = System.getProperty("user.home") + "/.junk/webpiecesexample-all"
-String WPRoot = new File("../").getCanonicalPath();
+String WPRoot = projectDir.getParentFile().getCanonicalPath()
 
 // Test upgrading legacy code to make sure we stay backwards compatible
 task buildLegacyProject(dependsOn: gradle.includedBuilds*.task(':build')) {
@@ -60,10 +60,9 @@ task buildLegacyProject(dependsOn: gradle.includedBuilds*.task(':build')) {
 }
 
 // Test creation of project, build of new project and start of the server
-task testWebserver(dependsOn: buildLegacyProject) {
+task testWebserver(dependsOn: gradle.includedBuilds*.task(':build')) {
     doLast {
 
-        // TODO Does not finish executing this
         int exitCode = exec {
             commandLine = ["./createProject.sh", "WebpiecesExample", "org.webpieces", ".."]
             ignoreExitValue = true
@@ -80,29 +79,32 @@ task testWebserver(dependsOn: buildLegacyProject) {
             throw new GradleException("Could not create example project")
         }
 
+        String generatedProject = "$WPRoot/webserver-templates/build/webpiecesexample-all"
+
+        // TODO Does not finish executing this
         // Build the generated project
         println "\n******** Running ./gradlew build assembleDist from webpiecesexample-all *********\n"
         exitCode = exec {
             commandLine = ["./gradlew", "build", "assembleDist"]
             ignoreExitValue = true
-            workingDir = new File("$WPRoot/webserver-templates/build/webpiecesexample-all")
+            workingDir = new File(generatedProject)
         }.exitValue
         if (exitCode == 0) {
             println "##################################"
-            println "SUCCESSFULLY BUILT LEGACY PROJECT $exampleProj"
+            println "SUCCESSFULLY BUILT GENERATED PROJECT"
             println "##################################"
         } else {
             println "##################################"
-            println "BUILDING LEGACY PROJECT FAILED $exitCode"
+            println "BUILDING LEGACY GENERATED FAILED $exitCode"
             println "##################################"
-            throw new GradleException("Could not build/assembleDist for legacy project")
+            throw new GradleException("Could not build/assembleDist for generated project")
         }
 
         // Unzip the distribution
         exitCode = exec {
             commandLine = ["unzip", "webpiecesexample.zip"]
             ignoreExitValue = true
-            workingDir = new File("$WPRoot/webserver-templates/build/webpiecesexample-all/webpiecesexample/output/distributions")
+            workingDir = new File("$generatedProject/webpiecesexample/output/distributions")
         }.exitValue
         if (exitCode == 0) {
             println "##################################"
@@ -114,7 +116,7 @@ task testWebserver(dependsOn: buildLegacyProject) {
             println "##################################"
             throw new GradleException("Could not unzip production server")
         }
-        String unzippedDir = "$WPRoot/webserver-templates/build/webpiecesexample-all/webpiecesexample/output/distributions/webpiecesexample"
+        String unzippedDir = "$generatedProject/webpiecesexample/output/distributions/webpiecesexample"
 
         // Start the server
         // Use a Process instead of exec { } because exec { } always waits for termination
