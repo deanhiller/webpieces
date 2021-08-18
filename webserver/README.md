@@ -7,6 +7,8 @@ ONLY THESE BIG ITEMS LEFT
 * fix SSL tests to use TLS1.3 or in circleCI get javax.net.ssl.SSLHandshakeException: No available authentication scheme
    * TestSslBasicClient.java
    * TestSslCloseClient.java
+   * TestSslCloseSvr.java
+   * TestSslBasicSvr.java
 * cannot run tests from core/core-channelmanager2 nore core/core-asyncserver in INTELLIJ!!!!! i
    * switch to intellij builds and intellij run tests and I can run the test now
 * get version numbers on the plugins html compiler to be dynamic using the cmd line arg so we can release

@@ -94,7 +94,7 @@ public class TemplateCompile extends AbstractCompile implements HasCompileOption
         //need to make customizable...
         File groovySrcGen = new File(buildDir, "groovysrc");
 
-        log.log(LogLevel.LIFECYCLE, "groovysrc: " + groovySrcGen);
+        log.log(LogLevel.LIFECYCLE, "putting groovy scripts in: " + groovySrcGen);
 
 		Charset encoding = Charset.forName(options.getEncoding());
 		TemplateCompileConfig config = new TemplateCompileConfig(false);
@@ -107,7 +107,7 @@ public class TemplateCompile extends AbstractCompile implements HasCompileOption
         LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
 
         File destinationDir = getDestinationDirectory().getAsFile().get();
-        log.log(LogLevel.LIFECYCLE, "destDir: " + destinationDir);
+        log.log(LogLevel.LIFECYCLE, "Writing class files to destDir: " + destinationDir);
         File routeIdFile = new File(destinationDir, ProdConstants.ROUTE_META_FILE);
         if(routeIdFile.exists())
         	routeIdFile.delete();
@@ -135,7 +135,7 @@ public class TemplateCompile extends AbstractCompile implements HasCompileOption
 	        for(File f : files) {
 				String fullName = findFullName(baseDir, f);
 
-	        	log.log(LogLevel.LIFECYCLE, "file compile name={}, file={}", fullName, f);
+	        	log.log(LogLevel.INFO, "file compile name={}, file={}", fullName, f);
 
 	        	String source = readSource(f);
 	        	
