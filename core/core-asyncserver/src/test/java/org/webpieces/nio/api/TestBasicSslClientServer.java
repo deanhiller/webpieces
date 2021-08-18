@@ -36,15 +36,13 @@ public class TestBasicSslClientServer {
 	private List<Integer> values = new ArrayList<>();
 
 	@Before
-	public void setup() {		
-		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
-		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
+	public void setup() {
+		//System.setProperty("javax.net.debug", "all");
 	}
 
 	@After
 	public void teardown() {
-		System.clearProperty("jdk.tls.server.protocols");
-		System.clearProperty("jdk.tls.client.protocols");
+
 	}
 
 	@Test
