@@ -36,13 +36,11 @@ public class TestBasicSslClientServer {
 	private List<Integer> values = new ArrayList<>();
 
 	@Before
-	public void setup() {
-		//System.setProperty("javax.net.debug", "all");
+	public void setup() {		
 	}
 
 	@After
 	public void teardown() {
-
 	}
 
 	@Test
@@ -53,7 +51,7 @@ public class TestBasicSslClientServer {
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool, new BackpressureConfig());
 		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 		
-		SSLEngineFactoryForTest f = new SSLEngineFactoryForTest();
+		SSLEngineFactoryForTestNew f = new SSLEngineFactoryForTestNew();
 		InetSocketAddress addr = new InetSocketAddress("localhost", 0);
 		AsyncServer svr = svrFactory.createTcpServer(new AsyncConfig("sslTcpSvr"), new SvrDataListener(), f);
 		svr.start(addr);

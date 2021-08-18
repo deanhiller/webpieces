@@ -17,6 +17,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
@@ -45,6 +47,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class TestSslBasicSvr {
 
+	private static final Logger log = LoggerFactory.getLogger(TestSslBasicSvr.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private MockAsyncListener listener = new MockAsyncListener();
@@ -63,7 +66,7 @@ public class TestSslBasicSvr {
 		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
 		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
 
-		SSLEngineFactoryForTestOld sslFactory = new SSLEngineFactoryForTestOld();
+		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
 
 		MeterRegistry meters = Metrics.globalRegistry;
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
@@ -99,8 +102,10 @@ public class TestSslBasicSvr {
 		Assert.assertEquals(false, connectionOpenedInfo.isReadyForWrites);
 		
 		mockChannel.setNumBytesToConsume(100000);
-		
+
+		log.info("force data read");
 		mockChannel.forceDataRead(mockJdk, result.getEncryptedData());
+		log.info("force data read DONE here");
 	}
 
 	@After
@@ -115,7 +120,7 @@ public class TestSslBasicSvr {
 	//all 3 received, server creates TWO packets  client -> server (server is connected here)
 	//client receives two packets and is connected
 	
-	//@Test
+	@Test
 	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException, GeneralSecurityException, IOException {
 		SslAction action = parseIncoming(); //3 encrypted packets sent here
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());
@@ -154,7 +159,7 @@ public class TestSslBasicSvr {
 		Assert.assertEquals(17000, action.getDecryptedData().getReadableSize()+action2.getDecryptedData().getReadableSize());
 	}
 	
-	//@Test
+	@Test
 	public void testSplitData() throws InterruptedException, ExecutionException, TimeoutException {
 		SslAction action = parseIncoming(); //3 encrypted packets sent here
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());

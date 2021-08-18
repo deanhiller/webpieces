@@ -12,18 +12,18 @@ import java.io.FileInputStream;
 import java.security.KeyStore;
 
 
-public class SSLEngineFactoryForTestOld implements SSLEngineFactory {
+public class SSLEngineFactoryForTestNew implements SSLEngineFactory {
 
 	//private static final Logger log = Logger.getLogger(MockSSLEngineFactory.class.getName());
 
 	private File clientKeystore;
 	private File serverKeystore;
-	private	String password = "root01";
+	private	String password = "123456";
 
-	public SSLEngineFactoryForTestOld() {
+	public SSLEngineFactoryForTestNew() {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
-		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client.keystore");
-		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server.keystore");
+		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client2.keystore");
+		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server2.keystore");
 	}
 	
 	@Override

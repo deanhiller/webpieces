@@ -169,7 +169,11 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 				log.error("How can r be null. actions="+s, new RuntimeException("need task was the status but r="+r+" new state="+engine.getHandshakeStatus()));
 			} else {
-				r.run(); 
+				log.info("run task");
+//				if(true)
+//					throw new RuntimeException("tsting");
+				r.run();
+				log.info("run task done");
 			}
 			
 			return CompletableFuture.completedFuture(null);	
@@ -388,14 +392,23 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	}
 
 	private CompletableFuture<Void> sendHandshakeMessage(SSLEngine engine) {
+		boolean success = true;
 		try {
+			log.info("send handshake msg");
 			return sendHandshakeMessageImpl(engine);
+		} catch (RuntimeException e) {
+			success = false;
+			throw e;
 		} catch (SSLException e) {
+			success = false;
 			throw new AsyncSSLEngineException(e);
+		} finally {
+			log.info("send handshake message done. success="+success);
 		}
 	}
 	
 	private CompletableFuture<Void> sendHandshakeMessageImpl(SSLEngine engine) throws SSLException {
+		log.info("send handshake impl");
 		SSLEngine sslEngine = mem.getEngine();
 		if(log.isTraceEnabled())
 			log.trace(mem+"sending handshake message");
@@ -416,9 +429,16 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus=" 
 							+ beforeWrapHandshakeStatus+" connectionState="+mem.getConnectionState()+" otherStat="+otherStatus+" eng1="+sslEngine+" eng2="+engine);
 
+
 			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP2_START, sslEngine));
 			//KEEEEEP This very small.  wrap and then listener.packetEncrypted
+
+			log.info("send handshake WRAP");
+
 			SSLEngineResult result = sslEngine.wrap(SslMementoImpl.EMPTY, engineToSocketData);
+
+			log.info("send handshake after WRAP="+result);
+
 			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP2_END, sslEngine));
 
 
@@ -459,6 +479,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				metrics.recordEncryptedToSocket(engineToSocketData.remaining());
 				sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
 			}
+
+			log.info("send handshake later");
 
 			if (lastStatus == Status.CLOSED && !clientInitiated) {
 				fireClose();
