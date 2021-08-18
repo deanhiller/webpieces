@@ -112,7 +112,7 @@ public class TestSslCloseSvr {
 	}
 
 	private SSLParser createClientParser() {
-		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
+		SSLEngineFactoryForTestOld sslFactory = new SSLEngineFactoryForTestOld();
 		BufferPool pool = new TwoPools("p1", new SimpleMeterRegistry());
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();
 		SSLMetrics sslMetrics = new SSLMetrics("", new SimpleMeterRegistry());
@@ -122,7 +122,7 @@ public class TestSslCloseSvr {
 
 	private AsyncServer createServer() {
 		MeterRegistry meters = Metrics.globalRegistry;
-		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
+		SSLEngineFactoryForTestOld sslFactory = new SSLEngineFactoryForTestOld();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new TwoPools("pl", new SimpleMeterRegistry()), new BackpressureConfig(), new DirectExecutor());
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr, meters);

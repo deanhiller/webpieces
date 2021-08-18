@@ -63,7 +63,7 @@ public class TestSslBasicSvr {
 		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
 		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
 
-		SSLEngineFactoryForTest sslFactory = new SSLEngineFactoryForTest();	
+		SSLEngineFactoryForTestOld sslFactory = new SSLEngineFactoryForTestOld();
 
 		MeterRegistry meters = Metrics.globalRegistry;
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk, meters);
