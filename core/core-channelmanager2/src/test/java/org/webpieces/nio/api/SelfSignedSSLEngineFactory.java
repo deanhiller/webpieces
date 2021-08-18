@@ -19,14 +19,14 @@ public class SelfSignedSSLEngineFactory implements SSLEngineFactoryWithHost {
 	
 	private File clientKeystore;
 	private File serverKeystore;
-	private	String password = "password";
+	private	String password = "123456";
 
 	private String cachedHost = "";
 	
 	public SelfSignedSSLEngineFactory() {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
-		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/exampletrust.jks");
-		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/exampleca.jks");
+		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client2.keystore");
+		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server2.keystore");
 	}
 	
 	@Override

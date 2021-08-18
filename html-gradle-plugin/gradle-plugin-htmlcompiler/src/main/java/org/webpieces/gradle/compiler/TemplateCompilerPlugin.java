@@ -191,7 +191,7 @@ public class TemplateCompilerPlugin implements Plugin<Project> {
             resourcesTask.eachFile(new Action<FileCopyDetails>() {
                 @Override
                 public void execute(FileCopyDetails fileCopyDetails) {
-                    log.log(LogLevel.LIFECYCLE, "copying file="+fileCopyDetails.getPath() +" from="+fileCopyDetails.getSourcePath());
+                    log.log(LogLevel.INFO, "copying file="+fileCopyDetails.getPath() +" from="+fileCopyDetails.getSourcePath());
                 }
             });
             resourcesTask.setDescription("Processes " + resourceSet + ".");

@@ -1,30 +1,29 @@
 package org.webpieces.nio.api;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.KeyStore;
+import org.webpieces.util.exceptions.SneakyThrow;
+import org.webpieces.util.file.FileFactory;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManagerFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.KeyStore;
 
-import org.webpieces.util.exceptions.SneakyThrow;
-import org.webpieces.util.file.FileFactory;
 
-
-public class SSLEngineFactoryForTest implements SSLEngineFactory {
+public class SSLEngineFactoryForTestOld implements SSLEngineFactory {
 
 	//private static final Logger log = Logger.getLogger(MockSSLEngineFactory.class.getName());
-	
+
 	private File clientKeystore;
 	private File serverKeystore;
-	private	String password = "123456";
+	private	String password = "root01";
 
-	public SSLEngineFactoryForTest() {
+	public SSLEngineFactoryForTestOld() {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
-		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client2.keystore");
-		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server2.keystore");
+		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client.keystore");
+		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server.keystore");
 	}
 	
 	@Override
