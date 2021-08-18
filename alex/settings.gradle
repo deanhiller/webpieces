@@ -1,1 +1,1 @@
-includeBuild '../'
+includeBuild '../webserver-templates'
