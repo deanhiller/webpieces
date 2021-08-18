@@ -8,3 +8,4 @@ come from the filesystem(clearly classpath resources are easy but many images ar
 served off the filesystem).  Also, we need to know where the dynamic html files
 are for the Development Server
 
+Test
