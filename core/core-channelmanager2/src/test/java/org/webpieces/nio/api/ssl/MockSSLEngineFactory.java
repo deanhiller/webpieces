@@ -20,12 +20,12 @@ public class MockSSLEngineFactory {
 	
 	private File clientKeystore;
 	private File serverKeystore;
-	private	String password = "root01";
+	private	String password = "123456";
 	
 	public MockSSLEngineFactory() {
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
-		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client.keystore");
-		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server.keystore");
+		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client2.keystore");
+		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server2.keystore");
 	}
 	
 	public SSLEngine createEngineForServerSocket()  throws GeneralSecurityException, IOException {

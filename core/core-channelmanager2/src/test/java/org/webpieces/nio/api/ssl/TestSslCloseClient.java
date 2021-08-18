@@ -12,10 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLEngine;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.TwoPools;
@@ -36,6 +33,7 @@ import org.webpieces.util.threading.DirectExecutor;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
+@Ignore
 public class TestSslCloseClient {
 
 	private MockSslDataListener mockClientDataListener = new MockSslDataListener();
@@ -51,9 +49,6 @@ public class TestSslCloseClient {
 
 	@Before
 	public void setup() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
-		System.setProperty("jdk.tls.server.protocols", "TLSv1.2");
-		System.setProperty("jdk.tls.client.protocols", "TLSv1.2");
-
 		svrSslParser = createSslSvrParser();
 		channel = createClientChannel("server", mockJdk);
 		
@@ -90,8 +85,6 @@ public class TestSslCloseClient {
 
 	@After
 	public void teardown() {
-		System.clearProperty("jdk.tls.server.protocols");
-		System.clearProperty("jdk.tls.client.protocols");
 	}
 
 	private void transferBigData() throws InterruptedException, ExecutionException, TimeoutException {
@@ -115,7 +108,7 @@ public class TestSslCloseClient {
 		Assert.assertEquals(17000, action.getDecryptedData().getReadableSize()+action2.getDecryptedData().getReadableSize());
 	}
 	
-	//@Test
+	@Test
 	public void testBasicCloseFromServer() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
 		SslAction action = svrSslParser.close();
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());
@@ -128,7 +121,7 @@ public class TestSslCloseClient {
 		Assert.assertEquals(SslActionEnum.LINK_SUCCESSFULLY_CLOSED, action2.getSslAction());
 	}
 	
-	//@Test
+	@Test
 	public void testBasicCloseFromClient() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
 		CompletableFuture<Void> future = channel.close();
 		Assert.assertTrue(future.isDone());
@@ -146,7 +139,7 @@ public class TestSslCloseClient {
 		future.get(2, TimeUnit.SECONDS);
 	}
 	
-	//@Test
+	@Test
 	public void testBothEndsAtSameTime() throws InterruptedException, ExecutionException, TimeoutException {
 		CompletableFuture<Void> future = channel.close();
 		SslAction action = svrSslParser.close();
@@ -164,7 +157,7 @@ public class TestSslCloseClient {
 		Assert.assertFalse(mockClientDataListener.isClosed());
 	}
 	
-	//@Test
+	@Test
 	public void testRaceFarendCloseThenClientCloses() throws InterruptedException, ExecutionException, TimeoutException {
 		SslAction action = svrSslParser.close();
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());

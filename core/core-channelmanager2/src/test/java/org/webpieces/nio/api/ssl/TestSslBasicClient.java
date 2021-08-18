@@ -23,6 +23,7 @@ import org.webpieces.ssl.api.SSLParser;
 import org.webpieces.ssl.api.dto.SslAction;
 import org.webpieces.ssl.api.dto.SslActionEnum;
 
+@Ignore
 public class TestSslBasicClient {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -71,8 +72,7 @@ public class TestSslBasicClient {
 	//all 3 received, server creates TWO packets  client -> server (server is connected here)
 	//client receives two packets as ONE packet here and is connected
 
-//	@Ignore
-//	@Test
+	@Test
 	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException, GeneralSecurityException, IOException {
 		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, parseIncoming().getSslAction());
 		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, parseIncoming().getSslAction());
@@ -163,8 +163,7 @@ public class TestSslBasicClient {
 		Assert.assertEquals(17000, buffer[0].remaining()+buffer[1].remaining());
 	}
 
-//	@Ignore
-//	@Test
+	@Test
 	public void testCombineBuffers() throws InterruptedException, ExecutionException, TimeoutException {
 		//in this case, combine the output of all 3 of the client engine...
 		DataWrapper fullData = dataGen.chainDataWrappers(mockChannel.nextPayload(), mockChannel.nextPayload(), mockChannel.nextPayload());
@@ -181,8 +180,7 @@ public class TestSslBasicClient {
 		connectFuture.get(2, TimeUnit.SECONDS);
 	}
 
-//	@Ignore
-//	@Test
+	@Test
 	public void testHalfThenTooMuchFedInPacket() throws InterruptedException, ExecutionException, TimeoutException {
 		List<DataWrapper> packets = reshuffle();
 
