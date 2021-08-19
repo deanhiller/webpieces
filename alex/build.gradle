@@ -1,10 +1,12 @@
-//String exampleProj = "../webpiecesexample-all" // TODO Not a fan of this
-String exampleProj = System.getProperty("user.home") + "/.junk/webpiecesexample-all"
 String WPRoot = projectDir.getParentFile().getCanonicalPath()
+String generatedProject = "$WPRoot/webserver-templates/build/webpiecesexample-all"
 
 // Test upgrading legacy code to make sure we stay backwards compatible
-task buildLegacyProject(dependsOn: gradle.includedBuilds*.task(':build')) {
+task buildLegacyProject {
     doLast {
+
+//        String exampleProj = "../webpiecesexample-all" // TODO Not a fan of this
+        String exampleProj = System.getProperty("user.home") + "/.junk/webpiecesexample-all"
 
         // Clone the example project if necessary
         File exampleDir = new File(exampleProj)
@@ -60,7 +62,7 @@ task buildLegacyProject(dependsOn: gradle.includedBuilds*.task(':build')) {
 }
 
 // Test creation of project, build of new project and start of the server
-task testWebserver(dependsOn: gradle.includedBuilds*.task(':build')) {
+task buildWebserver(dependsOn: gradle.includedBuilds*.task(':build')) {
     doLast {
 
         int exitCode = exec {
@@ -79,9 +81,6 @@ task testWebserver(dependsOn: gradle.includedBuilds*.task(':build')) {
             throw new GradleException("Could not create example project")
         }
 
-        String generatedProject = "$WPRoot/webserver-templates/build/webpiecesexample-all"
-
-        // TODO Does not finish executing this
         // Build the generated project
         println "\n******** Running ./gradlew build assembleDist from webpiecesexample-all *********\n"
         exitCode = exec {
@@ -95,34 +94,30 @@ task testWebserver(dependsOn: gradle.includedBuilds*.task(':build')) {
             println "##################################"
         } else {
             println "##################################"
-            println "BUILDING LEGACY GENERATED FAILED $exitCode"
+            println "BUILDING GENERATED PROJECT FAILED $exitCode"
             println "##################################"
             throw new GradleException("Could not build/assembleDist for generated project")
         }
+    }
+}
 
-        // Unzip the distribution
-        exitCode = exec {
-            commandLine = ["unzip", "webpiecesexample.zip"]
-            ignoreExitValue = true
-            workingDir = new File("$generatedProject/webpiecesexample/output/distributions")
-        }.exitValue
-        if (exitCode == 0) {
-            println "##################################"
-            println "Successfully Unzipped Production Server to `pwd`"
-            println "##################################"
-        } else {
-            println "##################################"
-            println "Unzip Production server FAILED"
-            println "##################################"
-            throw new GradleException("Could not unzip production server")
-        }
-        String unzippedDir = "$generatedProject/webpiecesexample/output/distributions/webpiecesexample"
+// Unzip the distribution
+task unzipWebserver(type: Copy, dependsOn: buildWebserver) {
+    File zipFile = file("$generatedProject/webpiecesexample/build/distributions/webpiecesexample.zip")
+    File outputDir = file("$generatedProject/webpiecesexample/build/distributions")
+    from zipTree(zipFile)
+    into outputDir
+}
+
+task testWebserver(dependsOn: unzipWebserver) {
+    doLast {
+        String unzippedDir = "$generatedProject/webpiecesexample/build/distributions/webpiecesexample"
 
         // Start the server
         // Use a Process instead of exec { } because exec { } always waits for termination
         Process serverProcess = new ProcessBuilder()
                 .command("./webpiecesexample")
-                .directory(new File(unzippedDir))
+                .directory(new File("$unzippedDir/bin"))
                 .inheritIO()
                 .start()
 
@@ -132,7 +127,6 @@ task testWebserver(dependsOn: gradle.includedBuilds*.task(':build')) {
         println "sleeping $sleep ms while server starts up"
         Thread.sleep(sleep)
 
-        // TODO Is this part really necessary?
         println "Searching logs for successful server startup ..."
         File logFile = new File("$unzippedDir/logs/server.log")
         if (logFile.text.contains("o.w.w.i.WebServerImpl     All servers started")) {

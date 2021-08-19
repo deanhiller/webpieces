@@ -38,6 +38,8 @@ dependencies {
   implementation deps['plugin-properties']
   
   implementation deps['commons-lang'] //used in json escaping
+  implementation deps['javax-validation']
+  implementation deps['hibernate-validator']
  
   //REMOVE once you are on a real database as there is a line testCompile deps['plugin-h2'] that brings this in for tests
   //AND we only use this so you work out of the box to start hacking 
