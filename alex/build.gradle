@@ -109,7 +109,7 @@ task unzipWebserver(type: Copy, dependsOn: buildWebserver) {
     into outputDir
 }
 
-task testWebserver(dependsOn: unzipWebserver) {
+task testWebserver {
     doLast {
         String unzippedDir = "$generatedProject/webpiecesexample/build/distributions/webpiecesexample"
 
@@ -143,15 +143,12 @@ task testWebserver(dependsOn: unzipWebserver) {
         }
 
         // Downloading https page on server
-        // Test out a curl request to localhost to make sure basic webpage is working
-        exec {
-            // TODO @Dean help please
-//            commandLine = ["curl" "-kL" "https://localhost:8443/@sslcert" > downloadedhtml.txt]
-            workingDir = new File("$unzippedDir")
-        }
-
-        File htmlFile = new File("$unzippedDir/downloadedhtml.txt")
-        if (htmlFile.text.contains("BACKEND Login")) {
+        println "Trying to download a page from the running server ..."
+        Process curlProcess = new ProcessBuilder()
+                .command("curl", "-kL", "https://localhost:8443/@sslcert")
+                .start()
+        curlProcess.waitFor()
+        if (curlProcess.text.contains("BACKEND Login")) {
             println "###########################################################################"
             println "Server Download Page Successful!!"
             println "###########################################################################"
@@ -159,6 +156,7 @@ task testWebserver(dependsOn: unzipWebserver) {
             println "##################################"
             println "Server Failed to Download Page!!"
             println "##################################"
+            serverProcess.destroyForcibly().waitFor()
             throw new GradleException("Could not download html page")
         }
 
