@@ -109,7 +109,7 @@ task unzipWebserver(type: Copy, dependsOn: buildWebserver) {
     into outputDir
 }
 
-task testWebserver {
+task testWebserver(dependsOn: unzipWebserver) {
     doLast {
         String unzippedDir = "$generatedProject/webpiecesexample/build/distributions/webpiecesexample"
 
