@@ -1,5 +1,3 @@
-
-
 //Have to do this on EACH project so it will transitively pick it up
 clean.dependsOn gradle.includedBuilds*.task(':clean')
 build.dependsOn gradle.includedBuilds*.task(':build')
@@ -11,16 +9,16 @@ test.dependsOn gradle.includedBuilds*.task(':test')
 repositories {
     mavenCentral()
     maven {
-       //for testing local manually or publishing plugin
-       name "webpiecesLocal1" 
-       url uri('/tmp/myRepo/') 
-    } 
+        //for testing local manually or publishing plugin
+        name "webpiecesLocal1"
+        url uri('/tmp/myRepo/')
+    }
 }
 
 //Have to ignore the template projects which violate checkstyle until used to create
 //customers projects
-if(!project.name.startsWith("WEBPIECESx")) {
-    System.out.println("proj name="+project.name)
+if (!project.name.startsWith("WEBPIECESx")) {
+    System.out.println("proj name=" + project.name)
     checkstyle {
         configFile = rootProject.file('../../config/checkstyle.xml')
     }
@@ -39,257 +37,257 @@ ext {
      * }
      */
     deps = [
-       'core-logging':              'org.webpieces:core-logging',
-       'core-metrics':              'org.webpieces:core-metrics',
-       'core-util':                 'org.webpieces:core-util',
-       'core-ddl':                  'org.webpieces:core-ddl',
-       'runtimecompile':            'org.webpieces:runtimecompile',
-       'core-datawrapper':          'org.webpieces:core-datawrapper',
-       'core-mock':                 'org.webpieces:core-mock',
-       'core-ssl':                  'org.webpieces:core-ssl',
-       'core-channelmanager2':      'org.webpieces:core-channelmanager2',
-       'core-asyncserver':          'org.webpieces:core-asyncserver',
-       'core-statemachine':         'org.webpieces:core-statemachine',
-       'http1_1-parser':            'org.webpieces:http1_1-parser',
-       'http1_1-client':            'org.webpieces:http1_1-client',
-       'http-api':                  'org.webpieces:http-api',
-       'http2-api':                 'org.webpieces:http2-api',
-       'http2-parser':              'org.webpieces:http2-parser',
-       'http2-hpack':               'org.webpieces:http2-hpack',
-       'http2-engine':              'org.webpieces:http2-engine',
-       'http2-client':              'org.webpieces:http2-client',
-       'http2-translations':        'org.webpieces:http2-translations',
-       'http2to1_1-client':         'org.webpieces:http2to1_1-client',
-       'http-frontend2':            'org.webpieces:http-frontend2',
-       'http-shared':               'org.webpieces:http-shared',
-       'http-router':               'org.webpieces:http-router',
-       'http-router-dev':           'org.webpieces:http-router-dev',
-       'html-compiler':             'org.webpieces:html-compiler',
-       'http-templating-lib':       'org.webpieces:http-templating-lib',
-       'http-templating-dev-lib':   'org.webpieces:http-templating-dev-lib',
-       'http-templating':           'org.webpieces:http-templating',
-       'http-templating-dev':       'org.webpieces:http-templating-dev',
-       'http-webserver-test':       'org.webpieces:http-webserver-test',
-       'http-webserver':            'org.webpieces:http-webserver',
-       'http-fortesting-plugins':   'org.webpieces:http-fortesting-plugins',
-       'webserver-templates':       'org.webpieces:webserver-templates',
-       'WEBPIECESxAPPNAME':         'org.webpieces:WEBPIECESxAPPNAME',
-       'WEBPIECESxAPPNAME-dev':     'org.webpieces:WEBPIECESxAPPNAME-dev',
+            'core-logging'           : 'org.webpieces:core-logging',
+            'core-metrics'           : 'org.webpieces:core-metrics',
+            'core-util'              : 'org.webpieces:core-util',
+            'core-ddl'               : 'org.webpieces:core-ddl',
+            'runtimecompile'         : 'org.webpieces:runtimecompile',
+            'core-datawrapper'       : 'org.webpieces:core-datawrapper',
+            'core-mock'              : 'org.webpieces:core-mock',
+            'core-ssl'               : 'org.webpieces:core-ssl',
+            'core-channelmanager2'   : 'org.webpieces:core-channelmanager2',
+            'core-asyncserver'       : 'org.webpieces:core-asyncserver',
+            'core-statemachine'      : 'org.webpieces:core-statemachine',
+            'http1_1-parser'         : 'org.webpieces:http1_1-parser',
+            'http1_1-client'         : 'org.webpieces:http1_1-client',
+            'http-api'               : 'org.webpieces:http-api',
+            'http2-api'              : 'org.webpieces:http2-api',
+            'http2-parser'           : 'org.webpieces:http2-parser',
+            'http2-hpack'            : 'org.webpieces:http2-hpack',
+            'http2-engine'           : 'org.webpieces:http2-engine',
+            'http2-client'           : 'org.webpieces:http2-client',
+            'http2-translations'     : 'org.webpieces:http2-translations',
+            'http2to1_1-client'      : 'org.webpieces:http2to1_1-client',
+            'http-frontend2'         : 'org.webpieces:http-frontend2',
+            'http-shared'            : 'org.webpieces:http-shared',
+            'http-router'            : 'org.webpieces:http-router',
+            'http-router-dev'        : 'org.webpieces:http-router-dev',
+            'html-compiler'          : 'org.webpieces:html-compiler',
+            'http-templating-lib'    : 'org.webpieces:http-templating-lib',
+            'http-templating-dev-lib': 'org.webpieces:http-templating-dev-lib',
+            'http-templating'        : 'org.webpieces:http-templating',
+            'http-templating-dev'    : 'org.webpieces:http-templating-dev',
+            'http-webserver-test'    : 'org.webpieces:http-webserver-test',
+            'http-webserver'         : 'org.webpieces:http-webserver',
+            'http-fortesting-plugins': 'org.webpieces:http-fortesting-plugins',
+            'webserver-templates'    : 'org.webpieces:webserver-templates',
+            'WEBPIECESxAPPNAME'      : 'org.webpieces:WEBPIECESxAPPNAME',
+            'WEBPIECESxAPPNAME-dev'  : 'org.webpieces:WEBPIECESxAPPNAME-dev',
 
-       'plugin-backend':            'org.webpieces:plugin-backend',
-       'plugin-documentation':      'org.webpieces:plugin-documentation',
-       'plugin-dto':                'org.webpieces:plugin-dto',
-       'plugin-grpc-json':          'org.webpieces:plugin-grpc-json',
-       'plugin-h2db':               'org.webpieces:plugin-h2db',
-       'plugin-hibernate':          'org.webpieces:plugin-hibernate',
-       'plugin-install-sslcert':    'org.webpieces:plugin-install-sslcert',
-       'plugin-json-jackson':       'org.webpieces:plugin-json-jackson',
-       'plugin-properties':         'org.webpieces:plugin-properties',
+            'plugin-backend'         : 'org.webpieces:plugin-backend',
+            'plugin-documentation'   : 'org.webpieces:plugin-documentation',
+            'plugin-dto'             : 'org.webpieces:plugin-dto',
+            'plugin-grpc-json'       : 'org.webpieces:plugin-grpc-json',
+            'plugin-h2db'            : 'org.webpieces:plugin-h2db',
+            'plugin-hibernate'       : 'org.webpieces:plugin-hibernate',
+            'plugin-install-sslcert' : 'org.webpieces:plugin-install-sslcert',
+            'plugin-json-jackson'    : 'org.webpieces:plugin-json-jackson',
+            'plugin-properties'      : 'org.webpieces:plugin-properties',
 
-       'projectcreator':            'org.webpieces:projectcreator',
+            'projectcreator'         : 'org.webpieces:projectcreator',
 
-       'groovy':                    'org.codehaus.groovy:groovy-all',
+            'groovy'                 : 'org.codehaus.groovy:groovy-all',
 
-       'commons-beans':             'commons-beanutils:commons-beanutils',
-       'commons-io':                'commons-io:commons-io',
-       'commons-lang':              'org.apache.commons:commons-lang3',
+            'commons-beans'          : 'commons-beanutils:commons-beanutils',
+            'commons-io'             : 'commons-io:commons-io',
+            'commons-lang'           : 'org.apache.commons:commons-lang3',
 
-       'slf4j-api':                 'org.slf4j:slf4j-api',
-       'logback-classic':           'ch.qos.logback:logback-classic',
-       'guice':                     'com.google.inject:guice',
-       'guava':                     'com.google.guava:guava',
-       'selenium':                  'org.seleniumhq.selenium:selenium-java',
-       'twitter-hpack':             'com.twitter:hpack',
-       
-       'hibernate':                 'org.hibernate:hibernate-core',
-       'hibernate-validator':       'org.hibernate.validator:hibernate-validator',
-       'hikari-cp':                 'org.hibernate:hibernate-hikaricp',
-       'el-for-validator':          'org.glassfish:jakarta.el',
-       
-       'log4jdbc':                  'com.googlecode.log4jdbc:log4jdbc',
-       'h2db':                      'com.h2database:h2',
+            'slf4j-api'              : 'org.slf4j:slf4j-api',
+            'logback-classic'        : 'ch.qos.logback:logback-classic',
+            'guice'                  : 'com.google.inject:guice',
+            'guava'                  : 'com.google.guava:guava',
+            'selenium'               : 'org.seleniumhq.selenium:selenium-java',
+            'twitter-hpack'          : 'com.twitter:hpack',
 
-       'acme-sslcerts':             'org.shredzone.acme4j:acme4j-client',
-       'acme-utils':                'org.shredzone.acme4j:acme4j-utils',
+            'hibernate'              : 'org.hibernate:hibernate-core',
+            'hibernate-validator'    : 'org.hibernate.validator:hibernate-validator',
+            'hikari-cp'              : 'org.hibernate:hibernate-hikaricp',
+            'el-for-validator'       : 'org.glassfish:jakarta.el',
 
-       'jackson':                   'com.fasterxml.jackson.core:jackson-databind',
-       'jackson-annotations':       'com.fasterxml.jackson.core:jackson-annotations',
-       'jackson-java-time':         'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',
-       'jackson-parameter-names':   'com.fasterxml.jackson.module:jackson-module-parameter-names',
-	   
-       'micrometer':                'io.micrometer:micrometer-core',
-       'elastic-search':            'org.elasticsearch.client:elasticsearch-rest-client',
+            'log4jdbc'               : 'com.googlecode.log4jdbc:log4jdbc',
+            'h2db'                   : 'com.h2database:h2',
 
-       'grpc-protobuf':             'io.grpc:grpc-protobuf',
-       'grpc-stub':                 'io.grpc:grpc-stub',
-       'grpc-json':                 'com.google.protobuf:protobuf-java-util'
+            'acme-sslcerts'          : 'org.shredzone.acme4j:acme4j-client',
+            'acme-utils'             : 'org.shredzone.acme4j:acme4j-utils',
+
+            'jackson'                : 'com.fasterxml.jackson.core:jackson-databind',
+            'jackson-annotations'    : 'com.fasterxml.jackson.core:jackson-annotations',
+            'jackson-java-time'      : 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',
+            'jackson-parameter-names': 'com.fasterxml.jackson.module:jackson-module-parameter-names',
+
+            'micrometer'             : 'io.micrometer:micrometer-core',
+            'elastic-search'         : 'org.elasticsearch.client:elasticsearch-rest-client',
+
+            'grpc-protobuf'          : 'io.grpc:grpc-protobuf',
+            'grpc-stub'              : 'io.grpc:grpc-stub',
+            'grpc-json'              : 'com.google.protobuf:protobuf-java-util'
     ]
 
 }
 
-if(project.hasProperty('projVersion')) {
-   println("Java Version="+ System.getProperty("java.version"))
+if (project.hasProperty('projVersion')) {
+    println("Java Version=" + System.getProperty("java.version"))
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
-   if(taskGraph.hasTask(publish)) {
-      println("graph has task PUBLISH!!!")
-      if(!project.hasProperty('projVersion')) {
-         throw new RuntimeException("You must have -PprojVersion set to run the publish task which your task depends on as sonas needs release numbers")
-      }
-   }
+    if (taskGraph.hasTask(publish)) {
+        println("graph has task PUBLISH!!!")
+        if (!project.hasProperty('projVersion')) {
+            throw new RuntimeException("You must have -PprojVersion set to run the publish task which your task depends on as sonas needs release numbers")
+        }
+    }
 }
 
-   def currentJvm = System.getProperty('java.version') + ' (' + System.getProperty('java.vendor') + ' ' + System.getProperty('java.runtime.version') + ')'
+def currentJvm = System.getProperty('java.version') + ' (' + System.getProperty('java.vendor') + ' ' + System.getProperty('java.runtime.version') + ')'
 
-   if(project.hasProperty('projVersion')) {
-      if(project.projVersion.replaceAll("[^.]","").length() != 2) {
-         throw new GradleException("projVersion must be the full version!")
-      }
-     project.version = project.projVersion
-     println("CREATING RELEASE VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
-   } else {
-     project.version = '2.1-developer'
-     println("CREATING DEVELOPER VERSION "+project.name+":"+project.version+"  jvm="+currentJvm)
-   }
+if (project.hasProperty('projVersion')) {
+    if (project.projVersion.replaceAll("[^.]", "").length() != 2) {
+        throw new GradleException("projVersion must be the full version!")
+    }
+    project.version = project.projVersion
+    println("CREATING RELEASE VERSION " + project.name + ":" + project.version + "  jvm=" + currentJvm)
+} else {
+    project.version = '2.1-developer'
+    println("CREATING DEVELOPER VERSION " + project.name + ":" + project.version + "  jvm=" + currentJvm)
+}
 
-   ext {
-      //This is an input directory that we read jars from if they are not in a repo somewhere
-      fixedLibDir = file('lib')
-      toStagingDir = file(new File(buildDir, 'alljars'))
-      github_org = 'deanhiller'
-      project_name = 'webpieces'
-      getCommitHash = {
-          def stdout = new ByteArrayOutputStream()
-          exec {
-              commandLine 'git', 'rev-parse', 'HEAD'
-              standardOutput = stdout
-          }
-          return stdout.toString().trim()
-      }.memoize()
-   }
+ext {
+    //This is an input directory that we read jars from if they are not in a repo somewhere
+    fixedLibDir = file('lib')
+    toStagingDir = file(new File(buildDir, 'alljars'))
+    github_org = 'deanhiller'
+    project_name = 'webpieces'
+    getCommitHash = {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }.memoize()
+}
 
-   dependencies {
+dependencies {
 
-       implementation platform('com.google.guava:guava-bom:30.1.1-jre')
-       implementation platform('com.google.protobuf:protobuf-bom:3.15.6')
-       implementation platform('com.fasterxml.jackson:jackson-bom:2.12.2')
-       implementation platform('io.grpc:grpc-bom:1.37.0')
+    implementation platform('com.google.guava:guava-bom:30.1.1-jre')
+    implementation platform('com.google.protobuf:protobuf-bom:3.15.6')
+    implementation platform('com.fasterxml.jackson:jackson-bom:2.12.2')
+    implementation platform('io.grpc:grpc-bom:1.37.0')
 
-       implementation 'jakarta.inject:jakarta.inject-api'
-       implementation 'org.slf4j:slf4j-api'
+    implementation 'jakarta.inject:jakarta.inject-api'
+    implementation 'org.slf4j:slf4j-api'
 
-       runtimeOnly 'ch.qos.logback:logback-classic'
+    runtimeOnly 'ch.qos.logback:logback-classic'
 
-       testImplementation 'junit:junit'
-       constraints {
+    testImplementation 'junit:junit'
+    constraints {
 
-           implementation 'jakarta.annotation:jakarta.annotation-api:[1.3.5,2)'
-           implementation 'jakarta.inject:jakarta.inject-api:[1.0.3,2)'
-           implementation 'jakarta.persistence:jakarta.persistence-api:[2.2.3,3)'
-           implementation 'jakarta.validation:jakarta.validation-api:[2.0.1,3)'
+        implementation 'jakarta.annotation:jakarta.annotation-api:[1.3.5,2)'
+        implementation 'jakarta.inject:jakarta.inject-api:[1.0.3,2)'
+        implementation 'jakarta.persistence:jakarta.persistence-api:[2.2.3,3)'
+        implementation 'jakarta.validation:jakarta.validation-api:[2.0.1,3)'
 
-           implementation 'ch.qos.logback:logback-classic:1.2.3'
-           implementation 'com.google.inject:guice:4.2.2'
-           implementation 'com.googlecode.log4jdbc:log4jdbc:1.2'
-           implementation 'com.h2database:h2:1.4.200'
-           implementation 'com.twitter:hpack:1.0.2'
-           implementation 'commons-beanutils:commons-beanutils:1.9.4'
-           implementation 'commons-io:commons-io:2.8.0'
-           implementation 'io.micrometer:micrometer-core:1.6.5'
-           implementation 'org.apache.commons:commons-lang3:3.12.0'
-           implementation 'org.codehaus.groovy:groovy-all:3.0.8'
-           implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.6.1'
-           implementation 'org.glassfish:jakarta.el:3.0.3'
-           implementation 'org.hibernate:hibernate-core:5.4.30.Final'
-           implementation 'org.hibernate:hibernate-hikaricp:5.4.30.Final'
-           implementation 'org.hibernate.validator:hibernate-validator:6.2.0.Final'
-           implementation 'org.seleniumhq.selenium:selenium-java:4.0.0-alpha-7'
-           implementation 'org.shredzone.acme4j:acme4j-client:2.11'
-           implementation 'org.shredzone.acme4j:acme4j-utils:2.11'
-           implementation 'org.slf4j:slf4j-api:1.7.30'
+        implementation 'ch.qos.logback:logback-classic:1.2.3'
+        implementation 'com.google.inject:guice:4.2.2'
+        implementation 'com.googlecode.log4jdbc:log4jdbc:1.2'
+        implementation 'com.h2database:h2:1.4.200'
+        implementation 'com.twitter:hpack:1.0.2'
+        implementation 'commons-beanutils:commons-beanutils:1.9.4'
+        implementation 'commons-io:commons-io:2.8.0'
+        implementation 'io.micrometer:micrometer-core:1.6.5'
+        implementation 'org.apache.commons:commons-lang3:3.12.0'
+        implementation 'org.codehaus.groovy:groovy-all:3.0.8'
+        implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.6.1'
+        implementation 'org.glassfish:jakarta.el:3.0.3'
+        implementation 'org.hibernate:hibernate-core:5.4.30.Final'
+        implementation 'org.hibernate:hibernate-hikaricp:5.4.30.Final'
+        implementation 'org.hibernate.validator:hibernate-validator:6.2.0.Final'
+        implementation 'org.seleniumhq.selenium:selenium-java:4.0.0-alpha-7'
+        implementation 'org.shredzone.acme4j:acme4j-client:2.11'
+        implementation 'org.shredzone.acme4j:acme4j-utils:2.11'
+        implementation 'org.slf4j:slf4j-api:1.7.30'
 
-           testImplementation 'junit:junit:4.13.2'
+        testImplementation 'junit:junit:4.13.2'
 
-       }
+    }
 
-   }
+}
 
-    configurations.all {
+configurations.all {
 
-        resolutionStrategy {
+    resolutionStrategy {
 
-            dependencySubstitution {
-                substitute module('javax.annotation:javax.annotation-api') with module('jakarta.annotation:jakarta.annotation-api:1.3.5')
-                substitute module('javax.inject:javax.inject') with module('jakarta.inject:jakarta.inject-api:1.0.3')
-                substitute module('javax.persistence:javax.persistence-api') with module('jakarta.persistence:jakarta.persistence-api:2.2.3')
-                substitute module('javax.validation:validation-api') with module('jakarta.validation:jakarta.validation-api:2.0.2')
-            }
+        dependencySubstitution {
+            substitute module('javax.annotation:javax.annotation-api') with module('jakarta.annotation:jakarta.annotation-api:1.3.5')
+            substitute module('javax.inject:javax.inject') with module('jakarta.inject:jakarta.inject-api:1.0.3')
+            substitute module('javax.persistence:javax.persistence-api') with module('jakarta.persistence:jakarta.persistence-api:2.2.3')
+            substitute module('javax.validation:validation-api') with module('jakarta.validation:jakarta.validation-api:2.0.2')
+        }
 
-            eachDependency { DependencyResolveDetails details ->
+        eachDependency { DependencyResolveDetails details ->
 
-                if(details.requested.group == 'com.google.guava' && details.requested.version.contains('android')) {
-                    details.useVersion details.requested.version.replace('android', 'jre')
-                    details.because 'we want the JRE version of Guava'
-                }
-
+            if (details.requested.group == 'com.google.guava' && details.requested.version.contains('android')) {
+                details.useVersion details.requested.version.replace('android', 'jre')
+                details.because 'we want the JRE version of Guava'
             }
 
         }
+
     }
+}
 
 
-   //We could do this just for the template projects, BUT during debugging, it is sooo
-   //damn nice to have the var names, it is worth the performance penalty I think though
-   //we could change this
-   [compileJava, compileTestJava]*.options.collect {options ->
-     options.compilerArgs.add '-parameters'
+//We could do this just for the template projects, BUT during debugging, it is sooo
+//damn nice to have the var names, it is worth the performance penalty I think though
+//we could change this
+[compileJava, compileTestJava]*.options.collect { options ->
+    options.compilerArgs.add '-parameters'
 
-     //For windows only, to get the TestI18n working(there is chinese text in the *.java file screwing 
-     //windows up, we either have to move that to a file(annoying) or turn on utf-8
-     options.encoding = 'UTF-8'
-   }
+    //For windows only, to get the TestI18n working(there is chinese text in the *.java file screwing
+    //windows up, we either have to move that to a file(annoying) or turn on utf-8
+    options.encoding = 'UTF-8'
+}
 
-   if (JavaVersion.current().isJava8Compatible()) {
-     tasks.withType(Javadoc) {
+if (JavaVersion.current().isJava8Compatible()) {
+    tasks.withType(Javadoc) {
         // disable the crazy super-strict doclint tool in Java 8
         //noinspection SpellCheckingInspection
         options.addStringOption('Xdoclint:none', '-quiet')
-     }
-   }
-   if(JavaVersion.current().isJava9Compatible()) {
-        tasks.withType(Javadoc) {
-            options.addBooleanOption('html5', true)
-        }
     }
+}
+if (JavaVersion.current().isJava9Compatible()) {
+    tasks.withType(Javadoc) {
+        options.addBooleanOption('html5', true)
+    }
+}
 
-   jar {
-      manifest {
-         attributes(
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'SCM-Revision': getCommitHash()
-         )
-      }
-   }
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'SCM-Revision': getCommitHash()
+        )
+    }
+}
 
-   task javadocJar(type: Jar, dependsOn: javadoc) {
-      archiveClassifier = 'javadoc'
-      from 'build/docs/javadoc'
-      manifest {
-         attributes(
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'SCM-Revision': getCommitHash()
-         )
-      }
-   }
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from 'build/docs/javadoc'
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'SCM-Revision': getCommitHash()
+        )
+    }
+}
 
-   
-   jacocoTestReport {
-      additionalSourceDirs.setFrom files(sourceSets.main.allSource.srcDirs)
-      sourceDirectories.setFrom files(sourceSets.main.allSource.srcDirs)
-      classDirectories.setFrom  files(sourceSets.main.output)
+
+jacocoTestReport {
+    additionalSourceDirs.setFrom files(sourceSets.main.allSource.srcDirs)
+    sourceDirectories.setFrom files(sourceSets.main.allSource.srcDirs)
+    classDirectories.setFrom files(sourceSets.main.output)
 /*
       classDirectories = files(sourceSets.main.output.filter { file ->
          if(file.getName().endsWith("Exception.class")) {
@@ -300,101 +298,109 @@ gradle.taskGraph.whenReady { taskGraph ->
          return true;
       })
 */
-      executionData.from = fileTree(buildDir).include("/jacoco/*.exec")
-      reports {
-          html.enabled = true
-          xml.enabled = true
-          csv.enabled = false
-      }
-   }
+    executionData.from = fileTree(buildDir).include("/jacoco/*.exec")
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
+    }
+}
 
-   jacocoTestReport.dependsOn test
-   check.dependsOn jacocoTestReport
+jacocoTestReport.dependsOn test
+check.dependsOn jacocoTestReport
 
-   task sourcesJar(type: Jar) {
-       duplicatesStrategy = DuplicatesStrategy.WARN
-       archiveClassifier = 'sources'
-      from sourceSets.main.allSource
-       manifest {
-           attributes(
-               'Implementation-Title': project.name,
-               'Implementation-Version': project.version,
-               'SCM-Revision': getCommitHash()
-           )
-       }
-   }
+task sourcesJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'SCM-Revision': getCommitHash()
+        )
+    }
+}
 
-   //This is really only needed for devrouter, embeddablewebserver, http-client, and embeddablehttpproxy
-   //I wonder if we can list out those few projects and this task to each one and the assemble.dependsOn as well
-   //let's at least copy all jars to a single directory to use in creating an application...
-   //ALSO, this DELETES jars we no longer use so it has to be different directory than the dest jar we are creating as well
-   task syncJars(type: Sync, dependsOn: 'jar') {
-       duplicatesStrategy = DuplicatesStrategy.WARN
-       from(configurations.compileClasspath)
-       from(fixedLibDir) {}
-       from("${buildDir}/${libsDirName}") {}
-       into toStagingDir
-   }
+//This is really only needed for devrouter, embeddablewebserver, http-client, and embeddablehttpproxy
+//I wonder if we can list out those few projects and this task to each one and the assemble.dependsOn as well
+//let's at least copy all jars to a single directory to use in creating an application...
+//ALSO, this DELETES jars we no longer use so it has to be different directory than the dest jar we are creating as well
+task syncJars(type: Sync, dependsOn: 'jar') {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    from(configurations.compileClasspath)
+    from(fixedLibDir) {}
+    from("${buildDir}/${libsDirName}") {}
+    into toStagingDir
+}
 
-   //processResources.dependsOn(":webserver:http-webserver:writeVersion")
-   assemble.dependsOn('syncJars')
+//processResources.dependsOn(":webserver:http-webserver:writeVersion")
+assemble.dependsOn('syncJars')
 
-   test {
-      //Tests fail with wifi OFF and ipv6....force ipv4 for now
-      systemProperty "java.net.preferIPv4Stack", true
+test {
+    //Tests fail with wifi OFF and ipv6....force ipv4 for now
+    systemProperty "java.net.preferIPv4Stack", true
 
-      beforeTest{ descr ->
+    beforeTest { descr ->
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
-      }
-      afterTest { descr, result ->
+    }
+    afterTest { descr, result ->
         def totalTime = result.endTime - result.startTime
         logger.warn("Test complete ${descr.className} : ${descr.name} TOTAL TIME=${totalTime}")
-      }
-      testLogging {
+    }
+    testLogging {
         events "failed"
         exceptionFormat "full"
         afterSuite { desc, result ->
             if (!desc.parent) { // will match the outermost suite
-               println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
             }
         }
-      }
-   }
+    }
+}
 
-   //Using eclipse bin folder is WAY too common.  use outputeclipse instead so we can safely ignore it
-   eclipse {
-      classpath {
-         defaultOutputDir = file('eclipse-output')
-      }
-   }
+//Using eclipse bin folder is WAY too common.  use outputeclipse instead so we can safely ignore it
+eclipse {
+    classpath {
+        defaultOutputDir = file('eclipse-output')
+    }
+}
 
-   eclipseProject {
-      doLast {
-         // https://discuss.gradle.org/t/how-to-write-properties-to-3rd-party-eclipse-settings-files/6499/2
+eclipseProject {
+    doLast {
+        // https://discuss.gradle.org/t/how-to-write-properties-to-3rd-party-eclipse-settings-files/6499/2
 
-         def props = new Properties()
-         file(".settings/org.eclipse.jdt.core.prefs").withInputStream {
+        def props = new Properties()
+        file(".settings/org.eclipse.jdt.core.prefs").withInputStream {
             stream -> props.load(stream)
-         }
-         props.setProperty("org.eclipse.jdt.core.compiler.codegen.methodParameters", "generate")
-         file(".settings/org.eclipse.jdt.core.prefs").withOutputStream {
+        }
+        props.setProperty("org.eclipse.jdt.core.compiler.codegen.methodParameters", "generate")
+        file(".settings/org.eclipse.jdt.core.prefs").withOutputStream {
             stream -> props.store(stream, null)
-         }
-      }
-   }
+        }
+    }
+}
 
 
-   publishing {
-      repositories {
-         maven {
+publishing {
+    repositories {
+        maven {
             name = 'webpiecesLocal2'
             url = "file:/tmp/myRepo/"
-         }
-      }
-      publications {
-         mavenJava(MavenPublication) {
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
             from components.java
             groupId group
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
             pom {
                 name = project.name
                 description = "Not filled in for this project"
@@ -412,8 +418,8 @@ gradle.taskGraph.whenReady { taskGraph ->
                         name = 'Dean Hiller'
                     }
                     developer {
-                       id = 'zreed'
-                       name = 'Zachary Reed'
+                        id = 'zreed'
+                        name = 'Zachary Reed'
                     }
                 }
                 scm {
@@ -422,31 +428,31 @@ gradle.taskGraph.whenReady { taskGraph ->
                     url = "https://github.com/${github_org}/${project_name}.git"
                 }
             }
-               
+
             artifact sourcesJar
             artifact javadocJar
-         }
-      }
-   }
+        }
+    }
+}
 
 publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
 
 
-   if(project.properties.sonatypeUsername
-           && project.properties.sonatypePassword
-           && project.properties.sonatypeDomain) {
-      if (!project.hasProperty("signing.keyId")) {
-         throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
-      }
-      //To upload to nexus, your key must be uploaded to https://keys.openpgp.org/ as well.
-      //generating new key is found in documentation on gradle signing plugin
-      signing {
-         //let's only sign if releasing to sonatype repo as we have to
-         //BUT even if we remove the signing section, we still end up generating *.md5 and *.sha1 so apparently things
-         //are still being signed.  This signing section only seems to make the *.asc get generated. Then on top of that,
-         //the *asc file is then hashed generating *.asc.md5 and *.asc.sha1 which is annoying. 
-         sign publishing.publications.mavenJava
-      }
+if (project.properties.sonatypeUsername
+        && project.properties.sonatypePassword
+        && project.properties.sonatypeDomain) {
+    if (!project.hasProperty("signing.keyId")) {
+        throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
+    }
+    //To upload to nexus, your key must be uploaded to https://keys.openpgp.org/ as well.
+    //generating new key is found in documentation on gradle signing plugin
+    signing {
+        //let's only sign if releasing to sonatype repo as we have to
+        //BUT even if we remove the signing section, we still end up generating *.md5 and *.sha1 so apparently things
+        //are still being signed.  This signing section only seems to make the *.asc get generated. Then on top of that,
+        //the *asc file is then hashed generating *.asc.md5 and *.asc.sha1 which is annoying.
+        sign publishing.publications.mavenJava
+    }
 
 //       nexusPublishing {
 //           repositories {
@@ -458,13 +464,13 @@ publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.included
 //               }
 //           }
 //       }
-   }
+}
 
-   if (!project.hasProperty("projVersion")) {
-     ext.sonatypeUsername = "nousername"
-     ext.sonatypePassword = "nopassword"
-     ext.sonatypeDomain = "nodomain"
-   }
+if (!project.hasProperty("projVersion")) {
+    ext.sonatypeUsername = "nousername"
+    ext.sonatypePassword = "nopassword"
+    ext.sonatypeDomain = "nodomain"
+}
 
 
 //WE should not need this target... (it does this by default but we can't seem to depend on it...wait until we are on 5.3)
@@ -484,7 +490,7 @@ publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.included
 
 task printTasks {
     doLast {
-       project.tasks.collect { task -> println("task="+task+" dependsOn="+task.dependsOn) }
+        project.tasks.collect { task -> println("task=" + task + " dependsOn=" + task.dependsOn) }
     }
 }
 
@@ -494,7 +500,7 @@ task jacocoRootReport(type: JacocoReport) {
     dependsOn = subprojects.test
     additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
     sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories.setFrom  files(subprojects.sourceSets.main.output)
+    classDirectories.setFrom files(subprojects.sourceSets.main.output)
     executionData.setFrom files(subprojects.jacocoTestReport.executionData).filter { f -> f.exists() }
     reports {
         html.enabled = true
@@ -508,17 +514,16 @@ task jacocoRootReport(type: JacocoReport) {
 
 //we don't do java plugin on top level on purpose as it is not a java
 //project BUT we need build and clean to work inline with the java projects
-if(project.tasks.findByName('build')) {
+if (project.tasks.findByName('build')) {
     build.dependsOn ':jacocoRootReport'
-}
-else {
+} else {
     task build(dependsOn: ':jacocoRootReport')
 }
 
 clean {
-   doLast {
-      delete "${buildDir}"
-   }
+    doLast {
+        delete "${buildDir}"
+    }
 }
 
 

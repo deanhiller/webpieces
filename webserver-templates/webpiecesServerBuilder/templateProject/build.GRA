@@ -1,5 +1,5 @@
 plugins {
-   id 'org.barfuin.gradle.taskinfo' version '1.0.5' // This prints out a task tree (pretty print)
+   id "com.dorongold.task-tree" version "1.5" //This prints out a task tree (pretty print)
 }
 
 //NOTE: There is a picture on https://docs.gradle.org/current/userguide/java_plugin.html as to the default gradle targets for the java
@@ -11,7 +11,7 @@ ext {
     /*
      * Dependencies can be named so that sub-projects can reference consistent version of them.
      * dependencies {
-     *     compile deps['joda-time']
+     *     implementation deps['joda-time']
      * }
      *
      * This list is NOT who you depend on but just a Map of String, String...
@@ -20,21 +20,23 @@ ext {
        'web-webserver':      "org.webpieces:http-webserver:${webpiecesVersion}",
        'web-webserver-test': "org.webpieces:http-webserver-test:${webpiecesVersion}",
        'web-devrouter':      "org.webpieces:http-router-dev:${webpiecesVersion}",
-       'web-devtemplating':  "org.webpieces:http-templating-dev:${webpiecesVersion}",
+       'web-devtemplating':  "org.webpieces:http-templating-dev-lib:${webpiecesVersion}",
        'core-mock':          "org.webpieces:core-mock:${webpiecesVersion}",
        'core-ddl':           "org.webpieces:core-ddl:${webpiecesVersion}",
        'plugin-hibernate':   "org.webpieces:plugin-hibernate:${webpiecesVersion}",
        'plugin-backend':     "org.webpieces:plugin-backend:${webpiecesVersion}",
-       'plugin-install-sslcert': "org.webpieces:plugin-install-sslcert:${webpiecesVersion}", 
+       'plugin-install-sslcert': "org.webpieces:plugin-install-sslcert:${webpiecesVersion}",
        'plugin-webpieces-documentation': "org.webpieces:plugin-webpieces-documentation:${webpiecesVersion}",
        'plugin-jackson':     "org.webpieces:plugin-json-jackson:${webpiecesVersion}",
        'plugin-properties':  "org.webpieces:plugin-properties:${webpiecesVersion}",
-       'commons-lang':       'org.apache.commons:commons-lang3',
-       'javax-validation':   'jakarta.validation:jakarta.validation-api',
-       'junit':           'junit:junit',
-       
+       'commons-lang':       "org.apache.commons:commons-lang3:3.5",
+       'javax-validation':   'jakarta.validation:jakarta.validation-api:2.0.2',
+       'junit':           'junit:junit:4.11',
+       'joda-time':       'joda-time:joda-time:2.9.4',
+
        'plugin-h2':          "org.webpieces:plugin-h2db:${webpiecesVersion}",
        'plugin-webpieces-documentation': "org.webpieces:plugin-documentation:${webpiecesVersion}",
+       'hibernate-validator': 'org.hibernate.validator:hibernate-validator:6.2.0.Final',
 
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
        'h2db':            'com.h2database:h2:1.4.192',
@@ -42,13 +44,13 @@ ext {
        //http-client or a nio library...
        //'web-channelmgr':  "org.webpieces:core-channelmanager2:${webpiecesVersion}",
        //'web-httpclient':  "org.webpieces:http-client:${webpiecesVersion}",
-       //'groovy':          'org.codehaus.groovy:groovy-all',
+       //'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
        //'guava':           'com.google.guava:guava:19.0',
        //'apache-commons-io': 'org.apache.commons:commons-io:1.3.2'
 
        'hikari-cp':     'org.hibernate:hibernate-hikaricp:5.4.10.Final'
 
-    ]  
+    ]
 }
 
 allprojects {
@@ -56,7 +58,7 @@ allprojects {
 
    repositories {
        mavenCentral()
-       maven { url uri('/tmp/myRepo/') }
+       maven { url uri('/tmp/myRepo/') } //For testing locally
    }
 
    jacoco {
@@ -70,9 +72,9 @@ subprojects {
    apply plugin: 'eclipse'
    apply plugin: 'idea'
 
-   //These 2 lines make it so you don't have to use @Param annotation on 
+   //These 2 lines make it so you don't have to use @Param annotation on
    //every controller method which can get quite annoying.  Instead, webpieces
-   //will just use reflection to grab the param names which is just as fast as 
+   //will just use reflection to grab the param names which is just as fast as
    //annotations
    [compileJava, compileTestJava]*.options.collect {options ->
      options.compilerArgs.add '-parameters'
@@ -90,62 +92,28 @@ subprojects {
        configFile = rootProject.file('config/checkstyle.xml')
    }
 
+    configurations {
+       customConfig.extendsFrom implementation
+    }
+
    dependencies {
+       testImplementation deps['junit']
 
        //add global dependencies for all projects here....
-       //compile deps['some jar from the above map of defined jars and versions']
+       implementation deps['web-webserver']
 
        //This line includes any jars a developer drops into {project}/lib directory
-       compile fileTree(dir: 'lib', include: '*.jar')
-
-       testImplementation 'junit:junit'
-
-        constraints {
-
-            implementation 'io.micrometer:micrometer-core:1.6.5'
-            implementation 'jakarta.annotation:jakarta.annotation-api:[1.3.5,2)'
-            implementation 'jakarta.inject:jakarta.inject-api:[1.0.3,2)'
-            implementation 'jakarta.persistence:jakarta.persistence-api:[2.2.3,3)'
-            implementation 'jakarta.validation:jakarta.validation-api:[2.0.1,3)'
-            implementation 'org.apache.commons:commons-lang3:3.12.0'
-            implementation 'org.codehaus.groovy:groovy-all:3.0.7'
-
-            testImplementation 'junit:junit:4.13.2'
-
-        }
-
-   }
-
-   configurations.all {
-
-       resolutionStrategy {
-
-           dependencySubstitution {
-               substitute module('javax.annotation:javax.annotation-api') with module('jakarta.annotation:jakarta.annotation-api:1.3.5')
-               substitute module('javax.inject:javax.inject') with module('jakarta.inject:jakarta.inject-api:1.0.3')
-               substitute module('javax.persistence:javax.persistence-api') with module('jakarta.persistence:jakarta.persistence-api:2.2.3')
-               substitute module('javax.validation:validation-api') with module('jakarta.validation:jakarta.validation-api:2.0.2')
-           }
-
-           eachDependency { DependencyResolveDetails details ->
-
-               if(details.requested.group == 'com.google.guava' && details.requested.version.contains('android')) {
-                   details.useVersion details.requested.version.replace('android', 'jre')
-                   details.because 'we want the JRE version of Guava'
-               }
-
-           }
-
-       }
+       implementation fileTree(dir: 'lib', include: '*.jar')
    }
 
    //This copies new jars over from ivy/maven and project/lib and finally our built up jar so all jars are in
    //one output directory AND it deletes jars in there that are no longer part of any of those locations as well since
    //it is a task of type: Sync
    task syncJars(type: Sync, dependsOn: 'jar') {
-       from(configurations.compile) {}
+       configurations.implementation.setCanBeResolved(true)
+       from(configurations.implementation) {}
        from(fixedLibDir) {}
-       from(libsDir) {}
+       from(libsDirectory) {}
        into toStagingDir
    }
 
@@ -162,15 +130,15 @@ subprojects {
       testLogging {
         events "failed"
         exceptionFormat "full"
-      } 
+      }
 
       systemProperty "gradle.running", "true"
    }
 
     jacocoTestReport {
-        additionalSourceDirs.setFrom files(sourceSets.main.allSource.srcDirs)
-        sourceDirectories.setFrom files(sourceSets.main.allSource.srcDirs)
-        classDirectories.setFrom files(sourceSets.main.output)
+        additionalSourceDirs.from files(sourceSets.main.allSource.srcDirs)
+        sourceDirectories.from files(sourceSets.main.allSource.srcDirs)
+        classDirectories.from files(sourceSets.main.output)
         reports {
             html.enabled = true
             xml.enabled = true
@@ -184,10 +152,10 @@ subprojects {
 
 task codeCoverage(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     dependsOn = subprojects.test
-    additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories.setFrom  files(subprojects.sourceSets.main.output)
-    executionData.setFrom files(subprojects.jacocoTestReport.executionData)
+    additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.from  files(subprojects.sourceSets.main.output)
+    executionData.from files(subprojects.jacocoTestReport.executionData)
     reports {
         html.enabled = true
         xml.enabled = true
@@ -195,11 +163,6 @@ task codeCoverage(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     }
     onlyIf = {
         true
-    }
-    doFirst {
-        executionData.setFrom files(executionData.findAll {
-            it.exists()
-        })
     }
 }
 
