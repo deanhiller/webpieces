@@ -31,6 +31,16 @@ public class Current {
 	public static void setContext(RequestContext requestCtx) {
 		Context.set(Context.REQUEST, requestCtx);
 
+		if(requestCtx == null) {
+			Context.set(Context.HEADERS, null);
+			return;
+		}
+
+		Map<String, String> headerMap = translateToSingleHeaders(requestCtx);
+		Context.set(Context.HEADERS, headerMap);
+	}
+
+	private static Map<String, String> translateToSingleHeaders(RequestContext requestCtx) {
 		Map<String, String> headerMap = new HashMap<>();
 		Map<String, List<RouterHeader>> requestHeaders = requestCtx.getRequest().getHeaders();
 		for(PlatformHeaders header : platformHeaders) {
@@ -43,8 +53,7 @@ public class Current {
 			RouterHeader routerHeader = routerHeaders.get(0);
 			headerMap.put(routerHeader.getName(), routerHeader.getValue());
 		}
-
-		Context.set(Context.HEADERS, headerMap);
+		return headerMap;
 	}
 
 	public static boolean isContextSet() {
