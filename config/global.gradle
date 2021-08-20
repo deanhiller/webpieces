@@ -118,6 +118,8 @@ ext {
             'micrometer'             : 'io.micrometer:micrometer-core',
             'elastic-search'         : 'org.elasticsearch.client:elasticsearch-rest-client',
 
+            'google-cloud-core':         'com.google.cloud:google-cloud-core',
+
             'grpc-protobuf'          : 'io.grpc:grpc-protobuf',
             'grpc-stub'              : 'io.grpc:grpc-stub',
             'grpc-json'              : 'com.google.protobuf:protobuf-java-util'
@@ -169,6 +171,11 @@ ext {
 
 dependencies {
 
+    implementation platform('com.google.api:gax-bom:1.63.0')
+    implementation platform('com.google.auth:google-auth-library-bom:0.22.2') // Cloud SQL JDBC library...
+    implementation platform('com.google.cloud:google-cloud-bom:0.152.0')
+    implementation platform('com.google.cloud:google-cloud-core-bom:1.94.7')
+    implementation platform('com.google.cloud:google-cloud-monitoring-bom:2.2.0')
     implementation platform('com.google.guava:guava-bom:30.1.1-jre')
     implementation platform('com.google.protobuf:protobuf-bom:3.15.6')
     implementation platform('com.fasterxml.jackson:jackson-bom:2.12.2')

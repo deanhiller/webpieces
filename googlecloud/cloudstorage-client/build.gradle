@@ -1,0 +1,37 @@
+plugins {
+    id 'java-library'
+    id 'java-test-fixtures'
+    id 'checkstyle'
+    id 'eclipse'
+    id 'jacoco'
+    id 'maven-publish'
+    id 'signing'
+}
+
+apply from: '../../config/global.gradle'
+
+group 'org.webpieces.googlecloud'
+
+repositories {
+    mavenCentral()
+    maven { url uri('/tmp/myRepo/') } // For testing locally
+}
+
+dependencies {
+
+    implementation deps['google-cloud-core']
+    implementation 'com.google.cloud:google-cloud-storage'
+    implementation deps['javax-inject-api']
+    implementation deps['slf4j-api']
+
+    // For checking if in a transaction
+    implementation deps['javax-persistence-api']
+    implementation(deps['plugin-hibernate']) {
+        exclude group: 'org.hibernate'
+    }
+
+    implementation deps['core-util']
+
+    testFixturesImplementation deps['core-util']
+
+}
