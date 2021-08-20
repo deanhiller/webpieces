@@ -71,7 +71,7 @@ public class TestSslBasicClient {
 	//all 3 received, server creates TWO packets  client -> server (server is connected here)
 	//client receives two packets as ONE packet here and is connected
 
-	//@Test
+	@Test
 	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException, GeneralSecurityException, IOException {
 		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, parseIncoming().getSslAction());
 		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, parseIncoming().getSslAction());

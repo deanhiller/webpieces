@@ -186,14 +186,14 @@ public class TestSslCloseClient {
 		BufferPool pool = new TwoPools("pClient", new SimpleMeterRegistry());
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(name+"Mgr", pool, new BackpressureConfig(), new DirectExecutor());
 
-		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();
+		SSLEngineFactoryForChanMgrTest sslFactory = new SSLEngineFactoryForChanMgrTest();
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();	
 		TCPChannel channel1 = chanMgr.createTCPChannel("client", clientSsl);
 		return channel1;
 	}
 	
 	public static SSLParser createSslSvrParser() throws GeneralSecurityException, IOException {
-		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();
+		SSLEngineFactoryForChanMgrTest sslFactory = new SSLEngineFactoryForChanMgrTest();
 		BufferPool pool = new TwoPools("pSvr", new SimpleMeterRegistry());
 		SSLEngine svrSsl = sslFactory.createEngineForServerSocket();
 		SSLMetrics metrics = new SSLMetrics("", new SimpleMeterRegistry());
