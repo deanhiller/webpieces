@@ -1,21 +1,21 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
-* HIGH PRIORITY - somehow most tests were moved into core-channelmanager2/test instead of src/test/java and need to be moved back
-* get the runAllTestingLocalRelease.sh ported into gradle - Alex Sweeney working on
-* get the webpeices template generators working
-* fix SSL tests to use TLS1.3 or in circleCI get javax.net.ssl.SSLHandshakeException: No available authentication scheme
-   * TestSslBasicClient.java
-   * TestSslCloseClient.java
+* Alex - get the runAllTestingLocalRelease.sh ported into gradle - Alex Sweeney working on
+* Alex - get the webpeices template generators working
+* Alex - get the publish working again so we can publish a real release to remote repository
+* Dean - get version numbers on the plugins html compiler to be dynamic using the cmd line arg so we can release
+* Dean - get a new context that is portable among platforms into the repo as well
+* Victor/Declan - fix SSL tests to use TLS1.3 or in circleCI get javax.net.ssl.SSLHandshakeException: No available authentication scheme
+   * Victor - TestSslBasicClient.java
+   * Declan - TestSslCloseClient.java
    * TestSslCloseSvr.java
    * TestSslBasicSvr.java
 * cannot run tests from core/core-channelmanager2 nore core/core-asyncserver in INTELLIJ!!!!! i
-   * switch to intellij builds and intellij run tests and I can run the test now
-* get version numbers on the plugins html compiler to be dynamic using the cmd line arg so we can release
-* get the publish working again so we can publish a real release to remote repository
-* get a new context that is portable among platforms into the repo as well
+   * WORKAROUND: switch to intellij builds and intellij run tests and I can run the test now
 * get GCPStorage ported as a first try according to the requirements
 * try doing this in our template compiler plugin https://discuss.gradle.org/t/can-anyone-explain-the-javaplugin-source-code/40744 as well as copying the resources into a different directory that is NOT used by the build!!!!!!  In this way, tests work, dev server works, but the *.html files are not put in production!!
+* somehow most tests were moved into core-channelmanager2/test instead of src/test/java and need to be moved back
 * Move ClientImp's and server connectors into webpieces
 * XFuture so context issue is solve
 * conversations
