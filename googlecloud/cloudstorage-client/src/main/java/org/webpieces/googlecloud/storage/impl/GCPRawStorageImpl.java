@@ -1,18 +1,16 @@
-package org.webpieces.googlecloud.storage.impl2;
+package org.webpieces.googlecloud.storage.impl;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.WriteChannel;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.Storage.BlobTargetOption;
+import com.google.cloud.storage.*;
 import com.google.cloud.storage.Storage.BlobGetOption;
 import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.Storage.BlobSourceOption;
 import com.google.cloud.storage.Storage.BlobWriteOption;
-import org.webpieces.googlecloud.storage.api2.GCPRawStorage;
+import org.webpieces.googlecloud.storage.api.GCPRawStorage;
 
+import javax.inject.Inject;
 import java.util.function.Supplier;
 
 /**
@@ -23,14 +21,14 @@ public class GCPRawStorageImpl implements GCPRawStorage { //implements Storage {
 
     private Supplier<Storage> storage;
 
-    @Override
-    public Blob create(BlobInfo blobInfo, BlobTargetOption... options) {
-        return storage.get().create(blobInfo, options);
+    @Inject
+    public GCPRawStorageImpl(StorageSupplier storage) {
+        this.storage = storage;
     }
 
     @Override
-    public Blob create(BlobInfo blobInfo, byte[] content, BlobTargetOption... options) {
-        return storage.get().create(blobInfo, content, options);
+    public Bucket get(String bucket, Storage.BucketGetOption... options) {
+        return storage.get().get(bucket, options);
     }
 
     @Override
@@ -62,4 +60,10 @@ public class GCPRawStorageImpl implements GCPRawStorage { //implements Storage {
     public WriteChannel writer(BlobInfo blobInfo, BlobWriteOption... options) {
         return storage.get().writer(blobInfo, options);
     }
+
+    @Override
+    public CopyWriter copy(Storage.CopyRequest copyRequest) {
+        return storage.get().copy(copyRequest);
+    }
+
 }
