@@ -14,7 +14,7 @@ public class TestLocalStorage {
 
     @Before
     public void setup() {
-        Module testModule = Modules.override().with(new LocalOverrideModule());
+        Module testModule = Modules.override(new FakeProdModule()).with(new LocalOverrideModule());
 
         Injector injector = Guice.createInjector(testModule);
         instance = injector.getInstance(GCPStorage.class);
@@ -22,7 +22,7 @@ public class TestLocalStorage {
 
     @Test
     public void testReadFromClasspath() {
-        //Perfect for Victor so do not implement yet :( 
+        //Perfect for Victor so do not implement yet :(
     }
 
     @Test
