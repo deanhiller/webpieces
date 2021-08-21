@@ -6,6 +6,9 @@ import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
 
+import javax.inject.Singleton;
+
+@Singleton
 public class LocalStorage implements GCPRawStorage {
 
     @Override

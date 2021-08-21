@@ -9,11 +9,13 @@ import org.webpieces.googlecloud.storage.api.GCPStorage;
 import org.webpieces.util.context.ClientAssertions;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Since tests mock rawStorage, changes to this class get included in testing.
  * THIS IS A GOOD THING ^^^^.   Do not break people
  */
+@Singleton
 public class GCPStorageImpl implements GCPStorage {
 
     private GCPRawStorage rawStorage;

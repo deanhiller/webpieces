@@ -11,12 +11,14 @@ import com.google.cloud.storage.Storage.BlobWriteOption;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.function.Supplier;
 
 /**
  * ADD NO CODE to this class as it is not tested until integration time.  If it is 1 to 1,
  * there is no testing to do and we rely on google's testing of Storage.java they have
  */
+@Singleton
 public class GCPRawStorageImpl implements GCPRawStorage { //implements Storage {
 
     private Supplier<Storage> storage;
