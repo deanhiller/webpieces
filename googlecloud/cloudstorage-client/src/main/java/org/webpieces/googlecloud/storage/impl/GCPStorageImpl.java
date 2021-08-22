@@ -4,12 +4,15 @@ import com.google.api.gax.paging.Page;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
+import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
 import org.webpieces.googlecloud.storage.api.GCPStorage;
 import org.webpieces.util.context.ClientAssertions;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 /**
  * Since tests mock rawStorage, changes to this class get included in testing.
@@ -43,7 +46,7 @@ public class GCPStorageImpl implements GCPStorage {
     }
 
     @Override
-    public Page<Blob> list(String bucket, Storage.BlobListOption... options) {
+    public Page<GCPBlob> list(String bucket, Storage.BlobListOption... options) {
         clientAssertions.throwIfCannotGoRemote();
         return rawStorage.list(bucket, options);
     }
@@ -61,15 +64,15 @@ public class GCPStorageImpl implements GCPStorage {
     }
 
     @Override
-    public ReadChannel reader(String bucket, String blob, Storage.BlobSourceOption... options) {
+    public ReadableByteChannel reader(String bucket, String blob, Storage.BlobSourceOption... options) {
         clientAssertions.throwIfCannotGoRemote();
-        return channelWrapper.newChannelProxy(ReadChannel.class, rawStorage.reader(bucket, blob, options));
+        return channelWrapper.newChannelProxy(ReadableByteChannel.class, rawStorage.reader(bucket, blob, options));
     }
 
     @Override
-    public WriteChannel writer(BlobInfo blobInfo, Storage.BlobWriteOption... options) {
+    public WritableByteChannel writer(BlobInfo blobInfo, Storage.BlobWriteOption... options) {
         clientAssertions.throwIfCannotGoRemote();
-        return channelWrapper.newChannelProxy(WriteChannel.class, rawStorage.writer(blobInfo, options));
+        return channelWrapper.newChannelProxy(WritableByteChannel.class, rawStorage.writer(blobInfo, options));
     }
 
     @Override

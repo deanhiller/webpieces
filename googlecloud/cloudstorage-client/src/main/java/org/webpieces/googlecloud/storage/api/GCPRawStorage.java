@@ -7,6 +7,9 @@ import com.google.cloud.storage.*;
 import com.google.inject.ImplementedBy;
 import org.webpieces.googlecloud.storage.impl.GCPRawStorageImpl;
 
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+
 /**
  * Create as you need GCPRawStorage methods - create in
  * GCPRawStorage, GCPStorage, GCPRawStorageImpl, LocalStorage for each
@@ -28,15 +31,15 @@ public interface GCPRawStorage {
 
     Blob get(String bucket, String blob, Storage.BlobGetOption... options);
 
-    Page<Blob> list(String bucket, Storage.BlobListOption... options);
+    Page<GCPBlob> list(String bucket, Storage.BlobListOption... options);
 
     boolean delete(String bucket, String blob, Storage.BlobSourceOption... options);
 
     byte[] readAllBytes(String bucket, String blob, Storage.BlobSourceOption... options);
 
-    ReadChannel reader(String bucket, String blob, Storage.BlobSourceOption... options);
+    ReadableByteChannel reader(String bucket, String blob, Storage.BlobSourceOption... options);
 
-    WriteChannel writer(BlobInfo blobInfo, Storage.BlobWriteOption... options);
+    WritableByteChannel writer(BlobInfo blobInfo, Storage.BlobWriteOption... options);
 
     CopyWriter copy(Storage.CopyRequest copyRequest);
 }

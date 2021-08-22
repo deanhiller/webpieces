@@ -1,6 +1,7 @@
 package org.webpieces.googlecloud.storage.impl;
 
 import com.google.api.gax.paging.Page;
+import com.google.cloud.PageImpl;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
@@ -8,6 +9,7 @@ import com.google.cloud.storage.Storage.BlobGetOption;
 import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.Storage.BlobSourceOption;
 import com.google.cloud.storage.Storage.BlobWriteOption;
+import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
 
 import javax.inject.Inject;
@@ -39,8 +41,10 @@ public class GCPRawStorageImpl implements GCPRawStorage { //implements Storage {
     }
 
     @Override
-    public Page<Blob> list(String bucket, BlobListOption... options) {
-        return storage.get().list(bucket, options);
+    public Page<GCPBlob> list(String bucket, BlobListOption... options) {
+
+        Page<Blob> list = storage.get().list(bucket, options);
+        return new GCPPageImpl(list);
     }
 
     @Override
