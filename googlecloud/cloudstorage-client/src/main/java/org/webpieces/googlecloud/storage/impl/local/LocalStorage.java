@@ -1,11 +1,10 @@
-package org.webpieces.googlecloud.storage.impl;
+package org.webpieces.googlecloud.storage.impl.local;
 
 import com.google.api.gax.paging.Page;
-import com.google.cloud.ReadChannel;
-import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
+import org.webpieces.googlecloud.storage.impl.ChannelWrapper;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -39,7 +38,7 @@ public class LocalStorage implements GCPRawStorage {
         File file = new File(LOCAL_BUILD_DIR+bucket);
         if(!file.exists())
             file.mkdirs();
-        return new LocalPage(file);
+        return new LocalPage(bucket, file);
     }
 
     @Override

@@ -1,11 +1,9 @@
 package org.webpieces.googlecloud.storage.api;
 
 import com.google.api.gax.paging.Page;
-import com.google.cloud.ReadChannel;
-import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
 import com.google.inject.ImplementedBy;
-import org.webpieces.googlecloud.storage.impl.GCPRawStorageImpl;
+import org.webpieces.googlecloud.storage.impl.raw.GCPRawStorageImpl;
 
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;

@@ -1,4 +1,4 @@
-package org.webpieces.googlecloud.storage.impl;
+package org.webpieces.googlecloud.storage.impl.raw;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.Blob;

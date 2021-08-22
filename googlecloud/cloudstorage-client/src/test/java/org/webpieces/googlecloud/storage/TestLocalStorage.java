@@ -69,6 +69,8 @@ public class TestLocalStorage {
 
     @Test
     public void testListFilesFromBothResourcesDirAndBuildDir() {
+        //finish this test out
+
         Page<GCPBlob> testbucket = instance.list("shitty");
         Iterable<GCPBlob> values = testbucket.getValues();
         for(GCPBlob shit : values) {
@@ -79,6 +81,10 @@ public class TestLocalStorage {
     @Test
     public void validateFileNotFoundReturnsNullBlob() {
 
+    }
+
+    @Test
+    public void testGetBlob() {
     }
 
     @Test
@@ -100,4 +106,19 @@ public class TestLocalStorage {
     public void testCopyFromBuildDirectory() {
 
     }
+
+    @Test
+    public void testGetBUcket() {
+    }
+
+    @Test
+    public void testAllCallsFailInTransaction() {
+
+    }
+
+    @Test
+    public void testNoReadingWhileInTransaction() {
+
+    }
+
 }

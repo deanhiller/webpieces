@@ -1,7 +1,8 @@
-package org.webpieces.googlecloud.storage.impl;
+package org.webpieces.googlecloud.storage.impl.local;
 
 import com.google.api.gax.paging.Page;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
+import org.webpieces.googlecloud.storage.impl.raw.GCPBlobImpl;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -9,9 +10,11 @@ import java.util.List;
 
 public class LocalPage implements Page<GCPBlob> {
 
+    private String bucket;
     private File directory;
 
-    public LocalPage(File directory) {
+    public LocalPage(String bucket, File directory) {
+        this.bucket = bucket;
         this.directory = directory;
     }
 
@@ -40,7 +43,7 @@ public class LocalPage implements Page<GCPBlob> {
         List<GCPBlob> blobList = new ArrayList<>();
 
         for(File f : directory.listFiles()) {
-            blobList.add(new GCPBlobImpl(f));
+            blobList.add(new LocalGCPBlobImpl(bucket, f.getName()));
         }
 
         return blobList;

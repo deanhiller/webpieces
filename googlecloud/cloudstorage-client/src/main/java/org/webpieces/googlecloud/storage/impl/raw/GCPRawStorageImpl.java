@@ -1,7 +1,6 @@
-package org.webpieces.googlecloud.storage.impl;
+package org.webpieces.googlecloud.storage.impl.raw;
 
 import com.google.api.gax.paging.Page;
-import com.google.cloud.PageImpl;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
@@ -11,6 +10,7 @@ import com.google.cloud.storage.Storage.BlobSourceOption;
 import com.google.cloud.storage.Storage.BlobWriteOption;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
+import org.webpieces.googlecloud.storage.impl.StorageSupplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
