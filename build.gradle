@@ -51,6 +51,8 @@ dependencies {
     api deps['plugin-properties']
 
     api deps['projectcreator']
+
+    api deps['gcp-cloud-storage']
 }
 
 publishing {
