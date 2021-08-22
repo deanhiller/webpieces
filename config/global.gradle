@@ -84,6 +84,8 @@ ext {
             'plugin-json-jackson'    : 'org.webpieces:plugin-json-jackson',
             'plugin-properties'      : 'org.webpieces:plugin-properties',
 
+            'generate-httpclient'    : 'org.webpieces:generate-htpclient',
+
             'projectcreator'         : 'org.webpieces:projectcreator',
 
             'groovy'                 : 'org.codehaus.groovy:groovy-all',

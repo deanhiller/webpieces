@@ -50,6 +50,7 @@ dependencies {
     api deps['plugin-json-jackson']
     api deps['plugin-properties']
 
+    api deps['generate-httpclient']
     api deps['projectcreator']
 }
 
