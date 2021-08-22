@@ -85,6 +85,7 @@ ext {
             'plugin-properties'      : 'org.webpieces:plugin-properties',
 
             'generate-httpclient'    : 'org.webpieces:generate-htpclient',
+            'cloud-api-lib'          : 'org.webpieces:cloud-api-lib',
 
             'projectcreator'         : 'org.webpieces:projectcreator',
 
