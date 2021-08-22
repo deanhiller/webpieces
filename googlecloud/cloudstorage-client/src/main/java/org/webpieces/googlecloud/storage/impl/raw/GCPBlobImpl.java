@@ -13,4 +13,8 @@ public class GCPBlobImpl implements GCPBlob {
         this.blob = blob;
     }
 
+    @Override
+    public String getName() {
+        return blob.getName();
+    }
 }

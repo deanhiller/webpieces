@@ -12,6 +12,9 @@ import java.io.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Singleton
 public class LocalStorage implements GCPRawStorage {
@@ -29,8 +32,20 @@ public class LocalStorage implements GCPRawStorage {
     }
 
     @Override
-    public Blob get(String bucket, String blob, Storage.BlobGetOption... options) {
-        throw new UnsupportedOperationException("Need to implement this still");
+    public GCPBlob get(String bucket, String blob, Storage.BlobGetOption... options) {
+        // If we find bucket and blob, we will return the value. Otherwise, we will return null.
+        try {
+            ReadableByteChannel channel = reader(bucket, blob);
+
+            InputStream i = Channels.newInputStream(channel);
+            if (i == null) {
+                return null;
+            }
+            LocalGCPBlobImpl local = new LocalGCPBlobImpl(bucket, blob);
+            return local;
+        } catch (Exception e){
+            return null;
+        }
     }
 
     @Override
