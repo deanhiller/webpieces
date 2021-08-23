@@ -1,8 +1,6 @@
 package org.webpieces.googlecloud.storage.impl;
 
 import com.google.api.gax.paging.Page;
-import com.google.cloud.ReadChannel;
-import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
@@ -40,7 +38,7 @@ public class GCPStorageImpl implements GCPStorage {
     }
 
     @Override
-    public Blob get(String bucket, String blob, Storage.BlobGetOption... options) {
+    public GCPBlob get(String bucket, String blob, Storage.BlobGetOption... options) {
         clientAssertions.throwIfCannotGoRemote();
         return rawStorage.get(bucket, blob, options);
     }

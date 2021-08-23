@@ -1,6 +1,7 @@
 package org.webpieces.googlecloud.storage;
 
 import com.google.api.gax.paging.Page;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.inject.Guice;
@@ -48,12 +49,7 @@ public class TestLocalStorage {
     @Test
     public void testWriteThenReadFromBuildDir() throws IOException {
         BlobId id = BlobId.of("testbucket", "fileShit.txt");
-        BlobInfo info = BlobInfo.newBuilder(id).build();
-        WritableByteChannel writer = instance.writer(info);
-        OutputStream o = Channels.newOutputStream(writer);
-        String fkingString = "testing a bitch";
-        byte[] bytes = fkingString.getBytes(StandardCharsets.UTF_8);
-        o.write(bytes);
+        writeFile(id);
 
 
         ReadableByteChannel channel = instance.reader("testbucket", "fileShit.txt");
@@ -67,6 +63,17 @@ public class TestLocalStorage {
         Assert.assertEquals("testing a bitch", text);
     }
 
+    private void writeFile(BlobId id) throws IOException {
+        BlobInfo info = BlobInfo.newBuilder(id).build();
+        WritableByteChannel writer = instance.writer(info);
+        OutputStream o = Channels.newOutputStream(writer);
+        String fkingString = "testing a bitch";
+        byte[] bytes = fkingString.getBytes(StandardCharsets.UTF_8);
+        o.write(bytes);
+        o.flush();
+        o.close();
+    }
+
     @Test
     public void testListFilesFromBothResourcesDirAndBuildDir() {
         //finish this test out
@@ -74,19 +81,32 @@ public class TestLocalStorage {
         Page<GCPBlob> testbucket = instance.list("shitty");
         Iterable<GCPBlob> values = testbucket.getValues();
         for(GCPBlob shit : values) {
-            Assert.fail();
+            //
         }
     }
 
     @Test
     public void validateFileNotFoundReturnsNullBlob() {
-
+        GCPBlob basket = instance.get("backet", "non-existent");
+        Assert.assertNull(basket);
     }
 
     @Test
-    public void testGetBlob() {
+    public void testGetBlobClassPath() {
+        GCPBlob testbucket = instance.get("testbucket", "mytest.txt");
+        Assert.assertEquals("mytest.txt",testbucket.getName());
     }
+    
+    @Test
+    public void testGetBlobFileSystem() throws IOException {
+        //create a file
+        BlobId id = BlobId.of("testbucket", "fileSystemFile.txt");
+        writeFile(id);
 
+
+        GCPBlob bucket = instance.get("testbucket", "fileSystemFile.txt");
+        Assert.assertEquals("fileSystemFile.txt",bucket.getName());
+    }
     @Test
     public void addFileToBucketAndThenListFiles() {
 

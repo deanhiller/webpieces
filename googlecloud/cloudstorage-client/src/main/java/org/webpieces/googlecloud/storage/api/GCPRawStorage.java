@@ -27,7 +27,7 @@ public interface GCPRawStorage {
 
     Bucket get(String bucket, Storage.BucketGetOption... options);
 
-    Blob get(String bucket, String blob, Storage.BlobGetOption... options);
+    GCPBlob get(String bucket, String blob, Storage.BlobGetOption... options);
 
     Page<GCPBlob> list(String bucket, Storage.BlobListOption... options);
 

@@ -10,4 +10,9 @@ public class LocalGCPBlobImpl implements GCPBlob {
         this.bucket = bucket;
         this.name = name;
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }

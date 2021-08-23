@@ -36,8 +36,9 @@ public class GCPRawStorageImpl implements GCPRawStorage { //implements Storage {
     }
 
     @Override
-    public Blob get(String bucket, String blob, BlobGetOption... options) {
-        return storage.get().get(bucket, blob, options);
+    public GCPBlob get(String bucket, String blob, BlobGetOption... options) {
+        Blob blob1 = storage.get().get(bucket, blob, options);
+        return new GCPBlobImpl(blob1);
     }
 
     @Override
