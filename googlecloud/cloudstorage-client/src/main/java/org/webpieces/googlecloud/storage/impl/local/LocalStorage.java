@@ -34,18 +34,18 @@ public class LocalStorage implements GCPRawStorage {
     @Override
     public GCPBlob get(String bucket, String blob, Storage.BlobGetOption... options) {
         // If we find bucket and blob, we will return the value. Otherwise, we will return null.
-        try {
-            ReadableByteChannel channel = reader(bucket, blob);
-
-            InputStream i = Channels.newInputStream(channel);
-            if (i == null) {
-                return null;
-            }
-            LocalGCPBlobImpl local = new LocalGCPBlobImpl(bucket, blob);
-            return local;
-        } catch (Exception e){
-            return null;
+        InputStream in = this.getClass().getClassLoader()
+                .getResourceAsStream(bucket + "/" + blob);
+        if(in != null) {
+            return new LocalGCPBlobImpl(bucket, blob);
         }
+
+        File file = new File(LOCAL_BUILD_DIR + bucket + "/" + blob);
+        if(file.exists()) {
+            return new LocalGCPBlobImpl(bucket, blob);
+        }
+
+        return null;
     }
 
     @Override
