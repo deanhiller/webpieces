@@ -54,6 +54,8 @@ dependencies {
     api deps['cloud-api-lib']
 
     api deps['projectcreator']
+
+    api deps['gcp-cloud-storage']
 }
 
 publishing {
