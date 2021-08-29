@@ -4,6 +4,7 @@ import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -19,6 +20,10 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class TestLocalStorage {
@@ -75,14 +80,30 @@ public class TestLocalStorage {
     }
 
     @Test
-    public void testListFilesFromBothResourcesDirAndBuildDir() {
+    public void testListFilesFromBothResourcesDirAndBuildDir() throws IOException {
         //finish this test out
 
-        Page<GCPBlob> testbucket = instance.list("shitty");
+        Page<GCPBlob> testbucket = instance.list("listbucket");
+        writeFile(BlobId.of("listbucket", "fileSystemFile1.txt"));
+        writeFile(BlobId.of("listbucket", "fileSystemFile2.txt"));
+
+
+
         Iterable<GCPBlob> values = testbucket.getValues();
-        for(GCPBlob shit : values) {
-            //
-        }
+        Iterator<GCPBlob> iter = values.iterator();
+        //convert values to list
+        //string filename1 = list.get(0)
+        //string filename2 = list.get(1)
+
+        List<String> list = new ArrayList<String>();
+        while(iter.hasNext()){
+            list.add(iter.next().getName());
+            }
+            Collections.sort(list);
+
+
+            Assert.assertEquals("fileSystemFile1.txt",list.get(0));
+            Assert.assertEquals("fileSystemFile2.txt",list.get(1));
     }
 
     @Test
@@ -113,13 +134,49 @@ public class TestLocalStorage {
     }
 
     @Test
-    public void addFileThenReadThenDeleteThenListFiles() {
+    public void addFileThenReadThenDeleteThenListFiles() throws IOException {
+        writeFile(BlobId.of("testbucket", "mytest1.txt"));
+        GCPBlob bucket = instance.get("testbucket", "mytest1.txt");
+        Assert.assertEquals("mytest1.txt",bucket.getName());//passed.
 
+        ReadableByteChannel readFile = instance.reader("testbucket", "mytest1.txt");
+
+        InputStream i = Channels.newInputStream(readFile);
+
+        String text = new BufferedReader(
+                new InputStreamReader(i, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+        Assert.assertEquals("testing a bitch", text);// Passed.
+
+        boolean success = instance.delete("testbucket", "mytest1.txt");
+        Assert.assertEquals(false,success);//passed.
+
+        Page<GCPBlob> testbucket = instance.list("testbucket");
+        Iterable<GCPBlob> values = testbucket.getValues();
+        Iterator<GCPBlob> iter = values.iterator();
+        List<String> list = new ArrayList<>();
+        while(iter.hasNext()){
+            list.add(iter.next().getName());
+        }
+        //length of the blob should be original length.
+        Assert.assertEquals(2,list.size());// testing on testbucket directory
+        // with 2 files already existed.
     }
 
     @Test
-    public void testCopyFromClassPath() {
+    public void testCopyFromClassPath() throws IOException {
+        //copy a file to build directory and check to make sure it exists.
 
+        //Copying a Blob.
+        String bucketName = "testbucket";
+        String blobName = "mytest.txt";
+        String copyBlobName = "mytest_copy.txt";
+        Storage.CopyRequest request = Storage.CopyRequest.newBuilder()
+                .setSource(BlobId.of(bucketName, blobName))
+                .setTarget(BlobId.of(bucketName, copyBlobName))
+                .build();
+        Blob blob = instance.copy(request).getResult();
     }
 
     @Test
