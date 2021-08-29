@@ -19,11 +19,9 @@ import java.nio.file.Paths;
 @Singleton
 public class LocalStorage implements GCPRawStorage {
     public static final String LOCAL_BUILD_DIR = "build/local-cloudstorage/";
-    private ChannelWrapper wrapper;
 
     @Inject
-    public LocalStorage(ChannelWrapper wrapper) {
-        this.wrapper = wrapper;
+    public LocalStorage() {
     }
 
     @Override
