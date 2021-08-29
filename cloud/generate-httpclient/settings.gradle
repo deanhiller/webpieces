@@ -1,0 +1,6 @@
+includeBuild '../../core/core-util'
+includeBuild '../../core/core-metrics'
+includeBuild '../../core/core-logging'
+includeBuild '../../core/core-jackson'
+includeBuild '../../cloud/cloud-api-lib'
+includeBuild '../../http/http2to1_1-client'

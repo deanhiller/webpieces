@@ -1,0 +1,30 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+dependencies {
+
+    api deps['core-util']
+
+    api 'com.fasterxml.jackson.core:jackson-annotations'
+    api 'com.fasterxml.jackson.core:jackson-databind'
+
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Webpieces jackson library to marshal to empty string'
+            }
+        }
+    }
+}
