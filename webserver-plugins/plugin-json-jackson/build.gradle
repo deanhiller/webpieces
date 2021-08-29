@@ -14,9 +14,7 @@ dependencies {
 
     api deps['http1_1-parser']
     api deps['http-router']
-
-    api 'com.fasterxml.jackson.core:jackson-annotations'
-    api 'com.fasterxml.jackson.core:jackson-databind'
+    api deps['core-jackson']
 
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'

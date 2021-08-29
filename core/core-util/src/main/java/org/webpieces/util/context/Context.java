@@ -19,4 +19,12 @@ public class Context {
     public void clear() {
         context.remove();
     }
+
+    public static Map<String, Object> getContext() {
+        return context.get();
+    }
+
+    public static void restoreContext(Map<String, Object> props) {
+        context.set(props);
+    }
 }

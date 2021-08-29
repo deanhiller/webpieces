@@ -50,12 +50,19 @@ public enum StatusCode {
     HTTP_431_REQUEST_HEADERS_TOO_LARGE(431, "Request Header Fields Too Large", StatusType.CLIENT_ERROR),
     HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS(451, "Unavailable For Legal Reasons", StatusType.CLIENT_ERROR),
 
+    //passthrough so upstream server knows to pass through BECAUSE upstream microservice turns 400 into
+    //500 because it is his bug BUT if you send this it tells the upstream server the request came all the
+    //way from a client far away and it is the client's fault
+    HTTP_491_BAD_CUSTOMER_REQUEST(491, "Bad Customer Request", StatusType.CLIENT_ERROR),
+
     HTTP_500_INTERNAL_SERVER_ERROR(500, "Internal Server Error", StatusType.SERVER_ERROR),
     HTTP_501_NOT_IMPLEMENTED(501, "Not Implemented", StatusType.SERVER_ERROR),
     HTTP_502_BAD_GATEWAY(502, "Bad Gateway", StatusType.SERVER_ERROR),
     HTTP_503_SERVICE_UNAVAILABLE(503, "Service Unavailable", StatusType.SERVER_ERROR),
     HTTP_504_GATEWAY_TIMEOUT(504, "Gateway Timeout", StatusType.SERVER_ERROR),
-    HTTP_505_HTTP_VERSION_NOT_SUPPORTED(505, "HTTP Version Not Supported", StatusType.SERVER_ERROR);
+    HTTP_505_HTTP_VERSION_NOT_SUPPORTED(505, "HTTP Version Not Supported", StatusType.SERVER_ERROR)
+
+    ;
 
     private static final Map<Integer, StatusCode> CODE_TO_STATUS = new HashMap<>();
 

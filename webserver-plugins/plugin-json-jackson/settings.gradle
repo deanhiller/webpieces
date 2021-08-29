@@ -1,2 +1,3 @@
 includeBuild '../../http/http1_1-parser'
 includeBuild '../../webserver/http-router'
+includeBuild '../../core/core-jackson'
