@@ -14,7 +14,22 @@ public class GCPBlobImpl implements GCPBlob {
     }
 
     @Override
+    public String getBucket() {
+        return blob.getBucket();
+    }
+
+    @Override
     public String getName() {
         return blob.getName();
+    }
+
+    @Override
+    public String getContentType() {
+        return blob.getContentType();
+    }
+
+    @Override
+    public long getSize() {
+        return blob.getSize();
     }
 }
