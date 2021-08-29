@@ -39,6 +39,7 @@ ext {
     deps = [
             'core-logging'           : 'org.webpieces:core-logging',
             'core-metrics'           : 'org.webpieces:core-metrics',
+            'core-jackson'           : 'org.webpieces:core-jackson',
             'core-util'              : 'org.webpieces:core-util',
             'core-ddl'               : 'org.webpieces:core-ddl',
             'runtimecompile'         : 'org.webpieces:runtimecompile',
@@ -83,6 +84,9 @@ ext {
             'plugin-install-sslcert' : 'org.webpieces:plugin-install-sslcert',
             'plugin-json-jackson'    : 'org.webpieces:plugin-json-jackson',
             'plugin-properties'      : 'org.webpieces:plugin-properties',
+
+            'generate-httpclient'    : 'org.webpieces:generate-httpclient',
+            'cloud-api-lib'          : 'org.webpieces:cloud-api-lib',
 
             'projectcreator'         : 'org.webpieces:projectcreator',
 
