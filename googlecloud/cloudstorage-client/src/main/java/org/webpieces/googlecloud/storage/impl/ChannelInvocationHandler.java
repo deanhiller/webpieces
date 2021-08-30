@@ -2,6 +2,7 @@ package org.webpieces.googlecloud.storage.impl;
 
 import org.webpieces.util.context.ClientAssertions;
 
+import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.nio.channels.Channel;
@@ -9,9 +10,10 @@ import java.nio.channels.Channel;
 public class ChannelInvocationHandler implements InvocationHandler {
 
     private ClientAssertions clientAssertions;
-    private final Channel channel;
+    private Channel channel;
 
-    public ChannelInvocationHandler(ClientAssertions clientAssertions, Channel channel) {
+    @Inject
+    public ChannelInvocationHandler(ClientAssertions clientAssertions) {
         this.clientAssertions = clientAssertions;
         this.channel = channel;
     }
@@ -25,8 +27,7 @@ public class ChannelInvocationHandler implements InvocationHandler {
 
     }
 
-    public Channel getChannel() {
-        return channel;
+    public void setChannel(Channel channel) {
+        this.channel = channel;
     }
-
 }

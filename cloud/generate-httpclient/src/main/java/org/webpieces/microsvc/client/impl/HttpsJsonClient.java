@@ -24,6 +24,7 @@ import org.webpieces.util.context.Contexts;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -52,6 +53,7 @@ public class HttpsJsonClient {
 
     private FutureHelper futureUtil;
 
+    @Inject
     public HttpsJsonClient(
             HttpsConfig httpsConfig,
             JacksonJsonConverter jsonMapper,

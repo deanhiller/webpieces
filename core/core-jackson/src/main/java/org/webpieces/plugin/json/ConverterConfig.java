@@ -13,6 +13,10 @@ public class ConverterConfig {
 	//To fix that, you can add a not empty constraint check instead.
 	private boolean convertNullToEmptyStr = true;
 
+	public ConverterConfig(boolean convertNullToEmptyStr) {
+		this.convertNullToEmptyStr = convertNullToEmptyStr;
+	}
+
 	public boolean isConvertNullToEmptyStr() {
 		return convertNullToEmptyStr;
 	}

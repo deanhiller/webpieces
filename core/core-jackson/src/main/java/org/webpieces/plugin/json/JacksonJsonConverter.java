@@ -15,17 +15,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.webpieces.util.SingletonSupplier;
 import org.webpieces.util.exceptions.SneakyThrow;
 
 public class JacksonJsonConverter {
 	
-	private ObjectMapper mapper;
+	private SingletonSupplier<ObjectMapper> mapper;
 	private Set<Class> primitiveTypes = new HashSet<>();
 	private boolean convertNullToEmptyStr;
 
+	/**
+	 * NOTE: It is better to inject ObjectMapperProvider in case FeatureTest on creating clients
+	 * via Guice forgets to bind to ObjectMapperProvider(or better yet, doesn't need to)
+	 */
 	@Inject
-	public JacksonJsonConverter(ObjectMapper mapper, ConverterConfig config) {
-		this.mapper = mapper;
+	public JacksonJsonConverter(ObjectMapperProvider mapperProvider, ConverterConfig config) {
+		this.mapper = new SingletonSupplier<>(() -> mapperProvider.get());
 		convertNullToEmptyStr = config.isConvertNullToEmptyStr();
 		primitiveTypes.add(Boolean.class);
 		primitiveTypes.add(Byte.class);
@@ -45,7 +50,7 @@ public class JacksonJsonConverter {
 
 	public <T> T readValue(byte[] json, Class<T> clazz) {
 		try {
-			T obj = mapper.readValue(json, clazz);
+			T obj = mapper.get().readValue(json, clazz);
 			if(convertNullToEmptyStr)
 				return convertStrings(obj, true);
 			return obj;
@@ -58,7 +63,7 @@ public class JacksonJsonConverter {
 
 	public <T> T readValue(String json, Class<T> clazz) {
 		try {
-			T obj = mapper.readValue(json, clazz);
+			T obj = mapper.get().readValue(json, clazz);
 			if(convertNullToEmptyStr)
 				return convertStrings(obj, true);
 			return obj;
@@ -164,7 +169,7 @@ public class JacksonJsonConverter {
 				convertStrings(obj, false);
 			}
 			
-			return mapper.writeValueAsString(obj);
+			return mapper.get().writeValueAsString(obj);
 		} catch (JsonProcessingException e) {
 			throw SneakyThrow.sneak(e);
 		}
@@ -176,7 +181,7 @@ public class JacksonJsonConverter {
 				convertStrings(obj, false);
 			}
 			
-			return mapper.writeValueAsBytes(obj);
+			return mapper.get().writeValueAsBytes(obj);
 		} catch (JsonProcessingException e) {
 			throw SneakyThrow.sneak(e);
 		}
@@ -184,7 +189,7 @@ public class JacksonJsonConverter {
 
 	public JsonNode readTree(byte[] data) {
 		try {
-			return mapper.readTree(data);
+			return mapper.get().readTree(data);
 		} catch(JsonProcessingException e) {
 			throw new JsonReadException(e.getMessage(), e);
 		} catch (IOException e) {
