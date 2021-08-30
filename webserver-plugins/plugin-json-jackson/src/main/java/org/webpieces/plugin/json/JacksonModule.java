@@ -20,10 +20,9 @@ public class JacksonModule extends AbstractModule {
 		Multibinder<BodyContentBinder> uriBinder = Multibinder.newSetBinder(binder(), BodyContentBinder.class);
 	    uriBinder.addBinding().to(JacksonLookup.class);
 
-	    ConverterConfig converterConfig = new ConverterConfig();
-	    converterConfig.setConvertNullToEmptyStr(config.isConvertNullToEmptyStr());
-	    
-	    bind(ObjectMapper.class).toProvider(ObjectMapperFactory.class).in(Singleton.class);
+	    ConverterConfig converterConfig = new ConverterConfig(config.isConvertNullToEmptyStr());
+
+	    bind(ObjectMapper.class).toProvider(ObjectMapperProvider.class).in(Singleton.class);
 	    bind(JacksonConfig.class).toInstance(config);
 	    bind(ConverterConfig.class).toInstance(converterConfig);
 	}
