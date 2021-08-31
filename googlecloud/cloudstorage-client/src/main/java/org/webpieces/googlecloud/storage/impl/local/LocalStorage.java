@@ -57,7 +57,10 @@ public class LocalStorage implements GCPRawStorage {
     @Override
     public boolean delete(String bucket, String blob, Storage.BlobSourceOption... options)
     {
-        throw new UnsupportedOperationException("Need to implement this still");
+        //check if the bucket and blob exists.
+        String dir = LOCAL_BUILD_DIR + bucket + "/" + blob;
+        File file = new File(dir);
+        return file.delete();
     }
 
     @Override
@@ -106,6 +109,22 @@ public class LocalStorage implements GCPRawStorage {
 
     @Override
     public CopyWriter copy(Storage.CopyRequest copyRequest) {
+        /*BlobId source = copyRequest.getSource();
+        BlobInfo target = copyRequest.getTarget();
+        //write a new file in target?
+        File inFile = new File(LOCAL_BUILD_DIR + source.getBucket() + "/" + source.getName());//mytest.txt
+        FileInputStream in = new FileInputStream(inFile);
+        File outFile = new File(LOCAL_BUILD_DIR + target.getBucket() + "/" + target.getName());
+        FileOutputStream out = new FileOutputStream(outFile);
+        int n;
+        while ((n = in.read()) != -1) {
+            out.write(n);
+        }
+        in.close();
+        out.close();
+        System.out.println("File Copied");
+        return outFile; //Need to know what is a CopyWriter.*/
+        //return null;
         throw new UnsupportedOperationException("Need to implement this still");
     }
 }

@@ -5,6 +5,8 @@ import com.google.cloud.storage.*;
 import com.google.inject.ImplementedBy;
 import org.webpieces.googlecloud.storage.impl.raw.GCPRawStorageImpl;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
