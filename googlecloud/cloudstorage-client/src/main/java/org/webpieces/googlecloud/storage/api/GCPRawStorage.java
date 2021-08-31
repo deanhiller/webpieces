@@ -41,5 +41,5 @@ public interface GCPRawStorage {
 
     WritableByteChannel writer(BlobInfo blobInfo, Storage.BlobWriteOption... options);
 
-    CopyWriter copy(Storage.CopyRequest copyRequest) throws IOException;
+    CopyWriter copy(Storage.CopyRequest copyRequest);
 }

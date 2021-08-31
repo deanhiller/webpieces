@@ -91,9 +91,6 @@ public class TestLocalStorage {
 
         Iterable<GCPBlob> values = testbucket.getValues();
         Iterator<GCPBlob> iter = values.iterator();
-        //convert values to list
-        //string filename1 = list.get(0)
-        //string filename2 = list.get(1)
 
         List<String> list = new ArrayList<String>();
         while(iter.hasNext()){
@@ -150,7 +147,7 @@ public class TestLocalStorage {
         Assert.assertEquals("testing a bitch", text);// Passed.
 
         boolean success = instance.delete("testbucket", "mytest1.txt");
-        Assert.assertEquals(false,success);//passed.
+        Assert.assertEquals(true,success);//passed.
 
         Page<GCPBlob> testbucket = instance.list("testbucket");
         Iterable<GCPBlob> values = testbucket.getValues();
@@ -169,14 +166,14 @@ public class TestLocalStorage {
         //copy a file to build directory and check to make sure it exists.
 
         //Copying a Blob.
-        String bucketName = "testbucket";
+        /*String bucketName = "testbucket";
         String blobName = "mytest.txt";
         String copyBlobName = "mytest_copy.txt";
         Storage.CopyRequest request = Storage.CopyRequest.newBuilder()
                 .setSource(BlobId.of(bucketName, blobName))
                 .setTarget(BlobId.of(bucketName, copyBlobName))
                 .build();
-        Blob blob = instance.copy(request).getResult();
+        Blob blob = instance.copy(request).getResult();*/
     }
 
     @Test

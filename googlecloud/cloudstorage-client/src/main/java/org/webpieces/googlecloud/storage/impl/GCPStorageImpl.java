@@ -9,6 +9,7 @@ import org.webpieces.util.context.ClientAssertions;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
@@ -76,6 +77,7 @@ public class GCPStorageImpl implements GCPStorage {
     @Override
     public CopyWriter copy(Storage.CopyRequest copyRequest) {
         clientAssertions.throwIfCannotGoRemote();
+        //return null;
         return rawStorage.copy(copyRequest);
     }
 }

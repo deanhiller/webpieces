@@ -110,8 +110,8 @@ public class LocalStorage implements GCPRawStorage {
     }
 
     @Override
-    public CopyWriter copy(Storage.CopyRequest copyRequest) throws IOException {
-        BlobId source = copyRequest.getSource();
+    public CopyWriter copy(Storage.CopyRequest copyRequest) {
+        /*BlobId source = copyRequest.getSource();
         BlobInfo target = copyRequest.getTarget();
         //write a new file in target?
         File inFile = new File(LOCAL_BUILD_DIR + source.getBucket() + "/" + source.getName());//mytest.txt
@@ -125,6 +125,8 @@ public class LocalStorage implements GCPRawStorage {
         in.close();
         out.close();
         System.out.println("File Copied");
-        return outFile; //Need to know what is a CopyWriter.
+        return outFile; //Need to know what is a CopyWriter.*/
+        //return null;
+        throw new UnsupportedOperationException("Need to implement this still");
     }
 }
