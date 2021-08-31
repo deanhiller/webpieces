@@ -60,9 +60,7 @@ public class LocalStorage implements GCPRawStorage {
         //check if the bucket and blob exists.
         String dir = LOCAL_BUILD_DIR + bucket + "/" + blob;
         File file = new File(dir);
-        file.delete();
-        return file.exists();
-        //if true, render the bucket null.
+        return file.delete();
     }
 
     @Override
