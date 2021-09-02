@@ -76,9 +76,9 @@ public class TestStreaming extends AbstractHttp2Test {
 	public static Collection bothServers() {
         List<Object[]> args = new ArrayList<Object[]>();
         args.add(new Object[] { TestMode.EMBEDDED_PARSING, null });
-//        args.add(new Object[] { TestMode.EMBEDDED_DIRET_NO_PARSING, null });
-//        args.add(new Object[] { TestMode.REMOTE, true });
-//        args.add(new Object[] { TestMode.REMOTE, false });
+        args.add(new Object[] { TestMode.EMBEDDED_DIRET_NO_PARSING, null });
+        args.add(new Object[] { TestMode.REMOTE, true });
+        args.add(new Object[] { TestMode.REMOTE, false });
 
 		return args;
 	}

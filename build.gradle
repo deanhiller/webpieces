@@ -51,7 +51,7 @@ dependencies {
     api deps['plugin-properties']
 
     api deps['generate-httpclient']
-    api deps['cloud-api-lib']
+    api deps['server-scaffolding']
 
     api deps['projectcreator']
 

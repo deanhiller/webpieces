@@ -70,7 +70,7 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 		//This mode slows things down but you can step through client and server http2 parser/hpack/engine etc.
 		//If you are a beginner run in EMBEDDED_DIRET_NO_PARSING mode as it's faster AND you can step through 
 		//the main stuff you care about(not the http2 protocol stuff).
-		return TestMode.EMBEDDED_PARSING;
+		return TestMode.EMBEDDED_DIRET_NO_PARSING;
 	}
 
 	//The default in superclass is an http2 client on top of an http1.1 protocol.

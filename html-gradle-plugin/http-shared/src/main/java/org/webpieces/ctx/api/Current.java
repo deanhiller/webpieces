@@ -29,15 +29,15 @@ public class Current {
 	}
 
 	public static void setContext(RequestContext requestCtx) {
-		Context.set(Context.REQUEST, requestCtx);
 
 		if(requestCtx == null) {
-			Context.set(Context.HEADERS, null);
+			Context.clear();
 			return;
 		}
 
 		Map<String, String> headerMap = translateToSingleHeaders(requestCtx);
 		Context.set(Context.HEADERS, headerMap);
+		Context.set(Context.REQUEST, requestCtx);
 	}
 
 	private static Map<String, String> translateToSingleHeaders(RequestContext requestCtx) {
