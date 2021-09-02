@@ -1,0 +1,28 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+apply from: '../../config/global.gradle'
+
+repositories {
+    mavenCentral()
+    maven { url uri('/tmp/myRepo/') } // For testing locally
+}
+
+dependencies {
+
+    //api deps['guice']
+    api deps['http-router']
+    api deps['cloud-api-lib']
+    //api deps['core-jackson']
+
+    //implementation deps['javax-inject-api']
+    //implementation deps['slf4j-api']
+
+}
