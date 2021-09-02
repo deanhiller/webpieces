@@ -164,7 +164,7 @@ public class RouterServiceImpl implements RouterService {
 			
 			return new RouterStreamRef("routerSevcTop", finalWriter, streamRef);
 		} finally {
-			MDC.put("txId", null);
+			MDC.remove("txId");
 		}
 	}
 

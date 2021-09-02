@@ -61,11 +61,13 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         Class retType = (Class)t.getActualTypeArguments()[0];
 
         Map<String, Object> context = Context.getContext();
-        Object header = context.get(Context.HEADERS);
 
         if(context == null) {
             throw new IllegalStateException("Please call Current.setContext with the request context or create your own context");
-        } else if(header == null) {
+        }
+
+        Object header = context.get(Context.HEADERS);
+        if(header == null) {
             throw new IllegalStateException("Context.HEADERS is missing from the Context.  please set that up first");
         } else if(! (header instanceof Map)) {
             throw new IllegalStateException("Context.HEADERS is not a Map<String, String> and is setup incorrectly");

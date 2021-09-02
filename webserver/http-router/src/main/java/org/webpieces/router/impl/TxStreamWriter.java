@@ -23,7 +23,7 @@ public class TxStreamWriter implements StreamWriter {
 		try {
 			return w.processPiece(data);
 		} finally {
-			MDC.put("txId", null);
+			MDC.remove(txId);
 		}
 	}
 
