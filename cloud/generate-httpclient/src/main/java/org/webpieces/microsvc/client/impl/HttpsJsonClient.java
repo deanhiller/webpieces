@@ -241,8 +241,10 @@ public class HttpsJsonClient {
     private <T> T unmarshal(String jsonReq, Contexts contexts, FullRequest request, FullResponse httpResp, int port, Class<T> type) {
 
         Map<String, String> loggingCtxMap = contexts.getLoggingCtxMap();
-        for (Map.Entry<String, String> entry : loggingCtxMap.entrySet()) {
-            MDC.put(entry.getKey(), entry.getValue());
+        if(loggingCtxMap != null) {
+            for (Map.Entry<String, String> entry : loggingCtxMap.entrySet()) {
+                MDC.put(entry.getKey(), entry.getValue());
+            }
         }
 
         //SINCE 99% of the time, we don't change threads on executing resolution of a future, we can set the ThreadLocal
