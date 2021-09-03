@@ -15,6 +15,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Singleton
 public class LocalStorage implements GCPRawStorage {
@@ -109,22 +110,31 @@ public class LocalStorage implements GCPRawStorage {
 
     @Override
     public CopyWriter copy(Storage.CopyRequest copyRequest) {
-        /*BlobId source = copyRequest.getSource();
-        BlobInfo target = copyRequest.getTarget();
-        //write a new file in target?
-        File inFile = new File(LOCAL_BUILD_DIR + source.getBucket() + "/" + source.getName());//mytest.txt
-        FileInputStream in = new FileInputStream(inFile);
-        File outFile = new File(LOCAL_BUILD_DIR + target.getBucket() + "/" + target.getName());
-        FileOutputStream out = new FileOutputStream(outFile);
-        int n;
-        while ((n = in.read()) != -1) {
-            out.write(n);
+        try {
+            //I still have trouble returning a CopyWriter variable. It appears to be an object, but I can't initialize the variable
+            List<Storage.BlobSourceOption> sourceOptions = copyRequest.getSourceOptions();
+            CopyWriter cp = new CopyWriter(sourceOptions, copyRequest);
+            BlobId source = copyRequest.getSource();
+            BlobInfo target = copyRequest.getTarget();
+
+            //I want to write a new file to the target.
+            //First, we will create an identical file, then we write the content to the new file.
+            File inFile = new File(LOCAL_BUILD_DIR + source.getBucket() + "/" + source.getName());//mytest.txt
+            FileInputStream in = new FileInputStream(inFile);
+            File outFile = new File(LOCAL_BUILD_DIR + target.getBucket() + "/" + target.getName());
+            FileOutputStream out = new FileOutputStream(outFile);
+            int n;
+            while ((n = in.read()) != -1) {
+                out.write(n);
+            }
+            in.close();
+            out.close();
+            System.out.println("File Copied");
+            return cp;
         }
-        in.close();
-        out.close();
-        System.out.println("File Copied");
-        return outFile; //Need to know what is a CopyWriter.*/
-        //return null;
-        throw new UnsupportedOperationException("Need to implement this still");
+        catch (IOException e){// When the file you want to copy does not exist in that directory.
+            System.out.println("File does not exist");
+            return null;
+        }
     }
 }
