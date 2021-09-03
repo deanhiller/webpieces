@@ -166,14 +166,25 @@ public class TestLocalStorage {
         //copy a file to build directory and check to make sure it exists.
 
         //Copying a Blob.
-        /*String bucketName = "testbucket";
+
+        String bucketName = "testbucket";
         String blobName = "mytest.txt";
         String copyBlobName = "mytest_copy.txt";
         Storage.CopyRequest request = Storage.CopyRequest.newBuilder()
                 .setSource(BlobId.of(bucketName, blobName))
                 .setTarget(BlobId.of(bucketName, copyBlobName))
                 .build();
-        Blob blob = instance.copy(request).getResult();*/
+        Blob blob = instance.copy(request).getResult();
+
+        ReadableByteChannel readFile = instance.reader("testbucket", "mytest_copy.txt");
+
+        InputStream i = Channels.newInputStream(readFile);
+
+        String text = new BufferedReader(
+                new InputStreamReader(i, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+        Assert.assertEquals("Some Test", text);// Passed.
     }
 
     @Test
