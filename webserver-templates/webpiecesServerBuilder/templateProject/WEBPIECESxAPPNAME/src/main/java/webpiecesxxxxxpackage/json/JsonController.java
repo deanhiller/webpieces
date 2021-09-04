@@ -24,17 +24,20 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import webpiecesxxxxxpackage.service.RemoteService;
 
 @Singleton
-public class JsonController implements ClientApi {
+public class JsonController implements SaveApi, ClientApi {
 	
 	private static final Logger log = LoggerFactory.getLogger(JsonController.class);
 
 	private Counter counter;
+	private RemoteService remoteService;
 
 	@Inject
-	public JsonController(MeterRegistry metrics) {
+	public JsonController(MeterRegistry metrics, RemoteService remoteService) {
 		counter = metrics.counter("testCounter");
+		this.remoteService = remoteService;
 	}
 	
 	public CompletableFuture<SearchResponse> asyncJsonRequest(int id, @Jackson SearchRequest request) {
@@ -98,6 +101,17 @@ public class JsonController implements ClientApi {
 		
 		CompletableFuture<StreamWriter> responseWriter = handle.process(response);
 		return new RequestStreamEchoWriter(requestCtx, handle, responseWriter);
+	}
+
+	@Override
+	public CompletableFuture<SearchResponse> search(@Jackson SearchRequest request) {
+		counter.increment();
+
+		//so we can test out mocking remote services
+		remoteService.sendData(6);
+
+		SearchResponse resp = postJson(request);
+		return CompletableFuture.completedFuture(resp);
 	}
 
 	private static class RequestStreamEchoWriter implements StreamWriter, StreamRef {

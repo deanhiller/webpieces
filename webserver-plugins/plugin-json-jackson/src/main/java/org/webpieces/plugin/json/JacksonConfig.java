@@ -2,6 +2,7 @@ package org.webpieces.plugin.json;
 
 public class JacksonConfig {
 
+	private String packageFilterPattern;
 	private String filterPattern;
 	private Class<? extends JacksonCatchAllFilter> filterClazz = JacksonCatchAllFilter.class;
 	private Class<? extends JacksonNotFoundFilter> notFoundFilterClazz = JacksonNotFoundFilter.class;
@@ -18,6 +19,9 @@ public class JacksonConfig {
 	//You basically add not null constraints to every String which means that thing you actually did require ...well, a not null constraint is not working anymore since you receive a "" instead.
 	//To fix that, you can add a not empty constraint check instead.
 	private boolean convertNullToEmptyStr = true;
+
+	public JacksonConfig() {
+	}
 
 	public JacksonConfig(String filterPattern) {
 		this.filterPattern = filterPattern;
@@ -76,5 +80,13 @@ public class JacksonConfig {
 	public void setConvertNullToEmptyStr(boolean convertNullToEmptyStr) {
 		this.convertNullToEmptyStr = convertNullToEmptyStr;
 	}
-	
+
+	public String getPackageFilterPattern() {
+		return packageFilterPattern;
+	}
+
+	public JacksonConfig setPackageFilterPattern(String packageFilterPattern) {
+		this.packageFilterPattern = packageFilterPattern;
+		return this;
+	}
 }
