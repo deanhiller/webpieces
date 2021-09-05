@@ -85,8 +85,9 @@ ext {
             'plugin-json-jackson'    : 'org.webpieces:plugin-json-jackson',
             'plugin-properties'      : 'org.webpieces:plugin-properties',
 
-            'generate-httpclient'    : 'org.webpieces:generate-httpclient',
             'cloud-api-lib'          : 'org.webpieces:cloud-api-lib',
+            'generate-httpclient'    : 'org.webpieces:generate-httpclient',
+            'server-scaffolding'     : 'org.webpieces:server-scaffolding',
 
             'projectcreator'         : 'org.webpieces:projectcreator',
 
@@ -100,6 +101,8 @@ ext {
 
             'slf4j-api'              : 'org.slf4j:slf4j-api',
             'logback-classic'        : 'ch.qos.logback:logback-classic',
+            'jul-to-slf4j'           : 'org.slf4j:jul-to-slf4j:1.7.25',
+
             'guice'                  : 'com.google.inject:guice',
             'guava'                  : 'com.google.guava:guava',
             'selenium'               : 'org.seleniumhq.selenium:selenium-java',
@@ -195,10 +198,10 @@ dependencies {
     testImplementation 'junit:junit'
     constraints {
 
-        implementation 'jakarta.annotation:jakarta.annotation-api:[1.3.5,2)'
-        implementation 'jakarta.inject:jakarta.inject-api:[1.0.3,2)'
-        implementation 'jakarta.persistence:jakarta.persistence-api:[2.2.3,3)'
-        implementation 'jakarta.validation:jakarta.validation-api:[2.0.1,3)'
+        implementation 'jakarta.annotation:jakarta.annotation-api:1.3.5'
+        implementation 'jakarta.inject:jakarta.inject-api:1.0.3'
+        implementation 'jakarta.persistence:jakarta.persistence-api:2.2.3'
+        implementation 'jakarta.validation:jakarta.validation-api:2.0.1'
 
         implementation 'ch.qos.logback:logback-classic:1.2.3'
         implementation 'com.google.inject:guice:4.2.2'

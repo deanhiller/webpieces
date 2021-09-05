@@ -10,13 +10,18 @@ public class Context {
     private static ThreadLocal<Map<String,Object>> context = ThreadLocal.withInitial(() -> new HashMap<>());
 
     public static void set(String key, Object value) {
+        //To prevent the key, null from being in the map, remove if value==null
+        if(value == null) {
+            context.get().remove(key);
+            return;
+        }
         context.get().put(key, value);
     }
     public static Object get(String key) {
         return context.get().get(key);
     }
 
-    public void clear() {
+    public static void clear() {
         context.remove();
     }
 
@@ -26,5 +31,10 @@ public class Context {
 
     public static void restoreContext(Map<String, Object> props) {
         context.set(props);
+    }
+
+    public static Map<String, Object> copyContext() {
+        Map<String, Object> stringObjectMap = context.get();
+        return new HashMap<>(stringObjectMap);
     }
 }
