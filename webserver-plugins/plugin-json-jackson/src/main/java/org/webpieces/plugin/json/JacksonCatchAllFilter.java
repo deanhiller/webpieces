@@ -1,15 +1,19 @@
 package org.webpieces.plugin.json;
 
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.RenderContent;
@@ -32,20 +36,50 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	private Pattern pattern;
 
-	@Inject
-	public JacksonCatchAllFilter(JacksonJsonConverter mapper) {
-		this.mapper = mapper;
-	}
-	
-	@Override
-	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
-		return nextFilter.invoke(meta).handle((a, t) -> translateFailure(meta, a, t));
-	}
+    @Inject
+    public JacksonCatchAllFilter(JacksonJsonConverter mapper) {
+        this.mapper = mapper;
+    }
+
+    @Override
+    public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+
+        printPreRequestLog(meta);
+
+        return nextFilter.invoke(meta).handle((a, t) -> translateFailure(meta, a, t));
+
+    }
 
 	@Override
 	public void initialize(JsonConfig config) {
 		this.pattern = config.getFilterPattern();
 	}
+
+    protected void printPreRequestLog(MethodMeta meta) {
+
+        Method method = meta.getLoadedController().getControllerMethod();
+        RouterRequest request = meta.getCtx().getRequest();
+
+        // Use this fancifully-named logger so that you can filter these out by controller method in your logging config
+        final Logger preRequestLog = LoggerFactory.getLogger(getClass().getSimpleName() + "." +
+                method.getDeclaringClass().getName() + "." + method.getName());
+
+        String httpMethod = request.method.getCode();
+        String endpoint = httpMethod + " " + request.domain + ":" + request.port + request.relativePath;
+        List<String> headers = meta.getCtx().getRequest().originalRequest.getHeaders().stream()
+                .map(h -> h.getName() + ": " + h.getValue())
+                .collect(Collectors.toList());
+        String json = new String(request.body.createByteArray());
+
+        // Print a pre-request log that describes the request
+        preRequestLog.info("The following log is the original request body and its headers. If this log is spammy or " +
+                        "unnecessary you can disable it in your logging config by filtering out this logger: {}",
+                preRequestLog.getName());
+        preRequestLog.info("{}:\n\n" +
+                "Headers: {}\n\n" +
+                "Request Body JSON:\n{}", endpoint, headers, json);
+
+    }
 
 	protected Action translateFailure(MethodMeta meta, Action action, Throwable t) {
 		if(t != null) {
