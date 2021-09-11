@@ -99,7 +99,7 @@ public class LocalStorage implements GCPRawStorage {
                 dir.mkdirs();
 //            if(!file.exists())
 //                file.createNewFile();
-            OutputStream o = new FileOutputStream(file, true);
+            OutputStream o = new FileOutputStream(file);
             WritableByteChannel writableByteChannel = Channels.newChannel(o);
             return writableByteChannel;
         } catch (IOException e) {
