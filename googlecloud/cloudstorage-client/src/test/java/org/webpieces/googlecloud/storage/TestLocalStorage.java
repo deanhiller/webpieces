@@ -12,6 +12,7 @@ import com.google.inject.util.Modules;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.googlecloud.storage.api.CopyInterface;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPStorage;
 
@@ -174,7 +175,9 @@ public class TestLocalStorage {
                 .setSource(BlobId.of(bucketName, blobName))
                 .setTarget(BlobId.of(bucketName, copyBlobName))
                 .build();
-        Blob blob = instance.copy(request).getResult();
+        CopyInterface copy = instance.copy(request);// What do we need for this interface?
+
+        //The copy will need a method to get the directory so that we can read the content.
 
         ReadableByteChannel readFile = instance.reader("testbucket", "mytest_copy.txt");
 

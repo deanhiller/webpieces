@@ -2,19 +2,18 @@ package org.webpieces.googlecloud.storage.impl.local;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
+import org.webpieces.googlecloud.storage.api.CopyInterface;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
-import org.webpieces.googlecloud.storage.impl.ChannelWrapper;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Singleton
@@ -109,32 +108,42 @@ public class LocalStorage implements GCPRawStorage {
     }
 
     @Override
-    public CopyWriter copy(Storage.CopyRequest copyRequest) {
+    public CopyInterface copy(Storage.CopyRequest copyRequest) {
         try {
             //I still have trouble returning a CopyWriter variable. It appears to be an object, but I can't initialize the variable
             List<Storage.BlobSourceOption> sourceOptions = copyRequest.getSourceOptions();
-            CopyWriter cp = new CopyWriter(sourceOptions, copyRequest);
+            LocalCopyWriter cp = new LocalCopyWriter(copyRequest);
             BlobId source = copyRequest.getSource();
             BlobInfo target = copyRequest.getTarget();
 
             //I want to write a new file to the target.
             //First, we will create an identical file, then we write the content to the new file.
-            File inFile = new File(LOCAL_BUILD_DIR + source.getBucket() + "/" + source.getName());//mytest.txt
-            FileInputStream in = new FileInputStream(inFile);
+            ReadableByteChannel inFile = reader(source.getBucket(), source.getName());//mytest.txt
+
             File outFile = new File(LOCAL_BUILD_DIR + target.getBucket() + "/" + target.getName());
+
             FileOutputStream out = new FileOutputStream(outFile);
-            int n;
-            while ((n = in.read()) != -1) {
-                out.write(n);
+            WritableByteChannel targetChannel = out.getChannel();
+
+            ByteBuffer byteBuffer = ByteBuffer.allocate(10240); //Had to import ByteBuffer to make it work.
+            int read;
+            read = inFile.read(byteBuffer);
+            if (read > 0) {
+                byteBuffer.limit(byteBuffer.position());
+                byteBuffer.rewind();
+                targetChannel.write(byteBuffer);
+                byteBuffer.clear();
             }
-            in.close();
-            out.close();
-            System.out.println("File Copied");
+            if (inFile != null) {
+                inFile.close();
+            }
+            if (targetChannel != null) {
+                targetChannel.close();
+            }
             return cp;
         }
-        catch (IOException e){// When the file you want to copy does not exist in that directory.
-            System.out.println("File does not exist");
-            return null;
+        catch (IOException e){
+            throw SneakyThrow.sneak(e);
         }
     }
 }
