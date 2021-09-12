@@ -8,6 +8,7 @@ import com.google.cloud.storage.Storage.BlobGetOption;
 import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.Storage.BlobSourceOption;
 import com.google.cloud.storage.Storage.BlobWriteOption;
+import org.webpieces.googlecloud.storage.api.CopyInterface;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
 import org.webpieces.googlecloud.storage.impl.StorageSupplier;
@@ -69,8 +70,9 @@ public class GCPRawStorageImpl implements GCPRawStorage { //implements Storage {
     }
 
     @Override
-    public CopyWriter copy(Storage.CopyRequest copyRequest) {
-        return storage.get().copy(copyRequest);
+    public CopyInterface copy(Storage.CopyRequest copyRequest) {
+        CopyWriter copyWriter = storage.get().copy(copyRequest);
+        return new CopyWriterImpl(copyWriter);
     }
 
 }

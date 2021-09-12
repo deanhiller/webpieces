@@ -2,6 +2,7 @@ package org.webpieces.googlecloud.storage.impl;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
+import org.webpieces.googlecloud.storage.api.CopyInterface;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
 import org.webpieces.googlecloud.storage.api.GCPStorage;
@@ -9,7 +10,6 @@ import org.webpieces.util.context.ClientAssertions;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
@@ -75,7 +75,7 @@ public class GCPStorageImpl implements GCPStorage {
     }
 
     @Override
-    public CopyWriter copy(Storage.CopyRequest copyRequest) {
+    public CopyInterface copy(Storage.CopyRequest copyRequest) {
         clientAssertions.throwIfCannotGoRemote();
         //return null;
         return rawStorage.copy(copyRequest);

@@ -12,6 +12,7 @@ import com.google.inject.util.Modules;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.googlecloud.storage.api.CopyInterface;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPStorage;
 
@@ -163,17 +164,26 @@ public class TestLocalStorage {
 
     @Test
     public void testCopyFromClassPath() throws IOException {
-        //copy a file to build directory and check to make sure it exists.
 
-        //Copying a Blob.
-        /*String bucketName = "testbucket";
+        String bucketName = "testbucket";
         String blobName = "mytest.txt";
         String copyBlobName = "mytest_copy.txt";
         Storage.CopyRequest request = Storage.CopyRequest.newBuilder()
                 .setSource(BlobId.of(bucketName, blobName))
                 .setTarget(BlobId.of(bucketName, copyBlobName))
                 .build();
-        Blob blob = instance.copy(request).getResult();*/
+        Page<GCPBlob> testbucket = instance.list("copybucket");
+        CopyInterface copy = instance.copy(request);
+
+        ReadableByteChannel readFile = instance.reader("copybucket", "mytest_copy.txt");
+
+        InputStream i = Channels.newInputStream(readFile);
+
+        String text = new BufferedReader(
+                new InputStreamReader(i, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+        Assert.assertEquals("Some Test", text);// Passed.
     }
 
     @Test
