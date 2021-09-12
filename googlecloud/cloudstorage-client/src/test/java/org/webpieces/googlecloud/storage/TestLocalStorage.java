@@ -164,9 +164,6 @@ public class TestLocalStorage {
 
     @Test
     public void testCopyFromClassPath() throws IOException {
-        //copy a file to build directory and check to make sure it exists.
-
-        //Copying a Blob.
 
         String bucketName = "testbucket";
         String blobName = "mytest.txt";
@@ -175,9 +172,8 @@ public class TestLocalStorage {
                 .setSource(BlobId.of(bucketName, blobName))
                 .setTarget(BlobId.of(bucketName, copyBlobName))
                 .build();
-        CopyInterface copy = instance.copy(request);// What do we need for this interface?
+        CopyInterface copy = instance.copy(request);
 
-        //The copy will need a method to get the directory so that we can read the content.
 
         ReadableByteChannel readFile = instance.reader("testbucket", "mytest_copy.txt");
 
