@@ -50,15 +50,19 @@ public abstract class MockSuperclass {
 	
 	protected void calledVoidMethod(MethodEnum method, Object ... args) {
 		addCalledMethod(method, args);
-		
+
+		throwExceptionIfNeeded(method);
+	}
+
+	private void throwExceptionIfNeeded(MethodEnum method) {
 		List<ValueToReturn> list = returnValues.get(method);
 		ValueToReturn toReturn;
 		if(list == null || list.size() == 0) {
 			toReturn = defaultReturnValues.get(method);
 		} else {
-			toReturn = list.remove(0);			
+			toReturn = list.remove(0);
 		}
-		
+
 		if(toReturn != null)
 			toReturn.returnOrThrowValue();
 	}

@@ -28,18 +28,22 @@ public class JacksonRoutes implements Routes {
 	@Override
 	public void configure(DomainRouteBuilder domainRouteBldr) {
 		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
-		Pattern pattern = Pattern.compile(filterPattern);
-		
+
 		int filterLevel = config.getFilterApplyLevel();
-		int notFoundLevel = config.getNotFoudFilterLevel();
-		
-		if(filter != null) {
+
+		if(config.getPackageFilterPattern() != null) {
+			log.info("Installing Json Catch All filter="+filter.getName()+" package regex="+config.getPackageFilterPattern());
+			Pattern pattern = Pattern.compile(config.getPackageFilterPattern());
+			bldr.addPackageFilter(config.getPackageFilterPattern(), filter, new JsonConfig(null, pattern), FilterPortType.ALL_FILTER, filterLevel);
+		} else if(filter != null) {
 			log.info("Installing Json Catch All filter="+filter.getName());
-			bldr.addFilter(filterPattern, filter, new JsonConfig(pattern), FilterPortType.ALL_FILTER, filterLevel);
+			int notFoundLevel = config.getNotFoudFilterLevel();
+			Pattern pattern = Pattern.compile(filterPattern);
+			bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, pattern), FilterPortType.ALL_FILTER, filterLevel);
+			bldr.addNotFoundFilter(notFoundFilter, new JsonConfig(pattern, pattern), FilterPortType.ALL_FILTER, notFoundLevel);
 		} else {
 			log.info("No catch all json filter installed.  PLEASE install your own somewhere so clean errors are sent back");
 		}
-		bldr.addNotFoundFilter(notFoundFilter, new JsonConfig(pattern), FilterPortType.ALL_FILTER, notFoundLevel);
 	}
 
 }
