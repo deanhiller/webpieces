@@ -134,12 +134,8 @@ public class LocalStorage implements GCPRawStorage {
                 targetChannel.write(byteBuffer);
                 byteBuffer.clear();
             }
-            if (inFile != null) {
                 inFile.close();
-            }
-            if (targetChannel != null) {
                 targetChannel.close();
-            }
             return cp;
         }
         catch (IOException e){
