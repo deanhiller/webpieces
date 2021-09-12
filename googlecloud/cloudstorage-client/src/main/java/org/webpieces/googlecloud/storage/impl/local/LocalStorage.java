@@ -110,15 +110,11 @@ public class LocalStorage implements GCPRawStorage {
     @Override
     public CopyInterface copy(Storage.CopyRequest copyRequest) {
         try {
-            //I still have trouble returning a CopyWriter variable. It appears to be an object, but I can't initialize the variable
-            List<Storage.BlobSourceOption> sourceOptions = copyRequest.getSourceOptions();
             LocalCopyWriter cp = new LocalCopyWriter(copyRequest);
             BlobId source = copyRequest.getSource();
             BlobInfo target = copyRequest.getTarget();
 
-            //I want to write a new file to the target.
-            //First, we will create an identical file, then we write the content to the new file.
-            ReadableByteChannel inFile = reader(source.getBucket(), source.getName());//mytest.txt
+            ReadableByteChannel inFile = reader(source.getBucket(), source.getName());
 
             File outFile = new File(LOCAL_BUILD_DIR + target.getBucket() + "/" + target.getName());
 
