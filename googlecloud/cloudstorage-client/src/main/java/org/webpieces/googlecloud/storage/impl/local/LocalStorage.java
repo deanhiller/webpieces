@@ -116,7 +116,7 @@ public class LocalStorage implements GCPRawStorage {
 
             ReadableByteChannel inFile = reader(source.getBucket(), source.getName());
 
-            File outFile = new File(LOCAL_BUILD_DIR + target.getBucket() + "/" + target.getName());
+            File outFile = new File(LOCAL_BUILD_DIR + "CopiedFiles" + "/" + target.getName());
 
             FileOutputStream out = new FileOutputStream(outFile);
             WritableByteChannel targetChannel = out.getChannel();

@@ -175,7 +175,7 @@ public class TestLocalStorage {
         CopyInterface copy = instance.copy(request);
 
 
-        ReadableByteChannel readFile = instance.reader("testbucket", "mytest_copy.txt");
+        ReadableByteChannel readFile = instance.reader("CopiedFiles", "mytest_copy.txt");
 
         InputStream i = Channels.newInputStream(readFile);
 
