@@ -246,7 +246,6 @@ public class HttpsJsonClient {
                 MDC.put(entry.getKey(), entry.getValue());
             }
         }
-
         //SINCE 99% of the time, we don't change threads on executing resolution of a future, we can set the ThreadLocal
         //for the RequestContext here to transfer that info to this thread AFTER a remote server responds
         //Of course, we have no way of resetting it, but the platform does initialize it on every request and every

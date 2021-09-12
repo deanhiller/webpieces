@@ -97,7 +97,7 @@ public class RESTApiRoutes implements Routes {
         if (paramTypes.length == 1) {
             String parameterType = paramTypes[0].getSimpleName();
             if (!parameterType.endsWith("Request") || !parameterType.toLowerCase().contains(methodName.toLowerCase())) {
-                errorResponse.add(api.getName() + "::" + methodName + " parameter type does not follow Orderly REST API convention.\n" +
+                errorResponse.add(api.getName() + "::" + methodName + " parameter type does not follow future-proof compatibility REST API convention.\n" +
                         "\tThe parameter type must have the format \"" + pascalMethodName + "Request\".\n" +
                         "\tUse the new convention, or add @Legacy or @Deprecated on this method and add a ticket to change your API");
             }

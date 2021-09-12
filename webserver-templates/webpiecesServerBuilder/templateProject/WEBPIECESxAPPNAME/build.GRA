@@ -36,7 +36,10 @@ dependencies {
   //optional plugin for if you have a json api
   implementation deps['plugin-jackson']
   implementation deps['plugin-properties']
-  
+  implementation deps['generate-httpclient']
+  implementation deps['server-scaffolding']
+  implementation deps['jul-to-slf4j']
+
   implementation deps['commons-lang'] //used in json escaping
   implementation deps['javax-validation']
   implementation deps['hibernate-validator']
