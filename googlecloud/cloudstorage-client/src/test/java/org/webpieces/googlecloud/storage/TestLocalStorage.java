@@ -172,10 +172,10 @@ public class TestLocalStorage {
                 .setSource(BlobId.of(bucketName, blobName))
                 .setTarget(BlobId.of(bucketName, copyBlobName))
                 .build();
+        Page<GCPBlob> testbucket = instance.list("copybucket");
         CopyInterface copy = instance.copy(request);
 
-
-        ReadableByteChannel readFile = instance.reader("CopiedFiles", "mytest_copy.txt");
+        ReadableByteChannel readFile = instance.reader("copybucket", "mytest_copy.txt");
 
         InputStream i = Channels.newInputStream(readFile);
 
