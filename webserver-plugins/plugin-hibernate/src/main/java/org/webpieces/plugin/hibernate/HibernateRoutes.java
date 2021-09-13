@@ -8,9 +8,11 @@ import org.webpieces.router.api.routes.Routes;
 public class HibernateRoutes implements Routes {
 
 	private HibernateConfiguration config;
+	private boolean transactionOnByDefault;
 
-	public HibernateRoutes(HibernateConfiguration config) {
+	public HibernateRoutes(HibernateConfiguration config, boolean transactionOnByDefault) {
 		this.config = config;
+		this.transactionOnByDefault = transactionOnByDefault;
 	}
 
 	@Override
@@ -31,11 +33,12 @@ public class HibernateRoutes implements Routes {
 		int filterApplyLevel = 500;
 		if(config != null)
 			config.getFilterApplyLevel();
-		
+
+		TxConfig txConfig = new TxConfig(transactionOnByDefault);
 		if(applyFilterToClassName) {
-			bldr.addPackageFilter(filterPath, TransactionFilter.class, null, FilterPortType.ALL_FILTER, filterApplyLevel);
+			bldr.addPackageFilter(filterPath, TransactionFilter.class, txConfig, FilterPortType.ALL_FILTER, filterApplyLevel);
 		} else {
-			bldr.addFilter(filterPath, TransactionFilter.class, null, FilterPortType.ALL_FILTER, filterApplyLevel);
+			bldr.addFilter(filterPath, TransactionFilter.class, txConfig, FilterPortType.ALL_FILTER, filterApplyLevel);
 		}
 	}
 
