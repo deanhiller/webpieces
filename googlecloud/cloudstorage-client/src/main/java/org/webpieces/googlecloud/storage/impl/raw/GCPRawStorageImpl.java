@@ -12,6 +12,7 @@ import org.webpieces.googlecloud.storage.api.CopyInterface;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPRawStorage;
 import org.webpieces.googlecloud.storage.impl.StorageSupplier;
+import org.webpieces.util.SingletonSupplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,11 +25,11 @@ import java.util.function.Supplier;
 @Singleton
 public class GCPRawStorageImpl implements GCPRawStorage { //implements Storage {
 
-    private Supplier<Storage> storage;
+    private SingletonSupplier<Storage> storage;
 
     @Inject
     public GCPRawStorageImpl(StorageSupplier storage) {
-        this.storage = storage;
+        this.storage = new SingletonSupplier<>(storage);
     }
 
     @Override
