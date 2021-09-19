@@ -95,7 +95,7 @@ public class WebServerModule implements Module {
 	@Provides
 	@Singleton
 	public ScheduledExecutorService provideTimer() {
-		return new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
+		return new ScheduledThreadPoolExecutor(10, new NamedThreadFactory("webpieces-timer"));
 	}
 	
 	@Provides 
