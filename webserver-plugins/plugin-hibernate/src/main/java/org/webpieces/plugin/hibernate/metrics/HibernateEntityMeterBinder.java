@@ -1,6 +1,5 @@
 package org.webpieces.plugin.hibernate.metrics;
 
-import antlr.StringUtils;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
@@ -23,18 +22,16 @@ import javax.persistence.Entity;
 public class HibernateEntityMeterBinder implements MeterBinder {
 
     private final SessionFactory sessionFactory;
-    private final HibernateEntityMeterConfig config;
 
-    public HibernateEntityMeterBinder(SessionFactory sessionFactory, HibernateEntityMeterConfig config) {
+    public HibernateEntityMeterBinder(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
-        this.config = config;
     }
 
     @Override
     public void bindTo(@NonNull MeterRegistry meterRegistry) {
         if (sessionFactory instanceof SessionFactoryImplementor) {
             EventListenerRegistry eventListenerRegistry = ((SessionFactoryImplementor) sessionFactory).getServiceRegistry().getService(EventListenerRegistry.class);
-            EntityEventListener eventListener = new EntityEventListener(meterRegistry, config);
+            EntityEventListener eventListener = new EntityEventListener(meterRegistry);
             eventListenerRegistry.appendListeners(EventType.POST_LOAD, eventListener);
             eventListenerRegistry.appendListeners(EventType.POST_DELETE, eventListener);
             eventListenerRegistry.appendListeners(EventType.POST_UPDATE, eventListener);
@@ -45,11 +42,9 @@ public class HibernateEntityMeterBinder implements MeterBinder {
     static class EntityEventListener implements PostLoadEventListener, PostDeleteEventListener, PostUpdateEventListener, PostInsertEventListener {
 
         private final MeterRegistry meterRegistry;
-        private final HibernateEntityMeterConfig config;
 
-        EntityEventListener(MeterRegistry meterRegistry, HibernateEntityMeterConfig config) {
+        EntityEventListener(MeterRegistry meterRegistry) {
             this.meterRegistry = meterRegistry;
-            this.config = config;
         }
 
         private Tags getTags(String entityName) {
@@ -59,7 +54,6 @@ public class HibernateEntityMeterBinder implements MeterBinder {
                     requestPath = "unknown";
                 }
                 return Tags.of(
-                        HibernateEntityMeterTags.SERVICE, config.getServiceName(),
                         HibernateEntityMeterTags.ENTITY_NAME, entityName,
                         HibernateEntityMeterTags.REQUEST, requestPath
                 );

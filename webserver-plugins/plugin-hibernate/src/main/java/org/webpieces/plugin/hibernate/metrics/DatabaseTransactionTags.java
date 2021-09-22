@@ -5,22 +5,15 @@ import java.util.Map;
 
 public class DatabaseTransactionTags {
 
-    public static final String SERVICE = "service";
     public static final String REQUEST = "request";
     public static final String TRANSACTION = "transaction";
 
-    private final String service;
     private final String request;
     private final String transaction;
 
-    public DatabaseTransactionTags(String service, String request, String transaction) {
-        this.service = service;
+    public DatabaseTransactionTags(String request, String transaction) {
         this.request = request;
         this.transaction = transaction;
-    }
-
-    public String getService() {
-        return service;
     }
 
     public String getRequest() {
@@ -33,7 +26,6 @@ public class DatabaseTransactionTags {
 
     public Map<String, String> getTagsMap() {
         Map<String, String> tags = new HashMap<>();
-        tags.put(SERVICE, service);
         tags.put(REQUEST, request);
         tags.put(TRANSACTION, transaction);
         return tags;
