@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.webpieces.http2.api.dto.highlevel.Http2HeaderStruct;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import org.slf4j.MDC;
 
 import org.webpieces.data.api.DataWrapper;
@@ -246,7 +248,49 @@ public class RouterRequest {
 
 	public UriInfo requestUri;
 
-    public void putMultipart(String key, String value) {
+	/**
+	 * Need to remove webpieces http2 stack from router(ie. Http2Request above and Http2Headers!!!!!!)
+	 * This is a step towards that to only
+	 * have RouterRequest which is the bare minimum object to allow router to do it's job.  In this way,
+	 * router is a piece that can work with an http stack(apache, etc. etc.) and a true piece to be
+	 * re-used.
+	 *
+	 * For now, http2 headers is too tightly coupled for worry about while we get this working so this is
+	 * at least one point of decoupling.  Steps...
+	 * Step 1. create all read points to read from methods like this reading in objects from org.webpieces.ctx.api
+	 * Step 2. figure out how to better translate from ANY http2/http1 into RouterRequest in
+	 *         the webserver connection layer
+	 * Step 3. Make these fields Object so any platform can insert their http2 or http1 objects
+	 *         public Http2Request originalRequest;
+	 * 	       public Http2Headers trailingHeaders;
+	 */
+	public Map<String, List<RouterHeader>> getHeaders() {
+		Map<String, List<RouterHeader>> routerHeaderMap = new HashMap<>();
+
+		//DO NOT cache this as there are clients that modify the Http2Header which will not
+		//modify this list so just generate this list every time for now.
+		//In webpieces getHeaders is only called once every request anyways!!!
+		Http2HeaderStruct headerLookupStruct = originalRequest.getHeaderLookupStruct();
+		for(String headerName : headerLookupStruct.getAllHeaderNames()) {
+			//http is well, 'interesting' allowing one to repeat header names and if I remember
+			//order matters and we keep the order
+			List<Http2Header> headerArray = headerLookupStruct.getHeaders(headerName);
+			List<RouterHeader> translatedList = translate(headerArray);
+			routerHeaderMap.put(headerName, translatedList);
+		}
+
+		return routerHeaderMap;
+	}
+
+	private List<RouterHeader> translate(List<Http2Header> headerArray) {
+		List<RouterHeader> headers = new ArrayList<>();
+		for(Http2Header header : headerArray) {
+			headers.add(new RouterHeader(header.getName(), header.getValue()));
+		}
+		return headers;
+	}
+
+	public void putMultipart(String key, String value) {
 		List<String> values = new ArrayList<>();
 		values.add(value);
 		multiPartFields.put(key, values);
