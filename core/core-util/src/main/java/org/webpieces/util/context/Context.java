@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Context {
+
     public static final String HEADERS = "__headers";
     public static final String REQUEST = "__request";
 
@@ -17,6 +18,7 @@ public class Context {
         }
         context.get().put(key, value);
     }
+
     public static Object get(String key) {
         return context.get().get(key);
     }
@@ -37,4 +39,5 @@ public class Context {
         Map<String, Object> stringObjectMap = context.get();
         return new HashMap<>(stringObjectMap);
     }
+
 }
