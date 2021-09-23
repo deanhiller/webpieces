@@ -10,10 +10,7 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.*;
 import org.hibernate.persister.entity.EntityPersister;
-import org.webpieces.ctx.api.ContentType;
 import org.webpieces.ctx.api.Current;
-import org.webpieces.util.context.Context;
-import org.webpieces.util.context.ContextKey;
 
 import javax.persistence.Entity;
 
@@ -52,7 +49,7 @@ public class HibernateEntityMeterBinder implements MeterBinder {
 
         private Tags getTags(String entityName) {
             try {
-                String requestPath = (String) Context.get(ContextKey.REQUEST_PATH.toString());
+                String requestPath = Current.request().relativePath;
                 if (requestPath == null || requestPath.isBlank()) {
                     requestPath = "unknown";
                 }

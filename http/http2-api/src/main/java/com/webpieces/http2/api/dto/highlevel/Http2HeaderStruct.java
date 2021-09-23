@@ -1,6 +1,9 @@
 package com.webpieces.http2.api.dto.highlevel;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
@@ -65,8 +68,5 @@ public class Http2HeaderStruct {
 		}
 		list.add(header);
 	}
-
-	public Set<String> getAllHeaderNames() {
-		return headers.keySet();
-	}
+	
 }
