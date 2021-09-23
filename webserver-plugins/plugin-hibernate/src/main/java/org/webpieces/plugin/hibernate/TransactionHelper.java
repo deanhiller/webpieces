@@ -2,8 +2,12 @@ package org.webpieces.plugin.hibernate;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.plugin.hibernate.metrics.DatabaseMetric;
 import org.webpieces.plugin.hibernate.metrics.DatabaseTransactionTags;
+import org.webpieces.util.context.Context;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
