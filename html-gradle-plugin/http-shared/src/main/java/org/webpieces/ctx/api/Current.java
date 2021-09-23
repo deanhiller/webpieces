@@ -1,6 +1,7 @@
 package org.webpieces.ctx.api;
 
 import org.webpieces.util.context.Context;
+import org.webpieces.util.context.ContextKey;
 import org.webpieces.util.context.PlatformHeaders;
 
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ public class Current {
 		Map<String, String> headerMap = translateToSingleHeaders(requestCtx);
 		Context.set(Context.HEADERS, headerMap);
 		Context.set(Context.REQUEST, requestCtx);
+		Context.set(ContextKey.REQUEST_PATH.toString(), requestCtx.getRequest().relativePath);
+
 	}
 
 	private static Map<String, String> translateToSingleHeaders(RequestContext requestCtx) {
