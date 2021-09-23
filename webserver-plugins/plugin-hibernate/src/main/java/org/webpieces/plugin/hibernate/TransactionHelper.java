@@ -8,6 +8,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.plugin.hibernate.metrics.DatabaseMetric;
 import org.webpieces.plugin.hibernate.metrics.DatabaseTransactionTags;
 import org.webpieces.util.context.Context;
+import org.webpieces.util.context.ContextKey;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -91,8 +92,13 @@ public class TransactionHelper {
     }
 
     private void monitorTransactionTime(String transactionName, long begin) {
+        String requestPath = (String) Context.get(ContextKey.REQUEST_PATH.toString());
+        if (requestPath == null || requestPath.isBlank()) {
+            requestPath = "unknown";
+        }
         Tags transactionTags = Tags.of(
-                DatabaseTransactionTags.TRANSACTION, transactionName
+                DatabaseTransactionTags.TRANSACTION, transactionName,
+                DatabaseTransactionTags.REQUEST, requestPath
         );
 
         meterRegistry.timer(DatabaseMetric.TRANSACTION_TIME.getDottedMetricName(), transactionTags)
