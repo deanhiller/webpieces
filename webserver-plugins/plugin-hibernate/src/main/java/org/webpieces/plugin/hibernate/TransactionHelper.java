@@ -32,7 +32,7 @@ public class TransactionHelper {
 
     public <Resp> Resp runWithEm(Supplier<Resp> function) {
         if (Em.get() != null) {
-            throw new IllegalStateException("Cannot open another entityManager when are already have one open");
+            throw new IllegalStateException("Cannot open another entity manager when one is already open");
         }
 
         EntityManager mgr = factory.createEntityManager();
@@ -47,28 +47,6 @@ public class TransactionHelper {
         } finally {
             Em.set(null);
         }
-    }
-
-    public void run(Consumer<EntityManager> consumer) {
-
-        EntityManager em = Em.get();
-
-        if(em == null) {
-            em = factory.createEntityManager();
-            Em.set(em);
-        }
-
-        try {
-            consumer.accept(em);
-            em.close();
-            return;
-        } catch (Throwable t) {
-            txCompleters.closeEm(t, em);
-            throw t;
-        } finally {
-            Em.set(null);
-        }
-
     }
 
     public <T> T run(Function<EntityManager,T> function) {
@@ -133,9 +111,9 @@ public class TransactionHelper {
     }
 
     private void monitorTransactionTime(String transactionName, long begin) {
-        String requestPath = Current.request().relativePath;
-        if (requestPath == null || requestPath.isBlank()) {
-            requestPath = "unknown";
+        String requestPath = "unknown";
+        if (Current.isContextSet() && Current.request().relativePath != null && !Current.request().relativePath.isBlank()) {
+            requestPath = Current.request().relativePath;
         }
         Tags transactionTags = Tags.of(
                 DatabaseTransactionTags.TRANSACTION, transactionName,
