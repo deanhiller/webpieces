@@ -12,6 +12,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Singleton
@@ -45,6 +47,50 @@ public class TransactionHelper {
         } finally {
             Em.set(null);
         }
+    }
+
+    public void run(Consumer<EntityManager> consumer) {
+
+        EntityManager em = Em.get();
+
+        if(em == null) {
+            em = factory.createEntityManager();
+            Em.set(em);
+        }
+
+        try {
+            consumer.accept(em);
+            em.close();
+            return;
+        } catch (Throwable t) {
+            txCompleters.closeEm(t, em);
+            throw t;
+        } finally {
+            Em.set(null);
+        }
+
+    }
+
+    public <T> T run(Function<EntityManager,T> function) {
+
+        EntityManager em = Em.get();
+
+        if(em == null) {
+            em = factory.createEntityManager();
+            Em.set(em);
+        }
+
+        try {
+            T rval = function.apply(em);
+            em.close();
+            return rval;
+        } catch (Throwable t) {
+            txCompleters.closeEm(t, em);
+            throw t;
+        } finally {
+            Em.set(null);
+        }
+
     }
 
     /**
