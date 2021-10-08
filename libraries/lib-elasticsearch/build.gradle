@@ -1,3 +1,6 @@
+
+group = 'org.webpieces.lib'
+
 dependencies {
 
     api deps['elastic-search']

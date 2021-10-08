@@ -75,3 +75,9 @@ test {
         exclude '**/*Selenium*'
     }
 }
+
+tasks.whenTaskAdded {task ->
+    if(task.name.toLowerCase().contains("sonatype")) {
+        task.enabled = false
+    }
+}
