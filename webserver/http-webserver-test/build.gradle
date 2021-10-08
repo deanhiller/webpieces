@@ -8,6 +8,8 @@ plugins {
     id 'maven-publish'
 }
 
+group = 'org.webpieces.server'
+
 apply from: '../../config/global.gradle'
 
 dependencies {

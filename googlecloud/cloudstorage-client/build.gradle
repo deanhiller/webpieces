@@ -8,6 +8,8 @@ plugins {
     id 'maven-publish'
 }
 
+group = 'org.webpieces.googlecloud'
+
 apply from: '../../config/global.gradle'
 
 repositories {

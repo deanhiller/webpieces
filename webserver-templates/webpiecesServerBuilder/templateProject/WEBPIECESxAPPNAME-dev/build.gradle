@@ -30,3 +30,9 @@ dependencies {
   //we load the documentation plugin in the development server (not the production server)
   implementation deps['plugin-documentation']
 }
+
+tasks.whenTaskAdded {task ->
+  if(task.name.toLowerCase().contains("sonatype")) {
+    task.enabled = false
+  }
+}
