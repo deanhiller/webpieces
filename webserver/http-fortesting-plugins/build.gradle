@@ -9,6 +9,8 @@ plugins {
     id 'org.webpieces.templatecompiler' version '2.1-developer'
 }
 
+group = 'org.webpieces.server'
+
 apply from: '../../config/global.gradle'
 
 dependencies {

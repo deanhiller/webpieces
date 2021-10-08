@@ -25,7 +25,9 @@ if (!project.name.startsWith("WEBPIECESx")) {
 }
 
 //MUST be defined here or every project has to override groupId in pom which is super annoying
-group = 'org.webpieces'
+if(group == null || group.isBlank()) {
+    group = 'org.webpieces'
+}
 
 ext {
     // Project constants
@@ -37,61 +39,60 @@ ext {
      * }
      */
     deps = [
-            'core-logging'           : 'org.webpieces:core-logging',
-            'core-metrics'           : 'org.webpieces:core-metrics',
-            'core-jackson'           : 'org.webpieces:core-jackson',
-            'core-util'              : 'org.webpieces:core-util',
-            'core-ddl'               : 'org.webpieces:core-ddl',
-            'runtimecompile'         : 'org.webpieces:runtimecompile',
-            'core-datawrapper'       : 'org.webpieces:core-datawrapper',
-            'core-mock'              : 'org.webpieces:core-mock',
-            'core-ssl'               : 'org.webpieces:core-ssl',
-            'core-channelmanager2'   : 'org.webpieces:core-channelmanager2',
-            'core-asyncserver'       : 'org.webpieces:core-asyncserver',
-            'core-statemachine'      : 'org.webpieces:core-statemachine',
-            'http1_1-parser'         : 'org.webpieces:http1_1-parser',
-            'http1_1-client'         : 'org.webpieces:http1_1-client',
-            'http-api'               : 'org.webpieces:http-api',
-            'http2-api'              : 'org.webpieces:http2-api',
-            'http2-parser'           : 'org.webpieces:http2-parser',
-            'http2-hpack'            : 'org.webpieces:http2-hpack',
-            'http2-engine'           : 'org.webpieces:http2-engine',
-            'http2-client'           : 'org.webpieces:http2-client',
-            'http2-translations'     : 'org.webpieces:http2-translations',
-            'http2to1_1-client'      : 'org.webpieces:http2to1_1-client',
-            'http-frontend2'         : 'org.webpieces:http-frontend2',
-            'http-shared'            : 'org.webpieces:http-shared',
-            'http-router'            : 'org.webpieces:http-router',
-            'http-router-dev'        : 'org.webpieces:http-router-dev',
-            'html-compiler'          : 'org.webpieces:html-compiler',
-            'http-templating-lib'    : 'org.webpieces:http-templating-lib',
-            'http-templating-dev-lib': 'org.webpieces:http-templating-dev-lib',
-            'http-templating'        : 'org.webpieces:http-templating',
-            'http-templating-dev'    : 'org.webpieces:http-templating-dev',
-            'http-webserver-test'    : 'org.webpieces:http-webserver-test',
-            'http-webserver'         : 'org.webpieces:http-webserver',
-            'http-fortesting-plugins': 'org.webpieces:http-fortesting-plugins',
+            'core-logging'           : 'org.webpieces.core:core-logging',
+            'core-metrics'           : 'org.webpieces.core:core-metrics',
+            'core-jackson'           : 'org.webpieces.core:core-jackson',
+            'core-util'              : 'org.webpieces.core:core-util',
+            'core-ddl'               : 'org.webpieces.core:core-ddl',
+            'runtimecompile'         : 'org.webpieces.core:runtimecompile',
+            'core-datawrapper'       : 'org.webpieces.core:core-datawrapper',
+            'core-mock'              : 'org.webpieces.core:core-mock',
+            'core-ssl'               : 'org.webpieces.core:core-ssl',
+            'core-channelmanager2'   : 'org.webpieces.core:core-channelmanager2',
+            'core-asyncserver'       : 'org.webpieces.core:core-asyncserver',
+            'core-statemachine'      : 'org.webpieces.core:core-statemachine',
+            'http1_1-parser'         : 'org.webpieces.http:http1_1-parser',
+            'http1_1-client'         : 'org.webpieces.http:http1_1-client',
+            'http-api'               : 'org.webpieces.http:http-api',
+            'http2-api'              : 'org.webpieces.http:http2-api',
+            'http2-parser'           : 'org.webpieces.http:http2-parser',
+            'http2-hpack'            : 'org.webpieces.http:http2-hpack',
+            'http2-engine'           : 'org.webpieces.http:http2-engine',
+            'http2-client'           : 'org.webpieces.http:http2-client',
+            'http2-translations'     : 'org.webpieces.http:http2-translations',
+            'http2to1_1-client'      : 'org.webpieces.http:http2to1_1-client',
+            'http-frontend2'         : 'org.webpieces.http:http-frontend2',
+            'http-shared'            : 'org.webpieces.http:http-shared',
+            'http-router'            : 'org.webpieces.server:http-router',
+            'http-router-dev'        : 'org.webpieces.server:http-router-dev',
+            'http-templating-lib'    : 'org.webpieces.template:http-templating-lib',
+            'http-templating-dev-lib': 'org.webpieces.template:http-templating-dev-lib',
+            'http-templating'        : 'org.webpieces.template:http-templating',
+            'http-templating-dev'    : 'org.webpieces.template:http-templating-dev',
+            'http-webserver-test'    : 'org.webpieces.server:http-webserver-test',
+            'http-webserver'         : 'org.webpieces.server:http-webserver',
+            'http-fortesting-plugins': 'org.webpieces.server:http-fortesting-plugins',
             'webserver-templates'    : 'org.webpieces:webserver-templates',
             'WEBPIECESxAPPNAME'      : 'org.webpieces:WEBPIECESxAPPNAME',
             'WEBPIECESxAPPNAME-dev'  : 'org.webpieces:WEBPIECESxAPPNAME-dev',
 
-            'plugin-backend'         : 'org.webpieces:plugin-backend',
-            'plugin-documentation'   : 'org.webpieces:plugin-documentation',
-            'plugin-dto'             : 'org.webpieces:plugin-dto',
-            'plugin-grpc-json'       : 'org.webpieces:plugin-grpc-json',
-            'plugin-h2db'            : 'org.webpieces:plugin-h2db',
-            'plugin-hibernate'       : 'org.webpieces:plugin-hibernate',
-            'plugin-install-sslcert' : 'org.webpieces:plugin-install-sslcert',
-            'plugin-json-jackson'    : 'org.webpieces:plugin-json-jackson',
-            'plugin-properties'      : 'org.webpieces:plugin-properties',
+            'plugin-backend'         : 'org.webpieces.server.plugin:plugin-backend',
+            'plugin-documentation'   : 'org.webpieces.server.plugin:plugin-documentation',
+            'plugin-dto'             : 'org.webpieces.server.plugin:plugin-dto',
+            'plugin-grpc-json'       : 'org.webpieces.server.plugin:plugin-grpc-json',
+            'plugin-h2db'            : 'org.webpieces.server.plugin:plugin-h2db',
+            'plugin-hibernate'       : 'org.webpieces.server.plugin:plugin-hibernate',
+            'plugin-install-sslcert' : 'org.webpieces.server.plugin:plugin-install-sslcert',
+            'plugin-json-jackson'    : 'org.webpieces.server.plugin:plugin-json-jackson',
+            'plugin-properties'      : 'org.webpieces.server.plugin:plugin-properties',
 
-            'cloud-api-lib'          : 'org.webpieces:cloud-api-lib',
-            'generate-httpclient'    : 'org.webpieces:generate-httpclient',
-            'server-scaffolding'     : 'org.webpieces:server-scaffolding',
+            'cloud-api-lib'          : 'org.webpieces.cloud:cloud-api-lib',
+            'generate-httpclient'    : 'org.webpieces.cloud:generate-httpclient',
+            'server-scaffolding'     : 'org.webpieces.cloud:server-scaffolding',
 
             'projectcreator'         : 'org.webpieces:projectcreator',
 
-            'gcp-cloud-storage'      : 'org.webpieces:cloudstorage-client',
+            'gcp-cloud-storage'      : 'org.webpieces.googlecloud:cloudstorage-client',
 
             'groovy'                 : 'org.codehaus.groovy:groovy-all',
 
@@ -397,78 +398,93 @@ eclipseProject {
     }
 }
 
+pluginManager.withPlugin('maven-publish') {
 
-publishing {
-    repositories {
-        maven {
-            name = 'webpiecesLocal2'
-            url = "file:/tmp/myRepo/"
+    publishing {
+        repositories {
+            maven {
+                name = 'webpiecesLocal2'
+                url = "file:/tmp/myRepo/"
+            }
+        }
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                groupId group
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
+                }
+                pom {
+                    name = project.name
+                    description = "Not filled in for this project"
+                    //'Someone forgot to fill this in.  See http://stackoverflow.com/questions/38272550/how-to-fail-the-gradle-build-if-subproject-is-missing-a-property'
+                    url = "https://github.com/${github_org}/${project_name}"
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'dhiller'
+                            name = 'Dean Hiller'
+                        }
+                        developer {
+                            id = 'zreed'
+                            name = 'Zachary Reed'
+                        }
+                    }
+                    scm {
+                        connection = "scm:git:https://github.com/${github_org}/${project_name}.git"
+                        developerConnection = "scm:git:git@github.com:${github_org}/${project_name}.git"
+                        url = "https://github.com/${github_org}/${project_name}.git"
+                    }
+                }
+
+                artifact sourcesJar
+                artifact javadocJar
+            }
         }
     }
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            groupId group
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
-            }
-            pom {
-                name = project.name
-                description = "Not filled in for this project"
-                //'Someone forgot to fill this in.  See http://stackoverflow.com/questions/38272550/how-to-fail-the-gradle-build-if-subproject-is-missing-a-property'
-                url = "https://github.com/${github_org}/${project_name}"
-                licenses {
-                    license {
-                        name = "The Apache License, Version 2.0"
-                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'dhiller'
-                        name = 'Dean Hiller'
-                    }
-                    developer {
-                        id = 'zreed'
-                        name = 'Zachary Reed'
-                    }
-                }
-                scm {
-                    connection = "scm:git:https://github.com/${github_org}/${project_name}.git"
-                    developerConnection = "scm:git:git@github.com:${github_org}/${project_name}.git"
-                    url = "https://github.com/${github_org}/${project_name}.git"
-                }
-            }
 
-            artifact sourcesJar
-            artifact javadocJar
+    publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
+
+
+    if (project.properties.sonatypeUsername
+            && project.properties.sonatypePassword
+            && project.properties.sonatypeDomain) {
+        if (!project.hasProperty("signing.keyId")) {
+            throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
         }
-    }
-}
+        publishing {
+            repositories {
+                maven {
+                    name = 'sonatype'
+                    url = uri('https://' + project.properties.sonatypeDomain + '/service/local/staging/deploy/maven2/')
+                    credentials {
+                        username = project.properties.sonatypeUsername
+                        password = project.properties.sonatypePassword
+                    }
+                }
+            }
+        }
+        //To upload to nexus, your key must be uploaded to https://keys.openpgp.org/ as well.
+        //generating new key is found in documentation on gradle signing plugin
+        signing {
+            //let's only sign if releasing to sonatype repo as we have to
+            //BUT even if we remove the signing section, we still end up generating *.md5 and *.sha1 so apparently things
+            //are still being signed.  This signing section only seems to make the *.asc get generated. Then on top of that,
+            //the *asc file is then hashed generating *.asc.md5 and *.asc.sha1 which is annoying.
+            sign publishing.publications.mavenJava
+        }
 
-publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
-
-
-if (project.properties.sonatypeUsername
-        && project.properties.sonatypePassword
-        && project.properties.sonatypeDomain) {
-    if (!project.hasProperty("signing.keyId")) {
-        throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
-    }
-    //To upload to nexus, your key must be uploaded to https://keys.openpgp.org/ as well.
-    //generating new key is found in documentation on gradle signing plugin
-    signing {
-        //let's only sign if releasing to sonatype repo as we have to
-        //BUT even if we remove the signing section, we still end up generating *.md5 and *.sha1 so apparently things
-        //are still being signed.  This signing section only seems to make the *.asc get generated. Then on top of that,
-        //the *asc file is then hashed generating *.asc.md5 and *.asc.sha1 which is annoying.
-        sign publishing.publications.mavenJava
-    }
+        publishMavenJavaPublicationToSonatypeRepository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToSonatypeRepository')
 
 //       nexusPublishing {
 //           repositories {
@@ -480,6 +496,8 @@ if (project.properties.sonatypeUsername
 //               }
 //           }
 //       }
+    }
+
 }
 
 if (!project.hasProperty("projVersion")) {

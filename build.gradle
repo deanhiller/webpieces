@@ -60,11 +60,11 @@ dependencies {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            pom {
-                description = 'Templating library using groovy as the scripting language'
-            }
-        }
+        //mavenJava(MavenPublication) {
+        //    pom {
+        //        description = 'Templating library using groovy as the scripting language'
+        //    }
+        //}
     }
 }
 
