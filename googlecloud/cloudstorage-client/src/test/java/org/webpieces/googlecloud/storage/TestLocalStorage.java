@@ -147,7 +147,7 @@ public class TestLocalStorage {
         while(iter.hasNext()){
             list.add(iter.next().getName());
         }
-        Assert.assertEquals(2,list.size());
+        Assert.assertEquals(3,list.size());
 
     }
 
