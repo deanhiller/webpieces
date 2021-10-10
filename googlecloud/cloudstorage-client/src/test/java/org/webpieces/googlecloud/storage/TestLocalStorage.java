@@ -128,11 +128,12 @@ public class TestLocalStorage {
 
     @Test
     public void addFileToBucketAndThenListFiles() throws IOException {
-        writeFile(BlobId.of("testbucket", "mytest1.txt"));
-        GCPBlob bucket = instance.get("testbucket", "mytest1.txt");
+        instance.list("ListFilebucket");
+        writeFile(BlobId.of("ListFilebucket", "mytest1.txt"));
+        GCPBlob bucket = instance.get("ListFilebucket", "mytest1.txt");
         Assert.assertEquals("mytest1.txt",bucket.getName());//passed.
 
-        ReadableByteChannel readFile = instance.reader("testbucket", "mytest1.txt");
+        ReadableByteChannel readFile = instance.reader("ListFilebucket", "mytest1.txt");
 
         InputStream i = Channels.newInputStream(readFile);
 
@@ -140,24 +141,24 @@ public class TestLocalStorage {
                 new InputStreamReader(i, StandardCharsets.UTF_8))
                 .lines()
                 .collect(Collectors.joining("\n"));
-        Page<GCPBlob> testbucket = instance.list("testbucket");
-        Iterable<GCPBlob> values = testbucket.getValues();
+        Page<GCPBlob> ListFilebucket = instance.list("ListFilebucket");
+        Iterable<GCPBlob> values = ListFilebucket.getValues();
         Iterator<GCPBlob> iter = values.iterator();
         List<String> list = new ArrayList<>();
         while(iter.hasNext()){
             list.add(iter.next().getName());
         }
-        Assert.assertEquals(3,list.size());
+        Assert.assertEquals(1,list.size());
 
     }
 
     @Test
     public void addFileThenReadThenDeleteThenListFiles() throws IOException {
-        writeFile(BlobId.of("testbucket", "mytest1.txt"));
-        GCPBlob bucket = instance.get("testbucket", "mytest1.txt");
+        writeFile(BlobId.of("AddReadDeleteListbucket", "mytest1.txt"));
+        GCPBlob bucket = instance.get("AddReadDeleteListbucket", "mytest1.txt");
         Assert.assertEquals("mytest1.txt",bucket.getName());//passed.
 
-        ReadableByteChannel readFile = instance.reader("testbucket", "mytest1.txt");
+        ReadableByteChannel readFile = instance.reader("AddReadDeleteListbucket", "mytest1.txt");
 
         InputStream i = Channels.newInputStream(readFile);
 
@@ -167,10 +168,10 @@ public class TestLocalStorage {
                 .collect(Collectors.joining("\n"));
         Assert.assertEquals("testing a bitch", text);// Passed.
 
-        boolean success = instance.delete("testbucket", "mytest1.txt");
+        boolean success = instance.delete("AddReadDeleteListbucket", "mytest1.txt");
         Assert.assertEquals(true,success);//passed.
 
-        Page<GCPBlob> testbucket = instance.list("testbucket");
+        Page<GCPBlob> testbucket = instance.list("AddReadDeleteListbucket");
         Iterable<GCPBlob> values = testbucket.getValues();
         Iterator<GCPBlob> iter = values.iterator();
         List<String> list = new ArrayList<>();
@@ -178,7 +179,7 @@ public class TestLocalStorage {
             list.add(iter.next().getName());
         }
         //length of the blob should be original length.
-        Assert.assertEquals(2,list.size());// testing on testbucket directory
+        Assert.assertEquals(0,list.size());// testing on testbucket directory
         // with 2 files already existed.
     }
 
@@ -250,6 +251,8 @@ public class TestLocalStorage {
         }
         catch(IllegalStateException e){
 
+        }finally{
+            Context.clear();
         }
     }
 
@@ -263,6 +266,8 @@ public class TestLocalStorage {
         }
         catch(IllegalStateException e){
 
+        } finally {
+            Context.clear();
         }
     }
 
