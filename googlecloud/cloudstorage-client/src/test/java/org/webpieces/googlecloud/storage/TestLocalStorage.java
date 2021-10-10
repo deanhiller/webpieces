@@ -141,8 +141,8 @@ public class TestLocalStorage {
                 new InputStreamReader(i, StandardCharsets.UTF_8))
                 .lines()
                 .collect(Collectors.joining("\n"));
-        Page<GCPBlob> ListFilebucket = instance.list("ListFilebucket");
-        Iterable<GCPBlob> values = ListFilebucket.getValues();
+        Page<GCPBlob> listfilebucket = instance.list("ListFilebucket");
+        Iterable<GCPBlob> values = listfilebucket.getValues();
         Iterator<GCPBlob> iter = values.iterator();
         List<String> list = new ArrayList<>();
         while(iter.hasNext()){
