@@ -6,7 +6,7 @@ plugins {
     id 'idea'
     id 'signing'
     id 'maven-publish'
-    id "co.riiid.gradle" version "0.4.2"
+    id "io.github.humblerookie.gradle" version "0.5.0"
 }
 
 apply from: '../config/global.gradle'
