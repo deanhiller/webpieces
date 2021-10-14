@@ -7,7 +7,7 @@ plugins {
     id 'idea'
     id 'signing'
     id 'maven-publish'
-    id 'com.gradle.plugin-publish' version '0.14.0'
+    id 'com.gradle.plugin-publish' version '0.16.0'
 }
 
 apply from: '../../config/global.gradle'
@@ -58,3 +58,17 @@ processResources {
     duplicatesStrategy = 'include'
 }
 
+publishing {
+    publications {
+        pluginMaven(MavenPublication) {
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+        }
+    }
+}
