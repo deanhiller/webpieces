@@ -93,7 +93,7 @@ public class TransactionHelper {
 
     private void monitorTransactionTime(String transactionName, long begin) {
         String requestPath = (String) Context.get(ContextKey.REQUEST_PATH.toString());
-        if (requestPath == null || requestPath.isBlank()) {
+        if (requestPath == null || requestPath.isEmpty()) {
             requestPath = "unknown";
         }
         Tags transactionTags = Tags.of(

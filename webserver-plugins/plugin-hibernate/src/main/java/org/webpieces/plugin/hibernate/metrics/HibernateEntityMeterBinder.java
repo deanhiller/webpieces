@@ -53,7 +53,7 @@ public class HibernateEntityMeterBinder implements MeterBinder {
         private Tags getTags(String entityName) {
             try {
                 String requestPath = (String) Context.get(ContextKey.REQUEST_PATH.toString());
-                if (requestPath == null || requestPath.isBlank()) {
+                if (requestPath == null || requestPath.isEmpty()) {
                     requestPath = "unknown";
                 }
                 return Tags.of(
@@ -71,7 +71,7 @@ public class HibernateEntityMeterBinder implements MeterBinder {
          */
         private String getEntityName(Object entity) {
             String entityName = entity.getClass().getAnnotation(Entity.class).name();
-            if (entityName.isBlank()) {
+            if (entityName.isEmpty()) {
                 entityName = entity.getClass().getSimpleName();
             }
             return entityName;
