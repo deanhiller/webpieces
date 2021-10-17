@@ -2,10 +2,12 @@ package org.webpieces.googlecloud.storage;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
+import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,15 +22,13 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TestLocalStorage {
 
     private GCPStorage instance;
+    private String testBucket;
 
     @Before
     public void setup() {
@@ -36,6 +36,20 @@ public class TestLocalStorage {
 
         Injector injector = Guice.createInjector(testModule);
         instance = injector.getInstance(GCPStorage.class);
+        testBucket = UUID.randomUUID().toString();
+    }
+
+    @After
+    public void tearDown() {
+        Page<GCPBlob> list = instance.list(testBucket);
+        for(GCPBlob blob : list.iterateAll()) {
+            if(!"mytest.txt".equals(blob.getName()))
+                deleteFile(blob);
+        }
+    }
+
+    private void deleteFile(GCPBlob blob) {
+        instance.delete(blob.getBucket(), blob.getName());
     }
 
     @Test
@@ -83,8 +97,8 @@ public class TestLocalStorage {
     public void testListFilesFromBothResourcesDirAndBuildDir() throws IOException {
         //finish this test out
 
-        Page<GCPBlob> testbucket = instance.list("listbucket");
-        writeFile(BlobId.of("listbucket", "fileSystemFile1.txt"));
+        Page<GCPBlob> testbucket = instance.list(t);
+        writeFile(BlobId.of(testBucket, "fileSystemFile1.txt"));
         writeFile(BlobId.of("listbucket", "fileSystemFile2.txt"));
 
 
