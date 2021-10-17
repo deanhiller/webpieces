@@ -54,6 +54,9 @@ public class HibernateEntityMeterBinder implements MeterBinder {
             try {
                 String requestPath = (String) Context.get(ContextKey.REQUEST_PATH.toString());
                 if (requestPath == null || requestPath.isEmpty()) {
+
+                if (requestPath == null || requestPath.isBlank()) {
+
                     requestPath = "unknown";
                 }
                 return Tags.of(
