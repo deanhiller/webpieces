@@ -37,9 +37,9 @@ public class Current {
 		}
 
 		Map<String, String> headerMap = translateToSingleHeaders(requestCtx);
-		Context.set(Context.HEADERS, headerMap);
-		Context.set(Context.REQUEST, requestCtx);
-		Context.set(ContextKey.REQUEST_PATH.toString(), requestCtx.getRequest().relativePath);
+		Context.put(Context.HEADERS, headerMap);
+		Context.put(Context.REQUEST, requestCtx);
+		Context.put(ContextKey.REQUEST_PATH.toString(), requestCtx.getRequest().relativePath);
 
 	}
 

@@ -29,7 +29,7 @@ public class ProxyRequestStreamHandle implements RequestStreamHandle {
 		Boolean isServerSide = (Boolean) Context.get(IS_SERVER_SIDE);
 
 		Map<String, Object> context = Context.copyContext();
-		Context.set(IS_SERVER_SIDE, Boolean.TRUE);
+		Context.put(IS_SERVER_SIDE, Boolean.TRUE);
 		try {
 			StreamRef streamRef = stream.incomingRequest(request, proxyResponse);
 
