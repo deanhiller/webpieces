@@ -31,6 +31,21 @@ if(group == null || group.isBlank()) {
 
 ext {
     // Project constants
+    sonatypeDomain = "s01.oss.sonatype.org"
+
+    //This is an input directory that we read jars from if they are not in a repo somewhere
+    fixedLibDir = file('lib')
+    toStagingDir = file(new File(buildDir, 'alljars'))
+    github_org = 'deanhiller'
+    project_name = 'webpieces'
+    getCommitHash = {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }.memoize()
 
     /*
      * Dependencies can be named so that sub-projects can reference consistent version of them.
@@ -161,22 +176,6 @@ if (project.hasProperty('projVersion')) {
 } else {
     project.version = '2.1-developer'
     println("CREATING DEVELOPER VERSION " + project.name + ":" + project.version + "  jvm=" + currentJvm)
-}
-
-ext {
-    //This is an input directory that we read jars from if they are not in a repo somewhere
-    fixedLibDir = file('lib')
-    toStagingDir = file(new File(buildDir, 'alljars'))
-    github_org = 'deanhiller'
-    project_name = 'webpieces'
-    getCommitHash = {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-parse', 'HEAD'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim()
-    }.memoize()
 }
 
 dependencies {
@@ -455,10 +454,8 @@ pluginManager.withPlugin('maven-publish') {
 
     publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
 
-
     if (project.properties.sonatypeUsername
-            && project.properties.sonatypePassword
-            && project.properties.sonatypeDomain) {
+            && project.properties.sonatypePassword) {
         if (!project.hasProperty("signing.keyId")) {
             throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
         }
@@ -503,7 +500,6 @@ pluginManager.withPlugin('maven-publish') {
 if (!project.hasProperty("projVersion")) {
     ext.sonatypeUsername = "nousername"
     ext.sonatypePassword = "nopassword"
-    ext.sonatypeDomain = "nodomain"
 }
 
 
