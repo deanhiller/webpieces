@@ -37,7 +37,7 @@ public class DelayedProxy implements Http2ChannelProxy {
 		Boolean isServerSide = (Boolean) Context.get(IS_SERVER_SIDE);
 
 		Map<String, Object> context = Context.copyContext();
-		Context.set(IS_SERVER_SIDE, Boolean.TRUE);
+		Context.put(IS_SERVER_SIDE, Boolean.TRUE);
 		try {
 			return toServerDataListener.incomingData(channel, buffer);
 		} finally {

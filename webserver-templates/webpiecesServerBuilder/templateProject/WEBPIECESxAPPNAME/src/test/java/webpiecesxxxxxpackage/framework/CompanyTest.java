@@ -111,7 +111,7 @@ public abstract class CompanyTest extends AbstractHttp2Test {
     protected abstract void startServer() throws IOException;
 
     protected void simulateContext() {
-        Context.set(Context.HEADERS, new HashMap<String, String>());
+        Context.put(Context.HEADERS, new HashMap<String, String>());
     }
 
     @Override
