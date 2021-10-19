@@ -1,11 +1,12 @@
 package webpiecesxxxxxpackage.json;
 
-import org.webpieces.microsvc.api.Path;
-
 import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 
 public interface SaveApi {
 
+    @POST
     @Path("/search/item")
     public CompletableFuture<SearchResponse> search(SearchRequest request);
 
