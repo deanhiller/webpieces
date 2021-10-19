@@ -1,6 +1,5 @@
 package org.webpieces.microsvc.server.api;
 
-import com.webpieces.http2.api.streaming.ResponseStreamHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
@@ -22,14 +21,12 @@ public class RESTApiRoutes implements Routes {
     private final Class<?> controller;
 
     public RESTApiRoutes(Class<?> api, Class<?> controller) {
-
         if (!api.isInterface()) {
             throw new IllegalArgumentException("api must be an interface and was not");
         }
 
         this.api = api;
         this.controller = controller;
-
     }
 
     @Override
@@ -60,12 +57,13 @@ public class RESTApiRoutes implements Routes {
             throw new IllegalArgumentException("The method on this API is invalid as it takes " + method.getParameterCount() + " and only 1 param is allowed.  method=" + method);
         }
 
-        if (method.getParameterTypes().length > 0 && ResponseStreamHandle.class.equals(method.getParameterTypes()[0])) {
-            bldr.addStreamRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
-        } else {
+//NEED to put a JsonStreamHandle on top of these instead of ResponseStreamHandle(though could allow both?)
+//        if (method.getParameterTypes().length > 0 && ResponseStreamHandle.class.equals(method.getParameterTypes()[0])) {
+//            bldr.addStreamRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
+//        } else {
             //We do not want to deploy to production exposing over HTTP
             bldr.addContentRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
-        }
+//        }
     }
 
     // Similar to validateApiConvention in PubSubServiceRoutes

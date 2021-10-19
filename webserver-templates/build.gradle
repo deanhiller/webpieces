@@ -30,6 +30,8 @@ project.ext {
 }
 
 task stageTemplate(type: Copy) {
+    dependsOn gradle.includedBuild('http-webserver').task(':build')
+
     from '.'
     into buildDir
     include stagingDirName + '/**'
@@ -96,11 +98,7 @@ github {
 }
 
 githubRelease {
-    dependsOn gradle.includedBuild('http-webserver').task(':build')
-    //, ':publish'
-
-    //Above replaces this -> (left so I can validate so delete if releases are working with versions)
-    //dependsOn ':webserver:build', ':publish'
+    dependsOn ':assemble'
     doFirst {
        println("Releasing to GitHub: " + github.assets)
     }
