@@ -1,23 +1,29 @@
 package org.webpieces.microsvc.client.impl;
 
-import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.webpieces.microsvc.api.HttpMethod;
-import org.webpieces.microsvc.api.Path;
-import org.webpieces.util.context.ClientAssertions;
-import org.webpieces.util.context.Context;
-
-import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
+import javax.inject.Inject;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.webpieces.microsvc.api.HttpMethod;
+import org.webpieces.util.context.ClientAssertions;
+import org.webpieces.util.context.Context;
 
 public class HttpsJsonClientInvokeHandler implements InvocationHandler {
+
+    private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);
 
     private final Logger log = LoggerFactory.getLogger(HttpsJsonClientInvokeHandler.class);
     private final HttpsJsonClient clientHelper;
@@ -49,8 +55,8 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
             throw new IllegalArgumentException("The @Path annotation is missing from method=" + method+" clazz="+method.getDeclaringClass());
         }
 
-        String path = annotation.value();
-        HttpMethod httpMethod = annotation.method();
+        String path = getPath(method);
+        HttpMethod httpMethod = getHttpMethod(method);
         Class<?> clazz = method.getReturnType();
 
         if(!(CompletableFuture.class.isAssignableFrom(clazz))) {
@@ -82,6 +88,89 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
                 Context.restoreContext(context);
                 return retVal;
             });
+
+    }
+
+    protected String getPath(Method method) {
+
+        Path path = method.getAnnotation(Path.class);
+
+        if(path == null) {
+            throw new IllegalArgumentException("The @Path annotation is missing from method=" + method);
+        }
+
+        String pathValue = getFullPath(method);
+
+        if((pathValue == null) || pathValue.isBlank()) {
+            throw new IllegalStateException("Invalid value for @Path annotation on " + method.getName() + ": " + pathValue);
+        }
+
+        return pathValue;
+
+    }
+
+    private String getFullPath(Method method) {
+
+        Path cPath = method.getDeclaringClass().getAnnotation(Path.class);
+        Path mPath = method.getAnnotation(Path.class);
+
+        String cPathValue = null;
+        String mPathValue = null;
+
+        if(cPath != null) {
+            cPathValue = cPath.value();
+        }
+
+        if(mPath != null) {
+            mPathValue = mPath.value();
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if(cPathValue != null) {
+            sb.append(cPathValue);
+        }
+
+        if(mPathValue != null) {
+            sb.append(mPathValue);
+        }
+
+        String path = REGEX_SLASH_MERGE.matcher(sb.toString().trim()).replaceAll("/");
+
+        return path;
+
+    }
+
+    protected HttpMethod getHttpMethod(Method method) {
+
+        Path path = method.getAnnotation(Path.class);
+
+        if(path == null) {
+            throw new IllegalArgumentException("The @Path annotation is missing from method=" + method);
+        }
+
+        HttpMethod httpMethod;
+
+        if(method.getAnnotation(DELETE.class) != null) {
+            httpMethod = HttpMethod.DELETE;
+        }
+        else if(method.getAnnotation(GET.class) != null) {
+            httpMethod = HttpMethod.GET;
+        }
+        else if(method.getAnnotation(OPTIONS.class) != null) {
+            httpMethod = HttpMethod.OPTIONS;
+        }
+        else if(method.getAnnotation(POST.class) != null) {
+            httpMethod = HttpMethod.POST;
+        }
+        else if(method.getAnnotation(PUT.class) != null) {
+            httpMethod = HttpMethod.PUT;
+        }
+        else {
+            throw new IllegalStateException("Missing or unsupported HTTP method annotation on " + method.getName() + ": Must be @DELETE,@GET,@OPTIONS,@PATCH,@POST,@PUT");
+        }
+
+        return httpMethod;
 
     }
 

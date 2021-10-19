@@ -109,6 +109,8 @@ ext {
 
             'gcp-cloud-storage'      : 'org.webpieces.googlecloud:cloudstorage-client',
 
+            'jakarta-rest-api'       : 'jakarta.ws.rs:jakarta.ws.rs-api',
+
             'groovy'                 : 'org.codehaus.groovy:groovy-all',
 
             'commons-beans'          : 'commons-beanutils:commons-beanutils',
@@ -202,6 +204,7 @@ dependencies {
         implementation 'jakarta.inject:jakarta.inject-api:1.0.3'
         implementation 'jakarta.persistence:jakarta.persistence-api:2.2.3'
         implementation 'jakarta.validation:jakarta.validation-api:2.0.1'
+        implementation 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
 
         implementation 'ch.qos.logback:logback-classic:1.2.3'
         implementation 'com.google.inject:guice:4.2.2'
@@ -238,6 +241,7 @@ configurations.all {
             substitute module('javax.inject:javax.inject') with module('jakarta.inject:jakarta.inject-api:1.0.3')
             substitute module('javax.persistence:javax.persistence-api') with module('jakarta.persistence:jakarta.persistence-api:2.2.3')
             substitute module('javax.validation:validation-api') with module('jakarta.validation:jakarta.validation-api:2.0.2')
+            substitute module('javax.ws.rs:javax.ws.rs-api') with module('jakarta.ws.rs:jakarta.ws.rs-api:2.1.6')
         }
 
         eachDependency { DependencyResolveDetails details ->
