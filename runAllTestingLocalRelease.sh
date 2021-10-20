@@ -70,7 +70,7 @@ else
 fi
 
 #reset to webpieces directory
-cd "../${DIR}"
+cd "${DIR}"
 
 echo path=$PWD
 
