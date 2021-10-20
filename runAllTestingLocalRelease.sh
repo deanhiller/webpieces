@@ -45,7 +45,7 @@ if [ ! -d "../webpiecesexample-all" ]; then
        echo "##################################"
        exit $test_result
    fi
-   cd webpieces
+   cd "${DIR}"
 else
    echo "Found legacy project already checked out=../webpiecesexample-all"
 fi
@@ -70,7 +70,7 @@ else
 fi
 
 #reset to webpieces directory
-cd ../webpieces 
+cd "../${DIR}"
 
 echo path=$PWD
 
