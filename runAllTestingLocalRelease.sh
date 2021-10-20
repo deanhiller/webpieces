@@ -7,8 +7,9 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR
 
 #RUN test first by building fake release THEN building fake project THEN building the fake project to make sure it works
-printf "\n*********Running ./gradlew --stacktrace clean build release -x javadoc *****\n"
-./gradlew clean build release -x javadoc
+printf "\n*********Running ./gradlew --stacktrace clean build *****\n"
+./gradlew --stacktrace clean
+./gradlew --stacktrace release
 
 test_result=$?
 if [ $test_result -eq 0 ]
