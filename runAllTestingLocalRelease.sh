@@ -54,7 +54,8 @@ cd ../webpiecesexample-all
 git pull
 
 printf "\n********** Running ./gradlew clean build assembleDist **************\n"
-./gradlew clean build assembleDist
+./gradlew clean
+./gradlew assembleDist
 test_result=$?
 if [ $test_result -eq 0 ]
 then
@@ -77,7 +78,7 @@ echo path=$PWD
 # Test creation of project, build of new project and start of the server
 #############################################################
 
-cd webserver/output/webpiecesServerBuilder
+cd webserver-templates/build/webpiecesServerBuilder
 
 echo path2=$PWD
 
@@ -114,7 +115,7 @@ else
   exit $test_result
 fi
 
-cd webpiecesexample/output/distributions
+cd webpiecesexample/build/distributions
 unzip webpiecesexample.zip
 test_result=$?
 if [ $test_result -eq 0 ]
