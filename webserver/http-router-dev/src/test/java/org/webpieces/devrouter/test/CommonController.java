@@ -3,12 +3,12 @@ package org.webpieces.devrouter.test;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Singleton;
+import javax.ws.rs.PathParam;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
-import org.webpieces.router.api.controller.annotations.Param;
 import org.webpieces.router.api.simplesvr.MtgRouteId;
 
 @Singleton
@@ -23,17 +23,17 @@ public class CommonController {
 		throw new IllegalStateException("fail this for testing");
 	}
 	
-	public Action argsMismatch(@Param("id") int id, @Param("accId") String accId) {
+	public Action argsMismatch(@PathParam("id") int id, @PathParam("accId") String accId) {
 		return Actions.renderThis();
 	}
 	
-	public Redirect badRedirect(@Param("id") int id) {
+	public Redirect badRedirect(@PathParam("id") int id) {
 		
 		//This is missing the id parameter
 		return Actions.redirect(MtgRouteId.SOME_EXAMPLE);
 	}
 	
-	public Action someExample(@Param("array") String ... args) {
+	public Action someExample(@PathParam("array") String ... args) {
 		return Actions.renderThis();
 	}
 	
@@ -67,7 +67,7 @@ public class CommonController {
 	 * @param id
 	 * @return
 	 */
-	public Action getUser(@Param("id") int id) {
+	public Action getUser(@PathParam("id") int id) {
 
 		Object user = null; //in reality, this is a lookup from the database by id
 		

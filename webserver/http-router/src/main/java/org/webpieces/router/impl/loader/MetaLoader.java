@@ -7,9 +7,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.PathParam;
 
 import org.webpieces.router.api.controller.actions.Action;
-import org.webpieces.router.api.controller.annotations.Param;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.util.filters.Service;
@@ -49,9 +49,9 @@ public class MetaLoader {
 			String value;
 			String name = p.getName();
 			if(matchesBadName(name)) {
-				Param annotation = p.getAnnotation(Param.class);
+				PathParam annotation = p.getAnnotation(PathParam.class);
 				if(annotation == null)
-					throw new IllegalArgumentException("Method='"+controllerMethod+"' has to have every argument annotated with @Param(paramName) since\n"
+					throw new IllegalArgumentException("Method='"+controllerMethod+"' has to have every argument annotated with @PathParam(paramName) since\n"
 						+ "you are not compiling with -parameters to enable the param names to be built into the *.class files.  Most likely, you "
 						+ "changed the build.gradle we generated or switched to a different build system and did not enable this compiler option");
 				value = annotation.value();
