@@ -6,8 +6,10 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 cd $DIR
 
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+
 if [[ $BRANCH != "master" ]]; then
-   echo "You must do releases from the master branch"
+   echo "You must do releases from the master branchi not branch=${BRANCH}"
    exit 1
 fi
 
