@@ -25,7 +25,7 @@ dependencies {
 }
 
 project.ext {
-    archiveFilePath = "build/distributions/webpiecesServerBuilder-${projVersion}.zip"
+    archiveFilePath = "build/distributions/webpiecesServerBuilder-${version}.zip"
   stagingDirName = 'webpiecesServerBuilder'
   outputStagingDir = new File(buildDir, stagingDirName)
 }
