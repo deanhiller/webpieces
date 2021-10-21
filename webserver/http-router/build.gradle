@@ -16,6 +16,7 @@ dependencies {
 
     api deps['guice']
     api deps['http-shared']
+    api deps['jakarta-rest-api']
 
     //these 2 for validation...(which don't depend on anything)
     implementation deps['hibernate-validator']

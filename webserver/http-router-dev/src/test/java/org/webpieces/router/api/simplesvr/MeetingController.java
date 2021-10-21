@@ -4,12 +4,12 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.PathParam;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
-import org.webpieces.router.api.controller.annotations.Param;
 
 @Singleton
 public class MeetingController {
@@ -69,7 +69,7 @@ public class MeetingController {
 	 * @param id
 	 * @return
 	 */
-	public Action getMeeting(@Param("id") int id) {
+	public Action getMeeting(@PathParam("id") int id) {
 
 		//MeetingDto user = null; //in reality, this is a lookup from the database by id
 		
