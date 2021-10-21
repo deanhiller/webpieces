@@ -6,6 +6,30 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 cd $DIR
 
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+
+if [[ $BRANCH != "master" ]]; then
+   echo "You must do releases from the master branchi not branch=${BRANCH}"
+   exit 1
+fi
+
+function evil_git_dirty {
+  [[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]] && echo "*"
+}
+
+NUM_FILES="$(evil_git_dirty)"
+echo "Num files not committed=$NUM_FILES"
+if [[ "$NUM_FILES" == "*" ]]; then
+   echo ""
+   echo "You have outstanding files that are not committed.  commit first or stash, then you can release off master branch"
+   echo ""
+   git status
+   echo "----------------------------------------------------------------------------------------------"
+   echo "You have outstanding files that are not committed.  commit first or stash, then you can push"
+   echo "----------------------------------------------------------------------------------------------"
+   exit 1
+fi
+
 ver=$@
 res="${ver//[^.]}"
 if [ "${#res}" -lt 2 ]; then
@@ -20,7 +44,7 @@ test_result=$?
 if [ $test_result -eq 0 ]
 then
   echo "##################################"
-  echo "Successfully RAN ALL TESTING $?"
+  echo "Successfully RAN ALL TESTING $? . pwd=$(pwd)"
   echo "##################################"
 else
   echo "##################################"
@@ -29,7 +53,7 @@ else
   exit $test_result
 fi
 
-cd webpiecesexample/build/distributions
+cd ../webpiecesexample-all/webpiecesexample/build/distributions
 unzip webpiecesexample.zip
 test_result=$?
 if [ $test_result -eq 0 ]
@@ -106,33 +130,22 @@ else
   exit 99
 fi
 
+echo "RESETTING to webpieces directory ${DIR}"
 
-
-
-
-
-
-
-
+cd $DIR
 
 echo "##################################"
 echo "next copy over legacy project to upgrade it(auto-upgrade)"
 echo "##################################"
 
 rm -rf ../webpiecesexample-all/*
-cp -r webserver/output/webpiecesexample-all/* ../webpiecesexample-all
-#Remove the cache directory that ends up there
-rm -rf ../webpiecesexample-all/webpiecesexample/webpiecesCache/
+cp -r webserver-templates/build/webpiecesexample-all/* ../webpiecesexample-all
 
 echo "##################################"
 echo "next release to maven repositories"
 echo "##################################"
 
-#This one is breaking the release/upload to nexus :( such that it creates
-#multiple repos which is too bad as it is REALLY fast
-#MUST turn parallel builds off for release or it fails!!!
-#We skip tests since those are done in runAllTesting.sh AND that script ALSO test legacy compatibility and building a fake project from the new release AND starting the server
-./gradlew --stacktrace -PprojVersion="$@" release -x test --scan && ./gradlew --stacktrace -PprojVersion="$@" :webserver:gradle-plugin-htmlcompiler:publishPlugins
+./gradlew --stacktrace -PprojVersion="$@" release -x test --scan
 test_result=$?
 if [ $test_result -eq 0 ]
 then
@@ -145,6 +158,8 @@ else
   echo "##################################"
   exit $test_result
 fi
+
+git tag -a "$@" -m "Tagging repo for version $@"
 
 end=`date +%s`
 runtime=$((end-start))
