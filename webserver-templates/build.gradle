@@ -25,6 +25,7 @@ dependencies {
 }
 
 project.ext {
+    archiveFilePath = "build/distributions/webpiecesServerBuilder-${projVersion}.zip"
   stagingDirName = 'webpiecesServerBuilder'
   outputStagingDir = new File(buildDir, stagingDirName)
 }
@@ -93,14 +94,14 @@ github {
   name = 'webpiecesServerBuilder'+version
   body = 'Official Release of '+version
   assets = [
-      zipGradleTemplate.archiveFile
+      "${archiveFilePath}"
   ]
 }
 
 githubRelease {
     dependsOn ':assemble'
     doFirst {
-       println("Releasing to GitHub: " + github.assets)
+       println("Releasing to GitHub: " + github.assets +" file=${archiveFilePath}")
     }
 }
 
