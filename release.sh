@@ -145,7 +145,7 @@ echo "##################################"
 echo "next release to maven repositories"
 echo "##################################"
 
-./gradlew --stacktrace -PprojVersion="$@" release -x test --scan
+./gradlew --stacktrace -PprojVersion="$@" release -x test
 test_result=$?
 if [ $test_result -eq 0 ]
 then
