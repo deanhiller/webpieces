@@ -105,6 +105,8 @@ ext {
             'generate-httpclient'    : 'org.webpieces.cloud:generate-httpclient',
             'server-scaffolding'     : 'org.webpieces.cloud:server-scaffolding',
 
+            'elastic-lib'          : 'org.webpieces.lib:lib-elasticsearch',
+
             'projectcreator'         : 'org.webpieces:projectcreator',
 
             'gcp-cloud-storage'      : 'org.webpieces.googlecloud:cloudstorage-client',

@@ -57,6 +57,8 @@ dependencies {
     api deps['generate-httpclient']
     api deps['server-scaffolding']
 
+    api deps['elastic-lib']
+
     api deps['projectcreator']
 
     api deps['gcp-cloud-storage']
