@@ -1,12 +1,9 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
-* verify webpiecesServerBuilder.zip is working
 * upgrade orderly to latest webpieces
 * publish to GCP artifactory to reduce Orderly iteration
 * XFuture so context issue is solve
-* Dean - get version numbers on the plugins html compiler to be dynamic using the cmd line arg so we can release
-* Dean - get a new context that is portable among platforms into the repo as well
 * Victor/Declan - fix SSL tests to use TLS1.3 or in circleCI get javax.net.ssl.SSLHandshakeException: No available authentication scheme
    * Victor - TestSslBasicClient.java
    * Declan - TestSslCloseClient.java
