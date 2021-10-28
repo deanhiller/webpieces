@@ -11,7 +11,7 @@ public class RouteModuleInfo {
 
 	private String packageName;
 	private String i18nBundleName;
-	private Class<? extends ProcessCors> corsProcessor;
+	private ProcessCors corsProcessor;
 
 	public RouteModuleInfo(Class<?> moduleClazz) {
 		if(!Routes.class.isAssignableFrom(moduleClazz) &&
@@ -45,7 +45,11 @@ public class RouteModuleInfo {
 		return i18nBundleName;
 	}
 
-	public void setCorProcessor(Class<? extends ProcessCors> corsProcessor) {
+	public void setCorProcessor(ProcessCors corsProcessor) {
 		this.corsProcessor = corsProcessor;
+	}
+
+	public ProcessCors getCorsProcessor() {
+		return corsProcessor;
 	}
 }

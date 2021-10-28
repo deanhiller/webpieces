@@ -16,7 +16,7 @@ public class CurrentRoutes {
 		currentPackage.set(info);
 	}
 
-	public static void setProcessCorsHook(Class<? extends ProcessCors> corsProcessor) {
+	public static void setProcessCorsHook(ProcessCors corsProcessor) {
 		RouteModuleInfo routeModuleInfo = get();
 		if(routeModuleInfo == null)
 			throw new IllegalStateException("This method can only be called within a file implementing Routes.java");

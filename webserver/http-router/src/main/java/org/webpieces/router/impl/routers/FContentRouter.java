@@ -7,6 +7,7 @@ import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
+import org.webpieces.router.impl.routebldr.ProcessCors;
 import org.webpieces.router.impl.routeinvoker.InvokeInfo;
 import org.webpieces.router.impl.routeinvoker.RouteInvoker;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
@@ -46,4 +47,7 @@ public class FContentRouter extends AbstractDynamicRouter implements ReversableR
 		return RouteType.CONTENT;
 	}
 
+	public ProcessCors getCorsProcessor() {
+		return moduleInfo.getCorsProcessor();
+	}
 }
