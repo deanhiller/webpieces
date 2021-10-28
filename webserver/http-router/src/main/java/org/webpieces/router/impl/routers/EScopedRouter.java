@@ -85,7 +85,7 @@ public class EScopedRouter {
 			MatchResult2 result = router.matches(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
 				ctx.setPathParams(result.getPathParams());
-				
+
 				return invokeRouter(router, ctx, handler);
 			}
 		}
@@ -93,7 +93,7 @@ public class EScopedRouter {
 		CompletableFuture<StreamWriter> failedFuture = futureUtil.failedFuture(new NotFoundException("route not found"));
 		return new RouterStreamRef("notFoundEScope", failedFuture, null);
 	}
-	
+
 	private RouterStreamRef invokeRouter(AbstractRouter router, RequestContext ctx,
 												 ProxyStreamHandle handler) {
 		RouterStreamRef streamRef = invokeWithProtection(router, ctx, handler);
@@ -206,15 +206,9 @@ public class EScopedRouter {
 			boolean methodMatches = false;
 			
 			if(!foundScope && path != null) {
-				Pattern pattern = route.getMatchInfo().getPattern();
-				Matcher matcher = pattern.matcher(path);
-				pathMatches = matcher.matches();
-				methodMatches = method == route.getMatchInfo().getHttpMethod();
-
-				if(route.getMatchInfo().getExposedPorts() == Port.BOTH)
-					portMatches = true;
-				else if(isHttps) //ok, it's not BOTH, so if isHttps, then it matches Port.HTTPS
-					portMatches = true;
+				pathMatches = route.getMatchInfo().patternMatches(path);
+				methodMatches = route.getMatchInfo().methodMatches(method);
+				portMatches = route.getMatchInfo().acceptsProtocol(isHttps);
 			}
 			
 			leftOvers += spacing+"<li>"+route.getMatchInfo().getLoggableHtml(portMatches, methodMatches, pathMatches, "&nbsp;")+"</li>\n";

@@ -28,7 +28,7 @@ import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.routebldr.CurrentPackage;
+import org.webpieces.router.impl.routebldr.CurrentRoutes;
 import org.webpieces.router.impl.routebldr.DomainRouteBuilderImpl;
 import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.ARouter;
@@ -278,9 +278,9 @@ public class RouteLoader {
 		}
 		
 		for(Routes module : all) {
-			CurrentPackage.set(new RouteModuleInfo(module.getClass()));
+			CurrentRoutes.set(new RouteModuleInfo(module.getClass()));
 			module.configure(routerBuilder);
-			CurrentPackage.set(null);
+			CurrentRoutes.set(null);
 		}
 		
 		log.info("added all routes to router.  Applying Filters");

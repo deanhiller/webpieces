@@ -5,6 +5,8 @@ import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
 
+import java.util.List;
+
 public interface ScopedRouteBuilder {
 
 	void addRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId);
