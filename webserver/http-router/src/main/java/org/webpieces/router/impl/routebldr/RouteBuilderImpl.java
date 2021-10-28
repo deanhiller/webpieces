@@ -20,7 +20,6 @@ import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.UrlPath;
-import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
 import org.webpieces.router.impl.model.RouterInfo;
@@ -93,7 +92,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	public void setPageNotFoundRoute(String controllerMethod) {
 		if(pageNotFoundInfo != null)
 			throw new IllegalStateException("Page Not found for domain="+routerInfo.getRouterId()+" was already set.  cannot set again.  previous="+pageNotFoundInfo);
-		RouteInfo route = new RouteInfo(CurrentPackage.get(), controllerMethod);
+		RouteInfo route = new RouteInfo(CurrentRoutes.get(), controllerMethod);
 		log.info("scope:'"+routerInfo+"' adding PAGE_NOT_FOUND route method="+route.getControllerMethodString());
 		
 		//MUST DO loadController HERE so stack trace has customer's line in it so he knows EXACTLY what 
@@ -106,7 +105,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 	public void setInternalErrorRoute(String controllerMethod) {
 		if(internalErrorInfo != null)
 			throw new IllegalStateException("Internal Error Route for domain="+routerInfo.getRouterId()+" was already set.  cannot set again");
-		RouteInfo route = new RouteInfo(CurrentPackage.get(), controllerMethod);
+		RouteInfo route = new RouteInfo(CurrentRoutes.get(), controllerMethod);
 		log.info("scope:'"+routerInfo+"' adding INTERNAL_SVR_ERROR route method="+route.getControllerMethodString());
 		
 		//MUST DO loadController HERE so stack trace has customer's line in it so he knows EXACTLY what 

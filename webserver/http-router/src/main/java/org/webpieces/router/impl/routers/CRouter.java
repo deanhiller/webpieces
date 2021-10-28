@@ -31,7 +31,6 @@ public class CRouter {
 
 	public RouterStreamRef invokeRoute(RequestContext ctx, ProxyStreamHandle handler) {
 		String relativePath = ctx.getRequest().relativePath;
-
 		DContentTypeRouter requestTypeRouter = getRequestContentTypeToRouter().get(ctx.getRequest().domain);
 		if(requestTypeRouter != null)
 			return requestTypeRouter.invokeRoute(ctx, handler, relativePath);

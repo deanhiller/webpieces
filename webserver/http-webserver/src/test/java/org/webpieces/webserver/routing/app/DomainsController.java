@@ -1,4 +1,4 @@
-package org.webpieces.webserver.domains.app;
+package org.webpieces.webserver.routing.app;
 
 import javax.inject.Singleton;
 

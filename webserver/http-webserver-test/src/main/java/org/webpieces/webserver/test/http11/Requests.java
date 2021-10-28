@@ -54,6 +54,42 @@ public class Requests {
 		return req;
 	}
 
+	public static HttpFullRequest createCorsRequest(String fromDomain, String url, String accessHeaders, KnownHttpMethod method) {
+		HttpUri httpUri = new HttpUri(url);
+		HttpRequestLine requestLine = new HttpRequestLine();
+		requestLine.setMethod(method);
+		requestLine.setUri(httpUri);
+
+		HttpRequest req = new HttpRequest();
+		req.setRequestLine(requestLine);
+
+		req.addHeader(new Header(KnownHeaderName.HOST, "api.domain.com"));
+		req.addHeader(new Header(KnownHeaderName.ORIGIN, fromDomain));
+		req.addHeader(new Header(KnownHeaderName.ACCESS_CONTROL_REQUEST_METHOD, method.getCode()));
+		req.addHeader(new Header(KnownHeaderName.ACCESS_CONTROL_REQUEST_HEADERS, accessHeaders));
+
+		HttpFullRequest fullReq = new HttpFullRequest(req, null);
+		return fullReq;
+	}
+
+	public static HttpFullRequest createOptionsPreflightRequest(String fromDomain, String url, String accessHeaders, String method) {
+		HttpUri httpUri = new HttpUri(url);
+		HttpRequestLine requestLine = new HttpRequestLine();
+		requestLine.setMethod(KnownHttpMethod.OPTIONS);
+		requestLine.setUri(httpUri);
+
+		HttpRequest req = new HttpRequest();
+		req.setRequestLine(requestLine);
+
+		req.addHeader(new Header(KnownHeaderName.HOST, "api.domain.com"));
+		req.addHeader(new Header(KnownHeaderName.ORIGIN, fromDomain));
+		req.addHeader(new Header(KnownHeaderName.ACCESS_CONTROL_REQUEST_METHOD, method));
+		req.addHeader(new Header(KnownHeaderName.ACCESS_CONTROL_REQUEST_HEADERS, accessHeaders));
+
+		HttpFullRequest fullReq = new HttpFullRequest(req, null);
+		return fullReq;
+	}
+
 	public static HttpFullRequest createGetRequest(String domain, String url) {
 		HttpUri httpUri = new HttpUri(url);
 		HttpRequestLine requestLine = new HttpRequestLine();

@@ -1,4 +1,4 @@
-package org.webpieces.webserver.domains;
+package org.webpieces.webserver.routing;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -26,7 +26,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("domainsMeta.txt", PrivateWebserverForTest.class.getClassLoader());
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("domainsMeta2.txt", PrivateWebserverForTest.class.getClassLoader());
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false, new SimpleMeterRegistry()), null, false, metaFile);
 		webserver.start();
 		httpsSocket = connectHttps(false, null, webserver.getUnderlyingHttpsChannel().getLocalAddress());

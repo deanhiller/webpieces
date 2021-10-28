@@ -234,13 +234,15 @@ public class ReverseRoutes implements ReverseRouteLookup {
 	private String createUrl(ReversableRouter routeMeta, String urlPath) {
 		RequestContext ctx = Current.getContext();
 		RouterRequest request = ctx.getRequest();
-		
-		boolean isHttpsOnly = routeMeta.getMatchInfo().getExposedPorts() == Port.HTTPS;
+
+
+		boolean isBoth = routeMeta.getMatchInfo().getExposedPorts() == Port.BOTH;
 		//1. if route is 'not' https only (ie. BOTH), return url path as we can just use the relative urlPath and
 		// stay on whatever the request is using in our redirect
 		//2. OR if request is https, we can also just use the relative path since it will stay in https
-		if(!isHttpsOnly || request.isHttps)
+		if(isBoth || request.isHttps)
 			return urlPath;
+		//else request is HTTP and route to go to is HTTPS so we have to do more work
 		
 		//we are rendering an http page with a link to https so need to do special magic
 		String domain = request.domain;
@@ -259,7 +261,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 
 	@Override
 	public boolean isGetRequest(RouteId routeId) {
-		return get(routeId).getMatchInfo().getHttpMethod() == HttpMethod.GET;
+		return get(routeId).getMatchInfo().methodMatches(HttpMethod.GET);
 	}
 
 	@Override

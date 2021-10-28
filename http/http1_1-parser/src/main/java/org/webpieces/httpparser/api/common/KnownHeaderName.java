@@ -41,7 +41,9 @@ public enum KnownHeaderName {
 	TE("TE", HeaderType.REQUEST),
 	USER_AGENT("User-Agent", HeaderType.REQUEST),
 	UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests", HeaderType.REQUEST),
-	
+	ACCESS_CONTROL_REQUEST_METHOD("Access-Control-Request-Method", HeaderType.REQUEST),
+	ACCESS_CONTROL_REQUEST_HEADERS("Access-Control-Request-Headers", HeaderType.REQUEST),
+
 	//Per RFC, these are the Response Header types
 	ACCEPT_RANGES("Accept-Ranges", HeaderType.RESPONSE),
 	AGE("Age", HeaderType.RESPONSE),
@@ -53,7 +55,10 @@ public enum KnownHeaderName {
 	SERVER("Server", HeaderType.RESPONSE),
 	VARY("Vary", HeaderType.RESPONSE),
 	WWW_AUTHENTICATE("WWW-Authenticate", HeaderType.RESPONSE),
-	
+	ACCESS_CONTROL_ALLOW_METHODS("Access-Control-Allow-Methods", HeaderType.RESPONSE),
+	ACCESS_CONTROL_ALLOW_HEADERS("Access-Control-Allow-Headers", HeaderType.RESPONSE),
+	ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin", HeaderType.RESPONSE),
+
 	ALLOW("Allow", HeaderType.ENTITY),         
 	CONTENT_ENCODING("Content-Encoding", HeaderType.ENTITY),     
 	CONTENT_LANGUAGE("Content-Language", HeaderType.ENTITY),      
@@ -64,7 +69,6 @@ public enum KnownHeaderName {
 	CONTENT_TYPE("Content-Type", HeaderType.ENTITY),  
 	EXPIRES("Expires", HeaderType.ENTITY),       
 	LAST_MODIFIED("Last-Modified", HeaderType.ENTITY),
-
 	// For HTTP2 upgrade
 	HTTP2_SETTINGS("HTTP2-Settings", HeaderType.REQUEST),
 	X_REQUESTED_WITH("X-Requested-With", HeaderType.REQUEST),
