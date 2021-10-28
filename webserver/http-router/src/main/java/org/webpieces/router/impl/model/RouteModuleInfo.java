@@ -2,11 +2,16 @@ package org.webpieces.router.impl.model;
 
 import org.webpieces.router.api.routes.BasicRoutes;
 import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.impl.routebldr.ProcessCors;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RouteModuleInfo {
 
 	private String packageName;
 	private String i18nBundleName;
+	private Class<? extends ProcessCors> corsProcessor;
 
 	public RouteModuleInfo(Class<?> moduleClazz) {
 		if(!Routes.class.isAssignableFrom(moduleClazz) &&
@@ -39,5 +44,8 @@ public class RouteModuleInfo {
 	public String getI18nBundleName() {
 		return i18nBundleName;
 	}
-	
+
+	public void setCorProcessor(Class<? extends ProcessCors> corsProcessor) {
+		this.corsProcessor = corsProcessor;
+	}
 }

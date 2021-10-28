@@ -1,4 +1,4 @@
-package org.webpieces.webserver.domains.app;
+package org.webpieces.webserver.routing.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.router.api.routes.Port.BOTH;
