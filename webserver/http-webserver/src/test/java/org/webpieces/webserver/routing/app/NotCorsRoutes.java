@@ -12,6 +12,9 @@ public class NotCorsRoutes implements Routes {
     public void configure(DomainRouteBuilder bldr) {
         RouteBuilder rtBuilder = bldr.getAllDomainsRouteBuilder();
 
+        //no CORS support here since it was setup below
+        rtBuilder.addContentRoute(Port.BOTH, HttpMethod.GET, "/noMethodsSupportCors", "ControllerForTestOptions.getContent");
+
         rtBuilder.addContentRoute(Port.BOTH, HttpMethod.POST, "/content", "ControllerForTestOptions.postContent");
         rtBuilder.addContentRoute(Port.BOTH, HttpMethod.DELETE, "/content", "ControllerForTestOptions.deleteContent");
 
