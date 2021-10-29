@@ -25,15 +25,13 @@ public class DomainsMeta2 implements WebAppMeta {
 	
 	@Override
     public List<Routes> getRouteModules() {
-
-
 		Routes domainModule = new ScopedDomainRoutes("mydomain.com", new Domain1Routes());
 
 		return Lists.newArrayList(
 				domainModule,
-				new Domain2Routes()
-//				new CorsForTwoDomains(),
-//				new CorsForAllDomains()
+				new Domain2Routes(),
+				new CorsForTwoDomains(),
+				new CorsForAllDomains()
 		);
 	}
 	

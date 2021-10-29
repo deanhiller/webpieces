@@ -8,7 +8,8 @@ public enum KnownStatusCode {
 	HTTP_100_CONTINUE(100, "Continue", HttpStatusType.Informational),
 	HTTP_101_SWITCHING_PROTOCOLS(101, "Switching Protocols", HttpStatusType.Informational),
 	
-	HTTP_200_OK(200, "OK", HttpStatusType.Success), 
+	HTTP_200_OK(200, "OK", HttpStatusType.Success),
+	HTTP_204_NO_CONTENT(204, "No Content", HttpStatusType.Success),
 	
 	HTTP_300_MULTIPLE_CHOICES(300, "Multiple Choices", HttpStatusType.Redirection),
 	HTTP_301_MOVED_PERMANENTLY(301, "Moved Permanently", HttpStatusType.Redirection),
