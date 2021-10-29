@@ -20,9 +20,10 @@ public abstract class Http2Headers implements Http2Msg {
 	 * what the issue is.  IF WE SET THIS TO true however, a stack trace will ensue because typically they will accidentally
 	 * send two payloads with this set to true causing a nice exception saying, we see you are sending response X with 
 	 * endOfStream=true BUT you already sent response Y with endOfStream=true making this situation much easier to debug
+	 *
+	 * Being practical of theoritical for the #win
 	 */
 	private boolean endOfStream = true;
-	
 	
     private PriorityDetails priorityDetails; /* optional */
 	protected List<Http2Header> headers = new ArrayList<>();
