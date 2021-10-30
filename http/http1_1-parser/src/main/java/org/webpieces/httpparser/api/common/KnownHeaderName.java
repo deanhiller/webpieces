@@ -58,6 +58,9 @@ public enum KnownHeaderName {
 	ACCESS_CONTROL_ALLOW_METHODS("Access-Control-Allow-Methods", HeaderType.RESPONSE),
 	ACCESS_CONTROL_ALLOW_HEADERS("Access-Control-Allow-Headers", HeaderType.RESPONSE),
 	ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin", HeaderType.RESPONSE),
+	ACCESS_CONTROL_ALLOW_CREDENTIALS("Access-Control-Allow-Credentials", HeaderType.RESPONSE),
+	ACCESS_CONTROL_EXPOSE_HEADERS("Access-Control-Expose-Headers", HeaderType.RESPONSE),
+	ACCESS_CONTROL_MAX_AGE("Access-Control-Max-Age", HeaderType.RESPONSE),
 
 	ALLOW("Allow", HeaderType.ENTITY),         
 	CONTENT_ENCODING("Content-Encoding", HeaderType.ENTITY),     

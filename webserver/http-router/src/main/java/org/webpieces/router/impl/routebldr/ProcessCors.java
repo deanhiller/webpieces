@@ -14,6 +14,6 @@ public interface ProcessCors {
      * @param request Http2Request if the router is in webpieces else other platforms request
      * @return Http2Response going back
      */
-    Http2Response processOptionsCors(Http2Request request, List<HttpMethod> methods, ResponseStreamHandle responseHandle);
+    void processOptionsCors(Http2Request request, List<HttpMethod> methods, ResponseStreamHandle responseHandle);
 
 }

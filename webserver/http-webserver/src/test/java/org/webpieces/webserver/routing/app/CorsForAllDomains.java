@@ -14,13 +14,15 @@ import java.util.List;
 import java.util.Set;
 
 public class CorsForAllDomains implements Routes {
+    public static final Set<String> ALLOWED_REQUEST_HEADERS = Sets.newHashSet("Authorization", "Content-Type");
+
     @Override
     public void configure(DomainRouteBuilder bldr) {
         RouteBuilder rtBuilder = bldr.getAllDomainsRouteBuilder();
 
         Set<String> domains = Sets.newHashSet("*");
-        Set<String> headers = Sets.newHashSet("Authorization", "Content-Type");
-        CurrentRoutes.setProcessCorsHook(new DefaultCorsProcessor(domains, headers));
+        Set<String> exposedResponseHeaders = Sets.newHashSet();
+        CurrentRoutes.setProcessCorsHook(new DefaultCorsProcessor(domains, ALLOWED_REQUEST_HEADERS, exposedResponseHeaders, false, 86400));
 
         rtBuilder.addContentRoute(Port.BOTH, HttpMethod.GET, "/allDomains", "ControllerForTestOptions.getContent");
         rtBuilder.addContentRoute(Port.BOTH, HttpMethod.POST, "/allDomains", "ControllerForTestOptions.postContent");
