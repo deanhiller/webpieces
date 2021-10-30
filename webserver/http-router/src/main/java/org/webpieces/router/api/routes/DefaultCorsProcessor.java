@@ -60,7 +60,18 @@ public class DefaultCorsProcessor implements ProcessCors {
         }
 
         Http2Response response = new Http2Response();
-        response.addHeader(new Http2Header(Http2HeaderName.STATUS, "204"));
+
+        Http2Header methodHeader = request.getHeaderLookupStruct().getHeader(Http2HeaderName.ACCESS_CONTROL_REQUEST_METHOD);
+        HttpMethod lookup = HttpMethod.lookup(methodHeader.getValue());
+        Http2Header headersRequested = request.getHeaderLookupStruct().getHeader(Http2HeaderName.ACCESS_CONTROL_REQUEST_HEADERS);
+        if(!methods.contains(lookup)) {
+            response.addHeader(new Http2Header(Http2HeaderName.STATUS, "403"));
+        } else if(hasInvalidHeader(allowedHeaders, headersRequested)) {
+            response.addHeader(new Http2Header(Http2HeaderName.STATUS, "403"));
+        } else {
+            response.addHeader(new Http2Header(Http2HeaderName.STATUS, "204"));
+        }
+
         response.addHeader(new Http2Header(Http2HeaderName.ACCESS_CONTROL_ALLOW_ORIGIN, header.getValue()));
         if(allowedDomains.contains("*")) {
             //since all domains, we must tell caches that Origin header in response will vary
@@ -84,6 +95,20 @@ public class DefaultCorsProcessor implements ProcessCors {
         response.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, "0"));
 
         sendResponse(responseStream, response);
+    }
+
+    private boolean hasInvalidHeader(Set<String> allowedHeaders, Http2Header headersRequested) {
+        if(allowedHeaders.contains("*"))
+            return false; // all headers allowed
+
+        String headerStr = headersRequested.getValue();
+        String[] eachHeader = headerStr.split(",");
+        for(String requestedHeader : eachHeader) {
+            if(!allowedHeaders.contains(requestedHeader.trim()))
+                return true;
+        }
+
+        return false;
     }
 
     private void send403Response(ResponseStreamHandle responseStream, Http2Request request) {
