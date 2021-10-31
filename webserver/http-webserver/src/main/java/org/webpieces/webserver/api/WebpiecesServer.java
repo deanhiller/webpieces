@@ -142,7 +142,8 @@ public class WebpiecesServer {
 		File lib = FileFactory.newFile(filePath, "lib");
 		File config = FileFactory.newFile(filePath, "config");
 		File publicFile = FileFactory.newFile(filePath, "public");
-		if(bin.exists() && lib.exists() && config.exists() && publicFile.exists()) {
+		File jibClasspath = FileFactory.newFile(filePath, "jib-classpath-file");
+		if((bin.exists() && lib.exists() && config.exists() && publicFile.exists()) ||  (jibClasspath.exists())) {
 			//For ->
 			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
 			//    MainApp | NO  | Production | N/A
