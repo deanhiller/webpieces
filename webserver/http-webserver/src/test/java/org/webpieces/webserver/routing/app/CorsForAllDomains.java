@@ -4,13 +4,11 @@ import com.google.common.collect.Sets;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
-import org.webpieces.router.api.routes.DefaultCorsProcessor;
+import org.webpieces.router.api.routebldr.DefaultCorsProcessor;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.impl.routebldr.CurrentRoutes;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class CorsForAllDomains implements Routes {

@@ -2,7 +2,9 @@ package org.webpieces.webserver.test.http11;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -54,7 +56,7 @@ public class Requests {
 		return req;
 	}
 
-	public static HttpFullRequest createCorsRequest(String fromDomain, String url, String accessHeaders, KnownHttpMethod method) {
+	public static HttpFullRequest createCorsRequestCookie(String fromDomain, String url, List<String> accessHeaders, KnownHttpMethod method, String cookieValue) {
 		HttpUri httpUri = new HttpUri(url);
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(method);
@@ -65,8 +67,29 @@ public class Requests {
 
 		req.addHeader(new Header(KnownHeaderName.HOST, "api.domain.com"));
 		req.addHeader(new Header(KnownHeaderName.ORIGIN, fromDomain));
-		req.addHeader(new Header(KnownHeaderName.ACCESS_CONTROL_REQUEST_METHOD, method.getCode()));
-		req.addHeader(new Header(KnownHeaderName.ACCESS_CONTROL_REQUEST_HEADERS, accessHeaders));
+		for(String name : accessHeaders) {
+			req.addHeader(new Header(name, name));
+		}
+		req.addHeader(new Header(KnownHeaderName.COOKIE, cookieValue));
+
+		HttpFullRequest fullReq = new HttpFullRequest(req, null);
+		return fullReq;
+	}
+
+	public static HttpFullRequest createCorsRequest(String fromDomain, String url, List<String> accessHeaders, KnownHttpMethod method) {
+		HttpUri httpUri = new HttpUri(url);
+		HttpRequestLine requestLine = new HttpRequestLine();
+		requestLine.setMethod(method);
+		requestLine.setUri(httpUri);
+
+		HttpRequest req = new HttpRequest();
+		req.setRequestLine(requestLine);
+
+		req.addHeader(new Header(KnownHeaderName.HOST, "api.domain.com"));
+		req.addHeader(new Header(KnownHeaderName.ORIGIN, fromDomain));
+		for(String name : accessHeaders) {
+			req.addHeader(new Header(name, name));
+		}
 
 		HttpFullRequest fullReq = new HttpFullRequest(req, null);
 		return fullReq;

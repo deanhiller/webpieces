@@ -2,10 +2,7 @@ package org.webpieces.router.impl.model;
 
 import org.webpieces.router.api.routes.BasicRoutes;
 import org.webpieces.router.api.routes.Routes;
-import org.webpieces.router.impl.routebldr.ProcessCors;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.webpieces.router.api.routebldr.ProcessCors;
 
 public class RouteModuleInfo {
 

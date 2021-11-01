@@ -31,7 +31,9 @@ public class DomainsMeta2 implements WebAppMeta {
 				domainModule,
 				new Domain2Routes(),
 				new CorsForTwoDomains(),
-				new CorsForAllDomains()
+				new CorsForAllDomains(),
+				new NotCorsRoutes(),
+				new CorsTestCookie()
 		);
 	}
 	
