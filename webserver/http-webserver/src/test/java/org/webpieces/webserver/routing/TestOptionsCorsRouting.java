@@ -19,6 +19,7 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -143,7 +144,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 
 		String expected = String.join(", ", CorsForAllDomains.ALLOWED_REQUEST_HEADERS);
 		Header header = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.ACCESS_CONTROL_ALLOW_HEADERS);
-		Assert.assertEquals(expected, header.getValue());
+		Assert.assertEquals(expected.toLowerCase(), header.getValue());
 
 		Header respDomain = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.ACCESS_CONTROL_ALLOW_ORIGIN);
 		Assert.assertEquals(fromDomain, respDomain.getValue());
@@ -207,7 +208,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 
 		String expected = String.join(", ", CorsForAllDomains.ALLOWED_REQUEST_HEADERS);
 		Header header = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.ACCESS_CONTROL_ALLOW_HEADERS);
-		Assert.assertEquals(expected, header.getValue());
+		Assert.assertEquals(expected.toLowerCase(), header.getValue());
 
 		Header respDomain = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.ACCESS_CONTROL_ALLOW_ORIGIN);
 		Assert.assertEquals(fromDomain, respDomain.getValue());

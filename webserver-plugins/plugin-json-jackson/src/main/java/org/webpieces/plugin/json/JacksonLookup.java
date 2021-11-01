@@ -40,7 +40,7 @@ public class JacksonLookup implements BodyContentBinder {
         	Class<T> entityClass = (Class<T>) meta.getFieldClass();
 
 			if(data.length == 0)
-				throw new BadRequestException("Client did not provide a json request in the body of the request");
+				return null;
 			else if(JsonNode.class.isAssignableFrom(entityClass))
 				return (T) mapper.readTree(data);
 			
