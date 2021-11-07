@@ -83,14 +83,21 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
     protected Action translateFailure(MethodMeta meta, Action action, Throwable t) {
         if (t != null) {
-            if (t instanceof HttpException) {
-                return translate(meta, (HttpException) t);
-            }
 
             byte[] obj = meta.getCtx().getRequest().body.createByteArray();
             String json = new String(obj, 0, Math.min(obj.length, 100));
+
+            if(t instanceof HttpException) {
+                int httpCode = ((HttpException) t).getHttpCode();
+                if (httpCode >= 500 && httpCode < 600) {
+                    log.error("Request failed for json=" + json + "\n500 Internal Server Error method=" + meta.getLoadedController().getControllerMethod(), t);
+                }
+                return translate(meta, (HttpException)t);
+            }
+
             log.error("Request failed for json=" + json + "\nInternal Server Error method=" + meta.getLoadedController().getControllerMethod(), t);
             return translateError(t);
+
         } else {
             return action;
         }

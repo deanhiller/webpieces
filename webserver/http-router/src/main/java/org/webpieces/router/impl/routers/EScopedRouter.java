@@ -1,20 +1,26 @@
 package org.webpieces.router.impl.routers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import com.webpieces.http2.api.dto.highlevel.Http2Response;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.ctx.api.RouterHeader;
 import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
+import org.webpieces.router.api.routebldr.AccessResult;
+import org.webpieces.router.api.routebldr.ProcessCors;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.exceptions.WebpiecesException;
-import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
@@ -81,22 +87,91 @@ public class EScopedRouter {
 	}
 	
 	private RouterStreamRef findAndInvokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+		if(ctx.getRequest().method == HttpMethod.OPTIONS) {
+			return respondToOptionsRequest(ctx, handler, subPath);
+		}
+
+		List<RouterHeader> origin = ctx.getRequest().getHeaders().get("origin");
+		if(origin == null) {
+			return findAndInvokeImpl(ctx, handler, subPath, false);
+		} else {
+			return findAndInvokeImpl(ctx, handler, subPath, true);
+		}
+	}
+
+	private RouterStreamRef findAndInvokeImpl(RequestContext ctx, ProxyStreamHandle handler, String subPath, boolean isCorsRequest) {
 		for(AbstractRouter router : routers) {
 			MatchResult2 result = router.matches(ctx.getRequest(), subPath);
 			if(result.isMatches()) {
 				ctx.setPathParams(result.getPathParams());
-				
-				return invokeRouter(router, ctx, handler);
+				return invokeRouter(router, ctx, handler, isCorsRequest);
 			}
 		}
 
 		CompletableFuture<StreamWriter> failedFuture = futureUtil.failedFuture(new NotFoundException("route not found"));
 		return new RouterStreamRef("notFoundEScope", failedFuture, null);
 	}
-	
+
+	private RouterStreamRef respondToOptionsRequest(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
+		List<FContentRouter> matchingMethods = new ArrayList<>();
+		for(AbstractRouter router : routers) {
+			if(!(router instanceof FContentRouter))
+				continue;
+
+			FContentRouter contentRouter = (FContentRouter) router;
+			if(router.getMatchInfo().acceptsProtocol(ctx.getRequest().isHttps)
+				&& router.getMatchInfo().patternMatches(subPath)
+					&& contentRouter.getCorsProcessor() != null
+			) {
+				matchingMethods.add(contentRouter);
+			}
+		}
+
+		if(matchingMethods.size() == 0) {
+			send403Response(handler, "No methods on this url path allow CORS requests");
+		} else {
+			doCorsProessing(ctx, handler, matchingMethods);
+		}
+
+		CompletableFuture<StreamWriter> empty = CompletableFuture.completedFuture(new EmptyWriter());
+		return new RouterStreamRef("optionsCorsEmptyWriter", empty, null);
+	}
+
+	private void send403Response(ProxyStreamHandle handler, String reason) {
+		Http2Response response = new Http2Response();
+		response.addHeader(new Http2Header(Http2HeaderName.STATUS, "403"));
+		response.addHeader(new Http2Header("Webpieces-Reason", reason));
+
+		CompletableFuture<StreamWriter> process = handler.process(response);
+
+		try {
+			process.get(10, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			throw SneakyThrow.sneak(e);
+		}
+	}
+
+	private void doCorsProessing(RequestContext ctx, ProxyStreamHandle handler, List<FContentRouter> matchingMethods) {
+		ProcessCors corsProcessor = matchingMethods.get(0).getCorsProcessor();
+		List<HttpMethod> methodsSupported = new ArrayList<>();
+		for (FContentRouter r : matchingMethods) {
+			HttpMethod httpMethod = r.matchInfo.getHttpMethod();
+			methodsSupported.add(httpMethod);
+			if (corsProcessor != r.getCorsProcessor()) {
+				throw new IllegalStateException("Developer has a mistake in routes file adding different ProcessCors to different methods of same url and port types");
+			}
+		}
+
+		try {
+			corsProcessor.processOptionsCors(ctx.getRequest().originalRequest, methodsSupported, handler);
+		} catch (Throwable e) {
+			log.error("Customer code for class=" + corsProcessor + " failed", e);
+		}
+	}
+
 	private RouterStreamRef invokeRouter(AbstractRouter router, RequestContext ctx,
-												 ProxyStreamHandle handler) {
-		RouterStreamRef streamRef = invokeWithProtection(router, ctx, handler);
+												 ProxyStreamHandle handler, boolean isCorsRequest) {
+		RouterStreamRef streamRef = invokeWithProtection(router, ctx, handler, isCorsRequest);
 		
 		CompletableFuture<StreamWriter> writer = 
 				streamRef.getWriter()
@@ -114,13 +189,41 @@ public class EScopedRouter {
 	}
 	
 	private RouterStreamRef invokeWithProtection(AbstractRouter router, RequestContext ctx,
-			 ProxyStreamHandle handler) {
+			 ProxyStreamHandle handler, boolean isCorsRequest) {
 		try {
+			if(isCorsRequest) {
+				if(isFailSecurityCheck(router, ctx, handler))
+					return new RouterStreamRef("failCors");
+			}
+
 			return router.invoke(ctx, handler);
 		} catch(Throwable e) {
 			//convert to async exception
 			return new RouterStreamRef("EScopedRouter", e);
 		}
+	}
+
+	private boolean isFailSecurityCheck(AbstractRouter router, RequestContext ctx, ProxyStreamHandle handler) {
+		if(!(router instanceof FContentRouter)) {
+			//we only do CORS for content requests(json/xml/etc)
+			send403Response(handler, "Only content routes allow CORS requests. Router not supported="+router.getClass());
+			return true;
+		}
+
+		FContentRouter contentRouter = (FContentRouter) router;
+		ProcessCors corsProcessor = contentRouter.getCorsProcessor();
+		if(corsProcessor == null) {
+			send403Response(handler, "This method and path did not support CORS");
+			return true;
+		}
+
+		AccessResult accessResult = corsProcessor.isAccessAllowed(ctx);
+		if(!accessResult.isAllowed()) {
+			send403Response(handler, accessResult.getReasonForDenial());
+			return true;
+		}
+
+		return false;
 	}
 
 	private Throwable convert(MatchInfo info, Throwable t) {
@@ -206,15 +309,9 @@ public class EScopedRouter {
 			boolean methodMatches = false;
 			
 			if(!foundScope && path != null) {
-				Pattern pattern = route.getMatchInfo().getPattern();
-				Matcher matcher = pattern.matcher(path);
-				pathMatches = matcher.matches();
-				methodMatches = method == route.getMatchInfo().getHttpMethod();
-
-				if(route.getMatchInfo().getExposedPorts() == Port.BOTH)
-					portMatches = true;
-				else if(isHttps) //ok, it's not BOTH, so if isHttps, then it matches Port.HTTPS
-					portMatches = true;
+				pathMatches = route.getMatchInfo().patternMatches(path);
+				methodMatches = route.getMatchInfo().methodMatches(method);
+				portMatches = route.getMatchInfo().acceptsProtocol(isHttps);
 			}
 			
 			leftOvers += spacing+"<li>"+route.getMatchInfo().getLoggableHtml(portMatches, methodMatches, pathMatches, "&nbsp;")+"</li>\n";

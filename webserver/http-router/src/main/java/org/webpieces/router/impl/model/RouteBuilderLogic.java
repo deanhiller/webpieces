@@ -34,7 +34,6 @@ public class RouteBuilderLogic {
 			ControllerLoader finder, 
 			RouteInvoker routeInvoker,
 			SvcProxyLogic svcProxyLogic,
-			BodyContentBinderChecker binderChecker,
 			FutureHelper futureUtil,
 			ResponseProcessorContent responseProcessorContent,
 			ResponseProcessorHtml responseProcessorHtml,

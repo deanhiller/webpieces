@@ -266,6 +266,8 @@ public class RouterRequest {
 	 */
 	public Map<String, List<RouterHeader>> getHeaders() {
 		Map<String, List<RouterHeader>> routerHeaderMap = new HashMap<>();
+		if(originalRequest == null)
+			return routerHeaderMap; //some legacy tests at Orderly simulate with no original request
 
 		//DO NOT cache this as there are clients that modify the Http2Header which will not
 		//modify this list so just generate this list every time for now.

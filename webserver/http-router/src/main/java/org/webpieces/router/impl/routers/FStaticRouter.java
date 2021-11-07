@@ -61,10 +61,10 @@ public class FStaticRouter extends AbstractRouterImpl {
 
 	@Override
 	public Matcher matchesAndParseParams(RouterRequest request, String subPath) {
-		if(!matchesMethod(request.method)) {
+		if(!matchInfo.methodMatches(request.method)) {
 			return null;
 		}
-		
+
 		Matcher matcher = matchInfo.getPattern().matcher(subPath);
 		
 		String hash = null;

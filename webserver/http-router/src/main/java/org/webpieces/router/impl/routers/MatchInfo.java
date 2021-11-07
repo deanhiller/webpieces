@@ -2,6 +2,7 @@ package org.webpieces.router.impl.routers;
 
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.webpieces.ctx.api.HttpMethod;
@@ -46,7 +47,7 @@ public class MatchInfo {
 	}
 
 	public boolean matchesMethod(HttpMethod method) {
-		if(this.getHttpMethod() == method)
+		if(this.httpMethod == method)
 			return true;
 		return false;
 	}
@@ -116,5 +117,27 @@ public class MatchInfo {
 
 	public Charset getUrlEncoding() {
 		return urlEncoding;
+	}
+
+	public boolean acceptsProtocol(boolean isHttps) {
+		if(exposedPort == Port.BOTH) {
+			//both accepts https AND http so just return true for everything
+			return true;
+		} else if(isHttps) {
+			//ok, we now know the port==Port.HTTPS so we just
+			// need to verify isHttps==true
+			return true;
+		}
+		//else return false
+		return false;
+	}
+
+	public boolean methodMatches(HttpMethod method) {
+		return method == this.httpMethod;
+	}
+
+	public boolean patternMatches(String path) {
+		Matcher matcher = patternToMatch.matcher(path);
+		return matcher.matches();
 	}
 }

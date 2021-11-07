@@ -9,6 +9,8 @@ plugins {
     id 'com.google.protobuf' version '0.8.15'
 }
 
+group = 'org.webpieces.server.plugin'
+
 apply from: '../../config/global.gradle'
 
 dependencies {

@@ -1,7 +1,7 @@
 plugins {
     id 'application'
     id 'idea'
-    id 'org.webpieces.htmlcompiler' version '2.1.0'
+    id 'org.webpieces.templatecompiler' version "2.1.8"
 }
 
 //Intellij Idea has a weird quirk we need to avoid

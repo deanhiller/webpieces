@@ -1,5 +1,7 @@
 package org.webpieces.util.futures;
 
+import org.webpieces.util.context.Context;
+
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -19,17 +21,17 @@ public class XFuture<T> extends CompletableFuture<T> {
 	}
 	
     public XFuture<Void> thenAccept(Consumer<? super T> originalFunction) {
-		Map<String, Object> state = FutureLocal.fetchState();
+		Map<String, Object> state = Context.getContext();
     	
     	Consumer<? super T> c2 = (s) -> {
-			Map<String, Object> prevState = FutureLocal.fetchState();
+			Map<String, Object> prevState = Context.getContext();
 			try {
-				FutureLocal.restoreState(state);
+				Context.restoreContext(state);
 				
 				originalFunction.accept(s);
 				
 			} finally {
-				FutureLocal.restoreState(prevState);
+				Context.restoreContext(prevState);
 			}
     	};
 
@@ -43,7 +45,7 @@ public class XFuture<T> extends CompletableFuture<T> {
     @SuppressWarnings("unchecked")
 	public <U> XFuture<U> thenApplyAsync(
             Function<? super T,? extends U> fn, Executor executor) {
-		Map<String, Object> state = FutureLocal.fetchState();
+		Map<String, Object> state = Context.getContext();
 		MyFunction f = new MyFunction(state, fn);		
 		
 		return (XFuture<U>) super.thenApplyAsync(f, executor);    	
@@ -52,7 +54,7 @@ public class XFuture<T> extends CompletableFuture<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <U> XFuture<U> thenApply(Function<? super T, ? extends U> fn) {
-		Map<String, Object> state = FutureLocal.fetchState();
+		Map<String, Object> state = Context.getContext();
 		MyFunction f = new MyFunction(state, fn);		
 		
 		return (XFuture<U>) super.thenApply(f);
@@ -61,7 +63,7 @@ public class XFuture<T> extends CompletableFuture<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <U> XFuture<U> thenCompose(Function<? super T, ? extends CompletionStage<U>> fn) {
-		Map<String, Object> state = FutureLocal.fetchState();
+		Map<String, Object> state = Context.getContext();
 		MyFunction f = new MyFunction(state, fn);
 		
 		return (XFuture<U>) super.thenCompose(f);
@@ -70,7 +72,7 @@ public class XFuture<T> extends CompletableFuture<T> {
     @SuppressWarnings("unchecked")
 	public XFuture<T> exceptionally(
             Function<Throwable, ? extends T> fn) {
-		Map<String, Object> state = FutureLocal.fetchState();
+		Map<String, Object> state = Context.getContext();
 		MyFunction f = new MyFunction(state, fn);
 
 		return (XFuture<T>) super.exceptionally(f);
@@ -97,14 +99,14 @@ public class XFuture<T> extends CompletableFuture<T> {
 		@Override
 		public Object apply(Object t) {
 
-			Map<String, Object> prevState = FutureLocal.fetchState();
+			Map<String, Object> prevState = Context.getContext();
 			try {
-				FutureLocal.restoreState(state);
+				Context.restoreContext(state);
 				
 				return originalFunction.apply(t);
 				
 			} finally {
-				FutureLocal.restoreState(prevState);
+				Context.restoreContext(prevState);
 			}
 			
 			
@@ -183,8 +185,6 @@ public class XFuture<T> extends CompletableFuture<T> {
 	}
 	
 	public static <T> XFuture<T> convert(CompletableFuture<T> future1, Function<Object, Boolean> cancelFunc) {
-		
-    	
     	XFuture<T> xFuture = new XFuture<T>(cancelFunc);
     	future1.handle( (resp, t) -> {
     		if(t != null)

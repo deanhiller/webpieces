@@ -8,6 +8,8 @@ plugins {
     id 'maven-publish'
 }
 
+group = 'org.webpieces.cloud'
+
 apply from: '../../config/global.gradle'
 
 repositories {
@@ -21,6 +23,7 @@ dependencies {
     api deps['http-router']
     api deps['cloud-api-lib']
     //api deps['core-jackson']
+    api deps['jakarta-rest-api']
 
     //implementation deps['javax-inject-api']
     //implementation deps['slf4j-api']

@@ -114,13 +114,13 @@ public class TestKeepContextHttp2 extends AbstractHttp2Test {
 		String json = "{ `meta`: { `numResults`: 4 }, `testValidation`:`notBlank` }".replace("`", "\"");
 		FullRequest req = org.webpieces.webserver.test.http2.Requests.createJsonRequest("POST", "/json/simple", json);
 
-		Context.set(ctxKey, ctxValue);
+		Context.put(ctxKey, ctxValue);
 
 		//Have to also test request and headers SEPARATELY as test was passing until I added this
 		Map<String, Object> headerMap = new HashMap<>();
 		headerMap.put(headerKey, headerVal);
-		Context.set(Context.REQUEST, requestVal);
-		Context.set(Context.HEADERS, headerMap);
+		Context.put(Context.REQUEST, requestVal);
+		Context.put(Context.HEADERS, headerMap);
 
 		CompletableFuture<FullResponse> respFuture = http2Socket.send(req);
 		ResponseWrapperHttp2 response = ResponseExtract.waitAndWrap(respFuture);

@@ -52,7 +52,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private TemplateApi templatingService;
-	private CompressionChunkingHandle handle;
+	protected CompressionChunkingHandle handle;
 	private ResponseCreator responseCreator;
 	private FutureHelper futureUtil;
 	private ReverseRoutes reverseRoutes;

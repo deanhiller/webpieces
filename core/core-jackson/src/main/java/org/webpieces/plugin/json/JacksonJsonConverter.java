@@ -73,6 +73,10 @@ public class JacksonJsonConverter {
 	}
 	
 	private <T> T convertStrings(T obj, boolean toEmptyStr) {
+		if (obj == null) {
+			return null;
+		}
+
 		Class c = obj.getClass();
 		Method[] methods = c.getMethods();
 		for(Method m : methods) {

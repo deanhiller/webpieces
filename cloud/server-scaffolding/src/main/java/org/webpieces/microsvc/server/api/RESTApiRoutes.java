@@ -1,20 +1,29 @@
 package org.webpieces.microsvc.server.api;
 
-import com.webpieces.http2.api.streaming.ResponseStreamHandle;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.StringJoiner;
+import java.util.regex.Pattern;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.microsvc.api.Path;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.Routes;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.util.StringJoiner;
-
 public class RESTApiRoutes implements Routes {
+
+    private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);
 
     private static final Logger log = LoggerFactory.getLogger(RESTApiRoutes.class);
 
@@ -22,14 +31,12 @@ public class RESTApiRoutes implements Routes {
     private final Class<?> controller;
 
     public RESTApiRoutes(Class<?> api, Class<?> controller) {
-
         if (!api.isInterface()) {
             throw new IllegalArgumentException("api must be an interface and was not");
         }
 
         this.api = api;
         this.controller = controller;
-
     }
 
     @Override
@@ -46,26 +53,22 @@ public class RESTApiRoutes implements Routes {
     }
 
     private void configurePath(RouteBuilder bldr, Method method) {
+
         String name = method.getName();
-        Path annotation = method.getAnnotation(Path.class);
-
-        if (annotation == null) {
-            throw new IllegalArgumentException("The @Path annotation is missing from method=" + method);
-        }
-
-        String path = annotation.value();
-        HttpMethod httpMethod = HttpMethod.valueOf(annotation.method().getMethod());
+        String path = getPath(method);
+        HttpMethod httpMethod = getHttpMethod(method);
 
         if (method.getParameterCount() != 1 && httpMethod.equals(HttpMethod.POST)) {
             throw new IllegalArgumentException("The method on this API is invalid as it takes " + method.getParameterCount() + " and only 1 param is allowed.  method=" + method);
         }
 
-        if (method.getParameterTypes().length > 0 && ResponseStreamHandle.class.equals(method.getParameterTypes()[0])) {
-            bldr.addStreamRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
-        } else {
+//NEED to put a JsonStreamHandle on top of these instead of ResponseStreamHandle(though could allow both?)
+//        if (method.getParameterTypes().length > 0 && ResponseStreamHandle.class.equals(method.getParameterTypes()[0])) {
+//            bldr.addStreamRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
+//        } else {
             //We do not want to deploy to production exposing over HTTP
             bldr.addContentRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
-        }
+//        }
     }
 
     // Similar to validateApiConvention in PubSubServiceRoutes
@@ -74,7 +77,7 @@ public class RESTApiRoutes implements Routes {
         String methodName = method.getName();
 
         // If it's not POST, don't worry about it for now
-        if (!HttpMethod.valueOf(method.getAnnotation(Path.class).method().getMethod()).equals(HttpMethod.POST)) {
+        if (getHttpMethod(method) != HttpMethod.POST) {
             return;
         }
 
@@ -108,6 +111,92 @@ public class RESTApiRoutes implements Routes {
         if (errorResponse.length() != 0) {
             throw new IllegalArgumentException(errorResponse.toString());
         }
+
+    }
+
+    protected String getPath(Method method) {
+
+        Path path = method.getAnnotation(Path.class);
+
+        if(path == null) {
+            throw new IllegalArgumentException("The @Path annotation is missing from method=" + method);
+        }
+
+        String pathValue = getFullPath(method);
+
+        if((pathValue == null) || pathValue.isBlank()) {
+            throw new IllegalStateException("Invalid value for @Path annotation on " + method.getName() + ": " + pathValue);
+        }
+
+        return pathValue;
+
+    }
+
+    private String getFullPath(Method method) {
+
+        Path cPath = method.getDeclaringClass().getAnnotation(Path.class);
+        Path mPath = method.getAnnotation(Path.class);
+
+        String cPathValue = null;
+        String mPathValue = null;
+
+        if(cPath != null) {
+            cPathValue = cPath.value();
+        }
+
+        if(mPath != null) {
+            mPathValue = mPath.value();
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if(cPathValue != null) {
+            sb.append(cPathValue);
+        }
+
+        if(mPathValue != null) {
+            sb.append(mPathValue);
+        }
+
+        String path = REGEX_SLASH_MERGE.matcher(sb.toString().trim()).replaceAll("/");
+
+        return path;
+
+    }
+
+    protected HttpMethod getHttpMethod(Method method) {
+
+        Path path = method.getAnnotation(Path.class);
+
+        if(path == null) {
+            throw new IllegalArgumentException("The @Path annotation is missing from method=" + method);
+        }
+
+        HttpMethod httpMethod;
+
+        if(method.getAnnotation(DELETE.class) != null) {
+            httpMethod = HttpMethod.DELETE;
+        }
+        else if(method.getAnnotation(GET.class) != null) {
+            httpMethod = HttpMethod.GET;
+        }
+        else if(method.getAnnotation(OPTIONS.class) != null) {
+            httpMethod = HttpMethod.OPTIONS;
+        }
+        else if(method.getAnnotation(PATCH.class) != null) {
+            httpMethod = HttpMethod.PATCH;
+        }
+        else if(method.getAnnotation(POST.class) != null) {
+            httpMethod = HttpMethod.POST;
+        }
+        else if(method.getAnnotation(PUT.class) != null) {
+            httpMethod = HttpMethod.PUT;
+        }
+        else {
+            throw new IllegalStateException("Missing or unsupported HTTP method annotation on " + method.getName() + ": Must be @DELETE,@GET,@OPTIONS,@PATCH,@POST,@PUT");
+        }
+
+        return httpMethod;
 
     }
 
