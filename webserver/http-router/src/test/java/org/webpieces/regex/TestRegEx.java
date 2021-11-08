@@ -5,8 +5,8 @@ import java.util.regex.Pattern;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.webpieces.router.impl.routebldr.RegExResult;
-import org.webpieces.router.impl.routebldr.RegExUtil;
+import org.webpieces.util.urlparse.RegExResult;
+import org.webpieces.util.urlparse.RegExUtil;
 
 public class TestRegEx {
 

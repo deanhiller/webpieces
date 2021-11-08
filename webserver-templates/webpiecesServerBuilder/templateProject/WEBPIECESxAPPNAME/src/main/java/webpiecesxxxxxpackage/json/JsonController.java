@@ -114,6 +114,17 @@ public class JsonController implements SaveApi, ClientApi {
 		return CompletableFuture.completedFuture(resp);
 	}
 
+	@Override
+	@Jackson
+	public CompletableFuture<MethodResponse> method(String id, int number) {
+		return CompletableFuture.completedFuture(new MethodResponse(number, id));
+	}
+
+	@Override
+	public CompletableFuture<PostTestResponse> postTest(String id, int number, @Jackson PostTestRequest request) {
+		return CompletableFuture.completedFuture(new PostTestResponse(id, number, request.getSomething()));
+	}
+
 	private static class RequestStreamEchoWriter implements StreamWriter, StreamRef {
 
 		private AtomicInteger total = new AtomicInteger();

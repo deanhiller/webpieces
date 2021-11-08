@@ -2,6 +2,7 @@ package org.webpieces.microsvc.client.impl;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -17,9 +18,12 @@ import javax.ws.rs.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.microsvc.api.HttpMethod;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.microsvc.api.NotEvolutionProof;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
+import org.webpieces.util.urlparse.RegExResult;
+import org.webpieces.util.urlparse.RegExUtil;
 
 public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
@@ -44,10 +48,6 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         clientAssertions.throwIfCannotGoRemote();
-
-        if(args.length != 1) {
-            throw new IllegalArgumentException("ALL clients should have EXACTLY 1 argument.  no more, no less.  Read GRPC as to why they do this too!!!");
-        }
 
         Path annotation = method.getAnnotation(Path.class);
 
@@ -79,16 +79,52 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
             throw new IllegalStateException("Context.HEADERS is not a Map<String, String> and is setup incorrectly");
         }
 
-        log.info("Sending http request to: " + addr.getHostName() + path);
+        log.info("Sending http request to: " + addr.getHostName()+":"+addr.getPort() + path);
 
-        Endpoint endpoint = new Endpoint(addr, httpMethod.getMethod(), path);
+        Object body = args[0];
+        if(method.getAnnotation(NotEvolutionProof.class) != null) {
+            path = transformPath(path, method, args);
+            body = findBody(method, args);
+        }
 
-        return clientHelper.sendHttpRequest(method, args[0], endpoint, retType)
+        Endpoint endpoint = new Endpoint(addr, httpMethod.getCode(), path);
+
+        return clientHelper.sendHttpRequest(method, body, endpoint, retType)
             .thenApply(retVal -> {
                 Context.restoreContext(context);
                 return retVal;
             });
 
+    }
+
+    private String transformPath(String path, Method method, Object[] args) {
+        String methodName = method.getName();
+        String requestName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1)+"Request";
+
+        Parameter[] parameters = method.getParameters();
+        for(int i = 0; i < args.length; i++) {
+            Parameter param = parameters[i];
+            if(param.getType().getSimpleName().equals(requestName))
+                continue; // skip the body
+
+            String name = param.getName();
+            String variable = "{"+name+"}";
+            if(!path.contains(variable))
+                throw new IllegalArgumentException("Can't find '"+variable+"' in the path to bind in the url");
+            path = path.replace("{"+name+"}", args[i]+"");
+        }
+
+        return path;
+    }
+
+    private Object findBody(Method method, Object[] args) {
+        String methodName = method.getName();
+        String requestName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1)+"Request";
+        for(Object arg : args) {
+            if(arg.getClass().getSimpleName().equals(requestName))
+                return arg;
+        }
+        return null;
     }
 
     protected String getPath(Method method) {
