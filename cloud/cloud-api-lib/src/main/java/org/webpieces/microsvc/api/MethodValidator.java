@@ -41,22 +41,22 @@ public class MethodValidator {
             validatePostPutMethods(api, method, methodName, pascalMethodName, errorResponse);
         }
 
-        NotEvolutionProof annotation = method.getAnnotation(NotEvolutionProof.class);
+        NotEvolutionProof annotation = api.getAnnotation(NotEvolutionProof.class);
         if(annotation == null) {
             Class<?>[] paramTypes = method.getParameterTypes();
             String requestName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1)+"Request";
             if(paramTypes.length != 1) {
-                errorResponse.add(api.getName() + "::" + methodName + " must add @NotEvolutionProof annotation " +
-                        "or must only have 1 parameter of '"+requestName+"' to be prepared for clean evolution");
+                errorResponse.add(api.getName() + " must add @NotEvolutionProof annotation " +
+                        "or "+methodName+" must only have 1 parameter of '"+requestName+"' to be prepared for clean evolution");
             } else if(!paramTypes[0].getSimpleName().equals(requestName)) {
-                errorResponse.add(api.getName() + "::" + methodName + " must take 1 parameter called '"+requestName+"' and does not");
+                errorResponse.add(api.getName() + "::" + methodName + " must take 1 parameter called '"+requestName+"' and does not" +
+                        " or you can add @NotEvolutionProof to create an http type REST api that is not very evolution proof");
             }
         }
 
         if (errorResponse.length() != 0) {
             throw new IllegalArgumentException(errorResponse.toString());
         }
-
     }
 
     private static void validatePostPutMethods(Class<?> api, Method method, String methodName, String pascalMethodName, StringJoiner errorResponse) {

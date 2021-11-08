@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  *  proliferation of methods
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ElementType.TYPE})
 public @interface NotEvolutionProof {
 
 }

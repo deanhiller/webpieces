@@ -1,22 +1,17 @@
 package org.webpieces.microsvc.server.api;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.util.StringJoiner;
-import java.util.regex.Pattern;
-
-import javax.ws.rs.Path;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.microsvc.api.MethodValidator;
-import org.webpieces.microsvc.api.NotEvolutionProof;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.Routes;
+
+import javax.ws.rs.Path;
+import java.lang.reflect.Method;
+import java.util.regex.Pattern;
 
 public class RESTApiRoutes implements Routes {
 

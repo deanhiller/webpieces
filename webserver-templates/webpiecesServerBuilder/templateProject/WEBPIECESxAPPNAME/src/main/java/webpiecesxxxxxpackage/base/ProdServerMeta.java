@@ -22,9 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
 import webpiecesxxxxxpackage.basesvr.YourGlobalModule;
-import webpiecesxxxxxpackage.json.JsonController;
-import webpiecesxxxxxpackage.json.JsonRoutes;
-import webpiecesxxxxxpackage.json.SaveApi;
+import webpiecesxxxxxpackage.json.*;
 import webpiecesxxxxxpackage.web.login.LoginRoutes;
 import webpiecesxxxxxpackage.web.main.MainRoutes;
 import webpiecesxxxxxpackage.web.secure.crud.CrudRoutes;
@@ -67,6 +65,7 @@ public class ProdServerMeta implements WebAppMeta {
     public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
 				new RESTApiRoutes(SaveApi.class, JsonController.class),
+				new RESTApiRoutes(ExampleRestAPI.class, JsonRESTController.class),
 				new MainRoutes(),
 				//The Controller package regex is webpiecesxxxxxpackage.web.secure\..* so that we match webpiecesxxxxxpackage.web.secure.* Controllers 
 				new LoginRoutes("/webpiecesxxxxxpackage/web/login/AppLoginController", "webpiecesxxxxxpackage.web.secure\\..*", "password"),
