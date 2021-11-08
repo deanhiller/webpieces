@@ -4,13 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.microsvc.api.MethodValidator;
+import org.webpieces.router.api.routebldr.DefaultCorsProcessor;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.impl.routebldr.CurrentRoutes;
 
 import javax.ws.rs.Path;
 import java.lang.reflect.Method;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class RESTApiRoutes implements Routes {
@@ -21,8 +24,17 @@ public class RESTApiRoutes implements Routes {
 
     private final Class<?> api;
     private final Class<?> controller;
+    private CorsConfig corsConfig;
 
     public RESTApiRoutes(Class<?> api, Class<?> controller) {
+        this(api, controller, null);
+    }
+
+    /**
+     * @param corsConfig - enable CORS by passing in CorsConfig
+     */
+    public RESTApiRoutes(Class<?> api, Class<?> controller, CorsConfig corsConfig) {
+        this.corsConfig = corsConfig;
         if (!api.isInterface()) {
             throw new IllegalArgumentException("api must be an interface and was not");
         }
@@ -35,6 +47,21 @@ public class RESTApiRoutes implements Routes {
     public void configure(DomainRouteBuilder domainRouteBldr) {
         RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
         Method[] methods = api.getMethods();
+
+        if (corsConfig != null) {
+            Set<String> domains = Set.of(corsConfig.getDomains());
+            Set<String> allowedRequestHeaders = Set.of(corsConfig.getAllowedRequestHeaders());
+            Set<String> exposedResponseHeaders = Set.of(corsConfig.getExposedResponseHeaders());
+            CurrentRoutes.setProcessCorsHook(
+                    new DefaultCorsProcessor(
+                            domains,
+                            allowedRequestHeaders,
+                            exposedResponseHeaders,
+                            corsConfig.isAllowCredentials(),
+                            corsConfig.getExpiredTimeSeconds()
+                    )
+            );
+        }
 
         for (Method m : methods) {
             configurePath(bldr, m);
