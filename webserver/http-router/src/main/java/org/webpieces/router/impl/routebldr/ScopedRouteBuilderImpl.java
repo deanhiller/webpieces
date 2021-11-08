@@ -35,6 +35,8 @@ import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.router.impl.services.SvcProxyForContent;
 import org.webpieces.router.impl.services.SvcProxyForHtml;
 import org.webpieces.util.futures.FutureHelper;
+import org.webpieces.util.urlparse.RegExResult;
+import org.webpieces.util.urlparse.RegExUtil;
 
 public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRouteBuilder {
 

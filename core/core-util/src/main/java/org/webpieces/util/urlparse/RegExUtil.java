@@ -1,4 +1,4 @@
-package org.webpieces.router.impl.routebldr;
+package org.webpieces.util.urlparse;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

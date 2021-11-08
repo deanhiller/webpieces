@@ -1,5 +1,9 @@
 package org.webpieces.util.context;
 
+/**
+ * Use this class to throw exceptions if developers are accidentally making remote calls while in
+ * a transaction(ie. that is very bad as it locks up the database)
+ */
 public interface ClientAssertions {
 
     /**
