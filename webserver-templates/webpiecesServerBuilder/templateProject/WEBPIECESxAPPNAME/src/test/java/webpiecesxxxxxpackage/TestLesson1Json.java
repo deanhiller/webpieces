@@ -47,7 +47,7 @@ public class TestLesson1Json extends FeatureTest {
 	public void testPathParams() throws ExecutionException, InterruptedException, TimeoutException {
 		String id = "asdf";
 		int number = 567;
-		MethodResponse methodResponse = dataSaveApi.method(id, number).get(5, TimeUnit.SECONDS);
+		MethodResponse methodResponse = restAPI.method(id, number).get(5, TimeUnit.SECONDS);
 
 		Assert.assertEquals(id, methodResponse.getId());
 		Assert.assertEquals(number, methodResponse.getNumber());
@@ -58,7 +58,7 @@ public class TestLesson1Json extends FeatureTest {
 		String id = "asdf1";
 		int number = 5671;
 		String something = "qwerasdfqewr";
-		PostTestResponse methodResponse = dataSaveApi.postTest(id, number, new PostTestRequest(something)).get(5, TimeUnit.SECONDS);
+		PostTestResponse methodResponse = restAPI.postTest(id, number, new PostTestRequest(something)).get(5, TimeUnit.SECONDS);
 
 		Assert.assertEquals(id, methodResponse.getId());
 		Assert.assertEquals(number, methodResponse.getNumber());

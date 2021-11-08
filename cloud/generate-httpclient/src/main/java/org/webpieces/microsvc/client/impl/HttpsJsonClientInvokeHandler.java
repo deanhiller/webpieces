@@ -1,5 +1,13 @@
 package org.webpieces.microsvc.client.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.util.context.ClientAssertions;
+import org.webpieces.util.context.Context;
+
+import javax.inject.Inject;
+import javax.ws.rs.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -8,22 +16,6 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.microsvc.api.NotEvolutionProof;
-import org.webpieces.util.context.ClientAssertions;
-import org.webpieces.util.context.Context;
-import org.webpieces.util.urlparse.RegExResult;
-import org.webpieces.util.urlparse.RegExUtil;
 
 public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
@@ -33,6 +25,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
     private final HttpsJsonClient clientHelper;
     private ClientAssertions clientAssertions;
     private InetSocketAddress addr;
+    private boolean hasUrlParams;
 
     @Inject
     public HttpsJsonClientInvokeHandler(HttpsJsonClient clientHelper, ClientAssertions clientAssertions) {
@@ -40,8 +33,9 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         this.clientAssertions = clientAssertions;
     }
 
-    public void setTargetAddress(InetSocketAddress addr) {
+    public void initialize(InetSocketAddress addr, boolean hasUrlParams) {
         this.addr = addr;
+        this.hasUrlParams = hasUrlParams;
     }
 
     @Override
@@ -82,7 +76,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         log.info("Sending http request to: " + addr.getHostName()+":"+addr.getPort() + path);
 
         Object body = args[0];
-        if(method.getAnnotation(NotEvolutionProof.class) != null) {
+        if(hasUrlParams) {
             path = transformPath(path, method, args);
             body = findBody(method, args);
         }
