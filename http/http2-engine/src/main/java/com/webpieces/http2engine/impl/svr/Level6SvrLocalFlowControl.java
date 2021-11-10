@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
@@ -17,7 +17,7 @@ public class Level6SvrLocalFlowControl extends Level6LocalFlowControl {
 		notify = notifyListener;
 	}
 
-	public CompletableFuture<Void> fireHeadersToClient(ServerStream stream, Http2Request payload) {
+	public XFuture<Void> fireHeadersToClient(ServerStream stream, Http2Request payload) {
 		return notify.fireRequestToApp(stream, payload);
 	}
 

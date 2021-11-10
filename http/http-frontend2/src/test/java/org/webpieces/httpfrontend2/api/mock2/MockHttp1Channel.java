@@ -5,7 +5,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -56,14 +56,14 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 	}
 	
 	@Override
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
 	}
 
 	public void sendHexToSvr(String hex) {
 		byte[] bytes = Hex.parseHexBinary(hex.replaceAll("\\s+",""));
 		ByteBuffer buf = ByteBuffer.wrap(bytes);
-		CompletableFuture<Void> fut = listener.incomingData(this, buf);
+		XFuture<Void> fut = listener.incomingData(this, buf);
 		try {
 			fut.get(2, TimeUnit.SECONDS);
 		} catch(ExecutionException | InterruptedException | TimeoutException e) {
@@ -72,7 +72,7 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 	}
 	
 	public void sendToSvr(HttpPayload msg) {
-		CompletableFuture<Void> fut = sendToSvrAsync(msg);
+		XFuture<Void> fut = sendToSvrAsync(msg);
 		try {
 			fut.get(2, TimeUnit.SECONDS);
 		} catch(ExecutionException | InterruptedException | TimeoutException e) {
@@ -80,25 +80,25 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 		}
 	}
 
-	public CompletableFuture<Void> sendToSvrAsync(HttpPayload msg) {
+	public XFuture<Void> sendToSvrAsync(HttpPayload msg) {
 		if(listener == null)
 			throw new IllegalStateException("Not connected so we cannot write back");
 		ByteBuffer buf = parser.marshalToByteBuffer(marshalState, msg);
-		CompletableFuture<Void> fut = listener.incomingData(this, buf);
+		XFuture<Void> fut = listener.incomingData(this, buf);
 		return fut;
 	}
 	
-	public CompletableFuture<Void> sendToSvr(ByteBuffer buf) {
+	public XFuture<Void> sendToSvr(ByteBuffer buf) {
 		return listener.incomingData(this, buf);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer b) {		
+	public XFuture<Void> write(ByteBuffer b) {
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		parser.parse(memento, data);
 		List<HttpPayload> payloads = memento.getParsedMessages();
-		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, payloads);
+		return (XFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, payloads);
 	}
 
 	public HttpPayload getFrameAndClear() {
@@ -120,14 +120,14 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 		return retVal.collect(Collectors.toList());
 	}
 	
-	public void setIncomingFrameDefaultReturnValue(CompletableFuture<Void> future) {
+	public void setIncomingFrameDefaultReturnValue(XFuture<Void> future) {
 		super.setDefaultReturnValue(Method.INCOMING_FRAME, future);
 	}
 	
 	
 	
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		isClosed = true;
 		return null;
 	}
@@ -168,8 +168,8 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Void> bind(SocketAddress addr) {
-		return CompletableFuture.completedFuture(null);
+	public XFuture<Void> bind(SocketAddress addr) {
+		return XFuture.completedFuture(null);
 	}
 
 	@Override

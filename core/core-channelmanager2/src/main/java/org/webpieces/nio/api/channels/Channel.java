@@ -3,7 +3,7 @@ package org.webpieces.nio.api.channels;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.handlers.DataListener;
 
@@ -43,7 +43,7 @@ public interface Channel extends RegisterableChannel {
 	/**
 	 * Connects and registers a DataListener that will be notified of all incoming data. 
      * 
-     * NOTE: We do not have a CompletableFuture read() as that can cause result in new gen objects that should
+     * NOTE: We do not have a XFuture read() as that can cause result in new gen objects that should
      * never end up in old gen being pulled to old gen.  You can backpressure incoming data using unregisterForReads()
      * and registerForReads() such that data is not read from the socket anymore if you desire on that specific 
      * channel
@@ -60,9 +60,9 @@ public interface Channel extends RegisterableChannel {
 	 * @param listener Once connected, this is the listener that will start receiving data
 	 * @return
 	 */
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener);
-	public CompletableFuture<Void> write(ByteBuffer b);
-	public CompletableFuture<Void> close();
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener);
+	public XFuture<Void> write(ByteBuffer b);
+	public XFuture<Void> close();
     
     /**
      * Gets the remote address the channel is communicating with.

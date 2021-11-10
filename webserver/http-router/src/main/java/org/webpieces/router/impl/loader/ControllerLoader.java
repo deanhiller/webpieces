@@ -4,7 +4,7 @@ package org.webpieces.router.impl.loader;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -57,19 +57,19 @@ public class ControllerLoader {
 		Method controllerMethod = loadedController.getControllerMethod();
 		
 		Class<?> clazz = controllerMethod.getReturnType();
-		if(CompletableFuture.class.isAssignableFrom(clazz)) {
+		if(XFuture.class.isAssignableFrom(clazz)) {
 			Type genericReturnType = controllerMethod.getGenericReturnType();
 			ParameterizedType t = (ParameterizedType) genericReturnType;
 			Type type2 = t.getActualTypeArguments()[0];
 			if(!(type2 instanceof Class))
-				throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'CompletableFuture<Render>' "
+				throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'XFuture<Render>' "
 						+ "for this method(and did not)="+controllerMethod);
 			@SuppressWarnings("rawtypes")
 			Class<?> type = (Class) type2;
 			if(!Render.class.isAssignableFrom(type))
-				throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'CompletableFuture<Render>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
+				throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'XFuture<Render>' not 'XFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
 		} else if(!Render.class.isAssignableFrom(clazz))
-			throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'CompletableFuture<Render>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
+			throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'XFuture<Render>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 	}
 	
 	public BinderAndLoader loadContentController(Injector injector, RouteInfo routeInfo) {
@@ -106,32 +106,32 @@ public class ControllerLoader {
 	private void htmlPreconditionCheck(Object meta, Method controllerMethod, boolean isPostOnly) {
 		if(isPostOnly) {
 			Class<?> clazz = controllerMethod.getReturnType();
-			if(CompletableFuture.class.isAssignableFrom(clazz)) {
+			if(XFuture.class.isAssignableFrom(clazz)) {
 				Type genericReturnType = controllerMethod.getGenericReturnType();
 				ParameterizedType t = (ParameterizedType) genericReturnType;
 				Type type2 = t.getActualTypeArguments()[0];
 				if(!(type2 instanceof Class))
-					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' for this method="+controllerMethod);
+					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'XFuture<Redirect>' for this method="+controllerMethod);
 				@SuppressWarnings("rawtypes")
 				Class<?> type = (Class) type2;
 				if(!Redirect.class.isAssignableFrom(type))
-					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
+					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'XFuture<Redirect>' not 'XFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
 			} else if(!Redirect.class.isAssignableFrom(clazz))
-				throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
+				throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'XFuture<Redirect>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 		} else {
 			Class<?> clazz = controllerMethod.getReturnType();
-			if(CompletableFuture.class.isAssignableFrom(clazz)) {
+			if(XFuture.class.isAssignableFrom(clazz)) {
 				Type genericReturnType = controllerMethod.getGenericReturnType();
 				ParameterizedType t = (ParameterizedType) genericReturnType;
 				Type type2 = t.getActualTypeArguments()[0];
 				if(!(type2 instanceof Class))
-					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' for this method(and did not)="+controllerMethod);
+					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'XFuture<Action>' for this method(and did not)="+controllerMethod);
 				@SuppressWarnings("rawtypes")
 				Class<?> type = (Class) type2;
 				if(!Action.class.isAssignableFrom(type))
-					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
+					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'XFuture<Action>' not 'XFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
 			} else if(!Action.class.isAssignableFrom(clazz))
-				throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
+				throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'XFuture<Action>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 		}
 	}
 

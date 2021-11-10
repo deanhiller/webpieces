@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -41,7 +41,7 @@ public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements S
 		this.finalLayer = finalLayer;
 	}
 	
-	public CompletableFuture<Void> sendInitializationToSocket() {
+	public XFuture<Void> sendInitializationToSocket() {
 		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
 		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
 		//just connect more sockets
@@ -52,7 +52,7 @@ public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements S
 				.thenCompose( v -> super.sendSettingsToSocket());
 	}
 	
-	public CompletableFuture<Stream> sendRequestToSocket(Http2Request headers, ResponseStreamHandle responseListener) {
+	public XFuture<Stream> sendRequestToSocket(Http2Request headers, ResponseStreamHandle responseListener) {
 		//This gets tricky, BUT must use the maxConcurrent permit queue first, THEN the serializer permit queue
 		return maxConcurrentQueue.runRequest( () -> {
 			int val = acquiredCnt.incrementAndGet();

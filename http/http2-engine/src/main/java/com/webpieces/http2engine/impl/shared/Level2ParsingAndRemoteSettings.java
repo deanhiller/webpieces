@@ -1,7 +1,7 @@
 package com.webpieces.http2engine.impl.shared;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,12 +68,12 @@ public abstract class Level2ParsingAndRemoteSettings {
 	 * @return 
 	 * @return 
 	 */
-	public CompletableFuture<Void> parse(DataWrapper newData) {
-		CompletableFuture<Void> future;
+	public XFuture<Void> parse(DataWrapper newData) {
+		XFuture<Void> future;
 		try {
 			future = parseImpl(newData);
 		} catch(Throwable t) {
-			future = new CompletableFuture<Void>();
+			future = new XFuture<Void>();
 			future.completeExceptionally(t);
 		}
 		
@@ -118,7 +118,7 @@ public abstract class Level2ParsingAndRemoteSettings {
 		return null;
 	}
 	
-	public CompletableFuture<Void> parseImpl(DataWrapper newData) {
+	public XFuture<Void> parseImpl(DataWrapper newData) {
 		
 		parsingState = lowLevelParser.unmarshal(parsingState, newData);
 		
@@ -126,7 +126,7 @@ public abstract class Level2ParsingAndRemoteSettings {
 		
 		//All the below futures must be chained with previous ones in case previous ones are not
 		//done which will serialize it all to be in sequence
-		CompletableFuture<Void> future = parsingState.getProcessFuture();
+		XFuture<Void> future = parsingState.getProcessFuture();
 		
 		for(Http2Msg lowLevelFrame : parsedMessages) {
 			//VERY IMPORTANT: Writing the code like this would slam through calling process N times
@@ -136,7 +136,7 @@ public abstract class Level2ParsingAndRemoteSettings {
 			//In these 2 lines of code, processCorrectly is CALLED N times RIGHT NOW
 			//The code below this only calls them right now IF AND ONLY IF the client returns
 			//a completed future each time!!!
-//			CompletableFuture<Void> messageFuture = process(lowLevelFrame);
+//			XFuture<Void> messageFuture = process(lowLevelFrame);
 //			allFutures = allFutures.thenCompose( f -> messageFuture);
 			
 			future = future.thenCompose( f -> process(lowLevelFrame));
@@ -147,11 +147,11 @@ public abstract class Level2ParsingAndRemoteSettings {
 		return future;
 	}
 
-	public CompletableFuture<Void> process(Http2Msg msg) {
+	public XFuture<Void> process(Http2Msg msg) {
 		if(streamsToDiscard.checkDiscard(msg.getStreamId()))
-			return CompletableFuture.completedFuture(null); //this is a stream that failed so discard frames for a bit
+			return XFuture.completedFuture(null); //this is a stream that failed so discard frames for a bit
 		
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
+		XFuture<Void> future = new XFuture<Void>();
 		try {
 			future = processImpl(msg);
 		} catch(Throwable e) {
@@ -161,7 +161,7 @@ public abstract class Level2ParsingAndRemoteSettings {
 		return future.handle((v, t) -> handleError(v, t));
 	}
 	
-	public CompletableFuture<Void> processImpl(Http2Msg msg) {
+	public XFuture<Void> processImpl(Http2Msg msg) {
 		if(log.isDebugEnabled())
 			if(log.isDebugEnabled())
 				log.debug(logId+"frame from socket="+msg);
@@ -190,12 +190,12 @@ public abstract class Level2ParsingAndRemoteSettings {
 		return processSpecific(msg);
 	}
 
-	protected abstract CompletableFuture<Void> processSpecific(Http2Msg msg);
+	protected abstract XFuture<Void> processSpecific(Http2Msg msg);
 
-	private CompletableFuture<Void> processHttp2SettingsFrame(SettingsFrame settings) {
+	private XFuture<Void> processHttp2SettingsFrame(SettingsFrame settings) {
 		if(settings.isAck()) {
 			log.info("server acked our settings frame");
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		} else {
 			log.info("applying remote settings frame");
 			

@@ -1,7 +1,7 @@
 package org.webpieces.http2client.impl;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +31,11 @@ public class Layer1Incoming implements DataListener {
 		this.socket = socket;
 	}
 
-	public CompletableFuture<Void> sendInitialFrames() {
+	public XFuture<Void> sendInitialFrames() {
 		return layer2.sendInitializationToSocket();
 	}
 	
-	public CompletableFuture<Void> sendPing() {
+	public XFuture<Void> sendPing() {
 		return layer2.sendPing();
 	}
 	
@@ -44,7 +44,7 @@ public class Layer1Incoming implements DataListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		if(log.isDebugEnabled())
 			log.debug(channel+"incoming data. size="+b.remaining());
 		DataWrapper data = dataGen.wrapByteBuffer(b);

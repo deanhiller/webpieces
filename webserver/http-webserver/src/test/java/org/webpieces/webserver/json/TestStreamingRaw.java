@@ -2,7 +2,10 @@ package org.webpieces.webserver.json;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+
+import org.junit.After;
+import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -53,10 +56,17 @@ public class TestStreamingRaw extends AbstractWebpiecesTest {
 		parser = HttpParserFactory.createStatefulParser("testParser", new SimpleMeterRegistry(), new TwoPools(new SimpleMeterRegistry()));
 	}
 
+	@After
+	public void teardown() {
+		//not exactly part of this test but checking for leak of server context into client
+		// (only in embedded modes does this occur)
+		Assert.assertEquals(0, Context.getContext().size());
+	}
+
 	@Test
 	public void testAsyncJsonGet() throws InterruptedException, ExecutionException {
 		MockChannel channel = new MockChannel();
-		CompletableFuture<DataListener> future = mgr.simulateHttpConnect(channel);
+		XFuture<DataListener> future = mgr.simulateHttpConnect(channel);
 		DataListener dataListener = future.get();
 
 		HttpFullRequest fullRequest = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/streaming");
@@ -77,19 +87,19 @@ public class TestStreamingRaw extends AbstractWebpiecesTest {
 		firstPacket.put(part1);
 		firstPacket.flip();
 		
-		CompletableFuture<Boolean> authFuture = new CompletableFuture<Boolean>();
+		XFuture<Boolean> authFuture = new XFuture<Boolean>();
 		mockAuth.addValueToReturn(authFuture);
 		
 		//Feed in request with content-length AND part of the body as well...
-		CompletableFuture<Void> fut1 = dataListener.incomingData(channel, firstPacket);
+		XFuture<Void> fut1 = dataListener.incomingData(channel, firstPacket);
 
 		//Feed in more BEFORE authFuture is complete(this was the bug, ie. race condition)
 		ByteBuffer buf2 = ByteBuffer.allocate(part2.length);
 		buf2.put(part2);
 		buf2.flip();
-		CompletableFuture<Void> fut2 = dataListener.incomingData(channel, buf2);
+		XFuture<Void> fut2 = dataListener.incomingData(channel, buf2);
 		
-		CompletableFuture<StreamWriter> streamWriterFuture = new CompletableFuture<StreamWriter>();
+		XFuture<StreamWriter> streamWriterFuture = new XFuture<StreamWriter>();
 		mockStreamClient.addStreamWriter(streamWriterFuture );
 		authFuture.complete(true); //complete it
 		

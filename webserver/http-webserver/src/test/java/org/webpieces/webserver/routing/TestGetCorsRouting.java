@@ -20,7 +20,7 @@ import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -43,7 +43,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization", "asfsf");
 		HttpFullRequest req = Requests.createCorsRequestCookie(CorsForTwoDomains.DOMAIN1, "/content", accessHeaders, KnownHttpMethod.PUT, cookieValue);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -56,7 +56,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization", "asfsf");
 		HttpFullRequest req = Requests.createCorsRequestCookie(CorsForTwoDomains.DOMAIN1, "/cookie", accessHeaders, KnownHttpMethod.GET, cookieValue);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -68,7 +68,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization");
 		HttpFullRequest req = Requests.createCorsRequest("http://notallowed.domain.com", "/noMethodsSupportCors", accessHeaders, KnownHttpMethod.PUT);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -80,7 +80,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization");
 		HttpFullRequest req = Requests.createCorsRequest("http://notallowed.domain.com", "/noMethodsSupportCors", accessHeaders, KnownHttpMethod.GET);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -92,7 +92,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization", "Content-Type");
 		HttpFullRequest req = Requests.createCorsRequest("http://notallowed.domain.com", "/content", accessHeaders, KnownHttpMethod.PUT);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -104,7 +104,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization");
 		HttpFullRequest req = Requests.createCorsRequest(CorsForTwoDomains.DOMAIN1, "/content", accessHeaders, KnownHttpMethod.POST);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -116,7 +116,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization", "asfsf");
 		HttpFullRequest req = Requests.createCorsRequest(CorsForTwoDomains.DOMAIN1, "/content", accessHeaders, KnownHttpMethod.PUT);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -138,7 +138,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization", "qwerewr");
 		HttpFullRequest req = Requests.createCorsRequest(CorsForTwoDomains.DOMAIN_WITH_PORT, "/content", accessHeaders, KnownHttpMethod.PUT);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -156,7 +156,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization");
 		HttpFullRequest req = Requests.createCorsRequest(CorsForTwoDomains.DOMAIN1, "/content2", accessHeaders, KnownHttpMethod.POST);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -172,7 +172,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization", "Content-Type", "NotAllowedHeader");
 		HttpFullRequest req = Requests.createCorsRequest(fromDomain, "/allDomains", accessHeaders, KnownHttpMethod.POST);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -185,7 +185,7 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 		List<String> accessHeaders = List.of("Authorization", "Content-Type");
 		HttpFullRequest req = Requests.createCorsRequest(fromDomain, "/allDomains", accessHeaders, KnownHttpMethod.POST);
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 

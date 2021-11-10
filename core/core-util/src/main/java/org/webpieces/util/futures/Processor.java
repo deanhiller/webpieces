@@ -1,8 +1,8 @@
 package org.webpieces.util.futures;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public interface Processor<T> {
 
-	public CompletableFuture<Void> process(T item);
+	public XFuture<Void> process(T item);
 }

@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -85,23 +85,23 @@ public abstract class BasChannelImpl
 	protected abstract int writeImpl(ByteBuffer b);
    
 	@Override
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		this.dataListener = listener;
 		
 		if(isRecording) 
 			dataListener = new RecordingDataListener("singleThreaded-", listener);
 		
-		CompletableFuture<Channel> future = connectImpl(addr);
+		XFuture<Channel> future = connectImpl(addr);
 		return future.thenCompose(v -> {
 			channelState = ChannelState.CONNECTED;
 			return registerForReads(dataListener);
 		});
 	}
 	
-    protected abstract CompletableFuture<Channel> connectImpl(SocketAddress addr);
+    protected abstract XFuture<Channel> connectImpl(SocketAddress addr);
 
 	private void unqueueAndFailWritesThenClose(CloseRunnable action) {
-    	List<CompletableFuture<Void>> promises;
+    	List<XFuture<Void>> promises;
     	synchronized(this) { //put here for emphasis that we are synchronizing here but not below
 			promises = failAllWritesInQueue();
     	}
@@ -114,7 +114,7 @@ public abstract class BasChannelImpl
     	//registerForWritesOrClose();
     	
     	//notify clients outside the synchronization block!!!
-		for(CompletableFuture<Void> promise : promises) {
+		for(XFuture<Void> promise : promises) {
     		log.info("WRITES outstanding while close was called, notifying client through his failure method of the exception");
     		//we only incur the cost of Throwable.fillInStackTrace() if we will use this exception
     		//(it's called in the Throwable constructor) so we don't do this on every close channel
@@ -126,7 +126,7 @@ public abstract class BasChannelImpl
     }
 
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer b) {
+	public XFuture<Void> write(ByteBuffer b) {
 		if(b.remaining() == 0)
 			throw new IllegalArgumentException(this+"buffer has no data");
 		else if(!selMgr.isRunning())
@@ -154,11 +154,11 @@ public abstract class BasChannelImpl
 				});
 	}
 	
-	private CompletableFuture<Void> writeSynchronized(ByteBuffer b) {
+	private XFuture<Void> writeSynchronized(ByteBuffer b) {
 		
 		//I feel like there is a bit too much in this sync block BUT this is also a complex problem and
 		//easy to get wrong.
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
+		XFuture<Void> future = new XFuture<Void>();
 		synchronized (writeLock ) {
 			if(!inDelayedWriteMode) {
 				int totalToWriteOut = b.remaining();
@@ -172,7 +172,7 @@ public abstract class BasChannelImpl
 				} else {
 					if(log.isTraceEnabled())
 						log.trace(this+" wrote bytes on client thread");
-					return CompletableFuture.completedFuture(null);
+					return XFuture.completedFuture(null);
 				}
 			}
 
@@ -192,8 +192,8 @@ public abstract class BasChannelImpl
 
 	//synchronized with writeAll as both try to go through every element in the queue
 	//while most of the time there will be no contention(only on the close do we hit this)
-	private synchronized List<CompletableFuture<Void>> failAllWritesInQueue() {
-		List<CompletableFuture<Void>> copy = new ArrayList<>();
+	private synchronized List<XFuture<Void>> failAllWritesInQueue() {
+		List<XFuture<Void>> copy = new ArrayList<>();
 		while(!dataToBeWritten.isEmpty()) {
 			WriteInfo runnable = dataToBeWritten.remove();
 			ByteBuffer buffer = runnable.getBuffer();
@@ -218,7 +218,7 @@ public abstract class BasChannelImpl
      *
      */
 	 void writeAll() {
-		List<CompletableFuture<Void>> finishedPromises = new ArrayList<>();
+		List<XFuture<Void>> finishedPromises = new ArrayList<>();
 		synchronized(writeLock) {
 	        if(dataToBeWritten.isEmpty())
 	        	throw new IllegalStateException(this+"bug, I am not sure this is possible..it shouldn't be...look into");
@@ -258,12 +258,12 @@ public abstract class BasChannelImpl
 		}
 		
         //MAKE SURE to notify clients outside of synchronization block so no deadlocks with their locks
-        for(CompletableFuture<Void> promise : finishedPromises) {
+        for(XFuture<Void> promise : finishedPromises) {
         	promise.complete(null);
         }
     }
 		
-    public CompletableFuture<Void> bind(SocketAddress addr) {
+    public XFuture<Void> bind(SocketAddress addr) {
         if(!(addr instanceof InetSocketAddress))
             throw new IllegalArgumentException(this+"Can only bind to InetSocketAddress addressses");
         if(apiLog.isTraceEnabled())
@@ -271,7 +271,7 @@ public abstract class BasChannelImpl
         
         try {
 			bindImpl(addr);
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		} catch (IOException e) {
 			throw new NioException(e);
 		}
@@ -301,12 +301,12 @@ public abstract class BasChannelImpl
      */
     protected abstract void bindImpl2(SocketAddress addr) throws IOException;
     
-    CompletableFuture<Void> registerForReads(DataListener l) {
+    XFuture<Void> registerForReads(DataListener l) {
     	this.dataListener = l;
     	return registerForReads(() -> true);
     }
     
-	public CompletableFuture<Void> registerForReads(Supplier<Boolean> shouldRegister) {
+	public XFuture<Void> registerForReads(Supplier<Boolean> shouldRegister) {
 		if(dataListener == null)
 			throw new IllegalArgumentException(this+"listener cannot be null");
 		else if(channelState != ChannelState.CONNECTED) {
@@ -326,7 +326,7 @@ public abstract class BasChannelImpl
 		}
 	}
 	
-	public CompletableFuture<Channel> unregisterForReads() {
+	public XFuture<Channel> unregisterForReads() {
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.unregisterForReads called");		
 		try {
@@ -348,11 +348,11 @@ public abstract class BasChannelImpl
 	}
     
     @Override
-    public CompletableFuture<Void> close() {
+    public XFuture<Void> close() {
         //To prevent the following exception, in the readImpl method, we
         //check if the socket is already closed, and if it is we don't read
         //and just return -1 to indicate socket closed.
-    	CompletableFuture<Void> future = new CompletableFuture<>();
+    	XFuture<Void> future = new XFuture<>();
     	try {
     		if(apiLog.isTraceEnabled())
 				apiLog.trace(this+"Basic.close called");

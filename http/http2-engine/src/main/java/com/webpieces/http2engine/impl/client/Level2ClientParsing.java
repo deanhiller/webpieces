@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2.api.dto.highlevel.Http2Push;
@@ -27,7 +27,7 @@ public class Level2ClientParsing extends Level2ParsingAndRemoteSettings {
 	}
 	
 	@Override
-	protected CompletableFuture<Void> processSpecific(Http2Msg msg) {
+	protected XFuture<Void> processSpecific(Http2Msg msg) {
 		if(msg instanceof Http2Response) {
 			return clientSyncro.sendResponseToApp((Http2Response) msg);
 		} else if(msg instanceof Http2Push) {

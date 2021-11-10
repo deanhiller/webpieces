@@ -3,7 +3,7 @@ package org.webpieces.asyncserver.impl;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -19,15 +19,15 @@ public class ProxyTCPChannel implements TCPChannel {
 		this.connectedChannels = connectedChannels;
 	}
 
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		return channel.connect(addr, listener);
 	}
 
-	public CompletableFuture<Void> write(ByteBuffer b) {
+	public XFuture<Void> write(ByteBuffer b) {
 		return channel.write(b);
 	}
 
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		//technically we are not closed until FutureOperation does it's callback, but remove because we also
 		//do not need to call close a second time...
 		connectedChannels.removeChannel(channel);
@@ -58,7 +58,7 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.getChannelId();
 	}
 	
-	public CompletableFuture<Void> bind(SocketAddress addr) {
+	public XFuture<Void> bind(SocketAddress addr) {
 		return channel.bind(addr);
 	}
 

@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class Level4ClientPreconditions extends Level4PreconditionChecks<ClientSt
 		this.clientSm = clientSm;
 	}
 
-	public CompletableFuture<Stream> createStreamAndSend(Http2Request frame, ResponseStreamHandle responseListener) {
+	public XFuture<Stream> createStreamAndSend(Http2Request frame, ResponseStreamHandle responseListener) {
 		ConnectionCancelled closedReason = clientSm.getClosedReason();
 		if(closedReason != null) {
 			return createExcepted(frame, "sending request", closedReason).thenApply((s) -> null);
@@ -37,19 +37,19 @@ public class Level4ClientPreconditions extends Level4PreconditionChecks<ClientSt
 	/**
 	 * Return Stream to release IF need to release the stream
 	 */
-	public CompletableFuture<Void> sendResponseToApp(Http2Response frame) {
+	public XFuture<Void> sendResponseToApp(Http2Response frame) {
 		if(clientSm.getClosedReason() != null) {
 			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		
 		return clientSm.sendResponse(frame);
 	}
 		
-	public CompletableFuture<Void> sendPushToApp(Http2Push fullPromise) {		
+	public XFuture<Void> sendPushToApp(Http2Push fullPromise) {
 		if(clientSm.getClosedReason() != null) {
 			log.info("ignoring incoming push="+fullPromise+" since socket is shutting down");
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		return clientSm.sendPushToApp(fullPromise);
 	}

@@ -1,7 +1,7 @@
 package org.webpieces.webserver.beans.app;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 
 import javax.annotation.Nullable;
@@ -43,8 +43,8 @@ public class BeansController {
 		return Actions.renderThis("user", "Dean Hiller");
 	}
 
-	public CompletableFuture<Action> pageParamAsync() {
-		CompletableFuture<Action> future = new CompletableFuture<>();
+	public XFuture<Action> pageParamAsync() {
+		XFuture<Action> future = new XFuture<>();
 		RequestContext ctx = Current.getContext();
 
 		executor.execute(new Runnable() {

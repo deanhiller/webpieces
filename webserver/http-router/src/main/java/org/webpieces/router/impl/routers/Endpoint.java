@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routers;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -23,7 +23,7 @@ public class Endpoint implements Service<MethodMeta, Action> {
 	}
 
 	@Override
-	public CompletableFuture<Action> invoke(MethodMeta meta) {
+	public XFuture<Action> invoke(MethodMeta meta) {
 		return service.invoke(meta);
 	}
 

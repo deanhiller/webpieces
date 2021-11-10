@@ -5,7 +5,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.security.KeyStore;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -37,7 +37,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private final TCPChannel realChannel;
 	
 	private final SocketDataListener socketDataListener;
-	private CompletableFuture<Void> closeFuture = new CompletableFuture<>();
+	private XFuture<Void> closeFuture = new XFuture<>();
 	private OurSslListener sslListener;
 	private SSLEngineFactory sslFactory;
 	private BufferPool pool;
@@ -65,9 +65,9 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		clientDataListener = new SslTryCatchListener(listener);
-		CompletableFuture<Void> future = realChannel.connect(addr, socketDataListener);
+		XFuture<Void> future = realChannel.connect(addr, socketDataListener);
 		
 		return future.thenCompose( c -> beginHandshake());
 	}
@@ -77,15 +77,15 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		return socketDataListener;
 	}
 
-	private CompletableFuture<Void> beginHandshake() {
-		CompletableFuture<Void> sslConnectfuture = new CompletableFuture<Void>();
+	private XFuture<Void> beginHandshake() {
+		XFuture<Void> sslConnectfuture = new XFuture<Void>();
 		sslListener.setSslClientConnectFuture(sslConnectfuture);
-		CompletableFuture<Void> future = sslEngine.beginHandshake();
+		XFuture<Void> future = sslEngine.beginHandshake();
 		return future.thenCompose(v -> sslConnectfuture);
 	}
 	
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer b) {
+	public XFuture<Void> write(ByteBuffer b) {
 		if(b.remaining() == 0)
 			throw new IllegalArgumentException("You must pass in bytebuffers that contain data.  b.remaining==0 in this buffer");
 		
@@ -97,7 +97,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		if(sslEngine == null) {
 			//this happens in the case where encryption link was not yet established(or even started for that matter)
 			//ie. HttpFrontend does a timeout on incoming client connections to the server so if someone connects to ssl, it
@@ -115,7 +115,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		//return closeFuture.thenApply(v -> actuallyCloseSocket(SslTCPChannel.this, realChannel));
 
 		actuallyCloseSocket(SslTCPChannel.this, realChannel);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 
 	}
 
@@ -126,7 +126,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	
 	private class OurSslListener implements SslListener {
 		private ConnectionListener conectionListener;
-		private CompletableFuture<Void> sslClientConnectFuture;
+		private XFuture<Void> sslClientConnectFuture;
 
 		public OurSslListener() {
 		}
@@ -137,7 +137,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			this.conectionListener = conectionListener;
 		}
 
-		public void setSslClientConnectFuture(CompletableFuture<Void> sslConnectfuture) {
+		public void setSslClientConnectFuture(XFuture<Void> sslConnectfuture) {
 			this.sslClientConnectFuture = sslConnectfuture;
 		}
 		
@@ -146,7 +146,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			if(sslClientConnectFuture != null)
 				sslClientConnectFuture.complete(null);
 			else {
-				CompletableFuture<DataListener> future = conectionListener.connected(SslTCPChannel.this, true);
+				XFuture<DataListener> future = conectionListener.connected(SslTCPChannel.this, true);
 				if(!future.isDone())
 					conectionListener.failed(SslTCPChannel.this, new IllegalArgumentException("Client did not return a datalistener"));
 				try {
@@ -158,23 +158,23 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		}
 
 		@Override
-		public CompletableFuture<Void> packetEncrypted(ByteBuffer engineToSocketData) {
+		public XFuture<Void> packetEncrypted(ByteBuffer engineToSocketData) {
 			return realChannel.write(engineToSocketData);
 		}
 		
 		@Override
-		public CompletableFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
+		public XFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
 			try {
 				return realChannel.write(engineToSocketData);
 			} catch(NioClosedChannelException e) {
 				log.info("Remote end closed before handshake was finished.  (nothing we can do about that)");
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			}
 		}
 		
 		@Override
-		public CompletableFuture<Void> packetUnencrypted(ByteBuffer out) {
-			CompletableFuture<Void> future = clientDataListener.incomingData(SslTCPChannel.this, out);
+		public XFuture<Void> packetUnencrypted(ByteBuffer out) {
+			XFuture<Void> future = clientDataListener.incomingData(SslTCPChannel.this, out);
 			return future;
 		}
 
@@ -202,7 +202,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		}
 		
 		@Override
-		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			if(isInPlainTextMode && firstPacket) {
 				//For HTTPS (and TLS/SSL generally) the first byte will be 0x16 (TLS), or >= 0x80 (SSLv2). For HTTP the first byte will be good-old printable 7-bit ASCII
 				if(firstCharacterIsSSL(b)) {
@@ -222,7 +222,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 				//this is frustrating so we just ack this set of data as completed(no backpressure basically here)
 				//since b will be null IF we did not receive the full bytes of the ssl clientHello packet
 				if(b == null) //to ack, we send a completed future back is all
-					return CompletableFuture.completedFuture(null); //not fully setup yet
+					return XFuture.completedFuture(null); //not fully setup yet
 			}
 			
 			return sslEngine.feedEncryptedPacket(b);
@@ -249,7 +249,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			return b & 0xFF;
 		}
 
-		private CompletableFuture<Void> feedPlainPacketWithCatch(Channel channel, ByteBuffer b) {
+		private XFuture<Void> feedPlainPacketWithCatch(Channel channel, ByteBuffer b) {
 			return plainTextListener.incomingData(channel, b);
 		}
 

@@ -1,6 +1,6 @@
 package org.webpieces.httpclientx.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http2translations.api.Http2ToHttp11;
 import org.webpieces.httpclient11.api.HttpDataWriter;
@@ -22,7 +22,7 @@ public class StreamWriterImpl implements StreamWriter {
 	}
 
 	@Override
-	public CompletableFuture<Void> processPiece(StreamMsg data) {
+	public XFuture<Void> processPiece(StreamMsg data) {
 		if(!(data instanceof DataFrame))
 			throw new IllegalArgumentException("You must feed in http1_1 compatible http2 payloads like DataFrame.  this is not http1_1 compatible="+data.getClass());
 		HttpData chunk = Http2ToHttp11.translate((DataFrame)data, req);

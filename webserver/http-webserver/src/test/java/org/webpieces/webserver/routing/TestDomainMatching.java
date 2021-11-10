@@ -1,6 +1,6 @@
 package org.webpieces.webserver.routing;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -36,7 +36,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testDomain1RequestDomain1Route() {
 		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/domain1");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -47,7 +47,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testDomain1RequestDomain1RouteWithPort() {
 		HttpFullRequest req = Requests.createGetRequest("mydomain.com:9000", "/domain1");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -58,7 +58,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testDomain1RequestDomain2Route() {
 		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/domain2");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -69,7 +69,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testDomain2RequestDomain1Route() {
 		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/domain1");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -80,7 +80,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testDomain2RequestDomain2Route() {
 		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/domain2");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -91,7 +91,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testStaticFileFromDomain1() {
 		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public1/myfile");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -102,7 +102,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testStaticFileFromDomain2NotFoundInDomain1() {
 		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public2/myfile");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -112,7 +112,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testStaticFileFromDomain2() {
 		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/public2/myfile");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -123,7 +123,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testStaticFileFromDomain1NotFoundInDomain2() {
 		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/public1/myfile");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -133,7 +133,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testStaticDirFromDomain1() {
 		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public1/asyncMeta.txt");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -144,7 +144,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testStaticDirFromDomain2NotFoundInDomain1() {
 		HttpFullRequest req = Requests.createGetRequest("mydomain.com", "/public2/asyncMeta.txt");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -154,7 +154,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	public void testStaticDirFromDomain2() {
 		HttpFullRequest req = Requests.createGetRequest("domain2.com", "/public2/asyncMeta.txt");
 		
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

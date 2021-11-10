@@ -1,11 +1,6 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
-* get OPTIONS working on bldr.addContentRoute()
-* get OPTIONS working on api + scaffolding
-* get OPTIONS working on api + client generated client
-* get url paths working /customer/{custId}/accounts/{accounts}
-
 * publish to GCP artifactory to reduce Orderly iteration
 * XFuture so context issue is solve
 * Victor/Declan - fix SSL tests to use TLS1.3 or in circleCI get javax.net.ssl.SSLHandshakeException: No available authentication scheme

@@ -1,7 +1,7 @@
 package org.webpieces.router.impl.services;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -23,11 +23,11 @@ public class SvcProxyFixedRoutes implements Service<MethodMeta, Action> {
 	}
 	
 	@Override
-	public CompletableFuture<Action> invoke(MethodMeta meta) {
+	public XFuture<Action> invoke(MethodMeta meta) {
 		return futureUtil.syncToAsyncException(() -> invokeMethod(meta));
 	}
 	
-	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
+	private XFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		return invoker.invokeAndCoerce(meta.getLoadedController(), new Object[0]);
 	}

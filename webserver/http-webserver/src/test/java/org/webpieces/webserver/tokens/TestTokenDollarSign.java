@@ -1,6 +1,6 @@
 package org.webpieces.webserver.tokens;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -36,7 +36,7 @@ public class TestTokenDollarSign extends AbstractWebpiecesTest {
 	public void testRequiredNotExist() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/requiredNotExist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
@@ -46,7 +46,7 @@ public class TestTokenDollarSign extends AbstractWebpiecesTest {
 	public void testOptionalNotExist() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/optionalNotExist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -57,7 +57,7 @@ public class TestTokenDollarSign extends AbstractWebpiecesTest {
 	public void testOptionalNotExist2() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/optionalNotExist2");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -68,7 +68,7 @@ public class TestTokenDollarSign extends AbstractWebpiecesTest {
 	public void testOptionalAndNull() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/optionalAndNull");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -79,7 +79,7 @@ public class TestTokenDollarSign extends AbstractWebpiecesTest {
 	public void testRequiredAndNull() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/requiredAndNull");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

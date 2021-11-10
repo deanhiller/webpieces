@@ -1,7 +1,7 @@
 package org.webpieces.webserver.test.http2.directfast;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamListener;
@@ -24,12 +24,12 @@ public class MockHttp2Socket implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(InetSocketAddress addr) {
-		return CompletableFuture.completedFuture(null); //pretend we connected
+	public XFuture<Void> connect(InetSocketAddress addr) {
+		return XFuture.completedFuture(null); //pretend we connected
 	}
 
 	@Override
-	public CompletableFuture<FullResponse> send(FullRequest request) {
+	public XFuture<FullResponse> send(FullRequest request) {
 		return new ResponseCacher(() -> openStream()).run(request);
 	}
 
@@ -47,13 +47,13 @@ public class MockHttp2Socket implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		streamListener.fireIsClosed(frontendSocket);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	@Override
-	public CompletableFuture<Void> sendPing() {
+	public XFuture<Void> sendPing() {
 		throw new UnsupportedOperationException("not supported");
 	}
 

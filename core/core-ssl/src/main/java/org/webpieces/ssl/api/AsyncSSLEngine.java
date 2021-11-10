@@ -1,14 +1,14 @@
 package org.webpieces.ssl.api;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public interface AsyncSSLEngine {
 
 	/**
 	 * Begins a handshake on one end (or asks for a re-handhsake)
 	 */
-	CompletableFuture<Void> beginHandshake();
+	XFuture<Void> beginHandshake();
 
 	/**
 	 * Feeding an encrypted packet results in one of four possible methods on SSLListener being called
@@ -26,9 +26,9 @@ public interface AsyncSSLEngine {
 	 * 
 	 * @param buffer The bytes
 	 */	
-	CompletableFuture<Void> feedEncryptedPacket(ByteBuffer buffer);
+	XFuture<Void> feedEncryptedPacket(ByteBuffer buffer);
 	
-	CompletableFuture<Void> feedPlainPacket(ByteBuffer buffer);
+	XFuture<Void> feedPlainPacket(ByteBuffer buffer);
 
 	void close();
 	

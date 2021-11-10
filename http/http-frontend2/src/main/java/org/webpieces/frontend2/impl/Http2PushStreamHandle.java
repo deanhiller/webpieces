@@ -1,6 +1,6 @@
 package org.webpieces.frontend2.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Push;
@@ -20,7 +20,7 @@ public class Http2PushStreamHandle implements PushStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<PushPromiseListener> process(Http2Push headers) {
+	public XFuture<PushPromiseListener> process(Http2Push headers) {
 		if(isResponseSent.get())
 			throw new IllegalStateException("You must call openPushStream AND send just the Http2Push "
 					+ "before process, but after "
@@ -34,7 +34,7 @@ public class Http2PushStreamHandle implements PushStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancelPush(CancelReason reset) {
+	public XFuture<Void> cancelPush(CancelReason reset) {
 		return pushStream.cancelPush(reset);
 	}
 

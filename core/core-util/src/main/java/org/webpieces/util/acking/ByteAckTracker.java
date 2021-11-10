@@ -1,6 +1,6 @@
 package org.webpieces.util.acking;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -22,11 +22,11 @@ public class ByteAckTracker {
 		this.fromSocket = fromSocket;
 	}
 
-	public CompletableFuture<Void> addBytesToTrack(int incomingBytes) {
+	public XFuture<Void> addBytesToTrack(int incomingBytes) {
 		if(metrics != null)
 			metrics.incrementTrackedBytes(incomingBytes);
 
-		CompletableFuture<Void> byteFuture = new CompletableFuture<Void>();
+		XFuture<Void> byteFuture = new XFuture<Void>();
 		records.add(new Record(incomingBytes, byteFuture));
 		totalBytesToAckOutstanding.addAndGet(incomingBytes);
 
@@ -35,9 +35,9 @@ public class ByteAckTracker {
 
 	private class Record {
 		public int bytesToAckLeft;
-		public CompletableFuture<Void> byteFuture;
+		public XFuture<Void> byteFuture;
 
-		public Record(int incomingBytes, CompletableFuture<Void> byteFuture) {
+		public Record(int incomingBytes, XFuture<Void> byteFuture) {
 			this.bytesToAckLeft = incomingBytes;
 			this.byteFuture = byteFuture;
 		}

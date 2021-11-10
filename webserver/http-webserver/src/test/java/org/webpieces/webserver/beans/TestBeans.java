@@ -1,6 +1,6 @@
 package org.webpieces.webserver.beans;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
@@ -51,7 +51,7 @@ public class TestBeans extends AbstractWebpiecesTest {
     public void testPageParam() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -63,7 +63,7 @@ public class TestBeans extends AbstractWebpiecesTest {
     public void testPageParamAsync() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam_async");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		Runnable runnable = mockExecutor.getRunnablesScheduled().get(0);
 		runnable.run();
@@ -83,7 +83,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//We should change this to a 400 bad request
@@ -99,7 +99,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -120,7 +120,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 				"user.id", "" //multipart is "" and nearly all webservers convert that to null(including ours)
 				);
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -138,7 +138,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 				"user.address.street", "Coolness Dr.",
 				"password", "should be hidden from flash");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -156,7 +156,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	public void testArrayForm() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/arrayForm");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -181,7 +181,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 				"user.fullName", "Dean Hiller"
 				);
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -217,7 +217,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 				"password", "hi"
 				);
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
@@ -232,7 +232,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 				"password", "hi"
 				);
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -242,7 +242,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	public void testQueryParamsToUserBean() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -252,7 +252,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	public void testBeanMissingForGetSoNotFoundResults() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser?user.firstName=jeff&password=as");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);

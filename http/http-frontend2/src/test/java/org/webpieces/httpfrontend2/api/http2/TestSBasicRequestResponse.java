@@ -1,6 +1,6 @@
 package org.webpieces.httpfrontend2.api.http2;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -58,7 +58,7 @@ public class TestSBasicRequestResponse extends AbstractFrontendHttp2Test {
 		Assert.assertEquals(2, mockChannel.getFramesAndClear().size());
 
 		Http2Response resp = Http2Requests.createResponse(request1.getStreamId(), false);
-		CompletableFuture<StreamWriter> future = incoming1.stream.process(resp);
+		XFuture<StreamWriter> future = incoming1.stream.process(resp);
 		
 		Http2Msg response = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, response);
@@ -97,7 +97,7 @@ public class TestSBasicRequestResponse extends AbstractFrontendHttp2Test {
 		Assert.assertEquals(trailing, incoming);		
 		
 		Http2Response resp = Http2Requests.createResponse(request1.getStreamId(), false);
-		CompletableFuture<StreamWriter> future = incoming1.stream.process(resp);
+		XFuture<StreamWriter> future = incoming1.stream.process(resp);
 		
 		Http2Msg response = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, response);
@@ -124,7 +124,7 @@ public class TestSBasicRequestResponse extends AbstractFrontendHttp2Test {
 		Assert.assertEquals(request1, incoming.request);
 		
 		Http2Push push = Http2Requests.createPush(request1.getStreamId());
-		CompletableFuture<PushPromiseListener> future = incoming.stream.openPushStream().process(push);
+		XFuture<PushPromiseListener> future = incoming.stream.openPushStream().process(push);
 		PushPromiseListener pushWriter = future.get(2, TimeUnit.SECONDS);
 		
 		Http2Push pushRecv = (Http2Push) mockChannel.getFrameAndClear();

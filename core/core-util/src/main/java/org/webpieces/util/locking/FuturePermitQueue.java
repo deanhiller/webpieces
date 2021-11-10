@@ -1,6 +1,6 @@
 package org.webpieces.util.locking;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -22,12 +22,12 @@ public class FuturePermitQueue {
 		queue = new PermitQueue(numPermits);
 	}
 	
-	public <RESP> CompletableFuture<RESP> runRequest(Supplier<CompletableFuture<RESP>> processor) {
-		Supplier<CompletableFuture<RESP>> proxy = new Supplier<CompletableFuture<RESP>>() {
-			public CompletableFuture<RESP> get() {
+	public <RESP> XFuture<RESP> runRequest(Supplier<XFuture<RESP>> processor) {
+		Supplier<XFuture<RESP>> proxy = new Supplier<XFuture<RESP>>() {
+			public XFuture<RESP> get() {
 				if(log.isDebugEnabled())
 					log.debug("key:"+key+" start virtual single thread. ");
-				CompletableFuture<RESP> fut = processor.get();
+				XFuture<RESP> fut = processor.get();
 				if(log.isDebugEnabled())
 					log.debug("key:"+key+" halfway there.  future needs to be acked to finish work and release virtual thread");
 				return fut;
@@ -43,13 +43,13 @@ public class FuturePermitQueue {
 				.thenCompose(Function.identity());
 	}
 
-	private <RESP> CompletableFuture<RESP> release(RESP v, Throwable e) {
+	private <RESP> XFuture<RESP> release(RESP v, Throwable e) {
 		if(log.isDebugEnabled())
 			log.debug("key:"+key+" end virtual single thread");
 		//immediately release when future is complete
 		queue.releasePermit();
 
-    	CompletableFuture<RESP> future = new CompletableFuture<RESP>();
+    	XFuture<RESP> future = new XFuture<RESP>();
         if (e != null) {
         	future.completeExceptionally(e);
         } else

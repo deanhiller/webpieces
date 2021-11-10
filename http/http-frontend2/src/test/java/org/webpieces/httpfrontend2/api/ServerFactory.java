@@ -2,7 +2,7 @@ package org.webpieces.httpfrontend2.api;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -48,7 +48,7 @@ class ServerFactory {
         HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", timer, pool, config, Metrics.globalRegistry);
         HttpSvrConfig svrConfig = new HttpSvrConfig("id2");
         HttpServer server = frontEndMgr.createHttpServer(svrConfig, new OurListener());
-        CompletableFuture<Void> fut = server.start();
+        XFuture<Void> fut = server.start();
         try {
 			fut.get(2, TimeUnit.SECONDS);
 		} catch (ExecutionException | InterruptedException | TimeoutException e) {
@@ -67,8 +67,8 @@ class ServerFactory {
 		}
 		
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
-			return CompletableFuture.completedFuture(null);
+		public XFuture<Void> processPiece(StreamMsg data) {
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
@@ -79,15 +79,15 @@ class ServerFactory {
     
     private static class StreamHandleImpl implements HttpStream {
 
-    	private CompletableFuture<StreamWriter> streamWriter = new CompletableFuture<StreamWriter>();
+    	private XFuture<StreamWriter> streamWriter = new XFuture<StreamWriter>();
     	
 		@Override
 		public StreamRef incomingRequest(Http2Request headers, ResponseStream stream) {
-			CompletableFuture<StreamWriter> writer = incomingRequestImpl(headers, stream);
+			XFuture<StreamWriter> writer = incomingRequestImpl(headers, stream);
 			return new MyStremRef(writer);
 		}
 		
-		public CompletableFuture<StreamWriter> incomingRequestImpl(Http2Request headers, ResponseStream stream) {
+		public XFuture<StreamWriter> incomingRequestImpl(Http2Request headers, ResponseStream stream) {
 			log.info(stream+"request="+headers);
 			Http2Response response = Http2Requests.createResponse(headers.getStreamId());
 			if(headers.getKnownMethod() == Http2Method.HEAD) {
@@ -111,20 +111,20 @@ class ServerFactory {
 
     private static class MyStremRef implements StreamRef {
 
-		private CompletableFuture<StreamWriter> writer;
+		private XFuture<StreamWriter> writer;
 
-		public MyStremRef(CompletableFuture<StreamWriter> writer) {
+		public MyStremRef(XFuture<StreamWriter> writer) {
 			this.writer = writer;
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> getWriter() {
+		public XFuture<StreamWriter> getWriter() {
 			return writer;
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason reason) {
-			return CompletableFuture.completedFuture(null); //nothing really to do on cancel
+		public XFuture<Void> cancel(CancelReason reason) {
+			return XFuture.completedFuture(null); //nothing really to do on cancel
 		}
     	
     }
@@ -139,9 +139,9 @@ class ServerFactory {
 		}
 
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
+		public XFuture<Void> processPiece(StreamMsg data) {
 			log.error(stream+"receiving data="+data);
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
     }
@@ -158,7 +158,7 @@ class ServerFactory {
 //		}
 //
 //		@Override
-//		public CompletableFuture<Void> processPiece(StreamMsg data) {
+//		public XFuture<Void> processPiece(StreamMsg data) {
 //			log.info(stream+"echoing back piece of data");
 //			return writer.processPiece(data);
 //		}
@@ -170,7 +170,7 @@ class ServerFactory {
 		private ResponseStream stream;
 		private Http2Response response;
 		private List<StreamMsg> datas = new ArrayList<>();
-		private CompletableFuture<StreamWriter> futureWriter = new CompletableFuture<StreamWriter>();
+		private XFuture<StreamWriter> futureWriter = new XFuture<StreamWriter>();
 
 		public CachedResponseWriter(ResponseStream stream, Http2Response response) {
 			this.stream = stream;
@@ -178,21 +178,21 @@ class ServerFactory {
 		}
 
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
+		public XFuture<Void> processPiece(StreamMsg data) {
 			if(!data.isEndOfStream()) {
 				log.info(stream+"consuming data");
 				datas.add(data);
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			}
 			
-			CompletableFuture<StreamWriter> future = stream.process(response);
+			XFuture<StreamWriter> future = stream.process(response);
 			future.thenApply(w -> futureWriter.complete(w));
 			
 			return future.thenCompose(w -> sendAllDatas(w, datas));
 		}
 		
-    	private CompletableFuture<Void> sendAllDatas(StreamWriter writer, List<StreamMsg> datas2) {
-    		CompletableFuture<Void> fut = CompletableFuture.completedFuture(null);
+    	private XFuture<Void> sendAllDatas(StreamWriter writer, List<StreamMsg> datas2) {
+    		XFuture<Void> fut = XFuture.completedFuture(null);
     		for(StreamMsg m : datas2) {
     			fut = fut.thenCompose(v -> writer.processPiece(m));
     		}

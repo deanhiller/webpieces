@@ -1,6 +1,6 @@
 package org.webpieces.router.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,7 +19,7 @@ public class RouterFutureUtil {
 		this.futureUtil = futureUtil;
 	}
 	
-	public CompletableFuture<StreamWriter> failedFuture(Throwable e) {
+	public XFuture<StreamWriter> failedFuture(Throwable e) {
 		return futureUtil.failedFuture(e);
 	}
 

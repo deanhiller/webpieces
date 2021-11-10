@@ -3,7 +3,7 @@ package org.webpieces.router.impl.routers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -67,7 +67,7 @@ public class EScopedRouter {
 		String prefix = subPath;
 		int index = subPath.indexOf("/", 1);
 		if(index == 1) {
-			CompletableFuture<StreamWriter> future = new CompletableFuture<>();
+			XFuture<StreamWriter> future = new XFuture<>();
 			future.completeExceptionally(new NotFoundException("Bad path="+ctx.getRequest().relativePath+" request="+ctx.getRequest()));
 			return new RouterStreamRef("badPath", future, null);
 		} else if(index > 1) {
@@ -108,7 +108,7 @@ public class EScopedRouter {
 			}
 		}
 
-		CompletableFuture<StreamWriter> failedFuture = futureUtil.failedFuture(new NotFoundException("route not found"));
+		XFuture<StreamWriter> failedFuture = futureUtil.failedFuture(new NotFoundException("route not found"));
 		return new RouterStreamRef("notFoundEScope", failedFuture, null);
 	}
 
@@ -133,7 +133,7 @@ public class EScopedRouter {
 			doCorsProessing(ctx, handler, matchingMethods);
 		}
 
-		CompletableFuture<StreamWriter> empty = CompletableFuture.completedFuture(new EmptyWriter());
+		XFuture<StreamWriter> empty = XFuture.completedFuture(new EmptyWriter());
 		return new RouterStreamRef("optionsCorsEmptyWriter", empty, null);
 	}
 
@@ -142,7 +142,7 @@ public class EScopedRouter {
 		response.addHeader(new Http2Header(Http2HeaderName.STATUS, "403"));
 		response.addHeader(new Http2Header("Webpieces-Reason", reason));
 
-		CompletableFuture<StreamWriter> process = handler.process(response);
+		XFuture<StreamWriter> process = handler.process(response);
 
 		try {
 			process.get(10, TimeUnit.SECONDS);
@@ -173,13 +173,13 @@ public class EScopedRouter {
 												 ProxyStreamHandle handler, boolean isCorsRequest) {
 		RouterStreamRef streamRef = invokeWithProtection(router, ctx, handler, isCorsRequest);
 		
-		CompletableFuture<StreamWriter> writer = 
+		XFuture<StreamWriter> writer =
 				streamRef.getWriter()
 					.handle( (r, t) -> {
 						if(t == null)
-							return CompletableFuture.completedFuture(r);
+							return XFuture.completedFuture(r);
 			
-						CompletableFuture<StreamWriter> fut = new CompletableFuture<>();
+						XFuture<StreamWriter> fut = new XFuture<>();
 						Throwable exc = convert(router.getMatchInfo(), t);
 						fut.completeExceptionally(exc);
 						return fut;

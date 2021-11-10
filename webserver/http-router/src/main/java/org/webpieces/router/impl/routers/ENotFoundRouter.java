@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routers;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
@@ -32,7 +32,7 @@ public class ENotFoundRouter {
 		this.svc = svc;
 	}
 
-	public CompletableFuture<StreamWriter> invokeNotFoundRoute(RequestContext ctx, ProxyStreamHandle handle, NotFoundException exc) {
+	public XFuture<StreamWriter> invokeNotFoundRoute(RequestContext ctx, ProxyStreamHandle handle, NotFoundException exc) {
 		Endpoint info = new Endpoint(svc);
 		RouteInfoForNotFound data = new RouteInfoForNotFound(exc);
 		InvokeInfo invokeInfo = new InvokeInfo(ctx, handle, RouteType.NOT_FOUND, loadedController, i18nBaseBundle);

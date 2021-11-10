@@ -2,7 +2,7 @@ package org.webpieces.frontend2.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.frontend2.api.HttpServer;
@@ -23,8 +23,8 @@ public class HttpServerImpl implements HttpServer {
 	}
 	
 	@Override
-	public CompletableFuture<Void> start() {
-		CompletableFuture<Void> future = server.start(config.bindAddress);
+	public XFuture<Void> start() {
+		XFuture<Void> future = server.start(config.bindAddress);
 		return future.thenApply(v -> {
 			InetSocketAddress localAddr = server.getUnderlyingChannel().getLocalAddress();
 			listener.setSvrSocketAddr(localAddr);
@@ -34,7 +34,7 @@ public class HttpServerImpl implements HttpServer {
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		if(!started)
 			throw new IllegalArgumentException("The server was not fully started yet.  you cannot close it until id is started");
 		return server.closeServerChannel();

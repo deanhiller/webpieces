@@ -1,6 +1,6 @@
 package org.webpieces.webserver.json.app;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,10 +25,10 @@ public class JsonController {
 	}
 
 	public StreamRef streaming(ResponseStreamHandle handle) {
-		CompletableFuture<StreamRef> futureStream = new CompletableFuture<>();
+		XFuture<StreamRef> futureStream = new XFuture<>();
 
-		CompletableFuture<Boolean> authFuture = svc.authenticate("bobsmith");
-		CompletableFuture<StreamWriter> writer = authFuture.thenCompose(resp -> {
+		XFuture<Boolean> authFuture = svc.authenticate("bobsmith");
+		XFuture<StreamWriter> writer = authFuture.thenCompose(resp -> {
 			StreamRef streamRef = client.stream(handle);
 			futureStream.complete(streamRef);
 			return streamRef.getWriter();
@@ -56,13 +56,13 @@ public class JsonController {
 	
 	
 	
-	public CompletableFuture<SearchResponse> asyncJsonRequest(int id, @Jackson SearchRequest request) {
+	public XFuture<SearchResponse> asyncJsonRequest(int id, @Jackson SearchRequest request) {
 		SearchResponse resp = new SearchResponse();
 		resp.setSearchTime(8);
 		resp.getMatches().add("match1");
 		resp.getMatches().add("match2");
 		
-		return CompletableFuture.completedFuture(resp);
+		return XFuture.completedFuture(resp);
 	}
 	
 	public SearchResponse jsonRequest(int id, @Jackson SearchRequest request) {
@@ -84,13 +84,13 @@ public class JsonController {
 		return resp;
 	}
 	
-	public CompletableFuture<SearchResponse> postAsyncJson(int id, @Jackson SearchRequest request) {
+	public XFuture<SearchResponse> postAsyncJson(int id, @Jackson SearchRequest request) {
 		SearchResponse resp = new SearchResponse();
 		resp.setSearchTime(98);
 		resp.getMatches().add("match1");
 		resp.getMatches().add("match2");
 		
-		return CompletableFuture.completedFuture(resp);
+		return XFuture.completedFuture(resp);
 	}
 	
 	@Jackson
@@ -104,8 +104,8 @@ public class JsonController {
 		
 	}
 
-	public CompletableFuture<Void> writeAsync(@Jackson SearchRequest request) {
-		return CompletableFuture.completedFuture(null);
+	public XFuture<Void> writeAsync(@Jackson SearchRequest request) {
+		return XFuture.completedFuture(null);
 	}
 	
 	public SearchResponse throwNotFound(int id, @Jackson SearchRequest request) {

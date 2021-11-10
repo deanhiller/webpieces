@@ -2,7 +2,7 @@ package org.webpieces.plugin.json;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +35,7 @@ public class JacksonNotFoundFilter extends RouteFilter<JsonConfig> {
 	}
 	
 	@Override
-	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+	public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 		String path = Current.request().relativePath;
 		if(pattern.matcher(path).matches())
 			return createNotFoundResponse(nextFilter, meta);
@@ -48,12 +48,12 @@ public class JacksonNotFoundFilter extends RouteFilter<JsonConfig> {
 		this.pattern = config.getFilterPattern();
 	}
 
-	protected CompletableFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
+	protected XFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
 		Matcher matcher = pattern.matcher(meta.getCtx().getRequest().relativePath);
 		if(!matcher.matches())
 			return nextFilter.invoke(meta);
 		
-		return CompletableFuture.completedFuture(
+		return XFuture.completedFuture(
 					createNotFound()
 				);
 	}

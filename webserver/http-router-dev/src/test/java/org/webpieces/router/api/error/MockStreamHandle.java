@@ -1,7 +1,7 @@
 package org.webpieces.router.api.error;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -27,22 +27,22 @@ public class MockStreamHandle implements RouterResponseHandler {
 	private boolean wasClosed;
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public XFuture<StreamWriter> process(Http2Response response) {
 		if(this.lastResponse != null)
 			tooManyResponses = true;
 		this.lastResponse = response;
 		
-		return CompletableFuture.completedFuture(new MockStreamWriter());
+		return XFuture.completedFuture(new MockStreamWriter());
 	}
 	
 	private class MockStreamWriter implements StreamWriter {
 
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
+		public XFuture<Void> processPiece(StreamMsg data) {
 			DataFrame frame = (DataFrame) data;
 			allData = dataGen.chainDataWrappers(allData, frame.getData());
 			
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		
 	}
@@ -53,7 +53,7 @@ public class MockStreamHandle implements RouterResponseHandler {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason payload) {
+	public XFuture<Void> cancel(CancelReason payload) {
 		throw new UnsupportedOperationException();
 	}
 

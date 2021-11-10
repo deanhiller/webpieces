@@ -2,7 +2,7 @@ package org.webpieces.ssl.api;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,10 +20,10 @@ public class MockSslListener extends MockSuperclass implements SslListener {
 	}
 	
 	class BufferedFuture {
-		public CompletableFuture<Void> future;
+		public XFuture<Void> future;
 		public ByteBuffer engineToSocketData;
 
-		public BufferedFuture(CompletableFuture<Void> future, ByteBuffer engineToSocketData) {
+		public BufferedFuture(XFuture<Void> future, ByteBuffer engineToSocketData) {
 			this.future = future;
 			this.engineToSocketData = engineToSocketData;
 		}
@@ -37,22 +37,22 @@ public class MockSslListener extends MockSuperclass implements SslListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> packetEncrypted(ByteBuffer engineToSocketData) {
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
+	public XFuture<Void> packetEncrypted(ByteBuffer engineToSocketData) {
+		XFuture<Void> future = new XFuture<Void>();
 		super.calledVoidMethod(Method.ENCRYPTED, new BufferedFuture(future, engineToSocketData));
 		return future;
 	}
 
 	@Override
-	public CompletableFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
-		CompletableFuture<Void> future = new CompletableFuture<Void>();		
+	public XFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
+		XFuture<Void> future = new XFuture<Void>();
 		super.calledVoidMethod(Method.ENCRYPTED_HANDSHAKE, new BufferedFuture(future, engineToSocketData));
 		return future;
 	}
 	
 	@Override
-	public CompletableFuture<Void> packetUnencrypted(ByteBuffer out) {
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
+	public XFuture<Void> packetUnencrypted(ByteBuffer out) {
+		XFuture<Void> future = new XFuture<Void>();
 		super.calledVoidMethod(Method.DECRYPTED, new BufferedFuture(future, out));
 		return future;
 	}

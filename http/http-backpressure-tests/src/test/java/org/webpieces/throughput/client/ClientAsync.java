@@ -3,7 +3,7 @@ package org.webpieces.throughput.client;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -46,7 +46,7 @@ public class ClientAsync {
 			try {
 				log.info("connecting socket num="+i);
 				Http2Socket socket = client.createHttpSocket(new CloseListener());
-				CompletableFuture<Void> connect = socket.connect(svrAddress);
+				XFuture<Void> connect = socket.connect(svrAddress);
 				connect.get(2, TimeUnit.SECONDS);
 				sockets.add(socket);
 			} catch(Throwable e) {
@@ -94,7 +94,7 @@ public class ClientAsync {
 				
 				RequestStreamHandle stream = socket.openStream();
 				StreamRef process = stream.process(request, handler);
-				CompletableFuture<StreamWriter> future = process.getWriter();
+				XFuture<StreamWriter> future = process.getWriter();
 				
 				//the future puts the perfect amount of backpressure or performance will tank
 				//(ie. comment out this line and watch performance tank)

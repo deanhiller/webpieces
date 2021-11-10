@@ -3,7 +3,7 @@ package com.webpieces.hpack.impl;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.twitter.hpack.Decoder;
 import com.webpieces.hpack.api.UnmarshalState;
@@ -23,7 +23,7 @@ public class UnmarshalStateImpl implements UnmarshalState {
 	private int numBytesJustParsed = 0;
 	private int dataToParseSize = 0;
 	private int halfParsedSize;
-	private CompletableFuture<Void> processFuture = CompletableFuture.completedFuture(null);
+	private XFuture<Void> processFuture = XFuture.completedFuture(null);
 	
 	public UnmarshalStateImpl(String logId, Http2Memento lowLevelState, HeaderDecoding decoding, Decoder decoder) {
 		this.logId = logId;
@@ -101,12 +101,12 @@ public class UnmarshalStateImpl implements UnmarshalState {
 	}
 
 	@Override
-	public CompletableFuture<Void> getProcessFuture() {
+	public XFuture<Void> getProcessFuture() {
 		return processFuture;
 	}
 
 	@Override
-	public void setProcessFuturee(CompletableFuture<Void> future) {
+	public void setProcessFuturee(XFuture<Void> future) {
 		this.processFuture = future;
 	}
 

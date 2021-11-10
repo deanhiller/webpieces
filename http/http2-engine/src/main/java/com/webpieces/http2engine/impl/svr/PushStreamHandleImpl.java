@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Push;
@@ -21,7 +21,7 @@ public class PushStreamHandleImpl implements PushStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<PushPromiseListener> process(Http2Push push) {
+	public XFuture<PushPromiseListener> process(Http2Push push) {
 		if(push.getStreamId() != 0 && push.getStreamId() != requestStream.getStreamId())
 			throw new IllegalArgumentException("WE WILL SET the Http2Push.streamID so you should leave it as 0.   push="+push);
 		else if(push.getPromisedStreamId() != 0)
@@ -34,7 +34,7 @@ public class PushStreamHandleImpl implements PushStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancelPush(CancelReason reset) {
+	public XFuture<Void> cancelPush(CancelReason reset) {
 		return level1ServerEngine.cancelPush(reset);
 	}
 

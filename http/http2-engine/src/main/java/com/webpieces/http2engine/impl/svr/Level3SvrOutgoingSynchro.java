@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.util.locking.PermitQueue;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class Level3SvrOutgoingSynchro extends Level3OutgoingSynchro {
 		this.streams = streams;
 	}
 
-	public CompletableFuture<StreamWriter> sendResponseToSocket(Stream stream, Http2Response data) {
+	public XFuture<StreamWriter> sendResponseToSocket(Stream stream, Http2Response data) {
 		return streams.sendResponseToSocket(stream, data)
 					.thenApply(v -> new EngineStreamWriter(stream));
 	}
@@ -47,12 +47,12 @@ public class Level3SvrOutgoingSynchro extends Level3OutgoingSynchro {
 		}
 
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
+		public XFuture<Void> processPiece(StreamMsg data) {
 			data.setStreamId(stream.getStreamId());
 			return streams.sendDataToSocket(stream, data);
 		}
 		
-		public CompletableFuture<Void> cancel(CancelReason frame) {
+		public XFuture<Void> cancel(CancelReason frame) {
 			if(!(frame instanceof RstStreamFrame))
 				throw new IllegalArgumentException("App can only pass in RstStreamFrame object here to be sent to clients.  The api is for consistency and shared with client");
 			
@@ -66,15 +66,15 @@ public class Level3SvrOutgoingSynchro extends Level3OutgoingSynchro {
 		}
 	}
 	
-	public CompletableFuture<Void> sendRstToSocket(Stream stream, RstStreamFrame frame) {
+	public XFuture<Void> sendRstToSocket(Stream stream, RstStreamFrame frame) {
 		return streams.sendRstToSocket(stream, frame);
 	}
 	
-	public CompletableFuture<ServerPushStream> sendPushToSocket(PushStreamHandleImpl handle, Http2Push push) {
+	public XFuture<ServerPushStream> sendPushToSocket(PushStreamHandleImpl handle, Http2Push push) {
 		return streams.sendPush(handle, push);
 	}
 
-	public CompletableFuture<Void> sendPushResponseToSocket(ServerPushStream stream, Http2Response response) {
+	public XFuture<Void> sendPushResponseToSocket(ServerPushStream stream, Http2Response response) {
 		//This gets tricky, BUT must use the maxConcurrent permit queue first, THEN the serializer permit queue
 		return maxConcurrentQueue.runRequest( () -> {
 			int val = acquiredCnt.incrementAndGet();
@@ -86,7 +86,7 @@ public class Level3SvrOutgoingSynchro extends Level3OutgoingSynchro {
 		});
 	}
 
-	public CompletableFuture<Void> sendPushRstToSocket(CancelReason reset) {
+	public XFuture<Void> sendPushRstToSocket(CancelReason reset) {
 		throw new UnsupportedOperationException("not yet");
 	}
 

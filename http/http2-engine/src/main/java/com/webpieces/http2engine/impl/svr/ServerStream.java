@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.javasm.api.Memento;
 
@@ -19,7 +19,7 @@ public class ServerStream extends Stream {
 		super(logId, streamId, currentState, localInitialWindowSize, remoteInitialWindowSize, false);
 	}
 
-	public CompletableFuture<StreamWriter> getStreamWriter() {
+	public XFuture<StreamWriter> getStreamWriter() {
 		return streamRef.getWriter();
 	}
 

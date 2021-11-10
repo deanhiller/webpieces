@@ -35,7 +35,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
@@ -108,7 +108,7 @@ public class HttpsJsonClient {
     /**
      * <b>DO NOT USE FOR PUBLIC HTTP REQUEST THIS IS FOR INTERNAL USE ONLY</b>
      */
-    public <T> CompletableFuture<T> sendHttpRequest(Method method, Object request, Endpoint endpoint, Class<T> responseType) {
+    public <T> XFuture<T> sendHttpRequest(Method method, Object request, Endpoint endpoint, Class<T> responseType) {
 
         InetSocketAddress apiAddress = endpoint.getServerAddress();
         String httpMethod = endpoint.getHttpMethod();
@@ -116,7 +116,7 @@ public class HttpsJsonClient {
         Http2Request httpReq = createHttpReq(apiAddress, httpMethod, endpointPath);
         RequestCloseListener closeListener = new RequestCloseListener(schedulerSvc);
         Http2Socket httpSocket = createSocket(apiAddress, closeListener);
-        CompletableFuture<Void> connect = httpSocket.connect(apiAddress);
+        XFuture<Void> connect = httpSocket.connect(apiAddress);
 
         String jsonRequest = marshal(request);
         byte[] reqAsBytes = jsonRequest.getBytes(StandardCharsets.UTF_8);
@@ -144,7 +144,7 @@ public class HttpsJsonClient {
         Contexts contexts = new Contexts(ctxMap, fullContext);
 
         long start = System.currentTimeMillis();
-        CompletableFuture<T> future = futureUtil.catchBlockWrap(
+        XFuture<T> future = futureUtil.catchBlockWrap(
                 () -> sendAndTranslate(contexts, apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
                 (t) -> translateException(httpReq, t)
         );
@@ -159,11 +159,11 @@ public class HttpsJsonClient {
 //
 //                if (e != null) {
 //                    monitoring.incrementHttpClientExceptionMetric(method, clientId, endpoint, e.getClass().getSimpleName());
-//                    return CompletableFuture.<T>failedFuture(e);
+//                    return XFuture.<T>failedFuture(e);
 //                }
 //
 //                monitoring.incrementHttpClientSuccessMetric(method, clientId, endpoint);
-//                return CompletableFuture.completedFuture(r);
+//                return XFuture.completedFuture(r);
 //            }).thenCompose(Function.identity());
 //        }
 
@@ -184,7 +184,7 @@ public class HttpsJsonClient {
 
     }
 
-    private <T> CompletableFuture<T> sendAndTranslate(Contexts contexts, InetSocketAddress apiAddress, Class<T> responseType, Http2Socket httpSocket, CompletableFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
+    private <T> XFuture<T> sendAndTranslate(Contexts contexts, InetSocketAddress apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
         return connect
                 .thenCompose(voidd -> httpSocket.send(fullRequest))
                 .thenApply(fullResponse -> unmarshal(jsonReq, contexts, fullRequest, fullResponse, apiAddress.getPort(), responseType));

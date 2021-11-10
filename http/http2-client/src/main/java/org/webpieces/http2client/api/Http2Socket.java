@@ -1,7 +1,7 @@
 package org.webpieces.http2client.api;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
@@ -10,7 +10,7 @@ import com.webpieces.http2.api.streaming.RequestStreamHandle;
 
 public interface Http2Socket {
 	
-	CompletableFuture<Void> connect(InetSocketAddress addr);
+	XFuture<Void> connect(InetSocketAddress addr);
 	
     /**
      * This can be used ONLY if 'you' know that the far end does NOT send a chunked download
@@ -24,7 +24,7 @@ public interface Http2Socket {
      * @param request
      */
     //TODO: Implement timeout for clients so that requests will timeout
-    CompletableFuture<FullResponse> send(FullRequest request);
+    XFuture<FullResponse> send(FullRequest request);
 
     /**
      * You should have a pretty good understanding the http/2 spec to use this method.  This method supports EVERY use-case
@@ -45,11 +45,11 @@ public interface Http2Socket {
      */
     RequestStreamHandle openStream();
     
-    CompletableFuture<Void> close();
+    XFuture<Void> close();
 
     /**
      * Future is complete when ping response is returned such that you can measure latency
      */
-    CompletableFuture<Void> sendPing();
+    XFuture<Void> sendPing();
     
 }

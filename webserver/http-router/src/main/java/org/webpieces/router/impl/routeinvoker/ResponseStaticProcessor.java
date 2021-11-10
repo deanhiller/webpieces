@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routeinvoker;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,29 +49,19 @@ public class ResponseStaticProcessor {
 		
 	}
 	public RouterStreamRef renderStaticResponse(RenderStaticResponse renderStatic) {
-		boolean wasSet = Current.isContextSet();
-		if(!wasSet)
-			Current.setContext(ctx); //Allow html tags to use the contexts
-		try {
-			if(log.isDebugEnabled())
-				log.debug("Sending render static html response. req="+request);
-			RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, handler);
-			
-			
-			CompletableFuture<StreamWriter> writer = futureUtil.catchBlockWrap(
-				() -> reader.sendRenderStatic(requestInfo, renderStatic, handler), 
-				(t) -> convert(t)
-			);
-			
-			//TODO(dhiller): if socket closed or request cancelled, we should implement cancel function to stop reading
-			//the file an pushing it back...
-			return new RouterStreamRef("staticRef", writer, null);
-			
-			//return responseCb.sendRenderStatic(renderStatic, handler);
-		} finally {
-			if(!wasSet) //then reset
-				Current.setContext(null);
-		}
+		if(log.isDebugEnabled())
+			log.debug("Sending render static html response. req="+request);
+		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, handler);
+
+
+		XFuture<StreamWriter> writer = futureUtil.catchBlockWrap(
+			() -> reader.sendRenderStatic(requestInfo, renderStatic, handler),
+			(t) -> convert(t)
+		);
+
+		//TODO(dhiller): if socket closed or request cancelled, we should implement cancel function to stop reading
+		//the file an pushing it back...
+		return new RouterStreamRef("staticRef", writer, null);
 	}
 	
 	//TODO(dhiller): copy paste during refactor.  try to get back to same code for all of them

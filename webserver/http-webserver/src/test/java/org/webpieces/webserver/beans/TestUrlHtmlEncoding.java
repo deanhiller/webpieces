@@ -1,6 +1,6 @@
 package org.webpieces.webserver.beans;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -38,7 +38,7 @@ public class TestUrlHtmlEncoding extends AbstractWebpiecesTest {
 	public void testUrlEncoding() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/urlencoding/Dean+Hiller");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

@@ -1,7 +1,7 @@
 package org.webpieces.throughput.server;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -38,11 +38,11 @@ public class ServerAsync {
 		http2Config.getLocalSettings().setMaxConcurrentStreams(max);
 	}
 
-	public CompletableFuture<InetSocketAddress> start() {
+	public XFuture<InetSocketAddress> start() {
     	log.error("running ASYNC HTTP1.1 AND HTTP2 SERVER");
 
 		HttpServer server = createFrontend();
-		CompletableFuture<Void> future = server.start();
+		XFuture<Void> future = server.start();
 		return future.thenApply(v -> server.getUnderlyingChannel().getLocalAddress());
 	}
 

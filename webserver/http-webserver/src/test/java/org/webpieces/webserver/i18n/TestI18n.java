@@ -1,6 +1,11 @@
 package org.webpieces.webserver.i18n;
 
-import java.util.concurrent.CompletableFuture;
+import org.junit.After;
+import org.junit.Assert;
+import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.XFuture;
+
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -30,17 +35,26 @@ public class TestI18n extends AbstractWebpiecesTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
+		Context.clear();
+
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("i18nMeta.txt", PrivateWebserverForTest.class.getClassLoader());
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false, new SimpleMeterRegistry()), null, false, metaFile);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
+	@After
+	public void teatDown() {
+		//not exactly part of this test but checking for leak of server context into client
+		// (only in embedded modes does this occur)
+		Assert.assertEquals(0, Context.getContext().size());
+	}
+
 	@Test
 	public void testDefaultText() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -53,7 +67,7 @@ public class TestI18n extends AbstractWebpiecesTest {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_LANGUAGE, "zh-CN"));
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

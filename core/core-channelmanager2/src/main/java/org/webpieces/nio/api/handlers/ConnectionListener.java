@@ -1,7 +1,7 @@
 package org.webpieces.nio.api.handlers;
 
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -23,11 +23,11 @@ public interface ConnectionListener {
 	 * @param isReadyForWrites This is true in every case except an SSL Server where connected is called twice, once for
 	 * when socket is connected(so you can start timeout timers if desired) and once when the encrypted link is established
 	 * and you can write to the socket
-	 * @return you must return CompletableFuture.completedFuture(yourDataListenerInstance).
+	 * @return you must return XFuture.completedFuture(yourDataListenerInstance).
 	 * We do this, because in multithread mode, you are in a thread pool, we only want to register for reads on the socket 
 	 * once we have this listener.  Without it, we don't want to read data with no where to send that data 
 	 */
-	CompletableFuture<DataListener> connected(Channel channel, boolean isReadyForWrites);
+	XFuture<DataListener> connected(Channel channel, boolean isReadyForWrites);
 	
 	/**
 	 * Unfortunately, channel may be the TCPServerChannel if accepting and failed or

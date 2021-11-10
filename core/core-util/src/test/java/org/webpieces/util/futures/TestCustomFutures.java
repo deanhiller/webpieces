@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.concurrent.CompletableFuture;
+
+import org.junit.After;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -17,7 +19,12 @@ import org.webpieces.util.context.Context;
 public class TestCustomFutures {
 
 	private Executor exec = Executors.newFixedThreadPool(3);
-	
+
+	@After
+	public void tearDown() {
+		Context.clear();
+	}
+
 	@Test
 	public void testFutureContext() throws InterruptedException, ExecutionException {
 

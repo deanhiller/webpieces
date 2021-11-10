@@ -1,7 +1,7 @@
 package org.webpieces.httpfrontend2.api.mock2;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
@@ -60,13 +60,13 @@ public class MockHttp2RequestListener extends MockSuperclass implements StreamLi
 	}
 	
 	public void setDefaultRetVal(StreamWriter writer) {
-		CompletableFuture<StreamWriter> writerFuture = CompletableFuture.completedFuture(writer);
+		XFuture<StreamWriter> writerFuture = XFuture.completedFuture(writer);
 		MockStreamRef ref = new MockStreamRef(writerFuture );		
 		super.setDefaultReturnValue(Method.PROCESS, ref);
 	}
 
 	public void addMockStreamToReturn(StreamWriter mockSw) {
-		CompletableFuture<StreamWriter> future = CompletableFuture.completedFuture(mockSw);
+		XFuture<StreamWriter> future = XFuture.completedFuture(mockSw);
 		MockStreamRef ref = new MockStreamRef(future );
 		addMockStreamToReturn(ref);
 	}

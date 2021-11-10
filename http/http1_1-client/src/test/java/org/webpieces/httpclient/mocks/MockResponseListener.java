@@ -2,7 +2,7 @@ package org.webpieces.httpclient.mocks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpResponseListener;
@@ -14,7 +14,7 @@ public class MockResponseListener implements HttpResponseListener {
 	private boolean isClosed;
 
 	@Override
-	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
+	public XFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 		return null;
 	}
 

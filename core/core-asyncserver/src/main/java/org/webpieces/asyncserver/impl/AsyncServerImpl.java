@@ -3,7 +3,7 @@ package org.webpieces.asyncserver.impl;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.nio.api.SSLEngineFactory;
@@ -27,9 +27,9 @@ public class AsyncServerImpl implements AsyncServer {
 	}
 
 	@Override
-	public CompletableFuture<Void> start(SocketAddress bindAddr) {
+	public XFuture<Void> start(SocketAddress bindAddr) {
 		log.info("binding server socket="+bindAddr+" with your engine="+sslFactory+"(if null, ssl is off)");
-		CompletableFuture<Void> future = serverChannel.bind(bindAddr);
+		XFuture<Void> future = serverChannel.bind(bindAddr);
 		return future.thenApply(v -> {
 			InetSocketAddress localAddr = getUnderlyingChannel().getLocalAddress();
 			log.info("now listening for incoming requests on "+localAddr);
@@ -38,7 +38,7 @@ public class AsyncServerImpl implements AsyncServer {
 	}
 	
 	@Override
-	public CompletableFuture<Void> closeServerChannel() {
+	public XFuture<Void> closeServerChannel() {
 		serverChannel.closeServerChannel();
 		
 		return connectionListener.closeChannels();

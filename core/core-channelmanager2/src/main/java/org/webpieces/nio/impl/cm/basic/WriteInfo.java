@@ -1,20 +1,20 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 
 public class WriteInfo {
 
 	private ByteBuffer buffer;
-	private CompletableFuture<Void> handler;
+	private XFuture<Void> handler;
 
-	public WriteInfo(ByteBuffer b, CompletableFuture<Void> impl) {
+	public WriteInfo(ByteBuffer b, XFuture<Void> impl) {
 		buffer = b;
 		handler = impl;
 	}
 
-	public CompletableFuture<Void> getPromise() {
+	public XFuture<Void> getPromise() {
 		return handler;
 	}
 

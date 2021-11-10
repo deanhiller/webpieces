@@ -34,7 +34,7 @@ public interface ScopedRouteBuilder {
 	/**
 	 * Adds a streaming route where the method in the controller should be of the form
 	 * 
-	 * public CompletableFuture<StreamWriter> processRequest(RouterRequest request, RouteStreamHandle stream);
+	 * public XFuture<StreamWriter> processRequest(RouterRequest request, RouteStreamHandle stream);
 	 * 
 	 * You can do bi-directional communication in http1.1 or http2 with this route.  Just keep writing to the
 	 * RouteStreamHandle and the client will keep writing to the StreamWriter that you return.

@@ -1,6 +1,6 @@
 package org.webpieces.plugin.hibernate;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,7 +38,7 @@ public class TransactionFilter extends RouteFilter<TxConfig> {
 	}
 	
 	@Override
-	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+	public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 		if(txConfig.isTransactionOnByDefault()) {
 			return filterWithTxOnDefault(meta, nextFilter);
 		} else {
@@ -46,7 +46,7 @@ public class TransactionFilter extends RouteFilter<TxConfig> {
 		}
 	}
 
-	private CompletableFuture<Action> filterWithTxOffDefault(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+	private XFuture<Action> filterWithTxOffDefault(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 		Transaction annotation = meta.getLoadedController().getControllerMethod().getAnnotation(Transaction.class);
 		if(annotation == null) {
 			//skip doing a transaction for methods annotated with @NoTransaction.
@@ -72,7 +72,7 @@ public class TransactionFilter extends RouteFilter<TxConfig> {
 		}
 	}
 
-	private CompletableFuture<Action> filterWithTxOnDefault(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+	private XFuture<Action> filterWithTxOnDefault(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 		NoTransaction annotation = meta.getLoadedController().getControllerMethod().getAnnotation(NoTransaction.class);
 		if(annotation != null) {
 			//skip doing a transaction for methods annotated with @NoTransaction.

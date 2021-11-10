@@ -1,6 +1,6 @@
 package org.webpieces.httpfrontend2.api.http2;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
@@ -38,14 +38,14 @@ public class TestBasicHttp2Server extends AbstractFrontendHttp2Test {
 		Assert.assertEquals(3, request2.getStreamId());
 		
 		Http2Response resp2 = Http2Requests.createResponse(request2.getStreamId());
-		CompletableFuture<StreamWriter> future = requestAndStream2.stream.process(resp2);
+		XFuture<StreamWriter> future = requestAndStream2.stream.process(resp2);
 		Assert.assertTrue(future.isDone());
 
 		Http2Response frame2 = (Http2Response) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp2, frame2);
 
 		Http2Response resp1 = Http2Requests.createResponse(request1.getStreamId());
-		CompletableFuture<StreamWriter> future1 = requestAndStream1.stream.process(resp1);
+		XFuture<StreamWriter> future1 = requestAndStream1.stream.process(resp1);
 		Assert.assertTrue(future1.isDone());
 
 		Http2Response frame1 = (Http2Response) mockChannel.getFrameAndClear();

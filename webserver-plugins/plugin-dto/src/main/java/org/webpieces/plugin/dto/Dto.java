@@ -18,7 +18,7 @@ public @interface Dto {
 
     /**
      * The function we call on lookupClass to lookup the entity.  The function can
-     * return CompletableFuture<Dto> OR Dto.  If it returns CompletableFuture<Dto>,
+     * return XFuture<Dto> OR Dto.  If it returns XFuture<Dto>,
      * webpieces will make the call asynchronously and free up a thread while waiting
      * for the response
      */

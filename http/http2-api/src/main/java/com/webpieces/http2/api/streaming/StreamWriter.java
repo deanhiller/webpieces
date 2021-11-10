@@ -1,11 +1,11 @@
 package com.webpieces.http2.api.streaming;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
 
 public interface StreamWriter {
 
-	CompletableFuture<Void> processPiece(StreamMsg data);
+	XFuture<Void> processPiece(StreamMsg data);
 
 }

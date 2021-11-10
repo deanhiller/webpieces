@@ -15,7 +15,7 @@ import org.webpieces.util.exceptions.SneakyThrow;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -179,7 +179,7 @@ public class DefaultCorsProcessor implements ProcessCors {
     }
 
     private void sendResponse(ResponseStreamHandle responseStream, Http2Response response) {
-        CompletableFuture<StreamWriter> process = responseStream.process(response);
+        XFuture<StreamWriter> process = responseStream.process(response);
         try {
             process.get(10, TimeUnit.SECONDS);
         } catch (Exception e) {

@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2engine.impl.shared.Level3IncomingSynchro;
@@ -21,7 +21,7 @@ public class Level3SvrIncomingSynchro extends Level3IncomingSynchro {
 		streams = streamsLayer;
 	}
 
-	public CompletableFuture<Void> processRequest(Http2Request msg) {
+	public XFuture<Void> processRequest(Http2Request msg) {
 		return streams.sendRequestToApp(msg);
 	}
 

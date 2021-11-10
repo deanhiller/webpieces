@@ -11,7 +11,7 @@ import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_HEADERS
 import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_HEADERS_EOS;
 import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_RST;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
@@ -80,28 +80,28 @@ public class Level5ClientStateMachine extends Level5CStateMachine {
 
 	}
 
-	public CompletableFuture<Void> sendResponse(Http2Response frame) {
+	public XFuture<Void> sendResponse(Http2Response frame) {
 		Stream stream = streamState.getStream(frame, true);
 		
-		CompletableFuture<Void> future = fireToClient(stream, frame);
+		XFuture<Void> future = fireToClient(stream, frame);
 		return future;
 	}
 	
-	public CompletableFuture<Void> fireToClient(Stream stream, Http2Response payload) { //, Supplier<StreamTransition> possiblyClose 
+	public XFuture<Void> fireToClient(Stream stream, Http2Response payload) { //, Supplier<StreamTransition> possiblyClose
 		return fireRecvToSM(stream, payload)
 				.thenCompose(v -> {
 					return local.fireResponseToApp(stream, payload);
 				});
 	}
 	
-	public CompletableFuture<Void> firePushToClient(ClientPushStream stream, Http2Push fullPromise) {
+	public XFuture<Void> firePushToClient(ClientPushStream stream, Http2Push fullPromise) {
 		return fireRecvToSM(stream, fullPromise)
 			.thenCompose(v -> {
 				return local.firePushToApp(stream, fullPromise);
 			});
 	}
 
-	public CompletableFuture<Stream> createStreamAndSend(Http2Request frame, ResponseStreamHandle responseListener) {
+	public XFuture<Stream> createStreamAndSend(Http2Request frame, ResponseStreamHandle responseListener) {
 		Stream stream = createStream(frame.getStreamId(), responseListener);
 		return fireToSocket(stream, frame).thenApply(v -> stream);
 	}
@@ -115,7 +115,7 @@ public class Level5ClientStateMachine extends Level5CStateMachine {
 		return stream;
 	}
 
-	public CompletableFuture<Void> sendPushToApp(Http2Push fullPromise) {
+	public XFuture<Void> sendPushToApp(Http2Push fullPromise) {
 		int newStreamId = fullPromise.getPromisedStreamId();
 		if(newStreamId % 2 == 1)
 			throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, logId, newStreamId, 
@@ -137,12 +137,12 @@ public class Level5ClientStateMachine extends Level5CStateMachine {
 		return stream;
 	}
 
-	public CompletableFuture<Void> sendDataToApp(DataFrame frame) {
+	public XFuture<Void> sendDataToApp(DataFrame frame) {
 		return sendDataToAppImpl(frame, true);
 	}
 
 	@Override
-	protected CompletableFuture<Void> sendTrailersToApp(Http2Trailers frame) {
+	protected XFuture<Void> sendTrailersToApp(Http2Trailers frame) {
 		return sendTrailersToAppImpl(frame, true);
 	}
 

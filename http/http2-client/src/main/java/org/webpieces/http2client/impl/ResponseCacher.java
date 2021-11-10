@@ -1,6 +1,6 @@
 package org.webpieces.http2client.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Supplier;
 
 import org.webpieces.data.api.DataWrapper;
@@ -22,7 +22,7 @@ public class ResponseCacher {
 		this.openStreamFunc = openStreamFunc;
 	}
 
-	public CompletableFuture<FullResponse> run(FullRequest request) {
+	public XFuture<FullResponse> run(FullRequest request) {
 		SingleResponseListener responseListener = new SingleResponseListener();
 		
 		RequestStreamHandle streamHandle = openStreamFunc.get();
@@ -67,7 +67,7 @@ public class ResponseCacher {
 		return data;
 	}
 	
-	private CompletableFuture<FullResponse> writeStuff(
+	private XFuture<FullResponse> writeStuff(
 			StreamWriter writer, Http2Request req, DataFrame data, Http2Trailers trailers, SingleResponseListener responseListener) {
 		
 		data.setStreamId(req.getStreamId());

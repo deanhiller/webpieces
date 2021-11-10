@@ -3,7 +3,7 @@ package org.webpieces.router.impl.services;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http.exception.BadRequestException;
 import org.webpieces.http.exception.Violation;
@@ -35,11 +35,11 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 	}
 
 	@Override
-	public CompletableFuture<Action> invoke(MethodMeta meta) {
+	public XFuture<Action> invoke(MethodMeta meta) {
 		return futureUtil.syncToAsyncException(() -> invokeMethod(meta));
 	}
 
-	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
+	private XFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		RouteInfoForContent info = (RouteInfoForContent) meta.getRoute();
 		
@@ -51,7 +51,7 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		//On top of that ORM plugins can have a transaction filter and then in this
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
-		CompletableFuture<List<Object>> futureArgs = translator.createArgs(m, meta.getCtx(), info.getBodyContentBinder())
+		XFuture<List<Object>> futureArgs = translator.createArgs(m, meta.getCtx(), info.getBodyContentBinder())
 														.thenApply ( args -> validate(obj, m, args));
 		
 		return futureArgs.thenCompose( argsResult -> invokeAndCoerce(meta, info, m, argsResult));
@@ -67,7 +67,7 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		return args;
 	}
 
-	private CompletableFuture<Action> invokeAndCoerce(MethodMeta meta, RouteInfoForContent info, Method m,
+	private XFuture<Action> invokeAndCoerce(MethodMeta meta, RouteInfoForContent info, Method m,
 			List<Object> argsResult) {
 		Object retVal;
 		try {
@@ -87,18 +87,18 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private CompletableFuture<Action> unwrapResult(Method method, Object retVal, BodyContentBinder binder) {
+	private XFuture<Action> unwrapResult(Method method, Object retVal, BodyContentBinder binder) {
 		Class<?> returnType = method.getReturnType();
 		
-		if(CompletableFuture.class.isAssignableFrom(returnType)) {
+		if(XFuture.class.isAssignableFrom(returnType)) {
 			if(retVal == null)
-				throw new IllegalStateException("Your method returned a null CompletableFuture which it not allowed.  method="+method);
-			CompletableFuture<Object> future = (CompletableFuture<Object>) retVal;
+				throw new IllegalStateException("Your method returned a null XFuture which it not allowed.  method="+method);
+			XFuture<Object> future = (XFuture<Object>) retVal;
 			return future.thenApply((bean) -> marshal(method, binder, bean));
 		} else {
 			RenderContent content = marshal(method, binder, retVal);
 			//binder.marshal(retVal);
-			return CompletableFuture.completedFuture(content);
+			return XFuture.completedFuture(content);
 		}
 	}
 

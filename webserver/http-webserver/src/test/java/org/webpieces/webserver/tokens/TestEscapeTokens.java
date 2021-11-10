@@ -1,6 +1,6 @@
 package org.webpieces.webserver.tokens;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -37,7 +37,7 @@ public class TestEscapeTokens extends AbstractWebpiecesTest {
 	public void testEscapingTokens() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/escaping");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

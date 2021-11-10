@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -66,7 +66,7 @@ public class IntegTestClientNotRead {
 			}
 		}, 1000, 5000);
 		
-		CompletableFuture<Void> connect = channel.connect(new InetSocketAddress(8080), new ClientDataListener());
+		XFuture<Void> connect = channel.connect(new InetSocketAddress(8080), new ClientDataListener());
 		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
@@ -99,7 +99,7 @@ public class IntegTestClientNotRead {
 		log.info("write from client. reason="+ reason);
 		byte[] data = new byte[2000];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		CompletableFuture<Void> write = channel.write(buffer);
+		XFuture<Void> write = channel.write(buffer);
 		final int count = counter+1;
 
 		if(counter >= 100) {
@@ -119,12 +119,12 @@ public class IntegTestClientNotRead {
 
 	private class ClientDataListener implements DataListener {
 		@Override
-		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			recordBytes(b.remaining());
 			
 			if(b.remaining() != 2000)
 				log.info("size of buffer="+b.remaining());	
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		
 		@Override

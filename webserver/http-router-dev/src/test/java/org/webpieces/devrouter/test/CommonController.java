@@ -1,6 +1,6 @@
 package org.webpieces.devrouter.test;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Singleton;
 import javax.ws.rs.PathParam;
@@ -37,28 +37,28 @@ public class CommonController {
 		return Actions.renderThis();
 	}
 	
-	public CompletableFuture<Action> createUserForm() {
+	public XFuture<Action> createUserForm() {
 		//if for some reason, reached wrong thing or not enough users, redirect to another page....
 		if(isWantRedirect) {
-			return CompletableFuture.completedFuture(Actions.redirect(SomeRouteId.GET_CREATE_USER_PAGE));
+			return XFuture.completedFuture(Actions.redirect(SomeRouteId.GET_CREATE_USER_PAGE));
 		}
 		
-		return CompletableFuture.completedFuture(Actions.renderThis());
+		return XFuture.completedFuture(Actions.renderThis());
 	}
 
-//	public CompletableFuture<Action> postUser(MeetingDto user) {
+//	public XFuture<Action> postUser(MeetingDto user) {
 //		
 //		//if user is !valid {
 //		if(isWantRedirect) {
 //			//flash.saveFormValues();
 //			//flash.setGlobalMessage("You have errors")
 //			//decorators kick in saying error per field with the field
-//			return CompletableFuture.completedFuture(new Redirect(SomeRouteId.GET_CREATE_USER_PAGE));
+//			return XFuture.completedFuture(new Redirect(SomeRouteId.GET_CREATE_USER_PAGE));
 //		}
 //		//}
 //		
 //		//need to send redirect at this point to getUser with id=id
-//		return CompletableFuture.completedFuture(new Redirect(SomeRouteId.GET_SHOW_USER));
+//		return XFuture.completedFuture(new Redirect(SomeRouteId.GET_SHOW_USER));
 //	}
 	
 	/**

@@ -1,7 +1,7 @@
 package org.webpieces.httpclient.api;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -42,8 +42,8 @@ public class TestWriteReads {
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
 		socket = httpClient.createHttpSocket(new Http2CloseListener());
 
-		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
-		CompletableFuture<Void> future = socket.connect(new InetSocketAddress(8080));
+		mockChannel.setConnectFuture(XFuture.completedFuture(null));
+		XFuture<Void> future = socket.connect(new InetSocketAddress(8080));
 		
 		future.get(2, TimeUnit.SECONDS);
 	}
@@ -53,34 +53,34 @@ public class TestWriteReads {
 		MockResponseListener listener = new MockResponseListener();
 		RequestStreamHandle handle = socket.openStream();
 
-		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
+		mockChannel.addWriteResponse(XFuture.completedFuture(null));
 		Http2Request request = Requests.createRequest();
 		StreamRef streamRef = handle.process(request, listener);
-		CompletableFuture<StreamWriter> writer = streamRef.getWriter();
+		XFuture<StreamWriter> writer = streamRef.getWriter();
 
 		Assert.assertTrue(writer.isDone());
 		Assert.assertEquals(request, mockChannel.getLastWriteParam());
 
 		MockResponseListener listener2 = new MockResponseListener();
 		request.getHeaderLookupStruct().getHeader("serverid").setValue("2");
-		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
+		mockChannel.addWriteResponse(XFuture.completedFuture(null));
 		StreamRef streamRef1 = handle.process(request, listener2);
-		CompletableFuture<StreamWriter> writer2 = streamRef1.getWriter();
+		XFuture<StreamWriter> writer2 = streamRef1.getWriter();
 
 		Assert.assertTrue(writer2.isDone());
 		Assert.assertEquals(request, mockChannel.getLastWriteParam());
 
 		Http2Response response1 = Requests.createResponse(1, 0);
-		listener.addProcessResponse(CompletableFuture.completedFuture(null));
-		CompletableFuture<Void> fut1 = mockChannel.writeResponse(response1);
+		listener.addProcessResponse(XFuture.completedFuture(null));
+		XFuture<Void> fut1 = mockChannel.writeResponse(response1);
 		fut1.get(2, TimeUnit.SECONDS); //throws if exception occurred and ensures future resolved
 		
 		Http2Response msg = listener.getIncomingMsg();
 		Assert.assertEquals(response1, msg);
 		
 		Http2Response response2 = Requests.createResponse(2, 0);
-		listener2.addProcessResponse(CompletableFuture.completedFuture(null));
-		CompletableFuture<Void> fut2 = mockChannel.writeResponse(response2);
+		listener2.addProcessResponse(XFuture.completedFuture(null));
+		XFuture<Void> fut2 = mockChannel.writeResponse(response2);
 		fut2.get(2, TimeUnit.SECONDS); //throws if exception occurred and ensures future resolved
 		Http2Response msg2 = listener2.getIncomingMsg();
 		Assert.assertEquals(response2, msg2);

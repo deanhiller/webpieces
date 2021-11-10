@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.shared;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,49 +31,49 @@ public abstract class Level4PreconditionChecks<T> {
 		this.stateMachine = stateMachine;
 	}
 
-	public CompletableFuture<Void> sendDataToApp(DataFrame frame) {
+	public XFuture<Void> sendDataToApp(DataFrame frame) {
 		if(stateMachine.getClosedReason() != null) {
 			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		return stateMachine.sendDataToApp(frame);
 	}
 	
-	public CompletableFuture<Void> sendTrailersToApp(Http2Trailers frame) {
+	public XFuture<Void> sendTrailersToApp(Http2Trailers frame) {
 		if(stateMachine.getClosedReason() != null) {
 			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		
 		return stateMachine.sendTrailersToApp(frame);
 	}
 	
-	public CompletableFuture<Void> sendRstToApp(RstStreamFrame frame) {
+	public XFuture<Void> sendRstToApp(RstStreamFrame frame) {
 		return stateMachine.fireRstToClient(frame);
 	}
 	
-	public CompletableFuture<Void> sendRstToServerAndApp(StreamException e) {
+	public XFuture<Void> sendRstToServerAndApp(StreamException e) {
 		if(stateMachine.getClosedReason() != null) {
 			log.info("ignoring incoming reset since socket is shutting down");
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		return stateMachine.sendRstToServerAndApp(e);
 	}
 
-	public CompletableFuture<Void> sendGoAwayToApp(ConnReset2 reset) {	
+	public XFuture<Void> sendGoAwayToApp(ConnReset2 reset) {
 		return stateMachine.sendGoAwayToApp(reset);
 	}
 	
-	public CompletableFuture<Void> sendGoAwayToSvrAndResetAllToApp(ShutdownConnection reset) {
+	public XFuture<Void> sendGoAwayToSvrAndResetAllToApp(ShutdownConnection reset) {
 		return stateMachine.sendGoAwayToSvrAndResetAllToApp(reset);
 	}
 
 	
-	public CompletableFuture<Void> updateWindowSize(WindowUpdateFrame msg) {
+	public XFuture<Void> updateWindowSize(WindowUpdateFrame msg) {
 		if(stateMachine.getClosedReason()  != null) {
 			log.info("ignoring incoming window update since socket is shutting down");
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		
 		if(msg.getStreamId() == 0) {
@@ -83,7 +83,7 @@ public abstract class Level4PreconditionChecks<T> {
 		}
 	}
 
-	public CompletableFuture<Void> sendDataToSocket(Stream stream, StreamMsg data) {
+	public XFuture<Void> sendDataToSocket(Stream stream, StreamMsg data) {
 		ConnectionCancelled closedReason = stateMachine.getClosedReason();
 		if(closedReason != null) {
 			return createExcepted(data, "sending data", closedReason);
@@ -92,9 +92,9 @@ public abstract class Level4PreconditionChecks<T> {
 		return fireToSocket(stream, data, false);
 	}
 	
-	public CompletableFuture<Void> createExcepted(Http2Msg payload, String extra, ConnectionCancelled closedReason) {
-		log.info("returning CompletableFuture.exception since this socket is closed('"+extra+"' frame="+payload+"):"+closedReason.getReasonCode());
-		CompletableFuture<Void> future = new CompletableFuture<>();
+	public XFuture<Void> createExcepted(Http2Msg payload, String extra, ConnectionCancelled closedReason) {
+		log.info("returning XFuture.exception since this socket is closed('"+extra+"' frame="+payload+"):"+closedReason.getReasonCode());
+		XFuture<Void> future = new XFuture<>();
 		ConnectionClosedException exception = new ConnectionClosedException(closedReason, "Connection closed or closing:"+closedReason.getReasonCode());
 
 		if(closedReason instanceof ConnectionFailure) {
@@ -107,25 +107,25 @@ public abstract class Level4PreconditionChecks<T> {
 		return future;
 	}
 	
-	public CompletableFuture<Void> sendRstToSocket(Stream stream, RstStreamFrame frame) {
+	public XFuture<Void> sendRstToSocket(Stream stream, RstStreamFrame frame) {
 		return stateMachine.fireRstToSocket(stream, frame);
 	}
 	
-	protected CompletableFuture<Void> fireToSocket(Stream stream, StreamMsg frame, boolean keepDelayedState) {
+	protected XFuture<Void> fireToSocket(Stream stream, StreamMsg frame, boolean keepDelayedState) {
 		return stateMachine.fireToSocket(stream, frame, keepDelayedState);
 	}
 	
 
-	public CompletableFuture<Void> sendPriorityFrameToApp(PriorityFrame frame) {
+	public XFuture<Void> sendPriorityFrameToApp(PriorityFrame frame) {
 		if(stateMachine.getClosedReason() != null) {
 			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}	
 		
 		return stateMachine.firePriorityToClient(frame);
 	}
 
-	public CompletableFuture<Void> sendUnknownFrame(UnknownFrame msg) {
+	public XFuture<Void> sendUnknownFrame(UnknownFrame msg) {
 		return stateMachine.sendUnkownFrame(msg);
 	}
 

@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -62,7 +62,7 @@ public class TestBasicSslClientServer {
 		System.out.println("port="+bound.getPort());
 		
 		TCPChannel channel = mgr.createTCPChannel("client", f.createEngineForSocket());
-		CompletableFuture<Void> connect = channel.connect(bound, new ClientListener());
+		XFuture<Void> connect = channel.connect(bound, new ClientListener());
 		connect.get(10000000, TimeUnit.SECONDS);
 		writeData(channel);
 		
@@ -89,7 +89,7 @@ public class TestBasicSslClientServer {
 	private class ClientListener implements DataListener {
 
 		@Override
-		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			int value = b.get();
 			log.info("incoming client data="+value);
 			pool.releaseBuffer(b);
@@ -100,7 +100,7 @@ public class TestBasicSslClientServer {
 					pool.notifyAll();
 				}
 			}
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
@@ -117,7 +117,7 @@ public class TestBasicSslClientServer {
 	private class SvrDataListener implements AsyncDataListener {
 
 		@Override
-		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			log.info("server received data");
 			return channel.write(b)
 					.thenApply(c -> null);

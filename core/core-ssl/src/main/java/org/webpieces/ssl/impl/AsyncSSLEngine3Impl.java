@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLEngine;
@@ -59,7 +59,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	}
 	
 	@Override
-	public CompletableFuture<Void> beginHandshake() {
+	public XFuture<Void> beginHandshake() {
 		SSLEngine sslEngine = mem.getEngine();
 
 		circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.BEGIN_HANDSHAKE_START, sslEngine));
@@ -84,13 +84,13 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	}
 
 	@Override
-	public CompletableFuture<Void> feedEncryptedPacket(ByteBuffer encryptedInData) {
+	public XFuture<Void> feedEncryptedPacket(ByteBuffer encryptedInData) {
 		SSLEngine sslEngine = mem.getEngine();
 		circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.FEED_ENCRYPTED_START, sslEngine));
 		try {
 		
 			metrics.recordEncryptedBytesFromSocket(encryptedInData.remaining());
-			CompletableFuture<Void> future = decryptionTracker.addBytesToTrack(encryptedInData.remaining());
+			XFuture<Void> future = decryptionTracker.addBytesToTrack(encryptedInData.remaining());
 	
 			ByteBuffer cached = mem.getCachedToProcess();
 			ByteBuffer newEncryptedData = combine(cached, encryptedInData);
@@ -99,7 +99,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			boolean justStarted = mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 	
 	
-			//This is a bit complex to allow backpressure through the SSL Layer.  If not enough CompletableFutures
+			//This is a bit complex to allow backpressure through the SSL Layer.  If not enough XFutures
 			//are resolved, the lower layers turn off the socket(deregister from selector) until quite a few are
 			//resolved and we catch up.  This prevents the server from tanking under load ;).  Yes, it's pretty
 			//fucking sick!!!  well, that's my opinion since I had fun adding shit that you'll never know about.
@@ -156,7 +156,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		return (hsStatus == HandshakeStatus.NOT_HANDSHAKING || hsStatus == HandshakeStatus.NEED_UNWRAP) && mem.getCachedToProcess().hasRemaining();
 	}
 
-	private CompletableFuture<Void> doHandshakeWork() {
+	private XFuture<Void> doHandshakeWork() {
 		SSLEngine engine = mem.getEngine();
 		HandshakeStatus hsStatus = engine.getHandshakeStatus();
 		if(hsStatus == HandshakeStatus.NEED_TASK) {
@@ -172,7 +172,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				r.run(); 
 			}
 			
-			return CompletableFuture.completedFuture(null);	
+			return XFuture.completedFuture(null);
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
 			return sendHandshakeMessage(engine);
 		}
@@ -360,19 +360,19 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		});
 	}
 
-	private CompletableFuture<Void> doHandshakeLoop() {
+	private XFuture<Void> doHandshakeLoop() {
 		SSLEngine engine = mem.getEngine();
 		HandshakeStatus hsStatus = engine.getHandshakeStatus();
 
-		List<CompletableFuture<Void>> futures = new ArrayList<>();
+		List<XFuture<Void>> futures = new ArrayList<>();
 		while((hsStatus == HandshakeStatus.NEED_WRAP && !sslEngineIsFarting) || hsStatus == HandshakeStatus.NEED_TASK) {
-			CompletableFuture<Void> future = doHandshakeWork();
+			XFuture<Void> future = doHandshakeWork();
 			futures.add(future);
 			hsStatus = engine.getHandshakeStatus();
 		}
 
 		sslEngineIsFarting = false;
-		CompletableFuture<Void> futureAll = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+		XFuture<Void> futureAll = XFuture.allOf(futures.toArray(new XFuture[futures.size()]));
 		return futureAll;
 	}
 
@@ -387,7 +387,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			log.trace(mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
 	}
 
-	private CompletableFuture<Void> sendHandshakeMessage(SSLEngine engine) {
+	private XFuture<Void> sendHandshakeMessage(SSLEngine engine) {
 		try {
 			return sendHandshakeMessageImpl(engine);
 		} catch (SSLException e) {
@@ -395,7 +395,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		}
 	}
 	
-	private CompletableFuture<Void> sendHandshakeMessageImpl(SSLEngine engine) throws SSLException {
+	private XFuture<Void> sendHandshakeMessageImpl(SSLEngine engine) throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
 		if(log.isTraceEnabled())
 			log.trace(mem+"sending handshake message");
@@ -437,7 +437,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		engineToSocketData.flip();
 
 		try {
-			CompletableFuture<Void> sentMsgFuture;
+			XFuture<Void> sentMsgFuture;
 			if(readNoData) {
 				if(log.isTraceEnabled())
 					log.trace("ssl engine is farting. READ 0 data.  hsStatus="+hsStatus+" status="+lastStatus+" previous="+beforeWrapHandshakeStatus);
@@ -454,7 +454,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				//ADDITIONAL(different day):  Every time in docker opening client to remote server caused the ssl engine to fart(ie. come into this whacky
 				//location).  This location is specifically SSLEngine tells us to WRAP, and THEN decides to wrap NOTHING!! wtf.
 				sslEngineIsFarting = true;
-				sentMsgFuture = CompletableFuture.completedFuture(null);
+				sentMsgFuture = XFuture.completedFuture(null);
 			} else {
 				metrics.recordEncryptedToSocket(engineToSocketData.remaining());
 				sentMsgFuture = listener.sendEncryptedHandshakeData(engineToSocketData);
@@ -490,7 +490,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	}
 	
 	@Override
-	public CompletableFuture<Void> feedPlainPacket(ByteBuffer buffer) {
+	public XFuture<Void> feedPlainPacket(ByteBuffer buffer) {
 		SSLEngine engine = mem.getEngine();
 		circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.FEED_PLAIN_START, engine));
 
@@ -504,7 +504,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		}
 	}
 
-	private CompletableFuture<Void> feedPlainPacketImpl(ByteBuffer buffer) throws SSLException {
+	private XFuture<Void> feedPlainPacketImpl(ByteBuffer buffer) throws SSLException {
 		if(mem.getConnectionState() != ConnectionState.CONNECTED)
 			throw new NioClosedChannelException(mem+" SSLEngine is not connected right now");
 		else if(!buffer.hasRemaining())
@@ -514,7 +514,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		if(log.isTraceEnabled())
 			log.trace(mem+"feedPlainPacket [in-buffer] pos="+buffer.position()+" lim="+buffer.limit());
 		
-		CompletableFuture<Void> future = encryptionTracker.addBytesToTrack(buffer.remaining());
+		XFuture<Void> future = encryptionTracker.addBytesToTrack(buffer.remaining());
 		
 		while(buffer.hasRemaining()) {
 			ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());

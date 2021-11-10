@@ -2,19 +2,19 @@ package org.webpieces.asyncserver.api;
 
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface AsyncServer {
 
-	public CompletableFuture<Void> start(SocketAddress bindAddr);
+	public XFuture<Void> start(SocketAddress bindAddr);
 	
 	/**
 	 * Closes the server channel and then closes all existing channels that are open
 	 * @return
 	 */
-    public CompletableFuture<Void> closeServerChannel();
+    public XFuture<Void> closeServerChannel();
     
 	/**
 	 * Puts the server in a mode where all incoming connections are sent the response in the

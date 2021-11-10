@@ -14,7 +14,7 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.regex.Pattern;
 
 public class HttpsJsonClientInvokeHandler implements InvocationHandler {
@@ -53,8 +53,8 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         HttpMethod httpMethod = getHttpMethod(method);
         Class<?> clazz = method.getReturnType();
 
-        if(!(CompletableFuture.class.isAssignableFrom(clazz))) {
-            throw new IllegalStateException("All api methods must return a CompletableFuture");
+        if(!(XFuture.class.isAssignableFrom(clazz))) {
+            throw new IllegalStateException("All api methods must return a XFuture");
         }
 
         ParameterizedType t = (ParameterizedType)method.getGenericReturnType();

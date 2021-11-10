@@ -2,7 +2,7 @@ package org.webpieces.http2client.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ public class Layer3Outgoing implements ClientEngineListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendToSocket(ByteBuffer data) {
+	public XFuture<Void> sendToSocket(ByteBuffer data) {
 		if(log.isTraceEnabled())
 			log.trace(channel+"writing out data to socket size="+data.remaining());
 		return channel.write(data)
@@ -33,11 +33,11 @@ public class Layer3Outgoing implements ClientEngineListener {
 		channel.write(buf);
 	}
 
-	public CompletableFuture<Void> connect(InetSocketAddress addr, Layer1Incoming incoming) {
+	public XFuture<Void> connect(InetSocketAddress addr, Layer1Incoming incoming) {
 		return channel.connect(addr, incoming);
 	}
 
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		return channel.close();
 	}
 

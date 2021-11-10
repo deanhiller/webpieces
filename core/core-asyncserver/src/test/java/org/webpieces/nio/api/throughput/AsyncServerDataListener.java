@@ -1,7 +1,7 @@
 package org.webpieces.nio.api.throughput;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -24,9 +24,9 @@ public class AsyncServerDataListener implements AsyncDataListener {
 	}
 	
 	@Override
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		log.warn("This should not be called for throughput test as we do unidirectional test");
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class AsyncServerDataListener implements AsyncDataListener {
 			recorder2.markTime();
 	        while (true) {
 				ByteBuffer buffer = pool2.nextBuffer(32*1024);
-				CompletableFuture<Void> future = channel.write(buffer);
+				XFuture<Void> future = channel.write(buffer);
 				future.get(10, TimeUnit.SECONDS);
 	        }
 		}

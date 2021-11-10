@@ -1,7 +1,7 @@
 package org.webpieces.router.impl.loader;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -24,20 +24,20 @@ public class ChainFilters {
 		}
 
 		@Override
-		public CompletableFuture<Action> invoke(MethodMeta meta) {
+		public XFuture<Action> invoke(MethodMeta meta) {
 			Method method = meta.getLoadedController().getControllerMethod();
 
-			CompletableFuture<Action> resp; 
+			XFuture<Action> resp; 
 			try {
 				resp = filter.filter(meta, svc).thenApply((r) -> responseCheck(method, r));
 			} catch(Throwable e) {
-				resp = new CompletableFuture<Action>();
+				resp = new XFuture<Action>();
 				resp.completeExceptionally(e);
 			}
 			
 			if(resp == null) {
-				resp = new CompletableFuture<Action>();
-				resp.completeExceptionally(new IllegalStateException("Filter returned null CompletableFuture<Action> which is not allowed="+filter.getClass()+" after being given request with controller method="+method));
+				resp = new XFuture<Action>();
+				resp.completeExceptionally(new IllegalStateException("Filter returned null XFuture<Action> which is not allowed="+filter.getClass()+" after being given request with controller method="+method));
 			}
 			
 			return resp;
@@ -45,7 +45,7 @@ public class ChainFilters {
 		
 		private Action responseCheck(Method method, Action resp) {
 			if(resp == null)
-				throw new IllegalStateException("Filter returned CompletableFuture<Action> where the Action resolved to null which is not allowed="+filter.getClass()+" after being given request with controller method="+method);
+				throw new IllegalStateException("Filter returned XFuture<Action> where the Action resolved to null which is not allowed="+filter.getClass()+" after being given request with controller method="+method);
 			return resp;
 		}
 

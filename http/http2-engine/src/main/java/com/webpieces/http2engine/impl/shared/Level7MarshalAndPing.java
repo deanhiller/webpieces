@@ -2,7 +2,7 @@ package com.webpieces.http2engine.impl.shared;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -30,7 +30,7 @@ public class Level7MarshalAndPing {
 	private EngineResultListener finalLayer;
 	private HeaderSettings remoteSettings;
 	private MarshalState marshalState;
-	private AtomicReference<CompletableFuture<Void>> pingFutureRef;
+	private AtomicReference<XFuture<Void>> pingFutureRef;
 	private String key;
 	
 	public Level7MarshalAndPing(String key, HpackParser parser, HeaderSettings remoteSettings, EngineResultListener finalLayer) {
@@ -43,15 +43,15 @@ public class Level7MarshalAndPing {
         marshalState = parser.prepareToMarshal(remoteSettings.getHeaderTableSize(), remoteSettings.getMaxFrameSize());
 	}
 	
-//	public CompletableFuture<Void> sendControlFrameToClient(Http2Msg msg) {
+//	public XFuture<Void> sendControlFrameToClient(Http2Msg msg) {
 //		return finalLayer.sendControlFrameToClient(msg);
 //	}
 	
-	public CompletableFuture<Void> sendPing() {
+	public XFuture<Void> sendPing() {
 		PingFrame ping = new PingFrame();
 		ping.setOpaqueData(8L);
 
-		CompletableFuture<Void> newFuture = new CompletableFuture<>();
+		XFuture<Void> newFuture = new XFuture<>();
 		boolean wasSet = pingFutureRef.compareAndSet(null, newFuture);
 		if(!wasSet) {
 			throw new IllegalStateException(key+"You must wait until the first ping you sent is complete.  2nd ping="+ping);
@@ -61,7 +61,7 @@ public class Level7MarshalAndPing {
 				.thenCompose(c -> newFuture);
 	}
 	
-	public CompletableFuture<Void> processPing(PingFrame ping) {
+	public XFuture<Void> processPing(PingFrame ping) {
 		if(!ping.isPingResponse()) {
 			PingFrame pingAck = new PingFrame();
 			pingAck.setIsPingResponse(true);
@@ -69,14 +69,14 @@ public class Level7MarshalAndPing {
 			return sendFrameToSocket(pingAck);
 		}
 
-		CompletableFuture<Void> future = pingFutureRef.get();
+		XFuture<Void> future = pingFutureRef.get();
 		if(future == null)
 			throw new IllegalStateException(key+"bug, this should not be possible");
 
 		pingFutureRef.compareAndSet(future, null); //clear the value
 		future.complete(null);
 		
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	public void setEncoderMaxTableSize(int value) {
@@ -84,7 +84,7 @@ public class Level7MarshalAndPing {
 		marshalState.setOutgoingMaxTableSize(value);
 	}
 	
-	public CompletableFuture<Void> goAway(ShutdownConnection shutdown) {
+	public XFuture<Void> goAway(ShutdownConnection shutdown) {
 		CancelReasonCode reason = shutdown.getReasonCode();
 		byte[] bytes = shutdown.getReason().getBytes(StandardCharsets.UTF_8);
 		DataWrapper debug = dataGen.wrapByteArray(bytes);
@@ -93,12 +93,12 @@ public class Level7MarshalAndPing {
 		frame.setDebugData(debug);
 		frame.setKnownErrorCode(reason.getErrorCode());
 
-		CompletableFuture<Void> future1 = sendControlDataToSocket(frame);
+		XFuture<Void> future1 = sendControlDataToSocket(frame);
 		finalLayer.closeSocket(shutdown);
 		return future1;
 	}
 	
-	public CompletableFuture<Void> sendControlDataToSocket(Http2Msg msg) {
+	public XFuture<Void> sendControlDataToSocket(Http2Msg msg) {
 		int streamId = msg.getStreamId();
 		if(streamId != 0)
 			throw new IllegalArgumentException("control frame is not stream 0.  streamId="+streamId+" frame type="+msg.getClass());
@@ -106,7 +106,7 @@ public class Level7MarshalAndPing {
 		return sendFrameToSocket(msg);
 	}
 
-	public CompletableFuture<Void> sendFrameToSocket(Http2Msg msg) {
+	public XFuture<Void> sendFrameToSocket(Http2Msg msg) {
 		if(log.isDebugEnabled())
 			log.debug(key+"sending frame down to socket(from client)=\n"+msg);
 		DataWrapper data = parser.marshal(marshalState, msg);
@@ -114,7 +114,7 @@ public class Level7MarshalAndPing {
 		return sendToSocket(buffer);
 	}
 
-	public CompletableFuture<Void> sendToSocket(ByteBuffer buffer) {
+	public XFuture<Void> sendToSocket(ByteBuffer buffer) {
 		return finalLayer.sendToSocket(buffer);
 	}
 

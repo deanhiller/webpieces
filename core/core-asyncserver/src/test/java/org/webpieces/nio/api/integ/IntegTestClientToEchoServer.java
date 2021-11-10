@@ -2,7 +2,7 @@ package org.webpieces.nio.api.integ;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -55,7 +55,7 @@ public class IntegTestClientToEchoServer {
 
 		recorder.start();
 
-		CompletableFuture<Void> connect = channel.connect(new InetSocketAddress(4444), listener);
+		XFuture<Void> connect = channel.connect(new InetSocketAddress(4444), listener);
 		connect.thenAccept(p -> runWriting(channel));
 		
 		synchronized(this) {
@@ -96,7 +96,7 @@ public class IntegTestClientToEchoServer {
 //			log.info("counter="+counter);
 		byte[] data = new byte[10240];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		CompletableFuture<Void> write = channel.write(buffer);
+		XFuture<Void> write = channel.write(buffer);
 		
 		write
 			.thenAccept(p -> write(channel, "wrote data from client"))

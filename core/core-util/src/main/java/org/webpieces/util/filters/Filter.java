@@ -1,6 +1,6 @@
 package org.webpieces.util.filters;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.util.futures.FutureHelper;
 
@@ -9,12 +9,12 @@ public abstract class Filter<REQ, RESP> {
 	//default to this one unless changed out
 	private static FutureHelper futureUtil = new FutureHelper();
 
-	public abstract CompletableFuture<RESP> filter(REQ meta, Service<REQ, RESP> nextFilter);
+	public abstract XFuture<RESP> filter(REQ meta, Service<REQ, RESP> nextFilter);
 	
 	public Filter<REQ, RESP> chain(Filter<REQ, RESP> nextFilter) {
 		return new Filter<REQ, RESP>() {
 			@Override
-			public CompletableFuture<RESP> filter(REQ meta, Service<REQ, RESP> nextFilter) {
+			public XFuture<RESP> filter(REQ meta, Service<REQ, RESP> nextFilter) {
 				return futureUtil.syncToAsyncException(() -> Filter.this.filter(meta, nextFilter));
 			}
 		};
@@ -23,7 +23,7 @@ public abstract class Filter<REQ, RESP> {
 	public Service<REQ, RESP> chain(Service<REQ, RESP> svc) {
 		return new Service<REQ, RESP>() {
 			@Override
-			public CompletableFuture<RESP> invoke(REQ meta) {
+			public XFuture<RESP> invoke(REQ meta) {
 				return futureUtil.syncToAsyncException(() -> Filter.this.filter(meta, svc));
 			}
 		};

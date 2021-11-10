@@ -1,7 +1,7 @@
 package org.webpieces.router.impl.routeinvoker;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
@@ -19,7 +19,7 @@ public class ResponseProcessorAppError implements Processor {
 	}
 	
 	@Override
-	public CompletableFuture<Void> continueProcessing(MethodMeta meta, Action controllerResponse, ProxyStreamHandle handle) {
+	public XFuture<Void> continueProcessing(MethodMeta meta, Action controllerResponse, ProxyStreamHandle handle) {
 		if(!(controllerResponse instanceof RenderImpl)) {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
 					+ "precondition check on error routes to assert the correct return types in ControllerLoader which is called from the RouteBuilders");
@@ -27,7 +27,7 @@ public class ResponseProcessorAppError implements Processor {
 		return createRenderResponse(meta, (RenderImpl) controllerResponse, handle);
 	}
 	
-	public CompletableFuture<Void> createRenderResponse(MethodMeta meta, RenderImpl controllerResponse, ProxyStreamHandle handle) {
+	public XFuture<Void> createRenderResponse(MethodMeta meta, RenderImpl controllerResponse, ProxyStreamHandle handle) {
 		LoadedController loadedController = meta.getLoadedController();
 		String controllerName = loadedController.getControllerInstance().getClass().getName();
 		String methodName = loadedController.getControllerMethod().getName();
@@ -49,7 +49,7 @@ public class ResponseProcessorAppError implements Processor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.INTERNAL_SERVER_ERROR);
 		
-		return ContextWrap.wrap(ctx, () -> handle.sendRenderHtml(resp));
+		return handle.sendRenderHtml(resp);
 	}
 	
 }

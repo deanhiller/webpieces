@@ -2,7 +2,7 @@ package org.webpieces.http2client;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,7 +49,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	public void testSection4_2FrameTooLarge() {		
 		MockStreamWriter mockStreamWriter = new MockStreamWriter();
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(mockStreamWriter));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(mockStreamWriter));
 		Http2Request request = sendRequestToServer(listener1);
 		sendResponseFromServer(listener1, request);
 		
@@ -72,7 +72,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		//send new request on closed connection
 		Http2Request request1 = Requests.createRequest();
 		StreamRef streamRef = httpSocket.openStream().process(request1, listener1);
-		CompletableFuture<StreamWriter> future = streamRef.getWriter();
+		XFuture<StreamWriter> future = streamRef.getWriter();
 
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
@@ -86,7 +86,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	public void testSection4_2CanSendLargestFrame() {
 		MockStreamWriter mockStreamWriter = new MockStreamWriter();
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(mockStreamWriter));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(mockStreamWriter));
 		Http2Request request = sendRequestToServer(listener1);
 		sendResponseFromServer(listener1, request);
 		
@@ -106,7 +106,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	@Test
 	public void testSection4_3BadDecompression() {
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(null));
 		Http2Request request = sendRequestToServer(listener1);
 		
 		Assert.assertEquals(1, request.getStreamId()); //has to be 1 since we use 1 in the response
@@ -153,7 +153,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	public void testSection4_3InterleavedFrames() {
 		MockStreamWriter mockStreamWriter = new MockStreamWriter();
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(mockStreamWriter));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(mockStreamWriter));
 		Http2Request request = sendRequestToServer(listener1);
 		
 		Assert.assertEquals(1, request.getStreamId()); //has to be 1 since we use 1 in the response

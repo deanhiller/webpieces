@@ -1,13 +1,13 @@
 package org.webpieces.httpclient11.api;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
 public interface HttpSocket {
 
-	public CompletableFuture<Void> connect(InetSocketAddress addr);
+	public XFuture<Void> connect(InetSocketAddress addr);
 
 	/**
 	 * This can be used ONLY if 'you' know that the far end does NOT sended a chunked download. 
@@ -18,11 +18,11 @@ public interface HttpSocket {
 	 * @param request
 	 */
 	//TODO: Implement timeout for clients so that requests will timeout
-	public CompletableFuture<HttpFullResponse> send(HttpFullRequest request);
+	public XFuture<HttpFullResponse> send(HttpFullRequest request);
 
 	public HttpStreamRef send(HttpRequest request, HttpResponseListener l);
 
-	public CompletableFuture<Void> close();
+	public XFuture<Void> close();
 
 	public boolean isClosed();
 }

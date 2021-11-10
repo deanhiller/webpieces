@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
@@ -43,7 +43,7 @@ public class ClientStreamHandle implements RequestStreamHandle {
 		int streamId = getNextAvailableStreamId();
 		request.setStreamId(streamId);
 
-		CompletableFuture<StreamWriter> future = outgoingSyncro.sendRequestToSocket(request, responseListener)
+		XFuture<StreamWriter> future = outgoingSyncro.sendRequestToSocket(request, responseListener)
 				.thenApply(s -> {
 					stream = s;
 					return new EngineStreamWriter(s, outgoingSyncro);
@@ -54,19 +54,19 @@ public class ClientStreamHandle implements RequestStreamHandle {
 
 	public class MyStreamRef implements StreamRef {
 
-		private CompletableFuture<StreamWriter> future;
+		private XFuture<StreamWriter> future;
 
-		public MyStreamRef(CompletableFuture<StreamWriter> future) {
+		public MyStreamRef(XFuture<StreamWriter> future) {
 			this.future = future;
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> getWriter() {
+		public XFuture<StreamWriter> getWriter() {
 			return future;
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason reset) {
+		public XFuture<Void> cancel(CancelReason reset) {
 			if (stream == null)
 				throw new IllegalStateException("You have not sent a request yet so there is nothing to cancel");
 			else if (!(reset instanceof RstStreamFrame))

@@ -2,7 +2,7 @@ package org.webpieces.plugin.grpcjson;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,7 +38,7 @@ public class GrpcJsonCatchAllFilter extends RouteFilter<JsonConfig> {
 	}
 	
 	@Override
-	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+	public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 		if(isNotFoundFilter)
 			return createNotFoundResponse(nextFilter, meta);
 
@@ -106,12 +106,12 @@ public class GrpcJsonCatchAllFilter extends RouteFilter<JsonConfig> {
 		return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
 	}
 
-	protected CompletableFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
+	protected XFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
 		Matcher matcher = pattern.matcher(meta.getCtx().getRequest().relativePath);
 		if(!matcher.matches())
 			return nextFilter.invoke(meta);
 		
-		return CompletableFuture.completedFuture(
+		return XFuture.completedFuture(
 					createNotFound()
 				);
 	}

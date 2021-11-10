@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.shared;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,19 +37,19 @@ public abstract class Level6LocalFlowControl {
 		this.connectionLocalWindowSize = localSettings.getInitialWindowSize();
 	}
 	
-//	public CompletableFuture<Void> fireHeadersToClient(Stream stream, Http2Trailers payload) {
+//	public XFuture<Void> fireHeadersToClient(Stream stream, Http2Trailers payload) {
 //		return notifyListener.sendPieceToApp(stream, payload);
 //	}
 
-	public CompletableFuture<Void> firePriorityToClient(Stream stream, PriorityFrame payload) {
+	public XFuture<Void> firePriorityToClient(Stream stream, PriorityFrame payload) {
 		return notifyListener.sendPieceToApp(stream, payload);		
 	}
 	
-	public CompletableFuture<Void> fireRstToClient(Stream stream, CancelReason payload) {
+	public XFuture<Void> fireRstToClient(Stream stream, CancelReason payload) {
 		return notifyListener.sendRstToApp(stream, payload);		
 	}	
 	
-	public CompletableFuture<Void> fireDataToClient(Stream stream, StreamMsg payload) {
+	public XFuture<Void> fireDataToClient(Stream stream, StreamMsg payload) {
 		if(!(payload instanceof DataFrame))
 			return notifyListener.sendPieceToApp(stream, payload);
 

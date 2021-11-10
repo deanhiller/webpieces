@@ -2,7 +2,11 @@ package org.webpieces.webserver.test.http11;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.httpclient11.impl.ChannelProxy;
 import org.webpieces.nio.api.handlers.ConnectionListener;
@@ -21,7 +25,7 @@ public class DelayedProxy implements ChannelProxy {
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
+	public XFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
 		channel.setDataListener(dataListener);
 		return listener.connected(channel, true).thenApply( d -> {
 			toServerDataListener = d;
@@ -30,14 +34,21 @@ public class DelayedProxy implements ChannelProxy {
 	}
 
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer buffer) {
-		return toServerDataListener.incomingData(channel, buffer);
+	public XFuture<Void> write(ByteBuffer buffer) {
+		Map<String, Object> clientContext = Context.getContext();
+		//put a blank server context...
+		Context.restoreContext(new HashMap<>());
+		try {
+			return toServerDataListener.incomingData(channel, buffer);
+		} finally {
+			Context.restoreContext(clientContext);
+		}
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		toServerDataListener.farEndClosed(channel);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	@Override
