@@ -108,7 +108,7 @@ public class XFuture<T> extends CompletableFuture<T> {
 		@Override
 		public Object apply(Object t) {
 
-			Map<String, Object> prevState = Context.getContext();
+			Map<String, Object> prevState = Context.copyContext();
 			try {
 				Context.restoreContext(state);
 				
@@ -137,7 +137,7 @@ public class XFuture<T> extends CompletableFuture<T> {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Object apply(Object o, Object o2) {
-			Map<String, Object> prevState = Context.getContext();
+			Map<String, Object> prevState = Context.copyContext();
 			try {
 				Context.restoreContext(state);
 

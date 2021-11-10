@@ -40,7 +40,7 @@ public class Current {
 		Context.put(Context.HEADERS, headerMap);
 		Context.put(Context.REQUEST, requestCtx);
 		Context.put(ContextKey.REQUEST_PATH.toString(), requestCtx.getRequest().relativePath);
-
+		
 	}
 
 	private static Map<String, String> translateToSingleHeaders(RequestContext requestCtx) {

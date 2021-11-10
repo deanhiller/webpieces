@@ -49,6 +49,8 @@ public class TestStreamingRaw extends AbstractWebpiecesTest {
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
+		Context.clear();
+
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("jsonMeta.txt", PrivateWebserverForTest.class.getClassLoader());
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(new SimpleMeterRegistry()), new TestOverrides(), true, metaFile);
 		webserver.start();
@@ -89,16 +91,20 @@ public class TestStreamingRaw extends AbstractWebpiecesTest {
 		
 		XFuture<Boolean> authFuture = new XFuture<Boolean>();
 		mockAuth.addValueToReturn(authFuture);
-		
+
+		Assert.assertEquals(0, Context.getContext().size());
 		//Feed in request with content-length AND part of the body as well...
 		XFuture<Void> fut1 = dataListener.incomingData(channel, firstPacket);
+		Assert.assertEquals(0, Context.getContext().size());
 
 		//Feed in more BEFORE authFuture is complete(this was the bug, ie. race condition)
 		ByteBuffer buf2 = ByteBuffer.allocate(part2.length);
 		buf2.put(part2);
 		buf2.flip();
 		XFuture<Void> fut2 = dataListener.incomingData(channel, buf2);
-		
+
+		Assert.assertEquals(0, Context.getContext().size());
+
 		XFuture<StreamWriter> streamWriterFuture = new XFuture<StreamWriter>();
 		mockStreamClient.addStreamWriter(streamWriterFuture );
 		authFuture.complete(true); //complete it
@@ -107,6 +113,8 @@ public class TestStreamingRaw extends AbstractWebpiecesTest {
 		Assert.assertFalse(fut2.isDone());
 		MockStreamWriter2 mockStreamWriter = new MockStreamWriter2();
 		streamWriterFuture.complete(mockStreamWriter);
+
+		Assert.assertEquals(0, Context.getContext().size());
 
 		Assert.assertTrue(fut1.isDone());
 		Assert.assertTrue(fut2.isDone());
@@ -122,6 +130,9 @@ public class TestStreamingRaw extends AbstractWebpiecesTest {
 		Assert.assertEquals(str, s1);
 		String s2 = f2.getData().createStringFromUtf8(0, f2.getData().getReadableSize());
 		Assert.assertEquals(str2, s2);
+
+		Assert.assertEquals(0, Context.getContext().size());
+
 	}
 	
 	private class TestOverrides implements Module {
