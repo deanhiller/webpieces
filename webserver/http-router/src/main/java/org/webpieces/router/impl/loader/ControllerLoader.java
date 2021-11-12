@@ -4,7 +4,7 @@ package org.webpieces.router.impl.loader;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import org.webpieces.util.futures.XFuture;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -57,7 +57,7 @@ public class ControllerLoader {
 		Method controllerMethod = loadedController.getControllerMethod();
 		
 		Class<?> clazz = controllerMethod.getReturnType();
-		if(XFuture.class.isAssignableFrom(clazz)) {
+		if(CompletableFuture.class.isAssignableFrom(clazz)) {
 			Type genericReturnType = controllerMethod.getGenericReturnType();
 			ParameterizedType t = (ParameterizedType) genericReturnType;
 			Type type2 = t.getActualTypeArguments()[0];
@@ -106,12 +106,12 @@ public class ControllerLoader {
 	private void htmlPreconditionCheck(Object meta, Method controllerMethod, boolean isPostOnly) {
 		if(isPostOnly) {
 			Class<?> clazz = controllerMethod.getReturnType();
-			if(XFuture.class.isAssignableFrom(clazz)) {
+			if(CompletableFuture.class.isAssignableFrom(clazz)) {
 				Type genericReturnType = controllerMethod.getGenericReturnType();
 				ParameterizedType t = (ParameterizedType) genericReturnType;
 				Type type2 = t.getActualTypeArguments()[0];
 				if(!(type2 instanceof Class))
-					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'XFuture<Redirect>' for this method="+controllerMethod);
+					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' for this method="+controllerMethod);
 				@SuppressWarnings("rawtypes")
 				Class<?> type = (Class) type2;
 				if(!Redirect.class.isAssignableFrom(type))
@@ -120,7 +120,7 @@ public class ControllerLoader {
 				throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'XFuture<Redirect>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 		} else {
 			Class<?> clazz = controllerMethod.getReturnType();
-			if(XFuture.class.isAssignableFrom(clazz)) {
+			if(CompletableFuture.class.isAssignableFrom(clazz)) {
 				Type genericReturnType = controllerMethod.getGenericReturnType();
 				ParameterizedType t = (ParameterizedType) genericReturnType;
 				Type type2 = t.getActualTypeArguments()[0];

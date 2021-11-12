@@ -3,6 +3,8 @@ package org.webpieces.router.impl.services;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http.exception.BadRequestException;
@@ -89,12 +91,18 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 	@SuppressWarnings("unchecked")
 	private XFuture<Action> unwrapResult(Method method, Object retVal, BodyContentBinder binder) {
 		Class<?> returnType = method.getReturnType();
-		
+
 		if(XFuture.class.isAssignableFrom(returnType)) {
 			if(retVal == null)
 				throw new IllegalStateException("Your method returned a null XFuture which it not allowed.  method="+method);
 			XFuture<Object> future = (XFuture<Object>) retVal;
 			return future.thenApply((bean) -> marshal(method, binder, bean));
+		} else if(CompletableFuture.class.isAssignableFrom(returnType)) {
+			if(retVal == null)
+				throw new IllegalStateException("Your method returned a null XFuture which it not allowed.  method="+method);
+			CompletableFuture<Object> future = (CompletableFuture<Object>) retVal;
+			XFuture<Object> xFuture = XFuture.completedFuture(null).thenCompose((voi) -> future);
+			return xFuture.thenApply((bean) -> marshal(method, binder, bean));
 		} else {
 			RenderContent content = marshal(method, binder, retVal);
 			//binder.marshal(retVal);

@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
@@ -33,14 +35,16 @@ public class ControllerInvoker {
 	@SuppressWarnings("unchecked")
 	public XFuture<Action> coerceReturnValue(Object retVal) {
 		if(retVal instanceof XFuture) {
+			return (XFuture<Action>) retVal;
+		} else if(retVal instanceof CompletableFuture) {
 			//SPECIAL case...cache MDC to make exist over threads so if the future 'completes' on another thread(very typical)
 			//then the function in the finallyBlock below will run on that thread..
 			Map<String, String> mdcCopy = MDC.getCopyOfContextMap();
-			
+
 			//special case, IF the controller is returning a future, then later when he responds, the MDC is LOST BECAUSE
 			//Java will not implement scalas Local.scala(like a ThreadLocal but for futures so you can have state follow
 			//the request.  This means, logging breaks over some threads in the controller and we CANNOT fix that!!!
-			XFuture<Action> future = (XFuture<Action>) retVal;
+			XFuture<Action> future = XFuture.completedFuture(null).thenCompose((nothing) -> (CompletableFuture<Action>) retVal);
 			return futureUtil.finallyBlock( () -> future, () -> {
 				for(Entry<String, String> entry : mdcCopy.entrySet()) {
 					MDC.put(entry.getKey(), entry.getValue());
