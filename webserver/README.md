@@ -2,7 +2,6 @@
 
 ONLY THESE BIG ITEMS LEFT
 * publish to GCP artifactory to reduce Orderly iteration
-* XFuture so context issue is solve
 * Victor/Declan - fix SSL tests to use TLS1.3 or in circleCI get javax.net.ssl.SSLHandshakeException: No available authentication scheme
    * Victor - TestSslBasicClient.java
    * Declan - TestSslCloseClient.java
