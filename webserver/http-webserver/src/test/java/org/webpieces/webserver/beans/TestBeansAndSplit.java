@@ -2,7 +2,7 @@ package org.webpieces.webserver.beans;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -66,16 +66,16 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 		
 		channel.setDataListener(new DataReceiver());
 		ConnectionListener listener = mgr.getHttpConnection();
-		CompletableFuture<DataListener> future = listener.connected(channel, true);
+		XFuture<DataListener> future = listener.connected(channel, true);
 		dataListener = future.get(2, TimeUnit.SECONDS);
 	}
 
 	private class DataReceiver implements DataListener {
 		@Override
-		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			DataWrapper wrapper = dataGen.wrapByteBuffer(b);
 			dataReceived = dataGen.chainDataWrappers(dataReceived, wrapper);
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		@Override

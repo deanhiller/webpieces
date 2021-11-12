@@ -16,6 +16,7 @@ dependencies {
 
     api deps['elastic-search']
     api deps['jackson']
+    api deps['core-util']
 
     implementation deps['micrometer']
 

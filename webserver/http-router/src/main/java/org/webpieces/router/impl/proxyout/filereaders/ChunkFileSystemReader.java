@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class ChunkFileSystemReader implements ChunkReader {
 		return "ChunkFileSystemReader="+file;
 	}
 	private static class OurCompletionHandler implements CompletionHandler<Integer, String> {
-		private CompletableFuture<Integer> future;
+		private XFuture<Integer> future;
 		private int remaining;
 		private String socket;
 		private String txId;
@@ -37,7 +37,7 @@ public class ChunkFileSystemReader implements ChunkReader {
 		private ByteBuffer buf;
 		private String filePathForLogging;
 		
-		public OurCompletionHandler(CompletableFuture<Integer> future, int remaining, Path file, ByteBuffer buf, String filePathForLogging) {
+		public OurCompletionHandler(XFuture<Integer> future, int remaining, Path file, ByteBuffer buf, String filePathForLogging) {
 			this.future = future;
 			this.remaining = remaining;
 			this.file = file;
@@ -77,8 +77,8 @@ public class ChunkFileSystemReader implements ChunkReader {
 	}
 	
 	@Override
-	public CompletableFuture<Integer> read(ByteBuffer buf, String filePathForLogging, int position) {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+	public XFuture<Integer> read(ByteBuffer buf, String filePathForLogging, int position) {
+		XFuture<Integer> future = new XFuture<Integer>();
 		
 		int remaining = buf.remaining();
     

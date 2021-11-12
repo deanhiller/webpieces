@@ -1,11 +1,11 @@
 package org.webpieces.router.api.simplesvr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class SomeService {
 
-	public CompletableFuture<Integer> remoteCall() {
-		return CompletableFuture.completedFuture(5);
+	public XFuture<Integer> remoteCall() {
+		return XFuture.completedFuture(5);
 	}
 
 }

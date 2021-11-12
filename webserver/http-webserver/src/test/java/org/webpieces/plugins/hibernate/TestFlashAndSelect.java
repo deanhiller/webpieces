@@ -1,6 +1,6 @@
 package org.webpieces.plugins.hibernate;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -68,7 +68,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		String urlPath = "/user/edit/"+user.getId();
         HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
         
-        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+        XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -90,7 +90,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 				"entity.levelOfEducation", ""
 				);
 		
-		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
+		XFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
 		
 		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -101,7 +101,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
-        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+        XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -117,7 +117,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		String urlPath = "/multiselect/"+user.getId();
         HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
         
-        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+        XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -141,7 +141,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 				"selectedRoles", "d"
 				);
 		
-		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
+		XFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
 		
 		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -152,7 +152,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
-        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+        XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -174,7 +174,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 				"selectedRoles", "j"
 				);
 		
-		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
+		XFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
 		
 		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -185,7 +185,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
-        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+        XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 

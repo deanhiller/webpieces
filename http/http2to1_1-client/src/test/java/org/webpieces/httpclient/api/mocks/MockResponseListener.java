@@ -1,7 +1,7 @@
 package org.webpieces.httpclient.api.mocks;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
@@ -23,8 +23,8 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
-		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.PROCESS, response);
+	public XFuture<StreamWriter> process(Http2Response response) {
+		return (XFuture<StreamWriter>) super.calledMethod(Method.PROCESS, response);
 	}
 
 	@Override
@@ -33,9 +33,9 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason payload) {
+	public XFuture<Void> cancel(CancelReason payload) {
 		isCancelled = true;
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	public Http2Response getIncomingMsg() {
@@ -45,7 +45,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 		return (Http2Response) params.get(0).getArgs()[0];
 	}
 
-	public void addProcessResponse(CompletableFuture<StreamWriter> future) {
+	public void addProcessResponse(XFuture<StreamWriter> future) {
 		super.addValueToReturn(Method.PROCESS, future);
 	}
 

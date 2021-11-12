@@ -2,7 +2,7 @@ package org.webpieces.nio.api;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -40,7 +40,7 @@ public class TestWriting {
 		
 		mockChannel.addConnectReturnValue(true);
 		mockJdk.setThread(Thread.currentThread());
-		CompletableFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
+		XFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
 		future.get(2, TimeUnit.SECONDS);
 		Assert.assertTrue(mockChannel.isRegisteredForReads());
 	}
@@ -48,7 +48,7 @@ public class TestWriting {
 	@Test
 	public void testImmediateWrite() throws InterruptedException, ExecutionException, TimeoutException {
 		mockChannel.setNumBytesToConsume(2);
-		CompletableFuture<Void> future = channel.write(ByteBuffer.wrap(new byte[] { 1, 3 }));
+		XFuture<Void> future = channel.write(ByteBuffer.wrap(new byte[] { 1, 3 }));
 		future.get(2, TimeUnit.SECONDS);
 		
 		Assert.assertEquals(1, mockChannel.nextByte());
@@ -58,7 +58,7 @@ public class TestWriting {
 	@Test
 	public void testDelayedWrite() throws InterruptedException, ExecutionException, TimeoutException {
 		
-		CompletableFuture<Void> future = channel.write(ByteBuffer.wrap(new byte[] { 2, 5 }));
+		XFuture<Void> future = channel.write(ByteBuffer.wrap(new byte[] { 2, 5 }));
 		Assert.assertFalse(future.isDone());		
 		Assert.assertTrue(mockChannel.isRegisteredForWrites());
 		
@@ -78,7 +78,7 @@ public class TestWriting {
 
 		mockChannel.setNumBytesToConsume(1);
 
-		CompletableFuture<Void> future = channel.write(ByteBuffer.wrap(new byte[] { 9, 5 }));
+		XFuture<Void> future = channel.write(ByteBuffer.wrap(new byte[] { 9, 5 }));
 		Assert.assertFalse(future.isDone());
 		Assert.assertEquals(1, mockChannel.getNumBytesConsumed());
 		Assert.assertEquals(9, mockChannel.nextByte());

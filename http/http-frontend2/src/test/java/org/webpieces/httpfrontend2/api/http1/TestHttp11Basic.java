@@ -2,7 +2,7 @@ package org.webpieces.httpfrontend2.api.http1;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -58,7 +58,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		HttpResponse resp = Requests.createResponse();
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 		Http2Response headers = Http11ToHttp2.responseToHeaders(resp);
-		CompletableFuture<StreamWriter> future = in1.stream.process(headers);
+		XFuture<StreamWriter> future = in1.stream.process(headers);
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, respToClient);
 		
@@ -132,7 +132,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		
 		HttpResponse resp = Requests.createNobodyResponse();
 		Http2Response http2Resp = Http11ToHttp2.responseToHeaders(resp);
-		CompletableFuture<StreamWriter> fut = in1.stream.process(http2Resp);
+		XFuture<StreamWriter> fut = in1.stream.process(http2Resp);
 		fut.get(2, TimeUnit.SECONDS);
 		
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
@@ -147,7 +147,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		mockChannel.sendToSvr(req);		
 		PassedIn in1 = mockListener.getSingleRequest();
 		
-		CompletableFuture<Void> future = mockChannel.sendToSvrAsync(req2);
+		XFuture<Void> future = mockChannel.sendToSvrAsync(req2);
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 		Assert.assertFalse(future.isDone());
 
@@ -192,7 +192,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		mockChannel.sendToSvr(data2);
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
 		
-		CompletableFuture<Void> fut = mockChannel.sendToSvrAsync(req2);
+		XFuture<Void> fut = mockChannel.sendToSvrAsync(req2);
 		Assert.assertFalse(fut.isDone());
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
 
@@ -225,20 +225,20 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		PassedIn in1 = mockListener.getSingleRequest();
 
 		req2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "20"));
-		CompletableFuture<Void> fut = mockChannel.sendToSvrAsync(req2);
+		XFuture<Void> fut = mockChannel.sendToSvrAsync(req2);
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 		Assert.assertFalse(fut.isDone());
 
 		byte[] buf = new byte[10];
 		DataWrapper dataWrapper = DATA_GEN.wrapByteArray(buf);
 		HttpData data1 = new HttpData(dataWrapper, false);
-		CompletableFuture<Void> fut2 = mockChannel.sendToSvrAsync(data1);
+		XFuture<Void> fut2 = mockChannel.sendToSvrAsync(data1);
 		Assert.assertFalse(fut.isDone());
 		Assert.assertFalse(fut2.isDone());
 
 		DataWrapper dataWrapper2 = DATA_GEN.wrapByteArray(buf);
 		HttpData data2 = new HttpData(dataWrapper2, true);
-		CompletableFuture<Void> fut3 = mockChannel.sendToSvrAsync(data2);
+		XFuture<Void> fut3 = mockChannel.sendToSvrAsync(data2);
 
 		Assert.assertFalse(fut.isDone());
 		Assert.assertFalse(fut2.isDone());
@@ -274,14 +274,14 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		mockChannel.sendToSvr(req);		
 		PassedIn in1 = mockListener.getSingleRequest();
 		
-		CompletableFuture<Void> fut1 = mockChannel.sendToSvrAsync(req2);
+		XFuture<Void> fut1 = mockChannel.sendToSvrAsync(req2);
 		Assert.assertFalse(fut1.isDone());
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "10"));
 		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
-		CompletableFuture<StreamWriter> future = in1.stream.process(headers1);
+		XFuture<StreamWriter> future = in1.stream.process(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
 		StreamWriter writer = future.get(2, TimeUnit.SECONDS);

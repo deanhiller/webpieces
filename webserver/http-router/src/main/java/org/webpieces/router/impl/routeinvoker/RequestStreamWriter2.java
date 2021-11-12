@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routeinvoker;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -33,23 +33,23 @@ public class RequestStreamWriter2 implements StreamWriter {
     private DataWrapper data = dataGen.emptyWrapper();
 
     private boolean cancelled;
-    private CompletableFuture<Void> responseFuture = new CompletableFuture<>();
+    private XFuture<Void> responseFuture = new XFuture<>();
 
 	private MethodMeta meta;
-	private Function<MethodMeta, CompletableFuture<Void>> invoker;
+	private Function<MethodMeta, XFuture<Void>> invoker;
 
     public RequestStreamWriter2(
-    		BodyParsers bodyParsers, MethodMeta meta, Function<MethodMeta, CompletableFuture<Void>> invoker) {
+    		BodyParsers bodyParsers, MethodMeta meta, Function<MethodMeta, XFuture<Void>> invoker) {
 		this.requestBodyParsers = bodyParsers;
 		this.meta = meta;
 		this.invoker = invoker;
     }
 
     @Override
-    public CompletableFuture<Void> processPiece(StreamMsg frame) {
+    public XFuture<Void> processPiece(StreamMsg frame) {
 
         if(cancelled) {
-            return CompletableFuture.completedFuture(null);
+            return XFuture.completedFuture(null);
         } else if(frame instanceof CancelReason) {
             cancelled = true;
             responseFuture.cancel(true);
@@ -69,10 +69,10 @@ public class RequestStreamWriter2 implements StreamWriter {
         }
 
         //return immediately resolved as we need more data to form request
-        return CompletableFuture.completedFuture(null);
+        return XFuture.completedFuture(null);
     }
 
-    private CompletableFuture<Void> handleCompleteRequestImpl() {
+    private XFuture<Void> handleCompleteRequestImpl() {
 
         RouterRequest request = meta.getCtx().getRequest();
 

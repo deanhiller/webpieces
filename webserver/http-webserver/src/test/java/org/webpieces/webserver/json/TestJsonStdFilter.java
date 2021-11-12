@@ -3,7 +3,7 @@ package org.webpieces.webserver.json;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -75,7 +75,7 @@ public class TestJsonStdFilter extends AbstractWebpiecesTest {
 		String json = "{ `query`: null, `meta`: { `numResults`: 4 } }".replace("`", "\"");
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/async/45", json);
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);

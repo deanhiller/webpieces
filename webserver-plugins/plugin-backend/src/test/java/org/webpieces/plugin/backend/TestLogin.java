@@ -1,7 +1,7 @@
 package org.webpieces.plugin.backend;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -58,7 +58,7 @@ public class TestLogin extends AbstractWebpiecesTest {
 	public void testLoginNotExistOnHttp() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@backend/login");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);		
@@ -68,7 +68,7 @@ public class TestLogin extends AbstractWebpiecesTest {
 	public void testLoginPageRender() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@backend/login");
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);		
@@ -83,7 +83,7 @@ public class TestLogin extends AbstractWebpiecesTest {
 				"username", "admin",
 				"password", "admin");
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);

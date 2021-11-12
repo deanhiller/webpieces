@@ -1,7 +1,7 @@
 package com.webpieces.http2engine.impl.client;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 
@@ -33,19 +33,19 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 		this.listener = socketListener;
 	}
 
-	public CompletableFuture<Void> sendPreface(DataWrapper prefaceData) {
+	public XFuture<Void> sendPreface(DataWrapper prefaceData) {
 		ByteBuffer buffer = ByteBuffer.wrap(prefaceData.createByteArray());
 		return sendToSocket(buffer);
 	}
 
 	@Override
-	public CompletableFuture<Void> sendToSocket(ByteBuffer buffer) {
+	public XFuture<Void> sendToSocket(ByteBuffer buffer) {
 		return listener.sendToSocket(buffer);
 	}
 
 	@Override
-	public CompletableFuture<Void> sendControlFrameToClient(Http2Msg msg) {
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
+	public XFuture<Void> sendControlFrameToClient(Http2Msg msg) {
+		XFuture<Void> future = new XFuture<Void>();
 		try {
 			if(msg instanceof GoAwayFrame) {
 				listener.sendControlFrameToClient((Http2Frame) msg);
@@ -69,7 +69,7 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
+	public XFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
 		
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
@@ -83,7 +83,7 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
+	public XFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
 		ClientStream str = (ClientStream) stream;
 		StreamWriter writer = str.getResponseWriter();
 		return writer.processPiece(payload)
@@ -91,14 +91,14 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload) {
+	public XFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload) {
 		ClientStream str = (ClientStream) stream;
 		StreamWriter writer = str.getResponseWriter();
 		return writer.processPiece(payload)
 				.thenApply(null);
 	}
 
-	public CompletableFuture<Void> sendResponseToApp(Stream stream, Http2Response response) {
+	public XFuture<Void> sendResponseToApp(Stream stream, Http2Response response) {
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
 			ResponseStreamHandle listener = str.getResponseListener();
@@ -118,7 +118,7 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 					});
 	}
 
-	public CompletableFuture<Void> sendPushToApp(ClientPushStream stream, Http2Push fullPromise) {
+	public XFuture<Void> sendPushToApp(ClientPushStream stream, Http2Push fullPromise) {
 		ResponseStreamHandle listener = stream.getOriginalResponseListener();
 		PushStreamHandle pushHandle = listener.openPushStream();
 		stream.setPushStreamHandle(pushHandle);

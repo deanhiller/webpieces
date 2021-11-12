@@ -2,7 +2,7 @@ package org.webpieces.router.impl.proxyout.filereaders;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public abstract class XFileReader {
 		this.futureUtil = futureUtil;
 	}
 
-	public CompletableFuture<Void> runFileRead(RequestInfo info, RenderStaticResponse renderStatic, ProxyStreamHandle handle) throws IOException {
+	public XFuture<Void> runFileRead(RequestInfo info, RenderStaticResponse renderStatic, ProxyStreamHandle handle) throws IOException {
 		
 		
 		VirtualFile fullFilePath = renderStatic.getFilePath();
@@ -90,7 +90,7 @@ public abstract class XFileReader {
 	private void empty() {}
 
 	
-	private CompletableFuture<Void> readLoop(
+	private XFuture<Void> readLoop(
 			StreamWriter writer, BufferPool pool, ChunkReader reader, int position) {
 		//Because asyncRead creates a new future every time and dumps it to a fileExecutor threadpool, we do not need
 		//to use future.thenApplyAsync to avoid a stackoverflow
@@ -102,7 +102,7 @@ public abstract class XFileReader {
 		//NOTE: I don't like inlining code BUT this is recursive and I HATE recursion between multiple methods so
 		//this method fileReadLoop ONLY calls itself below as it continues to read and send chunks
 
-		CompletableFuture<Integer> future = reader.read(buf, reader+"", position);
+		XFuture<Integer> future = reader.read(buf, reader+"", position);
 
 		return future.thenCompose(readCount -> {
 					buf.flip();
@@ -126,7 +126,7 @@ public abstract class XFileReader {
 			});
 	}
 	
-	private CompletableFuture<Void> sendHttpChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf, boolean isEos) {
+	private XFuture<Void> sendHttpChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf, boolean isEos) {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 
 		int len = data.getReadableSize();

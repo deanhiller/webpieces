@@ -2,7 +2,7 @@ package org.webpieces.router.impl.routebldr;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import org.webpieces.ctx.api.RequestContext;
@@ -48,14 +48,14 @@ public class StreamProxy implements StreamService {
 
 		
 		StreamRef streamRef = invokeStream(meta, controllerMethod, instance, requestCtx, handle);
-		CompletableFuture<StreamWriter> writer = streamRef.getWriter();
+		XFuture<StreamWriter> writer = streamRef.getWriter();
 		
-		CompletableFuture<StreamWriter> newFuture = futureUtil.catchBlockWrap(
+		XFuture<StreamWriter> newFuture = futureUtil.catchBlockWrap(
 				() -> writer,
 				(t) -> convert(loadedController, t)
 		); 
 
-		Function<CancelReason, CompletableFuture<Void>> cancelFunc = (reason) -> streamRef.cancel(reason);		
+		Function<CancelReason, XFuture<Void>> cancelFunc = (reason) -> streamRef.cancel(reason);
 		return new RouterStreamRef("streamProxy", newFuture, cancelFunc);
 	}
 
@@ -69,7 +69,7 @@ public class StreamProxy implements StreamService {
 			return streamRef;
 			
 		} catch (Throwable e) {
-			CompletableFuture<StreamWriter> failedFuture = futureUtil.failedFuture(e);
+			XFuture<StreamWriter> failedFuture = futureUtil.failedFuture(e);
 			return new RouterStreamRef("controllerFailed", failedFuture, null);
 		}
 	}

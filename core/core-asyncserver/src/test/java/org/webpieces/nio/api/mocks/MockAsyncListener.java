@@ -2,7 +2,7 @@ package org.webpieces.nio.api.mocks;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.mock.MethodEnum;
@@ -21,15 +21,15 @@ public class MockAsyncListener extends MockSuperclass implements AsyncDataListen
 	}
 	
 	public MockAsyncListener() {
-		setDefaultReturnValue(Method.INCOMING_DATA, CompletableFuture.completedFuture(null));
+		setDefaultReturnValue(Method.INCOMING_DATA, XFuture.completedFuture(null));
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		byte[] newData = new byte[b.remaining()];
 		b.get(newData);
-		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_DATA, channel, newData);
+		return (XFuture<Void>) super.calledMethod(Method.INCOMING_DATA, channel, newData);
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class MockAsyncListener extends MockSuperclass implements AsyncDataListen
 		return super.getCalledMethodList(Method.INCOMING_DATA).size();
 	}
 
-	public void addIncomingRetValue(CompletableFuture<Void> future1) {
+	public void addIncomingRetValue(XFuture<Void> future1) {
 		super.addValueToReturn(Method.INCOMING_DATA, future1);
 	}
 	

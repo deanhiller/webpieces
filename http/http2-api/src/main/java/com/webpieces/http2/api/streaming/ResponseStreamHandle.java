@@ -1,6 +1,6 @@
 package com.webpieces.http2.api.streaming;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.lowlevel.CancelReason;
@@ -11,7 +11,7 @@ public interface ResponseStreamHandle {
 	 * For Http2ClientEngine, this receives the Http2 Response and for Http2ServerEngine, you call this method
 	 * to send a response
 	 */
-	CompletableFuture<StreamWriter> process(Http2Response response);
+	XFuture<StreamWriter> process(Http2Response response);
 
 	/**
 	 * This does nothing in http1.1. 
@@ -30,6 +30,6 @@ public interface ResponseStreamHandle {
 	 * are tests that will fail if this cancel is moved there....sooo, this must stay PLUS you would break clients which
 	 * is even a bigger reason this can never be moved.
 	 */
-	CompletableFuture<Void> cancel(CancelReason reason);	
+	XFuture<Void> cancel(CancelReason reason);
 
 }

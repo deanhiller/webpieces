@@ -54,7 +54,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         Class<?> clazz = method.getReturnType();
 
         if(!(CompletableFuture.class.isAssignableFrom(clazz))) {
-            throw new IllegalStateException("All api methods must return a CompletableFuture");
+            throw new IllegalStateException("All api methods must return a XFuture");
         }
 
         ParameterizedType t = (ParameterizedType)method.getGenericReturnType();

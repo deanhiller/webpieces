@@ -1,6 +1,6 @@
 package org.webpieces.webserver.filters.app;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 
@@ -25,7 +25,7 @@ public class StatefulFilter extends RouteFilter<Integer> {
 	}
 
 	@Override
-	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+	public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 		svc.record(initialConfig);
 		return nextFilter.invoke(meta);
 	}

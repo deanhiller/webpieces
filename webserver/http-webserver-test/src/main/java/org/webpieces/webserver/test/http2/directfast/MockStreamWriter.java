@@ -5,8 +5,9 @@ import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 import org.webpieces.util.context.Context;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class MockStreamWriter implements StreamWriter {
     private static final String IS_SERVER_SIDE = "_isServerSide";
@@ -18,22 +19,16 @@ public class MockStreamWriter implements StreamWriter {
     }
 
     @Override
-    public CompletableFuture<Void> processPiece(StreamMsg data) {
-
-        Boolean isServerSide = (Boolean) Context.get(IS_SERVER_SIDE);
+    public XFuture<Void> processPiece(StreamMsg data) {
 
         Map<String, Object> context = Context.copyContext();
-        Context.put(IS_SERVER_SIDE, Boolean.TRUE);
+
+        //clear context for server side since client context does not leak there across socket
+        Context.restoreContext(new HashMap<>());
         try {
             return writer.processPiece(data);
         } finally {
-            if(isServerSide == null) {
-                //We must simulate being separate from the webserver and the webserver sets and
-                //clears the context so we need to capture context and restore it here for tests
-                //since everything is single threaded, the server loops around in which case, we
-                //do not want to touch the server's context
-                Context.restoreContext(context);
-            }
+            Context.restoreContext(context);
         }
     }
 }

@@ -1,7 +1,7 @@
 package org.webpieces.nio.impl.threading;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +25,8 @@ public class ThreadDataListener implements DataListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		XFuture<Void> future = new XFuture<Void>();
 		executor.execute(proxy, new DataListeneRunanble(dataListener, proxy, b, future));
 		
 		return future;
@@ -36,10 +36,10 @@ public class ThreadDataListener implements DataListener {
 		private DataListener dataListener;
 		private ThreadChannel proxy;
 		private ByteBuffer buffer;
-		private CompletableFuture<Void> future;
+		private XFuture<Void> future;
 
 		public DataListeneRunanble(DataListener dataListener, ThreadChannel proxyChannel, ByteBuffer b,
-				CompletableFuture<Void> future) {
+				XFuture<Void> future) {
 					this.dataListener = dataListener;
 					this.proxy = proxyChannel;
 					this.buffer = b;
@@ -51,7 +51,7 @@ public class ThreadDataListener implements DataListener {
 			MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
 
 			try {
-				CompletableFuture<Void> fut = dataListener.incomingData(proxy, buffer);
+				XFuture<Void> fut = dataListener.incomingData(proxy, buffer);
 				fut.handle((v, t) -> {
 					if(t == null)
 						future.complete(null);

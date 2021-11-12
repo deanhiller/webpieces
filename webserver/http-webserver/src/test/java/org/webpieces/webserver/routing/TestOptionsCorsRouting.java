@@ -20,7 +20,7 @@ import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -42,7 +42,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 		String accessHeaders = "Authorization, Content-Type";
 		HttpFullRequest req = Requests.createOptionsPreflightRequest("http://notallowed.domain.com", "/content", accessHeaders, "PUT");
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -57,7 +57,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 		String accessHeaders = "Authorization, Content-Type";
 		HttpFullRequest req = Requests.createOptionsPreflightRequest(CorsForTwoDomains.DOMAIN1, "/content", accessHeaders, "PUT");
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -90,7 +90,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 		String accessHeaders = "Authorization, Content-Type";
 		HttpFullRequest req = Requests.createOptionsPreflightRequest(CorsForTwoDomains.DOMAIN_WITH_PORT, "/content", accessHeaders, "PUT");
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -104,7 +104,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 		String accessHeaders = "Authorization, Content-Type";
 		HttpFullRequest req = Requests.createOptionsPreflightRequest(CorsForTwoDomains.DOMAIN1, "/content2", accessHeaders, "POST");
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -131,7 +131,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 		String accessHeaders = "Authorization";
 		HttpFullRequest req = Requests.createOptionsPreflightRequest(fromDomain, "/allDomains", accessHeaders, "POST");
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -165,7 +165,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 		String accessHeaders = "Content-Type";
 		HttpFullRequest req = Requests.createOptionsPreflightRequest(CorsForTwoDomains.DOMAIN1, "/content", accessHeaders, "POST");
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -198,7 +198,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 		String accessHeaders = "Authorization, Content-Type, NotAllowedHeader";
 		HttpFullRequest req = Requests.createOptionsPreflightRequest(fromDomain, "/allDomains", accessHeaders, "POST");
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -230,7 +230,7 @@ public class TestOptionsCorsRouting extends AbstractWebpiecesTest {
 		String accessHeaders = "Authorization";
 		HttpFullRequest req = Requests.createOptionsPreflightRequest(CorsForTwoDomains.DOMAIN_WITH_PORT, "/noMethodsSupportCors", accessHeaders, "GET");
 
-		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 

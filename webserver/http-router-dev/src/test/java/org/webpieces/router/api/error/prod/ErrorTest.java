@@ -1,6 +1,6 @@
 package org.webpieces.router.api.error.prod;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,7 +40,7 @@ public class ErrorTest {
 
 		MockStreamHandle mockStream = new MockStreamHandle();
 		StreamRef ref = server.incomingRequest(req, mockStream);
-		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+		XFuture<StreamWriter> future = ref.getWriter();
 		
 		//done and no exception SINCE we responded to client successfully
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally()); 

@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.data.api.DataWrapper;
@@ -64,12 +64,12 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendPing() {
+	public XFuture<Void> sendPing() {
 		return marshalLayer.sendPing();
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendInitializationToSocket() {
+	public XFuture<Void> sendInitializationToSocket() {
 		return outgoingSyncro.sendInitializationToSocket();
 	}
 	
@@ -79,7 +79,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	}
 
 	@Override
-	public CompletableFuture<Void> parse(DataWrapper newData) {
+	public XFuture<Void> parse(DataWrapper newData) {
 		return parsing.parse(newData);
 	}
 

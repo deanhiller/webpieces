@@ -1,11 +1,11 @@
 package org.webpieces.webserver.json.app;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class FakeAuthService {
 
-	public CompletableFuture<Boolean> authenticate(String username) {
-		return CompletableFuture.completedFuture(true);
+	public XFuture<Boolean> authenticate(String username) {
+		return XFuture.completedFuture(true);
 	}
 
 	public void saveRequest(SearchRequest request) {

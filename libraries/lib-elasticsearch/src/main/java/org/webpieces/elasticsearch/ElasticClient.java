@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import javax.inject.Singleton;
@@ -53,14 +53,14 @@ public class ElasticClient {
         }
     }
 
-    public CompletableFuture<Response> loadDocument(String index, long id, Object document) {
+    public XFuture<Response> loadDocument(String index, long id, Object document) {
         Map<String, String> params = Collections.emptyMap();
         //url format is /{index}/{type}/{documentId}
         //type goes away in future releases as well so don't put different types in the same index!!!(use new index)
         return performRequest("PUT", "/"+index+"/_doc/"+id, params, document);
     }
 
-    public CompletableFuture<Response> createAlias(String alias, String indexName) {
+    public XFuture<Response> createAlias(String alias, String indexName) {
         Map<String, String> params = Collections.emptyMap();
         
         AliasChange addAlias = new AliasChange();
@@ -76,12 +76,12 @@ public class ElasticClient {
     	return performRequest("POST", "/_aliases", params, list);
     }
     
-	public CompletableFuture<Response> getAliases(String index) {
+	public XFuture<Response> getAliases(String index) {
         Map<String, String> params = Collections.emptyMap();
     	return performRequest("GET", "/"+index+"/_alias/*", params, null);
 	}
 	
-    public CompletableFuture<Response> renameAlias(String previousIndex, String newIndex, String alias) {
+    public XFuture<Response> renameAlias(String previousIndex, String newIndex, String alias) {
         Map<String, String> params = Collections.emptyMap();
 
         AliasChange removeAlias = new AliasChange();
@@ -102,17 +102,17 @@ public class ElasticClient {
     	return performRequest("POST", "/_aliases", params, list);
     }
     
-    public CompletableFuture<Response> deleteIndex(String name) {
+    public XFuture<Response> deleteIndex(String name) {
         Map<String, String> params = Collections.emptyMap();
     	return performRequest("DELETE", "/"+name, params, null);
     }
     
-	public CompletableFuture<Response> createIndex(String name, ElasticIndex index) {
+	public XFuture<Response> createIndex(String name, ElasticIndex index) {
         Map<String, String> params = Collections.emptyMap();
 		return performRequest("PUT", "/"+name, params, index);
 	}
 	
-	public CompletableFuture<Response> performRequest(
+	public XFuture<Response> performRequest(
 			String method, String endpoint, Map<String, String> params, Object jsonObj, Header... headers) {
 		HttpEntity entity = null;
         String jsonString = null;
@@ -126,7 +126,7 @@ public class ElasticClient {
 		}
 		
 		String jsonStr = jsonString;
-		CompletableFuture<Response> future = new CompletableFuture<Response>();
+		XFuture<Response> future = new XFuture<Response>();
 		ResponseListener responseListener = new ToFutureListener(future);
 
 		RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
@@ -145,19 +145,19 @@ public class ElasticClient {
 		
 		return future.handle( (r, e) -> {
 			if(e != null) {
-				CompletableFuture<Response> f = new CompletableFuture<Response>();
+				XFuture<Response> f = new XFuture<Response>();
 				f.completeExceptionally(new RuntimeException("json failed to be processed by elastic search="+jsonStr, e));
 				return f;
 			}
-			return CompletableFuture.completedFuture(r);
+			return XFuture.completedFuture(r);
 		}).thenCompose(Function.identity());
 	}
 	
 	private static class ToFutureListener implements ResponseListener {
 
-		private CompletableFuture<Response> future;
+		private XFuture<Response> future;
 
-		public ToFutureListener(CompletableFuture<Response> future) {
+		public ToFutureListener(XFuture<Response> future) {
 			this.future = future;
 		}
 

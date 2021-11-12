@@ -12,7 +12,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -84,7 +84,7 @@ public class WebServerImpl implements WebServer {
 	
 	@Override
 	public void startSync() {
-		CompletableFuture<Void> future = startAsync();
+		XFuture<Void> future = startAsync();
 		try {
 			//If your server starts taking more than 2 seconds to start, your feature tests run the risk of being too
 			//long.  Go back and make sure you only load what you need for the tests and keep this under 2 seconds and make
@@ -124,7 +124,7 @@ public class WebServerImpl implements WebServer {
 	 *
 	 */
 	@Override
-	public CompletableFuture<Void> startAsync() {
+	public XFuture<Void> startAsync() {
 		if(!isConfigured)
 			throw new IllegalStateException("You must call configure first");
 		
@@ -137,11 +137,11 @@ public class WebServerImpl implements WebServer {
 		//START http server if wanted...
 		InetSocketAddress httpAddress = portAddresses.getHttpAddr().get();
 		boolean httpsOverHttpEnabled = portAddresses.getAllowHttpsIntoHttp().get();
-		CompletableFuture<Void> fut1;
+		XFuture<Void> fut1;
 		if(httpAddress != null) {
 			fut1 = startServerOnHttpPort(injector, httpAddress, httpsOverHttpEnabled);
 		} else {
-			fut1 = CompletableFuture.completedFuture(null);
+			fut1 = XFuture.completedFuture(null);
 			log.info("Serving the "+"http"+" is disabled since there was no address specified");
 		}
 		
@@ -149,11 +149,11 @@ public class WebServerImpl implements WebServer {
 
 		//START https server if wanted...
 		InetSocketAddress httpsAddress = portAddresses.getHttpsAddr().get();
-		CompletableFuture<Void> fut2;
+		XFuture<Void> fut2;
 		if(httpsAddress != null) {
 			fut2 = startHttpsServer(injector, httpsAddress);
 		} else {
-			fut2 = CompletableFuture.completedFuture(null);
+			fut2 = XFuture.completedFuture(null);
 			log.info("Serving the "+"https"+" is disabled since there was no address specified");
 		}
 
@@ -162,16 +162,16 @@ public class WebServerImpl implements WebServer {
 		//START backend if wanted (if not, pages are served over https server...if you don't want a backend, remove the plugins)
 
 		InetSocketAddress backendAddress = portAddresses.getBackendAddr().get();
-		CompletableFuture<Void> fut33;
+		XFuture<Void> fut33;
 		if(backendAddress != null) {
 			fut33 = startBackendServer(injector, backendAddress);
 		} else {
-			fut33 = CompletableFuture.completedFuture(null);
+			fut33 = XFuture.completedFuture(null);
 			log.info("Serving the backend over it's own port is disabled since there was no address specified");
 		}
-		CompletableFuture<Void> fut3 = fut33;
+		XFuture<Void> fut3 = fut33;
 		
-		return CompletableFuture.allOf(fut1, fut2, fut3).thenApply((v) -> {
+		return XFuture.allOf(fut1, fut2, fut3).thenApply((v) -> {
 			int httpPort = -1;
 			int httpsPort = -1;
 
@@ -186,8 +186,8 @@ public class WebServerImpl implements WebServer {
 		});
 	}
 
-	private CompletableFuture<Void> startBackendServer(Injector injector, InetSocketAddress backendAddress) {
-		CompletableFuture<Void> fut33;
+	private XFuture<Void> startBackendServer(Injector injector, InetSocketAddress backendAddress) {
+		XFuture<Void> fut33;
 		//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
 		//enable the backend or https ports
 		SSLConfiguration sslConfiguration = injector.getInstance(SSLConfiguration.class);
@@ -208,8 +208,8 @@ public class WebServerImpl implements WebServer {
 		return fut33;
 	}
 
-	private CompletableFuture<Void> startHttpsServer(Injector injector, InetSocketAddress httpsAddress) {
-		CompletableFuture<Void> fut2;
+	private XFuture<Void> startHttpsServer(Injector injector, InetSocketAddress httpsAddress) {
+		XFuture<Void> fut2;
 		//This is inside the if statement BECAUSE we do not need to bind an SSLConfiguration if they do not
 		//enable the backend or https ports
 		SSLEngineFactory factory = fetchSSLEngineFactory(injector);
@@ -225,9 +225,9 @@ public class WebServerImpl implements WebServer {
 		return fut2;
 	}
 
-	private CompletableFuture<Void> startServerOnHttpPort(Injector injector, InetSocketAddress httpAddress,
+	private XFuture<Void> startServerOnHttpPort(Injector injector, InetSocketAddress httpAddress,
 			boolean httpsOverHttpEnabled) {
-		CompletableFuture<Void> fut1;
+		XFuture<Void> fut1;
 		String type;
 		if(httpsOverHttpEnabled) {
 			type = "both";

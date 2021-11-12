@@ -3,7 +3,7 @@ package com.webpieces.http2engine.impl.shared;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Supplier;
 
 import org.webpieces.data.api.DataWrapper;
@@ -53,15 +53,15 @@ public class Level6RemoteFlowControl {
 		remoteWindowSize = remoteSettings.getInitialWindowSize();
 	}
 
-	public CompletableFuture<Void> sendPayloadToSocket(Stream stream, Http2Msg payload) {
+	public XFuture<Void> sendPayloadToSocket(Stream stream, Http2Msg payload) {
 		if(log.isDebugEnabled())
 			log.debug("sending payload to socket="+payload);
 		return layer6NotifyListener.sendFrameToSocket(payload);
 	}
 	
-	public CompletableFuture<Void> sendDataToSocket(Stream stream, DataFrame dataFrame) {
+	public XFuture<Void> sendDataToSocket(Stream stream, DataFrame dataFrame) {
 		log.info("sending payload to socket="+dataFrame);
-		CompletableFuture<Void> future = new CompletableFuture<>();
+		XFuture<Void> future = new XFuture<>();
 		DataTry data = new DataTry(stream, dataFrame, future, false);
 		trySendPayload(data);
 		return future;
@@ -130,7 +130,7 @@ public class Level6RemoteFlowControl {
 		return tuple;
 	}
 
-	private Object processComplete(Void v, Throwable t, CompletableFuture<Void> future) {
+	private Object processComplete(Void v, Throwable t, XFuture<Void> future) {
 		if(future == null)
 			return null; //nothing to do as this was only first piece of data
 		
@@ -156,7 +156,7 @@ public class Level6RemoteFlowControl {
 		streamState.updateAllStreams(initialWindow);
 	}
 
-	public CompletableFuture<Void> updateConnectionWindowSize(WindowUpdateFrame msg) {
+	public XFuture<Void> updateConnectionWindowSize(WindowUpdateFrame msg) {
 		int increment = msg.getWindowSizeIncrement();
 		if(increment == 0) {
 			throw new ConnectionException(CancelReasonCode.WINDOW_SIZE_INVALID, logId, msg.getStreamId(), 
@@ -182,10 +182,10 @@ public class Level6RemoteFlowControl {
 			trySendPayload(dataTry);
 		}
 		
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
-	public CompletableFuture<Void> updateStreamWindowSize(Stream stream, WindowUpdateFrame msg) {
+	public XFuture<Void> updateStreamWindowSize(Stream stream, WindowUpdateFrame msg) {
 		if(msg.getWindowSizeIncrement() == 0) {
 			throw new ConnectionException(CancelReasonCode.WINDOW_SIZE_INVALID, logId, msg.getStreamId(), 
 					"Received windowUpdate size increment=0");
@@ -210,14 +210,14 @@ public class Level6RemoteFlowControl {
 		}
 
 		//someday, remove synchronized above and then complete future when it is complete instead maybe
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
-	public CompletableFuture<Void> goAway(ShutdownConnection e) {
+	public XFuture<Void> goAway(ShutdownConnection e) {
 		return layer6NotifyListener.goAway(e);
 	}
 
-	public CompletableFuture<Void> fireResetToSocket(RstStreamFrame frame) {
+	public XFuture<Void> fireResetToSocket(RstStreamFrame frame) {
 		return layer6NotifyListener.sendFrameToSocket(frame);
 	}
 

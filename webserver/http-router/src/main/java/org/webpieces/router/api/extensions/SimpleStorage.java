@@ -1,7 +1,7 @@
 package org.webpieces.router.api.extensions;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 /**
  * SimpleStorage is a simple standard interface for Plugins to save their settings to the database
@@ -25,18 +25,18 @@ public interface SimpleStorage {
 	//storage for plugin data is what you decide you want it to be!!!
 	//table can be a column or an actual table(your choice).  In the case of noSql, it can be a column family
 	//or just prepended to the key.
-	public CompletableFuture<Void> save(String key, String subKey, String value);
+	public XFuture<Void> save(String key, String subKey, String value);
 	
 	//OR in noSQL update many pieces of the row (or in RDBMS, this updates many rows)
-	public CompletableFuture<Void> save(String key, Map<String, String> properties);
+	public XFuture<Void> save(String key, Map<String, String> properties);
 
 	//READ the entire row in noSQL (and in RDBMS, read all the rows that have that key)
-	public CompletableFuture<Map<String, String>> read(String key);
+	public XFuture<Map<String, String>> read(String key);
 	
 	//DELETE any rows in DB where the key matches the key column or in noSql, just delete the long row
-	public CompletableFuture<Void> delete(String key);
+	public XFuture<Void> delete(String key);
 	
 	//DELETE one row in DB where key/subkey match or in noSql, delete the column with pkey=key and columnName=subkey
-	public CompletableFuture<Void> delete(String key, String subKey);
+	public XFuture<Void> delete(String key, String subKey);
 	
 }

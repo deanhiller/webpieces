@@ -2,7 +2,7 @@ package org.webpieces.plugins.fortesting;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.router.api.extensions.SimpleStorage;
 
@@ -11,10 +11,10 @@ public class SimpleStorageInMemory implements SimpleStorage {
 	private Map<String, Map<String, String>> db = new HashMap<>();
 	
 	@Override
-	public CompletableFuture<Void> save(String key, String subKey, String value) {
+	public XFuture<Void> save(String key, String subKey, String value) {
 		Map<String, String> props = getSubMap(key);
 		props.put(subKey, value);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	private Map<String, String> getSubMap(String key) {
@@ -24,29 +24,29 @@ public class SimpleStorageInMemory implements SimpleStorage {
 	}
 
 	@Override
-	public CompletableFuture<Void> save(String key, Map<String, String> properties) {
+	public XFuture<Void> save(String key, Map<String, String> properties) {
 		Map<String, String> subMap = getSubMap(key);
 		subMap.putAll(properties);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	@Override
-	public CompletableFuture<Map<String, String>> read(String key) {
+	public XFuture<Map<String, String>> read(String key) {
 		Map<String, String> props = getSubMap(key);
-		return CompletableFuture.completedFuture(props);
+		return XFuture.completedFuture(props);
 	}
 
 	@Override
-	public CompletableFuture<Void> delete(String key) {
+	public XFuture<Void> delete(String key) {
 		db.remove(key);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	@Override
-	public CompletableFuture<Void> delete(String key, String subKey) {
+	public XFuture<Void> delete(String key, String subKey) {
 		Map<String, String> subMap = getSubMap(key);
 		subMap.remove(subKey);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 }

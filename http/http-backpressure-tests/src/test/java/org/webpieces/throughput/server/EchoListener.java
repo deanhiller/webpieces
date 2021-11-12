@@ -1,6 +1,6 @@
 package org.webpieces.throughput.server;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
@@ -28,7 +28,7 @@ public class EchoListener implements StreamListener {
 			
 			//automatically transfers backpressure back to the writer so if the reader of responses(the client in this case) 
 			//slows down, the writer(the client as well in this case) also is forced to slow down sending requests
-			CompletableFuture<StreamWriter> responseWriter = stream.process(resp);
+			XFuture<StreamWriter> responseWriter = stream.process(resp);
 			
 			return new MyStreamRef(stream, responseWriter);
 		}
@@ -38,20 +38,20 @@ public class EchoListener implements StreamListener {
 	private class MyStreamRef implements StreamRef {
 
 		private ResponseStream stream;
-		private CompletableFuture<StreamWriter> responseWriter;
+		private XFuture<StreamWriter> responseWriter;
 
-		public MyStreamRef(ResponseStream stream, CompletableFuture<StreamWriter> responseWriter) {
+		public MyStreamRef(ResponseStream stream, XFuture<StreamWriter> responseWriter) {
 			this.stream = stream;
 			this.responseWriter = responseWriter;
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> getWriter() {
+		public XFuture<StreamWriter> getWriter() {
 			return responseWriter;
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason reason) {
+		public XFuture<Void> cancel(CancelReason reason) {
 			//probably redundant to cancel the response stream since request stream is already cancelling it!!
 			return stream.cancel(reason);
 		}

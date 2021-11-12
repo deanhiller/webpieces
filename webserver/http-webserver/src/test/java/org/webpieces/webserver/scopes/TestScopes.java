@@ -1,6 +1,10 @@
 package org.webpieces.webserver.scopes;
 
-import java.util.concurrent.CompletableFuture;
+import org.junit.After;
+import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.XFuture;
+
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -15,6 +19,7 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.util.security.Security;
 import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
@@ -31,17 +36,28 @@ public class TestScopes extends AbstractWebpiecesTest {
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
+		Assert.assertEquals(new HashMap<>(), Context.getContext()); //validate nothing here first
+
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("scopesMeta.txt", PrivateWebserverForTest.class.getClassLoader());
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false, new SimpleMeterRegistry()), null, false, metaFile);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
+
+		//not exactly part of this test but checking for leak of server context into client
+		// (only in embedded modes does this occur)
+		Assert.assertEquals(new HashMap<>(), Context.getContext());
+	}
+
+	@After
+	public void tearDown() {
+		Context.clear();
 	}
 
 	@Test
 	public void testSessionScope() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -54,9 +70,15 @@ public class TestScopes extends AbstractWebpiecesTest {
 	@Test
 	public void testSessionScopeModificationByClient() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
-		
-		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
-		
+
+		//not exactly part of this test but noticed an issue of context leak from server to client in embedded mode that should not exist
+		Assert.assertEquals(0, Context.getContext().size());
+
+		XFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+
+		//not exactly part of this test but noticed an issue of context leak from server to client in embedded mode that should not exist
+		Assert.assertEquals(0, Context.getContext().size());
+
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture1);
 
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -71,7 +93,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 		HttpFullRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/displaySession");
 		req2.addHeader(new Header(KnownHeaderName.COOKIE, value));
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req2);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req2);
 		
         response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -87,7 +109,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 	@Test
     public void testFlashMessage() {
         HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
-        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+        XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -99,7 +121,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 	@Test
     public void testGetStaticFileDoesNotClearFlashMessage() {
         HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
-        CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+        XFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
 
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture1);
 
@@ -108,7 +130,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 		Header header = response.createCookieRequestHeader();
         HttpFullRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css");
         req2.addHeader(header);
-        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req2);
+        XFuture<HttpFullResponse> respFuture = http11Socket.send(req2);
         
         ResponseWrapper response2 = ResponseExtract.waitResponseAndWrap(respFuture);
         response2.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -139,7 +161,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 				"user.address.street", "Coolness Dr.");		
 		req.addHeader(header);
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -155,7 +177,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -168,7 +190,7 @@ public class TestScopes extends AbstractWebpiecesTest {
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
-        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+        XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 

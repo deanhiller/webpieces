@@ -1,6 +1,6 @@
 package org.webpieces.http2client.util;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.MockStreamWriter;
@@ -12,11 +12,11 @@ public class RequestHolder {
 
 	private Http2Request request;
 	private MockResponseListener listener;
-	private CompletableFuture<StreamWriter> future;
+	private XFuture<StreamWriter> future;
 	private MockStreamWriter writer;
 
 	public RequestHolder(Http2Request request, MockResponseListener listener,
-			MockStreamWriter writer, CompletableFuture<StreamWriter> future) {
+			MockStreamWriter writer, XFuture<StreamWriter> future) {
 				this.request = request;
 				this.listener = listener;
 				this.writer = writer;
@@ -31,7 +31,7 @@ public class RequestHolder {
 		return listener;
 	}
 
-	public CompletableFuture<StreamWriter> getFuture() {
+	public XFuture<StreamWriter> getFuture() {
 		return future;
 	}
 

@@ -1,7 +1,7 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -46,7 +46,7 @@ public class TestChunking {
 		HttpParser parser = HttpParserFactory.createParser("testParser", metrics, pool);
 		httpClient = HttpClientFactory.createHttpClient("testClient", mockChanMgr, parser);
 
-		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
+		mockChannel.setConnectFuture(XFuture.completedFuture(null));
 
 		mockChanMgr.addTCPChannelToReturn(mockChannel);
 		httpSocket = httpClient.createHttpSocket(new SocketListener());
@@ -54,17 +54,17 @@ public class TestChunking {
 
 	@Test
 	public void testChunkingHeaderMissing() throws InterruptedException, ExecutionException, TimeoutException {
-//		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+//		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
 //		MockResponseListener mockListener = new MockResponseListener();
 //		
 //		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home", false);
-//		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
+//		mockChannel.addWriteResponse(XFuture.completedFuture(null));
 //		HttpStreamRef ref = httpSocket.send(req, mockListener);
 //
 //		HttpDataWriter writer = ref.getWriter().get(2, TimeUnit.SECONDS);
 //		
 //		HttpChunk c = new HttpChunk(dataGen.emptyWrapper());
-//		CompletableFuture<Void> result = writer.send(c);
+//		XFuture<Void> result = writer.send(c);
 //		
 //		try {
 //			result.get(2, TimeUnit.SECONDS);

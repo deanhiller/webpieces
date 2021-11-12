@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2.api.dto.error.CancelReasonCode;
@@ -28,7 +28,7 @@ public class Level2ServerParsing extends Level2ParsingAndRemoteSettings {
 		serverSyncro = syncro;
 	}
 	@Override
-	protected CompletableFuture<Void> processSpecific(Http2Msg msg) {
+	protected XFuture<Void> processSpecific(Http2Msg msg) {
 		if(msg instanceof Http2Request) {
 			return serverSyncro.processRequest((Http2Request)msg);
 		} else if(msg instanceof Http2Push) {

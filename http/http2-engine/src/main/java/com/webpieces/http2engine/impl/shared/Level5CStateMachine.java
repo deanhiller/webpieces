@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.shared;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.util.locking.PermitQueue;
 import org.slf4j.Logger;
@@ -33,15 +33,15 @@ public abstract class Level5CStateMachine extends Level5BResets {
 		this.localFlowControl = localFlowControl;
 	}
 
-	public CompletableFuture<Void> fireToSocket(Stream stream, Http2Msg payload) {
+	public XFuture<Void> fireToSocket(Stream stream, Http2Msg payload) {
 		return fireSendToSM(stream, payload, false)
 				.thenCompose(v -> {
 					return remoteFlowControl.sendPayloadToSocket(stream, payload);
 				});
 	}
 	
-	public CompletableFuture<Void> fireToSocket(Stream stream, StreamMsg payload, boolean keepDelayedState) {
-		CompletableFuture<Void> future = fireSendToSM(stream, payload, keepDelayedState);
+	public XFuture<Void> fireToSocket(Stream stream, StreamMsg payload, boolean keepDelayedState) {
+		XFuture<Void> future = fireSendToSM(stream, payload, keepDelayedState);
 				
 		return future.thenCompose(v -> {
 					//if no exceptions occurred, send it on to flow control layer
@@ -52,13 +52,13 @@ public abstract class Level5CStateMachine extends Level5BResets {
 				});
 	}
 
-	public CompletableFuture<Void> firePriorityToClient(PriorityFrame frame) {
+	public XFuture<Void> firePriorityToClient(PriorityFrame frame) {
 		Stream stream;
 		try {
 			stream = streamState.getStream(frame, true);
 		} catch(ConnectionException e) {
 			//per spec, priority frames can be received on closed stream but ignore it
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		
 		return fireRecvToSM(stream, frame)
@@ -67,10 +67,10 @@ public abstract class Level5CStateMachine extends Level5BResets {
 				});
 	}
 
-	protected abstract CompletableFuture<Void> sendTrailersToApp(Http2Trailers payload);
-	protected abstract CompletableFuture<Void> sendDataToApp(DataFrame payload);
+	protected abstract XFuture<Void> sendTrailersToApp(Http2Trailers payload);
+	protected abstract XFuture<Void> sendDataToApp(DataFrame payload);
 
-	public CompletableFuture<Void> sendTrailersToAppImpl(Http2Trailers frame, boolean isConnectionError) {
+	public XFuture<Void> sendTrailersToAppImpl(Http2Trailers frame, boolean isConnectionError) {
 		Stream stream = streamState.getStream(frame, isConnectionError);
 		return fireRecvToSM(stream, frame)
 				.thenCompose(v -> {
@@ -78,7 +78,7 @@ public abstract class Level5CStateMachine extends Level5BResets {
 				});
 	}
 		
-	protected CompletableFuture<Void> sendDataToAppImpl(DataFrame payload, boolean isConnectionError) {
+	protected XFuture<Void> sendDataToAppImpl(DataFrame payload, boolean isConnectionError) {
 		Stream stream = streamState.getStream(payload, isConnectionError);
 		return fireRecvToSM(stream, payload)
 				.thenCompose(v -> {
@@ -86,7 +86,7 @@ public abstract class Level5CStateMachine extends Level5BResets {
 				});
 	}
 
-	public CompletableFuture<Void> sendUnkownFrame(UnknownFrame msg) {
+	public XFuture<Void> sendUnkownFrame(UnknownFrame msg) {
 		Stream stream = streamState.getStream(msg, false);
 		return fireRecvToSM(stream, msg)
 				.thenCompose(v -> {
@@ -94,14 +94,14 @@ public abstract class Level5CStateMachine extends Level5BResets {
 				});
 	}
 	
-	public CompletableFuture<Void> connectionWindowUpdate(WindowUpdateFrame msg) {
+	public XFuture<Void> connectionWindowUpdate(WindowUpdateFrame msg) {
 		return remoteFlowControl.updateConnectionWindowSize(msg);
 	}
 
-	public CompletableFuture<Void> streamWindowUpdate(WindowUpdateFrame msg) {
+	public XFuture<Void> streamWindowUpdate(WindowUpdateFrame msg) {
 		Stream stream = streamState.getStream(msg, true);
 		if(stream == null)
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		
 		return remoteFlowControl.updateStreamWindowSize(stream, msg);
 	}

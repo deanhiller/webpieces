@@ -1,7 +1,7 @@
 package org.webpieces.ssl.api;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.ssl.api.dto.SslAction;
@@ -23,7 +23,7 @@ public interface SSLParser {
 	 * @return a list of SSL actions the client needs to take like send encrypted packets to remote end AND fire link established
 	 * to the client app (this is a result of sometimes a list of actions needs to come back for the sslEngine
 	 */
-	CompletableFuture<List<SslAction>> parseIncoming(DataWrapper dataWrapper);
+	XFuture<List<SslAction>> parseIncoming(DataWrapper dataWrapper);
 
 	SslAction close();
 

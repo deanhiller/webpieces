@@ -1,6 +1,6 @@
 package org.webpieces.router.api.simplesvr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -39,28 +39,28 @@ public class MeetingController {
 		return Actions.redirect(MtgRouteId.SOME_EXAMPLE);
 	}
 	
-	public CompletableFuture<Action> createUserForm() {
+	public XFuture<Action> createUserForm() {
 		//if for some reason, reached wrong thing or not enough users, redirect to another page....
 		if(isWantRedirect) {
-			return CompletableFuture.completedFuture(Actions.redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
+			return XFuture.completedFuture(Actions.redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
 		}
 		
-		return CompletableFuture.completedFuture(Actions.renderThis());
+		return XFuture.completedFuture(Actions.renderThis());
 	}
 
-	public CompletableFuture<Redirect> postMeeting(/* @Param("mtg") MeetingDto mtg */) {
+	public XFuture<Redirect> postMeeting(/* @Param("mtg") MeetingDto mtg */) {
 		
 		//if user is !valid {
 		if(isWantRedirect) {
 			//flash.saveFormValues();
 			//flash.setGlobalMessage("You have errors")
 			//decorators kick in saying error per field with the field
-			return CompletableFuture.completedFuture(Actions.redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
+			return XFuture.completedFuture(Actions.redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
 		}
 		//}
 		
 		//need to send redirect at this point to getUser with id=id
-		return CompletableFuture.completedFuture(Actions.redirect(MtgRouteId.GET_SHOW_MTG, "id", 888));
+		return XFuture.completedFuture(Actions.redirect(MtgRouteId.GET_SHOW_MTG, "id", 888));
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class MeetingController {
 		return Actions.redirect(MtgRouteId.GET_SHOW_MTG, 999);
 	}
 	
-	public CompletableFuture<Redirect> asyncMethod() {
+	public XFuture<Redirect> asyncMethod() {
 		return service.remoteCall()
 			.thenApply(val -> Actions.redirect(MtgRouteId.GET_SHOW_MTG, "id", val));
 	}

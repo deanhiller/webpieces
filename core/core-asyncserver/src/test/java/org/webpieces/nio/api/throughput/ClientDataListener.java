@@ -1,7 +1,7 @@
 package org.webpieces.nio.api.throughput;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +23,13 @@ public final class ClientDataListener implements DataListener {
 	}
 	
 	@Override
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		recorder2.increment(b.remaining());
 		recorder.recordBytes(b.remaining());
 		
 		b.position(b.limit());
 		pool2.releaseBuffer(b);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	@Override

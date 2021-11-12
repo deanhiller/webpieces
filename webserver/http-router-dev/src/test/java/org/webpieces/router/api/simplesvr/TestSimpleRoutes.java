@@ -3,7 +3,7 @@ package org.webpieces.router.api.simplesvr;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -110,7 +110,7 @@ public class TestSimpleRoutes {
 		
 		MockStreamHandle mockStream = new MockStreamHandle();
 		StreamRef ref = server.incomingRequest(req, mockStream);
-		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+		XFuture<StreamWriter> future = ref.getWriter(); 
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
 		Http2Response resp = mockStream.getLastResponse();
@@ -123,7 +123,7 @@ public class TestSimpleRoutes {
 		
 		MockStreamHandle mockStream = new MockStreamHandle();
 		StreamRef ref = server.incomingRequest(req, mockStream);
-		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+		XFuture<StreamWriter> future = ref.getWriter(); 
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
 		Http2Response resp = mockStream.getLastResponse();

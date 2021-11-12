@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 package org.webpieces.nio.api.handlers;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 
@@ -49,7 +49,7 @@ public interface DataListener {
 	 * @return A future that you resolve once you have finished with the data.  Not resolving the futures from this
 	 * method will tell the Channels to start backpressuring the remote end
 	 */
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b);
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b);
 	
 	public void farEndClosed(Channel channel);
 

@@ -1,6 +1,6 @@
 package org.webpieces.plugin.properties;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -60,7 +60,7 @@ public class TestPropertiesPlugin extends AbstractWebpiecesTest {
 		//set-cookie: webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin; path=/; HttpOnly
 		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//redirect to login page

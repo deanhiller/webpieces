@@ -1,7 +1,7 @@
 package org.webpieces.util.futures;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -9,11 +9,11 @@ import java.util.concurrent.Executors;
 //all of them do this pattern and we should wire that all up
 public class LoopingChain<T> {
 
-	public CompletableFuture<Void> runLoop(List<T> newData, Session session, Processor<T> processFunction) {
+	public XFuture<Void> runLoop(List<T> newData, Session session, Processor<T> processFunction) {
 		
 		//All the below futures must be chained with previous ones in case previous ones are not
 		//done which will serialize it all to be in sequence
-		CompletableFuture<Void> future = session.getProcessFuture();
+		XFuture<Void> future = session.getProcessFuture();
 		
 		for(T data : newData) {
 			//VERY IMPORTANT: Writing the code like this would slam through calling process N times
@@ -25,7 +25,7 @@ public class LoopingChain<T> {
 			//a completed future each time!!!
 			
 			//This seems to have memory issues as well....
-			//CompletableFuture<Void> temp = processFunction.process(data);
+			//XFuture<Void> temp = processFunction.process(data);
 			//future = future.thenCompose(f -> temp);
 			
 			//future = future.thenComposeAsync( voidd -> processFunction.process(data), executor );

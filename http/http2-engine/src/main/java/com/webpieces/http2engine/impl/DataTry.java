@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.lowlevel.DataFrame;
 import com.webpieces.http2engine.impl.shared.data.Stream;
@@ -9,10 +9,10 @@ public class DataTry {
 
 	private Stream stream;
 	private DataFrame dataFrame;
-	private CompletableFuture<Void> future;
+	private XFuture<Void> future;
 	private boolean wasQueuedBefore;
 
-	public DataTry(Stream stream, DataFrame dataFrame, CompletableFuture<Void> future, boolean wasQueuedBefore) {
+	public DataTry(Stream stream, DataFrame dataFrame, XFuture<Void> future, boolean wasQueuedBefore) {
 		this.stream = stream;
 		this.dataFrame = dataFrame;
 		this.future = future;
@@ -27,7 +27,7 @@ public class DataTry {
 		return dataFrame;
 	}
 
-	public CompletableFuture<Void> getFuture() {
+	public XFuture<Void> getFuture() {
 		return future;
 	}
 

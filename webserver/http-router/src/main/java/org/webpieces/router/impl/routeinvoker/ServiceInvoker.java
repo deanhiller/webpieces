@@ -2,7 +2,7 @@ package org.webpieces.router.impl.routeinvoker;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,7 +42,7 @@ public class ServiceInvoker {
 		this.reverseRoutes = reverseRoutes;
 	}
 	
-	public CompletableFuture<Void> invokeSvc(
+	public XFuture<Void> invokeSvc(
 			MethodMeta meta,
 			String i18nBundleName,
 			Endpoint service,
@@ -59,27 +59,20 @@ public class ServiceInvoker {
 		Messages messages = new Messages(i18nBundleName, "webpieces");
 		requestCtx.setMessages(messages);
 
-		Current.setContext(requestCtx);
-		
-		CompletableFuture<Action> response;
-		try {
-			response = futureUtil.catchBlockWrap( 
-				() -> invokeService(service, meta),
-				(t) -> convert(loadedController, t)	
-			);
-		} finally {
-			Current.setContext(null);
-		}
+		XFuture<Action> response = futureUtil.catchBlockWrap(
+			() -> invokeService(service, meta),
+			(t) -> convert(loadedController, t)
+		);
 
 		return response.thenCompose(resp -> continueProcessing(handle, meta, resp, processor));
 	}
 
-	private CompletableFuture<Void> continueProcessing(ProxyStreamHandle handle, MethodMeta meta, Action resp, Processor processor) {
+	private XFuture<Void> continueProcessing(ProxyStreamHandle handle, MethodMeta meta, Action resp, Processor processor) {
 		return processor.continueProcessing(meta, resp, handle);
 	}
 	
 	
-	public CompletableFuture<Action> invokeService(Endpoint service, MethodMeta methodMeta) {
+	public XFuture<Action> invokeService(Endpoint service, MethodMeta methodMeta) {
 		return service.invoke(methodMeta);
 	}
 	

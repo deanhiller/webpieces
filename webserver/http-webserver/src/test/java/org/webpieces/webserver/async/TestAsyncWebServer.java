@@ -1,6 +1,6 @@
 package org.webpieces.webserver.async;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -44,7 +44,7 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 	public void testCompletePromiseOnRequestThread() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -53,12 +53,12 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testCompletePromiseOnAnotherThread() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future );
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncSuccessRoute");
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
 		//no response yet...
 		Assert.assertFalse(respFuture.isDone());
@@ -75,7 +75,7 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 	public void testRedirect() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);

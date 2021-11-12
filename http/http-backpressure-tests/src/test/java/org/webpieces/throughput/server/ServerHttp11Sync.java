@@ -8,7 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 public class ServerHttp11Sync {
 	private static final Logger log = LoggerFactory.getLogger(ServerHttp11Sync.class);
 
-	public CompletableFuture<InetSocketAddress> start() {
+	public XFuture<InetSocketAddress> start() {
 		try {
 			return startImpl();
 		} catch (IOException e) {
@@ -36,7 +36,7 @@ public class ServerHttp11Sync {
 		}
 	}
 	
-	public CompletableFuture<InetSocketAddress> startImpl() throws IOException {
+	public XFuture<InetSocketAddress> startImpl() throws IOException {
     	log.error("running SYNC HTTP1.1 SERVER");
 
 		ServerSocket server = new ServerSocket(0);
@@ -48,7 +48,7 @@ public class ServerHttp11Sync {
     	t.start();
     	
     	InetSocketAddress address = (InetSocketAddress) server.getLocalSocketAddress();
-    	return CompletableFuture.completedFuture(address);
+    	return XFuture.completedFuture(address);
 	}
 
     private static class ServerRunnable implements Runnable {

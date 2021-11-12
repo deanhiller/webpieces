@@ -1,7 +1,7 @@
 package org.webpieces.util.locking;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -23,9 +23,9 @@ public class TestPermitQueue {
 	
 	@Test
 	public void testPermits1() throws InterruptedException {
-		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
+		XFuture<Long> future1 = new XFuture<Long>();
 		svc.addToReturn(future1);
-		CompletableFuture<Long> future2 = new CompletableFuture<Long>();
+		XFuture<Long> future2 = new XFuture<Long>();
 		svc.addToReturn(future2);
 		
 		queue1.runRequest(() -> svc.runFunction(1));
@@ -47,7 +47,7 @@ public class TestPermitQueue {
 	public void testReducePermits() throws InterruptedException {
 		PermitQueue queue = new PermitQueue(2);
 		
-		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
+		XFuture<Long> future1 = new XFuture<Long>();
 		svc.addToReturn(future1);
 		svc.addToReturn(future1);
 		svc.addToReturn(future1);
@@ -85,7 +85,7 @@ public class TestPermitQueue {
 	public void testAddPermits() throws InterruptedException {
 		PermitQueue queue = new PermitQueue(1);
 		
-		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
+		XFuture<Long> future1 = new XFuture<Long>();
 		svc.addToReturn(future1);
 		svc.addToReturn(future1);
 		svc.addToReturn(future1);
@@ -123,7 +123,7 @@ public class TestPermitQueue {
 
 	}
 	
-	private CompletableFuture<Long> someFunction(int i) {
+	private XFuture<Long> someFunction(int i) {
 		System.out.println("function"+i);
 		
 		try {
@@ -132,7 +132,7 @@ public class TestPermitQueue {
 			throw SneakyThrow.sneak(e);
 		}
 		
-		CompletableFuture<Long> future = new CompletableFuture<Long>();
+		XFuture<Long> future = new XFuture<Long>();
 		executor.execute(() -> {
 			try {
 				Thread.sleep(1000);
@@ -148,11 +148,11 @@ public class TestPermitQueue {
 	
 	@Test
 	public void testFuturePermitQueue() throws InterruptedException {
-		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
+		XFuture<Long> future1 = new XFuture<Long>();
 		svc.addToReturn(future1);
-		CompletableFuture<Long> future2 = new CompletableFuture<Long>();
+		XFuture<Long> future2 = new XFuture<Long>();
 		svc.addToReturn(future2);
-		CompletableFuture<Long> future3 = new CompletableFuture<Long>();
+		XFuture<Long> future3 = new XFuture<Long>();
 		svc.addToReturn(future3);
 		
 		queue2.runRequest(() -> svc.runFunction(1));

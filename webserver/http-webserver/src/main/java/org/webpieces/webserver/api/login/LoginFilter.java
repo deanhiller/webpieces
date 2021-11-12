@@ -3,7 +3,7 @@ package org.webpieces.webserver.api.login;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,7 +52,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 	}
 	
 	@Override
-	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> next) {
+	public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> next) {
 		if(meta.getRoute() instanceof RouteInfoForNotFound || meta.getRoute() instanceof RouteInfoForInternalError) {
 			return next.invoke(meta); //no need to login for routeinfoNotFound NOR internal error pages
 		} else if(patternToMatch != null) {
@@ -79,7 +79,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 				Current.flash().keep(true);
 			}
 			
-			return CompletableFuture.completedFuture(Actions.ajaxRedirect(loginRoute));	
+			return XFuture.completedFuture(Actions.ajaxRedirect(loginRoute));	
 		} else if(request.method == HttpMethod.GET) {
 			//store url requested in flash so after logging in, we can redirect the user
 			//back to the original page
@@ -99,7 +99,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 		}
 		
 		//redirect to login page..
-		return CompletableFuture.completedFuture(Actions.redirect(loginRoute));
+		return XFuture.completedFuture(Actions.redirect(loginRoute));
 	}
 
 	private void clearSecureFields(MethodMeta meta) {

@@ -1,7 +1,11 @@
 package org.webpieces.webserver.test;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -52,7 +56,7 @@ public class AbstractWebpiecesTest {
 	public HttpSocket connectHttp(boolean isRemote, InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
 		NullHttp1CloseListener listener = new NullHttp1CloseListener();
 		HttpSocket socket = getClient(isRemote).createHttpSocket(listener);
-		CompletableFuture<Void> connect = socket.connect(addr);
+		XFuture<Void> connect = socket.connect(addr);
 		connect.get(2, TimeUnit.SECONDS);
 		return socket;
 	}
@@ -65,7 +69,7 @@ public class AbstractWebpiecesTest {
 		if(listener == null)
 			listener = new NullHttp1CloseListener();
 		HttpSocket socket = getClient().createHttpSocket(listener);
-		CompletableFuture<Void> connect = socket.connect(addr);
+		XFuture<Void> connect = socket.connect(addr);
 		try {
 			connect.get(2, TimeUnit.SECONDS);
 
@@ -82,7 +86,7 @@ public class AbstractWebpiecesTest {
 	public HttpSocket connectHttps(boolean isRemote, SSLEngine engine, InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
 		NullHttp1CloseListener listener = new NullHttp1CloseListener();
 		HttpSocket socket = getClient(isRemote).createHttpsSocket(engine, listener);
-		CompletableFuture<Void> connect = socket.connect(addr);
+		XFuture<Void> connect = socket.connect(addr);
 		connect.get(2, TimeUnit.SECONDS);
 		return socket;
 	}
@@ -96,7 +100,7 @@ public class AbstractWebpiecesTest {
 			listener = new NullHttp1CloseListener();
 		
 		HttpSocket socket = getClient().createHttpsSocket(engine, listener);
-		CompletableFuture<Void> connect = socket.connect(addr);
+		XFuture<Void> connect = socket.connect(addr);
 		try {
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;

@@ -4,7 +4,7 @@ import com.webpieces.http2.api.dto.lowlevel.CancelReason;
 import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class MockProxyStreamRef implements StreamRef {
     private StreamRef streamRef;
@@ -15,12 +15,12 @@ public class MockProxyStreamRef implements StreamRef {
     }
 
     @Override
-    public CompletableFuture<StreamWriter> getWriter() {
+    public XFuture<StreamWriter> getWriter() {
         return streamRef.getWriter().thenApply(writer -> new MockStreamWriter(writer));
     }
 
     @Override
-    public CompletableFuture<Void> cancel(CancelReason reason) {
+    public XFuture<Void> cancel(CancelReason reason) {
         return streamRef.cancel(reason);
     }
 }

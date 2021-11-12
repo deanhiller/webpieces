@@ -27,7 +27,7 @@ import org.webpieces.util.locking.PermitQueue;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -45,11 +45,11 @@ public class Layer2Http11Handler {
 		this.httpListener = httpListener;
 	}
 
-	public CompletableFuture<InitiationResult> initialData(FrontendSocketImpl socket, Consumer<ProtocolType> function, ByteBuffer buf) {
+	public XFuture<InitiationResult> initialData(FrontendSocketImpl socket, Consumer<ProtocolType> function, ByteBuffer buf) {
 		return initialDataImpl(socket, function, buf);
 	}
 	
-	public CompletableFuture<InitiationResult> initialDataImpl(FrontendSocketImpl socket, Consumer<ProtocolType> function, ByteBuffer buf) {
+	public XFuture<InitiationResult> initialDataImpl(FrontendSocketImpl socket, Consumer<ProtocolType> function, ByteBuffer buf) {
 		
 		Memento state = socket.getHttp11ParseState();
 		int newDataSize = buf.remaining();
@@ -60,7 +60,7 @@ public class Layer2Http11Handler {
 		InitiationResult result = checkForPreface(socket, state);
 		
 		if(result != null) {
-			return CompletableFuture.completedFuture(result);
+			return XFuture.completedFuture(result);
 		}
 
 		//TODO: check for EXACTLY ONE http request AND check if it is an h2c header with Http-Settings header!!!!
@@ -70,14 +70,14 @@ public class Layer2Http11Handler {
 		if(state.getParsedMessages().size() > 0) {
 			function.accept(ProtocolType.HTTP1_1);
 			
-			CompletableFuture<Void> fut = processWithBackpressure(socket, newDataSize, numBytesRead);
+			XFuture<Void> fut = processWithBackpressure(socket, newDataSize, numBytesRead);
 			
 			return fut.thenApply(s -> {
 				return new InitiationResult(InitiationStatus.HTTP1_1);				
 			});
 		}
 		
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	private InitiationResult checkForPreface(FrontendSocketImpl socket, Memento state) {
@@ -92,7 +92,7 @@ public class Layer2Http11Handler {
 		return new InitiationResult(state.getLeftOverData(), InitiationStatus.PREFACE);
 	}
 
-	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
+	public XFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
 		
 		Http11StreamImpl currentStream = socket.getCurrentStream();
 		if(currentStream != null && currentStream.isForConnectRequeest()) {
@@ -102,7 +102,7 @@ public class Layer2Http11Handler {
 			DataWrapper wrapper = dataGen.wrapByteBuffer(buf);
 			dataFrame.setData(wrapper);
 			
-			CompletableFuture<StreamWriter> writer = currentStream.getStreamRef().getWriter();
+			XFuture<StreamWriter> writer = currentStream.getStreamRef().getWriter();
 			
 			//We skip permit queue because this is chunking now in SSL that we can't read;
 			return writer.thenCompose(w -> w.processPiece(dataFrame));
@@ -124,7 +124,7 @@ public class Layer2Http11Handler {
 		});
 	}
 	
-	public CompletableFuture<Void> processWithBackpressure(
+	public XFuture<Void> processWithBackpressure(
 			FrontendSocketImpl socket, int newDataSize, int numBytesRead) {
 		
 		Memento state = socket.getHttp11ParseState();
@@ -138,7 +138,7 @@ public class Layer2Http11Handler {
 		
 		//ALL of the below MUST happen AFTER the previous processing happened
 		//which may not have finished so chain the below with the previous future
-		CompletableFuture<Void> future = session.getProcessFuture();
+		XFuture<Void> future = session.getProcessFuture();
 	
 		for(HttpPayload payload : parsed) {
 			//VERY IMPORTANT: Writing the code like this would slam through calling process N times
@@ -148,7 +148,7 @@ public class Layer2Http11Handler {
 			//In these 2 lines of code, processCorrectly is CALLED N times RIGHT NOW
 			//The code below this only calls them right now IF AND ONLY IF the client returns
 			//a completed future each time!!!
-			//CompletableFuture<Void> fut = processCorrectly(socket, payload);
+			//XFuture<Void> fut = processCorrectly(socket, payload);
 			//future = future.thenCompose(s -> fut);
 			
 			
@@ -167,7 +167,7 @@ public class Layer2Http11Handler {
 		return state;
 	}
 	
-	private CompletableFuture<Void> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
+	private XFuture<Void> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
 		try {
 			MDC.put("svrSocket", socket.getChannel().getChannelId());
 			
@@ -185,7 +185,7 @@ public class Layer2Http11Handler {
 		}
 	}
 
-	private CompletableFuture<Void> processData(FrontendSocketImpl socket, DataFrame msg) {
+	private XFuture<Void> processData(FrontendSocketImpl socket, DataFrame msg) {
 		PermitQueue permitQueue = socket.getPermitQueue();
 		return permitQueue.runRequest(() -> {
 			
@@ -195,7 +195,7 @@ public class Layer2Http11Handler {
 				//This situation occurs if we respond before the request finishes sending.
 				//stream goes null once we respond on the socket
 				permitQueue.releasePermit();
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			}
 			
 			if(msg.isEndOfStream())
@@ -210,8 +210,8 @@ public class Layer2Http11Handler {
 
 	}
 	
-	public CompletableFuture<Void> processPiece(Http11StreamImpl stream, DataFrame msg) {
-		CompletableFuture<StreamWriter> writer = stream.getStreamRef().getWriter();
+	public XFuture<Void> processPiece(Http11StreamImpl stream, DataFrame msg) {
+		XFuture<StreamWriter> writer = stream.getStreamRef().getWriter();
 
 		return writer.thenCompose(w -> w.processPiece(msg));
 	}
@@ -225,7 +225,7 @@ public class Layer2Http11Handler {
 
 	}
 
-	private CompletableFuture<Void> processInitialPieceOfRequest(FrontendSocketImpl socket, HttpRequest http1Req, Http2Request headers) {
+	private XFuture<Void> processInitialPieceOfRequest(FrontendSocketImpl socket, HttpRequest http1Req, Http2Request headers) {
 		int id = counter.getAndAdd(2);
 		
 		PermitQueue permitQueue = socket.getPermitQueue();

@@ -1,7 +1,7 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,16 +52,16 @@ public class IntegColoradoEdu {
 	private static class ChunkedResponseListener implements HttpResponseListener {
 
 		@Override
-		public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
+		public XFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 			log.info("received resp="+resp+" iscomplete="+isComplete);
-			return CompletableFuture.completedFuture(new Writer());
+			return XFuture.completedFuture(new Writer());
 		}
 
 		private class Writer implements HttpDataWriter {
 			@Override
-			public CompletableFuture<Void> send(HttpData chunk) {
+			public XFuture<Void> send(HttpData chunk) {
 				log.info("received resp="+chunk+" last="+chunk.isEndOfData());
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			}
 		}
 		

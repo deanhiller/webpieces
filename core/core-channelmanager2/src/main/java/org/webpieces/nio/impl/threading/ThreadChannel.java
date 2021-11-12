@@ -3,7 +3,7 @@ package org.webpieces.nio.impl.threading;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
@@ -23,25 +23,25 @@ public class ThreadChannel implements Channel {
 	}
 	
 	@Override
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		DataListener threaded = new ThreadDataListener(this, listener, sessionExecutor);
-		CompletableFuture<Void> future = tcpChannel.connect(addr, threaded);
+		XFuture<Void> future = tcpChannel.connect(addr, threaded);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
 		return future.thenApplyAsync(p -> null, executor);
 	}
 
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer b) {
-		CompletableFuture<Void> future = tcpChannel.write(b);
+	public XFuture<Void> write(ByteBuffer b) {
+		XFuture<Void> future = tcpChannel.write(b);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
 		return future.thenApplyAsync(p -> null, executor);
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
-		CompletableFuture<Void> future = tcpChannel.close();
+	public XFuture<Void> close() {
+		XFuture<Void> future = tcpChannel.close();
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
 		return future.thenApplyAsync(p -> null, executor);
@@ -56,7 +56,7 @@ public class ThreadChannel implements Channel {
 		return tcpChannel.getChannelId();
 	}
 
-	public CompletableFuture<Void> bind(SocketAddress addr) {
+	public XFuture<Void> bind(SocketAddress addr) {
 		return tcpChannel.bind(addr);
 	}
 

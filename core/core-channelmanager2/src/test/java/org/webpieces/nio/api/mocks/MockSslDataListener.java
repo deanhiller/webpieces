@@ -2,7 +2,7 @@ package org.webpieces.nio.api.mocks;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
@@ -19,13 +19,13 @@ public class MockSslDataListener extends MockSuperclass implements DataListener 
 	private boolean isClosed;
 
 	public MockSslDataListener() {
-		setDefaultReturnValue(Method.INCOMING, CompletableFuture.completedFuture(null));
+		setDefaultReturnValue(Method.INCOMING, XFuture.completedFuture(null));
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
-		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING, channel, b);
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		return (XFuture<Void>) super.calledMethod(Method.INCOMING, channel, b);
 	}
 
 	@Override

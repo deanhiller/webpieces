@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.CompletionStage;
 
 import javax.inject.Inject;
@@ -33,7 +33,6 @@ import org.webpieces.router.impl.dto.RenderContentResponse;
 import org.webpieces.router.impl.dto.RenderResponse;
 import org.webpieces.router.impl.dto.View;
 import org.webpieces.router.impl.proxyout.ResponseCreator.ResponseEncodingTuple;
-import org.webpieces.router.impl.routeinvoker.ContextWrap;
 import org.webpieces.router.impl.routers.ExceptionWrap;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
@@ -92,7 +91,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public XFuture<StreamWriter> process(Http2Response response) {
 		return handle.process(response);
 	}
 
@@ -128,7 +127,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason payload) {
+	public XFuture<Void> cancel(CancelReason payload) {
 		return handle.cancel(payload);
 	}
 
@@ -137,24 +136,24 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendAjaxRedirect(RouteId id, Object ... args) {
+	public XFuture<Void> sendAjaxRedirect(RouteId id, Object ... args) {
 		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
 		return createRedirect(null, id, argMap, true);
 	}
 
 	@Override
-	public CompletableFuture<Void> sendPortRedirect(HttpPort port, RouteId id, Object ... args) {
+	public XFuture<Void> sendPortRedirect(HttpPort port, RouteId id, Object ... args) {
 		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
 		return createRedirect(port, id, argMap, false);
 	}
 
 	@Override
-	public CompletableFuture<Void> sendFullRedirect(RouteId id, Object ... args) {
+	public XFuture<Void> sendFullRedirect(RouteId id, Object ... args) {
 		Map<String, Object> argMap = PageArgListConverter.createPageArgMap(args);
 		return createRedirect(null, id, argMap, false);
 	}
 
-	private CompletableFuture<Void> createRedirect(HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
+	private XFuture<Void> createRedirect(HttpPort requestedPort, RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
 		if(methodMeta == null) {
 			throw new IllegalStateException("Somehow methodMeta is missing.  This method should only be called from filters and controllers");
 		}
@@ -170,16 +169,16 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 
 		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
 
-		return ContextWrap.wrap(ctx, () -> sendRedirect(redirectResponse));
+		return sendRedirect(redirectResponse);
 	}
 
-	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
+	public XFuture<Void> sendRenderContent(RenderContentResponse resp) {
 		Http2Request request = originalHttp2Request;
 		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
 		return maybeCompressAndSend(request, null, tuple, resp.getPayload());
 	}
 
-	public CompletableFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
+	public XFuture<StreamWriter> sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
 		RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
 		Http2Response response = responseCreator.createRedirect(originalHttp2Request, httpResponse);
 
@@ -190,7 +189,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return process(response);
 	}
 
-	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
+	public XFuture<Void> sendRedirect(RedirectResponse httpResponse) {
 		Http2Request request = originalHttp2Request;
 		if(log.isDebugEnabled())
 			log.debug("Sending redirect response. req="+request);
@@ -200,9 +199,9 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return process(response).thenApply(s -> null);
 	}
 
-	public CompletableFuture<StreamWriter> topLevelFailure(Http2Request req, Throwable e) {
+	public XFuture<StreamWriter> topLevelFailure(Http2Request req, Throwable e) {
 		if(ExceptionWrap.isChannelClosed(e))
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 
 		log.error("HUGE failure on incoming request="+req, e);
 		
@@ -237,7 +236,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return createResponseAndSend(req, StatusCode.HTTP_500_INTERNAL_SERVER_ERROR, html, "html", "text/html").thenApply(voidd->null);
 	}
 
-	public CompletableFuture<Void> createResponseAndSend(Http2Request request, StatusCode statusCode, String content, String extension, String defaultMime) {
+	public XFuture<Void> createResponseAndSend(Http2Request request, StatusCode statusCode, String content, String extension, String defaultMime) {
 		if(content == null)
 			throw new IllegalArgumentException("content cannot be null");
 
@@ -252,7 +251,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return maybeCompressAndSend(request, extension, tuple, bytes);
 	}
 
-	public CompletableFuture<Void> maybeCompressAndSend(Http2Request request, String extension, ResponseEncodingTuple tuple, byte[] bytes) {
+	public XFuture<Void> maybeCompressAndSend(Http2Request request, String extension, ResponseEncodingTuple tuple, byte[] bytes) {
 		Http2Response resp = tuple.response;
 
 		if(bytes.length == 0) {
@@ -263,7 +262,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return sendChunkedResponse(request, resp, bytes);
 	}
 
-	private CompletableFuture<Void> sendChunkedResponse(Http2Request req, Http2Response resp, byte[] bytes) {
+	private XFuture<Void> sendChunkedResponse(Http2Request req, Http2Response resp, byte[] bytes) {
 
 		if(log.isDebugEnabled())
 			log.debug("sending response. size="+bytes.length+" resp="+resp+" for req="+req+" responseSender="+ this);
@@ -281,7 +280,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 		return writer.processPiece(frame);
 	}
 
-	public CompletableFuture<Void> sendRenderHtml(RenderResponse resp) {
+	public XFuture<Void> sendRenderHtml(RenderResponse resp) {
 		Http2Request request = originalHttp2Request;
 		if(log.isInfoEnabled())
 			log.info("About to send render html response for request="+request+" controller="

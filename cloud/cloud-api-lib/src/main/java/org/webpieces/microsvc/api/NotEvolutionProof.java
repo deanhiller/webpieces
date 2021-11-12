@@ -12,11 +12,11 @@ import java.lang.annotation.Target;
  *
  *     @POST
  *     @Path("/search/item")
- *     public CompletableFuture<SearchResponse> search(SearchRequest request);
+ *     public XFuture<SearchResponse> search(SearchRequest request);
  *
  *     @GET
  *     @Path("/users/{id}/account/{number}")
- *     public CompletableFuture<MethodResponse> method(String id, int number);
+ *     public XFuture<MethodResponse> method(String id, int number);
  *
  *  and in the future, you want to add a new parameter for 1 new customer.  With the first mehod, you simply add the
  *  new parameter to the 'SearchRequest' object.  In the other case, you have to create a whole other method.  On

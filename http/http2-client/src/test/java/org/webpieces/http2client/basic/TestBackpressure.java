@@ -3,7 +3,7 @@ package org.webpieces.http2client.basic;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -37,10 +37,10 @@ public class TestBackpressure extends AbstractTest {
 		MockResponseListener listener = new MockResponseListener();
 		RequestStreamHandle handle = httpSocket.openStream();
 
-		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
+		mockChannel.addWriteResponse(XFuture.completedFuture(null));
 		Http2Request request = Requests.createRequest();
 		StreamRef streamRef = handle.process(request, listener);
-		CompletableFuture<StreamWriter> writer = streamRef.getWriter();
+		XFuture<StreamWriter> writer = streamRef.getWriter();
 
 		Assert.assertTrue(writer.isDone());
 		Assert.assertEquals(request, mockChannel.getFrameAndClear());
@@ -49,13 +49,13 @@ public class TestBackpressure extends AbstractTest {
 
 		DataListener dataListener = mockChannel.getConnectedListener();
 
-		CompletableFuture<Void> fut1 = dataListener.incomingData(mockChannel, buffers.get(0));
+		XFuture<Void> fut1 = dataListener.incomingData(mockChannel, buffers.get(0));
 		Assert.assertTrue(fut1.isDone()); //consume since not enough data for client
 		
-		CompletableFuture<StreamWriter> future = new CompletableFuture<StreamWriter>();
+		XFuture<StreamWriter> future = new XFuture<StreamWriter>();
 		listener.addReturnValueIncomingResponse(future);
 
-		CompletableFuture<Void> fut2 = dataListener.incomingData(mockChannel, buffers.get(1));
+		XFuture<Void> fut2 = dataListener.incomingData(mockChannel, buffers.get(1));
 		Assert.assertFalse(fut2.isDone()); //not resolved yet since client only has part of the data
 		
 		MockStreamWriter mockWriter = new MockStreamWriter();
@@ -64,9 +64,9 @@ public class TestBackpressure extends AbstractTest {
 		fut2.get(2, TimeUnit.SECONDS);
 		
 		//feed the rest of first chunk in and feed part of last chunk
-		CompletableFuture<Void> firstChunkAck = new CompletableFuture<Void>();
+		XFuture<Void> firstChunkAck = new XFuture<Void>();
 		mockWriter.addProcessResponse(firstChunkAck);	
-		CompletableFuture<Void> fut3 = dataListener.incomingData(mockChannel, buffers.get(2));
+		XFuture<Void> fut3 = dataListener.incomingData(mockChannel, buffers.get(2));
 		
 		Assert.assertFalse(fut3.isDone());
 		
@@ -74,9 +74,9 @@ public class TestBackpressure extends AbstractTest {
 		
 		fut3.get(2, TimeUnit.SECONDS);
 
-		CompletableFuture<Void> lastChunkAck = new CompletableFuture<Void>();
+		XFuture<Void> lastChunkAck = new XFuture<Void>();
 		mockWriter.addProcessResponse(lastChunkAck);			
-		CompletableFuture<Void> fut4 = dataListener.incomingData(mockChannel, buffers.get(3));
+		XFuture<Void> fut4 = dataListener.incomingData(mockChannel, buffers.get(3));
 		Assert.assertFalse(fut4.isDone());
 		
 		lastChunkAck.complete(null);

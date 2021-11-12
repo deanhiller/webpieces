@@ -69,6 +69,15 @@ public class XFuture<T> extends CompletableFuture<T> {
 		return (XFuture<U>) super.thenCompose(f);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <U> XFuture<U> handle(BiFunction<? super T, Throwable, ? extends U> fn) {
+		Map<String, Object> state = Context.getContext();
+		MyBiFunction f = new MyBiFunction(state, fn);
+
+		return (XFuture<U>) super.handle(f);
+	}
+
     @SuppressWarnings("unchecked")
 	public XFuture<T> exceptionally(
             Function<Throwable, ? extends T> fn) {
@@ -99,7 +108,7 @@ public class XFuture<T> extends CompletableFuture<T> {
 		@Override
 		public Object apply(Object t) {
 
-			Map<String, Object> prevState = Context.getContext();
+			Map<String, Object> prevState = Context.copyContext();
 			try {
 				Context.restoreContext(state);
 				
@@ -114,6 +123,32 @@ public class XFuture<T> extends CompletableFuture<T> {
 		
 	}
 
+	private class MyBiFunction implements BiFunction {
+
+		private Map<String, Object> state;
+		private BiFunction originalFunction;
+
+		public MyBiFunction(Map<String, Object> state, BiFunction originalFunction) {
+			this.state = state;
+			this.originalFunction = originalFunction;
+
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object apply(Object o, Object o2) {
+			Map<String, Object> prevState = Context.copyContext();
+			try {
+				Context.restoreContext(state);
+
+				return originalFunction.apply(o, o2);
+
+			} finally {
+				Context.restoreContext(prevState);
+			}
+		}
+	}
+
     public static <U> XFuture<U> completedFuture(U value, Function<Object, Boolean> cancelFunction) {
     	XFuture<U> f = new XFuture<U>(cancelFunction);
     	f.complete(value);
@@ -125,13 +160,6 @@ public class XFuture<T> extends CompletableFuture<T> {
     	f.complete(value);
     	return f;
     }
-
-    
-    @SuppressWarnings("unchecked")
-	@Override
-	public <U> XFuture<U> handle(BiFunction<? super T, Throwable, ? extends U> fn) {
-		return (XFuture<U>) super.handle(fn);
-	}
 
 	public static <U> XFuture<U> failedFuture(Throwable t, Function<Object, Boolean> cancelFunction) {
     	XFuture<U> f = new XFuture<U>(cancelFunction);
@@ -163,7 +191,7 @@ public class XFuture<T> extends CompletableFuture<T> {
 	}
 	
 	public static XFuture<Void> allOf(XFuture<?> ... cfs) {
-    	CompletableFuture<Void> allOf = CompletableFuture.allOf(cfs);
+		CompletableFuture<Void> allOf = CompletableFuture.allOf(cfs);
     	
     	Function<Object, Boolean> cancelFunc = (s) -> {
     		boolean allCancelled = true;
@@ -180,7 +208,7 @@ public class XFuture<T> extends CompletableFuture<T> {
     	return convert(allOf, cancelFunc);
     }
 
-	public static <T> XFuture<T> convert(CompletableFuture<T> future1) {
+	public static <T> XFuture<T> convert(XFuture<T> future1) {
 		return convert(future1, null);
 	}
 	

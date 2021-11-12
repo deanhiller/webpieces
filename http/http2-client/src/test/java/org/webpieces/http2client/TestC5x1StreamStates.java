@@ -1,6 +1,6 @@
 package org.webpieces.http2client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -60,7 +60,7 @@ public class TestC5x1StreamStates extends AbstractTest {
 		MockResponseListener listener1 = new MockResponseListener();
 		Http2Request request1 = Requests.createRequest();
 		StreamRef streamRef = httpSocket.openStream().process(request1, listener1);
-		CompletableFuture<StreamWriter> future = streamRef.getWriter();
+		XFuture<StreamWriter> future = streamRef.getWriter();
 
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
@@ -75,9 +75,9 @@ public class TestC5x1StreamStates extends AbstractTest {
 	@Test
 	public void testSection5_1BadFrameReceivedInReservedRemoteState() {
 		MockPushListener pushListener = new MockPushListener();
-		pushListener.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
+		pushListener.setIncomingRespDefault(XFuture.<Void>completedFuture(null));
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(null));
 		listener1.addReturnValuePush(pushListener);
 		
 		Http2Request request = sendRequestToServer(listener1);
@@ -115,7 +115,7 @@ public class TestC5x1StreamStates extends AbstractTest {
 	public void testSection5_1ReceiveBadFrameAfterReceiveRstStreamFrame() {	
 		MockStreamWriter mockWriter = new MockStreamWriter();
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(mockWriter));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(mockWriter));
 		Http2Request request = sendRequestToServer(listener1);
 		sendResetFromServer(listener1, request);
 
@@ -137,7 +137,7 @@ public class TestC5x1StreamStates extends AbstractTest {
 		//send new request on closed connection
 		Http2Request request1 = Requests.createRequest();
 		StreamRef streamRef = httpSocket.openStream().process(request1, listener1);
-		CompletableFuture<StreamWriter> future = streamRef.getWriter();
+		XFuture<StreamWriter> future = streamRef.getWriter();
 
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
@@ -156,7 +156,7 @@ public class TestC5x1StreamStates extends AbstractTest {
 	@Test
 	public void testSection5_1ReceiveBadFrameAfterReceiveEndStream() {	
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(null));
 		Http2Request request = sendRequestToServer(listener1);
 		
 		sendEosResponseFromServer(listener1, request);
@@ -179,7 +179,7 @@ public class TestC5x1StreamStates extends AbstractTest {
 		//send new request on closed connection
 		Http2Request request1 = Requests.createRequest();
 		StreamRef streamRef = httpSocket.openStream().process(request1, listener1);
-		CompletableFuture<StreamWriter> future = streamRef.getWriter();
+		XFuture<StreamWriter> future = streamRef.getWriter();
 
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
@@ -198,7 +198,7 @@ public class TestC5x1StreamStates extends AbstractTest {
 	@Test
 	public void testSection5_1ReceivePriorityAfterReceiveRstStreamFrame() {
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(null));
 		Http2Request request = sendRequestToServer(listener1);
 		sendResetFromServer(listener1, request);
 
@@ -227,12 +227,12 @@ public class TestC5x1StreamStates extends AbstractTest {
 	@Test
 	public void testSection5_1ReceiveValidFramesAfterSendRstStreamFrame() throws InterruptedException, ExecutionException, TimeoutException {	
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(null));
 
 		Http2Request request1 = Requests.createRequest();
 		RequestStreamHandle stream = httpSocket.openStream();
 		StreamRef streamRef = httpSocket.openStream().process(request1, listener1);
-		CompletableFuture<StreamWriter> future = streamRef.getWriter();
+		XFuture<StreamWriter> future = streamRef.getWriter();
 
 		@SuppressWarnings("unused")
 		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
@@ -240,7 +240,7 @@ public class TestC5x1StreamStates extends AbstractTest {
 		Assert.assertEquals(request1, req);
 		
 		RstStreamFrame rst = new RstStreamFrame(request1.getStreamId(), Http2ErrorCode.CANCEL);
-		CompletableFuture<Void> cancel = streamRef.cancel(rst);
+		XFuture<Void> cancel = streamRef.cancel(rst);
 		cancel.get(2, TimeUnit.SECONDS);
 		
 		Http2Msg svrRst = mockChannel.getFrameAndClear();

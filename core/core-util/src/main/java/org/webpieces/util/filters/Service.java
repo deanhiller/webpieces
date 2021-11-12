@@ -1,6 +1,6 @@
 package org.webpieces.util.filters;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 /**
  * Yes, we could do Service<REQIN, RESPIN, REQOUT, RESPOUT> and allow stacking of filters in 
@@ -15,6 +15,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface Service<REQ, RESP> {
 
-	CompletableFuture<RESP> invoke(REQ meta);
+	XFuture<RESP> invoke(REQ meta);
 
 }

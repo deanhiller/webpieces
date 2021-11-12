@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.shared;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public abstract class Level3IncomingSynchro {
 		this.remoteSettings = remoteSettings;
 	}
 
-	public CompletableFuture<Void> applyRemoteSettingsAndAck(SettingsFrame settings) {
+	public XFuture<Void> applyRemoteSettingsAndAck(SettingsFrame settings) {
 		remoteSettings.applyRemoteSettings(settings);
 		
 		//now that settings is applied, ack the settings
@@ -55,39 +55,39 @@ public abstract class Level3IncomingSynchro {
 		return notifyListener.sendControlDataToSocket(settingsAck);
 	}
 
-	public CompletableFuture<Void> sendPriorityFrameToApp(PriorityFrame msg) {
+	public XFuture<Void> sendPriorityFrameToApp(PriorityFrame msg) {
 		return streamsLayer.sendPriorityFrameToApp(msg);			
 	}
 
-	public CompletableFuture<Void> sendDataToApp(DataFrame msg) {
+	public XFuture<Void> sendDataToApp(DataFrame msg) {
 		return streamsLayer.sendDataToApp(msg);
 	}
 
-	public CompletableFuture<Void> sendTrailersToApp(Http2Trailers msg) {
+	public XFuture<Void> sendTrailersToApp(Http2Trailers msg) {
 		return streamsLayer.sendTrailersToApp(msg);
 	}
 	
-	public CompletableFuture<Void> sendRstToApp(RstStreamFrame frame) {
+	public XFuture<Void> sendRstToApp(RstStreamFrame frame) {
 		return streamsLayer.sendRstToApp(frame);
 	}
 	
-	public CompletableFuture<Void> sendRstToServerAndApp(StreamException e) {
+	public XFuture<Void> sendRstToServerAndApp(StreamException e) {
 		return streamsLayer.sendRstToServerAndApp(e);
 	}
 
-	public CompletableFuture<Void> sendGoAwayToApp(ConnReset2 reset) {
+	public XFuture<Void> sendGoAwayToApp(ConnReset2 reset) {
 		return streamsLayer.sendGoAwayToApp(reset);
 	}
 	
-	public CompletableFuture<Void> sendGoAwayToSvrAndResetAllToApp(ShutdownConnection reset) {
+	public XFuture<Void> sendGoAwayToSvrAndResetAllToApp(ShutdownConnection reset) {
 		return streamsLayer.sendGoAwayToSvrAndResetAllToApp(reset);
 	}
 	
-	public CompletableFuture<Void> updateWindowSize(WindowUpdateFrame msg) {
+	public XFuture<Void> updateWindowSize(WindowUpdateFrame msg) {
 		return streamsLayer.updateWindowSize(msg);
 	}
 
-	public CompletableFuture<Void> sendUnkownFrameToApp(UnknownFrame msg) {
+	public XFuture<Void> sendUnkownFrameToApp(UnknownFrame msg) {
 		return streamsLayer.sendUnknownFrame(msg);
 	}
 

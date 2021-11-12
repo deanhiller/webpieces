@@ -3,7 +3,7 @@ package org.webpieces.plugin.secure.properties.beans;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ class ApplyDatabaseProperties implements Runnable {
 		try {
 			log.debug("Starting to apply properties from database to beans.  read Database first");
 
-			CompletableFuture<Map<String, String>> dbRead = storage.read(KeyUtil.PLUGIN_PROPERTIES_KEY);
+			XFuture<Map<String, String>> dbRead = storage.read(KeyUtil.PLUGIN_PROPERTIES_KEY);
 
 			Map<String, String> dbProps = dbRead.get();
 

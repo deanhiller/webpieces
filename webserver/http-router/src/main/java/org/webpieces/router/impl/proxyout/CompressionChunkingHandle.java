@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 
@@ -69,7 +69,7 @@ public class CompressionChunkingHandle implements RouterResponseHandler {
 	}
 	
     @Override
-    public CompletableFuture<StreamWriter> process(Http2Response response) {
+    public XFuture<StreamWriter> process(Http2Response response) {
         if(lastResponseSent != null)
             throw new IllegalStateException("You already sent a response.  "
                     + "do not call Actions.redirect or Actions.render more than once.  previous response="
@@ -168,7 +168,7 @@ public class CompressionChunkingHandle implements RouterResponseHandler {
 		}
 
 		@Override
-        public CompletableFuture<Void> processPiece(StreamMsg data) {
+        public XFuture<Void> processPiece(StreamMsg data) {
 			if(data.getMessageType() == Http2MsgType.DATA) {
 				return processData((DataFrame)data);
 			}
@@ -176,7 +176,7 @@ public class CompressionChunkingHandle implements RouterResponseHandler {
 			return w.processPiece(data);
 		}
 		
-		public CompletableFuture<Void> processData(DataFrame frame) {
+		public XFuture<Void> processData(DataFrame frame) {
 			boolean eos = frame.isEndOfStream();
 			
 			DataWrapper data = frame.getData();
@@ -198,11 +198,11 @@ public class CompressionChunkingHandle implements RouterResponseHandler {
 			
 			List<DataFrame> frames = chunkedStream.getFrames();
 			
-			CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
+			XFuture<Void> future = XFuture.completedFuture(null);
 
 			for(int i = 0; i < frames.size(); i++) {
 				DataFrame f = frames.get(i);
-				CompletableFuture<Void> fut;
+				XFuture<Void> fut;
 				if(eos && i == frames.size()-1) {
 					//IF client sent LAST frame, we must mark last frame we are sending as last frame too
 					f.setEndOfStream(true);
@@ -261,7 +261,7 @@ public class CompressionChunkingHandle implements RouterResponseHandler {
     }
 
     @Override
-    public CompletableFuture<Void> cancel(CancelReason payload) {
+    public XFuture<Void> cancel(CancelReason payload) {
         return handler.cancel(payload);
     }
 

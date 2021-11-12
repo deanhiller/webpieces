@@ -7,7 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class ServerHttp2Sync {
 	private static final String PREFACE = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
 	
 	@SuppressWarnings("unused")
-	public CompletableFuture<InetSocketAddress> start() {
+	public XFuture<InetSocketAddress> start() {
 		if(true)
 			throw new UnsupportedOperationException("This is broken and needs ot use the http2 engine to work");
 		try {
@@ -45,7 +45,7 @@ public class ServerHttp2Sync {
 		}
 	}
 	
-	public CompletableFuture<InetSocketAddress> startImpl() throws IOException {
+	public XFuture<InetSocketAddress> startImpl() throws IOException {
     	log.error("running SYNC HTTP2 SERVER");
 
 		ServerSocket server = new ServerSocket(0);
@@ -57,7 +57,7 @@ public class ServerHttp2Sync {
     	t.start();
     	
     	InetSocketAddress address = (InetSocketAddress) server.getLocalSocketAddress();
-    	return CompletableFuture.completedFuture(address);
+    	return XFuture.completedFuture(address);
 	}
 
     private static class ServerRunnable implements Runnable {

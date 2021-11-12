@@ -6,7 +6,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -85,7 +85,7 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 	private void verifyTokenPageSetup(MockProxyAuthorization proxyAuth) {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/.well-known/acme-challenge/"+proxyAuth.getToken());
 
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -93,7 +93,7 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 		response.assertContentType("text/plain");
 		
 		HttpFullRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/.well-known/acme-challenge/notexisttoken");
-		CompletableFuture<HttpFullResponse> respFuture2 = https11Socket.send(req2);
+		XFuture<HttpFullResponse> respFuture2 = https11Socket.send(req2);
 		ResponseWrapper response2 = ResponseExtract.waitResponseAndWrap(respFuture2);
 		String url = response2.getRedirectUrl();
 		response2.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -102,14 +102,14 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 	private void renderFirstPage(String url) throws MalformedURLException {
 		URI terms = URI.create("http://somerandom.com/place");
 		URL website = new URL("http://website.com");
-		mockAcmeClient.setRemoteInfo(CompletableFuture.completedFuture(new AcmeInfo(terms, website)));
+		mockAcmeClient.setRemoteInfo(XFuture.completedFuture(new AcmeInfo(terms, website)));
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, url);
 		//response from logging in taken from TestLogin in backend plugin test suite
 		//set-cookie: webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin; path=/; HttpOnly
 		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		
@@ -125,7 +125,7 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 			);
 		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -140,7 +140,7 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 		//set-cookie: webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin; path=/; HttpOnly
 		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		
@@ -151,21 +151,21 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 
 	private MockProxyAuthorization postOrgAndPlaceOrderAndFinalizeOrder(String url) throws MalformedURLException {
 		URL accountUrl = new URL("http://someurlfor.com/myexact/account/1234");
-		mockAcmeClient.setOpenAccount(CompletableFuture.completedFuture(accountUrl));
+		mockAcmeClient.setOpenAccount(XFuture.completedFuture(accountUrl));
 		
 		List<ProxyAuthorization> proxyAuth = new ArrayList<>();
 		MockProxyAuthorization mockProxyAuth = new MockProxyAuthorization("domain.com", Instant.now(), Status.PENDING, new URL("http://somelocation.asdf"), "sometokenforwebdisplay", "authcontent111");
 		proxyAuth.add(mockProxyAuth);
-		mockAcmeClient.setProxyOrder(CompletableFuture.completedFuture(new ProxyOrder(null, proxyAuth)));
+		mockAcmeClient.setProxyOrder(XFuture.completedFuture(new ProxyOrder(null, proxyAuth)));
 		
-		mockAcmeClient.setCertAndSigningRequest(CompletableFuture.completedFuture(new CertAndSigningRequest("fakecsr", new ArrayList<>())));
+		mockAcmeClient.setCertAndSigningRequest(XFuture.completedFuture(new CertAndSigningRequest("fakecsr", new ArrayList<>())));
 		
 		HttpFullRequest req = Requests.createPostRequest(url, 
 				"organization", "DeanCo"
 			);
 		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -185,7 +185,7 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 //		//set-cookie: webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin; path=/; HttpOnly
 //		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
 //		
-//		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+//		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 //		
 //		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 //		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);

@@ -5,7 +5,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -70,7 +70,7 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 	public void testAccessPageWillRedirectToLogin() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@sslcert");
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		
@@ -86,16 +86,16 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 		URI terms = URI.create("http://somerandom.com/place");
 		URL website = new URL("http://website.com");
 		
-		mockStorage.addReadResponse(CompletableFuture.completedFuture(new HashMap<>()));
+		mockStorage.addReadResponse(XFuture.completedFuture(new HashMap<>()));
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@sslcert");
 		//response from logging in taken from TestLogin in backend plugin test suite
 		//set-cookie: webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin; path=/; HttpOnly
 		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
 		
-		mockAcmeClient.setRemoteInfo(CompletableFuture.completedFuture(new AcmeInfo(terms, website)));
+		mockAcmeClient.setRemoteInfo(XFuture.completedFuture(new AcmeInfo(terms, website)));
 
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		
@@ -115,7 +115,7 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 				"email", "dean@gmail.com"
 			);
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);

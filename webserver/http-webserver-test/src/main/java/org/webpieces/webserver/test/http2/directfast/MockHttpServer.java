@@ -1,7 +1,7 @@
 package org.webpieces.webserver.test.http2.directfast;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.HttpSvrConfig;
@@ -17,12 +17,12 @@ public class MockHttpServer implements HttpServer {
 	}
 
 	@Override
-	public CompletableFuture<Void> start() {
-		return CompletableFuture.completedFuture(null);
+	public XFuture<Void> start() {
+		return XFuture.completedFuture(null);
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		// TODO Auto-generated method stub
 		return null;
 	}

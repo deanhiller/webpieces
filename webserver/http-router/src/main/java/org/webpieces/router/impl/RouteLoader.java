@@ -175,7 +175,7 @@ public class RouteLoader {
 
 			Injector injector = webInjector.createInjector(theModule);
 			
-			//CompletableFuture<Void> storageLoadComplete = setupSimpleStorage(injector);
+			//XFuture<Void> storageLoadComplete = setupSimpleStorage(injector);
 			
 			pluginSetup.wireInPluginPoints(injector);
 			
@@ -202,17 +202,17 @@ public class RouteLoader {
 		}
 	}
 
-//	private CompletableFuture<Void> setupSimpleStorage(Injector injector) {
+//	private XFuture<Void> setupSimpleStorage(Injector injector) {
 //		SimpleStorage storage = injector.getInstance(SimpleStorage.class);
 //		
-//		List<CompletableFuture<?>> futures = new ArrayList<>();
+//		List<XFuture<?>> futures = new ArrayList<>();
 //		List<NeedsSimpleStorage> needsStorage = config.getNeedsStorage();
 //		for(NeedsSimpleStorage bean : needsStorage) {
-//			CompletableFuture<Void> future = bean.init(storage);
+//			XFuture<Void> future = bean.init(storage);
 //			futures.add(future);
 //		}
 //		
-//		return CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]));
+//		return XFuture.allOf(futures.toArray(new XFuture<?>[0]));
 //	}
 
 	public Module createTHEModule(WebAppMeta routerModule, RoutingHolder routingHolder) {

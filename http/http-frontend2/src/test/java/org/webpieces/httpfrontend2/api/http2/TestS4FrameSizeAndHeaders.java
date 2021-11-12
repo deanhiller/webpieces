@@ -2,7 +2,7 @@ package org.webpieces.httpfrontend2.api.http2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -53,7 +53,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractFrontendHttp2Test {
 	@Test
 	public void testSection4_2FrameTooLarge() throws InterruptedException, ExecutionException, TimeoutException {
 		MockStreamWriter mockWriter = new MockStreamWriter();
-		CompletableFuture<StreamWriter> futA = CompletableFuture.completedFuture(mockWriter);
+		XFuture<StreamWriter> futA = XFuture.completedFuture(mockWriter);
 		MockStreamRef mockStream = new MockStreamRef(futA );
 		mockListener.addMockStreamToReturn(mockStream);
 		
@@ -89,7 +89,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractFrontendHttp2Test {
 
 		//send response with request not complete but failed as well anyways
 		Http2Response response = Http2Requests.createResponse(request.getStreamId());
-		CompletableFuture<StreamWriter> future = stream.process(response);
+		XFuture<StreamWriter> future = stream.process(response);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));

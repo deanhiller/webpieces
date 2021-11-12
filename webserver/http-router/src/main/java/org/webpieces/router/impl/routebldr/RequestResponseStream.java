@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routebldr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -47,7 +47,7 @@ public class RequestResponseStream implements StreamService {
 			//If there is no body, just invoke to process OR IN CASE of InternalError or NotFound, there is NO need
 			//to wait for the request body and we can respond early, which stops wasting CPU of reading in their body
 			meta.getCtx().getRequest().body = DataWrapperGeneratorFactory.EMPTY;
-			CompletableFuture<StreamWriter> invokeSvc = invoker.invokeSvc(meta, i18nBundleName, service, processor, handle)
+			XFuture<StreamWriter> invokeSvc = invoker.invokeSvc(meta, i18nBundleName, service, processor, handle)
 																.thenApply(voidd -> new NullWriter());
 			return new RouterStreamRef("reqRespStreamProxy", invokeSvc, null);
 		}
@@ -57,7 +57,7 @@ public class RequestResponseStream implements StreamService {
 				(newInfo) -> invoker.invokeSvc(newInfo, i18nBundleName, service, processor, handle)
 		);
 		
-		CompletableFuture<StreamWriter> w = CompletableFuture.completedFuture(writer);
+		XFuture<StreamWriter> w = XFuture.completedFuture(writer);
 		return new RouterStreamRef("requestRespStream", w, null);
 	}
 

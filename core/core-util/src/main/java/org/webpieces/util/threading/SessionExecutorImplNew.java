@@ -3,7 +3,7 @@ package org.webpieces.util.threading;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
@@ -25,8 +25,8 @@ public class SessionExecutorImplNew implements SessionExecutor {
 	}
 	
 	@Override
-	public <T> CompletableFuture<T> executeCall(Object key, Callable<CompletableFuture<T>> callable) {
-		CompletableFuture<T> future = new CompletableFuture<T>();
+	public <T> XFuture<T> executeCall(Object key, Callable<XFuture<T>> callable) {
+		XFuture<T> future = new XFuture<T>();
 		FutureRunnable<T> r = new FutureRunnable<>(callable, future);
 
 		execute(key, r);
@@ -35,10 +35,10 @@ public class SessionExecutorImplNew implements SessionExecutor {
 	}
 	
 	private class FutureRunnable<T> implements Runnable {
-		private Callable<CompletableFuture<T>> callable;
-		private CompletableFuture<T> future;
+		private Callable<XFuture<T>> callable;
+		private XFuture<T> future;
 
-		public FutureRunnable(Callable<CompletableFuture<T>> callable, CompletableFuture<T> future) {
+		public FutureRunnable(Callable<XFuture<T>> callable, XFuture<T> future) {
 			this.callable = callable;
 			this.future = future;
 		}
@@ -46,7 +46,7 @@ public class SessionExecutorImplNew implements SessionExecutor {
 		@Override
 		public void run() {
 			try {
-				CompletableFuture<T> result = callable.call();
+				XFuture<T> result = callable.call();
 				result.handle((r, t) -> {
 					if(t != null) {
 						future.completeExceptionally(t);

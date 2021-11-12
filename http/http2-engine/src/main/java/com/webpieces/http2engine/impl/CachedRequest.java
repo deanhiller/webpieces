@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Headers;
 import com.webpieces.http2.api.streaming.ResponseStreamHandle;
@@ -10,10 +10,10 @@ public class CachedRequest {
 
 	private Http2Headers frame;
 	private ResponseStreamHandle responseListener;
-	private CompletableFuture<StreamWriter> future;
+	private XFuture<StreamWriter> future;
 
 	public CachedRequest(Http2Headers frame, ResponseStreamHandle responseListener,
-			CompletableFuture<StreamWriter> future) {
+			XFuture<StreamWriter> future) {
 				this.frame = frame;
 				this.responseListener = responseListener;
 				this.future = future;
@@ -27,7 +27,7 @@ public class CachedRequest {
 		return responseListener;
 	}
 
-	public CompletableFuture<StreamWriter> getFuture() {
+	public XFuture<StreamWriter> getFuture() {
 		return future;
 	}
 	

@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routeinvoker;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.streams.StreamService;
@@ -14,7 +14,7 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ProdRouteInvoker.class)
 public interface RouteInvoker {
 
-	CompletableFuture<Void> invokeErrorController(InvokeInfo invokeInfo, Endpoint info, RouteData data);
+	XFuture<Void> invokeErrorController(InvokeInfo invokeInfo, Endpoint info, RouteData data);
 
 	RouterStreamRef invokeHtmlController(InvokeInfo invokeInfo, StreamService dynamicInfo, RouteData data);
 
@@ -22,7 +22,7 @@ public interface RouteInvoker {
 
 	RouterStreamRef invokeStreamingController(InvokeInfo invokeInfo, StreamService dynamicInfo, RouteData data);
 
-	CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, Endpoint info, RouteData data);
+	XFuture<Void> invokeNotFound(InvokeInfo invokeInfo, Endpoint info, RouteData data);
 
 	RouterStreamRef invokeStatic(RequestContext ctx, ProxyStreamHandle handler, RouteInfoForStatic data);
 

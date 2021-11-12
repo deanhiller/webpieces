@@ -8,7 +8,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.DatagramListener;
 
 import javax.net.ssl.SSLEngine;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class MockChannelManager implements ChannelManager {
 
@@ -37,11 +37,11 @@ public class MockChannelManager implements ChannelManager {
 		return new MockServerChannel();
 	}
 
-	public CompletableFuture<DataListener> simulateHttpsConnect(Channel channel) {
+	public XFuture<DataListener> simulateHttpsConnect(Channel channel) {
 		return httpsConnectionListener.connected(channel, true);
 	}
 	
-	public CompletableFuture<DataListener> simulateHttpConnect(Channel channel) {
+	public XFuture<DataListener> simulateHttpConnect(Channel channel) {
 		return httpConnectionListener.connected(channel, true);
 	}	
 	

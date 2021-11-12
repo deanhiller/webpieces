@@ -1,7 +1,7 @@
 package org.webpieces.nio.impl.ssl;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +20,12 @@ public class SslTryCatchListener implements DataListener {
 		this.listener = listener;
 	}
 
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		try {
 			return listener.incomingData(channel, b);
 		} catch (Throwable e) {
 			log.error("Exception", e);
-			CompletableFuture<Void> future = new CompletableFuture<>();
+			XFuture<Void> future = new XFuture<>();
 			future.completeExceptionally(e);
 			return future;
 		}

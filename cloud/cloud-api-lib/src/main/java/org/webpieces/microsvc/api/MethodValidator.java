@@ -31,7 +31,7 @@ public class MethodValidator {
         }
         if (!returnType.endsWith("Response") || !returnType.toLowerCase().contains(methodName.toLowerCase())) {
             errorResponse.add(api.getName() + "::" + methodName + " return type does not follow Orderly REST API convention.\n" +
-                    "\tThe return type must have the format \"CompletableFuture<" + pascalMethodName + "Response>\".\n" +
+                    "\tThe return type must have the format \"XFuture<" + pascalMethodName + "Response>\".\n" +
                     "\tUse the new convention, or add @Legacy or @Deprecated on this method and add a ticket to change your API");
         }
 

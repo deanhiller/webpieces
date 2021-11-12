@@ -3,7 +3,7 @@ package org.webpieces.webserver.test;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpFullResponse;
@@ -25,7 +25,7 @@ public class WebBrowserSimulator {
 			request.addHeader(createCookieHeader());
 		}
 
-		CompletableFuture<HttpFullResponse> respFuture = socket.send(request);
+		XFuture<HttpFullResponse> respFuture = socket.send(request);
 
 		ResponseWrapper responseWrapper = ResponseExtract.waitResponseAndWrap(respFuture);
 		

@@ -19,7 +19,7 @@ import org.webpieces.http2client.util.Requests;
 import org.webpieces.http2client.util.RequestsSent;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 
 public class TestCMaxConcurrentSetting extends AbstractTest {
@@ -29,7 +29,7 @@ public class TestCMaxConcurrentSetting extends AbstractTest {
 		RequestsSent sent = sendTwoRequests();
 
 		int streamId1 = sent.getRequest1().getRequest().getStreamId();
-		CompletableFuture<StreamWriter> future2 = sent.getRequest2().getFuture();
+		XFuture<StreamWriter> future2 = sent.getRequest2().getFuture();
 		RequestHolder holder1 = sent.getRequest1();
 		RequestHolder holder2 = sent.getRequest2();
 		
@@ -47,7 +47,7 @@ public class TestCMaxConcurrentSetting extends AbstractTest {
 		
 		MockResponseListener listener2 = holder2.getListener();
 		MockStreamWriter writer2 = holder2.getWriter();
-		listener2.addReturnValueIncomingResponse(CompletableFuture.completedFuture(writer2));
+		listener2.addReturnValueIncomingResponse(XFuture.completedFuture(writer2));
 		
 		Assert.assertFalse(future2.isDone());
 		DataFrame dataFrame = new DataFrame(streamId1, true);
@@ -87,15 +87,15 @@ public class TestCMaxConcurrentSetting extends AbstractTest {
 		MockStreamWriter writer1 = new MockStreamWriter();
 		MockStreamWriter writer2 = new MockStreamWriter();
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.completedFuture(writer1));
+		listener1.setIncomingRespDefault(XFuture.completedFuture(writer1));
 
 		//do not set default incoming response as we want to delay the resolution of the future
 		MockResponseListener listener2 = new MockResponseListener();
 
 		StreamRef streamRef1 = httpSocket.openStream().process(request1, listener1);
-		CompletableFuture<StreamWriter> future = streamRef1.getWriter();
+		XFuture<StreamWriter> future = streamRef1.getWriter();
 		StreamRef streamRef2 = httpSocket.openStream().process(request2, listener2);
-		CompletableFuture<StreamWriter> future2 = streamRef2.getWriter();
+		XFuture<StreamWriter> future2 = streamRef2.getWriter();
 
 		RequestHolder r1 = new RequestHolder(request1, listener1, writer1, future);
 		RequestHolder r2 = new RequestHolder(request2, listener2, writer2, future2);		

@@ -2,7 +2,7 @@ package org.webpieces.nio.impl.ssl;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
@@ -24,7 +24,7 @@ public abstract class SslChannel implements Channel {
 		return channel.getChannelId();
 	}
 
-	public CompletableFuture<Void> bind(SocketAddress addr) {
+	public XFuture<Void> bind(SocketAddress addr) {
 		return channel.bind(addr);
 	}
 

@@ -3,7 +3,7 @@ package org.webpieces.router.impl.services;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.ctx.api.Flash;
 import org.webpieces.ctx.api.HttpMethod;
@@ -42,11 +42,11 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 	}
 
 	@Override
-	public CompletableFuture<Action> invoke(MethodMeta meta) {
+	public XFuture<Action> invoke(MethodMeta meta) {
 		return futureUtil.syncToAsyncException(() -> invokeMethod(meta));
 	}
 
-	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
+	private XFuture<Action> invokeMethod(MethodMeta meta)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		RouteInfoForHtml info = (RouteInfoForHtml) meta.getRoute();
 		
@@ -61,7 +61,7 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 		//On top of that ORM plugins can have a transaction filter and then in this
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
-		CompletableFuture<List<Object>> future = translator.createArgs(m, meta.getCtx(), null)
+		XFuture<List<Object>> future = translator.createArgs(m, meta.getCtx(), null)
 													.thenApply ( args -> validate(obj, m, meta.getCtx(), args));
 		
 		return future.thenCompose(argsResult -> doTheInvoke(meta, argsResult));
@@ -93,7 +93,7 @@ public class SvcProxyForHtml implements Service<MethodMeta, Action> {
 		return args;
 	}
 	
-	private CompletableFuture<Action> doTheInvoke(MethodMeta meta, List<Object> argsResult) {
+	private XFuture<Action> doTheInvoke(MethodMeta meta, List<Object> argsResult) {
 		try {
 			return invoker.invokeAndCoerce(meta.getLoadedController(), argsResult.toArray()).thenApply( action -> {
 				if(config.isValidateFlash()) {

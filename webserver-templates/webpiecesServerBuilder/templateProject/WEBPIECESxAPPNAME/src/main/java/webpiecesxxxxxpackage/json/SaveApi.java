@@ -2,13 +2,13 @@ package webpiecesxxxxxpackage.json;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public interface SaveApi {
 
     @POST
     @Path("/search/item")
-    public CompletableFuture<SearchResponse> search(SearchRequest request);
+    public XFuture<SearchResponse> search(SearchRequest request);
 
 
 }

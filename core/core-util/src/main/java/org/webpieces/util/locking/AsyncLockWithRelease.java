@@ -1,6 +1,6 @@
 package org.webpieces.util.locking;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -32,7 +32,7 @@ public class AsyncLockWithRelease {
 		this.permitQueue = new PermitQueue(1);
 	}
 
-	public <RESP> CompletableFuture<RESP> lock(Function<Lock, CompletableFuture<RESP>> processor) {
+	public <RESP> XFuture<RESP> lock(Function<Lock, XFuture<RESP>> processor) {
 		int id = counter.getAndIncrement();
 		String key = logId+id;
 
@@ -40,10 +40,10 @@ public class AsyncLockWithRelease {
 			log.warn("id:"+key+" Your lock is backing up with requests.  either too much contention or deadlock occurred(either way, you should fix this)");
 		
 		Lock lock = new LockImpl(key);
-		Supplier<CompletableFuture<RESP>> proxy = new Supplier<CompletableFuture<RESP>>() {
-			public CompletableFuture<RESP> get() {
+		Supplier<XFuture<RESP>> proxy = new Supplier<XFuture<RESP>>() {
+			public XFuture<RESP> get() {
 				log.info("key:"+key+" enter async sync block");
-				CompletableFuture<RESP> fut = processor.apply(lock);
+				XFuture<RESP> fut = processor.apply(lock);
 				return fut;
 			}
 		};

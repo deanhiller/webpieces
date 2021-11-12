@@ -2,7 +2,7 @@ package webpiecesxxxxxpackage.mock;
 
 import java.awt.event.ActionEvent;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,8 +20,8 @@ public class MockRemoteSystem extends MockSuperclass implements RemoteService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Integer> fetchRemoteValue(String s, int i) {
-		return (CompletableFuture<Integer>) super.calledMethod(Method.FETCH_REMOTE_VAL, s, i);
+	public XFuture<Integer> fetchRemoteValue(String s, int i) {
+		return (XFuture<Integer>) super.calledMethod(Method.FETCH_REMOTE_VAL, s, i);
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class MockRemoteSystem extends MockSuperclass implements RemoteService {
 		super.calledVoidMethod(Method.SEND_DATA, num);
 	}
 
-	public void addValueToReturn(CompletableFuture<Integer> future) {
+	public void addValueToReturn(XFuture<Integer> future) {
 		super.addValueToReturn(Method.FETCH_REMOTE_VAL, future);
 	}
 

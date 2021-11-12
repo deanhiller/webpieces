@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.net.ssl.KeyManagerFactory;
@@ -63,10 +63,10 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 	//the main system in this case wants to read the certs from storage (so the cert is in ONE place instead of on
 	//N machines in your cluster, it will be read from storage that you lock down).
 	@Override
-	public CompletableFuture<Void> init(SimpleStorage storage) {
+	public XFuture<Void> init(SimpleStorage storage) {
 		log.info("intializing storage="+storage);
 		this.storage = storage;
-		CompletableFuture<Map<String, String>> future = storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
+		XFuture<Map<String, String>> future = storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
 		return future.thenApply((props) -> setupCert(props));
 	}
 	
@@ -112,12 +112,12 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 			if(certChain != null)
 				return createSslEngineFromCert();
 
-			CompletableFuture<Map<String, String>> future = CompletableFuture.completedFuture(new HashMap<String, String>());
+			XFuture<Map<String, String>> future = XFuture.completedFuture(new HashMap<String, String>());
 			if(storage != null)
 			//otherwise, each request, try to kick off the loading
 				future = storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
 			
-			//TODO: dhiller- I don't really like swallowing....we should weave this upstream to clients as a CompletableFuture
+			//TODO: dhiller- I don't really like swallowing....we should weave this upstream to clients as a XFuture
 			//instead so they can catch and fail.
 			future.thenApply( (props) -> setupCert(props)).exceptionally((t) -> {
 				log.error("Exception reading and we swallow it here.  we default then to self-signed cert", t);

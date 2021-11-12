@@ -1,7 +1,7 @@
 package org.webpieces.util.threading;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 /**
  * Shares a threadpool and all the threads in a unique way that each key gets a virtual thread which
@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface SessionExecutor {
 
-	public <T> CompletableFuture<T> executeCall(Object key, Callable<CompletableFuture<T>> r);
+	public <T> XFuture<T> executeCall(Object key, Callable<XFuture<T>> r);
 
 	public void execute(Object key, Runnable r);
 

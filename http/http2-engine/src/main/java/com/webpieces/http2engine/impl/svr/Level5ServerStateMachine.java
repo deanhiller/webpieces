@@ -12,7 +12,7 @@ import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_HEADERS
 import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_PUSH;
 import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_RST;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
@@ -82,14 +82,14 @@ public class Level5ServerStateMachine extends Level5CStateMachine {
 
 	}
 
-	public CompletableFuture<Void> fireToClient(ServerStream stream, Http2Request payload) {
+	public XFuture<Void> fireToClient(ServerStream stream, Http2Request payload) {
 		return fireRecvToSM(stream, payload)
 				.thenCompose(v-> {
 					return local.fireHeadersToClient(stream, payload);
 				});
 	}
 
-	public CompletableFuture<Void> sendRequestToApp(Http2Request request) {
+	public XFuture<Void> sendRequestToApp(Http2Request request) {
 		if(!streamState.isLargeEnough(request))
 			throw new StreamException(CancelReasonCode.CLOSED_STREAM, logId, request.getStreamId(), "Stream id too low and stream not exist(ie. stream was closed) request="+request);
 		
@@ -116,16 +116,16 @@ public class Level5ServerStateMachine extends Level5CStateMachine {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendDataToApp(DataFrame frame) {
+	public XFuture<Void> sendDataToApp(DataFrame frame) {
 		return sendDataToAppImpl(frame, false);
 	}
 
 	@Override
-	protected CompletableFuture<Void> sendTrailersToApp(Http2Trailers frame) {
+	protected XFuture<Void> sendTrailersToApp(Http2Trailers frame) {
 		return sendTrailersToAppImpl(frame, false);
 	}
 	
-	public CompletableFuture<ServerPushStream> sendPush(PushStreamHandleImpl handle, Http2Push push) {
+	public XFuture<ServerPushStream> sendPush(PushStreamHandleImpl handle, Http2Push push) {
 		int newStreamId = push.getPromisedStreamId();
 		ServerPushStream stream = createPushStream(handle, newStreamId);
 
@@ -133,7 +133,7 @@ public class Level5ServerStateMachine extends Level5CStateMachine {
 				.thenApply(s -> stream);
 	}
 
-	public CompletableFuture<Void> sendResponseHeaders(Stream stream, Http2Response response) {
+	public XFuture<Void> sendResponseHeaders(Stream stream, Http2Response response) {
 		return fireToSocket(stream, response);
 	}
 

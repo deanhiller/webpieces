@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -57,7 +57,7 @@ public class ParamToObjectTranslatorImpl {
 	//ON TOP of this, do you maintain a separate structure for params IN THE PATH /user/{var1} vs in the query params /user/{var1}?var1=xxx
 	//
 	//AND ON TOP of that, we have multi-part fields as well with keys and values
-	public CompletableFuture<List<Object>> createArgs(Method m, RequestContext ctx, BodyContentBinder binder) {
+	public XFuture<List<Object>> createArgs(Method m, RequestContext ctx, BodyContentBinder binder) {
 		RouterRequest req = ctx.getRequest();
 		try {
 			return createArgsImpl(m, ctx, binder);
@@ -78,7 +78,7 @@ public class ParamToObjectTranslatorImpl {
 		}
 	}
 
-	protected CompletableFuture<List<Object>> createArgsImpl(Method method, RequestContext ctx, BodyContentBinder binder) {
+	protected XFuture<List<Object>> createArgsImpl(Method method, RequestContext ctx, BodyContentBinder binder) {
 		RouterRequest req = ctx.getRequest();
 		Parameter[] paramMetas = method.getParameters();
 		Annotation[][] paramAnnotations = method.getParameterAnnotations();
@@ -97,17 +97,17 @@ public class ParamToObjectTranslatorImpl {
 		treeCreator.createTree(paramTree, ctx.getPathParams(), FromEnum.URL_PATH);
 
 		List<Object> results = new ArrayList<>();
-		CompletableFuture<List<Object>> future = CompletableFuture.completedFuture(results);
+		XFuture<List<Object>> future = XFuture.completedFuture(results);
 		for(int i = 0; i < paramMetas.length; i++) {
 			Parameter paramMeta = paramMetas[i];
 			Annotation[] annotations = paramAnnotations[i];
 			ParamMeta fieldMeta = new ParamMeta(method, paramMeta, annotations);
 			String name = fieldMeta.getName();
 			ParamNode paramNode = paramTree.get(name);
-			CompletableFuture<Object> beanFuture;
+			XFuture<Object> beanFuture;
 			if(binder != null && isManagedBy(binder, fieldMeta)) {
 				Object bean = binder.unmarshal(ctx, fieldMeta, req.body.createByteArray());
-				beanFuture = CompletableFuture.completedFuture(bean);
+				beanFuture = XFuture.completedFuture(bean);
 			} else {
 				beanFuture = translate(req, method, paramNode, fieldMeta, ctx.getValidation());
 			}
@@ -151,13 +151,13 @@ public class ParamToObjectTranslatorImpl {
 		return newForm;
 	}
 
-	private CompletableFuture<Object> translate(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
+	private XFuture<Object> translate(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
 
 		Class<?> fieldClass = fieldMeta.getFieldClass();
 		ObjectStringConverter<?> converter = objectTranslator.getConverter(fieldClass);
 		if(converter != null) {
 			Object convert = convert(req, method, valuesToUse, fieldMeta, converter, validator);
-			return CompletableFuture.completedFuture(convert);
+			return XFuture.completedFuture(convert);
 		} else if(fieldClass.isArray()) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
 		} else if(fieldClass.isEnum()) {
@@ -167,7 +167,7 @@ public class ParamToObjectTranslatorImpl {
 					"\t\tconversionBinder.addBinding().to({YOUR_ENUM}.WebConverter.class);");
 		} else if(List.class.isAssignableFrom(fieldClass)) {
 			if(valuesToUse == null)
-				return CompletableFuture.completedFuture(new ArrayList<>());
+				return XFuture.completedFuture(new ArrayList<>());
 			else if(valuesToUse instanceof ArrayNode) {
 				List<ParamNode> paramNodes = ((ArrayNode) valuesToUse).getList();
 				return createList(req, method, fieldMeta, validator, paramNodes);
@@ -185,7 +185,7 @@ public class ParamToObjectTranslatorImpl {
 			throw new IllegalArgumentException("Could not convert incoming value="+v.getValue()+" of key name="+fullName+" field="+fieldMeta);
 		} else if(valuesToUse == null) {
 			fieldMeta.validateNullValue(); //validate if null is ok or not
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		} else if(!(valuesToUse instanceof ParamTreeNode)) {
 			throw new IllegalStateException("Bug, must be missing a case. v="+valuesToUse+" type to field="+fieldMeta);
 		}
@@ -193,14 +193,14 @@ public class ParamToObjectTranslatorImpl {
 		ParamTreeNode tree = (ParamTreeNode) valuesToUse;
 		EntityLookup pluginLookup = fetchPluginLoader(fieldClass);
 		
-		CompletableFuture<Object> future = null;
+		XFuture<Object> future = null;
 		if(pluginLookup != null) {
 			future = pluginLookup.find(fieldMeta, tree, c -> createBean(c));
 			if(future == null)
 				throw new IllegalStateException("plugin="+pluginLookup.getClass()+" failed to create bean.  This is a plugin bug");
 		} else {
 			Object newBean = createBean(fieldClass);
-			future = CompletableFuture.completedFuture(newBean);
+			future = XFuture.completedFuture(newBean);
 		}
 		
 		return future.thenCompose( bean -> {
@@ -208,8 +208,8 @@ public class ParamToObjectTranslatorImpl {
 		});
 	}
 
-	private CompletableFuture<Object> fillBeanIn(Object bean, ParamTreeNode tree, RouterRequest req, Method method, Validation validator) {
-		CompletableFuture<Object> future = CompletableFuture.completedFuture(bean);
+	private XFuture<Object> fillBeanIn(Object bean, ParamTreeNode tree, RouterRequest req, Method method, Validation validator) {
+		XFuture<Object> future = XFuture.completedFuture(bean);
 		for(Map.Entry<String, ParamNode> entry: tree.entrySet()) {
 			String key = entry.getKey();
 			ParamNode value = entry.getValue();
@@ -218,7 +218,7 @@ public class ParamToObjectTranslatorImpl {
 			FieldMeta nextFieldMeta = new FieldMeta(field);
 			
 			//Here, if there are any lookups(doubtful!!), they would all be done in parallel....
-			CompletableFuture<Object> translated = translate(req, method, value, nextFieldMeta, validator);
+			XFuture<Object> translated = translate(req, method, value, nextFieldMeta, validator);
 			future = future.thenCompose( b -> translated)
 							.thenApply( translatedValue -> {
 								nextFieldMeta.setValueOnBean(bean, translatedValue);
@@ -230,7 +230,7 @@ public class ParamToObjectTranslatorImpl {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private CompletableFuture<Object> createList(RouterRequest req, Method method, Meta fieldMeta, Validation validator, List<ParamNode> paramNodes) {
+	private XFuture<Object> createList(RouterRequest req, Method method, Meta fieldMeta, Validation validator, List<ParamNode> paramNodes) {
 		List<Object> list = new ArrayList<>();
 		ParameterizedType type = (ParameterizedType) fieldMeta.getParameterizedType();
 		Type[] actualTypeArguments = type.getActualTypeArguments();
@@ -238,13 +238,13 @@ public class ParamToObjectTranslatorImpl {
 		@SuppressWarnings("rawtypes")
 		GenericMeta genMeta = new GenericMeta((Class) type2);
 		
-		CompletableFuture<List<Object>> future = CompletableFuture.completedFuture(list);
+		XFuture<List<Object>> future = XFuture.completedFuture(list);
 		for(ParamNode node : paramNodes) {
-			CompletableFuture<Object> fut;
+			XFuture<Object> fut;
 			if(node != null) { 
 				fut = translate(req, method, node, genMeta, validator);
 			} else {
-				fut = CompletableFuture.completedFuture(null);
+				fut = XFuture.completedFuture(null);
 			}
 			
 			future = future.thenCompose( myList -> {

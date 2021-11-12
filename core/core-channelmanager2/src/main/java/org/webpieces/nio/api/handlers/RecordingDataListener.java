@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.recording.api.Recorder;
@@ -27,7 +27,7 @@ public class RecordingDataListener implements DataListener {
 		this.realListener = realListener;
 	}
 
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		Recorder recorder = getOrCreate(channel);
 		recorder.record(b);
 		return realListener.incomingData(channel, b);

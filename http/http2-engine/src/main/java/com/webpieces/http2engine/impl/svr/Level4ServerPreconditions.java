@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,18 +28,18 @@ public class Level4ServerPreconditions extends Level4PreconditionChecks<ServerSt
 		this.serverSm = serverSm;
 	}
 
-	public CompletableFuture<Void> sendRequestToApp(Http2Request request) {
+	public XFuture<Void> sendRequestToApp(Http2Request request) {
 		if(request.getStreamId() % 2 == 0)
 			throw new ConnectionException(CancelReasonCode.BAD_STREAM_ID, logId, request.getStreamId(), "Bad stream id.  Even stream ids not allowed in requests to a server request="+request);
 
 		return serverSm.sendRequestToApp(request);
 	}
 	
-	public CompletableFuture<ServerPushStream> sendPush(PushStreamHandleImpl handle, Http2Push push) {
+	public XFuture<ServerPushStream> sendPush(PushStreamHandleImpl handle, Http2Push push) {
 		return serverSm.sendPush(handle, push);
 	}
 
-	public CompletableFuture<Void> sendResponseToSocket(Stream stream, Http2Response response) {
+	public XFuture<Void> sendResponseToSocket(Stream stream, Http2Response response) {
 		ConnectionCancelled closedReason = serverSm.getClosedReason();
 		if(closedReason != null) {
 			return createExcepted(response, "sending response", closedReason);
