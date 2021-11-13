@@ -1,10 +1,14 @@
 package org.webpieces.microsvc.client.impl;
 
+import org.checkerframework.checker.units.qual.Current;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.microsvc.impl.EndpointInfo;
+import org.webpieces.microsvc.impl.TestCaseRecorder;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -15,7 +19,11 @@ import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+
+import static org.webpieces.microsvc.impl.TestCaseRecorder.RECORDER_KEY;
 
 public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
@@ -40,6 +48,13 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+        TestCaseRecorder recorder = (TestCaseRecorder) Context.get(RECORDER_KEY);
+        EndpointInfo recordingInfo = null;
+        if(recorder != null) {
+            Map<String, Object> ctxSnapshot = Context.copyContext();
+            recordingInfo = new EndpointInfo(method, args, ctxSnapshot);
+        }
 
         clientAssertions.throwIfCannotGoRemote();
 
@@ -82,13 +97,31 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         }
 
         Endpoint endpoint = new Endpoint(addr, httpMethod.getCode(), path);
+        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType)
+                .thenApply(retVal -> {
+                    //Only needed by APIs/methods that return CompletableFuture :( not XFuture
+                    Context.restoreContext(context);
+                    return retVal;
+                });
 
-        return clientHelper.sendHttpRequest(method, body, endpoint, retType)
-            .thenApply(retVal -> {
-                Context.restoreContext(context);
-                return retVal;
-            });
+        if(recorder == null) {
+            return xFuture;
+        }
 
+        EndpointInfo finalInfo = recordingInfo;
+        return xFuture
+                .handle( (resp, exc1) -> addTestRecordingInfo(finalInfo, resp, exc1))
+                .thenCompose(Function.identity());
+    }
+
+    private XFuture<Object> addTestRecordingInfo(EndpointInfo recordingInfo, Object resp, Throwable exc1) {
+        if(exc1 != null) {
+            recordingInfo.addFailure(exc1);
+            return XFuture.failedFuture(exc1);
+        }
+
+        recordingInfo.addSuccessResponse(resp);
+        return XFuture.completedFuture(resp);
     }
 
     private String transformPath(String path, Method method, Object[] args) {
