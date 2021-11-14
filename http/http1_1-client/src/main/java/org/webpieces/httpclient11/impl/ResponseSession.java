@@ -1,16 +1,16 @@
 package org.webpieces.httpclient11.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class ResponseSession {
 
-	private CompletableFuture<Void> processFuture = CompletableFuture.completedFuture(null);
+	private XFuture<Void> processFuture = XFuture.completedFuture(null);
 
-	public CompletableFuture<Void> getProcessFuture() {
+	public XFuture<Void> getProcessFuture() {
 		return processFuture;
 	}
 
-	public void setProcessFuture(CompletableFuture<Void> future) {
+	public void setProcessFuture(XFuture<Void> future) {
 		this.processFuture = future;
 	}
 

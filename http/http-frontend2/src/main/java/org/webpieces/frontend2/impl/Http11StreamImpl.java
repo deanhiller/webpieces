@@ -3,7 +3,7 @@ package org.webpieces.frontend2.impl;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
@@ -81,7 +81,7 @@ public class Http11StreamImpl implements ResponseStream {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response headers) {
+	public XFuture<StreamWriter> process(Http2Response headers) {
 		closeCheck(headers);
 		HttpResponse response = Http2ToHttp11.translateResponse(headers);
 		
@@ -138,8 +138,8 @@ public class Http11StreamImpl implements ResponseStream {
 
 	private class NoWritesWriter implements StreamWriter {
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
-			CompletableFuture<Void> future = new CompletableFuture<>();
+		public XFuture<Void> processPiece(StreamMsg data) {
+			XFuture<Void> future = new XFuture<>();
 			future.completeExceptionally(new IllegalStateException("You already sent a response with endStream==true"));
 			return future;
 		}
@@ -156,7 +156,7 @@ public class Http11StreamImpl implements ResponseStream {
 		}
 		
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
+		public XFuture<Void> processPiece(StreamMsg data) {
 			closeCheck(data);
 			if(!(data instanceof DataFrame))
 				throw new UnsupportedOperationException("not supported in http1.1="+data);
@@ -199,7 +199,7 @@ public class Http11StreamImpl implements ResponseStream {
 		}
 		
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
+		public XFuture<Void> processPiece(StreamMsg data) {
 			closeCheck(data);
 			if(!(data instanceof DataFrame))
 				throw new UnsupportedOperationException("not supported in http1.1="+data);
@@ -217,7 +217,7 @@ public class Http11StreamImpl implements ResponseStream {
 				return write(new HttpChunk(frame.getData()));
 			}
 
-			CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
+			XFuture<Void> future = XFuture.completedFuture(null);
 			if(frame.getData().getReadableSize() > 0)
 				future = write(new HttpChunk(frame.getData()));
 			
@@ -250,7 +250,7 @@ public class Http11StreamImpl implements ResponseStream {
 		
 	}
 	
-	private CompletableFuture<Void> write(HttpPayload payload) {
+	private XFuture<Void> write(HttpPayload payload) {
 		if(hasRespondedToConnect) {
 			HttpChunk chunk = payload.getHttpChunk();
 			DataWrapper body = chunk.getBodyNonNull();
@@ -273,7 +273,7 @@ public class Http11StreamImpl implements ResponseStream {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason reason) {
+	public XFuture<Void> cancel(CancelReason reason) {
 		return socket.getChannel().close();
 	}
 

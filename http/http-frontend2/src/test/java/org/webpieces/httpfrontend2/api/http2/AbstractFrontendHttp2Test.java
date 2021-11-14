@@ -2,7 +2,7 @@ package org.webpieces.httpfrontend2.api.http2;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -52,7 +52,7 @@ public class AbstractFrontendHttp2Test {
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		MockTcpServerChannel svrChannel = new MockTcpServerChannel();
 		mockChanMgr.addTCPSvrChannelToReturn(svrChannel);
-		mockTcpChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(null));
+		mockTcpChannel.setIncomingFrameDefaultReturnValue(XFuture.completedFuture(null));
         mockListener.setDefaultRetVal(mockStreamWriter);
         mockStreamWriter.setDefaultRetValToThis();
 
@@ -73,7 +73,7 @@ public class AbstractFrontendHttp2Test {
 
 	private void simulateClientConnecting() throws InterruptedException, ExecutionException, TimeoutException {
 		ConnectionListener listener = mockChanMgr.getSingleConnectionListener();
-		CompletableFuture<DataListener> futureList = listener.connected(mockTcpChannel, true);
+		XFuture<DataListener> futureList = listener.connected(mockTcpChannel, true);
 		DataListener dataListener = futureList.get(3, TimeUnit.SECONDS);
 		mockChannel.setDataListener(dataListener);
 	}

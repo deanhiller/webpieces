@@ -4,7 +4,7 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.nio.channels.SelectionKey;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -17,7 +17,7 @@ public class ChannelInfo {
 	private String channelName;
 	private RegisterableChannel channel;
 	private DataListener dataHandler;
-	private CompletableFuture<Channel> connectCallback;
+	private XFuture<Channel> connectCallback;
 	
 	public ChannelInfo(RegisterableChannelImpl r) {
 		if(r == null)
@@ -40,7 +40,7 @@ public class ChannelInfo {
 		case SelectionKey.OP_CONNECT:
 			if(connectCallback != null)
 				throw new RuntimeException(channel+"ConnectionListener is already set, cannot be set again");
-			connectCallback = (CompletableFuture<Channel>)l;
+			connectCallback = (XFuture<Channel>)l;
 			break;
 		case SelectionKey.OP_READ:
 			if(dataHandler != null) {
@@ -70,7 +70,7 @@ public class ChannelInfo {
 		return channel;
 	}
 
-	public CompletableFuture<Channel> getConnectCallback() {
+	public XFuture<Channel> getConnectCallback() {
 		return connectCallback;
 	}
 

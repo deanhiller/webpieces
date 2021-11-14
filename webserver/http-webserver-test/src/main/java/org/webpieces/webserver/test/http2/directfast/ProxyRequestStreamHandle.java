@@ -6,6 +6,10 @@ import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.streaming.RequestStreamHandle;
 import com.webpieces.http2.api.streaming.ResponseStreamHandle;
 import com.webpieces.http2.api.streaming.StreamRef;
+import org.webpieces.util.context.Context;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProxyRequestStreamHandle implements RequestStreamHandle {
 
@@ -20,8 +24,19 @@ public class ProxyRequestStreamHandle implements RequestStreamHandle {
 	@Override
 	public StreamRef process(Http2Request request, ResponseStreamHandle responseListener) {
 		ProxyResponseStream proxyResponse = new ProxyResponseStream(responseListener, frontendSocket);
-		
-		return stream.incomingRequest(request, proxyResponse);
+
+		Map<String, Object> context = Context.copyContext();
+
+		//clear context so server uses a clean context
+		Context.restoreContext(new HashMap<>());
+		try {
+			StreamRef streamRef = stream.incomingRequest(request, proxyResponse);
+
+			return new MockProxyStreamRef(streamRef);
+		} finally {
+			//client still in this context
+			Context.restoreContext(context);
+		}
 	}
 
 }

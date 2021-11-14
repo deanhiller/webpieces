@@ -1,7 +1,7 @@
 package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -42,7 +42,7 @@ public class TestC6x5SettingsFrameErrors {
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(null));
+        mockChannel.setIncomingFrameDefaultReturnValue(XFuture.completedFuture(null));
 
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
@@ -54,7 +54,7 @@ public class TestC6x5SettingsFrameErrors {
         mockChanMgr.addTCPChannelToReturn(mockChannel);
 		socket = client.createHttpSocket(new SocketListener());
 		
-		CompletableFuture<Void> connect = socket.connect(new InetSocketAddress(555));
+		XFuture<Void> connect = socket.connect(new InetSocketAddress(555));
 		connect.get(2, TimeUnit.SECONDS);
 
 		//clear preface and settings frame from client

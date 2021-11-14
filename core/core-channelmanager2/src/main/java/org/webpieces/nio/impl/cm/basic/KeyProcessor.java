@@ -8,7 +8,7 @@ import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -166,7 +166,7 @@ public final class KeyProcessor {
 		if(log.isTraceEnabled())
 			log.trace(info.getChannel()+" finishing connect process");
 		
-		CompletableFuture<Channel> callback = info.getConnectCallback();
+		XFuture<Channel> callback = info.getConnectCallback();
 		BasTCPChannel channel = (BasTCPChannel)info.getChannel();
 
 		try {
@@ -354,7 +354,7 @@ public final class KeyProcessor {
 		payloadSize.record(bytes);
 
 		boolean unregister = false;
-		CompletableFuture<Void> future = in.incomingData(channel, b);
+		XFuture<Void> future = in.incomingData(channel, b);
 		int unackedByteCnt = 0;
 		AtomicReference<BackflowState1> connectionState = channel.getCompareSetBackflowState();
 		if(channel.getMaxUnacked() != null) {

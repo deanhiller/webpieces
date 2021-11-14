@@ -1,7 +1,7 @@
 plugins {
     id 'application'
     id 'idea'
-    id 'org.webpieces.htmlcompiler' version '2.1.0'
+    id 'org.webpieces.templatecompiler' version "2.1.8"
 }
 
 //Intellij Idea has a weird quirk we need to avoid
@@ -36,8 +36,13 @@ dependencies {
   //optional plugin for if you have a json api
   implementation deps['plugin-jackson']
   implementation deps['plugin-properties']
-  
+  implementation deps['generate-httpclient']
+  implementation deps['server-scaffolding']
+  implementation deps['jul-to-slf4j']
+
   implementation deps['commons-lang'] //used in json escaping
+  implementation deps['javax-validation']
+  implementation deps['hibernate-validator']
  
   //REMOVE once you are on a real database as there is a line testCompile deps['plugin-h2'] that brings this in for tests
   //AND we only use this so you work out of the box to start hacking 

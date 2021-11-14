@@ -1,6 +1,6 @@
 package org.webpieces.throughput.client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.util.time.RateRecorder;
 
@@ -15,11 +15,11 @@ public class ResponseCounterListener implements ResponseStreamHandle {
 	private RateRecorder recorder = new RateRecorder(10);
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public XFuture<StreamWriter> process(Http2Response response) {
 		
 		recorder.increment();
 
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class ResponseCounterListener implements ResponseStreamHandle {
 	}
 	
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason payload) {
+	public XFuture<Void> cancel(CancelReason payload) {
 		throw new UnsupportedOperationException("not implemented");
 	}
 

@@ -1,6 +1,6 @@
 package org.webpieces.plugin.documentation;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -54,7 +54,7 @@ public class TestDocs extends AbstractWebpiecesTest {
 	public void testLoginPageRender() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@documentation");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);		

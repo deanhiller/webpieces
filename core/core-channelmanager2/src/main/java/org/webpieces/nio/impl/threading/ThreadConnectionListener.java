@@ -1,6 +1,6 @@
 package org.webpieces.nio.impl.threading;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -21,8 +21,8 @@ public class ThreadConnectionListener implements ConnectionListener {
 	}
 
 	@Override
-	public CompletableFuture<DataListener> connected(Channel channel, boolean isReadyForWrites) {
-		CompletableFuture<DataListener> future = new CompletableFuture<DataListener>();
+	public XFuture<DataListener> connected(Channel channel, boolean isReadyForWrites) {
+		XFuture<DataListener> future = new XFuture<DataListener>();
 
 		ThreadTCPChannel proxy = new ThreadTCPChannel((TCPChannel) channel, executor);
 
@@ -39,11 +39,11 @@ public class ThreadConnectionListener implements ConnectionListener {
 		private ConnectionListener connectionListener;
 		private ThreadTCPChannel proxy;
 		private boolean isReadyForWrites;
-		private CompletableFuture<DataListener> future;
+		private XFuture<DataListener> future;
 		private SessionExecutor executor;
 
 		public ThreadConnectRunnable(SessionExecutor executor, Channel channel, ConnectionListener connectionListener, ThreadTCPChannel proxy,
-				boolean isReadyForWrites, CompletableFuture<DataListener> future) {
+				boolean isReadyForWrites, XFuture<DataListener> future) {
 					this.executor = executor;
 					this.channel = channel;
 					this.connectionListener = connectionListener;
@@ -56,7 +56,7 @@ public class ThreadConnectionListener implements ConnectionListener {
 		public void run() {
 			MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
 			try {
-				CompletableFuture<DataListener> dataListener = connectionListener.connected(proxy, isReadyForWrites);
+				XFuture<DataListener> dataListener = connectionListener.connected(proxy, isReadyForWrites);
 				//transfer the listener to the future to be used
 				dataListener
 					.thenAccept(listener -> translate(proxy, future, listener))
@@ -69,7 +69,7 @@ public class ThreadConnectionListener implements ConnectionListener {
 			}
 		}
 		
-		private void translate(ThreadTCPChannel proxy, CompletableFuture<DataListener> future, DataListener listener) {
+		private void translate(ThreadTCPChannel proxy, XFuture<DataListener> future, DataListener listener) {
 			DataListener wrappedDataListener = new ThreadDataListener(proxy, listener, executor);
 			future.complete(wrappedDataListener);
 		}

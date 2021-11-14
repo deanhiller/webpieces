@@ -3,7 +3,7 @@ package org.webpieces.ssl.impl;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLEngine;
@@ -54,7 +54,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	}
 
 	@Override
-	public CompletableFuture<Void> beginHandshake() {
+	public XFuture<Void> beginHandshake() {
 		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		SSLEngine sslEngine = mem.getEngine();
 		
@@ -69,13 +69,13 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		return sendHandshakeMessage();
 	}
 	
-	private CompletableFuture<Void> createRunnable() {
+	private XFuture<Void> createRunnable() {
 		//KISS here so we do not need to worry about race condition of runnable and
 		//incoming handshake packets (also decreases API surface area)
 		
 		SSLEngine sslEngine = mem.getEngine();
 		Runnable r = sslEngine.getDelegatedTask();
-//		CompletableFuture<Void> future = new CompletableFuture<Void>();
+//		XFuture<Void> future = new XFuture<Void>();
 //		listener.runTask(new Runnable() {
 //			@Override
 //			public void run() {
@@ -96,7 +96,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		return runnableComplete();
 	}
 	
-	private CompletableFuture<Void> runnableComplete() {
+	private XFuture<Void> runnableComplete() {
 		SSLEngine sslEngine = mem.getEngine();
 		
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
@@ -109,9 +109,9 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 				if(log.isTraceEnabled())
 					log.trace(mem+"[AfterRunnable][socketToEngine] refeeding myself pos="+cached.position()+" lim="+cached.limit());
 				//here the 'cached' was already recorded when fed in...(There is a test for this)
-				return feedEncryptedPacketImpl(cached, CompletableFuture.completedFuture(null));
+				return feedEncryptedPacketImpl(cached, XFuture.completedFuture(null));
 			}
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
 			if(log.isTraceEnabled())
 				log.trace(mem+"[Runnable]continuing handshake");
@@ -121,7 +121,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		}
 	}
 
-	private CompletableFuture<Void> sendHandshakeMessage() {
+	private XFuture<Void> sendHandshakeMessage() {
 		try {
 			return sendHandshakeMessageImpl();
 		} catch (SSLException e) {
@@ -129,7 +129,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		}
 	}
 	
-	private CompletableFuture<Void> sendHandshakeMessageImpl() throws SSLException {
+	private XFuture<Void> sendHandshakeMessageImpl() throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
 		if(log.isTraceEnabled())
 			log.trace(mem+"sending handshake message");
@@ -139,7 +139,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		if(hsStatus != HandshakeStatus.NEED_WRAP)
 			throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus="+hsStatus);
 		
-		List<CompletableFuture<Void>> futures = new ArrayList<>();
+		List<XFuture<Void>> futures = new ArrayList<>();
 		while(hsStatus == HandshakeStatus.NEED_WRAP) {
 			ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
 			
@@ -159,7 +159,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 					throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
 				
 				engineToSocketData.flip();
-				CompletableFuture<Void> fut = listener.sendEncryptedHandshakeData(engineToSocketData);
+				XFuture<Void> fut = listener.sendEncryptedHandshakeData(engineToSocketData);
 				futures.add(fut);
 			}
 			
@@ -178,7 +178,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			fireLinkEstablished();
 		}
 		
-		CompletableFuture<Void> futureAll = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+		XFuture<Void> futureAll = XFuture.allOf(futures.toArray(new XFuture[futures.size()]));
 		return futureAll;
 	}
 
@@ -189,18 +189,18 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	 * 
 	 */
 	@Override
-	public CompletableFuture<Void> feedEncryptedPacket(ByteBuffer encryptedInData) {
+	public XFuture<Void> feedEncryptedPacket(ByteBuffer encryptedInData) {
 		if(mem.getConnectionState() == ConnectionState.DISCONNECTED)
 			throw new IllegalStateException(mem+"SSLEngine is closed");
 		
 		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 
-		CompletableFuture<Void> future = decryptionTracker.addBytesToTrack(encryptedInData.remaining());
+		XFuture<Void> future = decryptionTracker.addBytesToTrack(encryptedInData.remaining());
 
 		return feedEncryptedPacketImpl(encryptedInData, future);
 	}
 	
-	private CompletableFuture<Void> feedEncryptedPacketImpl(ByteBuffer encryptedInData, CompletableFuture<Void> byteAcker) {	
+	private XFuture<Void> feedEncryptedPacketImpl(ByteBuffer encryptedInData, XFuture<Void> byteAcker) {
 		SSLEngine sslEngine = mem.getEngine();
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
 		Status status = null;
@@ -312,7 +312,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		}
 	}
 
-	private CompletableFuture<Void> cleanAndFire(HandshakeStatus hsStatus, Status status) {
+	private XFuture<Void> cleanAndFire(HandshakeStatus hsStatus, Status status) {
 		//First if avoids case where the close handshake is still going on so we are not closed
 		//yet I think(I am writing this from memory)...
 		if(status == Status.CLOSED) {
@@ -321,21 +321,21 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 				return sendHandshakeMessage();
 			} else {
 				fireClose();
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			}
 		} else if(hsStatus == HandshakeStatus.NEED_TASK) {
 			return createRunnable();
 		} else if(hsStatus == HandshakeStatus.NEED_UNWRAP) {
 			//just need to wait for more data
-			return CompletableFuture.completedFuture(null);			
+			return XFuture.completedFuture(null);
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
 			return sendHandshakeMessage();
 		} else if(hsStatus ==HandshakeStatus.FINISHED) {
 			fireLinkEstablished();
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		} else if(hsStatus == HandshakeStatus.NOT_HANDSHAKING) {
 			//nothing to do.  packet already fed
-			return CompletableFuture.completedFuture(null);			
+			return XFuture.completedFuture(null);
 		} else {
 			throw new UnsupportedOperationException("need to support state="+hsStatus+" status="+status);
 		}
@@ -372,7 +372,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	}
 
 	@Override
-	public CompletableFuture<Void> feedPlainPacket(ByteBuffer buffer) {
+	public XFuture<Void> feedPlainPacket(ByteBuffer buffer) {
 		try {
 			return feedPlainPacketImpl(buffer);
 		} catch (SSLException e) {
@@ -380,7 +380,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		}
 	}
 	
-	public CompletableFuture<Void> feedPlainPacketImpl(ByteBuffer buffer) throws SSLException {
+	public XFuture<Void> feedPlainPacketImpl(ByteBuffer buffer) throws SSLException {
 		if(mem.getConnectionState() != ConnectionState.CONNECTED)
 			throw new IllegalStateException(mem+" SSLEngine is not connected right now");
 		else if(!buffer.hasRemaining())
@@ -390,7 +390,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		if(log.isTraceEnabled())
 			log.trace(mem+"feedPlainPacket [in-buffer] pos="+buffer.position()+" lim="+buffer.limit());
 		
-		CompletableFuture<Void> future = encryptionTracker.addBytesToTrack(buffer.remaining());
+		XFuture<Void> future = encryptionTracker.addBytesToTrack(buffer.remaining());
 		
 		while(buffer.hasRemaining()) {
 			ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());

@@ -1,7 +1,7 @@
 package org.webpieces.frontend2.impl;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class Layer2Http2Handler {
 		this.httpListener = httpListener;
 	}
 
-	public CompletableFuture<Void> initialize(FrontendSocketImpl socket) {
+	public XFuture<Void> initialize(FrontendSocketImpl socket) {
 		Layer3Http2EngineListener listener = new Layer3Http2EngineListener(socket, httpListener);
 		Http2ServerEngine engine = svrEngineFactory.createEngine(socket+"", listener);
 		socket.setHttp2Engine(engine);
@@ -36,12 +36,12 @@ public class Layer2Http2Handler {
 		return engine.intialize();
 	}
 	
-	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer b) {
+	public XFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer b) {
 		DataWrapper wrapper = dataGen.wrapByteBuffer(b);
 		return incomingData(socket, wrapper);
 	}
 	
-	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, DataWrapper data) {
+	public XFuture<Void> incomingData(FrontendSocketImpl socket, DataWrapper data) {
 		Http2ServerEngine engine = socket.getHttp2Engine();
 		return engine.parse(data);
 	}

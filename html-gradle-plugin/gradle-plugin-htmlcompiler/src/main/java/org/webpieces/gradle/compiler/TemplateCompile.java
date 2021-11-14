@@ -220,13 +220,13 @@ public class TemplateCompile extends AbstractCompile implements HasCompileOption
 			if(target.exists()) {
 				//If you run ./gradle compileTemplates twice, the files will pre-exist already so we need to delete
 				//the file before we create and write to it.
-				log.log(LogLevel.LIFECYCLE, "Deleting {}", target);
+				log.log(LogLevel.INFO, "Deleting {}", target);
 				if(!target.delete())
 					throw new IllegalStateException("Could not delete file="+target+"  Cannot continue");
 			}
 
 			createFile(target);
-			log.log(LogLevel.LIFECYCLE, "Writing {}", target);
+			log.log(LogLevel.INFO, "Writing {}", target);
 			
 			try {
 				try (FileOutputStream str = new FileOutputStream(target)) {

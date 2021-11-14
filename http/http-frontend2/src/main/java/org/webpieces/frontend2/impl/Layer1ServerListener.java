@@ -10,7 +10,7 @@ import org.webpieces.util.futures.FutureHelper;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -39,7 +39,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		//recorder.increment(b.remaining());
 		FrontendSocketImpl socket = getSocket(channel);
 		switch (socket.getProtocol()) {
@@ -54,11 +54,11 @@ public class Layer1ServerListener implements AsyncDataListener {
 		}
 	}
 
-	private CompletableFuture<Void> initialData(ByteBuffer b, FrontendSocketImpl socket) {
+	private XFuture<Void> initialData(ByteBuffer b, FrontendSocketImpl socket) {
 		
 		Consumer<ProtocolType> function = (p) -> socket.setProtocol(p); //allows setting protocol type 'before' sending messages to clients
 		
-		CompletableFuture<InitiationResult> future = futureUtil.catchBlockWrap(
+		XFuture<InitiationResult> future = futureUtil.catchBlockWrap(
 				() -> http11Handler.initialData(socket, function, b),
 				(t) -> {
 					socket.close("reason not needed");
@@ -68,16 +68,16 @@ public class Layer1ServerListener implements AsyncDataListener {
 		
 		return future.thenCompose( initialData -> {
 			if(initialData == null)
-				return CompletableFuture.completedFuture(null); //nothing to do, we don't know protocol yet
+				return XFuture.completedFuture(null); //nothing to do, we don't know protocol yet
 			else if(initialData.getInitialStatus() == InitiationStatus.HTTP1_1) {
 				socket.setProtocol(ProtocolType.HTTP1_1);
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			} else if(initialData.getInitialStatus() == InitiationStatus.PREFACE) {
 				socket.setProtocol(ProtocolType.HTTP2);
-				CompletableFuture<Void> initFuture = http2Handler.initialize(socket);
+				XFuture<Void> initFuture = http2Handler.initialize(socket);
 				
 				//process any leftover data next
-				CompletableFuture<Void> dataFuture = http2Handler.incomingData(socket, initialData.getLeftOverData());
+				XFuture<Void> dataFuture = http2Handler.incomingData(socket, initialData.getLeftOverData());
 				
 				return initFuture.thenCompose(s -> dataFuture);
 				

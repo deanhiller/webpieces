@@ -21,6 +21,12 @@
 */**/gradlew
 #This one prevents the package..../gradle/.... in the plugin from existing..
 #*/**/gradle
+**/gradle
+!/gradle
+!/webserver-templates/webpiecesServerBuilder/gradle
+!/webserver-templates/webpiecesServerBuilder/gradlew
+!/webserver-templates/webpiecesServerBuilder/gradlew.bat
+!/html-gradle-plugin/gradle-plugin-htmlcompiler/src/main/java/org/webpieces/gradle
 
 #Intellij Idea files
 *.iml

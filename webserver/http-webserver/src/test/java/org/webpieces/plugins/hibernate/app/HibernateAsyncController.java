@@ -1,6 +1,6 @@
 package org.webpieces.plugins.hibernate.app;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -25,9 +25,9 @@ public class HibernateAsyncController {
 	public HibernateAsyncController(Executor exec) {
 		this.exec = exec;
 	}
-	public CompletableFuture<Redirect> save() {
+	public XFuture<Redirect> save() {
 		EntityManager mgr = Em.get();		
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		kickOffAsyncResponse(future);
 		return future.thenApply(intVal -> runSave(mgr));
 	}
@@ -44,9 +44,9 @@ public class HibernateAsyncController {
 		return Actions.redirect(HibernateRouteId.ASYNC_DISPLAY_ENTITY, "id", user.getId());
 	}
 	
-	public CompletableFuture<Render> display(Integer id) {
+	public XFuture<Render> display(Integer id) {
 		EntityManager mgr = Em.get();
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		kickOffAsyncResponse(future);
 		return future.thenApply(intVal -> runDisplay(mgr, id));
 	}
@@ -56,9 +56,9 @@ public class HibernateAsyncController {
 		return Actions.renderThis("user", user);
 	}
 
-	public CompletableFuture<Render> entityLoad(Integer id) {
+	public XFuture<Render> entityLoad(Integer id) {
 		EntityManager mgr = Em.get();
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		kickOffAsyncResponse(future);
 		return future.thenApply(intVal -> runEntityLoad(mgr, id));
 	}
@@ -69,7 +69,7 @@ public class HibernateAsyncController {
 		return Actions.renderThis("user", user);
 	}
 	
-	private void kickOffAsyncResponse(CompletableFuture<Integer> future) {
+	private void kickOffAsyncResponse(XFuture<Integer> future) {
 		exec.execute(new Runnable() {
 			@Override
 			public void run() {

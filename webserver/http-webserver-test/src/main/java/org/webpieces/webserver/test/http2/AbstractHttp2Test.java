@@ -1,7 +1,7 @@
 package org.webpieces.webserver.test.http2;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -45,7 +45,7 @@ public abstract class AbstractHttp2Test {
 			if(listener == null)
 				listener = new NullCloseListener();
 			Http2Socket socket = getClient().createHttpSocket(listener);
-			CompletableFuture<Void> connect = socket.connect(addr);
+			XFuture<Void> connect = socket.connect(addr);
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -62,7 +62,7 @@ public abstract class AbstractHttp2Test {
 			if(listener == null)
 				listener = new NullCloseListener();
 			Http2Socket socket = getClient().createHttpsSocket(engine, listener);
-			CompletableFuture<Void> connect = socket.connect(addr);
+			XFuture<Void> connect = socket.connect(addr);
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {

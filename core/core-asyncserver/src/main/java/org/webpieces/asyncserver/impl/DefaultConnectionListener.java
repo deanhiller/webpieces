@@ -1,7 +1,7 @@
 package org.webpieces.asyncserver.impl;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -30,7 +30,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 	}
 
 	@Override
-	public CompletableFuture<DataListener> connected(Channel tcpChannel, boolean isReadyForWrites) {
+	public XFuture<DataListener> connected(Channel tcpChannel, boolean isReadyForWrites) {
 		if(overloadResponse != null) {
 			overloadCounter.increment();
 			//This is annoying.....
@@ -39,7 +39,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 			//3. soooo...we must do both async and close on complete with timer to timeout and close on write regardless of success
 			//4. lastly, these all could throw exceptions and we don't really care about them at all
 			handleOverload(tcpChannel);
-			return new CompletableFuture<DataListener>(); //return a future that will never resolve so we do not register for reads
+			return new XFuture<DataListener>(); //return a future that will never resolve so we do not register for reads
 		}
 
 		boolean added = connectedChannels.addChannel(tcpChannel);
@@ -48,7 +48,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 			//start a timer task if no data comes in...
 			listener.connectionOpened(tcpChannel, isReadyForWrites);
 		}
-		return CompletableFuture.completedFuture(listener);
+		return XFuture.completedFuture(listener);
 	}
 
 	private void handleOverload(Channel tcpChannel) {
@@ -94,7 +94,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 		this.overloadResponse = null;
 	}
 
-	public CompletableFuture<Void> closeChannels() {
+	public XFuture<Void> closeChannels() {
 		return connectedChannels.closeChannels();
 	}
 

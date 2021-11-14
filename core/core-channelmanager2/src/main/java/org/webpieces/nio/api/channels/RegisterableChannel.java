@@ -2,7 +2,7 @@ package org.webpieces.nio.api.channels;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 /**
  * 
@@ -51,7 +51,7 @@ public interface RegisterableChannel {
 	 * @param addr
 	 * @return 
 	 */
-	public CompletableFuture<Void> bind(SocketAddress addr);
+	public XFuture<Void> bind(SocketAddress addr);
 	
 	public boolean isBlocking();
 	

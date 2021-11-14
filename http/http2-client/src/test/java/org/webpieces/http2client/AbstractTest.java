@@ -1,7 +1,7 @@
 package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -43,7 +43,7 @@ public class AbstractTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(null));
+        mockChannel.setIncomingFrameDefaultReturnValue(XFuture.completedFuture(null));
 
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
@@ -56,7 +56,7 @@ public class AbstractTest {
         mockChanMgr.addTCPChannelToReturn(mockChannel);
 		httpSocket = client.createHttpSocket(new SocketListener());
 		
-		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(555));
+		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(555));
 		connect.get(2, TimeUnit.SECONDS);
 
 		//clear preface and settings frame from client
@@ -79,7 +79,7 @@ public class AbstractTest {
 	protected void sendPushPromise(MockResponseListener listener1, int streamId, boolean eos) {
 		MockPushListener pushListener = new MockPushListener();
 		
-		pushListener.setDefaultResponse(CompletableFuture.completedFuture(null));
+		pushListener.setDefaultResponse(XFuture.completedFuture(null));
 		listener1.addReturnValuePush(pushListener);
 		Http2Push push = Requests.createPush(streamId);
 		mockChannel.write(push); //endOfStream=false

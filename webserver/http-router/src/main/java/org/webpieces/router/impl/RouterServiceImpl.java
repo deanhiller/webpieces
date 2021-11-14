@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -152,19 +152,19 @@ public class RouterServiceImpl implements RouterService {
 			
 
 			RouterStreamRef streamRef = incomingRequestProtected(req, proxyHandler);
-			CompletableFuture<StreamWriter> writer = streamRef.getWriter().thenApply(w -> new TxStreamWriter(txId, w));
+			XFuture<StreamWriter> writer = streamRef.getWriter().thenApply(w -> new TxStreamWriter(txId, w));
 
-			CompletableFuture<StreamWriter> finalWriter = writer.handle( (r, t) -> {
+			XFuture<StreamWriter> finalWriter = writer.handle( (r, t) -> {
 				if(t == null)
-					return CompletableFuture.completedFuture(r);
+					return XFuture.completedFuture(r);
 	
-				CompletableFuture<StreamWriter> fut = proxyHandler.topLevelFailure(req, t);
+				XFuture<StreamWriter> fut = proxyHandler.topLevelFailure(req, t);
 				return fut; 
 			}).thenCompose(Function.identity());
 			
 			return new RouterStreamRef("routerSevcTop", finalWriter, streamRef);
 		} finally {
-			MDC.put("txId", null);
+			MDC.remove("txId");
 		}
 	}
 

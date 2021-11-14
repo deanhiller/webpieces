@@ -2,7 +2,7 @@ package org.webpieces.http2client.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -16,12 +16,12 @@ public class Http2ChannelProxyImpl implements Http2ChannelProxy {
 	}
 
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer data) {
+	public XFuture<Void> write(ByteBuffer data) {
 		return channel.write(data);
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(InetSocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(InetSocketAddress addr, DataListener listener) {
 		if(addr == null)
 			throw new IllegalArgumentException("addr cannot be null");
 		
@@ -29,7 +29,7 @@ public class Http2ChannelProxyImpl implements Http2ChannelProxy {
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		return channel.close();
 	}
 

@@ -3,7 +3,7 @@ package org.webpieces.webserver.json;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -76,9 +76,9 @@ public class TestStreaming extends AbstractHttp2Test {
 	public static Collection bothServers() {
         List<Object[]> args = new ArrayList<Object[]>();
         args.add(new Object[] { TestMode.EMBEDDED_PARSING, null });
-//        args.add(new Object[] { TestMode.EMBEDDED_DIRET_NO_PARSING, null });
-//        args.add(new Object[] { TestMode.REMOTE, true });
-//        args.add(new Object[] { TestMode.REMOTE, false });
+        args.add(new Object[] { TestMode.EMBEDDED_DIRET_NO_PARSING, null });
+        args.add(new Object[] { TestMode.REMOTE, true });
+        args.add(new Object[] { TestMode.REMOTE, false });
 
 		return args;
 	}
@@ -123,7 +123,7 @@ public class TestStreaming extends AbstractHttp2Test {
 		RequestStreamHandle stream = http2Socket.openStream();
 		
 		StreamRef ref = stream.process(request, mockResponseListener );
-		CompletableFuture<StreamWriter> writer = ref.getWriter();		
+		XFuture<StreamWriter> writer = ref.getWriter();
 		
 		
 	}

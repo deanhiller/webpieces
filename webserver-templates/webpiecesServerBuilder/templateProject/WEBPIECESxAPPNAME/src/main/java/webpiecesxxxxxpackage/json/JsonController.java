@@ -1,6 +1,6 @@
 package webpiecesxxxxxpackage.json;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -24,26 +24,29 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import webpiecesxxxxxpackage.service.RemoteService;
 
 @Singleton
-public class JsonController implements ClientApi {
+public class JsonController implements SaveApi, ClientApi {
 	
 	private static final Logger log = LoggerFactory.getLogger(JsonController.class);
 
 	private Counter counter;
+	private RemoteService remoteService;
 
 	@Inject
-	public JsonController(MeterRegistry metrics) {
+	public JsonController(MeterRegistry metrics, RemoteService remoteService) {
 		counter = metrics.counter("testCounter");
+		this.remoteService = remoteService;
 	}
 	
-	public CompletableFuture<SearchResponse> asyncJsonRequest(int id, @Jackson SearchRequest request) {
+	public XFuture<SearchResponse> asyncJsonRequest(int id, @Jackson SearchRequest request) {
 		SearchResponse resp = new SearchResponse();
 		resp.setSearchTime(8);
 		resp.getMatches().add("match1");
 		resp.getMatches().add("match2");
 		
-		return CompletableFuture.completedFuture(resp);
+		return XFuture.completedFuture(resp);
 	}
 	
 	public SearchResponse jsonRequest(int id, @Jackson SearchRequest request) {
@@ -66,13 +69,13 @@ public class JsonController implements ClientApi {
 		return resp;
 	}
 	
-	public CompletableFuture<SearchResponse> postAsyncJson(int id, @Jackson SearchRequest request) {
+	public XFuture<SearchResponse> postAsyncJson(int id, @Jackson SearchRequest request) {
 		SearchResponse resp = new SearchResponse();
 		resp.setSearchTime(98);
 		resp.getMatches().add("match1");
 		resp.getMatches().add("match2");
 		
-		return CompletableFuture.completedFuture(resp);
+		return XFuture.completedFuture(resp);
 	}
 	
 	@Jackson
@@ -96,24 +99,35 @@ public class JsonController implements ClientApi {
 		Http2Response response = handle.createBaseResponse(requestCtx.getRequest().originalRequest, "text/plain", 200, "Ok");
 		response.setEndOfStream(false);
 		
-		CompletableFuture<StreamWriter> responseWriter = handle.process(response);
+		XFuture<StreamWriter> responseWriter = handle.process(response);
 		return new RequestStreamEchoWriter(requestCtx, handle, responseWriter);
+	}
+
+	@Override
+	public XFuture<SearchResponse> search(@Jackson SearchRequest request) {
+		counter.increment();
+
+		//so we can test out mocking remote services
+		remoteService.sendData(6);
+
+		SearchResponse resp = postJson(request);
+		return XFuture.completedFuture(resp);
 	}
 
 	private static class RequestStreamEchoWriter implements StreamWriter, StreamRef {
 
 		private AtomicInteger total = new AtomicInteger();
-		private CompletableFuture<StreamWriter> responseWriter;
+		private XFuture<StreamWriter> responseWriter;
 		private RouterStreamHandle handle; // in case you want to cancel the request
 
 		public RequestStreamEchoWriter(RequestContext requestCtx, RouterStreamHandle handle,
-				CompletableFuture<StreamWriter> responseWriter2) {
+				XFuture<StreamWriter> responseWriter2) {
 			this.responseWriter = responseWriter2;
 			this.handle = handle;
 		}
 
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
+		public XFuture<Void> processPiece(StreamMsg data) {
 			RequestContext requestCtx = Current.getContext(); 
 
 			DataFrame f = (DataFrame) data;
@@ -130,19 +144,19 @@ public class JsonController implements ClientApi {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> getWriter() {
+		public XFuture<StreamWriter> getWriter() {
 			//let's make it wait for our response to be written by 
 			//chaining with responseWriter future here
 			return responseWriter.thenApply(s -> this);
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason reason) {
+		public XFuture<Void> cancel(CancelReason reason) {
 			//here if using http client, we may forward to next stream like so
 			//responseStream.cancel(reason);
 			//but since the responseStream and request is the same, we can just stop sending instead
 			//which happens automatically since they stopped sending(ie. nothing to do here
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 	}

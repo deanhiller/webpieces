@@ -3,7 +3,7 @@ package org.webpieces.router.api.simplesvr;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -106,12 +106,12 @@ public class TestProdRouter {
 		Http2Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/async");
 
 		//setup returning a response
-		CompletableFuture<Integer> future1 = new CompletableFuture<Integer>();
+		XFuture<Integer> future1 = new XFuture<Integer>();
 		overrides.mockService.addToReturn(future1);
 		
 		MockStreamHandle mockStream = new MockStreamHandle();
 		StreamRef ref = server.incomingRequest(req, mockStream);
-		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+		XFuture<StreamWriter> future = ref.getWriter(); 
 		Assert.assertFalse(future.isDone());
 
 		//no response yet...

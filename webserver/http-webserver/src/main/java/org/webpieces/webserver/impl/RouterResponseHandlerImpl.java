@@ -1,7 +1,7 @@
 package org.webpieces.webserver.impl;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.ResponseStream;
@@ -23,12 +23,12 @@ public class RouterResponseHandlerImpl implements RouterResponseHandler {
     }
 
     @Override
-    public CompletableFuture<StreamWriter> process(Http2Response response) {
+    public XFuture<StreamWriter> process(Http2Response response) {
         return stream.process(response);
     }
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason reason) {
+	public XFuture<Void> cancel(CancelReason reason) {
 		return stream.cancel(reason);
 	}
 	

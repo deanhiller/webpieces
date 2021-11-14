@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routers;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import org.webpieces.ctx.api.Current;
@@ -15,7 +15,7 @@ public class NonStreamingWebAppErrorProxy implements StreamWriter {
     private FutureHelper futureUtil;
     private final StreamWriter strWriter;
     private ProxyStreamHandle handler;
-    private final Function<Throwable, CompletableFuture<StreamWriter>> failHandler;
+    private final Function<Throwable, XFuture<StreamWriter>> failHandler;
 	private RequestContext requestCtx;
 
     public NonStreamingWebAppErrorProxy(
@@ -23,7 +23,7 @@ public class NonStreamingWebAppErrorProxy implements StreamWriter {
         StreamWriter strWriter,
         ProxyStreamHandle handler,
         RequestContext requestCtx,
-        Function<Throwable, CompletableFuture<StreamWriter>> failHandler
+        Function<Throwable, XFuture<StreamWriter>> failHandler
     ) {
         this.futureUtil = futureUtil;
         this.strWriter = strWriter;
@@ -34,19 +34,21 @@ public class NonStreamingWebAppErrorProxy implements StreamWriter {
     }
 
     @Override
-    public CompletableFuture<Void> processPiece(StreamMsg data) {
+    public XFuture<Void> processPiece(StreamMsg data) {
+        //TODO(dhiller): Is this the proper chokepoint for streaming pieces?  Need it to be closer to
+        //choke point for request headers choke point I feel like
     	Current.setContext(requestCtx);
     	try {
-        return futureUtil.catchBlock(
-                () -> strWriter.processPiece(data),
-                (t) -> runRenderErrorPageIfNonStreaming(t)
-        );
+            return futureUtil.catchBlock(
+                    () -> strWriter.processPiece(data),
+                    (t) -> runRenderErrorPageIfNonStreaming(t)
+            );
     	} finally {
 			Current.setContext(null);
 		}
     }
 
-    private CompletableFuture<Void> runRenderErrorPageIfNonStreaming(Throwable t) {
+    private XFuture<Void> runRenderErrorPageIfNonStreaming(Throwable t) {
         //Some routes stream data in until they have all the data in which case, if anything fails, we
         //have to run the same failhandler ONLY if no response has been sent yet.....how to check on
         //the response

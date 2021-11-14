@@ -3,7 +3,7 @@ package org.webpieces.router.impl.proxyout.filereaders;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.util.exceptions.NioException;
 import org.webpieces.util.file.VirtualFile;
@@ -24,8 +24,8 @@ public class ChunkClassPathReader implements ChunkReader {
 	}
 	
 	@Override
-	public CompletableFuture<Integer> read(ByteBuffer buf, String filePathForLogging, int position) {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+	public XFuture<Integer> read(ByteBuffer buf, String filePathForLogging, int position) {
+		XFuture<Integer> future = new XFuture<Integer>();
 
 		try {
 			if(buf.position() != 0)

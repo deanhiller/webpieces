@@ -28,7 +28,7 @@ public class ErrorTest {
 //		
 //		MockStreamHandle mockStream = new MockStreamHandle();
 //		StreamRef ref = server.incomingRequest(req, mockStream);
-//		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+//		XFuture<StreamWriter> future = ref.getWriter();
 //		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 //
 //		Http2Response response = mockStream.getLastResponse();

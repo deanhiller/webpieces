@@ -1,7 +1,7 @@
 package org.webpieces.router.impl.routeinvoker;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
@@ -22,7 +22,7 @@ public class ResponseProcessorNotFound implements Processor {
 	}
 
 	@Override
-	public CompletableFuture<Void> continueProcessing(MethodMeta meta, Action controllerResponse, ProxyStreamHandle handle) {
+	public XFuture<Void> continueProcessing(MethodMeta meta, Action controllerResponse, ProxyStreamHandle handle) {
 		if(controllerResponse instanceof RenderImpl) {
 			return createRenderResponse(meta, (RenderImpl) controllerResponse, handle);
 		} else if(controllerResponse instanceof RenderContent) {
@@ -37,7 +37,7 @@ public class ResponseProcessorNotFound implements Processor {
 		}
 	}
 	
-	public CompletableFuture<Void> createRenderResponse(MethodMeta meta, RenderImpl controllerResponse, ProxyStreamHandle handle) {
+	public XFuture<Void> createRenderResponse(MethodMeta meta, RenderImpl controllerResponse, ProxyStreamHandle handle) {
 		LoadedController loadedController = meta.getLoadedController();
 		String controllerName = loadedController.getControllerInstance().getClass().getName();
 		String methodName = loadedController.getControllerMethod().getName();
@@ -59,13 +59,12 @@ public class ResponseProcessorNotFound implements Processor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.NOT_FOUND);
 		
-		return ContextWrap.wrap(ctx, () -> handle.sendRenderHtml(resp));
+		return handle.sendRenderHtml(resp);
 	}
 
-	public CompletableFuture<Void> createContentResponse(MethodMeta meta, RenderContent r, ProxyStreamHandle handle) {
-		RequestContext ctx = meta.getCtx();
+	public XFuture<Void> createContentResponse(MethodMeta meta, RenderContent r, ProxyStreamHandle handle) {
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
-		return ContextWrap.wrap(ctx, () -> handle.sendRenderContent(resp));
+		return handle.sendRenderContent(resp);
 	}
 	
 

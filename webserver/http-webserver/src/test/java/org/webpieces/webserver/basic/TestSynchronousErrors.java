@@ -1,6 +1,6 @@
 package org.webpieces.webserver.basic;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -56,7 +56,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	public void testNotFoundRoute() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -69,7 +69,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		//no int doesn't really exist so it's a NotFound
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -80,7 +80,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	public void testWebappThrowsNotFound() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -92,7 +92,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		mockNotFoundLib.throwNotFound();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
@@ -104,7 +104,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		mockNotFoundLib.throwRuntime();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
@@ -117,7 +117,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
@@ -131,7 +131,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		mockInternalSvrErrorLib.throwNotFound();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
@@ -147,7 +147,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		mockNotFoundLib.throwRuntime();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
@@ -160,7 +160,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
@@ -173,7 +173,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	public void testTemplateHasBug() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/badtemplate");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertContains("There was a bug in our software...sorry about that");	
@@ -186,7 +186,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		mockNotFoundLib.throwRuntime();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/null");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);

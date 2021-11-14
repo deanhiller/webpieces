@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Push;
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
@@ -19,11 +19,11 @@ public class Level6ClntLocalFlowControl extends Level6LocalFlowControl {
 		notify = notifyListener;
 	}
 
-	public CompletableFuture<Void> fireResponseToApp(Stream stream, Http2Response payload) {
+	public XFuture<Void> fireResponseToApp(Stream stream, Http2Response payload) {
 		return notify.sendResponseToApp(stream, payload);
 	}
 
-	public CompletableFuture<Void> firePushToApp(ClientPushStream stream, Http2Push fullPromise) {
+	public XFuture<Void> firePushToApp(ClientPushStream stream, Http2Push fullPromise) {
 		return notify.sendPushToApp(stream, fullPromise);
 	}
 

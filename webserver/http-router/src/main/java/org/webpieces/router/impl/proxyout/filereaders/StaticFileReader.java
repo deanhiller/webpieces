@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.proxyout.filereaders;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,13 +25,13 @@ public class StaticFileReader {
 	}
 
 
-	public CompletableFuture<StreamWriter> sendRenderStatic(RequestInfo info, RenderStaticResponse renderStatic, ProxyStreamHandle handle) {
+	public XFuture<StreamWriter> sendRenderStatic(RequestInfo info, RenderStaticResponse renderStatic, ProxyStreamHandle handle) {
 		try {
 			if(renderStatic.isOnClassPath())
 				return classPathFileReader.runFileRead(info, renderStatic, handle).thenApply(s -> new NullWriter());
 			return fileSystemReader.runFileRead(info, renderStatic, handle).thenApply(s -> new NullWriter());
 		} catch(Throwable e) {
-			CompletableFuture<StreamWriter> failed = new CompletableFuture<StreamWriter>();
+			XFuture<StreamWriter> failed = new XFuture<StreamWriter>();
 			failed.completeExceptionally(e);
 			return failed;
 		}

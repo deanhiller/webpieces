@@ -1,6 +1,6 @@
 package org.webpieces.webserver.tags;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -43,7 +43,7 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 	public void testCustomTag() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/customtag");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -59,7 +59,7 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 	public void testRenderTagArgsTag() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderTagArgs");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -72,7 +72,7 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 	public void testRenderPageArgsTag() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderPageArgs");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

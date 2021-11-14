@@ -1,7 +1,7 @@
 package com.webpieces.hpack.api;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;
 
@@ -21,7 +21,7 @@ public interface UnmarshalState {
     void setDecoderMaxTableSize(int newSize);
     void setIncomingMaxFrameSize(long maxFrameSize);
 
-	CompletableFuture<Void> getProcessFuture();
+	XFuture<Void> getProcessFuture();
 
-	void setProcessFuturee(CompletableFuture<Void> future);
+	void setProcessFuturee(XFuture<Void> future);
 }

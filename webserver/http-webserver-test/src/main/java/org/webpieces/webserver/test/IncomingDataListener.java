@@ -1,12 +1,12 @@
 package org.webpieces.webserver.test;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public interface IncomingDataListener {
 
-	CompletableFuture<Void> write(ByteBuffer b);
+	XFuture<Void> write(ByteBuffer b);
 
-	CompletableFuture<Void> close();
+	XFuture<Void> close();
 
 }

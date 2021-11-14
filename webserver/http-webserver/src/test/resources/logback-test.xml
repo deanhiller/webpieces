@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration scan="true" scanPeriod="30 seconds" debug="true">
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-	    <!--<filter class="org.webpieces.logging.logback.InvertedThresholdFilter">
+	    <filter class="org.webpieces.logging.logback.InvertedThresholdFilter">
 			<level>INFO</level>
-		</filter>-->
+		</filter>
     
 		<encoder>
 			<pattern>%date{ISO8601} [%thread] %caller{1} %-4level: %message%n</pattern>

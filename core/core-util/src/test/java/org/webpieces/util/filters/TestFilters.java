@@ -1,6 +1,6 @@
 package org.webpieces.util.filters;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
@@ -30,11 +30,11 @@ public class TestFilters {
 											.chain(filterTop)
 											.chain(new SomeService());
 		
-		CompletableFuture<String> future = service2.invoke(5);
+		XFuture<String> future = service2.invoke(5);
 		String result = future.get();
 		Assert.assertEquals("top", result);
 		
-		CompletableFuture<String> future2 = x3.invoke(2);
+		XFuture<String> future2 = x3.invoke(2);
 		String result2 = future2.get();
 		Assert.assertEquals("middle", result2);
 	}

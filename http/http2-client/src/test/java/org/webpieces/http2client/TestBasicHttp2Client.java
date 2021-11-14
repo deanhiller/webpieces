@@ -1,6 +1,6 @@
 package org.webpieces.http2client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
@@ -26,12 +26,12 @@ public class TestBasicHttp2Client extends AbstractTest {
 
 		MockStreamWriter writer1 = new MockStreamWriter();
 		MockResponseListener respListener1 = new MockResponseListener();
-		respListener1.setIncomingRespDefault(CompletableFuture.completedFuture(writer1));
+		respListener1.setIncomingRespDefault(XFuture.completedFuture(writer1));
 		MockResponseListener respListener2 = new MockResponseListener();
 		StreamRef streamRef1 = httpSocket.openStream().process(request1, respListener1);
-		CompletableFuture<StreamWriter> future =streamRef1.getWriter();
+		XFuture<StreamWriter> future =streamRef1.getWriter();
 		StreamRef streamRef2 = httpSocket.openStream().process(request2, respListener2);
-		CompletableFuture<StreamWriter> future2 = streamRef2.getWriter();
+		XFuture<StreamWriter> future2 = streamRef2.getWriter();
 
 		//max concurrent only 1 so only get 1
 		Http2Request req = (Http2Request) mockChannel.getFrameAndClear();
@@ -71,8 +71,8 @@ public class TestBasicHttp2Client extends AbstractTest {
 		FullRequest request1 = Requests.createHttp2Request();
 
 		MockResponseListener respListener1 = new MockResponseListener();
-		respListener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
-		CompletableFuture<FullResponse> future = httpSocket.send(request1);
+		respListener1.setIncomingRespDefault(XFuture.completedFuture(null));
+		XFuture<FullResponse> future = httpSocket.send(request1);
 		
 		Assert.assertFalse(future.isDone());
 		

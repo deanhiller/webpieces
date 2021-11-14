@@ -1,17 +1,17 @@
 package org.webpieces.frontend2.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class WebSession {
 
 	//start out completed
-	private CompletableFuture<Void> processFuture = CompletableFuture.completedFuture(null);
+	private XFuture<Void> processFuture = XFuture.completedFuture(null);
 
-	public CompletableFuture<Void> getProcessFuture() {
+	public XFuture<Void> getProcessFuture() {
 		return processFuture;
 	}
 
-	public void setProcessFuture(CompletableFuture<Void> processFuture) {
+	public void setProcessFuture(XFuture<Void> processFuture) {
 		this.processFuture = processFuture;
 	}
 

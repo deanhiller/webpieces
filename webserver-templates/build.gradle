@@ -6,7 +6,7 @@ plugins {
     id 'idea'
     id 'signing'
     id 'maven-publish'
-    id "co.riiid.gradle" version "0.4.2"
+    id "io.github.humblerookie.gradle" version "0.5.0"
 }
 
 apply from: '../config/global.gradle'
@@ -25,11 +25,14 @@ dependencies {
 }
 
 project.ext {
+    archiveFilePath = "webserver-templates/build/distributions/webpiecesServerBuilder-${version}.zip"
   stagingDirName = 'webpiecesServerBuilder'
   outputStagingDir = new File(buildDir, stagingDirName)
 }
 
 task stageTemplate(type: Copy) {
+    dependsOn gradle.includedBuild('http-webserver').task(':build')
+
     from '.'
     into buildDir
     include stagingDirName + '/**'
@@ -91,18 +94,20 @@ github {
   name = 'webpiecesServerBuilder'+version
   body = 'Official Release of '+version
   assets = [
-      zipGradleTemplate.archiveFile
+      "${archiveFilePath}"
   ]
 }
 
 githubRelease {
-    dependsOn gradle.includedBuild('http-webserver').task(':build')
-    //, ':publish'
-
-    //Above replaces this -> (left so I can validate so delete if releases are working with versions)
-    //dependsOn ':webserver:build', ':publish'
+    dependsOn ':assemble'
     doFirst {
-       println("Releasing to GitHub: " + github.assets)
+       println("Releasing to GitHub: " + github.assets +" file=${archiveFilePath}")
+    }
+}
+
+tasks.whenTaskAdded {task ->
+    if(task.name.toLowerCase().contains("sonatype")) {
+        task.enabled = false
     }
 }
 

@@ -1,23 +1,26 @@
 # webpieces
 
 ONLY THESE BIG ITEMS LEFT
-* HIGH PRIORITY - somehow most tests were moved into core-channelmanager2/test instead of src/test/java and need to be moved back
-* get the runAllTestingLocalRelease.sh ported into gradle - Alex Sweeney working on
-* get the webpeices template generators working
-* fix SSL tests to use TLS1.3 or in circleCI get javax.net.ssl.SSLHandshakeException: No available authentication scheme
-   * TestSslBasicClient.java
-   * TestSslCloseClient.java
+1. delete the damn ACC and clean up deps in monobuild around that shitshow (not webpieces but wiling to do a one off since that cleans up quite a bit)
+2. (HALF DONE)AUTOMATIC feature test case generation by feeding in a record http header(though to fully do it, need #3, but could do it for what we have first too)
+3. Revive properties plugin as now we can have lightning speed - this means A. Developer can just implement XXXXXManaged and the setters/getters are exposed to website and saved to DB and all servers poll for updates every 1 minute - the one thing I wish I had here though was a better idea of performance issues (ie. we should discuss).  This allows feature toggles or general properties that you can start easily changing in production live.  This generally gets used a ton around % traffic going to X
+4. New overrides header from entry into production/demo/staging that allows swapping out servers to go through a development server (allows testing in production without customer traffic flowing through production)
+5. Load Development Server into cloud and ‘something-like-rsync’ real-time development where changes happen in real-time without needing a deploy
+along with FutureExecutor and FutureScheduledExecutors
+8. oh, some more I forgot - I want to split test http1 with one of our servers running http2.  ie. in prod, I double request to a shadow http2 server to get soak on http2 in place.
+9. websockets is not there as when I wrote http2, it looked like it did websockets, it did not so getting websocket protocol in place would be fantastic so you can open a socket through one of our client APIs and stream both ways.  This platform is not only designed for it but also designed to backpressure as well.  It is also designed to stream through ‘all microservices’ at the same time (useful for file uploads)
+* publish to GCP artifactory to reduce Orderly iteration
+* Victor/Declan - fix SSL tests to use TLS1.3 or in circleCI get javax.net.ssl.SSLHandshakeException: No available authentication scheme
+   * Victor - TestSslBasicClient.java
+   * Declan - TestSslCloseClient.java
    * TestSslCloseSvr.java
    * TestSslBasicSvr.java
-* cannot run tests from core/core-channelmanager2 nore core/core-asyncserver in INTELLIJ!!!!! i
-   * switch to intellij builds and intellij run tests and I can run the test now
-* get version numbers on the plugins html compiler to be dynamic using the cmd line arg so we can release
-* get the publish working again so we can publish a real release to remote repository
-* get a new context that is portable among platforms into the repo as well
+* cannot run tests from core/core-channelmanager2 nor core/core-asyncserver in INTELLIJ!!!!! i
+   * WORKAROUND: switch to intellij builds and intellij run tests and I can run the test now
 * get GCPStorage ported as a first try according to the requirements
 * try doing this in our template compiler plugin https://discuss.gradle.org/t/can-anyone-explain-the-javaplugin-source-code/40744 as well as copying the resources into a different directory that is NOT used by the build!!!!!!  In this way, tests work, dev server works, but the *.html files are not put in production!!
+* somehow most tests were moved into core-channelmanager2/test instead of src/test/java and need to be moved back
 * Move ClientImp's and server connectors into webpieces
-* XFuture so context issue is solve
 * conversations
 * ALPN
 * IN PROGRESS - streaming filters?

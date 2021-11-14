@@ -1,17 +1,17 @@
 package org.webpieces.devrouter.impl;
 
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
+import java.util.Map;
+
+import org.webpieces.ctx.api.*;
+import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.ctx.api.ApplicationContext;
-import org.webpieces.ctx.api.FlashSub;
-import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.api.streams.StreamService;
 import org.webpieces.router.impl.WebInjector;
@@ -81,8 +81,8 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		if(exc != null) {
 			log.error("Could not compile your code", exc);
 			RouteInfoForInternalError error = new RouteInfoForInternalError(exc); 
-			CompletableFuture<Void> future = invokeDevelopmentErrorPage(invokeInfo, error);
-			CompletableFuture<StreamWriter> writer = future.thenApply( voidd -> new NullWriter());
+			XFuture<Void> future = invokeDevelopmentErrorPage(invokeInfo, error);
+			XFuture<StreamWriter> writer = future.thenApply( voidd -> new NullWriter());
 			return new RouterStreamRef("notCompileError", writer, null);
 		} if(invokeInfo.getRequestCtx().getRequest().queryParams.containsKey(DevelopmentController.INTERNAL_ERROR_KEY)) {
 			//special case for in DevelopmentServer when invokeErrorController was called and then it's iframe called back out again to display
@@ -93,14 +93,14 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 //		else if(invokeInfo.getRequestCtx().getFlash().containsKey(DevelopmentController.WEBPIECES_EXCCEPTION_KEY)) {
 //			//The user clicked refresh page so we have to intercept and show same issue
 //			RouteInfoForInternalError error = new RouteInfoForInternalError(exc); 
-//			CompletableFuture<StreamWriter> writer = invokeErrorController(invokeInfo, dynamicInfo, error);
+//			XFuture<StreamWriter> writer = invokeErrorController(invokeInfo, dynamicInfo, error);
 //			return new RouterStreamRef("notCompileErrorRefresh", writer, null);			
 //		}
 		return super.invokeHtmlController(invokeInfo, dynamicInfo, data);
 	}
 
 	@Override
-	public CompletableFuture<Void> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
+	public XFuture<Void> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		RouteInfoForInternalError error = (RouteInfoForInternalError)data;
 		Throwable exception = error.getException();
 
@@ -112,7 +112,7 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		return invokeDevelopmentErrorPage(invokeInfo, error);
 	}
 
-	private CompletableFuture<Void> invokeDevelopmentErrorPage(InvokeInfo invokeInfo, RouteInfoForInternalError data) {
+	private XFuture<Void> invokeDevelopmentErrorPage(InvokeInfo invokeInfo, RouteInfoForInternalError data) {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		ProxyStreamHandle handler = invokeInfo.getHandler();
 		RouterRequest req = requestCtx.getRequest();
@@ -138,15 +138,21 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		ApplicationContext ctx = webInjector.getAppContext();
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);
 		InvokeInfo newInvokeInfo = new InvokeInfo(overridenCtx, handler, RouteType.INTERNAL_SERVER_ERROR, newLoadedController, null);
-		
-		return super.invokeErrorController(newInvokeInfo, newInfo, data);
+
+		RequestContext oldContext = Current.getContext();
+		Current.setContext(overridenCtx);
+		try {
+			return super.invokeErrorController(newInvokeInfo, newInfo, data);
+		} finally {
+			Current.setContext(oldContext);
+		}
 	}
 
 	/**
 	 * This one is definitely special
 	 */
 	@Override
-	public CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, Endpoint info, RouteData data) {
+	public XFuture<Void> invokeNotFound(InvokeInfo invokeInfo, Endpoint info, RouteData data) {
 		//special case for if stuff didn't compile and we flag it
 		Throwable exc = (Throwable) invokeInfo.getRequestCtx().getRequest().requestState.get(ERROR_KEY);
 		if(exc != null) {
@@ -197,6 +203,13 @@ public class DevRouteInvoker extends AbstractRouteInvoker {
 		ApplicationContext ctx = webInjector.getAppContext();
 		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), newRequest, ctx);
 		InvokeInfo newInvokeInfo = new InvokeInfo(overridenCtx, handler, RouteType.NOT_FOUND, newLoadedController, null);
-		return super.invokeNotFound(newInvokeInfo, newInfo, data);
+
+		RequestContext oldContext = Current.getContext();
+		Current.setContext(overridenCtx);
+		try {
+			return super.invokeNotFound(newInvokeInfo, newInfo, data);
+		} finally {
+			Current.setContext(oldContext);
+		}
 	}
 }

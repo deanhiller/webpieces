@@ -1,15 +1,15 @@
 package org.webpieces.frontend2.api;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface HttpServer {
 
-	CompletableFuture<Void> start();
+	XFuture<Void> start();
 	
-	CompletableFuture<Void> close();
+	XFuture<Void> close();
 
 	void enableOverloadMode(ByteBuffer overloadResponse);
 

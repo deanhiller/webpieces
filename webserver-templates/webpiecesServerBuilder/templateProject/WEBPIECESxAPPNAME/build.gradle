@@ -42,6 +42,9 @@ dependencies {
     implementation deps['plugin-backend']
     implementation deps['plugin-install-sslcert']
     implementation deps['plugin-properties']
+    implementation deps['generate-httpclient']
+    implementation deps['server-scaffolding']
+    implementation deps['jul-to-slf4j']
 
     implementation deps['commons-lang'] //used in json escaping
     //for connection pooling: https://mvnrepository.com/artifact/org.hibernate/hibernate-hikaricp
@@ -70,5 +73,11 @@ compileJava.doLast {
 test {
     if (!project.hasProperty('includeSelenium')) {
         exclude '**/*Selenium*'
+    }
+}
+
+tasks.whenTaskAdded {task ->
+    if(task.name.toLowerCase().contains("sonatype")) {
+        task.enabled = false
     }
 }

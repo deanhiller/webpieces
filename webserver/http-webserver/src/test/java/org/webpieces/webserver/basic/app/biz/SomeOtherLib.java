@@ -1,11 +1,11 @@
 package org.webpieces.webserver.basic.app.biz;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class SomeOtherLib {
 
-	public CompletableFuture<Integer> someBusinessLogic() {
-		return CompletableFuture.completedFuture(99);
+	public XFuture<Integer> someBusinessLogic() {
+		return XFuture.completedFuture(99);
 	}
 
 	public void saveUser(UserDto user) {

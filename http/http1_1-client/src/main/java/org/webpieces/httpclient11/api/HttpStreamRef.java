@@ -1,11 +1,11 @@
 package org.webpieces.httpclient11.api;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public interface HttpStreamRef {
 	
-	public CompletableFuture<HttpDataWriter> getWriter();
+	public XFuture<HttpDataWriter> getWriter();
 	
-	public CompletableFuture<Void> cancel(Object reason);	
+	public XFuture<Void> cancel(Object reason);
 
 }

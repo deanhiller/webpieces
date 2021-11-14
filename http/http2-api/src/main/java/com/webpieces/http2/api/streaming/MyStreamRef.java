@@ -1,32 +1,32 @@
 package com.webpieces.http2.api.streaming;
 
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.webpieces.http2.api.dto.lowlevel.CancelReason;
 
 public class MyStreamRef implements StreamRef {
 
-	private AtomicReference<CompletableFuture<StreamWriter>> ref = new AtomicReference<CompletableFuture<StreamWriter>>();
+	private AtomicReference<XFuture<StreamWriter>> ref = new AtomicReference<XFuture<StreamWriter>>();
 
-	public MyStreamRef(CompletableFuture<StreamWriter> writer) {
+	public MyStreamRef(XFuture<StreamWriter> writer) {
 		ref.set(writer);
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> getWriter() {
+	public XFuture<StreamWriter> getWriter() {
 		return ref.get();
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason reason) {
+	public XFuture<Void> cancel(CancelReason reason) {
 		//swap out writer for a cancelled one
-		CompletableFuture<StreamWriter> writer = new CompletableFuture<StreamWriter>();
+		XFuture<StreamWriter> writer = new XFuture<StreamWriter>();
 		writer.completeExceptionally(new CancellationException("Cancelled.  reason="+reason));
 		ref.set(writer);
 		
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 }

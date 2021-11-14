@@ -1,7 +1,7 @@
 package org.webpieces.http2client.mock;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,11 +23,11 @@ public class MockPushListener extends MockSuperclass implements PushPromiseListe
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
-		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.INCOMING_PUSH, response);
+	public XFuture<StreamWriter> processPushResponse(Http2Response response) {
+		return (XFuture<StreamWriter>) super.calledMethod(Method.INCOMING_PUSH, response);
 	}
 
-	public void setIncomingRespDefault(CompletableFuture<Void> retVal) {
+	public void setIncomingRespDefault(XFuture<Void> retVal) {
 		super.setDefaultReturnValue(Method.INCOMING_PUSH, retVal);
 	}
 
@@ -43,7 +43,7 @@ public class MockPushListener extends MockSuperclass implements PushPromiseListe
 		return map.collect(Collectors.toList());
 	}
 
-	public void setDefaultResponse(CompletableFuture<StreamWriter> completableFuture) {
+	public void setDefaultResponse(XFuture<StreamWriter> completableFuture) {
 		super.setDefaultReturnValue(Method.INCOMING_PUSH, completableFuture);
 	}
 	

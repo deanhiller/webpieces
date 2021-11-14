@@ -1,7 +1,7 @@
 package org.webpieces.frontend2.impl;
 
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -15,23 +15,23 @@ import java.util.concurrent.Executors;
 		
 		
 		private void start() {
-			CompletableFuture<Integer> f = startProcess(5);
+			XFuture<Integer> f = startProcess(5);
 			
 			f.cancel(false);
 		}
 	
 	
-		private CompletableFuture<Integer> startProcess(int i) {
-			CompletableFuture<Integer> future1 = remoteCall(5);
-			CompletableFuture<Integer> future2 = future1.thenCompose(s -> remoteCall(10));
-			CompletableFuture<Integer> future3 = future2.thenCompose(s -> remoteCall(15));
-			CompletableFuture<Integer> future4 = future3.thenCompose(s -> remoteCall(20));
+		private XFuture<Integer> startProcess(int i) {
+			XFuture<Integer> future1 = remoteCall(5);
+			XFuture<Integer> future2 = future1.thenCompose(s -> remoteCall(10));
+			XFuture<Integer> future3 = future2.thenCompose(s -> remoteCall(15));
+			XFuture<Integer> future4 = future3.thenCompose(s -> remoteCall(20));
 			return future4;
 		}
 	
 	
-		public CompletableFuture<Integer> remoteCall(int value) {
-			CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		public XFuture<Integer> remoteCall(int value) {
+			XFuture<Integer> future = new XFuture<Integer>();
 			exec.execute(new Runnable() {
 				@Override
 				public void run() {

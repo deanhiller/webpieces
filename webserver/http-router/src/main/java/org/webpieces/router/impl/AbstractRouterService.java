@@ -2,17 +2,13 @@ package org.webpieces.router.impl;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+
+import org.webpieces.ctx.api.*;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.webpieces.ctx.api.ApplicationContext;
-import org.webpieces.ctx.api.FlashSub;
-import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.ctx.api.Session;
-import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.Startable;
@@ -57,17 +53,25 @@ public abstract class AbstractRouterService {
 			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(translator));
 			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(translator));
 			Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(translator));
-			ApplicationContext ctx = webInjector.getAppContext(); 
+			ApplicationContext ctx = webInjector.getAppContext();
 			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest, ctx);
-			
+
 			String user = session.get("userId");
 			MDC.put("userId", user);
-			return incomingRequestImpl(requestCtx, handler);
+
+			//TODO(dhiller): This is request heaaders choke point but need ot also perhaps setup streaming choke point
+			//here as well
+			Current.setContext(requestCtx);
+			try {
+				return incomingRequestImpl(requestCtx, handler);
+			} finally {
+				Current.setContext(null);
+			}
 
 		} catch(BadCookieException e) {
 			//CHEAT: we know this is syncrhonous exception from the translateCookieToScope
 			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
-			CompletableFuture<StreamWriter> writer = handler.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
+			XFuture<StreamWriter> writer = handler.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
 			return new RouterStreamRef("cookieFailed", writer, null);
 		}
 	}

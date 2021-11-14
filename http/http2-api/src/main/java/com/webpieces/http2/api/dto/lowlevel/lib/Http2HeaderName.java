@@ -42,7 +42,9 @@ public enum Http2HeaderName {
 	TE("te", HeaderType.REQUEST),
 	USER_AGENT("user-agent", HeaderType.REQUEST),
 	UPGRADE_INSECURE_REQUESTS("upgrade-insecure-requests", HeaderType.REQUEST),
-	
+	ACCESS_CONTROL_REQUEST_METHOD("access-control-request-method", HeaderType.REQUEST),
+	ACCESS_CONTROL_REQUEST_HEADERS("access-control-request-headers", HeaderType.REQUEST),
+
 	//Per RFC, these are the Response Header types
 	ACCEPT_RANGES("accept-ranges", HeaderType.RESPONSE),
 	AGE("age", HeaderType.RESPONSE),
@@ -54,7 +56,13 @@ public enum Http2HeaderName {
 	SERVER("server", HeaderType.RESPONSE),
 	VARY("vary", HeaderType.RESPONSE),
 	WWW_AUTHENTICATE("www-authenticate", HeaderType.RESPONSE),
-	
+	ACCESS_CONTROL_ALLOW_METHODS("access-control-allow-methods", HeaderType.RESPONSE),
+	ACCESS_CONTROL_ALLOW_HEADERS("access-control-allow-headers", HeaderType.RESPONSE),
+	ACCESS_CONTROL_ALLOW_ORIGIN("access-control-allow-origin", HeaderType.RESPONSE),
+	ACCESS_CONTROL_ALLOW_CREDENTIALS("access-control-allow-credentials", HeaderType.RESPONSE),
+	ACCESS_CONTROL_EXPOSE_HEADERS("access-control-expose-headers", HeaderType.RESPONSE),
+	ACCESS_CONTROL_MAX_AGE("access-control-max-age", HeaderType.RESPONSE),
+
 	ALLOW("allow", HeaderType.ENTITY),         
 	CONTENT_ENCODING("content-encoding", HeaderType.ENTITY),     
 	CONTENT_LANGUAGE("content-language", HeaderType.ENTITY),      

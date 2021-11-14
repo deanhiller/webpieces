@@ -1,7 +1,7 @@
 package org.webpieces.httpfrontend2.api.mock2;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
@@ -18,14 +18,14 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 	}
 	
 	public void setDefaultRetValToThis() {
-		CompletableFuture<Void> completedFuture = CompletableFuture.completedFuture(null);
+		XFuture<Void> completedFuture = XFuture.completedFuture(null);
 		super.setDefaultReturnValue(Method.SEND_MORE, completedFuture);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> processPiece(StreamMsg data) {
-		return (CompletableFuture<Void>) super.calledMethod(Method.SEND_MORE, data);
+	public XFuture<Void> processPiece(StreamMsg data) {
+		return (XFuture<Void>) super.calledMethod(Method.SEND_MORE, data);
 	}
 
 	public StreamMsg getSingleFrame() {
@@ -35,7 +35,7 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 		return (StreamMsg) list.get(0).getArgs()[0];
 	}
 	
-	public void addProcessResponse(CompletableFuture<Void> future) {
+	public void addProcessResponse(XFuture<Void> future) {
 		super.addValueToReturn(Method.SEND_MORE, future);
 	}
 

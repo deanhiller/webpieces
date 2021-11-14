@@ -2,11 +2,14 @@ package org.webpieces.webserver.test.http2.direct;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import java.util.HashMap;
+import java.util.Map;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http2client.impl.Http2ChannelProxy;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.context.Context;
 import org.webpieces.webserver.test.MockTcpChannel;
 
 public class DelayedProxy implements Http2ChannelProxy {
@@ -21,7 +24,7 @@ public class DelayedProxy implements Http2ChannelProxy {
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
+	public XFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
 		channel.setDataListener(dataListener);
 		return listener.connected(channel, true).thenApply( d -> {
 			toServerDataListener = d;
@@ -30,14 +33,21 @@ public class DelayedProxy implements Http2ChannelProxy {
 	}
 
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer buffer) {
-		return toServerDataListener.incomingData(channel, buffer);
+	public XFuture<Void> write(ByteBuffer buffer) {
+		Map<String, Object> context = Context.copyContext();
+		//no context server side...
+		Context.restoreContext(new HashMap<>());
+		try {
+			return toServerDataListener.incomingData(channel, buffer);
+		} finally {
+			Context.restoreContext(context);
+		}
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		toServerDataListener.farEndClosed(channel);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 

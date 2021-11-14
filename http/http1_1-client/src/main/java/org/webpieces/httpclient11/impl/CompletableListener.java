@@ -1,6 +1,6 @@
 package org.webpieces.httpclient11.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -15,36 +15,36 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 public class CompletableListener implements HttpResponseListener {
 
 	private final static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private CompletableFuture<HttpFullResponse> future;
+	private XFuture<HttpFullResponse> future;
 	private HttpFullResponse response;
 
-	public CompletableListener(CompletableFuture<HttpFullResponse> future) {
+	public CompletableListener(XFuture<HttpFullResponse> future) {
 		this.future = future;
 	}
 
 	@Override
-	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
+	public XFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 		HttpFullResponse resp1 = new HttpFullResponse(resp, dataGen.emptyWrapper());
 
 		if(isComplete) {
 			future.complete(resp1);
-			return CompletableFuture.completedFuture(new NullWriter());
+			return XFuture.completedFuture(new NullWriter());
 		}
 		
 		response = resp1;
-		return CompletableFuture.completedFuture(new DataWriterImpl());
+		return XFuture.completedFuture(new DataWriterImpl());
 	}
 
 	private class NullWriter implements HttpDataWriter {
 		@Override
-		public CompletableFuture<Void> send(HttpData data) {
+		public XFuture<Void> send(HttpData data) {
 			throw new UnsupportedOperationException("This should not happen");
 		}
 	}
 	
 	private class DataWriterImpl implements HttpDataWriter {
 		@Override
-		public CompletableFuture<Void> send(HttpData chunk) {
+		public XFuture<Void> send(HttpData chunk) {
 			DataWrapper allData = dataGen.chainDataWrappers(response.getData(), chunk.getBodyNonNull());
 			response.setData(allData);
 			
@@ -53,7 +53,7 @@ public class CompletableListener implements HttpResponseListener {
 				response = null;
 			}
 			
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 	}
 	

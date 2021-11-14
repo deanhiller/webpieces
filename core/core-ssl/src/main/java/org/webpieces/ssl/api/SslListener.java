@@ -1,7 +1,7 @@
 package org.webpieces.ssl.api;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public interface SslListener {
 	/**
@@ -17,7 +17,7 @@ public interface SslListener {
 	 * 
 	 * @param engineToSocketData
 	 */
-	CompletableFuture<Void> packetEncrypted(ByteBuffer engineToSocketData);
+	XFuture<Void> packetEncrypted(ByteBuffer engineToSocketData);
 
 	/**
 	 * This is in a synchronization block so must be executed as quickly as possibly while keeping the calls that
@@ -25,14 +25,14 @@ public interface SslListener {
 	 * 
 	 * @param engineToSocketData
 	 */
-	CompletableFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData);
+	XFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData);
 	
 	/**
 	 * This is NOT in a synchronization block in case clients take a long time processing the packet
 	 * 
 	 * @param out
 	 */
-	CompletableFuture<Void> packetUnencrypted(ByteBuffer out);
+	XFuture<Void> packetUnencrypted(ByteBuffer out);
 
 	/**
 	 * Called when the engine is closed after initiating a close

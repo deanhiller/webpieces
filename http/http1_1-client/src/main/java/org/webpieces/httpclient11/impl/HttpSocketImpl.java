@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.slf4j.Logger;
@@ -72,7 +72,7 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(InetSocketAddress addr) {
+	public XFuture<Void> connect(InetSocketAddress addr) {
 		if(isRecording ) {
 			dataListener = new RecordingDataListener("httpSock-", dataListener);
 		}
@@ -81,7 +81,7 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	@Override
-	public CompletableFuture<HttpFullResponse> send(HttpFullRequest request) {
+	public XFuture<HttpFullResponse> send(HttpFullRequest request) {
 		Integer contentLength = request.getRequest().getContentLength();
 		if(request.getData() == null || request.getData().getReadableSize() == 0) {
 			if(contentLength != null && contentLength != 0)
@@ -92,7 +92,7 @@ public class HttpSocketImpl implements HttpSocket {
 			throw new IllegalArgumentException("HttpRequest Content-Length header value="
 					+request.getRequest().getContentLength()+" does not match payload size="+request.getData().getReadableSize());
 
-		CompletableFuture<HttpFullResponse> future = new CompletableFuture<HttpFullResponse>();
+		XFuture<HttpFullResponse> future = new XFuture<HttpFullResponse>();
 		HttpResponseListener l = new CompletableListener(future);
 		
 		HttpStreamRef streamRef = send(request.getRequest(), l);
@@ -107,7 +107,7 @@ public class HttpSocketImpl implements HttpSocket {
 		future.exceptionally( t -> {
 			//we can only cancel if it is NOT keepalive or else we have to keep socket open
 			if(t instanceof CancellationException && !isKeepAliveRequest(request.getRequest())) {
-				streamRef.cancel("CompletableFuture cancelled by client, so cancel request");
+				streamRef.cancel("XFuture cancelled by client, so cancel request");
 			}
 			return null;
 		});
@@ -145,28 +145,28 @@ public class HttpSocketImpl implements HttpSocket {
 		
 		boolean canSendTheChunks = canSendChunks;
 		
-		CompletableFuture<HttpDataWriter> writer = channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect, canSendTheChunks));
+		XFuture<HttpDataWriter> writer = channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect, canSendTheChunks));
 		return new MyStreamRefImpl(writer, request);
 		
 	}
 	
 	private class MyStreamRefImpl implements HttpStreamRef {
 
-		private CompletableFuture<HttpDataWriter> writer;
+		private XFuture<HttpDataWriter> writer;
 		private HttpRequest request;
 
-		public MyStreamRefImpl(CompletableFuture<HttpDataWriter> writer, HttpRequest request) {
+		public MyStreamRefImpl(XFuture<HttpDataWriter> writer, HttpRequest request) {
 			this.writer = writer;
 			this.request = request;
 		}
 
 		@Override
-		public CompletableFuture<HttpDataWriter> getWriter() {
+		public XFuture<HttpDataWriter> getWriter() {
 			return writer;
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(Object reason) {
+		public XFuture<Void> cancel(Object reason) {
 			if(!isKeepAliveRequest(request)) {
 				return close();
 			}
@@ -174,7 +174,7 @@ public class HttpSocketImpl implements HttpSocket {
 			//nothing we can do in http1.1 since keep alive was sent and cancel means to cancel the 
 			//previous request.  TODO(dhiller): we should probably start disccarding the response coming back but alas
 			//clients can do that too (and http1.1 is going away)
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		
 	}
@@ -188,12 +188,12 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 	
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		if(isClosed) {
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 		
-		CompletableFuture<Void> future = channel.close();
+		XFuture<Void> future = channel.close();
 		return future.thenApply(chan -> {
 			isClosed = true;
 			return null;
@@ -202,11 +202,11 @@ public class HttpSocketImpl implements HttpSocket {
 
 	private class MyDataListener implements DataListener {
 		private static final String FUTURE_PROCESS_KEY = "__webpiecesFutureProcessKey";
-		private CompletableFuture<HttpDataWriter> dataWriterFuture;
+		private XFuture<HttpDataWriter> dataWriterFuture;
 		private boolean connectResponseReceived;
 
 		@Override
-		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 
 			DataWrapper leftOverData = null;
@@ -223,7 +223,7 @@ public class HttpSocketImpl implements HttpSocket {
 			}
 			
 			if(memento.getNumBytesJustParsed() == 0)
-				return CompletableFuture.completedFuture(null); //ack the future as we need more data.  there is nothing to track here
+				return XFuture.completedFuture(null); //ack the future as we need more data.  there is nothing to track here
 
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 
@@ -234,7 +234,7 @@ public class HttpSocketImpl implements HttpSocket {
 				session.put(FUTURE_PROCESS_KEY, rs);
 			}
 				
-			CompletableFuture<Void> future = rs.getProcessFuture();
+			XFuture<Void> future = rs.getProcessFuture();
 			
 			for(HttpPayload msg : parsedMessages) {
 				if(msg instanceof HttpData) {
@@ -268,7 +268,7 @@ public class HttpSocketImpl implements HttpSocket {
 			return future;
 		}
 
-		private CompletableFuture<Void> sendDataAfterHttpConnect(DataWrapper wrapper) {
+		private XFuture<Void> sendDataAfterHttpConnect(DataWrapper wrapper) {
 			//special case of just sending data through as we are doing proxying SSL stuff
 			HttpData data = new HttpData(wrapper, false);
 			return dataWriterFuture.thenCompose(w -> {
@@ -276,7 +276,7 @@ public class HttpSocketImpl implements HttpSocket {
 			});
 		}
 
-		private CompletableFuture<HttpDataWriter> processResponse(HttpResponse msg) {
+		private XFuture<HttpDataWriter> processResponse(HttpResponse msg) {
 			boolean isComplete;
 			HttpResponseListener listener;
 			if(msg.isHasChunkedTransferHeader() || msg.isHasNonZeroContentLength()) {					

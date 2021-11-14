@@ -1,6 +1,6 @@
 package org.webpieces.plugins.hibernate;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -60,7 +60,7 @@ public class TestAjaxHibernate extends AbstractWebpiecesTest {
 	public void testNotFoundInSubRoute() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/ajax/notfound");
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -76,7 +76,7 @@ public class TestAjaxHibernate extends AbstractWebpiecesTest {
 				"entity.firstName", "blah2",
 				"password", "asddd");
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);

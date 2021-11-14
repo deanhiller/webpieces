@@ -1,6 +1,6 @@
 package org.webpieces.webserver.json.app;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.webpieces.ctx.api.Current;
@@ -40,7 +40,7 @@ public class EchoStreamingClient {
 		}
 
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
+		public XFuture<Void> processPiece(StreamMsg data) {
 			return writer.processPiece(data);
 		}
 		
@@ -54,13 +54,13 @@ public class EchoStreamingClient {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> getWriter() {
-			return CompletableFuture.completedFuture(echoWriter);
+		public XFuture<StreamWriter> getWriter() {
+			return XFuture.completedFuture(echoWriter);
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason reason) {
-			return CompletableFuture.completedFuture(null);
+		public XFuture<Void> cancel(CancelReason reason) {
+			return XFuture.completedFuture(null);
 		}
 	}
 }

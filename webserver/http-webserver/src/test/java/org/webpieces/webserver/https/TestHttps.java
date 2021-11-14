@@ -1,6 +1,6 @@
 package org.webpieces.webserver.https;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -41,7 +41,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testSecureLoginHasHttpsPage() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal"); 
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//before we can show you the page, you need to be logged in, redirect to login page...
@@ -52,7 +52,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testBasicPageOverHttps() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -63,7 +63,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testAccessHttpsPageOverHttp() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//Even though the page exists....if accessed over http, it does not exist...
@@ -74,13 +74,13 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testSameRouteHttpAndHttpsWrongOrder() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same"); 
 		
-		CompletableFuture<HttpFullResponse> respFuture1 = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture1 = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Http Route"); //notice the Https Route page is not shown		
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -91,13 +91,13 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testSameRouteHttpAndHttpsCorrectOrder() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same2");
 		
-		CompletableFuture<HttpFullResponse> respFuture1 = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture1 = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Https Route");
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -108,7 +108,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testUseHttpButGoThroughLoginFilter() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/randomPage");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//Even though the page exists....if accessed over http, it does not exist...
@@ -119,7 +119,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testSecureLoginNotFoundHttpsPage() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/notFoundPage");
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//Page not exist
@@ -133,7 +133,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal"); 
 		req.addHeader(cookie);
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//before we can show you the page, you need to be logged in, redirect to login page...
@@ -145,7 +145,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testReverseUrlLookupOnHttpPageForHttpsUrl() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -157,7 +157,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testReverseUrlLookupOnHttpPageForHttpsUrl8443() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same", 8080);
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -167,7 +167,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	private Header simulateLogin() {
 		HttpFullRequest req1 = Requests.createRequest(KnownHttpMethod.POST, "/postLogin");
 		
-		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req1);
+		XFuture<HttpFullResponse> respFuture = https11Socket.send(req1);
 		
 		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture);
 		Header header = response1.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);

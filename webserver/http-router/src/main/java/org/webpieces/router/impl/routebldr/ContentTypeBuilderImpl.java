@@ -14,7 +14,6 @@ import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.UrlPath;
-import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.model.RouteBuilderLogic;
@@ -26,6 +25,8 @@ import org.webpieces.router.impl.routers.FContentRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.router.impl.services.SvcProxyForContent;
 import org.webpieces.util.futures.FutureHelper;
+import org.webpieces.util.urlparse.RegExResult;
+import org.webpieces.util.urlparse.RegExUtil;
 
 public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTypeRouteBuilder {
 
@@ -54,7 +55,7 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 			throw new IllegalArgumentException("controllerMethod must contain a . for the form Controller.method");
 		
 		UrlPath p = new UrlPath(routerInfo, path);
-		RouteModuleInfo moduleInfo = CurrentPackage.get();
+		RouteModuleInfo moduleInfo = CurrentRoutes.get();
 		RouteInfo routeInfo = new RouteInfo(moduleInfo, controllerMethod);
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what
 		//he did wrong when reading the exception!!
@@ -62,7 +63,7 @@ public class ContentTypeBuilderImpl extends SharedMatchUtil implements ContentTy
 
 		MatchInfo matchInfo = createMatchInfo(p, Port.HTTPS, HttpMethod.POST, holder.getUrlEncoding());
 		LoadedController loadedController = container.getMetaAndController().getLoadedController();
-		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), loadedController, moduleInfo.getI18nBundleName() , matchInfo, container.getBinder());
+		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), loadedController, moduleInfo, matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, container.getMetaAndController(), svc);
 		

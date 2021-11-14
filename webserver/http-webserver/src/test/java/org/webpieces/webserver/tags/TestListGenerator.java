@@ -1,6 +1,6 @@
 package org.webpieces.webserver.tags;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -39,7 +39,7 @@ public class TestListGenerator extends AbstractWebpiecesTest {
 	public void testListTag() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/list");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -52,7 +52,7 @@ public class TestListGenerator extends AbstractWebpiecesTest {
 	public void testEmptyList() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/emptyList");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

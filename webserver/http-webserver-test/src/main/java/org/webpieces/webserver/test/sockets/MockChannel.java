@@ -3,7 +3,7 @@ package org.webpieces.webserver.test.sockets;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -14,19 +14,19 @@ public class MockChannel implements TCPChannel {
 	private ChannelSession session = new MyChannelSession();
 
 	@Override
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer b) {
+	public XFuture<Void> write(ByteBuffer b) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -67,7 +67,7 @@ public class MockChannel implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Void> bind(SocketAddress addr) {
+	public XFuture<Void> bind(SocketAddress addr) {
 		// TODO Auto-generated method stub
 		return null;
 	}

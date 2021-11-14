@@ -10,15 +10,19 @@ plugins {
 
 apply from: 'config/global.gradle'
 
-//if(project.hasProperty('projVersion')) {
-//    task release(dependsOn: ':webserver:githubRelease')
-//} else {
+if(project.hasProperty('projVersion')) {
+    task release {
+        dependsOn('publishMavenJavaPublicationToSonatypeRepository')
+        dependsOn gradle.includedBuild('gradle-plugin-htmlcompiler').task(':publishPlugins')
+        dependsOn gradle.includedBuild('webserver-templates').task(':githubRelease')
+    }
+} else {
     task release {
         dependsOn gradle.includedBuild('webserver-templates').task(':build')
         dependsOn gradle.includedBuild('http2to1_1-client').task(':build')
         dependsOn('publishMavenJavaPublicationToWebpiecesLocal2Repository')
     }
-//}
+}
 //if(project.hasProperty('projVersion')) {
 //    //task release(dependsOn: ':webserver:githubRelease')
 //    tasks.register('release') {
@@ -50,16 +54,23 @@ dependencies {
     api deps['plugin-json-jackson']
     api deps['plugin-properties']
 
+    api deps['generate-httpclient']
+    api deps['server-scaffolding']
+
+    api deps['elastic-lib']
+
     api deps['projectcreator']
+
+    api deps['gcp-cloud-storage']
 }
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            pom {
-                description = 'Templating library using groovy as the scripting language'
-            }
-        }
+        //mavenJava(MavenPublication) {
+        //    pom {
+        //        description = 'Templating library using groovy as the scripting language'
+        //    }
+        //}
     }
 }
 

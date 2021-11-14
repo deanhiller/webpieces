@@ -3,7 +3,7 @@ package org.webpieces.router.api.error;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -67,7 +67,7 @@ public class ErrorCommonTest {
 
 		MockStreamHandle mockStream = new MockStreamHandle();
 		StreamRef ref = server.incomingRequest(req, mockStream);
-		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+		XFuture<StreamWriter> future = ref.getWriter();
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
 		
@@ -104,7 +104,7 @@ public class ErrorCommonTest {
 
 		MockStreamHandle mockStream = new MockStreamHandle();
 		StreamRef ref = server.incomingRequest(req, mockStream);
-		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+		XFuture<StreamWriter> future = ref.getWriter();
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 		
 		Http2Response response = mockStream.getLastResponse();
@@ -136,7 +136,7 @@ public class ErrorCommonTest {
 		
 		MockStreamHandle mockStream = new MockStreamHandle();
 		StreamRef ref = server.incomingRequest(req, mockStream);
-		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+		XFuture<StreamWriter> future = ref.getWriter();
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 
 		Http2Response response = mockStream.getLastResponse();
@@ -167,7 +167,7 @@ public class ErrorCommonTest {
 
 		MockStreamHandle mockStream = new MockStreamHandle();
 		StreamRef ref = server.incomingRequest(req, mockStream);
-		CompletableFuture<StreamWriter> future = ref.getWriter(); 
+		XFuture<StreamWriter> future = ref.getWriter();
 		Assert.assertTrue(future.isDone() && !future.isCompletedExceptionally());
 
 		Http2Response response = mockStream.getLastResponse();

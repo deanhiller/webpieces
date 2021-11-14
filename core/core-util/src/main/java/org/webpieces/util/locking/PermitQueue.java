@@ -1,6 +1,6 @@
 package org.webpieces.util.locking;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,11 +41,11 @@ public class PermitQueue {
 	
 	
 	@SuppressWarnings("unchecked")
-	public <RESP> CompletableFuture<RESP> runRequest(Supplier<CompletableFuture<RESP>> processor) {
+	public <RESP> XFuture<RESP> runRequest(Supplier<XFuture<RESP>> processor) {
 		long countId = counter.getAndIncrement();
 
 		long time = System.currentTimeMillis();
-		CompletableFuture<RESP> future = new CompletableFuture<RESP>();
+		XFuture<RESP> future = new XFuture<RESP>();
 		queue.add(new QueuedRequest<RESP>(future, processor, time));
 
 		//take a peek at the first item in queue and see when it was queued
@@ -76,10 +76,10 @@ public class PermitQueue {
 			return;
 		}
 
-		CompletableFuture<Object> future = req.getFuture();
+		XFuture<Object> future = req.getFuture();
 		
 		try {
-			CompletableFuture<Object> resp = (CompletableFuture<Object>) req.getProcessor().get();
+			XFuture<Object> resp = (XFuture<Object>) req.getProcessor().get();
 			resp.handle((r, t) -> handle(r, t, future));
 		} catch(Throwable e) {
 			handle(null, e, future);
@@ -99,7 +99,7 @@ public class PermitQueue {
 		permits.release(); 
 	}
 
-	private Void handle(Object resp, Throwable t, CompletableFuture<Object> future) {
+	private Void handle(Object resp, Throwable t, XFuture<Object> future) {
 		if(t != null)
 			future.completeExceptionally(t);
 		else

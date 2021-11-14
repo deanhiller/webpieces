@@ -1,6 +1,6 @@
 package webpiecesxxxxxpackage;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -83,7 +83,7 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 	public void testSynchronousController() {
 		HttpFullRequest req = createRequest("/sync");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -100,11 +100,11 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testAsyncControllerAndRemoteSystem() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockRemote.addValueToReturn(future);
 		HttpFullRequest req = createRequest("/async");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		Assert.assertFalse(respFuture.isDone());
 
@@ -126,7 +126,7 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 		HttpFullRequest req = createRequest("/sync");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

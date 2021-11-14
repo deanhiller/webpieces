@@ -1,7 +1,7 @@
 package webpiecesxxxxxpackage;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -70,7 +70,7 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 		//This mode slows things down but you can step through client and server http2 parser/hpack/engine etc.
 		//If you are a beginner run in EMBEDDED_DIRET_NO_PARSING mode as it's faster AND you can step through 
 		//the main stuff you care about(not the http2 protocol stuff).
-		return TestMode.EMBEDDED_PARSING;
+		return TestMode.EMBEDDED_DIRET_NO_PARSING;
 	}
 
 	//The default in superclass is an http2 client on top of an http1.1 protocol.
@@ -122,7 +122,7 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 		try {
 			FullRequest req = createHttpRequest(searchReq);
 	
-			CompletableFuture<FullResponse> respFuture = http2Socket.send(req);
+			XFuture<FullResponse> respFuture = http2Socket.send(req);
 			
 			return waitAndTranslateResponse(respFuture);
 		} catch (Throwable e) {
@@ -130,7 +130,7 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 		}
 	}
 
-	private SearchResponse waitAndTranslateResponse(CompletableFuture<FullResponse> respFuture)
+	private SearchResponse waitAndTranslateResponse(XFuture<FullResponse> respFuture)
 			throws InterruptedException, ExecutionException, TimeoutException, IOException, JsonParseException,
 			JsonMappingException {
 		

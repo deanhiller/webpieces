@@ -1,7 +1,7 @@
 package org.webpieces.httpclient11.impl;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient11.api.HttpDataWriter;
@@ -27,7 +27,7 @@ public class HttpChunkWriterImpl implements HttpDataWriter {
 	}
 
 	@Override
-	public CompletableFuture<Void> send(HttpData chunk) {
+	public XFuture<Void> send(HttpData chunk) {
 		if(isConnectMsg) {
 			//special case where we don't go through parser as SSL is being passed through now
 			DataWrapper body = chunk.getBody();
@@ -37,7 +37,7 @@ public class HttpChunkWriterImpl implements HttpDataWriter {
 		}
 		
 //		if(!canSendChunks) {
-//			CompletableFuture<Void> failure = new CompletableFuture<Void>();
+//			XFuture<Void> failure = new XFuture<Void>();
 //			failure.completeExceptionally(new IllegalStateException("Header "+KnownHeaderName.TRANSFER_ENCODING.getHeaderName()+" was not set with 'chunked' so you can't send chunks"));
 //			return failure;
 //		}

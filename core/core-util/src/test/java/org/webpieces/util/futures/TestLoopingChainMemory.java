@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -82,15 +82,15 @@ public class TestLoopingChainMemory {
 	
 	private class MySession implements Session {
 
-		private CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
+		private XFuture<Void> future = XFuture.completedFuture(null);
 
 		@Override
-		public void setProcessFuturee(CompletableFuture<Void> future) {
+		public void setProcessFuturee(XFuture<Void> future) {
 			this.future = future;
 		}
 
 		@Override
-		public CompletableFuture<Void> getProcessFuture() {
+		public XFuture<Void> getProcessFuture() {
 			return future;
 		}
 	}
@@ -100,12 +100,12 @@ public class TestLoopingChainMemory {
 		private AtomicInteger counter = new AtomicInteger(0);
 		
 		@Override
-		public CompletableFuture<Void> process(Integer item) {
+		public XFuture<Void> process(Integer item) {
 			int count = counter.addAndGet(1);
 			if(count % 10000 == 0)
 				System.out.println("processed="+count);
 			
-			CompletableFuture<Void> future = new CompletableFuture<Void>();
+			XFuture<Void> future = new XFuture<Void>();
 			
 			exec.execute(new Runnable() {
 				@Override

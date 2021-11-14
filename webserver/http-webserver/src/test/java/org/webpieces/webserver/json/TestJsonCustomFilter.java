@@ -3,7 +3,7 @@ package org.webpieces.webserver.json;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -79,7 +79,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 		//test out "something":null converts to "" in java....
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/simple");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -93,7 +93,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 		String json = "{ `query`: null, `meta`: { `numResults`: 4 }, `testValidation`:`notBlank` }".replace("`", "\"");
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/simple", json);
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -110,7 +110,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 		String json = "{ `meta`: { `numResults`: 4 }, `testValidation`:`notBlank` }".replace("`", "\"");
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/simple", json);
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -126,7 +126,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testAsyncJsonGet() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/async/45");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -138,7 +138,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testAsyncBadJsonGet() {
 		HttpFullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.GET, "/json/async/45");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
@@ -150,7 +150,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testAsyncJsonPost() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/async/45");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -162,7 +162,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testAsyncWriteOnlyPost() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/writeasync");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -173,7 +173,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testAsyncBadJsonPost() {
 		HttpFullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/async/45");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
@@ -185,7 +185,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testSyncJsonGet() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/45");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -198,7 +198,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testSimulateCurl() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/45");
 		req.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -210,7 +210,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testSyncBadJsonGet() {
 		HttpFullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.GET, "/json/45");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
@@ -222,7 +222,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testSyncJsonPost() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/45");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -234,7 +234,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testSyncWriteOnlyPost() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/write");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -245,7 +245,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testSyncBadJsonPost() {
 		HttpFullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/45");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
@@ -257,7 +257,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testNotFoundInJsonUrls() {
 		HttpFullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/some/notexist/route");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -269,7 +269,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testNotFoundInHtmlUrls() {
 		HttpFullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/html");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -281,7 +281,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testRouteParamConversionFail() {
 		HttpFullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/somenotexistroute");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND); //clearly this url has nothing there
@@ -293,7 +293,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testControllerThrowsNotFound() {
 		HttpFullRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/throw/333");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND); //clearly this url has nothing there
@@ -305,7 +305,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 	public void testReadOnly() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/json/read");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

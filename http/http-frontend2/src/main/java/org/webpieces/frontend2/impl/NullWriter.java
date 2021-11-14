@@ -1,6 +1,6 @@
 package org.webpieces.frontend2.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,13 +15,13 @@ public class NullWriter implements StreamWriter {
 	private static final Logger log = LoggerFactory.getLogger(NullWriter.class);
 	
 	@Override
-	public CompletableFuture<Void> processPiece(StreamMsg data) {
+	public XFuture<Void> processPiece(StreamMsg data) {
 		DataFrame f = (DataFrame)data;
 		DataWrapper body = f.getData();
 		String str = body.createStringFromUtf8(0, body.getReadableSize());
 		log.error("Should not be receiving data(len="+body.getReadableSize()
 			+").  data Received="+str, new RuntimeException("Received data here and should not").fillInStackTrace());
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 }

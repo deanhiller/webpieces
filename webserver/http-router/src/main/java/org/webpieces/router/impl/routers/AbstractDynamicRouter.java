@@ -17,14 +17,9 @@ public abstract class AbstractDynamicRouter extends AbstractRouterImpl {
 	
 	@Override
 	protected Matcher matchesAndParseParams(RouterRequest request, String path) {
-		if(matchInfo.getExposedPorts() == Port.HTTPS && !request.isHttps) {
-			//NOTE: we cannot do if isHttpsRoute != request.isHttps as every http route is 
-			//allowed over https as well by default.  so 
-			//isHttpsRoute=false and request.isHttps=true is allowed
-			//isHttpsRoute=false and request.isHttps=false is allowed
-			//isHttpsRoute=true  and request.isHttps=true is allowed
+		if(!matchInfo.acceptsProtocol(request.isHttps)) {
 			return null; //route is https but request is http so not allowed
-		} else if(matchInfo.getHttpMethod() != request.method) {
+		} else if(!matchInfo.methodMatches(request.method)) {
 			return null;
 		}
 		

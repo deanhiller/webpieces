@@ -1,7 +1,7 @@
 package org.webpieces.nio.api.integ;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +16,9 @@ public class IntegTestClientNotReadListener implements AsyncDataListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+	public XFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		log.info("receiving data server..writing now");
-		CompletableFuture<Void> future = channel.write(b);
+		XFuture<Void> future = channel.write(b);
 
 		return future.thenAccept(p -> finished("data written", b));
 	}
@@ -26,7 +26,7 @@ public class IntegTestClientNotReadListener implements AsyncDataListener {
 //	private Void fail(Channel channel, Throwable e) {
 //		log.info("finished exception="+e, e);
 //		if(!channel.isClosed()) {
-//			CompletableFuture<Channel> close = channel.close();
+//			XFuture<Channel> close = channel.close();
 //			close.thenAccept(p -> {
 //				log.info("Channel closed");
 //			});

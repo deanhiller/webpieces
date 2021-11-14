@@ -1,7 +1,7 @@
 package org.webpieces.http2client.impl;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(InetSocketAddress addr) {
+	public XFuture<Void> connect(InetSocketAddress addr) {
 		if(addr == null)
 			throw new IllegalArgumentException("addr cannot be null");
 			
@@ -42,7 +42,7 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		//TODO: For http/2, please send GOAWAY first(crap, do we need reason in the close method?...probably)
 		return outgoing.close();
 	}
@@ -53,7 +53,7 @@ public class Http2SocketImpl implements Http2Socket {
 	 * on the socket)
 	 */
 	@Override
-	public CompletableFuture<FullResponse> send(FullRequest request) {
+	public XFuture<FullResponse> send(FullRequest request) {
 		return new ResponseCacher(() -> openStream()).run(request);
 	}
 
@@ -63,7 +63,7 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendPing() {
+	public XFuture<Void> sendPing() {
 		return incoming.sendPing();
 	}
 

@@ -2,7 +2,7 @@ package org.webpieces.util.futures;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import javax.inject.Singleton;
@@ -13,22 +13,22 @@ public class FutureHelper {
 	/**
 	 * USAGE:
 	 *
-	 *	    CompletableFuture<Response> future = futureUtil.tryCatchFinallyBlock(
+	 *	    XFuture<Response> future = futureUtil.tryCatchFinallyBlock(
 	 *			() -> handleCompleteRequestImpl(),
 	 *		    () -> runOnSuccessOfAboveMethod()
 	 *			() -> runOnSuccessOrFailureOfAboveTwoMethods()
 	 *	    );
 	 */
-	public <T> CompletableFuture<T> trySuccessFinallyBlock(
-			Callable<CompletableFuture<T>> function,
-			Callable<CompletableFuture<T>> successFunction,
+	public <T> XFuture<T> trySuccessFinallyBlock(
+			Callable<XFuture<T>> function,
+			Callable<XFuture<T>> successFunction,
 			Runnable finallyCode
 	) {
 		//convert sync exceptions into async exceptions so we can re-use same exception handling logic..
-		CompletableFuture<T> future = syncToAsyncException(function);
-		CompletableFuture<T> newFuture = future.thenCompose( result -> syncToAsyncException(successFunction));
+		XFuture<T> future = syncToAsyncException(function);
+		XFuture<T> newFuture = future.thenCompose( result -> syncToAsyncException(successFunction));
 		
-		CompletableFuture<T> lastFuture = finallyBlock(
+		XFuture<T> lastFuture = finallyBlock(
 				() -> newFuture,
 				() -> finallyCode.run()
 		);
@@ -42,25 +42,25 @@ public class FutureHelper {
 	 *      //In this example, you might set the MDC and clear it in a finally block like so
 	 * 		MDC.put("txId", generate());
 	 * 
-	 *	    CompletableFuture<Response> future = futureUtil.finallyBlock(
+	 *	    XFuture<Response> future = futureUtil.finallyBlock(
 	 *			() -> handleCompleteRequestImpl(), 
 	 *			() -> MDC.put("txId", null)
 	 *	    );
 	 */
-	public <T> CompletableFuture<T> finallyBlock(
-			Callable<CompletableFuture<T>> function,
+	public <T> XFuture<T> finallyBlock(
+			Callable<XFuture<T>> function,
 			Runnable finallyCode
 	) {
 		//convert sync exceptions into async exceptions so we can re-use same exception handling logic.. 
-		CompletableFuture<T> future = syncToAsyncException(function);
+		XFuture<T> future = syncToAsyncException(function);
 		
 		//Now, handle ANY (sync or aysnc) exceptions the same by running a finally block......
-		CompletableFuture<T> local = future.handle((r, t) -> {
+		XFuture<T> local = future.handle((r, t) -> {
 			//RUN the finally code BUT try....catch it
 			try {
 				finallyCode.run();
 			} catch (Exception e) {
-				CompletableFuture<T> failedFuture = new CompletableFuture<>();
+				XFuture<T> failedFuture = new XFuture<>();
 				if(t != null) {				
 					failedFuture.completeExceptionally(t);
 					t.addSuppressed(e);
@@ -74,9 +74,9 @@ public class FutureHelper {
 			
 			//r and t can BOTH be null but t is not null on failure and null on good response
 			if(t == null) //response is good so return it
-				return CompletableFuture.completedFuture(r);
+				return XFuture.completedFuture(r);
 			
-			CompletableFuture<T> failedFuture = new CompletableFuture<>();
+			XFuture<T> failedFuture = new XFuture<>();
 			failedFuture.completeExceptionally(t);
 			return failedFuture;
 		}).thenCompose(Function.identity());
@@ -91,23 +91,23 @@ public class FutureHelper {
 	 *      //synchronous catch block EXCEPT this is for both async and sync exceptions 
 	 *      //from the function
 	 * 
-	 *	    CompletableFuture<Response> future = futureUtil.catchBlock(
+	 *	    XFuture<Response> future = futureUtil.catchBlock(
 	 *			() -> handleCompleteRequestImpl(), 
 	 *			(t) -> runCatchBlock(t) //can return success if recovering OR failure if not
 	 *	    );
 	 */
-	public <T> CompletableFuture<T> catchBlock(
-		Callable<CompletableFuture<T>> function,
-		Function<Throwable, CompletableFuture<T>> catchBlock
+	public <T> XFuture<T> catchBlock(
+		Callable<XFuture<T>> function,
+		Function<Throwable, XFuture<T>> catchBlock
 	) {
 		//convert sync exceptions into async exceptions so we can re-use same exception handling logic.. 
-		CompletableFuture<T> future = syncToAsyncException(function);
+		XFuture<T> future = syncToAsyncException(function);
 		
 		//Now, handle ANY (sync or aysnc) exceptions the same by running a finally block......
-		CompletableFuture<T> local = future.handle((r, t) -> {
+		XFuture<T> local = future.handle((r, t) -> {
 			//r and t can BOTH be null but t is not null on failure and null on good response
 			if(t == null) //response is good so return it
-				return CompletableFuture.completedFuture(r);
+				return XFuture.completedFuture(r);
 			
 			//RUN the finally code BUT try....catch it
 			try {
@@ -130,20 +130,20 @@ public class FutureHelper {
 	 * 
 	 * USAGE:
 	 * 
-	 *	CompletableFuture<Response> response = futureUtil.wrap(
+	 *	XFuture<Response> response = futureUtil.wrap(
 	 *		() -> pageNotFoundRouter.invokeNotFoundRoute(requestCtx, responseCb),
 	 *		(e) -> new RuntimeException("NotFound Route had an exception", e)
 	 *	);
 	 */
-	public <T> CompletableFuture<T> catchBlockWrap(
-			Callable<CompletableFuture<T>> function, 
+	public <T> XFuture<T> catchBlockWrap(
+			Callable<XFuture<T>> function,
 			Function<Throwable, Throwable> wrapException
 	) {
 		return catchBlock(function, (t) -> failedFuture(wrapException.apply(t)));
 	}
 
 	/**
-	 * Copying Twitter filters, we convert all synchronous exceptions to CompletableFuture.failedFuture
+	 * Copying Twitter filters, we convert all synchronous exceptions to XFuture.failedFuture
 	 * as there has never been a need over all twitter's 1000's of servers over 10 years where we need
 	 * to distinguish  between a synchronous exception and an asynchronous one.  IF YOU HAPPEN to find a
 	 * single case, 1. create a special AsyncException and key off that and 2. PLEASE do tell me as I am 
@@ -151,14 +151,14 @@ public class FutureHelper {
 	 * 
 	 * USAGE:
 	 * 
-	 * 	CompletableFuture<InitiationResult> future = 
+	 * 	XFuture<InitiationResult> future =
 	 *          futureUtil.syncToAsyncException( 
 	 *                  () -> http11Handler.initialData(socket, b)
 	 *          );
      *
 	 */
 	//Change to Runnable...
-	public <T> CompletableFuture<T> syncToAsyncException(Callable<CompletableFuture<T>> callable) {
+	public <T> XFuture<T> syncToAsyncException(Callable<XFuture<T>> callable) {
 	    try {
 			//DAMN these damn InvocationTargetExceptions that just fucking wrap the original
 			//GET rid of checked exceptions....in reality InvocationTargetException == FUCKING ANYTHING!!!
@@ -176,9 +176,9 @@ public class FutureHelper {
 	    }
 	}
 
-    //In jdk8, they don't have CompletableFuture.failedFuture yet :(	
-    public <T> CompletableFuture<T> failedFuture(Throwable ex) {
-        CompletableFuture<T> future = new CompletableFuture<>();
+    //In jdk8, they don't have XFuture.failedFuture yet :(
+    public <T> XFuture<T> failedFuture(Throwable ex) {
+        XFuture<T> future = new XFuture<>();
         future.completeExceptionally(ex);
         return future;
     }

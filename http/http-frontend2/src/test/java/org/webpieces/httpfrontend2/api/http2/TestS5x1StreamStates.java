@@ -1,6 +1,6 @@
 package org.webpieces.httpfrontend2.api.http2;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -64,7 +64,7 @@ public class TestS5x1StreamStates extends AbstractFrontendHttp2Test {
 	@Test
 	public void testSection5_1BadFrameReceivedInReservedRemoteState() {
 		MockStreamWriter mockWriter = new MockStreamWriter();
-		CompletableFuture<StreamWriter> futA = CompletableFuture.completedFuture(mockWriter);
+		XFuture<StreamWriter> futA = XFuture.completedFuture(mockWriter);
 		MockStreamRef mockStream = new MockStreamRef(futA );
 		mockListener.addMockStreamToReturn(mockStream);
 		
@@ -120,7 +120,7 @@ public class TestS5x1StreamStates extends AbstractFrontendHttp2Test {
 //		PassedIn in = mockListener.getSingleRequest();
 //		FrontendStream stream = in.stream;
 //		
-//		CompletableFuture<Void> future = stream.cancelStream(); //closes the stream
+//		XFuture<Void> future = stream.cancelStream(); //closes the stream
 //		future.get(2, TimeUnit.SECONDS);
 //		
 //		
@@ -149,7 +149,7 @@ public class TestS5x1StreamStates extends AbstractFrontendHttp2Test {
 //		PassedIn in = mockListener.getSingleRequest();
 //		FrontendStream stream = in.stream;
 //		
-//		CompletableFuture<Void> future = stream.cancelStream();
+//		XFuture<Void> future = stream.cancelStream();
 //		future.get(2, TimeUnit.SECONDS);
 //		
 //		RstStreamFrame reset = (RstStreamFrame) mockChannel.getFrameAndClear();
@@ -181,7 +181,7 @@ public class TestS5x1StreamStates extends AbstractFrontendHttp2Test {
 	@Test
 	public void testSection5_1ReceiveBadFrameAfterReceiveEndStream() {	
 //		MockResponseListener listener1 = new MockResponseListener();
-//		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
+//		listener1.setIncomingRespDefault(XFuture.<Void>completedFuture(null));
 //		Http2Headers request = sendRequestToServer(listener1);
 //		sendEosResponseFromServer(listener1, request);
 //
@@ -201,7 +201,7 @@ public class TestS5x1StreamStates extends AbstractFrontendHttp2Test {
 //		
 //		//send new request on closed connection
 //		Http2Headers request1 = Requests.createRequest();
-//		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
+//		XFuture<StreamWriter> future = httpSocket.send(request1, listener1);
 //		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 //		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
 //		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
@@ -219,7 +219,7 @@ public class TestS5x1StreamStates extends AbstractFrontendHttp2Test {
 	@Test
 	public void testSection5_1ReceivePriorityAfterReceiveRstStreamFrame() {	
 //		MockResponseListener listener1 = new MockResponseListener();
-//		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
+//		listener1.setIncomingRespDefault(XFuture.<Void>completedFuture(null));
 //		Http2Headers request = sendRequestToServer(listener1);
 //		sendResetFromServer(listener1, request);
 //
@@ -281,7 +281,7 @@ public class TestS5x1StreamStates extends AbstractFrontendHttp2Test {
 	@Test
 	public void testSection5_1_1TooLowStreamIdAfterHighStreamId() {
 		MockStreamWriter mockWriter = new MockStreamWriter();
-		CompletableFuture<StreamWriter> futA = CompletableFuture.completedFuture(mockWriter);
+		XFuture<StreamWriter> futA = XFuture.completedFuture(mockWriter);
 		MockStreamRef mockStream = new MockStreamRef(futA );
 		mockListener.addMockStreamToReturn(mockStream);
 		

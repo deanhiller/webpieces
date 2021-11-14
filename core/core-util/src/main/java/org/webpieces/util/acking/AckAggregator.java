@@ -1,6 +1,6 @@
 package org.webpieces.util.acking;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -11,7 +11,7 @@ public class AckAggregator {
 	private static final Logger log = LoggerFactory.getLogger(AckAggregator.class);
 	
 	private AtomicInteger countDown;
-	private CompletableFuture<Void> future = new CompletableFuture<>();
+	private XFuture<Void> future = new XFuture<>();
 
 	public AckAggregator(
 		int numFuturesToResolveOnceBytesAreAcked,

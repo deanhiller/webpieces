@@ -1,6 +1,6 @@
 package org.webpieces.plugin.hibernate;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,7 +19,7 @@ import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.util.filters.Service;
 
 @Singleton
-public class TransactionFilter extends RouteFilter<Void> {
+public class TransactionFilter extends RouteFilter<TxConfig> {
 
 	private static final Logger log = LoggerFactory.getLogger(TransactionFilter.class);
 	private EntityManagerFactory factory;
@@ -29,7 +29,8 @@ public class TransactionFilter extends RouteFilter<Void> {
 	//we want metered?
 	private static int state = 0; //0 for start, 1 for in progress, 2 for rolled back, 3 for committed
 	private TxCompleters txCompleters;
-	
+	private TxConfig txConfig;
+
 	@Inject
 	public TransactionFilter(EntityManagerFactory factory, TxCompleters txCompleters) {
 		this.factory = factory;
@@ -37,19 +38,26 @@ public class TransactionFilter extends RouteFilter<Void> {
 	}
 	
 	@Override
-	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
-		NoTransaction annotation = meta.getLoadedController().getControllerMethod().getAnnotation(NoTransaction.class);
-		if(annotation != null) {
+	public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+		if(txConfig.isTransactionOnByDefault()) {
+			return filterWithTxOnDefault(meta, nextFilter);
+		} else {
+			return filterWithTxOffDefault(meta, nextFilter);
+		}
+	}
+
+	private XFuture<Action> filterWithTxOffDefault(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+		Transaction annotation = meta.getLoadedController().getControllerMethod().getAnnotation(Transaction.class);
+		if(annotation == null) {
 			//skip doing a transaction for methods annotated with @NoTransaction.
 			//Those ones can use TransactionHelper
 			return nextFilter.invoke(meta);
 		}
-		
-		
+
 		state = 0;
 		if(Em.get() != null)
 			throw new IllegalStateException("Are you stacking two TransactionFilters as this Em should not be set yet.  be aware you do not need to call addFilter for this filter and should just include the HibernateRouteModule");
-		
+
 		EntityManager em = factory.createEntityManager();
 		Em.set(em);
 
@@ -57,7 +65,34 @@ public class TransactionFilter extends RouteFilter<Void> {
 			EntityTransaction tx = em.getTransaction();
 			tx.begin();
 			log.info("Transaction beginning");
-			
+
+			return nextFilter.invoke(meta).handle((action, ex) -> commitOrRollback(em, action, ex));
+		} finally {
+			Em.set(null);
+		}
+	}
+
+	private XFuture<Action> filterWithTxOnDefault(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+		NoTransaction annotation = meta.getLoadedController().getControllerMethod().getAnnotation(NoTransaction.class);
+		if(annotation != null) {
+			//skip doing a transaction for methods annotated with @NoTransaction.
+			//Those ones can use TransactionHelper
+			return nextFilter.invoke(meta);
+		}
+
+
+		state = 0;
+		if(Em.get() != null)
+			throw new IllegalStateException("Are you stacking two TransactionFilters as this Em should not be set yet.  be aware you do not need to call addFilter for this filter and should just include the HibernateRouteModule");
+
+		EntityManager em = factory.createEntityManager();
+		Em.set(em);
+
+		try {
+			EntityTransaction tx = em.getTransaction();
+			tx.begin();
+			log.info("Transaction beginning");
+
 			return nextFilter.invoke(meta).handle((action, ex) -> commitOrRollback(em, action, ex));
 		} finally {
 			Em.set(null);
@@ -93,7 +128,8 @@ public class TransactionFilter extends RouteFilter<Void> {
 	}
 
 	@Override
-	public void initialize(Void initialConfig) {
+	public void initialize(TxConfig initialConfig) {
+		this.txConfig = initialConfig;
 	}
 
 	//FOR TESTING ONLY.  not thread safe.  I HATE doing this, but verifying rollback on exception is critical that

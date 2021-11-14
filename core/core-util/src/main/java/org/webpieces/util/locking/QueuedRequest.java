@@ -1,17 +1,17 @@
 package org.webpieces.util.locking;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Supplier;
 
 public class QueuedRequest<RESP> {
 
-	private CompletableFuture<RESP> future;
-	private Supplier<CompletableFuture<RESP>> processor;
+	private XFuture<RESP> future;
+	private Supplier<XFuture<RESP>> processor;
 	private long timeQueued;
 
 	public QueuedRequest(
-			CompletableFuture<RESP> future, 
-			Supplier<CompletableFuture<RESP>> processor, 
+			XFuture<RESP> future,
+			Supplier<XFuture<RESP>> processor,
 			long timeQueued
 	) {
 		this.future = future;
@@ -19,11 +19,11 @@ public class QueuedRequest<RESP> {
 		this.timeQueued = timeQueued;
 	}
 
-	public CompletableFuture<RESP> getFuture() {
+	public XFuture<RESP> getFuture() {
 		return future;
 	}
 
-	public Supplier<CompletableFuture<RESP>> getProcessor() {
+	public Supplier<XFuture<RESP>> getProcessor() {
 		return processor;
 	}
 

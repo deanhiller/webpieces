@@ -1,7 +1,7 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.util.EventListener;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 public abstract class ChannelRegistrationListener implements EventListener {
 
 	private static final Logger log = LoggerFactory.getLogger(ChannelRegistrationListener.class);
-	private CompletableFuture<Void> future;
+	private XFuture<Void> future;
 	private int validOps;
 	
-	public ChannelRegistrationListener(CompletableFuture<Void> future, int validOps) {
+	public ChannelRegistrationListener(XFuture<Void> future, int validOps) {
 		this.future = future;
 		this.validOps = validOps;
 	}

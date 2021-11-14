@@ -1,7 +1,7 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -105,18 +105,18 @@ public class IntegGoogleHttps {
 
 	private static class OurListener implements HttpResponseListener {
 		@Override
-		public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
+		public XFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 			log.info("resp="+resp+" complete="+isComplete);
-			return CompletableFuture.completedFuture(new Writer());
+			return XFuture.completedFuture(new Writer());
 		}
 
 		private class Writer implements HttpDataWriter {
 			@Override
-			public CompletableFuture<Void> send(HttpData chunk) {
+			public XFuture<Void> send(HttpData chunk) {
 				DataWrapper wrapper = chunk.getBody();
 				String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.ISO8859_1);
 				log.info("result=(lastChunk="+chunk.isEndOfData()+")\n"+result+"/////");
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			}
 		}
 
