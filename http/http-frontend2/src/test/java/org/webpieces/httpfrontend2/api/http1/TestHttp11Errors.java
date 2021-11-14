@@ -1,6 +1,6 @@
 package org.webpieces.httpfrontend2.api.http1;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -39,7 +39,7 @@ public class TestHttp11Errors extends AbstractHttp1Test {
 		mockChannel.sendToSvr(req);		
 		PassedIn in1 = mockListener.getSingleRequest();
 		
-		CompletableFuture<Void> fut = mockChannel.sendToSvrAsync(req2);
+		XFuture<Void> fut = mockChannel.sendToSvrAsync(req2);
 		Assert.assertFalse(fut.isDone());
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 		
@@ -50,7 +50,7 @@ public class TestHttp11Errors extends AbstractHttp1Test {
 	
 	@Test
 	public void testRemoteClientClosesSocket() {
-		CompletableFuture<StreamWriter> fut = CompletableFuture.completedFuture(null);
+		XFuture<StreamWriter> fut = XFuture.completedFuture(null);
 		MockStreamRef mockStreamRef = new MockStreamRef(fut);
 		mockListener.addMockStreamToReturn(mockStreamRef);
 		
@@ -74,24 +74,24 @@ public class TestHttp11Errors extends AbstractHttp1Test {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 
-		CompletableFuture<StreamWriter> futA = CompletableFuture.completedFuture(null);
+		XFuture<StreamWriter> futA = XFuture.completedFuture(null);
 		MockStreamRef mockStreamRefA = new MockStreamRef(futA);
 		mockListener.addMockStreamToReturn(mockStreamRefA);
 		mockChannel.sendToSvr(req);		
 		PassedIn in1 = mockListener.getSingleRequest();
 		
 
-		CompletableFuture<StreamWriter> futB = CompletableFuture.completedFuture(null);
+		XFuture<StreamWriter> futB = XFuture.completedFuture(null);
 		MockStreamRef mockStreamRefB = new MockStreamRef(futB);
 		mockListener.addMockStreamToReturn(mockStreamRefB);
-		CompletableFuture<Void> fut1 = mockChannel.sendToSvrAsync(req2);
+		XFuture<Void> fut1 = mockChannel.sendToSvrAsync(req2);
 		Assert.assertFalse(fut1.isDone());
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "10"));
 		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
-		CompletableFuture<StreamWriter> future = in1.stream.process(headers1);
+		XFuture<StreamWriter> future = in1.stream.process(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
 		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
@@ -114,24 +114,24 @@ public class TestHttp11Errors extends AbstractHttp1Test {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 
-		CompletableFuture<StreamWriter> futA = CompletableFuture.completedFuture(null);
+		XFuture<StreamWriter> futA = XFuture.completedFuture(null);
 		MockStreamRef mockStreamRefA = new MockStreamRef(futA);
 		mockListener.addMockStreamToReturn(mockStreamRefA);
 		mockChannel.sendToSvr(req);		
 		PassedIn in1 = mockListener.getSingleRequest();
 		
 
-		CompletableFuture<StreamWriter> futB = CompletableFuture.completedFuture(null);
+		XFuture<StreamWriter> futB = XFuture.completedFuture(null);
 		MockStreamRef mockStreamRefB = new MockStreamRef(futB);
 		mockListener.addMockStreamToReturn(mockStreamRefB);
-		CompletableFuture<Void> fut1 = mockChannel.sendToSvrAsync(req2);
+		XFuture<Void> fut1 = mockChannel.sendToSvrAsync(req2);
 		Assert.assertFalse(fut1.isDone());
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 
 		HttpResponse resp1 = Requests.createResponse(1);
 		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "10"));
 		Http2Response headers1 = Http11ToHttp2.responseToHeaders(resp1);
-		CompletableFuture<StreamWriter> future = in1.stream.process(headers1);
+		XFuture<StreamWriter> future = in1.stream.process(headers1);
 		HttpPayload payload = mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, payload);
 		StreamWriter writer = future.get(2, TimeUnit.SECONDS);

@@ -8,8 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import webpiecesxxxxxpackage.framework.FeatureTest;
 import webpiecesxxxxxpackage.framework.Requests;
-import webpiecesxxxxxpackage.json.SearchRequest;
-import webpiecesxxxxxpackage.json.SearchResponse;
+import webpiecesxxxxxpackage.json.*;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -42,6 +41,28 @@ public class TestLesson1Json extends FeatureTest {
 		SearchResponse resp2 = dataSaveApi.search(req).get(5, TimeUnit.SECONDS);
 
 		validate(resp2);
+	}
+
+	@Test
+	public void testPathParams() throws ExecutionException, InterruptedException, TimeoutException {
+		String id = "asdf";
+		int number = 567;
+		MethodResponse methodResponse = restAPI.method(id, number).get(5, TimeUnit.SECONDS);
+
+		Assert.assertEquals(id, methodResponse.getId());
+		Assert.assertEquals(number, methodResponse.getNumber());
+	}
+
+	@Test
+	public void testPathParamsPost() throws ExecutionException, InterruptedException, TimeoutException {
+		String id = "asdf1";
+		int number = 5671;
+		String something = "qwerasdfqewr";
+		PostTestResponse methodResponse = restAPI.postTest(id, number, new PostTestRequest(something)).get(5, TimeUnit.SECONDS);
+
+		Assert.assertEquals(id, methodResponse.getId());
+		Assert.assertEquals(number, methodResponse.getNumber());
+		Assert.assertEquals(something, methodResponse.getSomething());
 	}
 
 	private void validate(SearchResponse resp) {

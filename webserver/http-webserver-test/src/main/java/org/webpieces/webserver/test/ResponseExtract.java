@@ -1,6 +1,6 @@
 package org.webpieces.webserver.test;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.http2client.api.dto.FullResponse;
@@ -11,7 +11,7 @@ import org.webpieces.webserver.test.http2.ResponseWrapperHttp2;
 
 public class ResponseExtract {
 
-	public static ResponseWrapper waitResponseAndWrap(CompletableFuture<HttpFullResponse> respFuture) {
+	public static ResponseWrapper waitResponseAndWrap(XFuture<HttpFullResponse> respFuture) {
 		try {
 			HttpFullResponse resp = respFuture.get(2, TimeUnit.SECONDS);
 			return new ResponseWrapper(resp);
@@ -20,7 +20,7 @@ public class ResponseExtract {
 		}
 	}
 	
-	public static ResponseWrapperHttp2 waitAndWrap(CompletableFuture<FullResponse> respFuture) {
+	public static ResponseWrapperHttp2 waitAndWrap(XFuture<FullResponse> respFuture) {
 		try {
 			FullResponse resp = respFuture.get(2, TimeUnit.SECONDS);
 			return new ResponseWrapperHttp2(resp);

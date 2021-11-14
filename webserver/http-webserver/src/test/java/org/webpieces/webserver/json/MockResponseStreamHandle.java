@@ -1,6 +1,6 @@
 package org.webpieces.webserver.json;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.lowlevel.CancelReason;
@@ -11,7 +11,7 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 public class MockResponseStreamHandle implements ResponseStreamHandle {
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public XFuture<StreamWriter> process(Http2Response response) {
 		return null;
 	}
 
@@ -21,7 +21,7 @@ public class MockResponseStreamHandle implements ResponseStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason reason) {
+	public XFuture<Void> cancel(CancelReason reason) {
 		return null;
 	}
 

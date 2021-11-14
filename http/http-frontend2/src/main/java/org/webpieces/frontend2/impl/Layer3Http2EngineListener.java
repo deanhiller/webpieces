@@ -1,7 +1,7 @@
 package org.webpieces.frontend2.impl;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamListener;
@@ -53,11 +53,11 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendToSocket(ByteBuffer newData) {
+	public XFuture<Void> sendToSocket(ByteBuffer newData) {
 		try {
 			return socket.getChannel().write(newData).thenApply(c -> null);
 		} catch(NioClosedChannelException e) {
-			CompletableFuture<Void> f = new CompletableFuture<Void>();
+			XFuture<Void> f = new XFuture<Void>();
 			f.completeExceptionally(e);
 			return f;
 		}

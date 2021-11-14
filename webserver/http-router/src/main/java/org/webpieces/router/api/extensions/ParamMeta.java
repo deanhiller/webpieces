@@ -4,9 +4,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import javax.annotation.Nullable;
+import javax.ws.rs.PathParam;
 
-import org.webpieces.router.api.controller.annotations.Nullable;
-import org.webpieces.router.api.controller.annotations.Param;
 import org.webpieces.router.api.exceptions.DataMismatchException;
 
 public class ParamMeta implements Meta {
@@ -22,7 +22,7 @@ public class ParamMeta implements Meta {
 	}
 
 	public String getName() {
-		Param annotation = paramMeta.getAnnotation(Param.class);
+		PathParam annotation = paramMeta.getAnnotation(PathParam.class);
 		String name = paramMeta.getName();
 		if(annotation != null) {
 			name = annotation.value();
@@ -59,7 +59,7 @@ public class ParamMeta implements Meta {
 				return; //null is allowed so just return
 		}
 		
-		throw new DataMismatchException("On method="+method+" the parameter="+this+" did not have any @Nullable annotation so data is required but none came in");
+		throw new DataMismatchException("On method="+method+" the parameter="+this+" did not have any @javax.annotation.Nullable annotation so data is required but none came in");
 	}
 
 }

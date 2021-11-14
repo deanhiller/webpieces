@@ -1,10 +1,10 @@
 package webpiecesxxxxxpackage.service;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public interface RemoteService {
 
-	public CompletableFuture<Integer> fetchRemoteValue(String s, int i);
+	public XFuture<Integer> fetchRemoteValue(String s, int i);
 	
 	public void sendData(int num);
 }

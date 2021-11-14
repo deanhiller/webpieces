@@ -2,8 +2,9 @@ package org.webpieces.webserver.test.http2.direct;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http2client.impl.Http2ChannelProxy;
 import org.webpieces.nio.api.handlers.ConnectionListener;
@@ -13,7 +14,6 @@ import org.webpieces.webserver.test.MockTcpChannel;
 
 public class DelayedProxy implements Http2ChannelProxy {
 
-	private static final String IS_SERVER_SIDE = "_isServerSide";
 	private ConnectionListener listener;
 	private MockTcpChannel channel;
 	private DataListener toServerDataListener;
@@ -24,7 +24,7 @@ public class DelayedProxy implements Http2ChannelProxy {
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
+	public XFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
 		channel.setDataListener(dataListener);
 		return listener.connected(channel, true).thenApply( d -> {
 			toServerDataListener = d;
@@ -33,28 +33,21 @@ public class DelayedProxy implements Http2ChannelProxy {
 	}
 
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer buffer) {
-		Boolean isServerSide = (Boolean) Context.get(IS_SERVER_SIDE);
-
+	public XFuture<Void> write(ByteBuffer buffer) {
 		Map<String, Object> context = Context.copyContext();
-		Context.set(IS_SERVER_SIDE, Boolean.TRUE);
+		//no context server side...
+		Context.restoreContext(new HashMap<>());
 		try {
 			return toServerDataListener.incomingData(channel, buffer);
 		} finally {
-			if(isServerSide == null) {
-				//We must simulate being separate from the webserver and the webserver sets and
-				//clears the context so we need to capture context and restore it here for tests
-				//since everything is single threaded, the server loops around in which case, we
-				//do not want to touch the server's context
-				Context.restoreContext(context);
-			}
+			Context.restoreContext(context);
 		}
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		toServerDataListener.farEndClosed(channel);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 

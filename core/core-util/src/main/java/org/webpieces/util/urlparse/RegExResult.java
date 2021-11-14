@@ -1,4 +1,4 @@
-package org.webpieces.router.impl.routebldr;
+package org.webpieces.util.urlparse;
 
 import java.util.List;
 

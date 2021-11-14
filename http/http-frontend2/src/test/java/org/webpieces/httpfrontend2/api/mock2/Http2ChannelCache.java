@@ -5,7 +5,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,17 +48,17 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 	}
 	
 	@Override
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer b) {		
+	public XFuture<Void> write(ByteBuffer b) {
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		parser.unmarshal(unmarshalState, data);
 		List<Http2Msg> parsedFrames = unmarshalState.getParsedFrames();
-		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
+		return (XFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
 	}
 
 	public Http2Msg getFrameAndClear() {
@@ -77,14 +77,14 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 		return retVal.collect(Collectors.toList());
 	}
 	
-	public void setIncomingFrameDefaultReturnValue(CompletableFuture<Void> future) {
+	public void setIncomingFrameDefaultReturnValue(XFuture<Void> future) {
 		super.setDefaultReturnValue(Method.INCOMING_FRAME, future);
 	}
 	
 	
 	
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		isClosed = true;
 		return null;
 	}
@@ -125,8 +125,8 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Void> bind(SocketAddress addr) {
-		return CompletableFuture.completedFuture(null);
+	public XFuture<Void> bind(SocketAddress addr) {
+		return XFuture.completedFuture(null);
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package org.webpieces.plugins.hibernate;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
@@ -61,7 +61,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 	private String saveBean(String path) {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.POST, path);
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		Assert.assertFalse(respFuture.isDone());
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
@@ -79,7 +79,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 	private void readBean(String redirectUrl, String email) {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		Assert.assertFalse(respFuture.isDone());
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
@@ -108,7 +108,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/async/dynamic/"+id);
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		Assert.assertFalse(respFuture.isDone());
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();

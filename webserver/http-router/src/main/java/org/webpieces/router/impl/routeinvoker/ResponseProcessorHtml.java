@@ -2,7 +2,7 @@ package org.webpieces.router.impl.routeinvoker;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
@@ -28,7 +28,7 @@ public class ResponseProcessorHtml implements Processor {
 	}
 
 	@Override
-	public CompletableFuture<Void> continueProcessing(MethodMeta meta, Action controllerResponse, ProxyStreamHandle handle) {
+	public XFuture<Void> continueProcessing(MethodMeta meta, Action controllerResponse, ProxyStreamHandle handle) {
 		if(controllerResponse instanceof RedirectImpl) {
 			RedirectImpl redirect = (RedirectImpl)controllerResponse;
 			return handle.sendFullRedirect(redirect.getId(), redirect.getArgs());
@@ -48,19 +48,19 @@ public class ResponseProcessorHtml implements Processor {
 		}
 	}
 	
-	public CompletableFuture<Void> createRawRedirect(MethodMeta meta, RawRedirect controllerResponse, ProxyStreamHandle handle) {
+	public XFuture<Void> createRawRedirect(MethodMeta meta, RawRedirect controllerResponse, ProxyStreamHandle handle) {
 		RequestContext ctx = meta.getCtx();
 		String url = controllerResponse.getUrl();
 		if(url.startsWith("http")) {
-			return ContextWrap.wrap(ctx, () -> handle.sendRedirect(new RedirectResponse(url)));
+			return handle.sendRedirect(new RedirectResponse(url));
 		}
 
 		RouterRequest request = ctx.getRequest();
 		RedirectResponse redirectResponse = new RedirectResponse(false, request.isHttps, request.domain, request.port, url);
-		return ContextWrap.wrap(ctx, () -> handle.sendRedirect(redirectResponse));
+		return handle.sendRedirect(redirectResponse);
 	}
 	
-	public CompletableFuture<Void> createRenderResponse(MethodMeta meta, RenderImpl controllerResponse, ProxyStreamHandle handle) {
+	public XFuture<Void> createRenderResponse(MethodMeta meta, RenderImpl controllerResponse, ProxyStreamHandle handle) {
 		RequestContext ctx = meta.getCtx();
 		RouterRequest request = ctx.getRequest();
 
@@ -96,7 +96,7 @@ public class ResponseProcessorHtml implements Processor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, RouteType.HTML);
 		
-		return ContextWrap.wrap(ctx, () -> handle.sendRenderHtml(resp));
+		return handle.sendRenderHtml(resp);
 	}
 
 	

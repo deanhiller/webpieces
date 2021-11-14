@@ -1,7 +1,7 @@
 package com.webpieces.http2engine.api.server;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.streaming.RequestStreamHandle;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
@@ -14,7 +14,7 @@ public interface ServerEngineListener {
 	 */
 	RequestStreamHandle openStream();
 	
-	CompletableFuture<Void> sendToSocket(ByteBuffer newData);
+	XFuture<Void> sendToSocket(ByteBuffer newData);
 
 	void closeSocket(ShutdownConnection reason);
 

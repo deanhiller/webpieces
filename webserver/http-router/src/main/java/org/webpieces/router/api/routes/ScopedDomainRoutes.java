@@ -6,7 +6,7 @@ import java.util.List;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.impl.model.RouteModuleInfo;
-import org.webpieces.router.impl.routebldr.CurrentPackage;
+import org.webpieces.router.impl.routebldr.CurrentRoutes;
 
 public class ScopedDomainRoutes implements Routes {
 
@@ -25,9 +25,9 @@ public class ScopedDomainRoutes implements Routes {
 		RouteBuilder scopedRouter = domainRouteBldr.getDomainScopedBuilder(domain).getBldrForAllOtherContentTypes();
 		
 		for(BasicRoutes module : modules) {
-			CurrentPackage.set(new RouteModuleInfo(module.getClass()));
+			CurrentRoutes.set(new RouteModuleInfo(module.getClass()));
 			module.configure(scopedRouter);
-			CurrentPackage.set(null);
+			CurrentRoutes.set(null);
 		}
 	}
 	

@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -72,7 +72,7 @@ public class TestSslBasicSvr {
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr, meters);
 		server = svrMgr.createTcpServer(new AsyncConfig(), listener, sslFactory);
 		
-		CompletableFuture<Void> future = server.start(new InetSocketAddress(8443));
+		XFuture<Void> future = server.start(new InetSocketAddress(8443));
 		Assert.assertFalse(future.isDone());
 		
 		mockJdk.setThread(Thread.currentThread());
@@ -142,7 +142,7 @@ public class TestSslBasicSvr {
 		b.put((byte) 4);
 		b.flip();
 		
-		CompletableFuture<Void> future = channel.write(b);
+		XFuture<Void> future = channel.write(b);
 		future.get(2, TimeUnit.SECONDS);
 
 		//results in two ssl packets going out instead of the one that was fed in..
@@ -205,7 +205,7 @@ public class TestSslBasicSvr {
 
 	private SslAction parseIncoming() throws InterruptedException, ExecutionException, TimeoutException {
 		DataWrapper payload = mockChannel.nextPayload();
-		CompletableFuture<List<SslAction>> resultFuture2 = clientSslParser.parseIncoming(payload);
+		XFuture<List<SslAction>> resultFuture2 = clientSslParser.parseIncoming(payload);
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
 		Assert.assertEquals(1, result2.size());
 		return result2.get(0);

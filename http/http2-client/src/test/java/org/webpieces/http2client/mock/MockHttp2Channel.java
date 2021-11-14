@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,7 +61,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	}
 	
 	@Override
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		if(connected)
 			throw new IllegalStateException("already connected");
 		else if(listener == null)
@@ -70,7 +70,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		connected = true;
 		this.marshalState = parser.prepareToMarshal(4096, 4096);
 		this.listener = listener;
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	public void writeHexBack(String hex) {
@@ -80,7 +80,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	}
 
 	public void write(Http2Msg msg) {
-		CompletableFuture<Void> fut = writeAsync(msg);
+		XFuture<Void> fut = writeAsync(msg);
 		try {
 			fut.get(2, TimeUnit.SECONDS);
 		} catch(Exception e) {
@@ -88,7 +88,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		}
 	}
 	
-	public CompletableFuture<Void> writeAsync(Http2Msg msg) {
+	public XFuture<Void> writeAsync(Http2Msg msg) {
 		if(listener == null)
 			throw new IllegalStateException("Not connected so we cannot write back");
 		DataWrapper data = parser.marshal(marshalState, msg);
@@ -110,7 +110,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer b) {
+	public XFuture<Void> write(ByteBuffer b) {
 		if(!prefaceReceived) {
 			//copy and store preface
 			ByteBuffer prefaceBuffer = ByteBuffer.allocate(b.remaining());
@@ -119,18 +119,18 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 			Preface preface = new Preface(prefaceBuffer);
 			List<Http2Msg> msgs = new ArrayList<>();
 			msgs.add(preface);
-			return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, msgs);
+			return (XFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, msgs);
 		}
 		
 		return processData(b);
 	}
 
 	@SuppressWarnings("unchecked")
-	private CompletableFuture<Void> processData(ByteBuffer b) {
+	private XFuture<Void> processData(ByteBuffer b) {
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		parser.unmarshal(unmarshalState, data);
 		List<Http2Msg> parsedFrames = unmarshalState.getParsedFrames();
-		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
+		return (XFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
 	}
 
 	public Http2Msg getFrameAndClear() {
@@ -152,16 +152,16 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		return retVal.collect(Collectors.toList());
 	}
 	
-	public void setIncomingFrameDefaultReturnValue(CompletableFuture<Void> future) {
+	public void setIncomingFrameDefaultReturnValue(XFuture<Void> future) {
 		super.setDefaultReturnValue(Method.INCOMING_FRAME, future);
 	}
 	
-	public void addWriteResponse(CompletableFuture<Object> future) {
+	public void addWriteResponse(XFuture<Object> future) {
 		super.addValueToReturn(Method.INCOMING_FRAME, future);
 	}
 	
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		isClosed = true;
 		return null;
 	}
@@ -196,8 +196,8 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Void> bind(SocketAddress addr) {
-		return CompletableFuture.completedFuture(null);
+	public XFuture<Void> bind(SocketAddress addr) {
+		return XFuture.completedFuture(null);
 	}
 
 	@Override

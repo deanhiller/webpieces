@@ -1,6 +1,6 @@
 package org.webpieces.nio.impl.ssl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.SSLEngineFactory;
@@ -30,10 +30,10 @@ public class SslConnectionListener implements ConnectionListener {
 	//thanks to SessionExecutor we will not start getting data to the listener until connected returns
 	//control back to the thread
 	@Override
-	public CompletableFuture<DataListener> connected(Channel c, boolean isReadyForWrites) {
+	public XFuture<DataListener> connected(Channel c, boolean isReadyForWrites) {
 		TCPChannel realChannel = (TCPChannel) c;
 		SslTCPChannel sslChannel = new SslTCPChannel(pool, realChannel, connectionListener, sslFactory, metrics, isStartInPlainText);
-		CompletableFuture<DataListener> plainTextListener = null;
+		XFuture<DataListener> plainTextListener = null;
 		if(isStartInPlainText)
 			plainTextListener = connectionListener.connected(sslChannel, true); //connected right away
 		else

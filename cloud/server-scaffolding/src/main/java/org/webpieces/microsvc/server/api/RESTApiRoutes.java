@@ -1,35 +1,46 @@
 package org.webpieces.microsvc.server.api;
 
-import com.webpieces.http2.api.streaming.ResponseStreamHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.microsvc.api.Path;
+import org.webpieces.microsvc.api.MethodValidator;
+import org.webpieces.router.api.routebldr.DefaultCorsProcessor;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.Routes;
+import org.webpieces.router.impl.routebldr.CurrentRoutes;
 
+import javax.ws.rs.Path;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.util.StringJoiner;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 public class RESTApiRoutes implements Routes {
+
+    private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);
 
     private static final Logger log = LoggerFactory.getLogger(RESTApiRoutes.class);
 
     private final Class<?> api;
     private final Class<?> controller;
+    private CorsConfig corsConfig;
 
     public RESTApiRoutes(Class<?> api, Class<?> controller) {
+        this(api, controller, null);
+    }
 
+    /**
+     * @param corsConfig - enable CORS by passing in CorsConfig
+     */
+    public RESTApiRoutes(Class<?> api, Class<?> controller, CorsConfig corsConfig) {
+        this.corsConfig = corsConfig;
         if (!api.isInterface()) {
             throw new IllegalArgumentException("api must be an interface and was not");
         }
 
         this.api = api;
         this.controller = controller;
-
     }
 
     @Override
@@ -37,78 +48,96 @@ public class RESTApiRoutes implements Routes {
         RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
         Method[] methods = api.getMethods();
 
+        if (corsConfig != null) {
+            Set<String> domains = Set.of(corsConfig.getDomains());
+            Set<String> allowedRequestHeaders = Set.of(corsConfig.getAllowedRequestHeaders());
+            Set<String> exposedResponseHeaders = Set.of(corsConfig.getExposedResponseHeaders());
+            CurrentRoutes.setProcessCorsHook(
+                    new DefaultCorsProcessor(
+                            domains,
+                            allowedRequestHeaders,
+                            exposedResponseHeaders,
+                            corsConfig.isAllowCredentials(),
+                            corsConfig.getExpiredTimeSeconds()
+                    )
+            );
+        }
+
         for (Method m : methods) {
-
             configurePath(bldr, m);
-            validateApiConvention(m);
-
+            MethodValidator.validateApiConvention(api, m);
         }
     }
 
     private void configurePath(RouteBuilder bldr, Method method) {
-        String name = method.getName();
-        Path annotation = method.getAnnotation(Path.class);
 
-        if (annotation == null) {
+        String name = method.getName();
+        String path = getPath(method);
+        HttpMethod httpMethod = MethodValidator.getHttpMethod(method);
+
+//NEED to put a JsonStreamHandle on top of these instead of ResponseStreamHandle(though could allow both?)
+//        if (method.getParameterTypes().length > 0 && ResponseStreamHandle.class.equals(method.getParameterTypes()[0])) {
+//            bldr.addStreamRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
+//        } else {
+            //We do not want to deploy to production exposing over HTTP
+            bldr.addContentRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
+//        }
+    }
+
+
+
+
+
+    protected String getPath(Method method) {
+
+        Path path = method.getAnnotation(Path.class);
+
+        if(path == null) {
             throw new IllegalArgumentException("The @Path annotation is missing from method=" + method);
         }
 
-        String path = annotation.value();
-        HttpMethod httpMethod = HttpMethod.valueOf(annotation.method().getMethod());
+        String pathValue = getFullPath(method);
 
-        if (method.getParameterCount() != 1 && httpMethod.equals(HttpMethod.POST)) {
-            throw new IllegalArgumentException("The method on this API is invalid as it takes " + method.getParameterCount() + " and only 1 param is allowed.  method=" + method);
+        if((pathValue == null) || pathValue.isBlank()) {
+            throw new IllegalStateException("Invalid value for @Path annotation on " + method.getName() + ": " + pathValue);
         }
 
-        if (method.getParameterTypes().length > 0 && ResponseStreamHandle.class.equals(method.getParameterTypes()[0])) {
-            bldr.addStreamRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
-        } else {
-            //We do not want to deploy to production exposing over HTTP
-            bldr.addContentRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
-        }
+        return pathValue;
+
     }
 
-    // Similar to validateApiConvention in PubSubServiceRoutes
-    private void validateApiConvention(Method method) {
+    private String getFullPath(Method method) {
 
-        String methodName = method.getName();
+        Path cPath = method.getDeclaringClass().getAnnotation(Path.class);
+        Path mPath = method.getAnnotation(Path.class);
 
-        // If it's not POST, don't worry about it for now
-        if (!HttpMethod.valueOf(method.getAnnotation(Path.class).method().getMethod()).equals(HttpMethod.POST)) {
-            return;
+        String cPathValue = null;
+        String mPathValue = null;
+
+        if(cPath != null) {
+            cPathValue = cPath.value();
         }
 
-        String pascalMethodName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1);
-
-        StringJoiner errorResponse = new StringJoiner("\n\n");
-
-        String returnType = "";
-        if (method.getGenericReturnType() instanceof ParameterizedType) {
-            returnType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0].getTypeName();
-            returnType = returnType.substring(returnType.lastIndexOf(".") + 1);
-        }
-        if (!returnType.endsWith("Response") || !returnType.toLowerCase().contains(methodName.toLowerCase())) {
-            errorResponse.add(api.getName() + "::" + methodName + " return type does not follow Orderly REST API convention.\n" +
-                    "\tThe return type must have the format \"CompletableFuture<" + pascalMethodName + "Response>\".\n" +
-                    "\tUse the new convention, or add @Legacy or @Deprecated on this method and add a ticket to change your API");
+        if(mPath != null) {
+            mPathValue = mPath.value();
         }
 
-        Class<?>[] paramTypes = method.getParameterTypes();
-        if (paramTypes.length == 1) {
-            String parameterType = paramTypes[0].getSimpleName();
-            if (!parameterType.endsWith("Request") || !parameterType.toLowerCase().contains(methodName.toLowerCase())) {
-                errorResponse.add(api.getName() + "::" + methodName + " parameter type does not follow future-proof compatibility REST API convention.\n" +
-                        "\tThe parameter type must have the format \"" + pascalMethodName + "Request\".\n" +
-                        "\tUse the new convention, or add @Legacy or @Deprecated on this method and add a ticket to change your API");
-            }
-        } else {
-            errorResponse.add(api.getName() + "::" + methodName + " must have exactly 1 parameter for POST requests");
+        StringBuilder sb = new StringBuilder();
+
+        if(cPathValue != null) {
+            sb.append(cPathValue);
         }
 
-        if (errorResponse.length() != 0) {
-            throw new IllegalArgumentException(errorResponse.toString());
+        if(mPathValue != null) {
+            sb.append(mPathValue);
         }
+
+        String path = REGEX_SLASH_MERGE.matcher(sb.toString().trim()).replaceAll("/");
+
+        return path;
 
     }
+
+
 
 }

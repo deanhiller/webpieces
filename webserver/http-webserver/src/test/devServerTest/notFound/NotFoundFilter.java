@@ -1,6 +1,6 @@
 package org.webpieces.webserver.dev.app;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Singleton;
 
@@ -14,9 +14,9 @@ import org.webpieces.util.filters.Service;
 public class NotFoundFilter extends RouteFilter<Void> {
 
 	@Override
-	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+	public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 		if(meta.getCtx().getRequest().relativePath.startsWith("/enableFilter")) {
-			return CompletableFuture.completedFuture(Actions.redirect(DevRouteId.FILTER_ROUTE));
+			return XFuture.completedFuture(Actions.redirect(DevRouteId.FILTER_ROUTE));
 		}
 		return nextFilter.invoke(meta);
 	}

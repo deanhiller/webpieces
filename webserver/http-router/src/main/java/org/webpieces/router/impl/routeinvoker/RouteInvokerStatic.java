@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routeinvoker;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 

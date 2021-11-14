@@ -1,6 +1,6 @@
 package org.webpieces.util.locking;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  *   
  *  where the thread blocks, you can do this
  *  
- *  CompletableFuture<Void> future = asyncLock.runRequest( () -> {
+ *  XFuture<Void> future = asyncLock.runRequest( () -> {
  *  			//do something
  *				return null;
  *			});
@@ -48,18 +48,18 @@ public class AsyncLock {
 		this.queue = new PermitQueue(logId, 1, timeMsWarning, queuedBackupWarnThreshold);
 	}
 	
-	public <RESP> CompletableFuture<RESP> synchronizeD(Supplier<RESP> processor) {
+	public <RESP> XFuture<RESP> synchronizeD(Supplier<RESP> processor) {
 		String key = logId+counter.getAndIncrement();
 		
-		Supplier<CompletableFuture<RESP>> proxy = new Supplier<CompletableFuture<RESP>>() {
-			public CompletableFuture<RESP> get() {
+		Supplier<XFuture<RESP>> proxy = new Supplier<XFuture<RESP>>() {
+			public XFuture<RESP> get() {
 				if(log.isTraceEnabled())
 					log.trace("key:"+key+" start virtual single thread. ");
 				try {
 					RESP resp = processor.get();
-					return CompletableFuture.completedFuture(resp);
+					return XFuture.completedFuture(resp);
 				} catch (Throwable e) {
-					CompletableFuture<RESP> future = new CompletableFuture<>();
+					XFuture<RESP> future = new XFuture<>();
 					future.completeExceptionally(e);
 					return future;
 				}
@@ -75,13 +75,13 @@ public class AsyncLock {
 				.thenCompose(Function.identity());
 	}
 
-	private <RESP> CompletableFuture<RESP> release(RESP v, Throwable e, String key) {
+	private <RESP> XFuture<RESP> release(RESP v, Throwable e, String key) {
 		if(log.isTraceEnabled())
 			log.trace("key:"+key+" end virtual single thread");
 		//immediately release when future is complete
 		queue.releasePermit();
 
-    	CompletableFuture<RESP> future = new CompletableFuture<RESP>();
+    	XFuture<RESP> future = new XFuture<RESP>();
         if (e != null) {
         	future.completeExceptionally(e);
         } else

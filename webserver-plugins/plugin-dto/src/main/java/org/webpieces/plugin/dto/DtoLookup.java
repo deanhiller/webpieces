@@ -2,7 +2,7 @@ package org.webpieces.plugin.dto;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -39,7 +39,7 @@ public class DtoLookup implements EntityLookup {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> CompletableFuture<T> find(Meta paramMeta, ParamTreeNode tree, Function<Class<T>, T> beanCreate) {
+	public <T> XFuture<T> find(Meta paramMeta, ParamTreeNode tree, Function<Class<T>, T> beanCreate) {
 		if(!(paramMeta instanceof ParamMeta))
 			throw new UnsupportedOperationException("this plugin does not support type="+paramMeta.getClass());
 		
@@ -76,7 +76,7 @@ public class DtoLookup implements EntityLookup {
 		
 		if(value == null) {
 			T theBean = beanCreate.apply(paramTypeToCreate);
-			return CompletableFuture.completedFuture(theBean);
+			return XFuture.completedFuture(theBean);
 		}
 		
 		@SuppressWarnings("rawtypes")
@@ -92,7 +92,7 @@ public class DtoLookup implements EntityLookup {
 		try {
 			lookupMethod = lookupClass.getMethod(function, idClazz);
 		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException("Your function in @Dto='CompletableFuture<"+paramTypeToCreate+"> "+function+"("+idClazz.getName()+")' on class="
+			throw new IllegalArgumentException("Your function in @Dto='XFuture<"+paramTypeToCreate+"> "+function+"("+idClazz.getName()+")' on class="
 						+lookupClass.getName()+" cannot be found.  We also did not find method='"+paramTypeToCreate+" "+function+"("+idClazz.getName()+")'");
 		}
 		
@@ -103,11 +103,11 @@ public class DtoLookup implements EntityLookup {
 			throw new RuntimeException("Exception invoking lookup method", e);
 		}
 		
-		if(result instanceof CompletableFuture) {
-			return (CompletableFuture<T>)result;
+		if(result instanceof XFuture) {
+			return (XFuture<T>)result;
 		}
 		
-		return (CompletableFuture<T>) CompletableFuture.completedFuture(result);
+		return (XFuture<T>) XFuture.completedFuture(result);
 	}
 
 

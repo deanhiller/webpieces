@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.shared;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.util.locking.PermitQueue;
@@ -49,16 +49,16 @@ public abstract class Level3OutgoingSynchro {
 		this.localSettings = localSettings;
 	}
 
-	public CompletableFuture<Void> sendSettingsToSocket() {
+	public XFuture<Void> sendSettingsToSocket() {
 		SettingsFrame settings = HeaderSettings.createSettingsFrame(localSettings);
 		return notifyListener.sendFrameToSocket(settings);
 	}
 	
-	public CompletableFuture<Void> sendDataToSocket(Stream stream, StreamMsg data) {		
+	public XFuture<Void> sendDataToSocket(Stream stream, StreamMsg data) {
 		return streamsLayer.sendDataToSocket(stream, data);
 	}
 
-	public CompletableFuture<Void> sendRstToSocket(Stream stream, RstStreamFrame data) {		
+	public XFuture<Void> sendRstToSocket(Stream stream, RstStreamFrame data) {
 		return streamsLayer.sendRstToSocket(stream, data);
 	}
 	

@@ -1,7 +1,7 @@
 package org.webpieces.http2client;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -28,7 +28,7 @@ public class TestCBasicRequestResponse extends AbstractTest {
 		FullRequest request1 = new FullRequest();
 		request1.setHeaders(Requests.createRequest());
 		
-		CompletableFuture<FullResponse> future = httpSocket.send(request1);
+		XFuture<FullResponse> future = httpSocket.send(request1);
 		
 		Assert.assertFalse(future.isDone());
 		
@@ -47,7 +47,7 @@ public class TestCBasicRequestResponse extends AbstractTest {
 	public void testWithData() throws InterruptedException, ExecutionException, TimeoutException {
 		FullRequest request1 = Requests.createHttp2Request();
 
-		CompletableFuture<FullResponse> future = httpSocket.send(request1);
+		XFuture<FullResponse> future = httpSocket.send(request1);
 		
 		Assert.assertFalse(future.isDone());
 		
@@ -72,7 +72,7 @@ public class TestCBasicRequestResponse extends AbstractTest {
 		Http2Trailers trailing = Requests.createTrailers();
 		request1.setTrailingHeaders(trailing);
 
-		CompletableFuture<FullResponse> future = httpSocket.send(request1);
+		XFuture<FullResponse> future = httpSocket.send(request1);
 		
 		Assert.assertFalse(future.isDone());
 		
@@ -99,7 +99,7 @@ public class TestCBasicRequestResponse extends AbstractTest {
 	@Test
 	public void testPushPromise() {
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
+		listener1.setIncomingRespDefault(XFuture.<StreamWriter>completedFuture(null));
 		Http2Request request = sendRequestToServer(listener1);
 		
 		sendPushPromise(listener1, request.getStreamId(), true);

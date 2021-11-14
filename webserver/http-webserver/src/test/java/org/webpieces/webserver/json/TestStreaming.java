@@ -3,7 +3,7 @@ package org.webpieces.webserver.json;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -123,7 +123,7 @@ public class TestStreaming extends AbstractHttp2Test {
 		RequestStreamHandle stream = http2Socket.openStream();
 		
 		StreamRef ref = stream.process(request, mockResponseListener );
-		CompletableFuture<StreamWriter> writer = ref.getWriter();		
+		XFuture<StreamWriter> writer = ref.getWriter();
 		
 		
 	}

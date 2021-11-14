@@ -20,7 +20,7 @@ import javax.inject.Singleton;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -40,7 +40,7 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
     }
 
     @Override
-    public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+    public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 
         printPreRequestLog(meta);
 
@@ -83,14 +83,21 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
     protected Action translateFailure(MethodMeta meta, Action action, Throwable t) {
         if (t != null) {
-            if (t instanceof HttpException) {
-                return translate(meta, (HttpException) t);
-            }
 
             byte[] obj = meta.getCtx().getRequest().body.createByteArray();
             String json = new String(obj, 0, Math.min(obj.length, 100));
+
+            if(t instanceof HttpException) {
+                int httpCode = ((HttpException) t).getHttpCode();
+                if (httpCode >= 500 && httpCode < 600) {
+                    log.error("Request failed for json=" + json + "\n500 Internal Server Error method=" + meta.getLoadedController().getControllerMethod(), t);
+                }
+                return translate(meta, (HttpException)t);
+            }
+
             log.error("Request failed for json=" + json + "\nInternal Server Error method=" + meta.getLoadedController().getControllerMethod(), t);
             return translateError(t);
+
         } else {
             return action;
         }
@@ -112,12 +119,12 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
         return new RenderContent(content, status.getCode(), status.getReason(), MIME_TYPE);
     }
 
-    protected CompletableFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
+    protected XFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
         Matcher matcher = pattern.matcher(meta.getCtx().getRequest().relativePath);
         if (!matcher.matches())
             return nextFilter.invoke(meta);
 
-        return CompletableFuture.completedFuture(
+        return XFuture.completedFuture(
                 createNotFound()
         );
     }

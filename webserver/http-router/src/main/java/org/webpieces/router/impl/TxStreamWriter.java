@@ -1,6 +1,6 @@
 package org.webpieces.router.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.MDC;
 
@@ -18,7 +18,7 @@ public class TxStreamWriter implements StreamWriter {
 	}
 
 	@Override
-	public CompletableFuture<Void> processPiece(StreamMsg data) {
+	public XFuture<Void> processPiece(StreamMsg data) {
 		MDC.put("txId", txId);
 		try {
 			return w.processPiece(data);

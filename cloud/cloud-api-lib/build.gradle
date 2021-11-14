@@ -19,11 +19,13 @@ repositories {
 
 dependencies {
 
+    api deps['jakarta-rest-api']
+
     //api deps['guice']
 
     //implementation deps['javax-inject-api']
     //implementation deps['slf4j-api']
 
-    //api deps['core-util']
+    api deps['core-util']
 
 }

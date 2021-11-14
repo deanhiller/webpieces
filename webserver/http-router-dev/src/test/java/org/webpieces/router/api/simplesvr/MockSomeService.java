@@ -2,18 +2,18 @@ package org.webpieces.router.api.simplesvr;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class MockSomeService extends SomeService {
 
-	private List<CompletableFuture<Integer>> toReturn = new ArrayList<>();
+	private List<XFuture<Integer>> toReturn = new ArrayList<>();
 	
 	@Override
-	public CompletableFuture<Integer> remoteCall() {
+	public XFuture<Integer> remoteCall() {
 		return toReturn.remove(0);
 	}
 	
-	public void addToReturn(CompletableFuture<Integer> val) {
+	public void addToReturn(XFuture<Integer> val) {
 		toReturn.add(val);
 	}
 

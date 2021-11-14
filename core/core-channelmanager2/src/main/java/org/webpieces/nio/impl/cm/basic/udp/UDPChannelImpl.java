@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.util.Calendar;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +58,9 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 		return channel.isOpen();
 	}
 	
-	protected synchronized CompletableFuture<Channel> connectImpl(SocketAddress addr) {
+	protected synchronized XFuture<Channel> connectImpl(SocketAddress addr) {
 		isServerrSide = false;
-		CompletableFuture<Channel> promise = new CompletableFuture<>();
+		XFuture<Channel> promise = new XFuture<>();
 		
 		try {
 			if(apiLog.isTraceEnabled())

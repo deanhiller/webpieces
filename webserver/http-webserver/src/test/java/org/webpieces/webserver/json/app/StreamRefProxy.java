@@ -1,6 +1,6 @@
 package org.webpieces.webserver.json.app;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,21 +12,21 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 public class StreamRefProxy implements StreamRef {
     private static final Logger log = LoggerFactory.getLogger(StreamRefProxy.class);
 
-    private final CompletableFuture<StreamWriter> writer;
-    private final CompletableFuture<StreamRef> futureStream;
+    private final XFuture<StreamWriter> writer;
+    private final XFuture<StreamRef> futureStream;
 
-    public StreamRefProxy(CompletableFuture<StreamWriter> writer, CompletableFuture<StreamRef> futureStream) {
+    public StreamRefProxy(XFuture<StreamWriter> writer, XFuture<StreamRef> futureStream) {
         this.writer = writer;
         this.futureStream = futureStream;
     }
 
     @Override
-    public CompletableFuture<StreamWriter> getWriter() {
+    public XFuture<StreamWriter> getWriter() {
         return writer;
     }
 
     @Override
-    public CompletableFuture<Void> cancel(CancelReason reason) {
+    public XFuture<Void> cancel(CancelReason reason) {
         //we can't block here or async sequential chain here since a futureStream may never come into
         //existence like if authentication fails.  ie. futureStream MAY NEVER resolve.
         futureStream
@@ -36,6 +36,6 @@ public class StreamRefProxy implements StreamRef {
                     return null;
                 });
 
-        return CompletableFuture.completedFuture(null);
+        return XFuture.completedFuture(null);
     }
 }

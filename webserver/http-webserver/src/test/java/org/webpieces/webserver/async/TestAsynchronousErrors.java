@@ -1,6 +1,6 @@
 package org.webpieces.webserver.async;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -56,11 +56,11 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	@Test
 	public void testNotFoundRoute() {
 		//NOTE: This is adding future to the notFound route 
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		Assert.assertFalse(respFuture.isDone());
 
@@ -74,13 +74,13 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testWebappThrowsNotFound() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
-		CompletableFuture<Integer> future2 = new CompletableFuture<Integer>();
+		XFuture<Integer> future2 = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future2);
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
 		Assert.assertFalse(respFuture.isDone());
 
@@ -97,11 +97,11 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testNotFoundHandlerThrowsNotFound() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
 		Assert.assertFalse(respFuture.isDone());
 		
@@ -114,11 +114,11 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testNotFoundThrowsException() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		Assert.assertFalse(respFuture.isDone());
 		
@@ -131,14 +131,14 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testNotFoundThrowsThenInternalSvrErrorHandlerThrows() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
-		CompletableFuture<Integer> future2 = new CompletableFuture<Integer>();
+		XFuture<Integer> future2 = new XFuture<Integer>();
 		mockInternalSvrErrorLib.queueFuture(future2);
 
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
 		Assert.assertFalse(respFuture.isDone());
 		
@@ -159,11 +159,11 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testWebAppHasBugRenders500Route() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
 		Assert.assertFalse(respFuture.isDone());
 		
@@ -176,13 +176,13 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testWebAppHasBugAndRender500HasBug() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
-		CompletableFuture<Integer> future2 = new CompletableFuture<Integer>();
+		XFuture<Integer> future2 = new XFuture<Integer>();
 		mockInternalSvrErrorLib.queueFuture(future2);
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		Assert.assertFalse(respFuture.isDone());
 		
@@ -199,12 +199,12 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 
 	@Test
 	public void testCompletePromiseAnotherThreadAndPageParamMissing() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockNotFoundLib.queueFuture(future );
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncFailRoute");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
 		//now have the server complete processing
 		future.complete(5);

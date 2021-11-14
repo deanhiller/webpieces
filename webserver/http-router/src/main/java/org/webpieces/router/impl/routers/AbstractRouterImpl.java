@@ -24,12 +24,6 @@ public abstract class AbstractRouterImpl implements AbstractRouter {
 		return matchInfo;
 	}
 	
-	public boolean matchesMethod(HttpMethod method) {
-		if(matchInfo.getHttpMethod() == method)
-			return true;
-		return false;
-	}
-	
 	@Override
 	public MatchResult2 matches(RouterRequest request, String subPath) {
 		Matcher matcher = matchesAndParseParams(request, subPath);

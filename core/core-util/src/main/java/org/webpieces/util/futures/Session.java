@@ -1,11 +1,11 @@
 package org.webpieces.util.futures;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public interface Session {
 
-	void setProcessFuturee(CompletableFuture<Void> future);
+	void setProcessFuturee(XFuture<Void> future);
 
-	CompletableFuture<Void> getProcessFuture();
+	XFuture<Void> getProcessFuture();
 
 }

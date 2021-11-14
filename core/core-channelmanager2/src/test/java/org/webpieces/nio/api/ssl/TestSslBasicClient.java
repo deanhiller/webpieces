@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -35,7 +35,7 @@ public class TestSslBasicClient {
 
 	private TCPChannel channel;
 
-	private CompletableFuture<Void> connectFuture;
+	private XFuture<Void> connectFuture;
 
 	@Before
 	public void setup() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
@@ -77,7 +77,7 @@ public class TestSslBasicClient {
 		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, parseIncoming().getSslAction());
 		
 		DataWrapper payload = mockChannel.nextPayload();
-		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(payload);
+		XFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(payload);
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, result2.get(0).getSslAction());
 		Assert.assertEquals(SslActionEnum.SEND_LINK_ESTABLISHED_TO_APP, result2.get(1).getSslAction());
@@ -125,7 +125,7 @@ public class TestSslBasicClient {
 		b.put((byte) 4);
 		b.flip();
 		
-		CompletableFuture<Void> future = channel.write(b);
+		XFuture<Void> future = channel.write(b);
 		future.get(2, TimeUnit.SECONDS);
 
 		//results in two ssl packets going out instead of the one that was fed in..
@@ -167,7 +167,7 @@ public class TestSslBasicClient {
 		//in this case, combine the output of all 3 of the client engine...
 		DataWrapper fullData = dataGen.chainDataWrappers(mockChannel.nextPayload(), mockChannel.nextPayload(), mockChannel.nextPayload());
 		
-		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(fullData);
+		XFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(fullData);
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, result2.get(0).getSslAction());
 		Assert.assertEquals(SslActionEnum.SEND_LINK_ESTABLISHED_TO_APP, result2.get(1).getSslAction());
@@ -192,7 +192,7 @@ public class TestSslBasicClient {
 		SslAction action3 = parseIncoming(packets.get(2));
 		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, action3.getSslAction());
 
-		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(packets.get(3));
+		XFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(packets.get(3));
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, result2.get(0).getSslAction());
 		Assert.assertEquals(SslActionEnum.SEND_LINK_ESTABLISHED_TO_APP, result2.get(1).getSslAction());
@@ -224,14 +224,14 @@ public class TestSslBasicClient {
 
 	private SslAction parseIncoming() throws InterruptedException, ExecutionException, TimeoutException {
 		DataWrapper payload = mockChannel.nextPayload();
-		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(payload);
+		XFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(payload);
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
 		Assert.assertEquals(1, result2.size());
 		return result2.get(0);
 	}
 
 	private SslAction parseIncoming(DataWrapper payload) throws InterruptedException, ExecutionException, TimeoutException {
-		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(payload);
+		XFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(payload);
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
 		Assert.assertEquals(1, result2.size());
 		return result2.get(0);

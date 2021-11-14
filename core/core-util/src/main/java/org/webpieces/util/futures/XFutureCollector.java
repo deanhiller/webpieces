@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -12,13 +11,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public class CompletableFutureCollector<X, T extends CompletableFuture<X>> implements Collector<T, List<T>, CompletableFuture<List<X>>>  {
+public class XFutureCollector<X, T extends XFuture<X>> implements Collector<T, List<T>, XFuture<List<X>>>  {
 
-    private CompletableFutureCollector(){
+    private XFutureCollector(){
     }
 
-    public static <X, T extends CompletableFuture<X>> Collector<T, List<T>, CompletableFuture<List<X>>> allOf(){
-        return new CompletableFutureCollector<>();
+    public static <X, T extends XFuture<X>> Collector<T, List<T>, XFuture<List<X>>> allOf(){
+        return new XFutureCollector<>();
     }
 
     @Override
@@ -37,11 +36,11 @@ public class CompletableFutureCollector<X, T extends CompletableFuture<X>> imple
     }
 
     @Override
-    public Function<List<T>, CompletableFuture<List<X>>> finisher() {
-        return ls->CompletableFuture.allOf(ls.toArray(new CompletableFuture[ls.size()]))
+    public Function<List<T>, XFuture<List<X>>> finisher() {
+        return ls->XFuture.allOf(ls.toArray(new XFuture[ls.size()]))
                 .thenApply(v -> ls
                         .stream()
-                        .map(CompletableFuture::join)
+                        .map(XFuture::join)
                         .collect(Collectors.toList()));
     }
 

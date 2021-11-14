@@ -1,7 +1,7 @@
 package org.webpieces.webserver.test.http2.directfast;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.ResponseStream;
@@ -23,7 +23,7 @@ public class ProxyResponseStream implements ResponseStream {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public XFuture<StreamWriter> process(Http2Response response) {
 		return responseListener.process(response);
 	}
 
@@ -33,7 +33,7 @@ public class ProxyResponseStream implements ResponseStream {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason reason) {
+	public XFuture<Void> cancel(CancelReason reason) {
 		return responseListener.cancel(reason);
 	}
 

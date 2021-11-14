@@ -1,7 +1,7 @@
 package org.webpieces.nio.api;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -42,7 +42,7 @@ public class TestAccepting {
 		MockAsyncListener listener = new MockAsyncListener();
 
 		AsyncServer server = svrMgr.createTcpServer(new AsyncConfig(), listener);
-		CompletableFuture<Void> future = server.start(new InetSocketAddress(4444));
+		XFuture<Void> future = server.start(new InetSocketAddress(4444));
 		Assert.assertFalse(future.isDone());
 
 		mockSvrChannel.addNewChannel(mockChannel);

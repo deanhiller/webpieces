@@ -2,7 +2,7 @@ package org.webpieces.frontend2.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.webpieces.frontend2.api.FrontendSocket;
@@ -31,7 +31,7 @@ public class Http2StreamImpl implements ResponseStream {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response resp) {
+	public XFuture<StreamWriter> process(Http2Response resp) {
 		sentResponseHeaders.set(true);
 		return responseHandler.process(resp);
 	}
@@ -43,7 +43,7 @@ public class Http2StreamImpl implements ResponseStream {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason reason) {
+	public XFuture<Void> cancel(CancelReason reason) {
 		RstStreamFrame frame = new RstStreamFrame(streamId, Http2ErrorCode.CANCEL);
 		return responseHandler.cancel(frame);
 	}

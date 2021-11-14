@@ -4,13 +4,13 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.httpclient11.api.SocketClosedException;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class RequestCloseListener<T> implements Http2SocketListener {
 
-    private CompletableFuture<T> aFutureException = new CompletableFuture<>();
+    private XFuture<T> aFutureException = new XFuture<>();
     private ScheduledExecutorService executorService;
 
     public RequestCloseListener(ScheduledExecutorService executorService) {
@@ -31,7 +31,7 @@ public class RequestCloseListener<T> implements Http2SocketListener {
 
     }
 
-    public void setFuture(CompletableFuture<T> responseFuture) {
+    public void setFuture(XFuture<T> responseFuture) {
 
         //when aFutureException resolves to an exception, THEN run the code below which
         //tells the responseFuturee to complete with an exception or else it may never

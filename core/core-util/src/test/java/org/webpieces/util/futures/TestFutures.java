@@ -1,6 +1,6 @@
 package org.webpieces.util.futures;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
@@ -14,7 +14,7 @@ public class TestFutures {
 
 	@Test
 	public void testRegisterTwoListenersToSameFuture() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 
 		
 		future.thenAccept(f -> fire(f));
@@ -44,27 +44,27 @@ public class TestFutures {
 	
 
 	private void recurse(int counter) {
-		CompletableFuture<Integer> future = writeData(counter);
+		XFuture<Integer> future = writeData(counter);
 		future.thenAccept(p -> recurse(p+1)).join();		
 	}
 	
-	private CompletableFuture<Integer> writeData(int counter) {
+	private XFuture<Integer> writeData(int counter) {
 		System.out.println("counter="+counter);
 		if(counter == 1455) {
 			System.out.println("mark");
 		}
 		
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		future.complete(counter);
 		return future;
 	}
 	
 	@Test
-	public void testCompletableFuture() throws InterruptedException {
+	public void testXFuture() throws InterruptedException {
 		System.out.println("thread="+Thread.currentThread());
-		CompletableFuture<Integer> myFuture = new CompletableFuture<>();
+		XFuture<Integer> myFuture = new XFuture<>();
 		myFuture.thenAccept(intResult -> log(intResult));
-		CompletableFuture<String> result = myFuture.thenApply(p -> translate(p));
+		XFuture<String> result = myFuture.thenApply(p -> translate(p));
 		
 		result.handle((r, e) -> handle(r, e));
 		
@@ -100,16 +100,16 @@ public class TestFutures {
 	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testAFinallyMethodWithCompletableFutures() throws InterruptedException, ExecutionException {
-		CompletableFuture<Integer> myFuture = new CompletableFuture<>();
-		CompletableFuture<Integer> newFuture = myFuture.thenApply(intResult -> throwException());
+	public void testAFinallyMethodWithXFutures() throws InterruptedException, ExecutionException {
+		XFuture<Integer> myFuture = new XFuture<>();
+		XFuture<Integer> newFuture = myFuture.thenApply(intResult -> throwException());
 		
 		myFuture.complete(5);
 
 		Assert.assertFalse(myFuture.isCompletedExceptionally());
 		Assert.assertTrue(newFuture.isCompletedExceptionally());
 		
-		CompletableFuture<Integer> future2 = newFuture.handle((r, e) -> {
+		XFuture<Integer> future2 = newFuture.handle((r, e) -> {
 			if(r != null)
 				return r;
 			else if(e != null)
@@ -121,7 +121,7 @@ public class TestFutures {
 		Assert.assertTrue(future2.isCompletedExceptionally());
 		
 		
-		CompletableFuture<Object> future = newFuture.handle((r, e) -> {
+		XFuture<Object> future = newFuture.handle((r, e) -> {
 			if(r != null)
 				return r;
 			else if(e != null)
@@ -142,7 +142,7 @@ public class TestFutures {
 	
 //	@Test
 //	public void testExecutor() throws InterruptedException {
-//		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+//		XFuture<Integer> future = new XFuture<Integer>();
 //
 //		future.complete(6);
 //		

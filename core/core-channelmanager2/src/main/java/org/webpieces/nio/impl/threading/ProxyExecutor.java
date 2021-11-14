@@ -39,9 +39,9 @@ public class ProxyExecutor implements Executor {
 //          ProxyExecutor$ProxyRunnable.run() line: 40	
 //			SessionExecutorImpl.execute(Object, Runnable) line: 93	
 //			ProxyExecutor.execute(Runnable) line: 22	
-//			CompletableFuture<T>.uniApplyNow(Object, Executor, Function<? super T,? extends V>) line: 677	
-//			CompletableFuture<T>.uniApplyStage(Executor, Function<? super T,? extends V>) line: 658	
-//			CompletableFuture<T>.thenApplyAsync(Function<? super T,? extends U>, Executor) line: 2104	
+//			XFuture<T>.uniApplyNow(Object, Executor, Function<? super T,? extends V>) line: 677
+//			XFuture<T>.uniApplyStage(Executor, Function<? super T,? extends V>) line: 658
+//			XFuture<T>.thenApplyAsync(Function<? super T,? extends U>, Executor) line: 2104
 //			ThreadTCPChannel(ThreadChannel).write(ByteBuffer) line: 39	
 //			SslTCPChannel$OurSslListener.sendEncryptedHandshakeData(ByteBuffer) line: 157	
 //			AsyncSSLEngine3Impl.sendHandshakeMessageImpl(SSLEngine) line: 407	

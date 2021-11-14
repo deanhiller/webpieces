@@ -1,9 +1,10 @@
 package org.webpieces.webserver.beans.app;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -12,7 +13,6 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
-import org.webpieces.router.api.controller.annotations.Nullable;
 import org.webpieces.webserver.basic.app.biz.Address;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
@@ -43,8 +43,8 @@ public class BeansController {
 		return Actions.renderThis("user", "Dean Hiller");
 	}
 
-	public CompletableFuture<Action> pageParamAsync() {
-		CompletableFuture<Action> future = new CompletableFuture<>();
+	public XFuture<Action> pageParamAsync() {
+		XFuture<Action> future = new XFuture<>();
 		RequestContext ctx = Current.getContext();
 
 		executor.execute(new Runnable() {

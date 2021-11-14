@@ -1,28 +1,39 @@
 package org.webpieces.microsvc.client.impl;
 
-import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import org.checkerframework.checker.units.qual.Current;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.microsvc.api.HttpMethod;
-import org.webpieces.microsvc.api.Path;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.microsvc.impl.EndpointInfo;
+import org.webpieces.microsvc.impl.TestCaseRecorder;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
+import javax.ws.rs.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+
+import static org.webpieces.microsvc.impl.TestCaseRecorder.RECORDER_KEY;
 
 public class HttpsJsonClientInvokeHandler implements InvocationHandler {
+
+    private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);
 
     private final Logger log = LoggerFactory.getLogger(HttpsJsonClientInvokeHandler.class);
     private final HttpsJsonClient clientHelper;
     private ClientAssertions clientAssertions;
     private InetSocketAddress addr;
+    private boolean hasUrlParams;
 
     @Inject
     public HttpsJsonClientInvokeHandler(HttpsJsonClient clientHelper, ClientAssertions clientAssertions) {
@@ -30,18 +41,22 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         this.clientAssertions = clientAssertions;
     }
 
-    public void setTargetAddress(InetSocketAddress addr) {
+    public void initialize(InetSocketAddress addr, boolean hasUrlParams) {
         this.addr = addr;
+        this.hasUrlParams = hasUrlParams;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-        clientAssertions.throwIfCannotGoRemote();
-
-        if(args.length != 1) {
-            throw new IllegalArgumentException("ALL clients should have EXACTLY 1 argument.  no more, no less.  Read GRPC as to why they do this too!!!");
+        TestCaseRecorder recorder = (TestCaseRecorder) Context.get(RECORDER_KEY);
+        EndpointInfo recordingInfo = null;
+        if(recorder != null) {
+            Map<String, Object> ctxSnapshot = Context.copyContext();
+            recordingInfo = new EndpointInfo(method, args, ctxSnapshot);
         }
+
+        clientAssertions.throwIfCannotGoRemote();
 
         Path annotation = method.getAnnotation(Path.class);
 
@@ -49,12 +64,12 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
             throw new IllegalArgumentException("The @Path annotation is missing from method=" + method+" clazz="+method.getDeclaringClass());
         }
 
-        String path = annotation.value();
-        HttpMethod httpMethod = annotation.method();
+        String path = getPath(method);
+        HttpMethod httpMethod = getHttpMethod(method);
         Class<?> clazz = method.getReturnType();
 
         if(!(CompletableFuture.class.isAssignableFrom(clazz))) {
-            throw new IllegalStateException("All api methods must return a CompletableFuture");
+            throw new IllegalStateException("All api methods must return a XFuture");
         }
 
         ParameterizedType t = (ParameterizedType)method.getGenericReturnType();
@@ -73,15 +88,152 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
             throw new IllegalStateException("Context.HEADERS is not a Map<String, String> and is setup incorrectly");
         }
 
-        log.info("Sending http request to: " + addr.getHostName() + path);
+        log.info("Sending http request to: " + addr.getHostName()+":"+addr.getPort() + path);
 
-        Endpoint endpoint = new Endpoint(addr, httpMethod.getMethod(), path);
+        Object body = args[0];
+        if(hasUrlParams) {
+            path = transformPath(path, method, args);
+            body = findBody(method, args);
+        }
 
-        return clientHelper.sendHttpRequest(method, args[0], endpoint, retType)
-            .thenApply(retVal -> {
-                Context.restoreContext(context);
-                return retVal;
-            });
+        Endpoint endpoint = new Endpoint(addr, httpMethod.getCode(), path);
+        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType)
+                .thenApply(retVal -> {
+                    //Only needed by APIs/methods that return CompletableFuture :( not XFuture
+                    Context.restoreContext(context);
+                    return retVal;
+                });
+
+        if(recorder == null) {
+            return xFuture;
+        }
+
+        EndpointInfo finalInfo = recordingInfo;
+        return xFuture
+                .handle( (resp, exc1) -> addTestRecordingInfo(finalInfo, resp, exc1))
+                .thenCompose(Function.identity());
+    }
+
+    private XFuture<Object> addTestRecordingInfo(EndpointInfo recordingInfo, Object resp, Throwable exc1) {
+        if(exc1 != null) {
+            recordingInfo.addFailure(exc1);
+            return XFuture.failedFuture(exc1);
+        }
+
+        recordingInfo.addSuccessResponse(resp);
+        return XFuture.completedFuture(resp);
+    }
+
+    private String transformPath(String path, Method method, Object[] args) {
+        String methodName = method.getName();
+        String requestName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1)+"Request";
+
+        Parameter[] parameters = method.getParameters();
+        for(int i = 0; i < args.length; i++) {
+            Parameter param = parameters[i];
+            if(param.getType().getSimpleName().equals(requestName))
+                continue; // skip the body
+
+            String name = param.getName();
+            String variable = "{"+name+"}";
+            if(!path.contains(variable))
+                throw new IllegalArgumentException("Can't find '"+variable+"' in the path to bind in the url");
+            path = path.replace("{"+name+"}", args[i]+"");
+        }
+
+        return path;
+    }
+
+    private Object findBody(Method method, Object[] args) {
+        String methodName = method.getName();
+        String requestName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1)+"Request";
+        for(Object arg : args) {
+            if(arg.getClass().getSimpleName().equals(requestName))
+                return arg;
+        }
+        return null;
+    }
+
+    protected String getPath(Method method) {
+
+        Path path = method.getAnnotation(Path.class);
+
+        if(path == null) {
+            throw new IllegalArgumentException("The @Path annotation is missing from method=" + method);
+        }
+
+        String pathValue = getFullPath(method);
+
+        if((pathValue == null) || pathValue.isBlank()) {
+            throw new IllegalStateException("Invalid value for @Path annotation on " + method.getName() + ": " + pathValue);
+        }
+
+        return pathValue;
+
+    }
+
+    private String getFullPath(Method method) {
+
+        Path cPath = method.getDeclaringClass().getAnnotation(Path.class);
+        Path mPath = method.getAnnotation(Path.class);
+
+        String cPathValue = null;
+        String mPathValue = null;
+
+        if(cPath != null) {
+            cPathValue = cPath.value();
+        }
+
+        if(mPath != null) {
+            mPathValue = mPath.value();
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if(cPathValue != null) {
+            sb.append(cPathValue);
+        }
+
+        if(mPathValue != null) {
+            sb.append(mPathValue);
+        }
+
+        String path = REGEX_SLASH_MERGE.matcher(sb.toString().trim()).replaceAll("/");
+
+        return path;
+
+    }
+
+    protected HttpMethod getHttpMethod(Method method) {
+
+        Path path = method.getAnnotation(Path.class);
+
+        if(path == null) {
+            throw new IllegalArgumentException("The @Path annotation is missing from method=" + method);
+        }
+
+        HttpMethod httpMethod;
+
+        if(method.getAnnotation(DELETE.class) != null) {
+            httpMethod = HttpMethod.DELETE;
+        }
+        else if(method.getAnnotation(GET.class) != null) {
+            httpMethod = HttpMethod.GET;
+        }
+        else if(method.getAnnotation(OPTIONS.class) != null) {
+            httpMethod = HttpMethod.OPTIONS;
+        }
+        else if(method.getAnnotation(POST.class) != null) {
+            httpMethod = HttpMethod.POST;
+        }
+        else if(method.getAnnotation(PUT.class) != null) {
+            httpMethod = HttpMethod.PUT;
+        }
+        else {
+            throw new IllegalStateException("Missing or unsupported HTTP method annotation on " + method.getName() + ": Must be @DELETE,@GET,@OPTIONS,@PATCH,@POST,@PUT");
+        }
+
+        return httpMethod;
 
     }
 

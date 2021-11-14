@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -138,7 +138,7 @@ public class PropertiesController {
 			Current.flash().setMessage("Modified Bean '"+name+".class' ONLY on this server in-memory.  (Changes not applied to database for restarts)");
 			Current.flash().keep();
 		} else {
-			CompletableFuture<Void> future = storage.save(KeyUtil.PLUGIN_PROPERTIES_KEY, propertiesToSaveToDatabase);
+			XFuture<Void> future = storage.save(KeyUtil.PLUGIN_PROPERTIES_KEY, propertiesToSaveToDatabase);
 			future.get(); //synchronously wait in case it fails so user is told it failed to save to database
 			
 			Current.flash().setMessage("Modified Bean '"+name+".class' and persisted to Database");

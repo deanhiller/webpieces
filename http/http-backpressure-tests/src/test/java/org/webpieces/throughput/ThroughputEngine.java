@@ -1,7 +1,7 @@
 package org.webpieces.throughput;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -30,7 +30,7 @@ public class ThroughputEngine {
 	}
 
 	protected void start(Mode clientConfig, Mode svrConfig, Protocol protocol) throws InterruptedException, ExecutionException, TimeoutException {
-		CompletableFuture<InetSocketAddress> future;
+		XFuture<InetSocketAddress> future;
 		if(svrConfig == Mode.ASYNCHRONOUS) {
 			//The asynchronous server supports BOTH protocols and automatically ends up doing
 			//the protocol of the client...

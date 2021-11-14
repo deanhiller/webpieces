@@ -1,7 +1,7 @@
 package org.webpieces.plugin.hibernate;
 
 import java.lang.annotation.Annotation;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -71,9 +71,9 @@ public class HibernateLookup implements EntityLookup {
 	}
 
 	@Override
-	public <T> CompletableFuture<T> find(Meta paramMeta, ParamTreeNode tree, Function<Class<T>, T> beanCreate) {
+	public <T> XFuture<T> find(Meta paramMeta, ParamTreeNode tree, Function<Class<T>, T> beanCreate) {
 		T result = (T) findImpl(paramMeta, tree, beanCreate);
-		return CompletableFuture.completedFuture(result);
+		return XFuture.completedFuture(result);
 	}
 	
 	@SuppressWarnings("unchecked")

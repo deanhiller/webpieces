@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.util.locking.PermitQueue;
@@ -68,17 +68,17 @@ public class Level1ServerEngine implements Http2ServerEngine {
 	}
 
 	@Override
-	public CompletableFuture<Void> intialize() {
+	public XFuture<Void> intialize() {
 		return outgoingSync.sendSettingsToSocket();
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendPing() {
+	public XFuture<Void> sendPing() {
 		return marshalLayer.sendPing();
 	}
 
 	@Override
-	public CompletableFuture<Void> parse(DataWrapper newData) {
+	public XFuture<Void> parse(DataWrapper newData) {
 		return parsing.parse(newData);
 	}
 
@@ -98,7 +98,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		incomingSync.sendGoAwayToSvrAndResetAllToApp(close);
 	}
 
-	public CompletableFuture<StreamWriter> sendResponseHeaders(Stream stream, Http2Response data) {
+	public XFuture<StreamWriter> sendResponseHeaders(Stream stream, Http2Response data) {
 		int streamId = data.getStreamId();
 		if(streamId <= 0)
 			throw new IllegalArgumentException(logId+"frames for requests must have a streamId > 0");
@@ -108,7 +108,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		return outgoingSync.sendResponseToSocket(stream, data);
 	}
 
-	public CompletableFuture<PushPromiseListener> sendPush(PushStreamHandleImpl handle, Http2Push push) {
+	public XFuture<PushPromiseListener> sendPush(PushStreamHandleImpl handle, Http2Push push) {
 		int streamId = push.getStreamId();
 		int promisedId = push.getPromisedStreamId();
 		if(streamId <= 0 || promisedId <= 0)
@@ -128,7 +128,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
+		public XFuture<StreamWriter> processPushResponse(Http2Response response) {
 			int streamId = response.getStreamId();
 			if(streamId != stream.getStreamId())
 				throw new IllegalArgumentException("response frame must have the same stream id as the push msg and did not.  pushStreamId="+stream.getStreamId()+" frame="+response);
@@ -146,7 +146,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		}
 
 		@Override
-		public CompletableFuture<Void> processPiece(StreamMsg data) {
+		public XFuture<Void> processPiece(StreamMsg data) {
 			int streamId = data.getStreamId();
 			if(streamId != stream.getStreamId())
 				throw new IllegalArgumentException("response frame must have the same stream id as the push msg and did not.  pushStreamId="+stream.getStreamId()+" frame="+data);
@@ -155,7 +155,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		}
 	}
 
-	public CompletableFuture<Void> sendCancel(Stream stream, RstStreamFrame frame) {
+	public XFuture<Void> sendCancel(Stream stream, RstStreamFrame frame) {
 		int streamId = frame.getStreamId();
 		if(streamId <= 0)
 			throw new IllegalArgumentException("frames for requests must have a streamId > 0");
@@ -165,7 +165,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		return outgoingSync.sendRstToSocket(stream, frame);
 	}
 	
-	public CompletableFuture<Void> cancelPush(CancelReason reset) {
+	public XFuture<Void> cancelPush(CancelReason reset) {
 		int streamId = reset.getStreamId();
 		if(streamId <= 0)
 			throw new IllegalArgumentException("frames for requests must have a streamId > 0");

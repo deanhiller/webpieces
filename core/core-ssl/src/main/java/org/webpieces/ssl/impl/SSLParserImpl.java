@@ -3,7 +3,7 @@ package org.webpieces.ssl.impl;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.net.ssl.SSLEngine;
 
@@ -40,31 +40,31 @@ public class SSLParserImpl implements SSLParser {
 		}
 
 		@Override
-		public CompletableFuture<Void> packetEncrypted(ByteBuffer engineToSocketData) {
+		public XFuture<Void> packetEncrypted(ByteBuffer engineToSocketData) {
 			if(encryptedData != null) {
 				DataWrapper newBuf = dataGen.wrapByteBuffer(engineToSocketData);
 				encryptedData = dataGen.chainDataWrappers(encryptedData, newBuf);
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			}
 			encryptedData = dataGen.wrapByteBuffer(engineToSocketData);
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
-		public CompletableFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
+		public XFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
 			if(encryptedData != null) {
 				DataWrapper newBuf = dataGen.wrapByteBuffer(engineToSocketData);
 				encryptedData = dataGen.chainDataWrappers(encryptedData, newBuf);
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			}
 			encryptedData = dataGen.wrapByteBuffer(engineToSocketData);
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
-		public CompletableFuture<Void> packetUnencrypted(ByteBuffer out) {
+		public XFuture<Void> packetUnencrypted(ByteBuffer out) {
 			decryptedData = dataGen.wrapByteBuffer(out);
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
@@ -75,7 +75,7 @@ public class SSLParserImpl implements SSLParser {
 	}
 
 	@Override
-	public CompletableFuture<List<SslAction>> parseIncoming(DataWrapper dataWrapper) {
+	public XFuture<List<SslAction>> parseIncoming(DataWrapper dataWrapper) {
 		byte[] bytes = dataWrapper.createByteArray();
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 		encryptedData = null;
@@ -83,7 +83,7 @@ public class SSLParserImpl implements SSLParser {
 
 		engine.feedEncryptedPacket(buffer);
 
-		return CompletableFuture.completedFuture(createResult());
+		return XFuture.completedFuture(createResult());
 	}
 
 	private List<SslAction> createResult() {

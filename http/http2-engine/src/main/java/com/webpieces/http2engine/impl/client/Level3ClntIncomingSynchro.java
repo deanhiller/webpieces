@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Push;
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
@@ -22,11 +22,11 @@ public class Level3ClntIncomingSynchro extends Level3IncomingSynchro {
 		streams = streamsLayer;
 	}
 
-	public CompletableFuture<Void> sendResponseToApp(Http2Response msg) {
+	public XFuture<Void> sendResponseToApp(Http2Response msg) {
 		return streams.sendResponseToApp(msg);
 	}
 
-	public CompletableFuture<Void> sendPushToApp(Http2Push msg) {
+	public XFuture<Void> sendPushToApp(Http2Push msg) {
 		return streams.sendPushToApp(msg);
 	}
 

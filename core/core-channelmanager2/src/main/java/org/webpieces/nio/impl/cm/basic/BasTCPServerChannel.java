@@ -8,7 +8,7 @@ import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +61,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	 * @see api.biz.xsoftware.nio.TCPServerChannel#accept()
 	 */
 	public boolean accept(int newSocketNum) throws IOException {
-		CompletableFuture<Void> future;
+		XFuture<Void> future;
 		try {
 			//special code...see information in close() method
 			if(isClosed())
@@ -77,11 +77,11 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			BasTCPChannel tcpChan = new BasTCPChannel(serverSocketId, newChan, remoteAddress, selMgr, router, pool, config);
 			if(log.isTraceEnabled())
 				log.trace(tcpChan+"Accepted new incoming connection");
-			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);
+			XFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);
 			future = connectFuture.thenCompose(l -> tcpChan.registerForReads(l)).thenApply(c -> null);
 			
 		} catch(Throwable e) {
-			future = new CompletableFuture<Void>();
+			future = new XFuture<Void>();
 			future.completeExceptionally(e);
 		}
 		
@@ -97,7 +97,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 		throw new UnsupportedOperationException("TCPServerChannel's can't read, they can only accept incoming connections");
 	}
 	
-	public CompletableFuture<Void> registerServerSocketChannel(ConnectionListener cb)  {
+	public XFuture<Void> registerServerSocketChannel(ConnectionListener cb)  {
 		if(!isBound())
 			throw new IllegalArgumentException("Only bound sockets can be registered or selector doesn't work");
 
@@ -110,7 +110,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 		}
 	}
 	
-	public CompletableFuture<Void> bind(SocketAddress srvrAddr) {
+	public XFuture<Void> bind(SocketAddress srvrAddr) {
 		try {
 			bindImpl(srvrAddr);
 			

@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.api.client;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 
@@ -8,7 +8,7 @@ import com.webpieces.http2.api.streaming.RequestStreamHandle;
 
 public interface Http2ClientEngine {
 
-	CompletableFuture<Void> sendInitializationToSocket();
+	XFuture<Void> sendInitializationToSocket();
 
 	/**
 	 * Future completes one the data is SENT! not when there is a response which allows to backpressure the socket and
@@ -16,9 +16,9 @@ public interface Http2ClientEngine {
 	 */
 	RequestStreamHandle openStream();
 
-	CompletableFuture<Void> sendPing();
+	XFuture<Void> sendPing();
 	
-	CompletableFuture<Void> parse(DataWrapper newData);
+	XFuture<Void> parse(DataWrapper newData);
 
 	/**
 	 * completely tear down engine

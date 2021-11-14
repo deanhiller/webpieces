@@ -1,7 +1,7 @@
 package org.webpieces.http2client.integ;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +53,9 @@ public class IntegColoradoEdu {
 	
 	private static class ChunkedResponseListener implements ResponseStreamHandle, PushPromiseListener, PushStreamHandle {
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Response response) {
+		public XFuture<StreamWriter> process(Http2Response response) {
 			log.info("incoming part of response="+response);
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
@@ -64,23 +64,23 @@ public class IntegColoradoEdu {
 		}
 		
 		@Override
-		public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
+		public XFuture<StreamWriter> processPushResponse(Http2Response response) {
 			log.info("incoming push promise. response="+response);
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason frame) {
-			return CompletableFuture.completedFuture(null);
+		public XFuture<Void> cancel(CancelReason frame) {
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
-		public CompletableFuture<Void> cancelPush(CancelReason payload) {
-			return CompletableFuture.completedFuture(null);
+		public XFuture<Void> cancelPush(CancelReason payload) {
+			return XFuture.completedFuture(null);
 		}
 		@Override
-		public CompletableFuture<PushPromiseListener> process(Http2Push headers) {
-			return CompletableFuture.completedFuture(this);
+		public XFuture<PushPromiseListener> process(Http2Push headers) {
+			return XFuture.completedFuture(this);
 		}
 	}
 	

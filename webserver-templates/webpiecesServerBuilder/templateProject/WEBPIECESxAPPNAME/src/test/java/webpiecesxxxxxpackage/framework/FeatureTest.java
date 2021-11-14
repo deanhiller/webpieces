@@ -3,12 +3,15 @@ package webpiecesxxxxxpackage.framework;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.util.context.Context;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.Asserts;
 import webpiecesxxxxxpackage.Server;
+import webpiecesxxxxxpackage.json.ExampleRestAPI;
 import webpiecesxxxxxpackage.json.SaveApi;
 import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteSystem;
@@ -31,6 +34,7 @@ public class FeatureTest extends CompanyTest {
     private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 
     protected SaveApi dataSaveApi;
+    protected ExampleRestAPI restAPI;
     protected MockRemoteSystem mockRemoteService = new MockRemoteSystem();
     protected SimpleMeterRegistry metrics;
 
@@ -39,6 +43,13 @@ public class FeatureTest extends CompanyTest {
         log.info("Setting up test");
         super.initialize();
         dataSaveApi = super.createRestClient(SaveApi.class);
+        restAPI = super.createRestClient(ExampleRestAPI.class);
+    }
+
+    @After
+    public void tearDown() {
+        //do not leak context between tests
+        Context.clear();
     }
 
     @Override

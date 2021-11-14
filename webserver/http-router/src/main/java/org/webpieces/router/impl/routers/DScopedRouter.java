@@ -2,7 +2,7 @@ package org.webpieces.router.impl.routers;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -53,15 +53,15 @@ public class DScopedRouter extends EScopedRouter {
 		
 		RouterStreamRef streamRef = invokeRouteCatchNotFound(ctx, handler, subPath);
 		
-		CompletableFuture<StreamWriter> writer = streamRef.getWriter()
+		XFuture<StreamWriter> writer = streamRef.getWriter()
 				.handle( (r, t) -> {
 					if(t == null)
-						return CompletableFuture.completedFuture(r);
+						return XFuture.completedFuture(r);
 		
 					return tryRenderWebAppErrorControllerResult(ctx, handler, t);
 				}).thenCompose(Function.identity());
 		
-		CompletableFuture<StreamWriter> proxyWriter = writer.thenApply(w -> createProxy(w, ctx, handler));
+		XFuture<StreamWriter> proxyWriter = writer.thenApply(w -> createProxy(w, ctx, handler));
 		
 		return new RouterStreamRef("dScopedRouter", proxyWriter, streamRef);
 	}
@@ -71,12 +71,12 @@ public class DScopedRouter extends EScopedRouter {
 				(t) -> tryRenderWebAppErrorControllerResult(ctx, handler, t));
 	}
 
-	private CompletableFuture<StreamWriter> tryRenderWebAppErrorControllerResult(RequestContext ctx, ProxyStreamHandle handler, Throwable t) {
+	private XFuture<StreamWriter> tryRenderWebAppErrorControllerResult(RequestContext ctx, ProxyStreamHandle handler, Throwable t) {
 		if(ExceptionWrap.isChannelClosed(t)) {
 			//if the socket was closed before we responded, do not log a failure
 			if(log.isTraceEnabled())
 				log.trace("async exception due to socket being closed", t);
-			return CompletableFuture.<StreamWriter>completedFuture(new NullStreamWriter());
+			return XFuture.<StreamWriter>completedFuture(new NullStreamWriter());
 		}
 
 		String failedRoute = "<Unknown Route>";
@@ -97,7 +97,7 @@ public class DScopedRouter extends EScopedRouter {
 			RstStreamFrame frame = new RstStreamFrame();
 			frame.setKnownErrorCode(Http2ErrorCode.CANCEL);
 			handler.cancel(frame);
-			return CompletableFuture.completedFuture(new NullStreamWriter());
+			return XFuture.completedFuture(new NullStreamWriter());
 		}
 		
 		return invokeWebAppErrorController(t, ctx, handler, failedRoute);
@@ -110,10 +110,10 @@ public class DScopedRouter extends EScopedRouter {
 	private RouterStreamRef invokeRouteCatchNotFound(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
 		RouterStreamRef streamRef = super.invokeRoute(ctx, handler, subPath);
 
-		CompletableFuture<StreamWriter> writer = streamRef.getWriter()
+		XFuture<StreamWriter> writer = streamRef.getWriter()
 				.handle( (r, t) -> {
 					if(t == null)
-						return CompletableFuture.completedFuture(r);
+						return XFuture.completedFuture(r);
 
 					if (t instanceof NotFoundException)
 						return notFound((NotFoundException) t, ctx, handler);
@@ -123,7 +123,7 @@ public class DScopedRouter extends EScopedRouter {
 		return new RouterStreamRef("DScopedNotFoundCheck", writer, streamRef);
 	}
 
-	private CompletableFuture<StreamWriter> invokeWebAppErrorController(
+	private XFuture<StreamWriter> invokeWebAppErrorController(
 			Throwable exc, RequestContext requestCtx, ProxyStreamHandle handler, Object failedRoute) {
 		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
 		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
@@ -137,7 +137,7 @@ public class DScopedRouter extends EScopedRouter {
 		return new InternalErrorRouteFailedException(t, failedRoute);
 	}
 	
-	private CompletableFuture<StreamWriter> notFound(NotFoundException exc, RequestContext requestCtx, ProxyStreamHandle handler) {
+	private XFuture<StreamWriter> notFound(NotFoundException exc, RequestContext requestCtx, ProxyStreamHandle handler) {
 		return futureHelper.catchBlockWrap(
 			() -> pageNotFoundRouter.invokeNotFoundRoute(requestCtx, handler, exc),
 			(e) -> new RuntimeException("NotFound Route had an exception", e)

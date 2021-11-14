@@ -2,14 +2,14 @@ package org.webpieces.util.locking;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 public class MockService {
 
-	private List<CompletableFuture<Long>> toReturn = new ArrayList<>();
+	private List<XFuture<Long>> toReturn = new ArrayList<>();
 	private List<Integer> params = new ArrayList<>();
 	
-	public CompletableFuture<Long> runFunction(int i) {
+	public XFuture<Long> runFunction(int i) {
 		if(toReturn.size() == 0)
 			throw new IllegalArgumentException("not enough return values provided");
 		
@@ -17,7 +17,7 @@ public class MockService {
 		return toReturn.remove(0);
 	}
 
-	public void addToReturn(CompletableFuture<Long> future1) {
+	public void addToReturn(XFuture<Long> future1) {
 		toReturn.add(future1);
 	}
 

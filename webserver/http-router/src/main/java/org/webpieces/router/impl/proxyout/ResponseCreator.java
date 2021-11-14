@@ -61,7 +61,8 @@ public class ResponseCreator {
 	public ResponseEncodingTuple createContentResponse(
 			Http2Request request, int statusCode,
 			String reason, MimeTypeResult mimeType) {
-		return createContentResponseImpl(request, statusCode, reason, false, mimeType);
+		//JSON and Content can do cookies
+		return createContentResponseImpl(request, statusCode, reason, true, mimeType);
 	}
 	
 	private ResponseEncodingTuple createContentResponseImpl(

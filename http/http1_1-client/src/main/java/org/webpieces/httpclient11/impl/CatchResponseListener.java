@@ -1,6 +1,6 @@
 package org.webpieces.httpclient11.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +24,14 @@ public class CatchResponseListener implements HttpResponseListener {
 	}
 
 	@Override
-	public CompletableFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
+	public XFuture<HttpDataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 		try {
 			MDC.put("svrSocket", svrSocket);
 			return listener.incomingResponse(resp, isComplete)
 					.thenApply(w -> new CatchDataWriter(w, svrSocket));
 		} catch(Throwable e) {
 			log.error("exception", e);
-			CompletableFuture<HttpDataWriter> future = new CompletableFuture<HttpDataWriter>();
+			XFuture<HttpDataWriter> future = new XFuture<HttpDataWriter>();
 			future.completeExceptionally(e);
 			return future;
 		} finally {
@@ -48,13 +48,13 @@ public class CatchResponseListener implements HttpResponseListener {
 		}
 
 		@Override
-		public CompletableFuture<Void> send(HttpData chunk) {
+		public XFuture<Void> send(HttpData chunk) {
 			try {
 				MDC.put("svrSocket", svrSocket2);
 				return writer.send(chunk);
 			} catch(Throwable e) {
 				log.error("exception", e);
-				CompletableFuture<Void> future = new CompletableFuture<Void>();
+				XFuture<Void> future = new XFuture<Void>();
 				future.completeExceptionally(e);
 				return future;
 			} finally {

@@ -3,10 +3,7 @@ package org.webpieces.router.impl.routebldr;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
-import java.io.File;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +20,6 @@ import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.ResettingLogic;
 import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.UrlPath;
-import org.webpieces.router.impl.dto.RouteType;
 import org.webpieces.router.impl.loader.BinderAndLoader;
 import org.webpieces.router.impl.loader.LoadedController;
 import org.webpieces.router.impl.loader.MethodMetaAndController;
@@ -34,16 +30,13 @@ import org.webpieces.router.impl.routers.AbstractRouter;
 import org.webpieces.router.impl.routers.EScopedRouter;
 import org.webpieces.router.impl.routers.FContentRouter;
 import org.webpieces.router.impl.routers.FHtmlRouter;
-import org.webpieces.router.impl.routers.FStaticRouter;
 import org.webpieces.router.impl.routers.FStreamingRouter;
 import org.webpieces.router.impl.routers.MatchInfo;
 import org.webpieces.router.impl.services.SvcProxyForContent;
 import org.webpieces.router.impl.services.SvcProxyForHtml;
-import org.webpieces.util.file.FileFactory;
-import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.futures.FutureHelper;
+import org.webpieces.util.urlparse.RegExResult;
+import org.webpieces.util.urlparse.RegExUtil;
 
 public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRouteBuilder {
 
@@ -78,7 +71,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 	@Override
 	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		UrlPath p = new UrlPath(routerInfo, path);
-		RouteModuleInfo moduleInfo = CurrentPackage.get();
+		RouteModuleInfo moduleInfo = CurrentRoutes.get();
 		RouteInfo routeInfo = new RouteInfo(moduleInfo, controllerMethod);
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
@@ -86,7 +79,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		LoadedController loadedController = container.getMetaAndController().getLoadedController();
-		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), loadedController, moduleInfo.getI18nBundleName(), matchInfo, container.getBinder());
+		FContentRouter router = new FContentRouter(holder.getRouteInvoker2(), loadedController, moduleInfo, matchInfo, container.getBinder());
 		SvcProxyForContent svc = new SvcProxyForContent(holder.getSvcProxyLogic(), futureUtil);
 		RouterAndInfo routerAndInfo = new RouterAndInfo(router, routeInfo, container.getMetaAndController(), svc);
 		
@@ -105,7 +98,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 	@Override
 	public void addStreamRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		UrlPath p = new UrlPath(routerInfo, path);
-		RouteModuleInfo moduleInfo = CurrentPackage.get();
+		RouteModuleInfo moduleInfo = CurrentRoutes.get();
 		RouteInfo routeInfo = new RouteInfo(moduleInfo, controllerMethod);
 
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
@@ -147,7 +140,7 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 		UrlPath p = new UrlPath(routerInfo, path);
 
 		boolean isPostOnly = method == HttpMethod.POST;
-		RouteModuleInfo moduleInfo = CurrentPackage.get();
+		RouteModuleInfo moduleInfo = CurrentRoutes.get();
 		RouteInfo routeInfo = new RouteInfo(moduleInfo, controllerMethod);
 
 		//MUST DO loadControllerIntoMetat HERE so stack trace has customer's line in it so he knows EXACTLY what 

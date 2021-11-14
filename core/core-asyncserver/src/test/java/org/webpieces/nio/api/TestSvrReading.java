@@ -1,7 +1,7 @@
 package org.webpieces.nio.api;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -47,7 +47,7 @@ public class TestSvrReading {
 		listener = new MockAsyncListener();
 
 		AsyncServer server = svrMgr.createTcpServer(new AsyncConfig(), listener);
-		CompletableFuture<Void> future = server.start(new InetSocketAddress(4444));
+		XFuture<Void> future = server.start(new InetSocketAddress(4444));
 		Assert.assertFalse(future.isDone());
 
 		mockJdk.setThread(Thread.currentThread());
@@ -74,10 +74,10 @@ public class TestSvrReading {
 
 	@Test
 	public void testBackpressureRead() throws InterruptedException, ExecutionException, TimeoutException {
-		CompletableFuture<Void> future1 = new CompletableFuture<Void>();
-		CompletableFuture<Void> future2 = new CompletableFuture<Void>();
-		CompletableFuture<Void> future3 = new CompletableFuture<Void>();
-		CompletableFuture<Void> future4 = new CompletableFuture<Void>();
+		XFuture<Void> future1 = new XFuture<Void>();
+		XFuture<Void> future2 = new XFuture<Void>();
+		XFuture<Void> future3 = new XFuture<Void>();
+		XFuture<Void> future4 = new XFuture<Void>();
 
 		listener.addIncomingRetValue(future1);
 		listener.addIncomingRetValue(future2);

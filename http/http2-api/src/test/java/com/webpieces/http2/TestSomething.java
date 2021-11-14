@@ -1,3 +1,5 @@
+package com.webpieces.http2;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,7 +10,7 @@ import org.junit.Test;
  * @author dean
  *
  */
-public class TestSplitHeaders {
+public class TestSomething {
 
 
 	@Before

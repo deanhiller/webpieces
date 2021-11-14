@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routeinvoker;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Messages;
@@ -44,18 +44,18 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
+	public XFuture<Void> invokeErrorController(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		ResponseProcessorAppError processor = new ResponseProcessorAppError();
 		return invokeSvc(invokeInfo, dynamicInfo, data, processor);
 	}
 	
 	@Override
-	public CompletableFuture<Void> invokeNotFound(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
+	public XFuture<Void> invokeNotFound(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data) {
 		ResponseProcessorNotFound processor = new ResponseProcessorNotFound();
 		return invokeSvc(invokeInfo, dynamicInfo, data, processor);	
 	}
 	
-	private CompletableFuture<Void> invokeSvc(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data, Processor processor) {
+	private XFuture<Void> invokeSvc(InvokeInfo invokeInfo, Endpoint dynamicInfo, RouteData data, Processor processor) {
 		LoadedController loadedController = invokeInfo.getLoadedController();
 		ProxyStreamHandle handle = invokeInfo.getHandler();
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
@@ -85,10 +85,10 @@ public abstract class AbstractRouteInvoker implements RouteInvoker {
 		RequestContext requestCtx = invokeInfo.getRequestCtx();
 		Messages messages = new Messages(invokeInfo.getI18nBundleName(), "webpieces");
 		requestCtx.setMessages(messages);
-		Current.setContext(requestCtx);
-		MethodMeta methodMeta = new MethodMeta(loadedController, Current.getContext(), invokeInfo.getRouteType(), data);
-		
+
+		MethodMeta methodMeta = new MethodMeta(loadedController, requestCtx, invokeInfo.getRouteType(), data);
+
 		return endpoint.openStream(methodMeta, invokeInfo.getHandler());
 	}
-	
+
 }

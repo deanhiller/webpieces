@@ -2,7 +2,7 @@ package org.webpieces.httpclient11.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -16,19 +16,19 @@ public class Proxy implements ChannelProxy {
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
+	public XFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
 		if(addr == null)
 			throw new IllegalArgumentException("addr cannot be null");
 		return channel.connect(addr, dataListener);
 	}
 
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer wrap) {
+	public XFuture<Void> write(ByteBuffer wrap) {
 		return channel.write(wrap);
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		return channel.close();
 	}
 

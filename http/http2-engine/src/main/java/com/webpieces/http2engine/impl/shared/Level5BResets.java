@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.shared;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentMap;
 
 import org.webpieces.util.locking.PermitQueue;
@@ -33,12 +33,12 @@ public abstract class Level5BResets extends Level5AStates {
 		return closedReason;
 	}
 	
-	public CompletableFuture<Void> sendGoAwayToApp(ConnReset2 reset) {
+	public XFuture<Void> sendGoAwayToApp(ConnReset2 reset) {
 		resetAllClientStreams(reset);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 	
-	public CompletableFuture<Void> sendRstToServerAndApp(StreamException e) {
+	public XFuture<Void> sendRstToServerAndApp(StreamException e) {
 		RstStreamFrame frame = new RstStreamFrame();
 		frame.setKnownErrorCode(e.getReason().getErrorCode());
 		frame.setStreamId(e.getStreamId());
@@ -49,7 +49,7 @@ public abstract class Level5BResets extends Level5AStates {
 			
 			return fireRstToSocket(stream, frame)
 					.thenCompose( v -> {
-							CompletableFuture<Void> future = fireRstToClient(stream, frame);
+							XFuture<Void> future = fireRstToClient(stream, frame);
 							return future;
 						});
 		} else {
@@ -58,7 +58,7 @@ public abstract class Level5BResets extends Level5AStates {
 		}
 	}
 	
-	public CompletableFuture<Void> sendGoAwayToSvrAndResetAllToApp(ShutdownConnection reset) {
+	public XFuture<Void> sendGoAwayToSvrAndResetAllToApp(ShutdownConnection reset) {
 		closedReason = reset;
 		
 		remoteFlowControl.goAway(reset);
@@ -66,7 +66,7 @@ public abstract class Level5BResets extends Level5AStates {
 		resetAllClientStreams(reset);
 		
 		//since we are closing...mark closed so app can start failing immediately (rather than wait for it to write to nic)
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	private void resetAllClientStreams(ConnectionCancelled reset) {
@@ -77,19 +77,19 @@ public abstract class Level5BResets extends Level5AStates {
 		}		
 	}
 	
-	public CompletableFuture<Void> fireRstToClient(RstStreamFrame frame) {
+	public XFuture<Void> fireRstToClient(RstStreamFrame frame) {
 		Stream stream = streamState.getStream(frame, true);
 		return fireRstToClient(stream, frame);
 	}
 	
-	public CompletableFuture<Void> fireRstToClient(Stream stream, CancelReason frame) { 
+	public XFuture<Void> fireRstToClient(Stream stream, CancelReason frame) {
 		return fireRecvToSM(stream, frame)
 				.thenCompose(v-> {
 					return localFlowControl.fireRstToClient(stream, frame);
 				});
 	}
 	
-	public CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame) {
+	public XFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame) {
 		return fireSendToSM(stream, frame, true)
 				.thenCompose(v -> {
 					return remoteFlowControl.sendPayloadToSocket(stream, frame);

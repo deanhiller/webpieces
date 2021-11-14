@@ -1,6 +1,6 @@
 package com.webpieces.http2.api.streaming;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 
@@ -14,6 +14,6 @@ public interface PushPromiseListener {
 	 * @param resp
 	 * @return Future that completes when we should free up more space to read in more data
 	 */
-	CompletableFuture<StreamWriter> processPushResponse(Http2Response response);
+	XFuture<StreamWriter> processPushResponse(Http2Response response);
 
 }

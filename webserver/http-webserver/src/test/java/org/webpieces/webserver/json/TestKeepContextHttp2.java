@@ -6,6 +6,7 @@ import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.streaming.ResponseStreamHandle;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +42,7 @@ import org.webpieces.webserver.test.http2.ResponseWrapperHttp2;
 import org.webpieces.webserver.test.http2.TestMode;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -95,12 +96,20 @@ public class TestKeepContextHttp2 extends AbstractHttp2Test {
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
+		//fails if another test is leaking the context...
+		Assert.assertEquals(new HashMap(), Context.getContext());
+
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("jsonMeta.txt", PrivateWebserverForTest.class.getClassLoader());
 		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(new SimpleMeterRegistry()), new TestOverrides(), true, metaFile);
 		webserver.start();
 		http2Socket = connectHttp(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
+	@After
+	public void tearDown() {
+		//clear client context
+		Context.clear();
+	}
 
 	@Test
 	public void testNoAttributeValueInJsonGoesToEmptyString() {
@@ -114,15 +123,15 @@ public class TestKeepContextHttp2 extends AbstractHttp2Test {
 		String json = "{ `meta`: { `numResults`: 4 }, `testValidation`:`notBlank` }".replace("`", "\"");
 		FullRequest req = org.webpieces.webserver.test.http2.Requests.createJsonRequest("POST", "/json/simple", json);
 
-		Context.set(ctxKey, ctxValue);
+		Context.put(ctxKey, ctxValue);
 
 		//Have to also test request and headers SEPARATELY as test was passing until I added this
 		Map<String, Object> headerMap = new HashMap<>();
 		headerMap.put(headerKey, headerVal);
-		Context.set(Context.REQUEST, requestVal);
-		Context.set(Context.HEADERS, headerMap);
+		Context.put(Context.REQUEST, requestVal);
+		Context.put(Context.HEADERS, headerMap);
 
-		CompletableFuture<FullResponse> respFuture = http2Socket.send(req);
+		XFuture<FullResponse> respFuture = http2Socket.send(req);
 		ResponseWrapperHttp2 response = ResponseExtract.waitAndWrap(respFuture);
 
 		//validate that Context was not blown away
@@ -147,8 +156,16 @@ public class TestKeepContextHttp2 extends AbstractHttp2Test {
 
 		MDC.put(mdcKey, mdcValue);
 
-		CompletableFuture<FullResponse> respFuture = http2Socket.send(req);
+		//not exactly part of this test but checking for leak of server context into client
+		// (only in embedded modes does this occur)
+		Assert.assertEquals(0, Context.getContext().size());
+
+		XFuture<FullResponse> respFuture = http2Socket.send(req);
 		ResponseWrapperHttp2 response = ResponseExtract.waitAndWrap(respFuture);
+
+		//not exactly part of this test but checking for leak of server context into client
+		// (only in embedded modes does this occur)
+		Assert.assertEquals(0, Context.getContext().size());
 
 		//validate that MDC was not blown away
 		Assert.assertEquals(mdcValue, MDC.get(mdcKey));

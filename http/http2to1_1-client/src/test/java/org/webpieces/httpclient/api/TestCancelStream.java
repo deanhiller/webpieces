@@ -1,7 +1,7 @@
 package org.webpieces.httpclient.api;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,36 +38,36 @@ public class TestCancelStream {
 		TwoPools pool = new TwoPools("client.bufferpool", metrics);
 		httpClient = Http2to11ClientFactory.createHttpClient("myClient2", mockChanMgr, new SimpleMeterRegistry(), pool);
 
-		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
+		mockChannel.setConnectFuture(XFuture.completedFuture(null));
 
 		mockChanMgr.addTCPChannelToReturn(mockChannel);
 		httpSocket = httpClient.createHttpSocket(new Http2CloseListener());
 	}
 
 //	@Test
-//	public void testRequestResponseCompletableFutureCancelNoKeepAlive() {
+//	public void testRequestResponseXFutureCancelNoKeepAlive() {
 //		throw new UnsupportedOperationException("not done yet");
 //	}
 //
 //	@Test
-//	public void testRequestResponseCompletableFutureCancelWithKeepAlive() {
+//	public void testRequestResponseXFutureCancelWithKeepAlive() {
 //		throw new UnsupportedOperationException("not done yet");
 //	}
 
 	@Test
 	public void testClientCancelWithKeepAlive() {
-		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		Http2Request req = Requests.createRequest(false);
 		req.addHeader(new Http2Header(Http2HeaderName.CONNECTION, "keep-alive"));
 
-		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
+		mockChannel.addWriteResponse(XFuture.completedFuture(null));
 		RequestStreamHandle requestStream = httpSocket.openStream();
 		StreamRef ref = requestStream.process(req, mockListener);
 		
 		CancelReason reason = new RstStreamFrame();
-		CompletableFuture<Void> cancelDone = ref.cancel(reason);
+		XFuture<Void> cancelDone = ref.cancel(reason);
 		Assert.assertTrue(cancelDone.isDone());
 		
 		//Assert the socket is NOT closed
@@ -76,16 +76,16 @@ public class TestCancelStream {
 
 	@Test
 	public void testClientCancelNoKeepAlive() {
-		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		Http2Request req = Requests.createRequest(false);
-		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
+		mockChannel.addWriteResponse(XFuture.completedFuture(null));
 		RequestStreamHandle requestStream = httpSocket.openStream();
 		StreamRef ref = requestStream.process(req, mockListener);
 		
 		CancelReason reason = new RstStreamFrame();
-		CompletableFuture<Void> cancelDone = ref.cancel(reason);
+		XFuture<Void> cancelDone = ref.cancel(reason);
 		Assert.assertTrue(cancelDone.isDone());
 		
 		//Assert the socket is NOT closed
@@ -94,11 +94,11 @@ public class TestCancelStream {
 
 	@Test
 	public void testServerCloseSocket() {
-		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		Http2Request req = Requests.createRequest(false);
-		mockChannel.addWriteResponse(CompletableFuture.completedFuture(null));
+		mockChannel.addWriteResponse(XFuture.completedFuture(null));
 		RequestStreamHandle requestStream = httpSocket.openStream();
 		StreamRef ref = requestStream.process(req, mockListener);
 		

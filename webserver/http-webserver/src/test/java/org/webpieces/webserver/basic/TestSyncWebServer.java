@@ -1,7 +1,7 @@
 package org.webpieces.webserver.basic;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -47,7 +47,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testBasic() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -66,7 +66,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testAbsoluteHtmlPath() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute2");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -80,7 +80,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testRedirect() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -92,7 +92,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testJsonFile() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/somejson");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -104,7 +104,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testRedirectRawRelativeUrl() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawurlredirect");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -116,7 +116,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testRedirectRawAbsoluteUrl() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawabsoluteurlredirect");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
@@ -128,7 +128,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testScopedRoot() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -139,7 +139,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testScopedRootWithSlash() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped/");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -57,18 +57,18 @@ public class InstallSslCertController {
 		this.acmeClient = acmeClient;
 	}
 	
-	public CompletableFuture<Action> sslSetup() {
-		CompletableFuture<Map<String, String>> read = this.storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
+	public XFuture<Action> sslSetup() {
+		XFuture<Map<String, String>> read = this.storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
 		return read.thenCompose( (properties) -> decide(properties));
 	}
 
-	private CompletableFuture<Action> decide(Map<String, String> properties) {
+	private XFuture<Action> decide(Map<String, String> properties) {
 		String base64 = properties.get(InstallSslCertPlugin.ACCOUNT_KEYPAIR_KEY);
 		if(base64 == null) {
 			log.info("accountKeyPair not found in database");
 
 			//It really sucks that this is synchronous(could throw into future pool next time)
-			CompletableFuture<AcmeInfo> future = acmeClient.fetchRemoteInfo();
+			XFuture<AcmeInfo> future = acmeClient.fetchRemoteInfo();
 
 			return future.thenApply((info) -> {
 				return Actions.renderThis(
@@ -82,10 +82,10 @@ public class InstallSslCertController {
 
 		log.info("accountKeyPair found in database.  redirecting to step 2");
 
-		return CompletableFuture.completedFuture(Actions.redirect(InstallSslCertRouteId.STEP2));
+		return XFuture.completedFuture(Actions.redirect(InstallSslCertRouteId.STEP2));
 	}
 
-	public CompletableFuture<Redirect> postStartSslInstall(String email) {
+	public XFuture<Redirect> postStartSslInstall(String email) {
 
 		log.info("create key pair");
 		KeyPair accountKeyPair = KeyPairUtils.createKeyPair(2048);
@@ -105,14 +105,14 @@ public class InstallSslCertController {
 				});
 			
 		} catch(IOException e) {
-                        CompletableFuture future = new CompletableFuture();
+                        XFuture future = new XFuture();
                         future.completeExceptionally(e);
                         return future;
 		}
 	}
 
-	public CompletableFuture<Action> step2() {
-		CompletableFuture<Map<String, String>> read = this.storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
+	public XFuture<Action> step2() {
+		XFuture<Map<String, String>> read = this.storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
 		return read.thenApply((props) -> decideStep2(props));
 	}
 
@@ -131,13 +131,13 @@ public class InstallSslCertController {
 				"organization", null);
 	}
 
-	public CompletableFuture<Redirect> postStep2(String organization) {
+	public XFuture<Redirect> postStep2(String organization) {
 		RouterRequest request = Current.request();
 		return this.storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY)
 				.thenCompose((props) -> process(props, request, organization));
 	}
 	
-	private CompletableFuture<Redirect> process(Map<String, String> props, RouterRequest request, String organization) {
+	private XFuture<Redirect> process(Map<String, String> props, RouterRequest request, String organization) {
 		log.info("read in properties from database");
 		String domain = request.domain;
 		String accountKeyPairString = props.get(InstallSslCertPlugin.ACCOUNT_KEYPAIR_KEY);
@@ -153,7 +153,7 @@ public class InstallSslCertController {
 		}	
 	}
 	
-	private CompletableFuture<Redirect> saveUrlAndProcessOrder(URL url, KeyPair accountKeyPair, String email, String domain, String organization) {
+	private XFuture<Redirect> saveUrlAndProcessOrder(URL url, KeyPair accountKeyPair, String email, String domain, String organization) {
 		return storage.save(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY, URL, url+"")
 					.thenCompose((nothing) -> acmeClient.placeOrder(url, accountKeyPair))
 					.thenCompose((order) -> createWebPages(order))
@@ -166,7 +166,7 @@ public class InstallSslCertController {
 	 * WE ONLY use ONE webpage that renders ALL requests for these tokens and that web page just looks up the token in the database
 	 * to see if the page exists and only renders an html page if that page exists 
 	 */
-	private CompletableFuture<ProxyOrder> createWebPages(ProxyOrder order) {
+	private XFuture<ProxyOrder> createWebPages(ProxyOrder order) {
 		List<ProxyAuthorization> authorizations = order.getAuthorizations();
 		Map<String, String> properties = new HashMap<>();
 		for(ProxyAuthorization auth : authorizations) {
@@ -185,7 +185,7 @@ public class InstallSslCertController {
 				.thenApply((nothing) -> order);
 	}
 	
-	private CompletableFuture<Void> installCertAllServers(CertAndSigningRequest certInfo) {
+	private XFuture<Void> installCertAllServers(CertAndSigningRequest certInfo) {
 		List<X509Certificate> certChain = certInfo.getCertChain();
 
 		Map<String, String> props = new HashMap<>();
@@ -204,9 +204,9 @@ public class InstallSslCertController {
 		}
 	}
 
-	public CompletableFuture<Render> renderToken(String token) {
+	public XFuture<Render> renderToken(String token) {
 		Current.getContext().addModifyResponse((http2Response) -> modifyResponse(http2Response));
-		CompletableFuture<Map<String, String>> future = storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
+		XFuture<Map<String, String>> future = storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
 		return future.thenApply((props) -> {
 			String result = props.get(token);
 			log.info("token="+token+" value="+result);

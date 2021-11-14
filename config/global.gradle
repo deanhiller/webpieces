@@ -31,6 +31,21 @@ if(group == null || group.isBlank()) {
 
 ext {
     // Project constants
+    sonatypeDomain = "s01.oss.sonatype.org"
+
+    //This is an input directory that we read jars from if they are not in a repo somewhere
+    fixedLibDir = file('lib')
+    toStagingDir = file(new File(buildDir, 'alljars'))
+    github_org = 'deanhiller'
+    project_name = 'webpieces'
+    getCommitHash = {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }.memoize()
 
     /*
      * Dependencies can be named so that sub-projects can reference consistent version of them.
@@ -90,9 +105,13 @@ ext {
             'generate-httpclient'    : 'org.webpieces.cloud:generate-httpclient',
             'server-scaffolding'     : 'org.webpieces.cloud:server-scaffolding',
 
+            'elastic-lib'          : 'org.webpieces.lib:lib-elasticsearch',
+
             'projectcreator'         : 'org.webpieces:projectcreator',
 
             'gcp-cloud-storage'      : 'org.webpieces.googlecloud:cloudstorage-client',
+
+            'jakarta-rest-api'       : 'jakarta.ws.rs:jakarta.ws.rs-api',
 
             'groovy'                 : 'org.codehaus.groovy:groovy-all',
 
@@ -163,22 +182,6 @@ if (project.hasProperty('projVersion')) {
     println("CREATING DEVELOPER VERSION " + project.name + ":" + project.version + "  jvm=" + currentJvm)
 }
 
-ext {
-    //This is an input directory that we read jars from if they are not in a repo somewhere
-    fixedLibDir = file('lib')
-    toStagingDir = file(new File(buildDir, 'alljars'))
-    github_org = 'deanhiller'
-    project_name = 'webpieces'
-    getCommitHash = {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-parse', 'HEAD'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim()
-    }.memoize()
-}
-
 dependencies {
 
     implementation platform('com.google.api:gax-bom:1.63.0')
@@ -203,6 +206,7 @@ dependencies {
         implementation 'jakarta.inject:jakarta.inject-api:1.0.3'
         implementation 'jakarta.persistence:jakarta.persistence-api:2.2.3'
         implementation 'jakarta.validation:jakarta.validation-api:2.0.1'
+        implementation 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
 
         implementation 'ch.qos.logback:logback-classic:1.2.3'
         implementation 'com.google.inject:guice:4.2.2'
@@ -239,6 +243,7 @@ configurations.all {
             substitute module('javax.inject:javax.inject') with module('jakarta.inject:jakarta.inject-api:1.0.3')
             substitute module('javax.persistence:javax.persistence-api') with module('jakarta.persistence:jakarta.persistence-api:2.2.3')
             substitute module('javax.validation:validation-api') with module('jakarta.validation:jakarta.validation-api:2.0.2')
+            substitute module('javax.ws.rs:javax.ws.rs-api') with module('jakarta.ws.rs:jakarta.ws.rs-api:2.1.6')
         }
 
         eachDependency { DependencyResolveDetails details ->
@@ -455,10 +460,8 @@ pluginManager.withPlugin('maven-publish') {
 
     publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
 
-
     if (project.properties.sonatypeUsername
-            && project.properties.sonatypePassword
-            && project.properties.sonatypeDomain) {
+            && project.properties.sonatypePassword) {
         if (!project.hasProperty("signing.keyId")) {
             throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
         }
@@ -503,7 +506,6 @@ pluginManager.withPlugin('maven-publish') {
 if (!project.hasProperty("projVersion")) {
     ext.sonatypeUsername = "nousername"
     ext.sonatypePassword = "nopassword"
-    ext.sonatypeDomain = "nodomain"
 }
 
 

@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -70,7 +70,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDir() throws InterruptedException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -89,7 +89,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 		req.addHeader(new Header(KnownHeaderName.CONNECTION, "keep-alive"));
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -105,7 +105,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDirWithHashGeneration() throws FileNotFoundException, IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
@@ -120,7 +120,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		String hash = loadUrlEncodedHash();		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash="+hash);
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -141,7 +141,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDirWithBadHashDoesNotLoadMismatchFileIntoBrowser() throws FileNotFoundException, IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash=BADHASH");
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -151,7 +151,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDirJpg() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -164,7 +164,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDirAndNotFound() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -176,7 +176,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticFile() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -188,7 +188,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticFileCssLarger() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/mycss");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -199,7 +199,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testClasspathDirJpb() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/testclasspath/image.jpg");
 
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

@@ -1,7 +1,7 @@
 package com.webpieces.http2engine.impl.svr;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
@@ -31,8 +31,8 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendControlFrameToClient(Http2Msg msg) {
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
+	public XFuture<Void> sendControlFrameToClient(Http2Msg msg) {
+		XFuture<Void> future = new XFuture<Void>();
 		try {
 			future.complete(null);
 		} catch(Throwable e) {
@@ -47,12 +47,12 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendToSocket(ByteBuffer buffer) {
+	public XFuture<Void> sendToSocket(ByteBuffer buffer) {
 		return listener.sendToSocket(buffer).thenApply(s -> null);
 	}
 
 	@Override
-	public CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
+	public XFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
 		if(stream instanceof ServerStream) {
 			ServerStream str = (ServerStream) stream;
 			StreamRef streamRef = str.getStreamRef();
@@ -60,25 +60,25 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 		}
 
 		//since the stream is closed, any writes to the push streams will automatically close and be cancelled
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
+	public XFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
 		ServerStream s = (ServerStream) stream;
-		CompletableFuture<StreamWriter> writer = s.getStreamWriter();
+		XFuture<StreamWriter> writer = s.getStreamWriter();
 	
 		return writer.thenCompose(w -> w.processPiece(payload));
 	}
 
 	@Override
-	public CompletableFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload) {
+	public XFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload) {
 		ServerStream s = (ServerStream) stream;
-		CompletableFuture<StreamWriter> writer = s.getStreamWriter();
+		XFuture<StreamWriter> writer = s.getStreamWriter();
 		return writer.thenCompose(w -> w.processPiece(payload));
 	}
 
-	public CompletableFuture<Void> fireRequestToApp(ServerStream stream, Http2Request payload) {
+	public XFuture<Void> fireRequestToApp(ServerStream stream, Http2Request payload) {
 		SvrSideResponseHandler handler = new SvrSideResponseHandler(level1ServerEngine, stream, pushIdGenerator);
 		RequestStreamHandle streamHandle = listener.openStream();
 		StreamRef streamRef = streamHandle.process(payload, handler);

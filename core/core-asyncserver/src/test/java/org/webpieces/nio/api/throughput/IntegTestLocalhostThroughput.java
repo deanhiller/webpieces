@@ -1,7 +1,7 @@
 package org.webpieces.nio.api.throughput;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -63,7 +63,7 @@ public class IntegTestLocalhostThroughput {
 		recorder.setClientChannel(channel);
 		recorder.start();
 
-		CompletableFuture<Void> connect = channel.connect(new InetSocketAddress(8080), listener);
+		XFuture<Void> connect = channel.connect(new InetSocketAddress(8080), listener);
 		connect.get(2, TimeUnit.SECONDS);
 		
 		synchronized(this) {

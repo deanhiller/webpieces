@@ -7,7 +7,7 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,13 +18,13 @@ public class MockStreamWriter2 extends MockSuperclass implements StreamWriter {
 	}
 	
 	public MockStreamWriter2() {
-		setDefaultReturnValue(Method.INCOMING_DATA, CompletableFuture.completedFuture(null));
+		setDefaultReturnValue(Method.INCOMING_DATA, XFuture.completedFuture(null));
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> processPiece(StreamMsg data) {
-		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_DATA, data);
+	public XFuture<Void> processPiece(StreamMsg data) {
+		return (XFuture<Void>) super.calledMethod(Method.INCOMING_DATA, data);
 	}
 
 	public List<StreamMsg> getFrames() {
@@ -40,7 +40,7 @@ public class MockStreamWriter2 extends MockSuperclass implements StreamWriter {
 		return frames.get(0);
 	}
 
-	public void addProcessResponse(CompletableFuture<Void> future) {
+	public void addProcessResponse(XFuture<Void> future) {
 		super.addValueToReturn(Method.INCOMING_DATA, future);
 	}
 

@@ -10,17 +10,16 @@ public class Context {
 
     private static ThreadLocal<Map<String,Object>> context = ThreadLocal.withInitial(() -> new HashMap<>());
 
-    public static void set(String key, Object value) {
-        //To prevent the key, null from being in the map, remove if value==null
-        if(value == null) {
-            context.get().remove(key);
-            return;
-        }
+    public static Object get(String key) {
+        return context.get().get(key);
+    }
+
+    public static void put(String key, Object value) {
         context.get().put(key, value);
     }
 
-    public static Object get(String key) {
-        return context.get().get(key);
+    public static Object remove(String key) {
+        return context.get().remove(key);
     }
 
     public static void clear() {

@@ -1,6 +1,6 @@
 package org.webpieces.httpfrontend2.api.mock2;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -9,7 +9,7 @@ import org.junit.Assert;
 
 public class TestAssert {
 
-	public static <T> Throwable intercept(CompletableFuture<T> future) {
+	public static <T> Throwable intercept(XFuture<T> future) {
 		try {
 			future.get(10, TimeUnit.SECONDS);
 			Assert.fail("Should have thrown an exception and did not");

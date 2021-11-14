@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -24,18 +24,18 @@ public class MockTcpChannel implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer b) {
+	public XFuture<Void> write(ByteBuffer b) {
 		return dataListener.incomingData(this, b);
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		dataListener.farEndClosed(this);
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 	
 	@Override
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		throw new UnsupportedOperationException("no needed");
 	}
 
@@ -69,8 +69,8 @@ public class MockTcpChannel implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Void> bind(SocketAddress addr) {
-		return CompletableFuture.completedFuture(null);
+	public XFuture<Void> bind(SocketAddress addr) {
+		return XFuture.completedFuture(null);
 	}
 
 	@Override

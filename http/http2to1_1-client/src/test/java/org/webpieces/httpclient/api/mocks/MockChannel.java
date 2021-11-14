@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -45,29 +45,29 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
+	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		if(this.listener != null)
 			throw new IllegalStateException("connect should only be called once");
 		this.listener = listener;
-		return (CompletableFuture<Void>) super.calledMethod(Method.CONNECT, addr, listener);
+		return (XFuture<Void>) super.calledMethod(Method.CONNECT, addr, listener);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> write(ByteBuffer b) {
+	public XFuture<Void> write(ByteBuffer b) {
 		DataWrapper wrapper = dataGen.wrapByteBuffer(b);
 		List<HttpPayload> parsedData = parser.parse(wrapper);
 		if(parsedData.size() != 1)
 			throw new IllegalArgumentException("The impl should be writing out full single payloads each write call");
 		HttpPayload payload = parsedData.get(0);
 		Http2Msg http2 = Http11ToHttp2.translate(payload, false);
-		return (CompletableFuture<Void>) super.calledMethod(Method.WRITE, http2);
+		return (XFuture<Void>) super.calledMethod(Method.WRITE, http2);
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		isClosed = true;
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Void> bind(SocketAddress addr) {
+	public XFuture<Void> bind(SocketAddress addr) {
 		
 		return null;
 	}
@@ -146,11 +146,11 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 		
 	}
 
-	public void setConnectFuture(CompletableFuture<Void> future) {
+	public void setConnectFuture(XFuture<Void> future) {
 		super.addValueToReturn(Method.CONNECT, future);
 	}
 
-	public void addWriteResponse(CompletableFuture<Void> future) {
+	public void addWriteResponse(XFuture<Void> future) {
 		super.addValueToReturn(Method.WRITE, future);
 	}
 
@@ -168,7 +168,7 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 		return (DataListener) params.get(0).getArgs()[1];
 	}
 
-	public CompletableFuture<Void> writeResponse(Http2Response response1) {
+	public XFuture<Void> writeResponse(Http2Response response1) {
 		HttpResponse response = Http2ToHttp11.translateResponse(response1);
 		ByteBuffer buffer = parser.marshalToByteBuffer(response);
 		return listener.incomingData(this, buffer);

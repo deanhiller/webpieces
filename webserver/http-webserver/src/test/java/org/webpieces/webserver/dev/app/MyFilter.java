@@ -1,6 +1,6 @@
 package org.webpieces.webserver.dev.app;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Singleton;
 
@@ -14,8 +14,8 @@ import org.webpieces.util.filters.Service;
 public class MyFilter extends RouteFilter<Void> {
 
 	@Override
-	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
-		return CompletableFuture.completedFuture(Actions.redirect(DevRouteId.HOME));
+	public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+		return XFuture.completedFuture(Actions.redirect(DevRouteId.HOME));
 	}
 
 	@Override

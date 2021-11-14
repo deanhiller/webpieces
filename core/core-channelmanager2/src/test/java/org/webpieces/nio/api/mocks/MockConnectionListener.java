@@ -2,7 +2,7 @@ package org.webpieces.nio.api.mocks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -19,9 +19,9 @@ public class MockConnectionListener implements ConnectionListener {
 	}
 
 	@Override
-	public CompletableFuture<DataListener> connected(Channel channel, boolean isReadyForWrites) {
+	public XFuture<DataListener> connected(Channel channel, boolean isReadyForWrites) {
 		channels.add(channel);
-		return CompletableFuture.completedFuture(dataListener);
+		return XFuture.completedFuture(dataListener);
 	}
 
 	@Override

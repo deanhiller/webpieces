@@ -1,6 +1,6 @@
 package org.webpieces.router.impl.routers;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.controller.actions.Action;
@@ -30,7 +30,7 @@ public class EInternalErrorRouter {
 		this.svc = svc;
 	}
 
-	public CompletableFuture<StreamWriter> invokeErrorRoute(RequestContext ctx, ProxyStreamHandle handle, Throwable exc) {
+	public XFuture<StreamWriter> invokeErrorRoute(RequestContext ctx, ProxyStreamHandle handle, Throwable exc) {
 		Endpoint info = new Endpoint(svc);
 		RouteInfoForInternalError data = new RouteInfoForInternalError(exc);
 		InvokeInfo invokeInfo = new InvokeInfo(ctx, handle, RouteType.INTERNAL_SERVER_ERROR, loadedController, i18nBundleName);

@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
@@ -23,7 +23,7 @@ public class SvrSideResponseHandler implements ResponseStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public XFuture<StreamWriter> process(Http2Response response) {
 		response.setStreamId(stream.getStreamId());
 
 		if(!response.isStatusSet())
@@ -38,7 +38,7 @@ public class SvrSideResponseHandler implements ResponseStreamHandle {
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason frame) {
+		public XFuture<Void> cancel(CancelReason frame) {
 			if(!(frame instanceof RstStreamFrame))
 				throw new IllegalArgumentException("App can only pass in RstStreamFrame object here to be sent to clients.  The api is for consistency and shared with client");
 			return level1ServerEngine.sendCancel(stream, (RstStreamFrame)frame);

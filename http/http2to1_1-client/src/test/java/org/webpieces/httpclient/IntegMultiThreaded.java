@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -135,7 +135,7 @@ public class IntegMultiThreaded {
 	private static class ChunkedResponseListener implements ResponseStreamHandle, PushPromiseListener, PushStreamHandle {
 
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Response response) {
+		public XFuture<StreamWriter> process(Http2Response response) {
 			log.info("incoming part of response="+response);
 			
 			if(response.isEndOfStream()) {
@@ -145,7 +145,7 @@ public class IntegMultiThreaded {
 				log.info("completed="+completed.size()+" completedPus="+completedPush.size()+" sent="+sent.size()+" list="+completed);
 			}
 			
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
@@ -154,7 +154,7 @@ public class IntegMultiThreaded {
 		}
 		
 		@Override
-		public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
+		public XFuture<StreamWriter> processPushResponse(Http2Response response) {
 			log.info("incoming push promise="+response);
 			if(response.isEndOfStream()) {
 				synchronized(this) {
@@ -162,20 +162,20 @@ public class IntegMultiThreaded {
 					log.info("completedPush="+completedPush+" sent="+sent.size());
 				}
 			}
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason frame) {
-			return CompletableFuture.completedFuture(null);
+		public XFuture<Void> cancel(CancelReason frame) {
+			return XFuture.completedFuture(null);
 		}
 		@Override
-		public CompletableFuture<Void> cancelPush(CancelReason payload) {
-			return CompletableFuture.completedFuture(null);
+		public XFuture<Void> cancelPush(CancelReason payload) {
+			return XFuture.completedFuture(null);
 		}
 		@Override
-		public CompletableFuture<PushPromiseListener> process(Http2Push headers) {
-			return CompletableFuture.completedFuture(this);
+		public XFuture<PushPromiseListener> process(Http2Push headers) {
+			return XFuture.completedFuture(this);
 		}
 	}
 

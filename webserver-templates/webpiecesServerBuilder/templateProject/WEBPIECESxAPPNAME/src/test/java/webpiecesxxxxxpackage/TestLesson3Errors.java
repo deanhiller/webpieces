@@ -1,6 +1,6 @@
 package webpiecesxxxxxpackage;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -80,7 +80,7 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 		});
 		HttpFullRequest req = TestLesson2Html.createRequest("/");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
@@ -94,7 +94,7 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 	public void testNotFound() {
 		HttpFullRequest req = TestLesson2Html.createRequest("/route/that/does/not/exist");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
@@ -106,11 +106,11 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testRemoteSystemDown() {
-		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		XFuture<Integer> future = new XFuture<Integer>();
 		mockRemote.addValueToReturn(future);
 		HttpFullRequest req = TestLesson2Html.createRequest("/async");
 		
-		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		XFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
 		Assert.assertFalse(respFuture.isDone());
 

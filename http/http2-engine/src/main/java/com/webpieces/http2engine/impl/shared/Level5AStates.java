@@ -7,7 +7,7 @@ import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_DATA_EO
 import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_HEADERS_EOS;
 import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_RST;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -78,17 +78,17 @@ public class Level5AStates {
 		stateMachine.createTransition(halfClosedRemote, closed, SENT_HEADERS_EOS, SENT_DATA_EOS, RECV_RST, SENT_RST);
 	}
 
-	protected CompletableFuture<Void> fireSendToSM(Stream stream, Http2Msg payload, boolean keepDelayedState) {
+	protected XFuture<Void> fireSendToSM(Stream stream, Http2Msg payload, boolean keepDelayedState) {
 		return fireToStateMachine(Http2SendRecieve.SEND, stream, payload, keepDelayedState);
 	}
-	protected CompletableFuture<Void> fireRecvToSM(Stream stream, Http2Msg payload) {
+	protected XFuture<Void> fireRecvToSM(Stream stream, Http2Msg payload) {
 		return fireToStateMachine(Http2SendRecieve.RECEIVE, stream, payload, false);
 	}
 	
-	private CompletableFuture<Void> fireToStateMachine(Http2SendRecieve type, Stream stream, Http2Msg payload, boolean keepDelayedState) {
+	private XFuture<Void> fireToStateMachine(Http2SendRecieve type, Stream stream, Http2Msg payload, boolean keepDelayedState) {
 		Http2Event event = translate(type, payload);
 
-		CompletableFuture<Void> future = stream.getLock().synchronizeD( () -> {
+		XFuture<Void> future = stream.getLock().synchronizeD( () -> {
 
 			fireToStatemachineImpl(stream, event);
 			return checkForClosedState(stream, payload, keepDelayedState);
@@ -100,7 +100,7 @@ public class Level5AStates {
 		
 		return future.handle((v, e) -> {
 	        if (e == null) {
-	            return CompletableFuture.completedFuture(v);
+	            return XFuture.completedFuture(v);
 	        } else {
 	        	return translateException(stream, e);
 	        }
@@ -116,8 +116,8 @@ public class Level5AStates {
 		}
 	}
 	
-	private CompletableFuture<Void> translateException(Stream stream, Throwable t) {
-		CompletableFuture<Void> fut = new CompletableFuture<>();
+	private XFuture<Void> translateException(Stream stream, Throwable t) {
+		XFuture<Void> fut = new XFuture<>();
 		if(t instanceof NoTransitionConnectionError)
 			fut.completeExceptionally(new ConnectionException(CancelReasonCode.BAD_FRAME_RECEIVED_FOR_THIS_STATE, logId, stream.getStreamId(), t.getMessage(), t));
 		else if(t instanceof NoTransitionStreamError)

@@ -1,6 +1,6 @@
 package org.webpieces.router.api;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.router.api.controller.actions.HttpPort;
 import org.webpieces.router.api.routes.RouteId;
@@ -21,10 +21,10 @@ public interface RouterStreamHandle extends RouterResponseHandler {
      */
     Http2Response createBaseResponse(Http2Request req, String mimeType, int statusCode, String statusReason);
 
-	CompletableFuture<Void> sendFullRedirect(RouteId id, Object ... args);
+	XFuture<Void> sendFullRedirect(RouteId id, Object ... args);
 
-	CompletableFuture<Void> sendAjaxRedirect(RouteId id, Object ... args);
+	XFuture<Void> sendAjaxRedirect(RouteId id, Object ... args);
 
-	CompletableFuture<Void> sendPortRedirect(HttpPort port, RouteId id, Object ... args);
+	XFuture<Void> sendPortRedirect(HttpPort port, RouteId id, Object ... args);
 
 }

@@ -1,7 +1,7 @@
 package org.webpieces.http2client.mock;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,19 +28,19 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 	}
 
 	public MockResponseListener() {
-		setDefaultReturnValue(Method.CANCEL, CompletableFuture.completedFuture(null));
-		setDefaultReturnValue(Method.CANCEL_PUSH, CompletableFuture.completedFuture(null));
+		setDefaultReturnValue(Method.CANCEL, XFuture.completedFuture(null));
+		setDefaultReturnValue(Method.CANCEL_PUSH, XFuture.completedFuture(null));
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
-		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.INCOMING_RESPONSE, response);
+	public XFuture<StreamWriter> process(Http2Response response) {
+		return (XFuture<StreamWriter>) super.calledMethod(Method.INCOMING_RESPONSE, response);
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason frame) {
-		return (CompletableFuture<Void>) super.calledMethod(Method.CANCEL, frame);
+	public XFuture<Void> cancel(CancelReason frame) {
+		return (XFuture<Void>) super.calledMethod(Method.CANCEL, frame);
 	}
 	
 	@Override
@@ -48,7 +48,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 		return new MockPushStreamHandle();
 	}
 
-	public void addReturnValueIncomingResponse(CompletableFuture<StreamWriter> future) {
+	public void addReturnValueIncomingResponse(XFuture<StreamWriter> future) {
 		super.addValueToReturn(Method.INCOMING_RESPONSE, future);
 	}
 	
@@ -65,7 +65,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 		return retVal.collect(Collectors.toList());
 	}
 
-	public void setIncomingRespDefault(CompletableFuture<StreamWriter> retVal) {
+	public void setIncomingRespDefault(XFuture<StreamWriter> retVal) {
 		super.setDefaultReturnValue(Method.INCOMING_RESPONSE, retVal);
 	}
 	
@@ -87,26 +87,26 @@ public class MockResponseListener extends MockSuperclass implements ResponseStre
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public CompletableFuture<PushPromiseListener> process(Http2Push headers) {
-			return (CompletableFuture<PushPromiseListener>) 
+		public XFuture<PushPromiseListener> process(Http2Push headers) {
+			return (XFuture<PushPromiseListener>) 
 					MockResponseListener.super.calledMethod(Method.INCOMING_PUSH, headers);
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public CompletableFuture<Void> cancelPush(CancelReason reset) {
-			return (CompletableFuture<Void>) 
+		public XFuture<Void> cancelPush(CancelReason reset) {
+			return (XFuture<Void>) 
 					MockResponseListener.super.calledMethod(Method.CANCEL_PUSH, reset);
 		}
 
 	}
 	
 	public void addReturnValuePush(PushPromiseListener retVal) {
-		super.addValueToReturn(Method.INCOMING_PUSH, CompletableFuture.completedFuture(retVal));
+		super.addValueToReturn(Method.INCOMING_PUSH, XFuture.completedFuture(retVal));
 	}
 	
 	public void setIncomingPushDefault(PushPromiseListener pushListener) {
-		super.setDefaultReturnValue(Method.INCOMING_PUSH, CompletableFuture.completedFuture(pushListener));
+		super.setDefaultReturnValue(Method.INCOMING_PUSH, XFuture.completedFuture(pushListener));
 	}
 	
 	public Http2Push getSinglePush() {

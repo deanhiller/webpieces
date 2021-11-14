@@ -1,7 +1,7 @@
 package org.webpieces.httpclientx.impl;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.dto.FullRequest;
@@ -29,7 +29,7 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Void> connect(InetSocketAddress addr) {
+	public XFuture<Void> connect(InetSocketAddress addr) {
 		return socket11.connect(addr);
 	}
 
@@ -44,7 +44,7 @@ public class Http2SocketImpl implements Http2Socket {
 			HttpRequest req = Http2ToHttp11.translateRequest(request);
 			
 			HttpStreamRef streamRef = socket11.send(req, new ResponseListener(socket11+"", responseListener));
-			CompletableFuture<StreamWriter> newWriter = streamRef.getWriter().thenApply(s -> new StreamWriterImpl(s, req));
+			XFuture<StreamWriter> newWriter = streamRef.getWriter().thenApply(s -> new StreamWriterImpl(s, req));
 			return new MyStreamRef(newWriter, request);
 		}
 
@@ -52,24 +52,24 @@ public class Http2SocketImpl implements Http2Socket {
 	
 	public class MyStreamRef implements StreamRef {
 
-		private CompletableFuture<StreamWriter> writer;
+		private XFuture<StreamWriter> writer;
 		private Http2Request request;
 
-		public MyStreamRef(CompletableFuture<StreamWriter> writer, Http2Request request) {
+		public MyStreamRef(XFuture<StreamWriter> writer, Http2Request request) {
 			this.writer = writer;
 			this.request = request;
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> getWriter() {
+		public XFuture<StreamWriter> getWriter() {
 			return writer;
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason reason) {
+		public XFuture<Void> cancel(CancelReason reason) {
 			String value = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
 			if("keep-alive".equals(value)) //do nothing as keep-alive was set so we can't really cancel in http1.1 for this case
-				return CompletableFuture.completedFuture(null);
+				return XFuture.completedFuture(null);
 			
 			//keep alive not set so close the socket for http1.1
 			return socket11.close();
@@ -78,18 +78,18 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 	
 	@Override
-	public CompletableFuture<FullResponse> send(FullRequest request) {
+	public XFuture<FullResponse> send(FullRequest request) {
 		HttpFullRequest req = Translations2.translate(request);
 		return socket11.send(req).thenApply(r -> Translations2.translate(r));
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public XFuture<Void> close() {
 		return socket11.close();
 	}
 
 	@Override
-	public CompletableFuture<Void> sendPing() {
+	public XFuture<Void> sendPing() {
 		throw new UnsupportedOperationException("Http1.1 does not support ping");
 	}
 	

@@ -1,6 +1,6 @@
 package org.webpieces.http2client.impl;
 
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -22,23 +22,23 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 public class SingleResponseListener implements ResponseStreamHandle, StreamWriter {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private CompletableFuture<FullResponse> responseFuture = new CompletableFuture<FullResponse>();
+	private XFuture<FullResponse> responseFuture = new XFuture<FullResponse>();
 	private Http2Response resp;
 	private DataWrapper fullData = dataGen.emptyWrapper();
 	
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Response response) {
+	public XFuture<StreamWriter> process(Http2Response response) {
 		this.resp = response;
 		if(resp.isEndOfStream()) {
 			responseFuture.complete(new FullResponse(resp, dataGen.emptyWrapper(), null));
-			return CompletableFuture.completedFuture(null);
+			return XFuture.completedFuture(null);
 		}
 				
-		return CompletableFuture.completedFuture(this);
+		return XFuture.completedFuture(this);
 	}
 	
 	@Override
-	public CompletableFuture<Void> processPiece(StreamMsg frame) {
+	public XFuture<Void> processPiece(StreamMsg frame) {
 		if(frame instanceof DataFrame) {
 			incomingData((DataFrame) frame);
 		} else if(frame instanceof RstStreamFrame) {
@@ -50,7 +50,7 @@ public class SingleResponseListener implements ResponseStreamHandle, StreamWrite
 		
 		//complete immediately because client is in control of single request/response
 		//and can just send less requests if he wants to back off
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 	
 	public void incomingData(DataFrame data) {
@@ -72,7 +72,7 @@ public class SingleResponseListener implements ResponseStreamHandle, StreamWrite
 		responseFuture.completeExceptionally(new ServerRstStreamException("Server cancelled this stream. code="+response.getErrorCode()));
 	}
 
-	public CompletableFuture<FullResponse> fetchResponseFuture() {
+	public XFuture<FullResponse> fetchResponseFuture() {
 		return responseFuture;
 	}
 
@@ -82,9 +82,9 @@ public class SingleResponseListener implements ResponseStreamHandle, StreamWrite
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason frame) {
+	public XFuture<Void> cancel(CancelReason frame) {
 		responseFuture.completeExceptionally(new ServerRstStreamException("The remote end reset this stream. reason="+frame));
-		return CompletableFuture.completedFuture(null);
+		return XFuture.completedFuture(null);
 	}
 
 }

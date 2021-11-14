@@ -1,7 +1,7 @@
 package com.webpieces.http2engine.impl.shared;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Trailers;
 import com.webpieces.http2.api.dto.lowlevel.CancelReason;
@@ -13,16 +13,16 @@ import com.webpieces.http2engine.impl.shared.data.Stream;
 public interface EngineResultListener {
 
 
-	CompletableFuture<Void> sendControlFrameToClient(Http2Msg msg);
+	XFuture<Void> sendControlFrameToClient(Http2Msg msg);
 
 	void closeSocket(ShutdownConnection shutdown);
 
-	CompletableFuture<Void> sendToSocket(ByteBuffer buffer);
+	XFuture<Void> sendToSocket(ByteBuffer buffer);
 
-	CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload);
+	XFuture<Void> sendRstToApp(Stream stream, CancelReason payload);
 
-	CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload);
+	XFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload);
 	
-	CompletableFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload);
+	XFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload);
 	
 }

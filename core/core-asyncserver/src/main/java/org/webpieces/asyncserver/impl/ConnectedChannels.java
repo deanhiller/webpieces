@@ -2,7 +2,7 @@ package org.webpieces.asyncserver.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.webpieces.nio.api.channels.Channel;
@@ -45,18 +45,18 @@ public class ConnectedChannels {
 		this.connectedChannels.remove(channel);
 	}
 
-	public CompletableFuture<Void> closeChannels() {
+	public XFuture<Void> closeChannels() {
 		//first prevent other threads from calling above functions ever again
 		closed = true;
 
-		List<CompletableFuture<Void>> futures = new ArrayList<>();
+		List<XFuture<Void>> futures = new ArrayList<>();
 		for(Channel c : connectedChannels.keySet()) {
 			futures.add(c.close());
 		}
 		
 		@SuppressWarnings("rawtypes")
-		CompletableFuture[] array = futures.toArray(new CompletableFuture[0]);
-		return CompletableFuture.allOf(array);
+		XFuture[] array = futures.toArray(new XFuture[0]);
+		return XFuture.allOf(array);
 	}
 	
 }

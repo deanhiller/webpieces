@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -64,7 +64,7 @@ public class TestSslCloseSvr {
 		server = createServer();
 		clientSslParser = createClientParser();
 		
-		CompletableFuture<Void> future = server.start(new InetSocketAddress(8443));
+		XFuture<Void> future = server.start(new InetSocketAddress(8443));
 		Assert.assertFalse(future.isDone());
 		
 		mockJdk.setThread(Thread.currentThread());
@@ -139,7 +139,7 @@ public class TestSslCloseSvr {
 		b.put((byte) 4);
 		b.flip();
 		
-		CompletableFuture<Void> future = channel.write(b);
+		XFuture<Void> future = channel.write(b);
 		future.get(2, TimeUnit.SECONDS);
 
 		//results in two ssl packets going out instead of the one that was fed in..
@@ -153,11 +153,11 @@ public class TestSslCloseSvr {
 	
 	//@Test
 	public void testBasicCloseFromServer() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
-		CompletableFuture<Void> future = channel.close();
+		XFuture<Void> future = channel.close();
 		Assert.assertTrue(future.isDone());
 
 		DataWrapper payload = mockChannel.nextPayload();
-		CompletableFuture<List<SslAction>> resultFuture2 = clientSslParser.parseIncoming(payload);
+		XFuture<List<SslAction>> resultFuture2 = clientSslParser.parseIncoming(payload);
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
 		Assert.assertEquals(2, result2.size());
 
@@ -187,7 +187,7 @@ public class TestSslCloseSvr {
 	
 	//@Test
 	public void testBothEndsAtSameTime() throws InterruptedException, ExecutionException, TimeoutException {
-		CompletableFuture<Void> future = channel.close();
+		XFuture<Void> future = channel.close();
 		SslAction action = clientSslParser.close();
 		
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());
@@ -215,13 +215,13 @@ public class TestSslCloseSvr {
 		Assert.assertEquals(SslActionEnum.LINK_SUCCESSFULLY_CLOSED, action2.getSslAction());
 
 		//but before the client knew it was closing and was notified, it calls close as well
-		CompletableFuture<Void> future = channel.close();
+		XFuture<Void> future = channel.close();
 		future.get(2, TimeUnit.SECONDS);
 	}
 	
 	private SslAction parseIncoming() throws InterruptedException, ExecutionException, TimeoutException {
 		DataWrapper payload = mockChannel.nextPayload();
-		CompletableFuture<List<SslAction>> resultFuture2 = clientSslParser.parseIncoming(payload);
+		XFuture<List<SslAction>> resultFuture2 = clientSslParser.parseIncoming(payload);
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
 		Assert.assertEquals(1, result2.size());
 		return result2.get(0);
