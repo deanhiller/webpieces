@@ -1,22 +1,23 @@
 package org.webpieces.googlecloud.storage;
 
+import com.google.api.client.util.Lists;
 import com.google.api.gax.paging.Page;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.*;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.googlecloud.storage.api.CopyInterface;
 import org.webpieces.googlecloud.storage.api.GCPBlob;
 import org.webpieces.googlecloud.storage.api.GCPStorage;
+import org.webpieces.util.context.Context;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -38,6 +39,26 @@ public class TestLocalStorage {
         Injector injector = Guice.createInjector(testModule);
         instance = injector.getInstance(GCPStorage.class);
     }
+    @After
+    public void tearDown() {
+        List<String> buckets = new ArrayList<String>();
+        buckets.add("testbucket");
+
+        for(String bucket : buckets) {
+            deleteFilesInBucket(bucket);
+        }
+    }
+
+    private void deleteFilesInBucket(String bucket) {
+        Page<GCPBlob> list = instance.list(bucket);
+        for(GCPBlob blob : list.iterateAll()) {
+            deleteFile(blob);
+        }
+    }
+
+    private void deleteFile(GCPBlob blob) {
+        instance.delete(blob.getBucket(), blob.getName());
+    }
 
     @Test
     public void testReadFromClasspath() {
@@ -50,6 +71,7 @@ public class TestLocalStorage {
                 .collect(Collectors.joining("\n"));
 
         Assert.assertEquals("Some Test", text);
+
     }
 
     @Test
@@ -126,18 +148,40 @@ public class TestLocalStorage {
         GCPBlob bucket = instance.get("testbucket", "fileSystemFile.txt");
         Assert.assertEquals("fileSystemFile.txt",bucket.getName());
     }
+
     @Test
-    public void addFileToBucketAndThenListFiles() {
+    public void addFileToBucketAndThenListFiles() throws IOException {
+        instance.list("ListFilebucket");
+        writeFile(BlobId.of("ListFilebucket", "mytest1.txt"));
+        GCPBlob bucket = instance.get("ListFilebucket", "mytest1.txt");
+        Assert.assertEquals("mytest1.txt",bucket.getName());//passed.
+
+        ReadableByteChannel readFile = instance.reader("ListFilebucket", "mytest1.txt");
+
+        InputStream i = Channels.newInputStream(readFile);
+
+        String text = new BufferedReader(
+                new InputStreamReader(i, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+        Page<GCPBlob> listfilebucket = instance.list("ListFilebucket");
+        Iterable<GCPBlob> values = listfilebucket.getValues();
+        Iterator<GCPBlob> iter = values.iterator();
+        List<String> list = new ArrayList<>();
+        while(iter.hasNext()){
+            list.add(iter.next().getName());
+        }
+        Assert.assertEquals(1,list.size());
 
     }
 
     @Test
     public void addFileThenReadThenDeleteThenListFiles() throws IOException {
-        writeFile(BlobId.of("testbucket", "mytest1.txt"));
-        GCPBlob bucket = instance.get("testbucket", "mytest1.txt");
+        writeFile(BlobId.of("AddReadDeleteListbucket", "mytest1.txt"));
+        GCPBlob bucket = instance.get("AddReadDeleteListbucket", "mytest1.txt");
         Assert.assertEquals("mytest1.txt",bucket.getName());//passed.
 
-        ReadableByteChannel readFile = instance.reader("testbucket", "mytest1.txt");
+        ReadableByteChannel readFile = instance.reader("AddReadDeleteListbucket", "mytest1.txt");
 
         InputStream i = Channels.newInputStream(readFile);
 
@@ -147,10 +191,10 @@ public class TestLocalStorage {
                 .collect(Collectors.joining("\n"));
         Assert.assertEquals("testing a bitch", text);// Passed.
 
-        boolean success = instance.delete("testbucket", "mytest1.txt");
+        boolean success = instance.delete("AddReadDeleteListbucket", "mytest1.txt");
         Assert.assertEquals(true,success);//passed.
 
-        Page<GCPBlob> testbucket = instance.list("testbucket");
+        Page<GCPBlob> testbucket = instance.list("AddReadDeleteListbucket");
         Iterable<GCPBlob> values = testbucket.getValues();
         Iterator<GCPBlob> iter = values.iterator();
         List<String> list = new ArrayList<>();
@@ -158,7 +202,7 @@ public class TestLocalStorage {
             list.add(iter.next().getName());
         }
         //length of the blob should be original length.
-        Assert.assertEquals(2,list.size());// testing on testbucket directory
+        Assert.assertEquals(0,list.size());// testing on testbucket directory
         // with 2 files already existed.
     }
 
@@ -187,22 +231,67 @@ public class TestLocalStorage {
     }
 
     @Test
-    public void testCopyFromBuildDirectory() {
+    public void testCopyFromBuildDirectory() throws IOException {
+        // which build directory?
+        //step 1: write file to
+        //step 2: copy file to the same bucket with different file name.
+        //step 3: read it in and make sure it exists as a copy.
+        String str = "Hello";
+        instance.list("build-dir-copybucket");
+        File file = new File("build/local-cloudstorage/build-dir-copybucket/originalfile.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writer.write(str);
+        writer.close();
+        String bucketName = "build-dir-copybucket";
+        String blobName = "originalfile.txt";
+        String copyBlobName = "originalfile_copy.txt";
+        Storage.CopyRequest request = Storage.CopyRequest.newBuilder()
+                .setSource(BlobId.of(bucketName, blobName))
+                .setTarget(BlobId.of(bucketName, copyBlobName))
+                .build();
+        instance.copy(request);
 
+        ReadableByteChannel readFile = instance.reader("copybucket", copyBlobName);
+        InputStream i = Channels.newInputStream(readFile);
+
+        String text = new BufferedReader(
+                new InputStreamReader(i, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+        Assert.assertEquals("Hello", text);
     }
 
     @Test
-    public void testGetBUcket() {
+    public void testGetBucket() {
     }
 
     @Test
     public void testAllCallsFailInTransaction() {
+        Context.set("tests",1);
+        try {
+            instance.get("testbucket", "fileSystemFile");
+            Assert.fail("Was expecting an exception. Should not get here");
+        }
+        catch(IllegalStateException e){
 
+        }finally{
+            Context.clear();
+        }
     }
 
     @Test
-    public void testNoReadingWhileInTransaction() {
+    public void testNoReadingWhileInTransaction() throws IOException{
+        ReadableByteChannel reader = instance.reader("testbucket","mytest.txt");//what file should we read?
+        Context.set("tests",1);
+        try {
+            int read = reader.read(ByteBuffer.allocateDirect(2048));//how to read using readableByteChannel.
+            Assert.fail("Was expecting an exception. Should not get here");
+        }
+        catch(IllegalStateException e){
 
+        } finally {
+            Context.clear();
+        }
     }
 
 }
