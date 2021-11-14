@@ -149,6 +149,7 @@ ext {
             'elastic-search'         : 'org.elasticsearch.client:elasticsearch-rest-client',
 
             'google-cloud-core'      : 'com.google.cloud:google-cloud-core',
+            'google-cloud-tasks'     : 'com.google.cloud:google-cloud-tasks',
 
             'grpc-protobuf'          : 'io.grpc:grpc-protobuf',
             'grpc-stub'              : 'io.grpc:grpc-stub',

@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
 
+    implementation deps['google-cloud-tasks']
     implementation deps['guice']
 
     //implementation deps['javax-inject-api']
