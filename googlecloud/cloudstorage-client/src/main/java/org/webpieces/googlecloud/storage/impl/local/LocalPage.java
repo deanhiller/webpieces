@@ -35,7 +35,7 @@ public class LocalPage implements Page<GCPBlob> {
 
     @Override
     public Iterable<GCPBlob> iterateAll() {
-        throw new UnsupportedOperationException();
+        return getValues();
     }
 
     @Override

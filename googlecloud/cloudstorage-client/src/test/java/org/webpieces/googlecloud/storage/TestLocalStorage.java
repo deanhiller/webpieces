@@ -1,11 +1,13 @@
 package org.webpieces.googlecloud.storage;
 
+import com.google.api.client.util.Lists;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +39,26 @@ public class TestLocalStorage {
         Injector injector = Guice.createInjector(testModule);
         instance = injector.getInstance(GCPStorage.class);
     }
+    @After
+    public void tearDown() {
+        List<String> buckets = new ArrayList<String>();
+        buckets.add("testbucket");
+
+        for(String bucket : buckets) {
+            deleteFilesInBucket(bucket);
+        }
+    }
+
+    private void deleteFilesInBucket(String bucket) {
+        Page<GCPBlob> list = instance.list(bucket);
+        for(GCPBlob blob : list.iterateAll()) {
+            deleteFile(blob);
+        }
+    }
+
+    private void deleteFile(GCPBlob blob) {
+        instance.delete(blob.getBucket(), blob.getName());
+    }
 
     @Test
     public void testReadFromClasspath() {
@@ -49,6 +71,7 @@ public class TestLocalStorage {
                 .collect(Collectors.joining("\n"));
 
         Assert.assertEquals("Some Test", text);
+
     }
 
     @Test
@@ -258,7 +281,7 @@ public class TestLocalStorage {
 
     @Test
     public void testNoReadingWhileInTransaction() throws IOException{
-        ReadableByteChannel reader = instance.reader("testbucket","filesystemFile.txt");//what file should we read?
+        ReadableByteChannel reader = instance.reader("testbucket","mytest.txt");//what file should we read?
         Context.set("tests",1);
         try {
             int read = reader.read(ByteBuffer.allocateDirect(2048));//how to read using readableByteChannel.
