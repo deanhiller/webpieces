@@ -110,6 +110,7 @@ ext {
             'projectcreator'         : 'org.webpieces:projectcreator',
 
             'gcp-cloud-storage'      : 'org.webpieces.googlecloud:cloudstorage-client',
+            'gcp-cloud-tasks'        : 'org.webpieces.googlecloud:cloudtasks-client',
 
             'jakarta-rest-api'       : 'jakarta.ws.rs:jakarta.ws.rs-api',
 

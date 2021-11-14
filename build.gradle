@@ -62,6 +62,7 @@ dependencies {
     api deps['projectcreator']
 
     api deps['gcp-cloud-storage']
+    api deps['gcp-cloud-tasks']
 }
 
 publishing {

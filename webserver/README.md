@@ -17,7 +17,6 @@ along with FutureExecutor and FutureScheduledExecutors
    * TestSslBasicSvr.java
 * cannot run tests from core/core-channelmanager2 nor core/core-asyncserver in INTELLIJ!!!!! i
    * WORKAROUND: switch to intellij builds and intellij run tests and I can run the test now
-* get GCPStorage ported as a first try according to the requirements
 * try doing this in our template compiler plugin https://discuss.gradle.org/t/can-anyone-explain-the-javaplugin-source-code/40744 as well as copying the resources into a different directory that is NOT used by the build!!!!!!  In this way, tests work, dev server works, but the *.html files are not put in production!!
 * somehow most tests were moved into core-channelmanager2/test instead of src/test/java and need to be moved back
 * Move ClientImp's and server connectors into webpieces
@@ -32,9 +31,6 @@ along with FutureExecutor and FutureScheduledExecutors
    * JSON CRUD with DTOs and DBOs
 * PLUGIN - GRPC
 * swap all DataWrapper with 'http ok client' ByteBuffer pool thingy?  Optimizes stuff more
-* microservices 
-   * microsvc-client project with Client Creator project -> port work from orderly
-   * microsvc-server project with Routes file and filter -> port work from orderly
 * port newline streaming lib and json lib and file upload lib into webpieces router api
 * PLUGIN - sync with remote Docker system by linking first at https://host:port/@remote
    * In this case, once linked, any changes to your DevServer occur in Docker container remotely in the cloud

@@ -1,9 +1,11 @@
 package webpiecesxxxxxpackage.base;
 
+import com.google.inject.Provides;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.ctx.api.extension.HtmlTagCreator;
+import org.webpieces.microsvc.client.api.RESTClientCreator;
 import org.webpieces.plugin.backend.login.BackendLogin;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.SimpleStorage;
@@ -15,13 +17,12 @@ import com.google.inject.multibindings.Multibinder;
 
 import webpiecesxxxxxpackage.db.EducationEnum;
 import webpiecesxxxxxpackage.db.RoleEnum;
-import webpiecesxxxxxpackage.service.RemoteService;
-import webpiecesxxxxxpackage.service.RemoteServiceImpl;
-import webpiecesxxxxxpackage.service.SimpleStorageImpl;
-import webpiecesxxxxxpackage.service.SomeLibrary;
-import webpiecesxxxxxpackage.service.SomeLibraryImpl;
+import webpiecesxxxxxpackage.service.*;
 import webpiecesxxxxxpackage.web.login.BackendLoginImpl;
 import webpiecesxxxxxpackage.web.tags.MyHtmlTagCreator;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 public class GuiceModule implements Module {
 
@@ -62,4 +63,9 @@ public class GuiceModule implements Module {
 		binder.bind(ApplicationContext.class).to(GlobalAppContext.class).asEagerSingleton();
 	}
 
+	@Provides
+	@Singleton
+	public RemoteService create(RESTClientCreator creator, YourServiceDirectory directory) {
+		return creator.createClient(RemoteService.class, directory.getRemoteSvc());
+	}
 }
