@@ -12,14 +12,14 @@ apply from: 'config/global.gradle'
 
 if(project.hasProperty('projVersion')) {
     task release {
+        dependsOn build
         dependsOn('publishMavenJavaPublicationToSonatypeRepository')
         dependsOn gradle.includedBuild('gradle-plugin-htmlcompiler').task(':publishPlugins')
         dependsOn gradle.includedBuild('webserver-templates').task(':githubRelease')
     }
 } else {
     task release {
-        dependsOn gradle.includedBuild('webserver-templates').task(':build')
-        dependsOn gradle.includedBuild('http2to1_1-client').task(':build')
+        dependsOn build
         dependsOn('publishMavenJavaPublicationToWebpiecesLocal2Repository')
     }
 }

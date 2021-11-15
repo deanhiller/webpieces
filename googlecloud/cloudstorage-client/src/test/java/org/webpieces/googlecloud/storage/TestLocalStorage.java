@@ -267,7 +267,7 @@ public class TestLocalStorage {
 
     @Test
     public void testAllCallsFailInTransaction() {
-        Context.set("tests",1);
+        Context.put("tests",1);
         try {
             instance.get("testbucket", "fileSystemFile");
             Assert.fail("Was expecting an exception. Should not get here");
@@ -282,7 +282,7 @@ public class TestLocalStorage {
     @Test
     public void testNoReadingWhileInTransaction() throws IOException{
         ReadableByteChannel reader = instance.reader("testbucket","mytest.txt");//what file should we read?
-        Context.set("tests",1);
+        Context.put("tests",1);
         try {
             int read = reader.read(ByteBuffer.allocateDirect(2048));//how to read using readableByteChannel.
             Assert.fail("Was expecting an exception. Should not get here");
