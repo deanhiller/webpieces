@@ -54,6 +54,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         if(recorder != null) {
             Map<String, Object> ctxSnapshot = Context.copyContext();
             recordingInfo = new EndpointInfo(method, args, ctxSnapshot);
+            recorder.addEndpointInfo(recordingInfo);
         }
 
         clientAssertions.throwIfCannotGoRemote();

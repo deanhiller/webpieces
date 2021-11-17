@@ -15,6 +15,8 @@ import org.webpieces.router.api.controller.actions.Render;
 
 import webpiecesxxxxxpackage.base.GlobalAppContext;
 import webpiecesxxxxxpackage.mgmt.SomeBean;
+import webpiecesxxxxxpackage.service.FetchValueRequest;
+import webpiecesxxxxxpackage.service.FetchValueResponse;
 import webpiecesxxxxxpackage.service.RemoteService;
 import webpiecesxxxxxpackage.service.SomeLibrary;
 
@@ -62,8 +64,12 @@ public class MainController {
 	}
 	
 	public XFuture<Action> myAsyncMethod() {
-		XFuture<Integer> remoteValue = service.fetchRemoteValue("dean", 21);
-		return remoteValue.thenApply(s -> convertToAction(s));
+
+
+		FetchValueRequest request = new FetchValueRequest("dean", 21);
+		XFuture<FetchValueResponse> remoteValue = service.fetchValue(request);
+		//fetchRemoteValue("dean", 21);
+		return remoteValue.thenApply(s -> convertToAction(s.getNum()));
 	}
 	
 	//called from method above
