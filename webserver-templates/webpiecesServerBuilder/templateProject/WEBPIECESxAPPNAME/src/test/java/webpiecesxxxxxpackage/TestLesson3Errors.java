@@ -25,7 +25,7 @@ import com.google.inject.Module;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import webpiecesxxxxxpackage.mock.JavaCache;
-import webpiecesxxxxxpackage.mock.MockRemoteSystem;
+import webpiecesxxxxxpackage.mock.MockRemoteService;
 import webpiecesxxxxxpackage.mock.MockSomeLibrary;
 import webpiecesxxxxxpackage.service.FetchValueResponse;
 import webpiecesxxxxxpackage.service.RemoteService;
@@ -47,7 +47,7 @@ import webpiecesxxxxxpackage.service.SomeLibrary;
 public class TestLesson3Errors extends AbstractWebpiecesTest {
 
 	//see below comments in AppOverrideModule
-	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
+	private MockRemoteService mockRemote = new MockRemoteService(); //our your favorite mock library
 	private MockSomeLibrary mockLibrary = new MockSomeLibrary();
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };

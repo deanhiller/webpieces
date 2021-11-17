@@ -12,7 +12,7 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import webpiecesxxxxxpackage.service.*;
 
-public class MockRemoteSystem extends MockSuperclass implements RemoteService {
+public class MockRemoteService extends MockSuperclass implements RemoteService {
 
 	public static enum Method implements MethodEnum {
 		FETCH_REMOTE_VAL, SEND_DATA

@@ -9,12 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.util.context.Context;
 import org.webpieces.webserver.api.ServerConfig;
-import org.webpieces.webserver.test.Asserts;
 import webpiecesxxxxxpackage.Server;
 import webpiecesxxxxxpackage.json.ExampleRestAPI;
 import webpiecesxxxxxpackage.json.SaveApi;
 import webpiecesxxxxxpackage.mock.JavaCache;
-import webpiecesxxxxxpackage.mock.MockRemoteSystem;
+import webpiecesxxxxxpackage.mock.MockRemoteService;
 import webpiecesxxxxxpackage.service.RemoteService;
 
 import java.net.InetSocketAddress;
@@ -33,17 +32,17 @@ public class FeatureTest extends CompanyTest {
     private final static Logger log = LoggerFactory.getLogger(FeatureTest.class);
     private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 
-    protected SaveApi dataSaveApi;
-    protected ExampleRestAPI restAPI;
-    protected MockRemoteSystem mockRemoteService = new MockRemoteSystem();
+    protected SaveApi saveApi;
+    protected ExampleRestAPI exampleRestAPI;
+    protected MockRemoteService mockRemoteService = new MockRemoteService();
     protected SimpleMeterRegistry metrics;
 
     @Before
     public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
         log.info("Setting up test");
         super.initialize();
-        dataSaveApi = super.createRestClient(SaveApi.class);
-        restAPI = super.createRestClient(ExampleRestAPI.class);
+        saveApi = super.createRestClient(SaveApi.class);
+        exampleRestAPI = super.createRestClient(ExampleRestAPI.class);
     }
 
     @After

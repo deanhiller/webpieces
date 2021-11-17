@@ -44,7 +44,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import webpiecesxxxxxpackage.json.SearchRequest;
 import webpiecesxxxxxpackage.json.SearchResponse;
 import webpiecesxxxxxpackage.mock.JavaCache;
-import webpiecesxxxxxpackage.mock.MockRemoteSystem;
+import webpiecesxxxxxpackage.mock.MockRemoteService;
 import webpiecesxxxxxpackage.service.RemoteService;
 
 /**
@@ -168,7 +168,7 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 		public void configure(Binder binder) {
 			//Add overrides here generally using mocks from fields in the test class
 			
-			binder.bind(RemoteService.class).toInstance(new MockRemoteSystem()); //see above comment on the field mockRemote
+			binder.bind(RemoteService.class).toInstance(new MockRemoteService()); //see above comment on the field mockRemote
 		}
 	}
 	
