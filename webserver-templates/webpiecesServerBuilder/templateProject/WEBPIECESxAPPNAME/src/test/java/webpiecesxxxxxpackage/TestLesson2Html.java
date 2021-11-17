@@ -33,7 +33,7 @@ import com.google.inject.Module;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import webpiecesxxxxxpackage.mock.JavaCache;
-import webpiecesxxxxxpackage.mock.MockRemoteSystem;
+import webpiecesxxxxxpackage.mock.MockRemoteService;
 import webpiecesxxxxxpackage.service.FetchValueResponse;
 import webpiecesxxxxxpackage.service.RemoteService;
 
@@ -49,7 +49,7 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 	private final static Logger log = LoggerFactory.getLogger(TestLesson2Html.class);
 	
 	//see below comments in AppOverrideModule
-	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
+	private MockRemoteService mockRemote = new MockRemoteService(); //our your favorite mock library
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
