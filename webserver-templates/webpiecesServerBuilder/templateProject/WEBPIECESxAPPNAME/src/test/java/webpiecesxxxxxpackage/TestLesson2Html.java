@@ -34,6 +34,7 @@ import com.google.inject.Module;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteSystem;
+import webpiecesxxxxxpackage.service.FetchValueResponse;
 import webpiecesxxxxxpackage.service.RemoteService;
 
 /**
@@ -100,7 +101,7 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testAsyncControllerAndRemoteSystem() {
-		XFuture<Integer> future = new XFuture<Integer>();
+		XFuture<FetchValueResponse> future = new XFuture<FetchValueResponse>();
 		mockRemote.addValueToReturn(future);
 		HttpFullRequest req = createRequest("/async");
 		
@@ -111,7 +112,7 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 		//notice that the thread returned but there is no response back to browser yet such that thread can do more work.
 		//next, simulate remote system returning a value..
 		int value = 85;
-		future.complete(value);
+		future.complete(new FetchValueResponse(85));
 
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);

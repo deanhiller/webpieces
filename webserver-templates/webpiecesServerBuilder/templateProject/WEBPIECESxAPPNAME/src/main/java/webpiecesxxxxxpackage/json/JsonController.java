@@ -1,6 +1,8 @@
 package webpiecesxxxxxpackage.json;
 
 import org.webpieces.util.futures.XFuture;
+
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -25,6 +27,7 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import webpiecesxxxxxpackage.service.RemoteService;
+import webpiecesxxxxxpackage.service.SendDataRequest;
 
 @Singleton
 public class JsonController implements SaveApi, ClientApi {
@@ -108,7 +111,7 @@ public class JsonController implements SaveApi, ClientApi {
 		counter.increment();
 
 		//so we can test out mocking remote services
-		remoteService.sendData(6);
+		remoteService.sendData(new SendDataRequest(6)).join();
 
 		SearchResponse resp = postJson(request);
 		return XFuture.completedFuture(resp);

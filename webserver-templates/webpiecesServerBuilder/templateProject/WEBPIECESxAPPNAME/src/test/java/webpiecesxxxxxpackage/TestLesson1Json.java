@@ -6,9 +6,12 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.util.futures.XFuture;
 import webpiecesxxxxxpackage.framework.FeatureTest;
 import webpiecesxxxxxpackage.framework.Requests;
 import webpiecesxxxxxpackage.json.*;
+import webpiecesxxxxxpackage.service.SendDataRequest;
+import webpiecesxxxxxpackage.service.SendDataResponse;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -33,6 +36,8 @@ public class TestLesson1Json extends FeatureTest {
 	public void testSynchronousController() throws ExecutionException, InterruptedException, TimeoutException {
 		//move complex request building out of the test...
 		SearchRequest req = Requests.createSearchRequest();
+
+		mockRemoteService.setSendDefaultRetValue(XFuture.completedFuture(new SendDataResponse()));
 
 		//always call the client api we test in the test method so developers can find what we test
 		//very easily.. (do not push this down behind a method as we have found it slows others down
@@ -75,9 +80,9 @@ public class TestLesson1Json extends FeatureTest {
 		Assert.assertEquals(2.0, counter.count(), 0.1);
 
 		//check the mock system was called with 6
-		List<Integer> params = mockRemoteService.getSendMethodParameters();
+		List<SendDataRequest> params = mockRemoteService.getSendMethodParameters();
 		Assert.assertEquals(2, params.size());
-		Assert.assertEquals(6, params.get(0).intValue());
+		Assert.assertEquals(6, params.get(0).getNum());
 	}
 
 }

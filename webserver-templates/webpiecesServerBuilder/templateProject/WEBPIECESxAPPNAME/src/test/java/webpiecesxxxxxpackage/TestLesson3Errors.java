@@ -27,6 +27,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteSystem;
 import webpiecesxxxxxpackage.mock.MockSomeLibrary;
+import webpiecesxxxxxpackage.service.FetchValueResponse;
 import webpiecesxxxxxpackage.service.RemoteService;
 import webpiecesxxxxxpackage.service.SomeLibrary;
 
@@ -106,7 +107,7 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testRemoteSystemDown() {
-		XFuture<Integer> future = new XFuture<Integer>();
+		XFuture<FetchValueResponse> future = new XFuture<FetchValueResponse>();
 		mockRemote.addValueToReturn(future);
 		HttpFullRequest req = TestLesson2Html.createRequest("/async");
 		
