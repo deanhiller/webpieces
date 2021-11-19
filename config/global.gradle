@@ -172,7 +172,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 def currentJvm = System.getProperty('java.version') + ' (' + System.getProperty('java.vendor') + ' ' + System.getProperty('java.runtime.version') + ')'
 
 if (project.hasProperty('projVersion')) {
-    if (project.projVersion.replaceAll("[^.]", "").length() != 2) {
+    if (project.projVersion.replaceAll("[^.]", "").length() < 2) {
         throw new GradleException("projVersion must be the full version!")
     }
     project.version = project.projVersion
@@ -258,16 +258,16 @@ configurations.all {
     }
 }
 
+pluginManager.withPlugin('java') {
 
-//We could do this just for the template projects, BUT during debugging, it is sooo
-//damn nice to have the var names, it is worth the performance penalty I think though
-//we could change this
-[compileJava, compileTestJava]*.options.collect { options ->
-    options.compilerArgs.add '-parameters'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
 
-    //For windows only, to get the TestI18n working(there is chinese text in the *.java file screwing
-    //windows up, we either have to move that to a file(annoying) or turn on utf-8
-    options.encoding = 'UTF-8'
+    [compileJava, compileTestJava]*.options.collect { options ->
+        options.compilerArgs.add '-parameters'
+        options.encoding = 'UTF-8'
+    }
+
 }
 
 if (JavaVersion.current().isJava8Compatible()) {

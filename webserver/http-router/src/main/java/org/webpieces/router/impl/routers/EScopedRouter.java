@@ -191,7 +191,15 @@ public class EScopedRouter {
 	private RouterStreamRef invokeWithProtection(AbstractRouter router, RequestContext ctx,
 			 ProxyStreamHandle handler, boolean isCorsRequest) {
 		try {
-			if(isCorsRequest) {
+
+			//if((router instanceof FContentRouter)) {
+			//	FContentRouter contentRouter = (FContentRouter) router;
+			//
+			//}
+
+			if(isCorsRequest && (router instanceof FContentRouter)) {
+				//boolean routerAllowsCors = false;
+				//routerAllowsCors = contentRouter.getCorsProcessor() != null;
 				if(isFailSecurityCheck(router, ctx, handler))
 					return new RouterStreamRef("failCors");
 			}
