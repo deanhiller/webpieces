@@ -100,6 +100,18 @@ public class TestGetCorsRouting extends AbstractWebpiecesTest {
 	}
 
 	@Test
+	public void testPostNotInCorsMethodsWithPostWithNotCORSRequestAndOriginExists() {
+		List<String> accessHeaders = List.of("Authorization");
+		HttpFullRequest req = Requests.createNotCorsRequest("/content", accessHeaders, KnownHttpMethod.POST);
+
+		XFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
+
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+	}
+
+	@Test
 	public void testPostNotInCorsMethodsResult403() {
 		List<String> accessHeaders = List.of("Authorization");
 		HttpFullRequest req = Requests.createCorsRequest(CorsForTwoDomains.DOMAIN1, "/content", accessHeaders, KnownHttpMethod.POST);

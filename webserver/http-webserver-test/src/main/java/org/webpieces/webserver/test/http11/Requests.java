@@ -95,6 +95,26 @@ public class Requests {
 		return fullReq;
 	}
 
+	public static HttpFullRequest createNotCorsRequest(String url, List<String> accessHeaders, KnownHttpMethod method) {
+		HttpUri httpUri = new HttpUri(url);
+		HttpRequestLine requestLine = new HttpRequestLine();
+		requestLine.setMethod(method);
+		requestLine.setUri(httpUri);
+
+		HttpRequest req = new HttpRequest();
+		req.setRequestLine(requestLine);
+
+		String domain = "api.domain.com";
+		req.addHeader(new Header(KnownHeaderName.HOST, domain));
+		req.addHeader(new Header(KnownHeaderName.ORIGIN, "https://"+domain));
+		for(String name : accessHeaders) {
+			req.addHeader(new Header(name, name));
+		}
+
+		HttpFullRequest fullReq = new HttpFullRequest(req, null);
+		return fullReq;
+	}
+
 	public static HttpFullRequest createOptionsPreflightRequest(String fromDomain, String url, String accessHeaders, String method) {
 		HttpUri httpUri = new HttpUri(url);
 		HttpRequestLine requestLine = new HttpRequestLine();

@@ -248,6 +248,8 @@ public class RouterRequest {
 
 	public UriInfo requestUri;
 
+	private Map<String, List<RouterHeader>> routerHeaderMap;
+
 	/**
 	 * Need to remove webpieces http2 stack from router(ie. Http2Request above and Http2Headers!!!!!!)
 	 * This is a step towards that to only
@@ -264,10 +266,13 @@ public class RouterRequest {
 	 *         public Http2Request originalRequest;
 	 * 	       public Http2Headers trailingHeaders;
 	 */
-	public Map<String, List<RouterHeader>> getHeaders() {
-		Map<String, List<RouterHeader>> routerHeaderMap = new HashMap<>();
-		if(originalRequest == null)
+	public synchronized Map<String, List<RouterHeader>> getHeaders() {
+		if(routerHeaderMap != null)
+			return routerHeaderMap;
+		else if(originalRequest == null)
 			return routerHeaderMap; //some legacy tests at Orderly simulate with no original request
+
+		routerHeaderMap = new HashMap<>();
 
 		//DO NOT cache this as there are clients that modify the Http2Header which will not
 		//modify this list so just generate this list every time for now.
@@ -282,6 +287,16 @@ public class RouterRequest {
 		}
 
 		return routerHeaderMap;
+	}
+
+	public RouterHeader getSingleHeader(String headerName) {
+		Map<String, List<RouterHeader>> headers = getHeaders();
+		List<RouterHeader> routerHeaders = headers.get(headerName);
+		if(routerHeaders == null)
+			return null;
+		else if(routerHeaders.size() > 1)
+			throw new IllegalStateException("There are "+routerHeaders.size()+" headers with name="+headerName+" not one");
+		return routerHeaders.get(0);
 	}
 
 	private List<RouterHeader> translate(List<Http2Header> headerArray) {

@@ -3,6 +3,9 @@ package org.webpieces.router.impl.routers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -87,16 +90,21 @@ public class EScopedRouter {
 	}
 	
 	private RouterStreamRef findAndInvokeRoute(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
-		if(ctx.getRequest().method == HttpMethod.OPTIONS) {
+		RouterRequest routerReq = ctx.getRequest();
+		if(routerReq.method == HttpMethod.OPTIONS) {
 			return respondToOptionsRequest(ctx, handler, subPath);
 		}
 
-		List<RouterHeader> origin = ctx.getRequest().getHeaders().get("origin");
-		if(origin == null) {
-			return findAndInvokeImpl(ctx, handler, subPath, false);
-		} else {
-			return findAndInvokeImpl(ctx, handler, subPath, true);
+		RouterHeader origin = routerReq.getSingleHeader("origin");
+		RouterHeader scheme = routerReq.getSingleHeader(Http2HeaderName.SCHEME.getHeaderName());
+		RouterHeader authority = routerReq.getSingleHeader(Http2HeaderName.AUTHORITY.getHeaderName());
+		String fullDomain = scheme.getValue()+"://"+authority.getValue();
+		boolean isCorsRequest = false;
+		if(origin != null && !fullDomain.equals(origin.getValue())) {
+			isCorsRequest = true;
 		}
+
+		return findAndInvokeImpl(ctx, handler, subPath, isCorsRequest);
 	}
 
 	private RouterStreamRef findAndInvokeImpl(RequestContext ctx, ProxyStreamHandle handler, String subPath, boolean isCorsRequest) {
@@ -192,15 +200,7 @@ public class EScopedRouter {
 			 ProxyStreamHandle handler, boolean isCorsRequest) {
 		try {
 
-			//if((router instanceof FContentRouter)) {
-			//	FContentRouter contentRouter = (FContentRouter) router;
-			//
-			//}
-
-			if(isCorsRequest && (router instanceof FContentRouter)) {
-				//boolean routerAllowsCors = false;
-				//routerAllowsCors = contentRouter.getCorsProcessor() != null;
-				if(isFailSecurityCheck(router, ctx, handler))
+			if(isCorsRequest && isFailSecurityCheck(router, ctx, handler)) {
 					return new RouterStreamRef("failCors");
 			}
 
