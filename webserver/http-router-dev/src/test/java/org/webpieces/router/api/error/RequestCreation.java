@@ -11,6 +11,7 @@ public class RequestCreation {
 		Http2Request req = new Http2Request();
 		req.addHeader(new Http2Header(Http2HeaderName.METHOD, method.getCode()));
 		req.addHeader(new Http2Header(Http2HeaderName.PATH, path));
+		req.addHeader(new Http2Header(Http2HeaderName.SCHEME, "http"));
 		req.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, "orderly.com"));
 		return req;
 	}
