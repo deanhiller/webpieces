@@ -1,13 +1,19 @@
 package org.webpieces.ctx.api;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import com.webpieces.http2.api.dto.highlevel.Http2HeaderStruct;
-import com.webpieces.http2.api.dto.highlevel.Http2Headers;
-import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import org.slf4j.MDC;
+
 import org.webpieces.data.api.DataWrapper;
 
-import java.util.*;
+import com.webpieces.http2.api.dto.highlevel.Http2Headers;
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
 
 /**
  * The format of this class caters to the router so it has everything the router uses and no more.  It

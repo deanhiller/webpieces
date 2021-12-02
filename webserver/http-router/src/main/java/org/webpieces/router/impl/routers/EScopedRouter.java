@@ -1,33 +1,38 @@
 package org.webpieces.router.impl.routers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.base.Strings;
+
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.util.futures.XFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
-import com.webpieces.http2.api.streaming.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.RouterHeader;
 import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.api.exceptions.SpecificRouterInvokeException;
 import org.webpieces.router.api.routebldr.AccessResult;
 import org.webpieces.router.api.routebldr.ProcessCors;
+import org.webpieces.util.exceptions.SneakyThrow;
+import org.webpieces.util.exceptions.WebpiecesException;
 import org.webpieces.router.impl.RouterFutureUtil;
 import org.webpieces.router.impl.model.MatchResult2;
 import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
 import org.webpieces.router.impl.routeinvoker.RouterStreamRef;
-import org.webpieces.util.exceptions.SneakyThrow;
-import org.webpieces.util.exceptions.WebpiecesException;
-import org.webpieces.util.futures.XFuture;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class EScopedRouter {
 	private static final Logger log = LoggerFactory.getLogger(EScopedRouter.class);
