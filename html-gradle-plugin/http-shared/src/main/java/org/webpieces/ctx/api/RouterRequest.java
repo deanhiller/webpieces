@@ -1,19 +1,13 @@
 package org.webpieces.ctx.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import com.webpieces.http2.api.dto.highlevel.Http2HeaderStruct;
-import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
-import org.slf4j.MDC;
-
-import org.webpieces.data.api.DataWrapper;
-
 import com.webpieces.http2.api.dto.highlevel.Http2Headers;
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import org.slf4j.MDC;
+import org.webpieces.data.api.DataWrapper;
+
+import java.util.*;
 
 /**
  * The format of this class caters to the router so it has everything the router uses and no more.  It
@@ -346,5 +340,16 @@ public class RouterRequest {
 				+ queryParams + ", \nmultiPartFields=\n" + multiPartFields + "\n"
 				+ "cookies="+cookies+"\n]";
 	}
-	
+
+	public String getSingleHeaderValue(String headerName) {
+		RouterHeader singleHeader = getSingleHeader(headerName);
+		if (singleHeader == null) return null;
+		return singleHeader.getValue();
+	}
+
+	public String getSingleHeaderValueOrDefault(String headerName, String def) {
+		String value = getSingleHeaderValue(headerName);
+		if (value == null) return def;
+		return value;
+	}
 }
