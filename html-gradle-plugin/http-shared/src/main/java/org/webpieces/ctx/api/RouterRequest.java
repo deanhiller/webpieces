@@ -346,5 +346,16 @@ public class RouterRequest {
 				+ queryParams + ", \nmultiPartFields=\n" + multiPartFields + "\n"
 				+ "cookies="+cookies+"\n]";
 	}
-	
+
+	public String getSingleHeaderValue(String headerName) {
+		RouterHeader singleHeader = getSingleHeader(headerName);
+		if (singleHeader == null) return null;
+		return singleHeader.getValue();
+	}
+
+	public String getSingleHeaderValueOrDefault(String headerName, String def) {
+		String value = getSingleHeaderValue(headerName);
+		if (value == null) return def;
+		return value;
+	}
 }

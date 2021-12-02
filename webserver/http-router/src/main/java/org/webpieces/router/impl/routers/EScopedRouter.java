@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Strings;
+
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.util.futures.XFuture;
@@ -95,14 +97,15 @@ public class EScopedRouter {
 			return respondToOptionsRequest(ctx, handler, subPath);
 		}
 
-		RouterHeader origin = routerReq.getSingleHeader("origin");
-		RouterHeader scheme = routerReq.getSingleHeader(Http2HeaderName.SCHEME.getHeaderName());
-		RouterHeader authority = routerReq.getSingleHeader(Http2HeaderName.AUTHORITY.getHeaderName());
-		String fullDomain = scheme.getValue()+"://"+authority.getValue();
-		boolean isCorsRequest = false;
-		if(origin != null && !fullDomain.equals(origin.getValue())) {
-			isCorsRequest = true;
-		}
+		String forwarded = routerReq.getSingleHeaderValue(Http2HeaderName.X_FORWARDED_PROTO.getHeaderName());
+		String scheme = routerReq.getSingleHeaderValueOrDefault(Http2HeaderName.SCHEME.getHeaderName(), "");
+		if (!Strings.isNullOrEmpty(forwarded)) scheme = "https";
+
+		String authority = routerReq.getSingleHeaderValueOrDefault(Http2HeaderName.AUTHORITY.getHeaderName(), "");
+		String fullDomain = scheme+"://"+authority;
+
+		String origin = routerReq.getSingleHeaderValueOrDefault(Http2HeaderName.ORIGIN.getHeaderName(), "");
+		boolean isCorsRequest = !Strings.isNullOrEmpty(origin) && !fullDomain.equals(origin);
 
 		return findAndInvokeImpl(ctx, handler, subPath, isCorsRequest);
 	}
