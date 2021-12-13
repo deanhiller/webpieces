@@ -7,8 +7,8 @@ public enum DatabaseMetric {
     DATABASE_ENTITY_UPDATES("webpieces/database/entity/updates"),
     DATABASE_ENTITY_INSERTS("webpieces/database/entity/inserts"),
 
-    TRANSACTION_TIME("webpieces/database/transaction/time", "/max"),
-    TRANSACTION_TIME_COUNT("webpieces/database/transaction/time", "/count")
+    EXECUTION_TIME("webpieces/database/execution/time", "/max"),
+    EXECUTION_COUNT("webpieces/database/execution/time", "/count")
     ;
 
     private final String name;
