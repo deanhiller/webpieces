@@ -19,6 +19,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * @deprecated Replaced by {@link PersistenceHelper}.
+ */
+@Deprecated
 @Singleton
 public class TransactionHelper {
 
@@ -97,11 +101,11 @@ public class TransactionHelper {
             requestPath = "unknown";
         }
         Tags transactionTags = Tags.of(
-                DatabaseTransactionTags.TRANSACTION, transactionName,
+                DatabaseTransactionTags.EXECUTION_ID, transactionName,
                 DatabaseTransactionTags.REQUEST, requestPath
         );
 
-        meterRegistry.timer(DatabaseMetric.TRANSACTION_TIME.getDottedMetricName(), transactionTags)
+        meterRegistry.timer(DatabaseMetric.EXECUTION_TIME.getDottedMetricName(), transactionTags)
                 .record(System.currentTimeMillis() - begin, TimeUnit.MILLISECONDS);
     }
 
