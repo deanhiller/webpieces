@@ -22,7 +22,7 @@ public class FileLookup {
      * @return The virtualFile if found
      */
     public VirtualFile getJava(String name) {
-        if(name.contains("$HibernateProxy$")) //Avoid bytebuddy classes that hibernate creates
+        if(name.contains("$HibernateProxy$") || name.endsWith("_")) //Avoid bytebuddy classes that hibernate creates
             return null;
 
         String fileName = name;
