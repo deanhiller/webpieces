@@ -109,17 +109,19 @@ public class PropertiesController {
 			}
 			
 		}
-		
+
+		RequestContext ctx = Current.getContext();
 		if(Current.validation().hasErrors()) {
-			RequestContext ctx = Current.getContext();
 			ctx.moveFormParamsToFlash(new HashSet<>());
-			ctx.getFlash().keep();
-			ctx.getValidation().keep();
-			return Actions.redirect(PropertiesRouteId.BEAN_ROUTE, 
+			ctx.getFlash().keep(true);
+			ctx.getValidation().keep(true);
+			return Actions.redirect(PropertiesRouteId.BEAN_ROUTE,
 					"category", category, 
 					"name", name);			
 		}
-		
+
+		ctx.getValidation().keep(false);
+
 		//KISS: not doing rollback code so if one prop fails to set, it does not save to database
 		//and is partially applied.  (ie. keep your setter code simple!!).
 		

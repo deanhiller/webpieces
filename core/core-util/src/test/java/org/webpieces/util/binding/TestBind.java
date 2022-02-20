@@ -1,6 +1,7 @@
 package org.webpieces.util.binding;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.ExecutionException;
@@ -19,7 +20,11 @@ public class TestBind {
 	public void testFilters() throws InterruptedException, ExecutionException, IOException {
 		ServerSocket s = new ServerSocket();
 		s.setReuseAddress(true);
-		s.bind(new InetSocketAddress(8080));
+		try {
+			s.bind(new InetSocketAddress(8080));
+		} catch (BindException e) {
+			throw new RuntimeException("You cannot be running a server on port 8080 nor 8443 to run the build.  Please shutdown the server first", e);
+		}
 		
 		s.close();
 

@@ -214,4 +214,8 @@ public class CookieTranslator implements CookieWebManaged {
 		return "Webpieces Router";
 	}
 
+	@Override
+	public String toString() {
+		return "CookieTranslator.class";
+	}
 }

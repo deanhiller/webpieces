@@ -16,7 +16,7 @@ exposed here.  Say bye bye to property files!!!</p>
       <li id="tab_${category.name}$">${category.name}$
         <ul>
             #{list items:category.beanMetas, as:'beanMeta'}#
-            <li><a href="@[BEAN_ROUTE, category:category.name, name:beanMeta.name]@">${beanMeta.name}$.class</a></li>
+            <li><a href="@[BEAN_ROUTE, category:category.name, name:beanMeta.name]@">${beanMeta.name}$</a></li>
              #{/list}#
              #{else}#
              <li><a href="">Bug, please report as this should not be possible</a>

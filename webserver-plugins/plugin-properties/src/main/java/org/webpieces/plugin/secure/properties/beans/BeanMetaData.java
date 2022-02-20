@@ -102,12 +102,9 @@ public class BeanMetaData implements Startable {
 		}
 
 		Map<String, BeanMeta> list = meta.getOrDefault(category, new HashMap<>());
-		
-		String finalKey = injectee.getClass().getSimpleName();
-		if(list.get(finalKey) != null) {
-			finalKey = injectee.getClass().getName(); //use full name to prevent conflicts
-		}
-		
+
+		String finalKey = injectee.toString();
+
 		Method[] methods = interfaze.getMethods();
 		List<PropertyInfo> properties = create(objectTranslator, injectee, interfaze, methods);
 		

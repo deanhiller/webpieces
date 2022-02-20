@@ -65,7 +65,7 @@ public class TestPropertiesPlugin extends AbstractWebpiecesTest {
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//redirect to login page
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("<a href=`/@properties/bean/Webpieces+Router/CookieTranslator`>CookieTranslator.class</a>".replace("`", "\""));
+		response.assertContains("<a href=`/@properties/bean/Webpieces+Router/CookieTranslator.class`>CookieTranslator.class</a>".replace("`", "\""));
 	}
 
 }
