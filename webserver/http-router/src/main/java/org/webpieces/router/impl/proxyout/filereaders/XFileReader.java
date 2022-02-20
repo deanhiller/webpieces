@@ -2,6 +2,8 @@ package org.webpieces.router.impl.proxyout.filereaders;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
@@ -46,8 +48,10 @@ public abstract class XFileReader {
 
 	public XFuture<Void> runFileRead(RequestInfo info, RenderStaticResponse renderStatic, ProxyStreamHandle handle) throws IOException {
 		
-		
 		VirtualFile fullFilePath = renderStatic.getFilePath();
+		if(!fullFilePath.exists()) {
+			throw new NotFoundException("File not found");
+		}
 
 		String fileName = getNameToUse(fullFilePath);
 	    String extension = null;
