@@ -50,7 +50,9 @@ public abstract class XFileReader {
 		
 		VirtualFile fullFilePath = renderStatic.getFilePath();
 		if(!fullFilePath.exists()) {
-			throw new NotFoundException("File not found");
+			throw new NotFoundException("File not found="+fullFilePath);
+		} else if(fullFilePath.isDirectory()) {
+			throw new NotFoundException("File not found (it was a directory that can't be rendered)="+fullFilePath);
 		}
 
 		String fileName = getNameToUse(fullFilePath);

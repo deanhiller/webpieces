@@ -116,14 +116,18 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 
 	@Override
 	public void addStaticDir(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath) {
-		if(!urlPath.endsWith("/"))
+		//urlPath must start with / and not end with / but we must allow just '/' which technicall
+		//ends and begins with /
+		if(!urlPath.endsWith("/") && !"/".equals(urlPath))
 			throw new IllegalArgumentException("Static directory so urlPath must end with a /");
 		addStaticRoute(port, urlPath, fileSystemPath, isOnClassPath);
 	}
 
 	@Override
 	public void addStaticFile(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath) {
-		if(urlPath.endsWith("/"))
+		//urlPath must start with / and not end with / but we must allow just '/' which technicall
+		//ends and begins with /
+		if(urlPath.endsWith("/") && !"/".equals(urlPath))
 			throw new IllegalArgumentException("Static file so urlPath must NOT end with a /");
 		addStaticRoute(port, urlPath, fileSystemPath, isOnClassPath);
 	}
@@ -173,22 +177,22 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		List<String> pathParamNames = new ArrayList<>();
 		Pattern patternToMatch;
 		boolean isFile;
-		if(isDirectory(urlSubPath)) {
-			if(!file.isDirectory())
-				throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
-			else if(!file.isDirectory())
-				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a directory and must be for static directories");
+		if(file.isDirectory()) {
+			//if file on file system is directory, then we cannot be adding a static looking url!!!
+			if(!isDirectory(urlSubPath))
+				throw new IllegalArgumentException("Static directory so urlPath must end with a / to map to directory="+file);
+
 			patternToMatch = Pattern.compile("^"+urlSubPath+"(?<resource>.*)$");
 			pathParamNames.add("resource");
 			isFile = false;
+		} else if(!file.isFile()) {
+			//it should be a file if not a directory but let's make sure
+			throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a file and must be for static file route");
 		} else {
-			if(file.isDirectory())
-				throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
-			else if(!file.isFile())
-				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a file and must be for static file route");
+			//it is a file
 			patternToMatch = Pattern.compile("^"+urlSubPath+"$");
 			isFile = true;
-		}		
+		}
 		
 		MatchInfo matchInfo = new MatchInfo(urlPath, exposedPort, httpMethod, urlEncoding, patternToMatch, pathParamNames);
 		String relativePath = urlSubPath.substring(1);
