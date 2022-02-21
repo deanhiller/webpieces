@@ -460,9 +460,12 @@ pluginManager.withPlugin('maven-publish') {
 
     publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
 
-    if (project.properties.sonatypeUsername
-            && project.properties.sonatypePassword) {
-        if (!project.hasProperty("signing.keyId")) {
+    if(project.hasProperty('projVersion')) {
+        if (!project.properties.sonatypeUsername) {
+            throw new IllegalStateException("You are missing sonatypeUsername in properties")
+        } else if(!project.properties.sonatypePassword) {
+            throw new IllegalStateException("You are missing sonatypePassword in properties")
+        } else if (!project.hasProperty("signing.keyId")) {
             throw new IllegalStateException("signing.keyId property required for sonas release.  see https://docs.gradle.org/current/userguide/signing_plugin.html")
         }
         publishing {
