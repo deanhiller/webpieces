@@ -49,6 +49,8 @@ public class RouteInvokerStatic {
 			resp.setFilePath(data.getFileSystemPath());
 		} else {
 			String relativeUrl = ctx.getPathParams().get("resource");
+			if(relativeUrl.startsWith("/")) //make it truly relative so it does not start with /
+				relativeUrl = relativeUrl.substring(1);
 			VirtualFile fullPath = data.getFileSystemPath().child(relativeUrl);
 			resp.setFileAndRelativePath(fullPath, relativeUrl);
 		}

@@ -116,33 +116,22 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 
 	@Override
 	public void addStaticDir(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath) {
-		//urlPath must start with / and not end with / but we must allow just '/' which technicall
-		//ends and begins with /
-		if(!urlPath.endsWith("/") && !"/".equals(urlPath))
-			throw new IllegalArgumentException("Static directory so urlPath must end with a /");
-		addStaticRoute(port, urlPath, fileSystemPath, isOnClassPath);
+		addStaticRoute(port, urlPath, fileSystemPath, isOnClassPath, false);
 	}
 
 	@Override
 	public void addStaticFile(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath) {
-		//urlPath must start with / and not end with / but we must allow just '/' which technicall
-		//ends and begins with /
-		if(urlPath.endsWith("/") && !"/".equals(urlPath))
-			throw new IllegalArgumentException("Static file so urlPath must NOT end with a /");
-		addStaticRoute(port, urlPath, fileSystemPath, isOnClassPath);
+		addStaticRoute(port, urlPath, fileSystemPath, isOnClassPath, true);
 	}
 	
-	private void addStaticRoute(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath) {
-		if(!urlPath.startsWith("/"))
-			throw new IllegalArgumentException("static resource url paths must start with / path="+urlPath);
-		
+	private void addStaticRoute(Port port, String urlPath, String fileSystemPath, boolean isOnClassPath, boolean isFile) {
 		if(isOnClassPath)
-			addStaticClasspathFile(port, urlPath, fileSystemPath);
+			addStaticClasspathFile(port, urlPath, fileSystemPath, isFile);
 		else
-			addStaticLocalFile(port, urlPath, fileSystemPath);
+			addStaticLocalFile(port, urlPath, fileSystemPath, isFile);
 	}
 	
-	private void addStaticClasspathFile(Port port, String urlSubPath, String fileSystemPath) {
+	private void addStaticClasspathFile(Port port, String urlSubPath, String fileSystemPath, boolean isFile) {
 		if(!fileSystemPath.startsWith("/"))
 			throw new IllegalArgumentException("Classpath resources must start with a / and be absolute on the classpath");
 		
@@ -155,9 +144,9 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		if(!isDirectory && !file.exists())
 			throw new IllegalArgumentException("Static File="+file.getCanonicalPath()+" does not exist. fileSysPath="+file+" abs="+file.getAbsolutePath());
 
-		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, true);
+		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, true, isFile);
 	}
-	private void addStaticLocalFile(Port port, String path, String fileSystemPath) {
+	private void addStaticLocalFile(Port port, String path, String fileSystemPath, boolean isFile) {
 		if(fileSystemPath.startsWith("/"))
 			throw new IllegalArgumentException("Absolute file system path is not supported as it is not portable across OS when done wrong.  Override the modules working directory instead");
 		
@@ -168,30 +157,31 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		if(!file.exists())
 			throw new IllegalArgumentException("Static File="+file.getCanonicalPath()+" does not exist. fileSysPath="+file+" abs="+file.getAbsolutePath());
 
-		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, false);
+		createStaticRouter(p, port, HttpMethod.GET, holder.getUrlEncoding(), file, false, isFile);
 	}
 	
-	private void createStaticRouter(UrlPath urlPath, Port exposedPort, HttpMethod httpMethod, Charset urlEncoding, VirtualFile file, boolean isOnClassPath) {
+	private void createStaticRouter(UrlPath urlPath, Port exposedPort, HttpMethod httpMethod, Charset urlEncoding,
+									VirtualFile file, boolean isOnClassPath, boolean isFile) {
 
 		String urlSubPath = urlPath.getSubPath();
 		List<String> pathParamNames = new ArrayList<>();
 		Pattern patternToMatch;
-		boolean isFile;
-		if(file.isDirectory()) {
-			//if file on file system is directory, then we cannot be adding a static looking url!!!
-			if(!isDirectory(urlSubPath))
-				throw new IllegalArgumentException("Static directory so urlPath must end with a / to map to directory="+file);
+		if(file.isDirectory() && isFile) {
+			throw new IllegalArgumentException("directory="+file.getCanonicalPath()+" is not a file and must be for adding a static file route");
+		} else if(!file.isDirectory() && !isFile) {
+			throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a directory and must be for adding a static directory route");
+		} if(file.isDirectory()) {
+			//Customer can supply the resource capture group OR we provide it if it is a simple directory match
+			if(!urlSubPath.contains("<resource>")) {
+				patternToMatch = Pattern.compile("^"+urlSubPath+"(?<resource>.*)$");
+			} else {
+				patternToMatch = Pattern.compile("^"+urlSubPath+"$");
+			}
 
-			patternToMatch = Pattern.compile("^"+urlSubPath+"(?<resource>.*)$");
 			pathParamNames.add("resource");
-			isFile = false;
-		} else if(!file.isFile()) {
-			//it should be a file if not a directory but let's make sure
-			throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a file and must be for static file route");
 		} else {
 			//it is a file
 			patternToMatch = Pattern.compile("^"+urlSubPath+"$");
-			isFile = true;
 		}
 		
 		MatchInfo matchInfo = new MatchInfo(urlPath, exposedPort, httpMethod, urlEncoding, patternToMatch, pathParamNames);
