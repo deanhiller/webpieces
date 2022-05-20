@@ -205,7 +205,7 @@ public class WebpiecesServer {
 				throw new NoRunningServerMainInIDEException(); 
 			} else {
 				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java in webpieces project from Intellij");
-				return FileFactory.newFile(filePath, "webserver/webpiecesServerBuilder/templateProject/"+projectName+"/src/dist");
+				return FileFactory.newFile(filePath, "webserver-templates/webpiecesServerBuilder/templateProject/"+projectName+"/src/dist");
 			}
 		}
 

@@ -22,7 +22,7 @@ public class IDESupport {
         } else if(filePath1.endsWith("webpieces")) {
         	//intellij is more annoying since it runs in webpieces for the template project we use to generate
 			//AND THEN runs in the webapp directory which is way different path than the template directory
-			directory = directory+"/webserver/webpiecesServerBuilder/templateProject";
+			directory = directory+"/webserver-templates/webpiecesServerBuilder/templateProject";
 		}
         
 		return VirtualFileFactory.newAbsoluteFile(directory);
