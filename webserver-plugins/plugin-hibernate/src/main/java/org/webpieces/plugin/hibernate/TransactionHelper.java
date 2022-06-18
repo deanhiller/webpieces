@@ -2,13 +2,11 @@ package org.webpieces.plugin.hibernate;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
-import org.webpieces.ctx.api.Current;
-import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterRequest;
+
 import org.webpieces.plugin.hibernate.metrics.DatabaseMetric;
 import org.webpieces.plugin.hibernate.metrics.DatabaseTransactionTags;
 import org.webpieces.util.context.Context;
-import org.webpieces.util.context.ContextKey;
+import org.webpieces.util.context.WebpiecesContextKey;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -16,7 +14,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -96,7 +93,7 @@ public class TransactionHelper {
     }
 
     private void monitorTransactionTime(String transactionName, long begin) {
-        String requestPath = (String) Context.get(ContextKey.REQUEST_PATH.toString());
+        String requestPath = (String) Context.get(WebpiecesContextKey.REQUEST_PATH.toString());
         if (requestPath == null || requestPath.isBlank()) {
             requestPath = "unknown";
         }

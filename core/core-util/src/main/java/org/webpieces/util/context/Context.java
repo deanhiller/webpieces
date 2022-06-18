@@ -10,16 +10,28 @@ public class Context {
 
     private static ThreadLocal<Map<String,Object>> context = ThreadLocal.withInitial(() -> new HashMap<>());
 
-    public static Object get(String key) {
-        return context.get().get(key);
+    public static <T> T get(String key) {
+        return (T)context.get().get(key);
+    }
+
+    public static <T> T get(ContextKey key) {
+        return (T)get(key.name());
     }
 
     public static void put(String key, Object value) {
         context.get().put(key, value);
     }
 
+    public static void put(ContextKey key, Object value) {
+        put(key.name(), value);
+    }
+
     public static Object remove(String key) {
         return context.get().remove(key);
+    }
+
+    public static Object remove(ContextKey key) {
+        return remove(key.name());
     }
 
     public static void clear() {
