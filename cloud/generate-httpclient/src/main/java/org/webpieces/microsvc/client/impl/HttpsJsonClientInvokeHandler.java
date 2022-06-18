@@ -1,6 +1,5 @@
 package org.webpieces.microsvc.client.impl;
 
-import org.checkerframework.checker.units.qual.Current;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
@@ -19,7 +18,6 @@ import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
