@@ -212,7 +212,7 @@ dependencies {
         implementation 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
 
         implementation 'ch.qos.logback:logback-classic:1.2.3'
-        implementation 'com.google.inject:guice:4.2.2'
+        implementation 'com.google.inject:guice:5.1.0'
         implementation 'com.googlecode.log4jdbc:log4jdbc:1.2'
         implementation 'com.h2database:h2:1.4.200'
         implementation 'com.twitter:hpack:1.0.2'
