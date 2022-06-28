@@ -24,12 +24,15 @@ public class MethodValidator {
 
         StringJoiner errorResponse = new StringJoiner("\n\n");
 
+        Deprecated deprecatedAnnotation = api.getAnnotation(Deprecated.class);
+        boolean isDeprecated = deprecatedAnnotation != null;
+
         String returnType = "";
         if (method.getGenericReturnType() instanceof ParameterizedType) {
             returnType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0].getTypeName();
             returnType = returnType.substring(returnType.lastIndexOf(".") + 1);
         }
-        if (!returnType.endsWith("Response") || !returnType.toLowerCase().contains(methodName.toLowerCase())) {
+        if (!isDeprecated && (!returnType.endsWith("Response") || !returnType.toLowerCase().contains(methodName.toLowerCase()))) {
             errorResponse.add(api.getName() + "::" + methodName + " return type does not follow Orderly REST API convention.\n" +
                     "\tThe return type must have the format \"XFuture<" + pascalMethodName + "Response>\".\n" +
                     "\tUse the new convention, or add @Legacy or @Deprecated on this method and add a ticket to change your API");
@@ -37,12 +40,12 @@ public class MethodValidator {
 
         // If it's not POST, don't worry about it for now
         HttpMethod httpMethod = getHttpMethod(method);
-        if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT) {
+        if (!isDeprecated && (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT)) {
             validatePostPutMethods(api, method, methodName, pascalMethodName, errorResponse);
         }
 
         NotEvolutionProof annotation = api.getAnnotation(NotEvolutionProof.class);
-        if(annotation == null) {
+        if(annotation == null && !isDeprecated) {
             Class<?>[] paramTypes = method.getParameterTypes();
             String requestName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1)+"Request";
             if(paramTypes.length != 1) {
