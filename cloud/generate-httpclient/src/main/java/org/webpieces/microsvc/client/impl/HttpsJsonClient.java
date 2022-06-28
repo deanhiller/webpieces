@@ -202,6 +202,11 @@ public class HttpsJsonClient {
 
         try {
 
+            String keyStoreType = "JKS";
+            if(httpsConfig.getKeyStoreLocation().endsWith(".p12")) {
+                keyStoreType = "PKCS12";
+            }
+
             InputStream in = this.getClass().getResourceAsStream(httpsConfig.getKeyStoreLocation());
 
             if (in == null) {
@@ -210,7 +215,7 @@ public class HttpsJsonClient {
 
             //char[] passphrase = password.toCharArray();
             // First initialize the key and trust material.
-            KeyStore ks = KeyStore.getInstance("JKS");
+            KeyStore ks = KeyStore.getInstance(keyStoreType);
             SSLContext sslContext = SSLContext.getInstance("TLS");
 
             ks.load(in, httpsConfig.getKeyStorePassword().toCharArray());
@@ -218,7 +223,7 @@ public class HttpsJsonClient {
             //****************Client side specific*********************
 
             // TrustManager's decide whether to allow connections.
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
 
             tmf.init(ks);
 

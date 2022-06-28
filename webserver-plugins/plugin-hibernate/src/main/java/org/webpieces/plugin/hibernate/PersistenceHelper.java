@@ -15,7 +15,7 @@ import io.micrometer.core.instrument.Tags;
 import org.webpieces.plugin.hibernate.metrics.DatabaseMetric;
 import org.webpieces.plugin.hibernate.metrics.DatabaseTransactionTags;
 import org.webpieces.util.context.Context;
-import org.webpieces.util.context.ContextKey;
+import org.webpieces.util.context.WebpiecesContextKey;
 
 @Singleton
 public class PersistenceHelper {
@@ -114,7 +114,7 @@ public class PersistenceHelper {
 
     private void monitorExecutionTime(String transactionName, long start, long end) {
 
-        String requestPath = (String) Context.get(ContextKey.REQUEST_PATH.toString());
+        String requestPath = (String) Context.get(WebpiecesContextKey.REQUEST_PATH.toString());
 
         if((requestPath == null ) || requestPath.isBlank()) {
             requestPath = "unknown";

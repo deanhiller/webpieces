@@ -19,7 +19,6 @@ repositories {
 
 dependencies {
 
-    api deps['guice']
     api deps['cloud-api-lib']
     api deps['http2to1_1-client']
     api deps['core-jackson']

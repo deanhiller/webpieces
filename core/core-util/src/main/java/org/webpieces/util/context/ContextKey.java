@@ -1,7 +1,14 @@
 package org.webpieces.util.context;
 
-public enum ContextKey {
+public interface ContextKey {
 
-    REQUEST_PATH
+    String name();
+
+    default boolean addToMDC() {
+        String key = getMDCKey();
+        return (key != null && !key.isBlank());
+    }
+
+    String getMDCKey();
 
 }
