@@ -6,6 +6,9 @@ test.dependsOn gradle.includedBuilds*.task(':test')
 //gradle.taskGraph. { taskGraph ->
 //}
 
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
 repositories {
     mavenCentral()
     maven {
