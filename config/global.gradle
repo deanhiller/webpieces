@@ -462,6 +462,7 @@ pluginManager.withPlugin('maven-publish') {
     }
 
     publishMavenJavaPublicationToWebpiecesLocal2Repository.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToWebpiecesLocal2Repository')
+    publishMavenJavaPublicationToMavenLocal.dependsOn gradle.includedBuilds*.task(':publishMavenJavaPublicationToMavenLocal')
 
     if(project.hasProperty('projVersion')) {
         if (!project.properties.sonatypeUsername) {

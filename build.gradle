@@ -21,6 +21,7 @@ if(project.hasProperty('projVersion')) {
     task release {
         dependsOn build
         dependsOn('publishMavenJavaPublicationToWebpiecesLocal2Repository')
+        dependsOn('publishMavenJavaPublicationToMavenLocal')
     }
 }
 //if(project.hasProperty('projVersion')) {
@@ -71,6 +72,19 @@ publishing {
         //        description = 'Templating library using groovy as the scripting language'
         //    }
         //}
+    }
+}
+
+if(project.hasProperty('projVersion')) {
+    tasks.withType(PublishToSonatypeRepository) {
+        onlyIf {
+            (project.name != 'webpieces' && project.name != 'gradle-plugin-htmlcompiler')
+        }
+    }
+}
+tasks.withType(PublishToMavenLocal) {
+    onlyIf {
+        ((project.name != 'webpieces') && (project.name != 'gradle-plugin-htmlcompiler'))
     }
 }
 

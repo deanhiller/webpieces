@@ -119,3 +119,15 @@ tasks.whenTaskAdded {task ->
     }
 }
 
+if(project.hasProperty('projVersion')) {
+    tasks.withType(PublishToSonatypeRepository) {
+        onlyIf {
+            false
+        }
+    }
+}
+tasks.withType(PublishToMavenLocal) {
+    onlyIf {
+        false
+    }
+}
