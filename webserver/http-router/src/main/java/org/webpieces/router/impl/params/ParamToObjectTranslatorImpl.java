@@ -30,7 +30,7 @@ import org.webpieces.router.api.extensions.EntityLookup;
 import org.webpieces.router.api.extensions.Meta;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.ParamMeta;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 @Singleton
 public class ParamToObjectTranslatorImpl {

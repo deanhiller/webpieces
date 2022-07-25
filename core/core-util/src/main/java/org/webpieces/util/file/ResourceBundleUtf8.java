@@ -14,7 +14,7 @@ import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
 import java.util.function.Supplier;
 
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 public class ResourceBundleUtf8 extends Control {
 

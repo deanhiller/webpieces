@@ -8,7 +8,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.nio.api.SSLEngineFactory;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 public class SSLEngineFactoryWebServerTesting implements SSLEngineFactory {
 

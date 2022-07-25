@@ -22,7 +22,7 @@ import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.throughput.RequestCreator;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.util.time.RateRecorder;
 
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Msg;

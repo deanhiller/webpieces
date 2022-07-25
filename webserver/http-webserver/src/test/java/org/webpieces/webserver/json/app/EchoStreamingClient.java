@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.router.impl.proxyout.ProxyStreamHandle;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
