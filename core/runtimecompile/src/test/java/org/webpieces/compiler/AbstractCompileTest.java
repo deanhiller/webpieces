@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.compiler.impl.CompileOnDemandImpl;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFileImpl;

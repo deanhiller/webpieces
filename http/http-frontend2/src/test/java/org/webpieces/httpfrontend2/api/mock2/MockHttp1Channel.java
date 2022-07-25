@@ -30,7 +30,7 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
 import org.webpieces.util.bytes.Hex;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
