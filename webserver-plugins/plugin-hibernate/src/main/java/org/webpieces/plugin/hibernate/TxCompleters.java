@@ -3,7 +3,7 @@ package org.webpieces.plugin.hibernate;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 public class TxCompleters {
 

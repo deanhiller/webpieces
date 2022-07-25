@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.util.locking.FuturePermitQueue;
 import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.threading.NamedThreadFactory;

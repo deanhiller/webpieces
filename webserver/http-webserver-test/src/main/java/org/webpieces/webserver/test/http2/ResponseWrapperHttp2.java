@@ -13,7 +13,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.http2client.api.dto.ContentType;
 import org.webpieces.http2client.api.dto.FullResponse;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import org.webpieces.http.StatusCode;

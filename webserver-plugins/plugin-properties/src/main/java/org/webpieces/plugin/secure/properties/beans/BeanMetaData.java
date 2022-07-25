@@ -20,7 +20,7 @@ import org.webpieces.router.api.extensions.Startable;
 import org.webpieces.router.impl.mgmt.CachedBean;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 /**
  * A proxy to get around the weird circular dependency order so the guice created controller can listen

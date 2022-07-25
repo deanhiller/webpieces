@@ -6,7 +6,7 @@ import java.security.MessageDigest;
 import java.util.function.Supplier;
 
 import org.webpieces.compiler.api.CompileConfig;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.util.file.VirtualFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

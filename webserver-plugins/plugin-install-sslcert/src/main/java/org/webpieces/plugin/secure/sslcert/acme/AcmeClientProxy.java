@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.plugin.secure.sslcert.CertAndSigningRequest;
 import org.webpieces.plugin.secure.sslcert.ChallengeInBadStateException;
 import org.webpieces.plugin.secure.sslcert.InstallSslCertConfig;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.util.futures.XFutureCollector;
 
 /**

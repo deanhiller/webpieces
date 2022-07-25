@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 @Singleton
 public class PropertyInvoker {
