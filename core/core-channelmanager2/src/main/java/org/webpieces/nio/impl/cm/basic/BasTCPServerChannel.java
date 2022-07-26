@@ -22,7 +22,7 @@ import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.exceptions.NioException;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 
 /**

@@ -27,7 +27,7 @@ import org.webpieces.ssl.api.AsyncSSLFactory;
 import org.webpieces.ssl.api.SSLMetrics;
 import org.webpieces.ssl.api.SslListener;
 import org.webpieces.util.exceptions.NioClosedChannelException;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class SslTCPChannel extends SslChannel implements TCPChannel {
 

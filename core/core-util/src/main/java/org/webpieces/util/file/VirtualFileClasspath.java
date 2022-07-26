@@ -9,7 +9,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class VirtualFileClasspath implements VirtualFile {
 

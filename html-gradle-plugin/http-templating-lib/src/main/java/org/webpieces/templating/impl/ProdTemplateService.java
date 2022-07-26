@@ -16,7 +16,7 @@ import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateResult;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 @Singleton
 public class ProdTemplateService extends AbstractTemplateService implements TemplateService {

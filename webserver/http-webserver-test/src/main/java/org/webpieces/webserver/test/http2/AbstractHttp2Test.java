@@ -15,7 +15,7 @@ import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.BackpressureConfig;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.webserver.test.MockChannelManager;
 import org.webpieces.webserver.test.OverridesForEmbeddedSvrWithParsing;
 import org.webpieces.webserver.test.OverridesForTestRealServer;

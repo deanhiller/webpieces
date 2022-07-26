@@ -33,7 +33,7 @@ import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.http.exception.NotFoundException;
 import org.webpieces.router.api.extensions.SimpleStorage;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;

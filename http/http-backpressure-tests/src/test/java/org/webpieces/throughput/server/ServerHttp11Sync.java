@@ -21,7 +21,7 @@ import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.throughput.RequestCreator;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

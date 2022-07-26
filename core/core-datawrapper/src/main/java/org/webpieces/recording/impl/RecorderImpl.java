@@ -9,7 +9,7 @@ import java.nio.channels.WritableByteChannel;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.recording.api.Recorder;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.exceptions.SneakyThrow;
 
 public class RecorderImpl implements Recorder {
 
