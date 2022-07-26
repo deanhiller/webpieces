@@ -91,8 +91,8 @@ ext {
             'http-webserver'         : 'org.webpieces.server:http-webserver',
             'http-fortesting-plugins': 'org.webpieces.server:http-fortesting-plugins',
             'webserver-templates'    : 'org.webpieces:webserver-templates',
-            'WEBPIECESxAPPNAME'      : 'org.webpieces:WEBPIECESxAPPNAME',
-            'WEBPIECESxAPPNAME-dev'  : 'org.webpieces:WEBPIECESxAPPNAME-dev',
+            'template1-production'   : 'org.webpieces:WEBPIECESxAPPNAME',
+            'template1-development'  : 'org.webpieces:WEBPIECESxAPPNAME-dev',
 
             'plugin-backend'         : 'org.webpieces.server.plugin:plugin-backend',
             'plugin-documentation'   : 'org.webpieces.server.plugin:plugin-documentation',

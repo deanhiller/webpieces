@@ -3,5 +3,5 @@
 org.apache.tools.ant.DirectoryScanner.removeDefaultExclude("**/.gitignore")
 
 includeBuild '../webserver/http-webserver'
-includeBuild 'webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME'
-includeBuild 'webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME-dev'
+includeBuild 'webpiecesServerBuilder/templateProject/production'
+includeBuild 'webpiecesServerBuilder/templateProject/development'

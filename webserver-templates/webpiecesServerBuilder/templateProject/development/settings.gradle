@@ -1,4 +1,4 @@
-includeBuild '../WEBPIECESxAPPNAME'
+includeBuild '../production'
 includeBuild '../../../../webserver-plugins/plugin-backend'
 includeBuild '../../../../webserver-plugins/plugin-hibernate'
 includeBuild '../../../../webserver-plugins/plugin-h2db'
