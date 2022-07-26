@@ -144,12 +144,74 @@ public class WebpiecesServer {
 		File publicFile = FileFactory.newFile(filePath, "public");
 		File jibClasspath = FileFactory.newFile(filePath, "jib-classpath-file");
 		if((bin.exists() && lib.exists() && config.exists() && publicFile.exists()) ||  (jibClasspath.exists())) {
+			//TEST CASE:
+			// 1. Generate project using ./createProject.sh from webpiecesServerBuilder.zip
+			// 2. Run ./gradlew build
+			// 3. unzip the distribution and run the production server
+
 			//For ->
 			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
 			//    MainApp | NO  | Production | N/A
 			log.info("Running in production environment");
 			return filePath;
-		} else if((projectName+"-dev").equals(name)) {
+		} else if(locatorFile1.exists()) {
+			//TEST CASE:
+			// 1. Generate project using ./createProject.sh from webpiecesServerBuilder.zip
+			// 2. Import project into Intellij
+			// 3. run DevelopmentServer.java to see if it starts correctly
+
+			//DAMNIT Intellij...FIX THIS STUFF!!!
+			//DAMNIT Intellij...FIX THIS STUFF!!!
+			//SPECIAL CASE ONLY Intelij NEEDS.  Neither Gradle nor eclipse needs this section
+
+			//For ->
+			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
+			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
+			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/production
+			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/development
+			if(isRunningServerMainMethod) {
+				log.info("You appear to be running Server.java from Intellij");
+				throw new NoRunningServerMainInIDEException();
+			} else {
+				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java from Intellij");
+				File newLocation = FileFactory.newFile(filePath, "production/src/dist");
+				if(newLocation.exists()) {
+					return newLocation;
+				}
+
+				return FileFactory.newFile(filePath, projectName+"/src/dist");
+			}
+		} else if(locatorFile2.exists()) {
+			//TEST CASE:
+			// 1. Import webpieces project,
+			// 2. start DevelopmentServer.java and make sure it works
+
+			//DAMNIT Intellij...FIX THIS STUFF!!!
+			//SPECIAL CASE ONLY Intelij NEEDS.  Neither Gradle nor eclipse needs this section
+			//
+			//   This section is only for webpieces use and can safely be deleted for your project if you want to reduce clutter
+			//
+			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
+			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/production
+			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/development
+			if(isRunningServerMainMethod) {
+				log.info("You appear to be running "+projectName+".Server.java from webpieces in Intellij");
+				throw new NoRunningServerMainInIDEException();
+			} else {
+				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java in webpieces project from Intellij");
+				return FileFactory.newFile(filePath, "webserver-templates/webpiecesServerBuilder/templateProject/production/src/dist");
+			}
+		} else if((projectName+"-dev").equals(name) || "development".equals(name)) {
+			//TEST CASE 1(webpieces):
+			// 1. import webpieces into intellij
+			// 2. Run TestBasicDevStart.java
+
+			//TEST CASE (generated project):
+			// 1. Generate project using ./createProject.sh from webpiecesServerBuilder.zip
+			// 2. Import project into Intellij
+			// 3. run TestBasicDevStart.java to see if it starts correctly
+
 			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}			
 			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
@@ -159,10 +221,32 @@ public class WebpiecesServer {
 			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
+			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/development
+			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/development
+			//    Test    | NO  | Gradle     | WEBPIECESxAPPNAME-all/development
+			//    Test    | YES | Gradle     | WEBPIECESxAPPNAME-all/development
+			//    MainApp | NO  | Eclipse    | WEBPIECESxAPPNAME-all/development
+			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/development
+			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/development
+			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/development
 			log.info("You appear to be running test from Intellij, Eclipse or Gradle(xxxx-dev subproject), or the DevelopmentServer.java/ProdServerForIDE.java from eclipse");
 			File parent = filePath.getParentFile();
-			return FileFactory.newFile(parent, projectName+"/src/dist");
-		} else if(projectName.equals(name)) {
+			if(name.equals("development")) {
+				return FileFactory.newFile(parent, "production/src/dist");
+			} else {
+				return FileFactory.newFile(parent, projectName + "/src/dist");
+			}
+
+		} else if(projectName.equals(name) || "production".equals(name)) {
+			//TEST CASE 1(webpieces):
+			// 1. Import webpieces project in Intellij
+			// 2. Run TestLesson1Json.java
+
+			//TEST CASE 2 (generated project):
+			// 1. Generate project using ./createProject.sh from webpiecesServerBuilder.zip
+			// 2. Import project into Intellij
+			// 3. run TestLesson1Json.java
+
 			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
 			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
@@ -172,40 +256,21 @@ public class WebpiecesServer {
 			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
-			if(isRunningServerMainMethod) {
+
+			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/production
+			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/production
+			//    Test    | NO  | Gradle     | WEBPIECESxAPPNAME-all/production
+			//    Test    | YES | Gradle     | WEBPIECESxAPPNAME-all/production
+			//    MainApp | NO  | Eclipse    | WEBPIECESxAPPNAME-all/production
+			//    Test    | NO  | Eclipse    | WEBPIECESxAPPNAME-all/production
+			//    MainApp | YES | Eclipse    | WEBPIECESxAPPNAME-all/production
+			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/production
+			if (isRunningServerMainMethod) {
 				log.info("You appear to be running Server.java from Eclipse");
-				throw new NoRunningServerMainInIDEException(); 
-			} else {	
+				throw new NoRunningServerMainInIDEException();
+			} else {
 				log.info("You appear to be running test from Intellij, Eclipse or Gradle(main subproject)");
 				return FileFactory.newFile(filePath, "src/dist");
-			}
-		} else if(locatorFile1.exists()) {
-			//DAMNIT Intellij...FIX THIS STUFF!!!
-			//For ->
-			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
-			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
-			//    MainApp | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
-			if(isRunningServerMainMethod) {
-				log.info("You appear to be running Server.java from Intellij");
-				throw new NoRunningServerMainInIDEException(); 
-			} else {
-				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java from Intellij");
-				return FileFactory.newFile(filePath, projectName+"/src/dist");
-			}
-		} else if(locatorFile2.exists()) {
-			//DAMNIT Intellij...FIX THIS STUFF!!!
-			//
-			//   This section is only for webpieces use and can safely be deleted for your project if you want to reduce clutter
-			//
-			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
-			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
-			//    MainApp | YES | Intellij    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
-			if(isRunningServerMainMethod) {
-				log.info("You appear to be running "+projectName+".Server.java from webpieces in Intellij");
-				throw new NoRunningServerMainInIDEException(); 
-			} else {
-				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java in webpieces project from Intellij");
-				return FileFactory.newFile(filePath, "webserver-templates/webpiecesServerBuilder/templateProject/"+projectName+"/src/dist");
 			}
 		}
 

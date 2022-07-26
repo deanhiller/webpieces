@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.httpclient11.api.HttpFullResponse;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.exceptions.SneakyThrow;
 import org.webpieces.webserver.test.http2.ResponseWrapperHttp2;
 
 

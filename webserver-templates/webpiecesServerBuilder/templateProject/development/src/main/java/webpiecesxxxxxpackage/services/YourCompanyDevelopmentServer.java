@@ -33,7 +33,7 @@ public abstract class YourCompanyDevelopmentServer extends YourCompanyAbstractDe
             boolean usePortZero
     ) {
         super(name, usePortZero);
-        VirtualFile metaFile = directory.child(name + "/src/main/resources/appmetadev.txt");
+        VirtualFile metaFile = directory.child("production/src/main/resources/appmetadev.txt");
 
         //html and json template file encoding...
         TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths);

@@ -15,7 +15,7 @@ publishing.publications.mavenJava.pom.description='project only used in testing.
 
 dependencies {
 
-  implementation deps['WEBPIECESxAPPNAME']
+  implementation deps['template1-production']
   //we start people off with the hibernate plugin
   implementation deps['http-router-dev']
   implementation deps['http-templating-dev-lib']

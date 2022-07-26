@@ -20,7 +20,7 @@ repositories {
 
 //Have to ignore the template projects which violate checkstyle until used to create
 //customers projects
-if (!project.name.startsWith("WEBPIECESx")) {
+if (!project.name.startsWith("production") && !project.name.startsWith("development")) {
     System.out.println("proj name=" + project.name)
     checkstyle {
         configFile = rootProject.file('../../config/checkstyle.xml')
@@ -91,8 +91,8 @@ ext {
             'http-webserver'         : 'org.webpieces.server:http-webserver',
             'http-fortesting-plugins': 'org.webpieces.server:http-fortesting-plugins',
             'webserver-templates'    : 'org.webpieces:webserver-templates',
-            'WEBPIECESxAPPNAME'      : 'org.webpieces:WEBPIECESxAPPNAME',
-            'WEBPIECESxAPPNAME-dev'  : 'org.webpieces:WEBPIECESxAPPNAME-dev',
+            'template1-production'   : 'org.webpieces:production',
+            'template1-development'  : 'org.webpieces:development',
 
             'plugin-backend'         : 'org.webpieces.server.plugin:plugin-backend',
             'plugin-documentation'   : 'org.webpieces.server.plugin:plugin-documentation',
@@ -138,8 +138,6 @@ ext {
 
             'log4jdbc'               : 'com.googlecode.log4jdbc:log4jdbc',
             'h2db'                   : 'com.h2database:h2',
-
-            'sneakythrow'            : 'org.digitalforge:sneakythrow:1.0.1',
 
             'acme-sslcerts'          : 'org.shredzone.acme4j:acme4j-client',
             'acme-utils'             : 'org.shredzone.acme4j:acme4j-utils',

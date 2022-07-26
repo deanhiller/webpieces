@@ -17,7 +17,7 @@ public class ServerConfig {
 	 * plugins.
 	 */
 	private VirtualFile metaFile= new VirtualFileClasspath("appmeta.txt", WebpiecesServer.class.getClassLoader());
-	
+
 	/**
 	 * This is not used in production so we default it to false, but a special test that we
 	 * already wrote for you sets this to true such that we validate all route ids in your

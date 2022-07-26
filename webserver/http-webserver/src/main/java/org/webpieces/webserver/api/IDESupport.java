@@ -15,7 +15,7 @@ public class IDESupport {
 		
 		String directory = filePath1;
         //intellij and eclipse use different user directories... :( :(
-        if(filePath1.contains(name+"-dev")) {
+        if(filePath1.contains(name+"-dev") || filePath1.contains("development")) {
             //eclipse starts in WEBPIECESxAPPNAME-dev so move one directory back
 			//THIS works in BOTH webpieces/..../template and in the code generated for webapp projects
             directory = directory+"/..";

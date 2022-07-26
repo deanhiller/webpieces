@@ -20,8 +20,8 @@ apply from: '../config/global.gradle'
 
 dependencies {
     implementation deps['http-webserver']
-    implementation deps['WEBPIECESxAPPNAME']
-    implementation deps['WEBPIECESxAPPNAME-dev']
+    implementation deps['template1-production']
+    implementation deps['template1-development']
 }
 
 project.ext {
@@ -48,27 +48,27 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/templateProject/.project'
     exclude stagingDirName + '/templateProject/.settings'
     exclude stagingDirName + '/templateProject/build'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/build.gradle'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/settings.gradle'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/build'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/out'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/bin'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/eclipse-output'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.classpath'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.project'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.settings'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.gradle'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/build.gradle'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/settings.gradle'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/build'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/out'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/bin'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/webpiecesCache'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/eclipse-output'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.classpath'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.project'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.settings'
-    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.gradle'
+    exclude stagingDirName + '/templateProject/production/build.gradle'
+    exclude stagingDirName + '/templateProject/production/settings.gradle'
+    exclude stagingDirName + '/templateProject/production/build'
+    exclude stagingDirName + '/templateProject/production/out'
+    exclude stagingDirName + '/templateProject/production/bin'
+    exclude stagingDirName + '/templateProject/production/eclipse-output'
+    exclude stagingDirName + '/templateProject/production/.classpath'
+    exclude stagingDirName + '/templateProject/production/.project'
+    exclude stagingDirName + '/templateProject/production/.settings'
+    exclude stagingDirName + '/templateProject/production/.gradle'
+    exclude stagingDirName + '/templateProject/development/build.gradle'
+    exclude stagingDirName + '/templateProject/development/settings.gradle'
+    exclude stagingDirName + '/templateProject/development/build'
+    exclude stagingDirName + '/templateProject/development/out'
+    exclude stagingDirName + '/templateProject/development/bin'
+    exclude stagingDirName + '/templateProject/development/webpiecesCache'
+    exclude stagingDirName + '/templateProject/development/eclipse-output'
+    exclude stagingDirName + '/templateProject/development/.classpath'
+    exclude stagingDirName + '/templateProject/development/.project'
+    exclude stagingDirName + '/templateProject/development/.settings'
+    exclude stagingDirName + '/templateProject/development/.gradle'
 }
 
 task copyGradleTemplate(type: Copy, dependsOn: 'stageTemplate') {

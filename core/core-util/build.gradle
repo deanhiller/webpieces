@@ -21,7 +21,6 @@ dependencies {
 
     api deps['core-metrics']
     api deps['core-logging']
-    api deps['sneakythrow']
 }
 
 publishing {
