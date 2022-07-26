@@ -73,15 +73,7 @@ publishing {
     }
 }
 
+publish.onlyIf { false }
 if(project.hasProperty('projVersion')) {
-    tasks.withType(PublishToSonatypeRepository) {
-        onlyIf {
-            false
-        }
-    }
-}
-tasks.withType(PublishToMavenLocal) {
-    onlyIf {
-        false
-    }
+    publishMavenJavaPublicationToSonatypeRepository.onlyIf {false}
 }

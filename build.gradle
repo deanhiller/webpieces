@@ -75,16 +75,7 @@ publishing {
     }
 }
 
+publish.onlyIf { false }
 if(project.hasProperty('projVersion')) {
-    tasks.withType(PublishToSonatypeRepository) {
-        onlyIf {
-            (project.name != 'webpieces' && project.name != 'gradle-plugin-htmlcompiler')
-        }
-    }
+    publishMavenJavaPublicationToSonatypeRepository.onlyIf {false}
 }
-tasks.withType(PublishToMavenLocal) {
-    onlyIf {
-        ((project.name != 'webpieces') && (project.name != 'gradle-plugin-htmlcompiler'))
-    }
-}
-

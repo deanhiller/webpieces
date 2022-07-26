@@ -144,9 +144,9 @@ subprojects {
         sourceDirectories.from files(sourceSets.main.allSource.srcDirs)
         classDirectories.from files(sourceSets.main.output)
         reports {
-            html.enabled = true
-            xml.enabled = true
-            csv.enabled = false
+            html.required = true
+            xml.required = true
+            csv.required = false
         }
     }
 
@@ -161,9 +161,9 @@ task codeCoverage(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     classDirectories.from  files(subprojects.sourceSets.main.output)
     executionData.from files(subprojects.jacocoTestReport.executionData)
     reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
+        html.required = true
+        xml.required = true
+        csv.required = false
     }
     onlyIf = {
         true
