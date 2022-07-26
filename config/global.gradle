@@ -327,9 +327,9 @@ jacocoTestReport {
 */
     executionData.from = fileTree(buildDir).include("/jacoco/*.exec")
     reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
+        html.required = true
+        xml.required = true
+        csv.required = false
     }
 }
 
@@ -548,9 +548,9 @@ task jacocoRootReport(type: JacocoReport) {
     classDirectories.setFrom files(subprojects.sourceSets.main.output)
     executionData.setFrom files(subprojects.jacocoTestReport.executionData).filter { f -> f.exists() }
     reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
+        html.required = true
+        xml.required = true
+        csv.required = false
     }
     onlyIf = {
         true
