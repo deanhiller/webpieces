@@ -62,8 +62,8 @@ public abstract class YourCompanyAbstractDevServer {
 
         //Next you need to add the source code directories so we can re-compile the files you change
         //If you add libraries, add the directories here BUT prefer looping to find them
-        srcPaths.add(directory.child(name+"/src/main/java"));
-        srcPaths.add(directory.child(name+"-dev/src/main/java"));
+        srcPaths.add(directory.child("production/src/main/java"));
+        srcPaths.add(directory.child("development/src/main/java"));
         
       /* Here(see below commented out code as example) you should programmatically add all source to your servers
        * Ideally, you can add just the source from the libraries you depend on BUT you can start for speed and agility

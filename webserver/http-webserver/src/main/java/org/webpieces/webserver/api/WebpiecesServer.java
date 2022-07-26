@@ -161,7 +161,12 @@ public class WebpiecesServer {
 			//    Test    | YES | Eclipse    | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			log.info("You appear to be running test from Intellij, Eclipse or Gradle(xxxx-dev subproject), or the DevelopmentServer.java/ProdServerForIDE.java from eclipse");
 			File parent = filePath.getParentFile();
-			return FileFactory.newFile(parent, projectName+"/src/dist");
+			if(name.equals("development")) {
+				return FileFactory.newFile(parent, "production/src/dist");
+			} else {
+				return FileFactory.newFile(parent, projectName + "/src/dist");
+			}
+
 		} else if(projectName.equals(name) || "production".equals(name)) {
 			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
 			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
@@ -175,7 +180,7 @@ public class WebpiecesServer {
 			if(isRunningServerMainMethod) {
 				log.info("You appear to be running Server.java from Eclipse");
 				throw new NoRunningServerMainInIDEException(); 
-			} else {	
+			} else {
 				log.info("You appear to be running test from Intellij, Eclipse or Gradle(main subproject)");
 				return FileFactory.newFile(filePath, "src/dist");
 			}
