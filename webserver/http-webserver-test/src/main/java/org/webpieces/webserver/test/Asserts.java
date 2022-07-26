@@ -3,7 +3,7 @@ package org.webpieces.webserver.test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 public class Asserts {
 

@@ -15,7 +15,7 @@ import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.throughput.AsyncConfig;
 import org.webpieces.throughput.RequestCreator;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.streaming.RequestStreamHandle;

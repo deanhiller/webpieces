@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 public class VirtualFileImpl implements VirtualFile {
 

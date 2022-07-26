@@ -10,7 +10,7 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline2.Arguments;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.util.filters.Filter;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.webserver.impl.PortConfigLookupImpl;
