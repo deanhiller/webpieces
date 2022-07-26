@@ -14,13 +14,17 @@ apply from: '../../config/global.gradle'
 
 dependencies {
     api deps['guice']
-    
+
+    api deps['generate-httpclient']
     api deps['http2to1_1-client']
 
     api deps['core-mock']
     api deps['http-frontend2']
     api deps['http1_1-client']
     api deps['http-shared']
+
+    //really need to remove this one...
+    implementation deps['jul-to-slf4j']
 
     //For testing, swap in just templating-dev such that we can debug test failures in an IDE without some
     //need for a generate html to class files each time (it uses the same template compiler that the

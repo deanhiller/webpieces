@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.util.context.Context;
 import org.webpieces.webserver.api.ServerConfig;
+import org.webpieces.webserver.test.http2.CompanyApiTest;
 import webpiecesxxxxxpackage.Server;
 import webpiecesxxxxxpackage.json.ExampleRestAPI;
 import webpiecesxxxxxpackage.json.SaveApi;
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeoutException;
  * @author dhiller
  *
  */
-public class FeatureTest extends CompanyTest {
+public class FeatureTest extends CompanyApiTest {
 
     private final static Logger log = LoggerFactory.getLogger(FeatureTest.class);
     private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
