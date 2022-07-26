@@ -149,7 +149,7 @@ public class WebpiecesServer {
 			//    MainApp | NO  | Production | N/A
 			log.info("Running in production environment");
 			return filePath;
-		} else if((projectName+"-dev").equals(name)) {
+		} else if((projectName+"-dev").equals(name) || "development".equals(name)) {
 			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}			
 			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
 			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME-dev
@@ -162,7 +162,7 @@ public class WebpiecesServer {
 			log.info("You appear to be running test from Intellij, Eclipse or Gradle(xxxx-dev subproject), or the DevelopmentServer.java/ProdServerForIDE.java from eclipse");
 			File parent = filePath.getParentFile();
 			return FileFactory.newFile(parent, projectName+"/src/dist");
-		} else if(projectName.equals(name)) {
+		} else if(projectName.equals(name) || "production".equals(name)) {
 			//	 {type}   |{isWebpieces} | {IDE or Container} | {subprojectName}
 			//    Test    | NO  | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
 			//    Test    | YES | Intellij   | WEBPIECESxAPPNAME-all/WEBPIECESxAPPNAME
