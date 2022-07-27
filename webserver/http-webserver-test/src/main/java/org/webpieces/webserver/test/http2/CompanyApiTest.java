@@ -1,4 +1,4 @@
-package webpiecesxxxxxpackage.framework;
+package org.webpieces.webserver.test.http2;
 
 import com.google.inject.Binder;
 import com.google.inject.Guice;
@@ -15,8 +15,6 @@ import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
 import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.webserver.test.Asserts;
-import org.webpieces.webserver.test.http2.AbstractHttp2Test;
-import org.webpieces.webserver.test.http2.TestMode;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -24,9 +22,9 @@ import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public abstract class CompanyTest extends AbstractHttp2Test {
+public abstract class CompanyApiTest extends AbstractHttp2Test {
 
-    private final static Logger log = LoggerFactory.getLogger(CompanyTest.class);
+    private final static Logger log = LoggerFactory.getLogger(CompanyApiTest.class);
 
     protected InetSocketAddress serverHttpsAddr;
     protected InetSocketAddress serverHttpAddr;
@@ -122,3 +120,4 @@ public abstract class CompanyTest extends AbstractHttp2Test {
         return TestMode.EMBEDDED_DIRET_NO_PARSING;
     }
 }
+
