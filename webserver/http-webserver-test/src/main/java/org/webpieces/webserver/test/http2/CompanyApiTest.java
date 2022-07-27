@@ -13,7 +13,7 @@ import org.webpieces.microsvc.client.api.RESTClientCreator;
 import org.webpieces.plugin.json.ConverterConfig;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.webserver.test.Asserts;
 
 import java.io.IOException;

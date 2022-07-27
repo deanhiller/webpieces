@@ -28,7 +28,7 @@ import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.routeinvoker.PortAndIsSecure;
 import org.webpieces.router.impl.routeinvoker.RedirectFormation;
 import org.webpieces.router.impl.routers.MatchInfo;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 public class ReverseRoutes implements ReverseRouteLookup {
 

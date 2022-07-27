@@ -139,6 +139,8 @@ ext {
             'log4jdbc'               : 'com.googlecode.log4jdbc:log4jdbc',
             'h2db'                   : 'com.h2database:h2',
 
+            'sneakythrow'            : 'org.digitalforge:sneakythrow:1.0.1',
+
             'acme-sslcerts'          : 'org.shredzone.acme4j:acme4j-client',
             'acme-utils'             : 'org.shredzone.acme4j:acme4j-utils',
 
@@ -325,9 +327,9 @@ jacocoTestReport {
 */
     executionData.from = fileTree(buildDir).include("/jacoco/*.exec")
     reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
+        html.required = true
+        xml.required = true
+        csv.required = false
     }
 }
 
@@ -546,9 +548,9 @@ task jacocoRootReport(type: JacocoReport) {
     classDirectories.setFrom files(subprojects.sourceSets.main.output)
     executionData.setFrom files(subprojects.jacocoTestReport.executionData).filter { f -> f.exists() }
     reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
+        html.required = true
+        xml.required = true
+        csv.required = false
     }
     onlyIf = {
         true

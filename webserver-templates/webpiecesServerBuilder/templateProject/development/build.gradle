@@ -37,16 +37,7 @@ tasks.whenTaskAdded {task ->
   }
 }
 
+publish.onlyIf { false }
 if(project.hasProperty('projVersion')) {
-  tasks.withType(PublishToSonatypeRepository) {
-    onlyIf {
-      false
-    }
-  }
+  publishMavenJavaPublicationToSonatypeRepository.onlyIf {false}
 }
-tasks.withType(PublishToMavenLocal) {
-  onlyIf {
-    false
-  }
-}
-

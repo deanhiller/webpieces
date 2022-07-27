@@ -10,7 +10,7 @@ import org.webpieces.httpclient11.impl.HttpSocketImpl;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.webserver.test.MockChannelManager;
 import org.webpieces.webserver.test.MockTcpChannel;
 

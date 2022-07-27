@@ -15,7 +15,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.data.api.TwoPools;
 import org.webpieces.throughput.RequestCreator;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.util.time.RateRecorder;
 
 import com.webpieces.hpack.api.HpackConfig;

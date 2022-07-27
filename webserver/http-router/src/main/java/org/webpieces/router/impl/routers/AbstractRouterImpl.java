@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.impl.model.MatchResult2;
-import org.webpieces.util.exceptions.SneakyThrow;
+import org.digitalforge.sneakythrow.SneakyThrow;
 
 public abstract class AbstractRouterImpl implements AbstractRouter {
 
