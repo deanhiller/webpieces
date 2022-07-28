@@ -35,16 +35,12 @@ public class JacksonRoutes implements Routes {
 			log.info("Installing Json Catch All filter="+filter.getName()+" package regex="+config.getPackageFilterPattern());
 			Pattern pattern = Pattern.compile(config.getPackageFilterPattern());
 			bldr.addPackageFilter(config.getPackageFilterPattern(), filter, new JsonConfig(null, pattern), FilterPortType.ALL_FILTER, filterLevel);
-			bldr.setInternalErrorRoute("JacksonDefaultErrorController.internalError");
-			bldr.setPageNotFoundRoute("JacksonDefaultErrorController.notFound");
 		} else if(filter != null) {
 			log.info("Installing Json Catch All filter="+filter.getName());
 			int notFoundLevel = config.getNotFoudFilterLevel();
 			Pattern pattern = Pattern.compile(filterPattern);
 			bldr.addFilter(filterPattern, filter, new JsonConfig(pattern, pattern), FilterPortType.ALL_FILTER, filterLevel);
 			bldr.addNotFoundFilter(notFoundFilter, new JsonConfig(pattern, pattern), FilterPortType.ALL_FILTER, notFoundLevel);
-			bldr.setInternalErrorRoute("JacksonDefaultErrorController.internalError");
-			bldr.setPageNotFoundRoute("JacksonDefaultErrorController.notFound");
 		} else {
 			log.info("No catch all json filter installed.  PLEASE install your own somewhere so clean errors are sent back");
 		}
