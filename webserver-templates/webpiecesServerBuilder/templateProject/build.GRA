@@ -35,7 +35,7 @@ ext {
        'commons-lang':       "org.apache.commons:commons-lang3:3.5",
        'javax-validation':   'jakarta.validation:jakarta.validation-api:2.0.2',
        'junit-api':          'org.junit.jupiter:junit-jupiter-api:5.8.2',
-       'junit-runtime':      'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+       'junit-runtime':      'org.junit.jupiter:junit-jupiter-engine:5.8.2',
        'joda-time':          'joda-time:joda-time:2.9.4',
 
        'jul-to-slf4j':       'org.slf4j:jul-to-slf4j:1.7.25',
@@ -101,8 +101,8 @@ subprojects {
     }
 
    dependencies {
-       testImplementation deps['junitApi']
-       testRuntimeOnly deps['junitRuntime']
+       testImplementation deps['junit-api']
+       testRuntimeOnly deps['junit-runtime']
 
        //add global dependencies for all projects here....
        implementation deps['web-webserver']
