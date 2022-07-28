@@ -34,7 +34,8 @@ ext {
        'plugin-properties':  "org.webpieces.server.plugin:plugin-properties:${webpiecesVersion}",
        'commons-lang':       "org.apache.commons:commons-lang3:3.5",
        'javax-validation':   'jakarta.validation:jakarta.validation-api:2.0.2',
-       'junit':              'junit:junit:4.11',
+       'junit-api':          'org.junit.jupiter:junit-jupiter-api:5.8.2',
+       'junit-runtime':      'org.junit.jupiter:junit-jupiter-engine:5.8.2'
        'joda-time':          'joda-time:joda-time:2.9.4',
 
        'jul-to-slf4j':       'org.slf4j:jul-to-slf4j:1.7.25',
@@ -100,29 +101,16 @@ subprojects {
     }
 
    dependencies {
-       testImplementation deps['junit']
+       testImplementation deps['junitApi']
+       testRuntimeOnly deps['junitRuntime']
 
        //add global dependencies for all projects here....
        implementation deps['web-webserver']
 
-       //This line includes any jars a developer drops into {project}/lib directory
-       implementation fileTree(dir: 'lib', include: '*.jar')
    }
-
-   //This copies new jars over from ivy/maven and project/lib and finally our built up jar so all jars are in
-   //one output directory AND it deletes jars in there that are no longer part of any of those locations as well since
-   //it is a task of type: Sync
-   task syncJars(type: Sync, dependsOn: 'jar') {
-       configurations.implementation.setCanBeResolved(true)
-       from(configurations.implementation) {}
-       from(fixedLibDir) {}
-       from(libsDirectory) {}
-       into toStagingDir
-   }
-
-   assemble.dependsOn('syncJars')
 
    test{
+      useJUnitPlatform()
       beforeTest{ descr ->
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
       }
