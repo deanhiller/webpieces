@@ -135,7 +135,7 @@ ext {
             'hibernate-validator'    : 'org.hibernate.validator:hibernate-validator',
             'el-for-validator'       : 'org.glassfish:jakarta.el',
 
-            'log4jdbc'               : 'com.googlecode.log4jdbc:log4jdbc',
+            'log4jdbc'               : 'org.digitalforge:log4jdbc',
             'h2db'                   : 'com.h2database:h2',
 
             'sneakythrow'            : 'org.digitalforge:sneakythrow:1.0.1',
