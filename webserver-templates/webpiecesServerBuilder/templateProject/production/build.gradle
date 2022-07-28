@@ -47,8 +47,6 @@ dependencies {
     implementation deps['jul-to-slf4j']
 
     implementation deps['commons-lang'] //used in json escaping
-    //for connection pooling: https://mvnrepository.com/artifact/org.hibernate/hibernate-hikaricp
-    implementation deps['hikari-cp']
     implementation 'jakarta.validation:jakarta.validation-api'
 
     testImplementation deps['core-ddl']

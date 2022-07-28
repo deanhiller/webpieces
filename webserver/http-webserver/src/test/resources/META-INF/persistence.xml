@@ -8,7 +8,7 @@
 
       <properties>
          <!-- property name="javax.persistence.jdbc.driver" value="org.h2.Driver" /-->
-         <property name="javax.persistence.jdbc.driver" value="net.sf.log4jdbc.DriverSpy" />
+         <property name="javax.persistence.jdbc.driver" value="org.digitalforge.log4jdbc.LoggingDriver" />
          <property name="javax.persistence.jdbc.url" value="jdbc:log4jdbc:h2:mem:test" />
          <property name="javax.persistence.jdbc.user" value="sa" />
          <property name="javax.persistence.jdbc.password" value="" />

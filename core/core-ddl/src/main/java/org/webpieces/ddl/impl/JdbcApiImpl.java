@@ -22,7 +22,7 @@ public class JdbcApiImpl implements JdbcApi {
 
 	private Connection createConnection() {
 		try {
-			Class.forName("net.sf.log4jdbc.DriverSpy");
+			Class.forName("org.digitalforge.log4jdbc.LoggingDriver");
 			return DriverManager.getConnection(driver, username, password);
 		} catch (ClassNotFoundException | SQLException e) {
 			throw SneakyThrow.sneak(e);
