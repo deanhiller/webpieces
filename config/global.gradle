@@ -131,9 +131,8 @@ ext {
             'selenium'               : 'org.seleniumhq.selenium:selenium-java',
             'twitter-hpack'          : 'com.twitter:hpack',
 
-            'hibernate'              : 'org.hibernate:hibernate-core',
+            'hibernate'              : 'org.hibernate:hibernate-hikaricp',
             'hibernate-validator'    : 'org.hibernate.validator:hibernate-validator',
-            'hikari-cp'              : 'org.hibernate:hibernate-hikaricp',
             'el-for-validator'       : 'org.glassfish:jakarta.el',
 
             'log4jdbc'               : 'com.googlecode.log4jdbc:log4jdbc',
@@ -215,7 +214,7 @@ dependencies {
 
         implementation 'ch.qos.logback:logback-classic:1.2.3'
         implementation 'com.google.inject:guice:5.1.0'
-        implementation 'com.googlecode.log4jdbc:log4jdbc:1.2'
+        implementation 'org.digitalforge:log4jdbc:1.0.2'
         implementation 'com.h2database:h2:1.4.200'
         implementation 'com.twitter:hpack:1.0.2'
         implementation 'commons-beanutils:commons-beanutils:1.9.4'
@@ -225,8 +224,7 @@ dependencies {
         implementation 'org.codehaus.groovy:groovy-all:3.0.8'
         implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.6.1'
         implementation 'org.glassfish:jakarta.el:3.0.3'
-        implementation 'org.hibernate:hibernate-core:5.4.30.Final'
-        implementation 'org.hibernate:hibernate-hikaricp:5.4.30.Final'
+        implementation 'org.hibernate:hibernate-hikaricp:5.4.33.Final' // KEEP IN SYNC WITH HikariCP
         implementation 'org.hibernate.validator:hibernate-validator:6.2.0.Final'
         implementation 'org.seleniumhq.selenium:selenium-java:4.0.0-alpha-7'
         implementation 'org.shredzone.acme4j:acme4j-client:2.11'

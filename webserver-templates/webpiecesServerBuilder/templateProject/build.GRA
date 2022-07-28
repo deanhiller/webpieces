@@ -53,7 +53,6 @@ ext {
        //'guava':           'com.google.guava:guava:19.0',
        //'apache-commons-io': 'org.apache.commons:commons-io:1.3.2'
 
-       'hikari-cp':     'org.hibernate:hibernate-hikaricp:5.4.10.Final'
     ]
 }
 
