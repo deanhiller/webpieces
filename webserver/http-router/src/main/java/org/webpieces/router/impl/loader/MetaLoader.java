@@ -25,7 +25,7 @@ public class MetaLoader {
 		Method[] methods = controllerInst.getClass().getMethods();
 		List<Method> matches = new ArrayList<>();
 		for(Method m : methods) {
-			if(m.getName().equals(methodStr))
+			if(m.getName().equals(methodStr) && !m.isBridge())
 				matches.add(m);
 		}
 
