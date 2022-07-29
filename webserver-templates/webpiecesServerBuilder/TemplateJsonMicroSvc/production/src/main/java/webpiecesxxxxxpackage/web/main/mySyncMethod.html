@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Webpieces - Re-usable pieces of a webserver</title>
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800">
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Dosis:300,400,500,600,700">
+        
+        #{stylesheet href:'%[assets/primesTheme/assets/bootstrap/css/bootstrap.min.css]%'/}#
+        #{stylesheet href:'%[assets/primesTheme/assets/font-awesome/css/font-awesome.min.css]%'/}#
+        #{stylesheet href:'%[assets/primesTheme/assets/elegant-icons/css/elegant-icons.min.css]%'/}#
+        #{stylesheet href:'%[assets/primesTheme/assets/ionicons/css/ionicons.min.css]%'/}#
+        #{stylesheet href:'%[assets/primesTheme/assets/owl-carousel/owl.carousel.css]%'/}#
+        #{stylesheet href:'%[assets/primesTheme/assets/owl-carousel/owl.theme.css]%'/}#
+        #{stylesheet href:'%[assets/primesTheme/assets/cubeportfolio/css/cubeportfolio.min.css]%'/}#
+        #{stylesheet href:'%[assets/primesTheme/assets/css/style.css]%'/}#
+        
+            <!--Colors-->
+            <!-- <link rel="stylesheet" type="text/css" href="assets/primesTheme/assets/css/colors/red.css"> -->
+            <!-- <link rel="stylesheet" type="text/css" href="assets/primesTheme/assets/css/colors/orange.css"> -->
+            <!-- <link rel="stylesheet" type="text/css" href="assets/primesTheme/assets/css/colors/green.css"> -->
+            <!-- <link rel="stylesheet" type="text/css" href="assets/primesTheme/assets/css/colors/lime.css"> -->
+            <!-- <link rel="stylesheet" type="text/css" href="assets/primesTheme/assets/css/colors/brown.css"> -->
+            <!-- <link rel="stylesheet" type="text/css" href="assets/primesTheme/assets/css/colors/blue.css"> -->
+            <!-- <link rel="stylesheet" type="text/css" href="assets/primesTheme/assets/css/colors/yellow.css"> -->
+             <!-- <link rel="stylesheet" type="text/css" href="assets/primesTheme/assets/css/colors/purple.css"> -->
+
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+    </head>
+
+    <body data-spy="scroll" data-offset="80">
+         <div class="navbar navbar-default navbar-fixed-top menu-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#home"><i class="fa fa-star-half-o"></i> WEBPIECES</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#examples-section">Examples</a></li>
+                        <li><a href="#features-section">Features</a></li>
+
+                        <li><a href="#portfolio-section">Portfolio</a></li>
+                        <li><a href="#pricing-section">Free</a></li>
+                        <li><a href="#contact-section">Contact</a></li>
+                    </ul>
+                </div> 
+            </div>
+        </div> 
+
+        <!-- Top content -->
+        <div id="home" class="parallax top-content" data-stellar-background-ratio="0.3">
+            <div class="inner-bg">
+                <div class="container">
+                    <div class="row">
+
+			<div class="col-md-10 col-md-offset-1 top-description">
+				
+				<h2 class="text-center">
+				Build your <strong>Business</strong> with <strong>Webpieces</strong></h2>
+				
+					
+		<p>Webpieces Webserver is the most swappable platform on the market.  You can override any
+			 piece of the webserver so it is the first platform to allow you to customize every corner for your needs</p>
+		                            <div class="top-button">
+                            	<a class="btn btn-top btn-lg" href="#examples-section">Examples</a>
+                            	<a class="btn btn-top-white btn-lg" href="#features-section">Features</a>
+                            </div>
+	
+					</div>
+                            </div>
+	
+					</div>
+
+			
+				</div>
+			</div>
+
+        <!-- Features -->
+        <div id="examples-section" class="features-container">
+	        <div class="container">
+	            <div class="row">
+	                <div class="col-sm-12 features">
+	                    <h3>Examples</h3>
+	                    <p>Three highlights but there is way more than just this</p>
+
+	                </div>
+	            </div>
+	            <div class="row">
+	                <div class="col-sm-4 features-box">
+	                	<div class="icon">
+	                		<i class="icon ion-ios-lightbulb-outline"></i>
+	                	</div>
+	                    <h4>CRUD</h4>
+	                    <p>
+	                    	The basic crud example but when you dig into the code you will find it doesn't take much code.
+	                    </p>
+                            	<a class="btn btn-features btn-lg" href="@[LIST_USERS]@"> Learn More</a>
+
+	                </div>
+	                <div class="col-sm-4 features-box">
+	                	<div class="icon">
+	                		<i class="icon ion-ios-flame-outline"></i>
+	                	</div>
+	                    <h4>Ajax CRUD</h4>
+	                    <p>
+	                    	Advanced CRUD example that has to deal with advanced use cases of being logged out when invoking javascript but thankfully we do the heavy lifting
+
+	                    </p>
+                            	<a class="btn btn-features btn-lg" href="@[AJAX_LIST_USERS]@"> Learn More</a>
+
+	                </div>
+	                <div class="col-sm-4 features-box">
+	                	<div class="icon">
+	                		<i class="icon ion-ios-flask-outline"></i>
+	                	</div>
+	                    <h4>Tags</h4>
+	                    <p>
+	                    	An assortment of tags with ability to create your own as well.  
+
+	                    </p>
+                            	<a class="btn btn-features btn-lg" href=""> Learn More</a>
+
+	                </div>
+	            </div>
+	        </div>
+        </div>
+        
+        
+        <!-- Services -->
+
+        <div id="features-section" class="services-container">
+	        <div class="container">
+	            <div class="row">
+
+	                <div class="col-sm-12 services">
+	                    <h3>Features</h3>
+	                    <p>Four highlights but there is way more than just this.</p>
+				</div>
+			</div>
+			</div>
+
+
+	        <div class="container">
+	            <div class="row">
+
+				<div class="col-lg-6 col-sm-6">
+                        <div class="services-icon-wrap clearfix">
+                            <div class="left-side-icon">
+                                <i class="ion-ios-loop"></i>
+
+						</div>
+                            <div class="services-text-right">
+
+						<h5>Developer Server Mode</h5>
+						
+<p>Much like ruby development, refactor your code like crazy and never restart your webserver.  Also, without restarting you can place and remove breakpoints in your debugger and they keep working as long as you don't delete that line.</p>
+                            </div>
+                        </div> 
+					
+                        <div class="services-icon-wrap clearfix">
+                            <div class="left-side-icon">
+                                <i class="ion-social-buffer-outline"></i>
+
+						</div>
+                            <div class="services-text-right">
+
+						<h5>Browser caching that works</h5>
+<p>Other webservers have issues like when updating a *.js file, some customers don't get the update breaking their app.  Webpieces solves that issue by modifying urls to have a hash in the url so if you change the javascript we force the update to all customers.</p>
+                            </div>
+                        </div> 
+                            </div>
+
+				<div class="col-lg-6 col-sm-6">
+                        <div class="services-icon-wrap clearfix">
+                            <div class="left-side-icon">
+                                <i class="ion-social-windows-outline"></i>
+
+						</div>
+                            <div class="services-text-right">
+
+						<h5>Tooling Provided</h5>
+<p>We provide you with the gradle build files.  We provide you with code coverage, and free 
+checking for bad patterns in your code.  We provide you with a build that builds a zip file with 
+your app and webserver that you can upload to production.  We provide you with log4jdbc and an 
+inmemory database out of the box to see if you have 1+n query issues.  We have clickable 
+log statements.</p>
+                            </div>
+                        </div> 
+					
+                        <div class="services-icon-wrap clearfix">
+                            <div class="left-side-icon">
+                                <i class="ion-ios-reload"></i>
+
+						</div>
+                            <div class="services-text-right">
+
+						<h5>Feature Testable</h5>
+<p>One of the best hidden gems.  This server is NOT tested with single class tests but instead is tested in terms of what YOU use.  This also has the added benefit that we can refactor to create new features without the drag of needing to change unit tests</p>
+
+                            </div>
+                        </div> 
+
+				</div>
+			</div>
+		</div>
+		</div>
+
+	<!-- VIDEO SECTION -->
+	<div id="video" class="video-container">
+		<!--video iframe-->
+		<div class="video">
+			<iframe frameborder="0" height="281" src="http://player.vimeo.com/video/163694555?title=0&amp;byline=0&amp;portrait=0&amp;color=ffffff&amp;autoplay=0" width="640"></iframe>
+		</div>
+	</div>
+	<!-- VIDEO SECTION -->
+
+        <div id="portfolio-section" class="portfolio-container">
+	        <div class="container">
+	            <div class="row">
+	                <div class="col-sm-12 portfolio">
+
+	                    <h3>Portfolio</h3>
+	                    <p>Ut lobortis auctor est, quis ornare orci tristique vel. Pellentesque sit amet ultricies nisl.</p>
+
+	            </div>
+	            </div>
+
+
+
+    <div class="clearfix">
+
+        <div id="js-filters-lightbox-gallery2" class="cbp-l-filters-button cbp-l-filters-center">
+            <div data-filter="*" class="cbp-filter-item-active cbp-filter-item">All</div>
+            <div data-filter=".graphic" class="cbp-filter-item">Graphic</div>
+            <div data-filter=".logos" class="cbp-filter-item">Logo</div>
+            <div data-filter=".motion" class="cbp-filter-item">Motion</div>
+        </div>
+    </div>
+
+    <div id="js-grid-lightbox-gallery" class="cbp">
+        <div class="cbp-item web-design graphic print motion">
+            <a href="assets/primesTheme/ajax-lightbox-gallery/project1.html" class="cbp-caption cbp-singlePageInline" data-title="World Clock Widget" rel="nofollow">
+                <div class="cbp-caption-defaultWrap">
+									<img src="assets/primesTheme/assets/img/portfolio/1.jpg" alt="">
+                </div>
+                <div class="cbp-caption-activeWrap">
+                    <div class="cbp-l-caption-alignLeft">
+                        <div class="cbp-l-caption-body">
+                            <div class="cbp-l-caption-title">World Clock Widget</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="cbp-item web-design logos identity graphic">
+            <a href="assets/primesTheme/ajax-lightbox-gallery/project2.html" class="cbp-caption cbp-singlePageInline" data-title="Bolt UI" rel="nofollow">
+                <div class="cbp-caption-defaultWrap">
+									<img src="assets/primesTheme/assets/img/portfolio/2.jpg" alt="">
+                </div>
+                <div class="cbp-caption-activeWrap">
+                    <div class="cbp-l-caption-alignLeft">
+                        <div class="cbp-l-caption-body">
+                            <div class="cbp-l-caption-title">Bolt UI</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="cbp-item graphic print identity">
+            <a href="assets/primesTheme/ajax-lightbox-gallery/project3.html" class="cbp-caption cbp-singlePageInline" data-title="WhereTO App" rel="nofollow">
+                <div class="cbp-caption-defaultWrap">
+									<img src="assets/primesTheme/assets/img/portfolio/3.jpg" alt="">
+                </div>
+                <div class="cbp-caption-activeWrap">
+                    <div class="cbp-l-caption-alignLeft">
+                        <div class="cbp-l-caption-body">
+                            <div class="cbp-l-caption-title">WhereTO App</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="cbp-item web-design motion logos">
+            <a href="assets/primesTheme/ajax-lightbox-gallery/project4.html" class="cbp-caption cbp-singlePageInline" data-title="iDevices" rel="nofollow">
+                <div class="cbp-caption-defaultWrap">
+									<img src="assets/primesTheme/assets/img/portfolio/4.jpg" alt="">
+                </div>
+                <div class="cbp-caption-activeWrap">
+                    <div class="cbp-l-caption-alignLeft">
+                        <div class="cbp-l-caption-body">
+                            <div class="cbp-l-caption-title">iDevices</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="cbp-item identity graphic print">
+            <a href="assets/primesTheme/ajax-lightbox-gallery/project5.html" class="cbp-caption cbp-singlePageInline" data-title="Seemple* Music for iPad" rel="nofollow">
+                <div class="cbp-caption-defaultWrap">
+									<img src="assets/primesTheme/assets/img/portfolio/5.jpg" alt="">
+                </div>
+                <div class="cbp-caption-activeWrap">
+                    <div class="cbp-l-caption-alignLeft">
+                        <div class="cbp-l-caption-body">
+                            <div class="cbp-l-caption-title">Seemple* Music for iPad</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="cbp-item motion print logos web-design">
+            <a href="assets/primesTheme/ajax-lightbox-gallery/project6.html" class="cbp-caption cbp-singlePageInline" data-title="Remind~Me Widget" rel="nofollow">
+                <div class="cbp-caption-defaultWrap">
+									<img src="assets/primesTheme/assets/img/portfolio/6.jpg" alt="">
+                </div>
+                <div class="cbp-caption-activeWrap">
+                    <div class="cbp-l-caption-alignLeft">
+                        <div class="cbp-l-caption-body">
+                            <div class="cbp-l-caption-title">Remind~Me Widget</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="cbp-item graphic logos">
+            <a href="assets/primesTheme/ajax-lightbox-gallery/project7.html" class="cbp-caption cbp-singlePageInline" data-title="Workout Buddy" rel="nofollow">
+                <div class="cbp-caption-defaultWrap">
+									<img src="assets/primesTheme/assets/img/portfolio/7.jpg" alt="">
+                </div>
+                <div class="cbp-caption-activeWrap">
+                    <div class="cbp-l-caption-alignLeft">
+                        <div class="cbp-l-caption-body">
+                            <div class="cbp-l-caption-title">Workout Buddy</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="cbp-item identity print logos motion">
+            <a href="assets/primesTheme/ajax-lightbox-gallery/project8.html" class="cbp-caption cbp-singlePageInline" data-title="Digital Menu" rel="nofollow">
+                <div class="cbp-caption-defaultWrap">
+									<img src="assets/primesTheme/assets/img/portfolio/8.jpg" alt="">
+                </div>
+                <div class="cbp-caption-activeWrap">
+                    <div class="cbp-l-caption-alignLeft">
+                        <div class="cbp-l-caption-body">
+                            <div class="cbp-l-caption-title">Digital Menu</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="cbp-item identity motion web-design">
+            <a href="assets/primesTheme/ajax-lightbox-gallery/project9.html" class="cbp-caption cbp-singlePageInline" data-title="Holiday Selector" rel="nofollow">
+                <div class="cbp-caption-defaultWrap">
+									<img src="assets/primesTheme/assets/img/portfolio/9.jpg" alt="">
+                </div>
+                <div class="cbp-caption-activeWrap">
+                    <div class="cbp-l-caption-alignLeft">
+                        <div class="cbp-l-caption-body">
+                            <div class="cbp-l-caption-title">Holiday Selector</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div id="js-loadMore-lightbox-gallery" class="cbp-l-loadMore-button">
+        <a href="assets/primesTheme/ajax-lightbox-gallery/loadMore.html" class="cbp-l-loadMore-link" rel="nofollow">
+            <span class="cbp-l-loadMore-defaultText">Load More</span>
+            <span class="cbp-l-loadMore-loadingText">Loading...</span>
+            <span class="cbp-l-loadMore-noMoreLoading">No More Works</span>
+        </a>
+    </div>
+
+    </div>
+
+
+			</div>
+		</div>
+	</div>
+
+
+        <!-- Fact -->
+
+        <div id="fact-container" class="fact-container">
+	        <div class="container">
+            <div class="row">
+	                <div class="col-sm-3 fact-box">
+	                	<div class="icon">
+	                		<i class="icon ion-ios-alarm-outline"></i>
+	                	</div>
+	                    <h4>1754</h4>
+	                    <h5>hours worked</h5>
+
+	                </div>
+	                <div class="col-sm-3 fact-box">
+	                	<div class="icon">
+	                		<i class="icon ion-social-dropbox-outline"></i>
+	                	</div>
+	                    <h4>300</h4>
+	                    <h5>Finished projects</h5>
+
+	                </div>
+	                <div class="col-sm-3 fact-box">
+	                	<div class="icon">
+	                		<i class="icon ion-ios-cloud-download-outline"></i>
+	                	</div>
+	                    <h4>842</h4>
+	                    <h5>downloads</h5>
+
+	                </div>
+	                <div class="col-sm-3 fact-box">
+	                	<div class="icon">
+	                		<i class="icon ion-ios-person-outline"></i>
+	                	</div>
+	                    <h4>910</h4>
+	                    <h5>happy customers</h5>
+
+	                </div>
+</div>
+</div>
+</div>
+</div>
+
+        <!-- Pricing -->
+
+        <div id="pricing-section" class="pricing-container">
+	        <div class="container">
+	            <div class="row">
+	                <div class="col-sm-12 pricing">
+	                    <h3>Choose the package</h3>
+	                    <p>Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4 toLeft">
+					<div class="price-column">
+						<h2>Standard</h2>
+						<h3><span>From</span> $0<span>.00 per month</span></h3>
+						<ul>
+							<li>Vestibulum est magna</li>
+							<li>Mauris auctor massa libero</li>
+							<li>Praesent magna tortor</li>
+							<li>Cras et fermentum massa</li>
+						<li><button type="button" class="btn btn-top btn-lg">Purchase</button></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-4 toIn">
+					<div class="price-column large">
+						<h2>Premium</h2>
+						<h3><span>From</span> $0<span>.00 per month</span></h3>
+						<ul>
+							<li>Vestibulum est magna</li>
+							<li>Mauris auctor massa libero</li>
+							<li>Praesent magna tortor</li>
+							<li>Cras et fermentum massa</li>
+						<li><button type="button" class="btn btn-top btn-lg">Purchase</button></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-4 toRight">
+					<div class="price-column">
+						<h2>Ultimate</h2>
+						<h3><span>From</span> $0<span>.00 per month</span></h3>
+						<ul>
+							<li>Vestibulum est magna</li>
+							<li>Mauris auctor massa libero</li>
+							<li>Praesent magna tortor</li>
+							<li>Cras et fermentum massa</li>
+						<li><button type="button" class="btn btn-top btn-lg">Purchase</button></li>
+						</ul>
+
+					</div>
+				</div>
+			</div>
+			
+					</div>
+	
+		</div>
+
+
+   
+                <!-- Testimonials -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 testimonials">
+                    <h3>What our customers have to say...</h3>
+
+                    <div class="col-md-12 text-center">
+                        <div id="testimonial-carousel" class="owl-carousel owl-spaced">
+                            <div>
+									<img src="assets/primesTheme/assets/img/testimonials/1.jpg" alt="" class="img-responsive img-thumbnail" />
+
+                                <h4>
+                                    Pellentesque sit amet augue a mi luctus laoreet ut nec velit. Morbi in fermentum elit. Curabitur pellentesque neque eget diam posuere porta. Aliquam imperdiet nulla id scelerisque auctor. Proin egestas mauris vel arcu bibendum ornare. 
+                                </h4>
+                                <p>-Diana Rosswert</p>
+                            </div>
+                            <div>
+									<img src="assets/primesTheme/assets/img/testimonials/2.jpg" alt="" class="img-responsive img-thumbnail" />
+
+                                <h4>
+                                    Pellentesque sit amet augue a mi luctus laoreet ut nec velit. Morbi in fermentum elit. Curabitur pellentesque neque eget diam posuere porta. Aliquam imperdiet nulla id scelerisque auctor. Proin egestas mauris vel arcu bibendum ornare. 
+                                </h4>
+                                <p>-Diana Rosswert</p>
+                            </div>
+                            <div>
+									<img src="assets/primesTheme/assets/img/testimonials/3.jpg" alt="" class="img-responsive img-thumbnail" />
+
+                                <h4>
+                                    Pellentesque sit amet augue a mi luctus laoreet ut nec velit. Morbi in fermentum elit. Curabitur pellentesque neque eget diam posuere porta. Aliquam imperdiet nulla id scelerisque auctor. Proin egestas mauris vel arcu bibendum ornare. 
+                                </h4>
+                                <p>-Diana Rosswert</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+
+        <!-- Contact us -->
+        <div id="contact-section" class="contact-container">
+
+            <div class="inner-contact">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 contact">
+                    <h3>Contact Us</h3>
+                    <p>
+                    	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi pharetra odio ac felis iaculis cursus aliquet quis orci. Nunc id lorem ut mi euismod accumsan. 
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-7 form-group contact-form">
+                    <h4>Send Message</h4>
+                    <form method="post" action="assets/primesTheme/assets/contact.php">
+                        <input type="text" name="email" placeholder="Email" class="form-control contact-email">
+                        <input type="text" name="subject" placeholder="Subject" class="form-control contact-subject">
+                        <textarea name="message" class="form-control" placeholder="Message"></textarea>
+                        <button type="submit" class="btn btn-contact">Submit</button>
+                    </form>
+                </div>
+                <div class="col-sm-5 contact-address contact-about">
+                    <h4>About Us</h4>
+                    <p>Fusce at leo eros. Morbi mauris arcu, eleifend sit amet turpis ac, porta luctus neque. Etiam ultricies ac augue a venenatis. Quisque aliquam odio eu magna sodales, vel interdum erat suscipit. Mauris ut porttitor tellus. Integer ac bibendum lectus. Quisque interdum aliquam felis vel volutpat. Vivamus commodo felis quis dui pharetra, ac venenatis magna lacinia. Vestibulum quis dignissim nibh. Duis vitae felis orci. Aliquam porta interdum feugiat. Ut ac varius nibh. Nullam est nisl, sagittis sed risus vel, facilisis commodo tortor. Suspendisse suscipit tellus vitae tellus porta rutrum. Proin ac orci auctor, consequat dolor nec, scelerisque nisl.</p>
+                    <h4>Address</h4>
+                    <p><i class="fa fa-map-marker"></i>13 Brant Street, Burlington, Ontario, Canada</p>
+                    <p><i class="fa fa-phone"></i>Phone: 0011 222 335 7773</p>
+
+                </div>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        
+	<!-- footer -->
+	<div id="footer">
+	<h3>Follow Us!</h3>
+	<p>Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Suspendisse suscipit tellus vitae tellus porta rutrum. Aliquam imperdiet nulla id scelerisque auctor.</p>
+	<div class="follow-us">
+                        <a href="#" class="social-icon"><i class="fa fa-facebook"></i></a>
+                        <a href="#" class="social-icon"><i class="fa fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fa fa-linkedin"></i></a>
+                        <a href="#" class="social-icon"><i class="fa fa-pinterest"></i></a>
+                        <a href="#" class="social-icon"><i class="fa fa-google-plus"></i></a>
+		</div>
+	</div>
+	<!-- footer 2 -->
+	<div id="footer2">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-12">
+				<div class="copyright">&copy;primes
+							<script type="text/javascript">
+							//<![CDATA[
+								var d = new Date()
+								document.write(d.getFullYear())
+								//]]>
+								</script>
+							  - <a href="http://themebootstrap.net/">themebootstrap.net</a>
+						</div>
+						</div>
+					</div>
+				</div>
+					</div>
+        
+        <!-- Javascript -->
+        #{script src:'%[assets/primesTheme/assets/js/jquery-1.10.2.min.js]%'/}#
+        #{script src:'%[assets/primesTheme/assets/bootstrap/js/bootstrap.min.js]%'/}#
+        *{   #{script src:'%[assets/primesTheme/assets/js/retina-1.1.0.min.js]%'/}#  }*
+        #{script src:'%[assets/primesTheme/assets/js/jquery.easing.1.3.min.js]%'/}#
+        #{script src:'%[assets/primesTheme/assets/js/jquery.stellar.min.js]%'/}#
+        #{script src:'%[assets/primesTheme/assets/owl-carousel/owl.carousel.min.js]%'/}#
+        #{script src:'%[assets/primesTheme/assets/cubeportfolio/js/jquery.cubeportfolio.min.js]%'/}#
+        #{script src:'%[assets/primesTheme/assets/js/cube.js]%'/}#
+        #{script src:'%[assets/primesTheme/assets/js/script.js]%'/}#
+        #{script src:'%[assets/primesTheme/assets/js/main.js]%'/}#
+        
+    </body>
+
+</html>
+

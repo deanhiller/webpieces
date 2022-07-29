@@ -93,7 +93,8 @@ ext {
             'webserver-templates'    : 'org.webpieces:webserver-templates',
             'template1-production'   : 'org.webpieces:production',
             'template1-development'  : 'org.webpieces:development',
-
+            'template-json-production': 'org.webpieces.server.jsontemplate:production',
+            'template-json-development':'org.webpieces.server.jsontemplate:development',
             'plugin-backend'         : 'org.webpieces.server.plugin:plugin-backend',
             'plugin-documentation'   : 'org.webpieces.server.plugin:plugin-documentation',
             'plugin-dto'             : 'org.webpieces.server.plugin:plugin-dto',

@@ -1,0 +1,22 @@
+#custom_logoutbtn a
+    {
+    color:white;
+    width:120px;
+    height:14px;
+    
+    }
+
+#in_pricing .plan h3 {
+	font-size: 23px;
+}
+
+/* 
+  let's override bootstrap pre and code to be more ideal for code
+*/
+pre {
+  overflow: auto;
+}
+
+pre code {
+    white-space: pre;;
+}

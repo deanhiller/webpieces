@@ -1,0 +1,11 @@
+This file serves as a locator so as we run we can figure out where things are.
+Intellij proved the most difficult as it chooses odd locations to run from for programs ONLY while
+eclipse and gradle(and intellij unit tests) actually run from the same locations(kind of the location you would
+think actually...the subproject directory you ran the server in).  Why in the world doees intellij
+run intellij unit tests in the subproject dir but not the servers?  That is a bit too inconsistent
+
+Since we run in many environments, it can be hard to locate html resources that
+come from the filesystem(clearly classpath resources are easy but many images are 
+served off the filesystem).  Also, we need to know where the dynamic html files
+are for the Development Server
+

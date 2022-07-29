@@ -1,0 +1,14 @@
+//THIS is the file used when we generate the template
+
+dependencies {
+  //add dev-server only dependencies here if you have any(you shouldn't most likely)
+  implementation project(':production')
+  //This contains development overrides that pulls in the eclipse compiler...
+  implementation deps['web-devrouter']
+  implementation deps['web-devtemplating']
+  
+  //optional plugin for if you use H2 which supplies a GUI to access in memory database during development
+  implementation deps['plugin-h2']
+  //we load the documentation plugin in the development server (not the production server)
+  implementation deps['plugin-webpieces-documentation']
+}

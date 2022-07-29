@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>#{get 'title' /}#</title>
+        <meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Styles -->
+    
+    #{stylesheet href:'%[/assets/crud/css/bootstrap.css]%'/}#
+    #{stylesheet href:'%[/assets/crud/css/theme.css]%'/}#
+    #{stylesheet href:'%[/assets/crud/css/index.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/lib/animate.css]%', media:'screen, projection'/}#
+    #{stylesheet href:'%[/assets/crud/css/about.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/sign-in.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/sign-up.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/lib/flexslider.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/contact.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/blog.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/blogpost.css]%', media:'screen'/}#
+    
+    *{ <link href="%['/assets/crud/fonts.css']%" rel='stylesheet' type='text/css'> }*
+	
+    #{stylesheet href:'%[/assets/crud/overrides.css]%'/}#
+    	
+	#{script src:'%[/assets/crud/js/jquery/jquery-1.9.1.js]%'/}#
+
+    #{if _appContext.googleAnalyticsCode}#
+        <!-- Global site tag (gtag.js) - Google Analytics for PROD -->
+        *{UA-162386815-1}*
+        <script async src="https://www.googletagmanager.com/gtag/js?id=${_appContext.googleAnalyticsCode}$"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', '${_appContext.googleAnalyticsCode}$');
+        </script>
+    #{/if}#    
+
+</head>
+<body>
+  <!--[if lt IE 9]>  <div style='border: 1px solid #F7941D; background: #FEEFDA; text-align: center; clear: both; height: 75px; position: relative;'>    <div style='position: absolute; right: 3px; top: 3px; font-family: courier new; font-weight: bold;'><a href='#' onclick='javascript:this.parentNode.parentNode.style.display="none"; return false;'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-cornerx.jpg' style='border: none;' alt='Close this notice'/></a></div>    <div style='width: 640px; margin: 0 auto; text-align: left; padding: 0; overflow: hidden; color: black;'>      <div style='width: 75px; float: left;'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-warning.jpg' alt='Warning!'/></div>      <div style='width: 275px; float: left; font-family: Arial, sans-serif;'>        <div style='font-size: 14px; font-weight: bold; margin-top: 12px;'>You are using an outdated browser</div>        <div style='font-size: 12px; margin-top: 6px; line-height: 12px;'>For a better experience using this site, please upgrade to a modern web browser.</div>      </div>      <div style='width: 75px; float: left;'><a href='http://www.firefox.com' target='_blank'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-firefox.jpg' style='border: none;' alt='Get Firefox 3.5'/></a></div>      <div style='width: 75px; float: left;'><a href='http://www.browserforthebetter.com/download.html' target='_blank'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-ie8.jpg' style='border: none;' alt='Get Internet Explorer 8'/></a></div>      <div style='width: 73px; float: left;'><a href='http://www.apple.com/safari/download/' target='_blank'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-safari.jpg' style='border: none;' alt='Get Safari 4'/></a></div>      <div style='float: left;'><a href='http://www.google.com/chrome' target='_blank'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-chrome.jpg' style='border: none;' alt='Get Google Chrome'/></a></div>    </div>  </div>  <![endif]-->
+  
+    <div class="navbar transparent navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            	<img src="%[/assets/crud/resources/pulldown.png]%"/>
+            	*{<span class="icon-chevron-down"></span>}*
+            </a>
+            <a class="brand" href="@[MAIN_ROUTE]@">
+                <strong>&{'My Webpieces', 'title.createstore'}&</strong>
+            </a>
+            <div class="nav-collapse collapse">
+                <ul class="nav pull-right">
+                    <li id="tab_home"><a href="@[MAIN_ROUTE]@">&{'Home', 'link.home'}&</a></li>
+                   	#{if _session.get('userId') != null}#
+                	<li id="tab_loggedin"><a id="loggedinhome" href="@[LOGGED_IN_HOME]@">&{'Logged in Home', 'link.home'}&</a></li>
+            		<li id="tab_store" class="dropdown">
+            			<a href="#" class="dropdown-toggle" id="pages-drop" data-toggle="dropdown">&{'Examples', 'examples'}&</a>   
+						<!-- Dropdown Menu -->
+						<ul class="dropdown-menu">
+							<li><a href="@[LIST_USERS]@">&{'CRUD Example', 'crud'}&</a></li>
+			            	<li><a href="@[AJAX_LIST_USERS]@">&{ 'Ajax CRUD Example', 'ajax'}&</a></li>
+			            	
+			            	*{ We could use @[TEMPLATES]@ here BUT tests do not have the plugin so would fail}*
+			            	<li><a href="http://localhost:8080/@documentation/templates">&{ 'Tags', 'tags'}&</a></li>
+			        	</ul>
+			        </li>
+			        #{/if}#
+                    #{if _session.get('userId')}#
+                        <li>
+                        	<div style="padding-left: 15px;padding-right: 15px">
+                        	<div>${_session.get('userId')}$</div>
+                        	<div id="custom_logoutbtn">
+                        		<a id="logout" href="@[LOGOUT]@"  class="btn btn-primary" style="height: 18px;width: 110px">&{'Logout', 'link.logout'}&</a>
+                        	</div>
+                        	</div>
+                        </li>
+            		#{/if}#
+            		#{else}#
+                    <li id="tab_login"><a class="btn-header" href="@[LOGIN]@">&{'Login', 'link.login'}&</a></li>
+                    #{/else}#	
+                </ul>
+            </div>
+        </div>
+      </div>
+    </div>
+
+		<script type="text/javascript" language="JavaScript">
+       		$("li#tab_#{get 'tab'/}# > a").addClass("active");
+  		</script>
+
+	#{if _flash.message}#
+		<div class="row-fluid">
+			<div class="offset3 span6 alert alert-error">
+				${_flash.message}$
+			</div>
+		</div>
+	#{/if}#
+
+	<div id="content">
+  		<div class="container"> 
+			<div class="content rt">
+				#{get 'body'/}#
+			</div>
+  		</div>
+	</div>
+
+	<!-- starts footer -->
+    <footer id="footer">
+        <div class="container">
+            <div class="row sections">
+                <div class="span4 recent_posts">
+                   *{ <h3 class="footer_header">
+                        Recent Updates
+                    </h3>
+                    <div class="post">
+                        <div class="date">
+                            Lock to computer
+                        </div>
+                            You can now lock to a single computer so employees can't clock-in on
+                            mobile phones
+                    </div>
+                    <div class="post">
+                        <div class="date">
+                            Graph of hours
+                        </div>
+                            Graphing of hours over each week
+                    </div>}*
+                </div>
+                <div class="span4 testimonials">
+                  *{  <h3 class="footer_header">
+                        Testimonials
+                    </h3>
+                    <div class="wrapper">
+                        <div class="quote">
+                            <span></span>
+                            Just 5 minutes to setup a store.  The quickest thing there is out there to look like a real business
+                            <span></span>
+                        </div>
+                        <div class="author">
+                            <img src="%[/assets/crud/img/user-display.png]%" />
+                            <div class="name">Alejandra Galvan Castillo</div>
+                            <div class="info">
+                                Puzzing
+                            </div>
+                        </div>
+                    </div> }*
+                </div>
+                <div class="span4 contact">
+                    <h3 class="footer_header" style="margin-left: 0px;margin-bottom: 15px">
+                        &{'Contact', 'title.contact'}&
+                    </h3>
+                    <div style="text-align: left;margin-bottom: 20px">
+                    support@buffalosw.com
+                    <br/>
+                    </div>
+                    *{ <form action="#" method="post">
+                        <input type="text" placeholder="Your name" />
+                        <input type="text" placeholder="Your email" />
+                        <textarea rows="3" placeholder="Message"></textarea>
+                        <input type="submit" value="Send" />
+                    </form> }*
+                </div>
+            </div>
+            <div class="row credits">
+                <div class="span12">
+                    *{ <div class="row social">
+                        <div class="span12">
+                            <a href="#" class="facebook">
+                                <span class="socialicons ico1"></span>
+                                <span class="socialicons_h ico1h"></span>
+                            </a>
+                            <a href="#" class="twitter">
+                                <span class="socialicons ico2"></span>
+                                <span class="socialicons_h ico2h"></span>
+                            </a>
+                            <a href="#" class="gplus">
+                                <span class="socialicons ico3"></span>
+                                <span class="socialicons_h ico3h"></span>
+                            </a>
+                            <a href="#" class="flickr">
+                                <span class="socialicons ico4"></span>
+                                <span class="socialicons_h ico4h"></span>
+                            </a>
+                            <a href="#" class="pinterest">
+                                <span class="socialicons ico5"></span>
+                                <span class="socialicons_h ico5h"></span>
+                            </a>
+                            <a href="#" class="dribble">
+                                <span class="socialicons ico6"></span>
+                                <span class="socialicons_h ico6h"></span>
+                            </a>
+                            <a href="#" class="behance">
+                                <span class="socialicons ico7"></span>
+                                <span class="socialicons_h ico7h"></span>
+                            </a>
+                        </div>
+                    </div> }*
+                    <div class="row copyright">
+                        <div class="span12">
+                            &{'some long copyright here', 'msg.copyright'}&
+                        </div>
+                    </div>
+                </div>            
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    #{script src:'%[/assets/crud/js/bootstrap/bootstrap.min.js]%'/}#
+    #{script src:'%[/assets/crud/js/bootstrap/theme.js]%'/}#
+    #{script src:'%[/assets/crud/js/bootstrap/flexslider.js]%'/}#
+    #{script src:'%[/assets/crud/js/bootstrap/index-slider.js]%'/}#
+    #{script src:'%[/assets/crud/js/bootstrap/bootstrap-datepicker.js]%'/}#
+    
+    <script type="text/javascript">
+    	/* enable tooltips */
+    	$(function () {
+    	    $("[rel='tooltip']").tooltip();
+    	});
+	</script>
+
+*{
+
+#{if controllers.Utility.isLocale('en')}
+	<script type="text/javascript">
+	var _urq = _urq || [];
+	_urq.push(['initSite', 'dbba204e-e224-4c2e-9715-645207f1698c']);
+	(function() {
+	var ur = document.createElement('script'); ur.type = 'text/javascript'; ur.async = true;
+	ur.src = ('https:' == document.location.protocol ? 'https://cdn.userreport.com/userreport.js' : 'http://cdn.userreport.com/userreport.js');
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ur, s);
+	})();
+	</script>
+#{/if}
+#{elseif controllers.Utility.isLocale('zh')}
+	<!-- UserVoice JavaScript SDK (only needed once on a page) -->
+	<script>(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/IMfJpkp41eHgjMWsqlMlng.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})()</script>
+	
+	<!-- A tab to launch the Classic Widget -->
+	<script>
+	UserVoice = window.UserVoice || [];
+	UserVoice.push(['showTab', 'classic_widget', {
+	  mode: 'full',
+	  primary_color: '#cc6d00',
+	  link_color: '#007dbf',
+	  default_mode: 'support',
+	  forum_id: 234063,
+	  tab_label: "&{'link.feedback.support'}",
+	  tab_color: '#396fd4',
+	  tab_position: 'middle-left',
+	  tab_inverted: false
+	}]);
+	</script>
+#{/elseif}
+
+}*
+
+</body>
+</html>

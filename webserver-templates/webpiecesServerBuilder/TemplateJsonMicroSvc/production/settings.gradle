@@ -1,0 +1,8 @@
+includeBuild '../../../../webserver-plugins/plugin-backend'
+includeBuild '../../../../webserver-plugins/plugin-hibernate'
+includeBuild '../../../../webserver-plugins/plugin-h2db'
+includeBuild '../../../../webserver-plugins/plugin-json-jackson'
+includeBuild '../../../../webserver-plugins/plugin-properties'
+includeBuild '../../../../webserver-plugins/plugin-install-sslcert'
+includeBuild '../../../../cloud/generate-httpclient'
+includeBuild '../../../../cloud/server-scaffolding'

@@ -1,0 +1,88 @@
+plugins {
+    id 'java-library'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+group = 'org.webpieces.server.jsontemplate'
+
+apply from: '../../../../config/global.gradle'
+
+//This file is used when we build the whole webpieces project AND is not part of template generation
+
+publishing.publications.mavenJava.pom.description='fake project used in testing.  ignore this jar'
+
+sourceSets {
+    main {
+        resources {
+            srcDirs += ["src/main/java"]
+            excludes = ["logback.xml"]
+        }
+    }
+}
+
+
+//Intellij Idea has a weird quirk we need to avoid
+if (System.getProperty('idea.active')) {
+
+    // to have classes and resources in the same output directory
+    idea {
+        module {
+            outputDir file("out/production/classes")
+        }
+    }
+}
+
+dependencies {
+    api deps['http-webserver']
+    //we start people off with the hibernate plugin
+    implementation deps['plugin-hibernate']
+    implementation deps['plugin-json-jackson']
+    implementation deps['plugin-backend']
+    implementation deps['plugin-install-sslcert']
+    implementation deps['plugin-properties']
+    implementation deps['generate-httpclient']
+    implementation deps['server-scaffolding']
+    implementation deps['jul-to-slf4j']
+
+    implementation deps['commons-lang'] //used in json escaping
+    implementation 'jakarta.validation:jakarta.validation-api'
+
+    testImplementation deps['core-ddl']
+    testImplementation deps['core-mock']
+    testImplementation deps['plugin-h2db']
+    testImplementation deps['http-webserver-test']
+    testImplementation deps['selenium']
+}
+
+//NOTE: jar section has to go AFTER dependencies section to read all dependencies
+jar {
+    manifest.attributes(
+            "Class-Path": configurations.runtimeClasspath.files.collect { it.name }.join(' '),
+            "Main-Class": 'webpiecesxxxxxpackage.Server'
+    )
+}
+
+compileJava.doLast {
+   logger.warn("processed resources="+sourceSets.main.output.resourcesDir)
+}
+
+test {
+    if (!project.hasProperty('includeSelenium')) {
+        exclude '**/*Selenium*'
+    }
+}
+
+tasks.whenTaskAdded {task ->
+    if(task.name.toLowerCase().contains("sonatype")) {
+        task.enabled = false
+    }
+}
+
+publish.onlyIf { false }
+if(project.hasProperty('projVersion')) {
+    publishMavenJavaPublicationToSonatypeRepository.onlyIf {false}
+}

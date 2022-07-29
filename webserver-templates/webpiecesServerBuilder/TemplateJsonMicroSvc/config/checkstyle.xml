@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC
+    "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+    "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<!-- This is a checkstyle configuration file. For descriptions of
+what the following rules do, please see the checkstyle configuration
+page at http://checkstyle.sourceforge.net/config.html -->
+
+<module name="Checker">
+
+  <!--module name="RegexpSingleline"-->
+    <!-- Checks that TODOs are named.  (Actually, just that they are followed
+         by an open paren.)
+    -->
+    <!--property name="format" value="((//.*)|(\*.*))TODO[^(]" />
+    <property name="message" value='All TODOs should be named.  e.g. "TODO(johndoe): Refactor when v2 is released."' />
+  </module-->
+
+  <module name="FileLength">
+    <property name="max" value="700"/>
+    <property name="fileExtensions" value=".java"/>
+  </module>
+
+  <!-- All Java AST specific tests live under TreeWalker module. -->
+  <module name="TreeWalker">
+
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="@(One|Many)ToOne(?!\([^)]*fetch)"/>
+      <!-- Because as apps evolve you will want to add many queries, you do not want to lock yourself into EAGER EVER as you want the
+           option for new queries to do lazy or eager.  Therefore, always use fetch type lazy and IF you need eager in some query cases,
+           have those queries be written to eagerly fetch -->
+      <property name="message" value="Please declare the fetch type to LAZY.  Eager should only be done in JPQL"/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="@(OneToMany)(.*fetch)"/>
+      <!-- Because as apps evolve you will want to add many queries, you do not want to lock yourself into EAGER EVER as you want the
+           option for new queries to do lazy or eager.  Therefore, always use fetch type lazy and IF you need eager in some query cases,
+           have those queries be written to eagerly fetch -->
+      <property name="message" value="Please don't set fetch for OneToMany, it defaults to false and prefer HQL to eagerly fetch.  It will cause hard to debug issues down the road."/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="@(OneToMany|ManyToOne|OneToOne)(.*cascade)"/>
+      <!-- Because as apps evolve you will want to add many ways to save, it is bad to use cascade not to mention
+       you can get into complicated use cases and very buggy hard to understand situations.  To keep usage of
+       hiberante simple and easy to debug, avoid cascade -->
+      <property name="message" value="Please don't use cascade attribute on JPA annotation.  It will cause hard to debug issues down the road."/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="@(OneToMany|ManyToOne|OneToOne)(.*orphanRemoval)"/>
+      <!-- This one is debatable but I am putting the check in anyways and it can be removed
+
+      It's better to KISS and code up removal of everything yourself rather than get into weird situations
+       so code your removals and have the right database constraints to catch your bugs-->
+      <property name="message" value="Please don't use orphanRemoval attribute on JPA annotation.  It will cause hard to debug issues down the road."/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+    
+    <!-- shorter methods are easy to read forcing developers to create tables of contents in their methods -->
+    <module name="MethodLength">
+      <property name="tokens" value="METHOD_DEF"/>
+      <property name="max" value="70"/>
+      <property name="countEmpty" value="false"/>
+    </module>
+
+    <module name="AnonInnerLength">
+      <property name="max" value="16"/>
+    </module>
+
+    <module name="OuterTypeNumber"/>
+
+    <module name="ParameterNumber">
+      <property name="max" value="7"/>
+      <property name="tokens" value="METHOD_DEF"/>
+    </module>
+
+    <module name="ParameterNumber">
+      <property name="max" value="7"/>
+      <property name="tokens" value="CTOR_DEF"/>
+    </module>
+
+    <module name="NestedForDepth">
+      <property name="max" value="2"/>
+    </module>
+    <module name="NestedIfDepth">
+      <property name="max" value="2"/>
+    </module>
+
+    <module name="StringLiteralEquality"/>
+    <module name="NoFinalizer"/>
+    <module name="EqualsHashCode"/>
+
+    <!--
+    NAMING CHECKS
+    -->
+
+    <!-- Item 38 - Adhere to generally accepted naming conventions -->
+
+    <module name="PackageName">
+      <!-- Validates identifiers for package names against the
+        supplied expression. -->
+      <!-- Here the default checkstyle rule restricts package name parts to
+        seven characters, this is not in line with common practice at Google.
+      -->
+      <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]{1,})*$"/>
+    </module>
+
+    <module name="TypeNameCheck">
+      <!-- Validates static, final fields against the
+      expression "^[A-Z][a-zA-Z0-9]*$". -->
+      <metadata name="altname" value="TypeName"/>
+    </module>
+
+    <module name="ConstantNameCheck">
+      <!-- Validates non-private, static, final fields against the supplied
+      public/package final fields "^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$". -->
+      <metadata name="altname" value="ConstantName"/>
+      <property name="applyToPublic" value="true"/>
+      <property name="applyToProtected" value="true"/>
+      <property name="applyToPackage" value="true"/>
+      <property name="applyToPrivate" value="false"/>
+      <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|FLAG_.*)$"/>
+      <message key="name.invalidPattern"
+               value="Variable ''{0}'' should be in ALL_CAPS (if it is a constant) or be private (otherwise)."/>
+    </module>
+
+    <module name="StaticVariableNameCheck">
+      <!-- Validates static, non-final fields against the supplied
+      expression "^[a-z][a-zA-Z0-9]*_?$". -->
+      <metadata name="altname" value="StaticVariableName"/>
+      <property name="applyToPublic" value="true"/>
+      <property name="applyToProtected" value="true"/>
+      <property name="applyToPackage" value="true"/>
+      <property name="applyToPrivate" value="true"/>
+      <property name="format" value="^[a-z][a-zA-Z0-9]*_?$"/>
+    </module>
+
+    <module name="MemberNameCheck">
+      <!-- Validates non-static members against the supplied expression. -->
+      <metadata name="altname" value="MemberName"/>
+      <property name="applyToPublic" value="true"/>
+      <property name="applyToProtected" value="true"/>
+      <property name="applyToPackage" value="true"/>
+      <property name="applyToPrivate" value="true"/>
+      <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+    </module>
+
+    <module name="MethodNameCheck">
+      <!-- Validates identifiers for method names. -->
+      <metadata name="altname" value="MethodName"/>
+      <property name="format" value="^[a-z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*$"/>
+    </module>
+
+    <module name="ParameterName">
+      <!-- Validates identifiers for method parameters against the
+        expression "^[a-z][a-zA-Z0-9]*$". -->
+    </module>
+
+    <module name="LocalFinalVariableName">
+      <!-- Validates identifiers for local final variables against the
+        expression "^[a-z][a-zA-Z0-9]*$". -->
+    </module>
+
+    <module name="LocalVariableName">
+      <!-- Validates identifiers for local variables against the
+        expression "^[a-z][a-zA-Z0-9]*$". -->
+    </module>
+
+
+    <!--
+    LENGTH and CODING CHECKS
+    -->
+
+    <!--module name="LineLength"-->
+      <!-- Checks if a line is too long. -->
+      <!--property name="max" value="${com.puppycrawl.tools.checkstyle.checks.sizes.LineLength.max}" default="150"/>
+      <property name="severity" value="error"/-->
+
+      <!--
+        The default ignore pattern exempts the following elements:
+          - import statements
+          - long URLs inside comments
+      -->
+
+      <!--property name="ignorePattern"
+          value="${com.puppycrawl.tools.checkstyle.checks.sizes.LineLength.ignorePattern}"
+          default="^(package .*;\s*)|(import .*;\s*)|( *(\*|//).*https?://.*)$"/>
+    </module-->
+
+    <module name="UpperEll">
+      <!-- Checks that long constants are defined with an upper ell.-->
+      <property name="severity" value="error"/>
+    </module>
+
+    <module name="FallThrough">
+      <!-- Warn about falling through to the next case statement.  Similar to
+      javac -Xlint:fallthrough, but the check is suppressed if a single-line comment
+      on the last non-blank line preceding the fallen-into case contains 'fall through' (or
+      some other variants which we don't publicized to promote consistency).
+      -->
+      <property name="reliefPattern"
+       value="fall through|Fall through|fallthru|Fallthru|falls through|Falls through|fallthrough|Fallthrough|No break|NO break|no break|continue on"/>
+      <property name="severity" value="error"/>
+    </module>
+
+  </module>
+</module>
+

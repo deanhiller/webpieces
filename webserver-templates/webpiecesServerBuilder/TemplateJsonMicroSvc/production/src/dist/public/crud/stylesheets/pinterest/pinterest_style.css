@@ -1,0 +1,208 @@
+/* Section Styles */
+body {
+	background-color:black;
+}
+
+#outer {
+	background-image:url(dark_wood.png);
+	height:100px;
+	width:auto;
+	margin-bottom:5px;
+	text-align:center;
+	color:#E3DAC9;
+}
+
+#page-wrap {
+	background-color:black;
+	width: auto;
+}
+
+.item {
+	margin-top:5px;
+	background-color:gray;
+	position:relative;
+	border-radius:5px;
+}
+
+.item img{
+	display: block;
+	float: left;
+	width: 200px;
+	margin-top:10px;
+	margin-right:10px;
+	margin-left:10px;
+	margin-bottom:20px;
+	box-shadow: 5px 5px 5px black;
+}
+
+#static-page-wrap {
+	background-color:black;
+	width: auto;
+	height:310px;
+}
+
+.static-item {
+	margin-top:5px;
+	margin-right:5px;
+	background-color:gray;
+	position:relative;
+	border-radius:5px;
+	width:320px;Phone
+
+Password
+
+Address
+
+
+Already have an Account?
+
+Login
+	height:300px;
+	float:left;
+	display: inline-block;
+}
+
+.static-item-black{
+	margin-top:20px;
+	background-color:black;
+	width: auto;
+	color:#E3DAC9;
+}
+
+.static-item img {
+	width: 300px;
+	margin-top:10px;
+	margin-right:10px;
+	margin-left:10px;
+	margin-bottom:20px;
+	box-shadow: 5px 5px 5px black;
+}
+
+#footer {
+	position:absolute;
+	width:100%;
+	background-image:url(dark_wood.png);
+	height:250px;
+	bottom:5px;
+	color:#E3DAC9;
+	text-align:center;
+	
+}
+
+#icons {
+	margin-top:5px;
+}
+
+#icons img{
+	display: inline-block;
+	margin-left:5px;
+	height:50px;
+}
+
+.align-left {
+	display:inline-block;
+	width:300px;
+}
+
+.align_right {
+	display:inline-block;
+	background-color:black;
+	height:300px;
+	margin-left:10px;
+	width:2000px;
+}
+
+
+/* Font Styles */
+@font-face{font-family:Ingleby; src: url(ingleby_regular.ttf);}
+@font-face{font-family:Ingleby-Italic; src: url(ingleby_italic.ttf);}
+@font-face{font-family:Ingleby-Bold; src: url(ingleby_bold.ttf);}
+@font-face{font-family:Ingleby-Bold-Italic; src: url(ingleby_bold_italic.ttf);}
+
+
+#store{
+	font-family:Ingleby-Bold, Verdana, sans-serif;
+	font-size:40px;	
+}
+
+.inner {
+	display:inline;
+	font-family:Ingleby-Italic, Verdana, sans-serif;
+	color:#E3DAC9;
+	font-size:24px;
+	margin-left:10px;
+	margin-right:10px;
+}
+
+.caption {
+	position:absolute;
+	color:white;
+	font-family:Futura, Verdana, sans-serif;
+	bottom:0;
+	margin-left:10px;
+}
+
+.top-caption{
+	position:absolute;
+	color:#95B9C7;
+	font-family:Futura, Verdana, sans-serif;
+	top:0;
+	margin-left:10px;
+}
+
+h1{ color: white;font-family:Futura, Verdana, sans-serif;}
+
+.h1 {font-size:40px;font-family:Ingleby-Bold,Avant Garde,Verdana, sans-serif;}
+.h2 {font-size:30px;font-family:Ingleby,Avant Garde, Verdana, sans-serif;}
+.h3 {font-size:24px;font-family:Ingleby,Avant Garde, Verdana, sans-serif;}
+.h3i {font-size:24px;font-family:Ingleby-Italic,Avant Garde, Verdana, sans-serif;}
+.h4 {font-size:20px;font-family:Ingleby,Avant Garde,Verdana, sans-serif;}
+.h4i {font-size:20px;font-family:Ingleby-Italic,Avant Garde,Verdana, sans-serif;}
+.h5 {font-size:16px;font-family:Ingleby,Avant Garde, Verdana, sans-serif;}
+.h6 {font-size:12px;font-family:Ingleby,Avant Garde, Verdana, sans-serif;}
+
+/* Button Styles */
+button {
+	position:absolute;
+	width:100px;
+	height:40px;
+	z-index:2;
+	border-radius:5px;
+	background-color:#0F5380;
+	display:inline;
+
+}
+
+.left {
+	left:0;
+}
+
+.right {
+	right:0;
+}
+
+.hover {
+	background-color:Silver;
+}
+
+/* Link Styles */
+
+a:link{
+	color:#E3DAC9;
+	text-decoration:none;
+}
+a:visited {text-decoration:none;}
+a:hover {color:silver:}
+
+
+
+/* From Twitter BS */
+
+
+
+
+
+
+
+
+
