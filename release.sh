@@ -53,8 +53,8 @@ else
   exit $test_result
 fi
 
-cd ../webpiecesexample-all/webpiecesexample/build/distributions
-unzip webpiecesexample.zip
+cd ../webpiecesexample-all/production/build/distributions
+unzip production.zip
 test_result=$?
 if [ $test_result -eq 0 ]
 then
@@ -69,9 +69,9 @@ else
 fi
 
 #TODO: startup the server in background and run test to grep out success in log files
-cd webpiecesexample
-printf "\n************* Run ./bin/webpiecesexample to start server ***********\n"
-./bin/webpiecesexample &
+cd production
+printf "\n************* Run ./bin/production to start server ***********\n"
+./bin/production &
 server_pid=$!
 
 #AHHHHH, my computer with this code is clocking 5 seconds to lookup localhost all of the sudden...
