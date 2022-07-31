@@ -86,6 +86,8 @@ echo path2=$PWD
 
 printf "**********./createProject.sh running from $PWD**********"
 ./createProject.sh TemplateBasic WebpiecesExample org.webpieces ..
+cd ..
+mv webpiecesexample webpiecesexample-all
 
 test_result=$?
 if [ $test_result -eq 0 ]
@@ -100,7 +102,7 @@ else
   exit $test_result
 fi
 
-cd ../webpiecesexample-all
+cd webpiecesexample-all
 printf "\n******** Running ./gradlew build assembleDist from webpiecesexample-all *********\n"
 ./gradlew build assembleDist
 test_result=$?
