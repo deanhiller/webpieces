@@ -28,7 +28,7 @@ public class ProjectCreator {
 	}
 
 	private void createProject(String[] args) throws IOException {
-		if(args.length != 3)
+		if(args.length != 4)
 			throw new IllegalArgumentException("./createProject {templateNumber} {className} {package} {Directory} is the format");
 
 		String templateName = args[0];
