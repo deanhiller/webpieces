@@ -103,7 +103,8 @@ else
 fi
 
 cd webpiecesexample-all
-printf "\n******** Running ./gradlew build assembleDist from webpiecesexample-all *********\n"
+printf "path=$PWD"
+printf "\n******** Running ./gradlew build assembleDist from webpiecesexample-all $PWD *********\n"
 ./gradlew build assembleDist
 test_result=$?
 if [ $test_result -eq 0 ]
