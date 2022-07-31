@@ -1,6 +1,6 @@
 package webpiecesxxxxxpackage.framework;
 
-import webpiecesxxxxxpackage.json.SearchRequest;
+import webpiecesxxxxxpackage.deleteme.api.SearchRequest;
 
 public class Requests {
     public static SearchRequest createSearchRequest() {

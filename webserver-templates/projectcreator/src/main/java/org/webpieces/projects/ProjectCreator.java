@@ -2,6 +2,8 @@ package org.webpieces.projects;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class ProjectCreator {
@@ -27,22 +29,52 @@ public class ProjectCreator {
 
 	private void createProject(String[] args) throws IOException {
 		if(args.length != 3)
-			throw new IllegalArgumentException("./createProject {className} {package} {Directory} is the format");
-		
-		String className = args[0];
-		String packageStr = args[1];
-		String dir = args[2];
-		createProject(className, packageStr, dir);
+			throw new IllegalArgumentException("./createProject {templateNumber} {className} {package} {Directory} is the format");
+
+		String templateName = args[0];
+		String className = args[1];
+		String packageStr = args[2];
+		String dir = args[3];
+
+		File webpiecesDir = fetchRunningDir();
+		List<File> templateDirs = fetchTemplateDirs(webpiecesDir);
+		File templateDir = findByName(templateName, templateDirs);
+
+		createProject(templateDir, className, packageStr, dir);
+	}
+
+	private File findByName(String templateName, List<File> templateDirs) {
+		for(File f : templateDirs) {
+			if(f.getName().equals(templateName))
+				return f;
+		}
+
+		System.err.println("Template '"+templateName+"' was not found in list of templates");
+		System.exit(1);
+		return null;
 	}
 
 	private void start() throws IOException {
+		File webpiecesDir = fetchRunningDir();
+		List<File> templateDirs = fetchTemplateDirs(webpiecesDir);
+
 		try (Scanner scanner = new Scanner(System.in)) {
-		    //  prompt for the user's name
+			for(File f : templateDirs) {
+				System.out.println("* "+f.getName());
+			}
+			//  prompt for the user's template
+			System.out.print("Enter the template name above to use(case sensitive): ");
+
+			// get their input as a String
+			String templateName = scanner.next();
+			File templateDir = findByName(templateName, templateDirs);
+
+			//  prompt for the user's name
 		    System.out.print("Enter your camel case app name(used in class file names): ");
 	
 		    // get their input as a String
 		    String appClassName = scanner.next();
-		    String appDirectoryNameTmp = appClassName.toLowerCase()+"-all";
+		    String appDirectoryNameTmp = appClassName.toLowerCase();
 
 		    
 		    System.out.println("Enter your package with . separating each package(ie. org.webpieces.myapp): ");
@@ -55,14 +87,33 @@ public class ProjectCreator {
 		    System.out.println("we will create a directory called="+appDirectoryNameTmp+" OR will re-use an existing directory called "+ appDirectoryNameTmp+" to fill it in");
 		    String directory = scanner.next();
 		    
-		    createProject(appClassName, packageStr, directory);
+		    createProject(templateDir, appClassName, packageStr, directory);
 		}
 	}
 
-	private void createProject(String appClassName, String packageStr, String directory) throws IOException {
-		String justAppName = appClassName.toLowerCase();
-		String appDirectoryName = justAppName+"-all";
-		
+	private List<File> fetchTemplateDirs(File webpiecesDir) {
+		List<File> templateDirs = new ArrayList<>();
+		File[] files = webpiecesDir.listFiles();
+		for(File f : files) {
+			if(f.isDirectory() && f.getName().startsWith("Template")) {
+				templateDirs.add(f);
+			}
+		}
+		return templateDirs;
+	}
+
+	private int convert(String templateNumber) {
+		try {
+			return Integer.parseInt(templateNumber);
+		} catch (NumberFormatException e) {
+			System.err.println("You were supposed to enter a number.  Good bye");
+			System.exit(1);
+		}
+
+		throw new IllegalStateException("Should never reach here ever");
+	}
+
+	private File fetchRunningDir() {
 		//we only allow execution from the jar file right now due to this...(so running this in the IDE probably won't work)
 		String path = ProjectCreator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		File jarFile = new File(path);
@@ -70,6 +121,11 @@ public class ProjectCreator {
 
 		File webpiecesDir = jarFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
 		System.out.println("Base Directory="+webpiecesDir);
+		return webpiecesDir;
+	}
+
+	private void createProject(File templateDir, String appClassName, String packageStr, String directory) throws IOException {
+		String justAppName = appClassName.toLowerCase();
 
 		if(packageStr.contains("/") || packageStr.contains("\\"))
 			throw new IllegalArgumentException("package must contain '.' character and no '/' nor '\\' characters");
@@ -77,10 +133,10 @@ public class ProjectCreator {
 		File dirTheUserTypedIn = new File(directory);
 		setupDirectory(dirTheUserTypedIn);
 
-		File appDir = new File(dirTheUserTypedIn, appDirectoryName);
+		File appDir = new File(dirTheUserTypedIn, justAppName);
 		setupDirectory(appDir);
 		
-		new FileCopy(webpiecesDir, appClassName, justAppName, packageStr, appDir, version).createProject();
+		new FileCopy(templateDir, appClassName, justAppName, packageStr, appDir, version).createProject();
 	}
 
 	private void setupDirectory(File dirTheUserTypedIn) throws IOException {

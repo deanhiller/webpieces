@@ -20,13 +20,13 @@ public class FileCopy {
 	private String packageStr;
 	private String[] packagePieces;
 	private String appName;
-	private File webpiecesDir;
 	private String packageDir;
 	private String version;
 	private String secretKeyBase64;
+	private File templateDir;
 
-	public FileCopy(File webpiecesDir, String appClassName, String appName, String packageStr, File newAppDirectory, String version) {
-		this.webpiecesDir = webpiecesDir;
+	public FileCopy(File templateDir, String appClassName, String appName, String packageStr, File newAppDirectory, String version) {
+		this.templateDir = templateDir;
 		this.newAppDirectory = newAppDirectory;
 		this.appClassName = appClassName;
 		this.appName = appName;
@@ -63,13 +63,10 @@ public class FileCopy {
 		// and need to replace those three things in file names, or file text
 		//ALSO, must rename all *.GRA files to *.GRADLE so the build is in place
 
-		//currently, just the one template...
-		File template = new File(webpiecesDir, "templateProject");
-
 		System.out.println("/n");
-		System.out.println("copy from directory="+template.getCanonicalPath());
+		System.out.println("copy from directory="+templateDir.getCanonicalPath());
 		System.out.println("copy to directory  ="+newAppDirectory.getCanonicalPath());
-		copyFiles(template, newAppDirectory);
+		copyFiles(templateDir, newAppDirectory);
 	}
 
 	private void copyFiles(File template, File targetDirectory) throws IOException {

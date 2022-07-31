@@ -10,7 +10,6 @@ cd $DIR
 
 #RUN test first by building fake release THEN building fake project THEN building the fake project to make sure it works
 printf "\n*********Running ./gradlew --stacktrace clean build from ${DIR} *****\n"
-./gradlew --stacktrace clean
 ./gradlew --stacktrace release
 
 test_result=$?

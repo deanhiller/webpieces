@@ -1,18 +1,19 @@
 package webpiecesxxxxxpackage.base;
 
 import com.google.inject.Provides;
+import com.google.inject.name.Names;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ApplicationContext;
-import org.webpieces.ctx.api.extension.HtmlTagCreator;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 import org.webpieces.microsvc.client.api.HttpsConfig;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
 import org.webpieces.nio.api.BackpressureConfig;
-import org.webpieces.plugin.backend.login.BackendLogin;
-import org.webpieces.router.api.extensions.ObjectStringConverter;
+import org.webpieces.nio.api.SSLConfiguration;
+import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.plugin.secure.sslcert.WebSSLFactory;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.extensions.Startable;
 
@@ -21,15 +22,9 @@ import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
 import org.webpieces.util.context.ClientAssertions;
-import webpiecesxxxxxpackage.db.EducationEnum;
-import webpiecesxxxxxpackage.db.RoleEnum;
-import webpiecesxxxxxpackage.service.RemoteService;
-import webpiecesxxxxxpackage.service.RemoteServiceSimulator;
-import webpiecesxxxxxpackage.service.SimpleStorageImpl;
-import webpiecesxxxxxpackage.service.SomeLibrary;
-import webpiecesxxxxxpackage.service.SomeLibraryImpl;
-import webpiecesxxxxxpackage.web.login.BackendLoginImpl;
-import webpiecesxxxxxpackage.web.tags.MyHtmlTagCreator;
+import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
+import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteServiceSimulator;
+import webpiecesxxxxxpackage.deleteme.service.SimpleStorageImpl;
 
 import javax.inject.Singleton;
 
@@ -51,26 +46,21 @@ public class GuiceModule implements Module {
 		//all modules have access to adding their own Startable objects to be run on server startup
 		Multibinder<Startable> uriBinder = Multibinder.newSetBinder(binder, Startable.class);
 	    uriBinder.addBinding().to(PopulateDatabase.class);
-
-		Multibinder<ObjectStringConverter> conversionBinder = Multibinder.newSetBinder(binder, ObjectStringConverter.class);
-		conversionBinder.addBinding().to(EducationEnum.WebConverter.class);
-		conversionBinder.addBinding().to(RoleEnum.WebConverter.class);
-
-		Multibinder<HtmlTagCreator> htmlTagCreators = Multibinder.newSetBinder(binder, HtmlTagCreator.class);
-		htmlTagCreators.addBinding().to(MyHtmlTagCreator.class);
 		
-	    binder.bind(SomeLibrary.class).to(SomeLibraryImpl.class);
-
 	    //Must bind a SimpleStorage for plugins to read/save data and render their html pages
 	    binder.bind(SimpleStorage.class).to(SimpleStorageImpl.class).asEagerSingleton();
-	    
-	    //Must bind a BackendLogin for the backend plugin(or remove the backend plugin)
-	    binder.bind(BackendLogin.class).to(BackendLoginImpl.class).asEagerSingleton();
 
 	    //since GlobalAppContext is a singleton, ApplicationContext will be to and will be the same
 		binder.bind(ApplicationContext.class).to(GlobalAppContext.class).asEagerSingleton();
 
 		binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(true));
+
+		binder.bind(SSLEngineFactory.class).to(WebSSLFactory.class);
+
+		//2 bugs,
+		// 1. Guice not respecting null injection
+		// 2. webpieces requiring a null to be injected or it fails that we did not bind a 'something' and need to bind null :(
+		binder.bind(SSLEngineFactory.class).annotatedWith(Names.named(SSLConfiguration.BACKEND_SSL)).to(WebSSLFactory.class);
 
 		binder.bind(ClientAssertions.class).to(ClientAssertionsImpl.class).asEagerSingleton();
 	}

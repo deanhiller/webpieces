@@ -5,14 +5,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.microsvc.server.api.RESTApiRoutes;
-import org.webpieces.plugin.backend.BackendPlugin;
 import org.webpieces.plugin.hibernate.HibernatePlugin;
 import org.webpieces.plugin.json.JacksonConfig;
 import org.webpieces.plugin.json.JacksonPlugin;
-import org.webpieces.plugin.secure.properties.PropertiesConfig;
-import org.webpieces.plugin.secure.properties.PropertiesPlugin;
-import org.webpieces.plugin.secure.sslcert.InstallSslCertConfig;
-import org.webpieces.plugin.secure.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.plugins.Plugin;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.api.routes.WebAppConfig;
@@ -21,12 +16,10 @@ import org.webpieces.router.api.routes.WebAppMeta;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-import webpiecesxxxxxpackage.basesvr.YourGlobalModule;
+import webpiecesxxxxxpackage.deleteme.api.SaveApi;
+import webpiecesxxxxxpackage.deleteme.basesvr.YourGlobalModule;
 import webpiecesxxxxxpackage.json.*;
-import webpiecesxxxxxpackage.web.login.LoginRoutes;
-import webpiecesxxxxxpackage.web.main.MainRoutes;
-import webpiecesxxxxxpackage.web.secure.crud.CrudRoutes;
-import webpiecesxxxxxpackage.web.secure.crudajax.AjaxCrudRoutes;
+import webpiecesxxxxxpackage.web.MainRoutes;
 
 //This is where the list of Guice Modules go as well as the list of RouterModules which is the
 //core of anything you want to plugin to your web app.  To make re-usable components, you create
@@ -64,14 +57,8 @@ public class ProdServerMeta implements WebAppMeta {
 	@Override
     public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
-				new RESTApiRoutes(SaveApi.class, JsonController.class),
-				new RESTApiRoutes(ExampleRestAPI.class, JsonRESTController.class),
 				new MainRoutes(),
-				//The Controller package regex is webpiecesxxxxxpackage.web.secure\..* so that we match webpiecesxxxxxpackage.web.secure.* Controllers 
-				new LoginRoutes("/webpiecesxxxxxpackage/web/login/AppLoginController", "webpiecesxxxxxpackage.web.secure\\..*", "password"),
-				new CrudRoutes(),
-				new AjaxCrudRoutes(),
-				new JsonRoutes()
+				new RESTApiRoutes(SaveApi.class, JsonController.class)
 				);
 	}
 
@@ -87,10 +74,7 @@ public class ProdServerMeta implements WebAppMeta {
 				//to transitive dependencies)
 				new HibernatePlugin(pluginConfig.getCmdLineArguments()),
 				//ANY controllers in json package or subpackages are run through this filter independent of the url
-				new JacksonPlugin(new JacksonConfig().setPackageFilterPattern("webpiecesxxxxxpackage.json.*")),
-				new BackendPlugin(pluginConfig.getCmdLineArguments()),
-				new PropertiesPlugin(new PropertiesConfig()),
-				new InstallSslCertPlugin(new InstallSslCertConfig("acme://letsencrypt.org/staging"))
+				new JacksonPlugin(new JacksonConfig().setPackageFilterPattern("webpiecesxxxxxpackage.json.*"))
 				);
 	}
 

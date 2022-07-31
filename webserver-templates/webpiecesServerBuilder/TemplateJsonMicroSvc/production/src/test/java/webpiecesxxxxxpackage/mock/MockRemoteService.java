@@ -1,16 +1,11 @@
 package webpiecesxxxxxpackage.mock;
 
-import java.awt.event.ActionEvent;
-import java.util.List;
-import org.webpieces.util.futures.XFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
-
-import org.webpieces.mock.ParametersPassedIn;
-import webpiecesxxxxxpackage.service.*;
+import org.webpieces.util.futures.XFuture;
+import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueRequest;
+import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueResponse;
+import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
 
 public class MockRemoteService extends MockSuperclass implements RemoteService {
 
@@ -23,22 +18,8 @@ public class MockRemoteService extends MockSuperclass implements RemoteService {
 		return (XFuture<FetchValueResponse>) super.calledMethod(Method.FETCH_REMOTE_VAL, request);
 	}
 
-	@Override
-	public XFuture<SendDataResponse> sendData(SendDataRequest num) {
-		return (XFuture<SendDataResponse>)super.calledMethod(Method.SEND_DATA, num);
-	}
-
 	public void addValueToReturn(XFuture<FetchValueResponse> future) {
 		super.addValueToReturn(Method.FETCH_REMOTE_VAL, future);
 	}
 
-	public void setSendDefaultRetValue(XFuture<SendDataResponse> future) {
-		super.setDefaultReturnValue(Method.SEND_DATA, future);
-	}
-	public List<SendDataRequest> getSendMethodParameters() {
-		Stream<ParametersPassedIn> calledMethods2 = super.getCalledMethods(Method.SEND_DATA);
-		return calledMethods2
-				.map(p -> (SendDataRequest)p.getArgs()[0])
-				.collect(Collectors.toList());
-	}
 }

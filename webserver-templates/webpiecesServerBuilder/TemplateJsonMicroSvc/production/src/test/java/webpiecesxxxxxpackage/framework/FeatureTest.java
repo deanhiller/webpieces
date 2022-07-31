@@ -11,11 +11,10 @@ import org.webpieces.util.context.Context;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.http2.CompanyApiTest;
 import webpiecesxxxxxpackage.Server;
-import webpiecesxxxxxpackage.json.ExampleRestAPI;
-import webpiecesxxxxxpackage.json.SaveApi;
+import webpiecesxxxxxpackage.deleteme.api.SaveApi;
 import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteService;
-import webpiecesxxxxxpackage.service.RemoteService;
+import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
@@ -34,7 +33,8 @@ public class FeatureTest extends CompanyApiTest {
     private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 
     protected SaveApi saveApi;
-    protected ExampleRestAPI exampleRestAPI;
+    //protected ExampleRestAPI api2IfSvcHas2Apis;  //sometimes desired before splitting into 2 microservices prematurely
+
     protected MockRemoteService mockRemoteService = new MockRemoteService();
     protected SimpleMeterRegistry metrics;
 
@@ -43,7 +43,7 @@ public class FeatureTest extends CompanyApiTest {
         log.info("Setting up test");
         super.initialize();
         saveApi = super.createRestClient(SaveApi.class);
-        exampleRestAPI = super.createRestClient(ExampleRestAPI.class);
+        //exampleRestAPI = super.createRestClient(ExampleRestAPI.class);
     }
 
     @After

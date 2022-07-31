@@ -3,8 +3,8 @@
 org.apache.tools.ant.DirectoryScanner.removeDefaultExclude("**/.gitignore")
 
 includeBuild '../webserver/http-webserver'
-includeBuild 'webpiecesServerBuilder/TemplateBasic/production'
-includeBuild 'webpiecesServerBuilder/TemplateBasic/development'
+//includeBuild 'webpiecesServerBuilder/TemplateBasic/production'
+//includeBuild 'webpiecesServerBuilder/TemplateBasic/development'
 
 includeBuild 'webpiecesServerBuilder/TemplateJsonMicroSvc/production'
 includeBuild 'webpiecesServerBuilder/TemplateJsonMicroSvc/development'

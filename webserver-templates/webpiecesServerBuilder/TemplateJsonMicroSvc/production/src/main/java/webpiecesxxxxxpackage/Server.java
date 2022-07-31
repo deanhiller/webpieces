@@ -7,7 +7,7 @@ import org.webpieces.webserver.api.ServerConfig;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-import webpiecesxxxxxpackage.basesvr.YourCompanyServer;
+import webpiecesxxxxxpackage.deleteme.basesvr.YourCompanyServer;
 
 /**
  * Changes to any class in this 'package' (or any classes that classes in this 

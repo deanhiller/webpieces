@@ -6,7 +6,7 @@ import org.webpieces.webserver.api.ServerConfig;
 
 import com.google.inject.util.Modules;
 
-import webpiecesxxxxxpackage.basesvr.YourCompanyServer;
+import webpiecesxxxxxpackage.deleteme.basesvr.YourCompanyServer;
 
 import com.google.inject.Module;
 

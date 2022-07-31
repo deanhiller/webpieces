@@ -11,7 +11,7 @@ import org.webpieces.webserver.api.ServerConfig;
 
 import com.google.inject.util.Modules;
 
-import webpiecesxxxxxpackage.basesvr.YourCompanyServer;
+import webpiecesxxxxxpackage.deleteme.basesvr.YourCompanyServer;
 import webpiecesxxxxxpackage.meta.JavaCache;
 
 import com.google.inject.Module;

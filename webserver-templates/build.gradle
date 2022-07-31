@@ -20,10 +20,10 @@ apply from: '../config/global.gradle'
 
 dependencies {
     implementation deps['http-webserver']
-    implementation deps['template1-production']
-    implementation deps['template1-development']
-    implementation deps['template-json-production']
-    implementation deps['template-json-development']
+    implementation deps['template-basic-prod']
+    implementation deps['template-basic-dev']
+    implementation deps['template-json-prod']
+    implementation deps['template-json-dev']
 }
 
 project.ext {
