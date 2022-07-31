@@ -91,9 +91,10 @@ ext {
             'http-webserver'         : 'org.webpieces.server:http-webserver',
             'http-fortesting-plugins': 'org.webpieces.server:http-fortesting-plugins',
             'webserver-templates'    : 'org.webpieces:webserver-templates',
-            'template1-production'   : 'org.webpieces:production',
-            'template1-development'  : 'org.webpieces:development',
-
+            'template-basic-prod'    : 'org.webpieces.server.templates:production',
+            'template-basic-dev'     : 'org.webpieces.server.templates:development',
+            'template-json-prod'     : 'org.webpieces.server.templates:production',
+            'template-json-dev'      : 'org.webpieces.server.templates:development',
             'plugin-backend'         : 'org.webpieces.server.plugin:plugin-backend',
             'plugin-documentation'   : 'org.webpieces.server.plugin:plugin-documentation',
             'plugin-dto'             : 'org.webpieces.server.plugin:plugin-dto',

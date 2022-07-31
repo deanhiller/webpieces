@@ -1,0 +1,99 @@
+plugins {
+    id 'application'
+    id 'idea'
+    id 'org.webpieces.templatecompiler' version "2.1.8"
+}
+
+//Intellij Idea has a weird quirk we need to avoid
+if (System.getProperty('idea.active')) {
+    // to add src/main/java/**/*.html files for the IntelliJ resource builder
+    sourceSets {
+        main {
+            resources {
+                srcDirs += ["src/main/java"]
+                excludes = ["logback.xml"]
+            }
+        }
+    }
+
+    // to have classes and resources in the same output directory
+    idea {
+        module {
+            outputDir file("out/production/classes")
+        }
+    }
+}
+
+dependencies {
+  //add maven dependencies here
+  implementation deps['web-webserver']
+  //optional plugin BUT required for any backend type plugins since they all plugin to this guys login
+  implementation deps['plugin-backend']
+  //optional plugin for EASY https cert install and auto renew
+  implementation deps['plugin-install-sslcert']
+  //optional plugin for if you use hibernate
+  implementation deps['plugin-hibernate']
+  //optional plugin for if you have a json api
+  implementation deps['plugin-jackson']
+  implementation deps['plugin-properties']
+  implementation deps['generate-httpclient']
+  implementation deps['server-scaffolding']
+  implementation deps['jul-to-slf4j']
+
+  implementation deps['commons-lang'] //used in json escaping
+  implementation deps['javax-validation']
+  implementation deps['hibernate-validator']
+ 
+  //REMOVE once you are on a real database as there is a line testCompile deps['plugin-h2'] that brings this in for tests
+  //AND we only use this so you work out of the box to start hacking 
+  implementation deps['h2db']
+ 
+  //IF you add dependencies on other projects locally, you need to modify WEBPIECESxCLASSDevServer.java to include those
+  //SOURCE paths(ie. *.java file paths not *.class files)) or it will not recompile that code as it changes
+
+  //optional plugin for H2 for testing to swap to in-memory database making things easy/fast to clear the db
+  testImplementation deps['plugin-h2']
+
+  //A library that does everything mockito does but in just one class(so therefore, way easier to debug)
+  testImplementation deps['core-mock']
+  testImplementation deps['core-ddl']
+
+  //For testing, we need to bring in web-webserver-test such that we can debug in the IDE as this just ensures
+  //we use the htmlcompiler on-demand rather than waiting for the gradle plugin to invoke the same code. For 
+  //production jars, the html files are compiled to *.class files
+  testImplementation deps['web-webserver-test']
+  testImplementation deps['selenium']
+}
+
+application {
+    mainClassName = "webpiecesxxxxxpackage.Server"
+    applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
+}
+
+//NOTE: jar section has to go AFTER dependencies section to read all dependencies
+jar {
+    manifest.attributes(
+            "Class-Path": configurations.runtimeClasspath.files.collect { it.name }.join(' '),
+            "Main-Class": application.mainClassName
+    )
+}
+
+//Here, we must modify the start scripts to set cd to user.dir correctly as setting user.dir does NOT work
+//as new File("relative") ignores user.dir and uses something else.  We do this such that user.dir IS
+//the app directory AND new File("relative") will work as well (found issue on mac running from different
+//directories)
+CreateStartScripts startScripts = project.startScripts
+startScripts.with {
+    doLast {
+        unixScript.text = unixScript.text.replace('DEFAULT_JVM_OPTS=', 
+                              'cd $APP_HOME\necho running from $APP_HOME\nDEFAULT_JVM_OPTS=')
+        windowsScript.text = windowsScript.text.replace('set DEFAULT_JVM_OPTS=', 
+                              'cd %APP_HOME%\r\necho running from %APP_HOME%\r\nset DEFAULT_JVM_OPTS=')
+    }
+}
+
+compileTemplateSetting {
+  //Since the groovy plugin has no way of knowing about your custom tags, list them here or the compile will
+  //fail (This catches mispellings and such so you don't release a broken app to production)
+  customTags = [ "mytag", "anothertag", "id", "myfield" ]
+}

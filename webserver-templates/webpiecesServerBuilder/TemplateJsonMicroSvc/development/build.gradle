@@ -7,6 +7,8 @@ plugins {
   id 'maven-publish'
 }
 
+group = 'org.webpieces.server.templates'
+
 apply from: '../../../../config/global.gradle'
 
 //This file is used when we build the whole webpieces project AND is not part of template generation
@@ -15,7 +17,7 @@ publishing.publications.mavenJava.pom.description='project only used in testing.
 
 dependencies {
 
-  implementation deps['template1-production']
+  implementation deps['template-json-prod']
   //we start people off with the hibernate plugin
   implementation deps['http-router-dev']
   implementation deps['http-templating-dev-lib']

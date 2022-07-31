@@ -10,7 +10,6 @@ cd $DIR
 
 #RUN test first by building fake release THEN building fake project THEN building the fake project to make sure it works
 printf "\n*********Running ./gradlew --stacktrace clean build from ${DIR} *****\n"
-./gradlew --stacktrace clean
 ./gradlew --stacktrace release
 
 test_result=$?
@@ -86,6 +85,8 @@ echo path2=$PWD
 
 printf "**********./createProject.sh running from $PWD**********"
 ./createProject.sh TemplateBasic WebpiecesExample org.webpieces ..
+cd ..
+mv webpiecesexample webpiecesexample-all
 
 test_result=$?
 if [ $test_result -eq 0 ]
@@ -100,11 +101,8 @@ else
   exit $test_result
 fi
 
-mv ../webpiecesexample ../webpiecesexample-all
-ls ../webpiecesexample-all
-cd ../webpiecesexample-all
-printf "path=$PWD"
-printf "\n******** Running ./gradlew build assembleDist from webpiecesexample-all $PWD *********\n"
+cd webpiecesexample-all
+printf "\n******** Running ./gradlew build assembleDist from webpiecesexample-all *********\n"
 ./gradlew build assembleDist
 test_result=$?
 if [ $test_result -eq 0 ]

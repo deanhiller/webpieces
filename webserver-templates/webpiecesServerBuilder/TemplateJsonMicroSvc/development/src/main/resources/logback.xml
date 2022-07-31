@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="30 seconds" debug="true">
+
+	<property name="CONSOLE_PREFIX" value="%date{yyyy-MM-dd HH:mm:ss.SSS} %-4level [%thread][%X{svrSocket}][%X{txId}:%X{userId}]"/>
+	<property name="CONSOLE_PATTERN" value="${CONSOLE_PREFIX} %wpCaller:%n%message%n"/>
+
+	<conversionRule conversionWord="wpCaller" converterClass="org.webpieces.logging.logback.WebpiecesCallerDataConverter" />
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="org.webpieces.logging.logback.InvertedThresholdFilter">
+			<level>INFO</level>
+	    </filter>
+    
+		<encoder>
+			<pattern>${CONSOLE_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STDOUT-SQL" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<!-- %n will need to be added to the end of this pattern when log4jdbc -->
+			<!-- is updated (to not put a newline at the end of its messages) -->
+			<pattern>${CONSOLE_PREFIX}:%n%message</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter"> 
+			<level>WARN</level>
+    	</filter>
+    
+		<encoder>
+			<pattern>${CONSOLE_PATTERN}</pattern>
+		</encoder>
+		<target>System.err</target>
+	</appender>
+	
+	<logger name="jdbc.sqlonly" level="INFO" additivity="false">
+		<appender-ref ref="STDOUT-SQL"/>
+	</logger>
+    <logger name="jdbc.sqltiming" level="WARN"/>
+    <logger name="jdbc.audit" level="WARN"/>
+    <logger name="jdbc.resultset" level="WARN"/>
+    <logger name="jdbc.connection" level="WARN"/>
+    
+	<root level="INFO">
+		<appender-ref ref="STDOUT"/>
+		<appender-ref ref="STDERR"/>
+	</root>
+</configuration>

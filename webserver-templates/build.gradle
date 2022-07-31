@@ -20,8 +20,10 @@ apply from: '../config/global.gradle'
 
 dependencies {
     implementation deps['http-webserver']
-    implementation deps['template1-production']
-    implementation deps['template1-development']
+    implementation deps['template-basic-prod']
+    implementation deps['template-basic-dev']
+    implementation deps['template-json-prod']
+    implementation deps['template-json-dev']
 }
 
 project.ext {
@@ -43,32 +45,32 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/.settings'
     exclude stagingDirName + '/build.gradle.template'
     exclude stagingDirName + '/bin'
-    exclude stagingDirName + '/templateProject/bin'
-    exclude stagingDirName + '/templateProject/.classpath'
-    exclude stagingDirName + '/templateProject/.project'
-    exclude stagingDirName + '/templateProject/.settings'
-    exclude stagingDirName + '/templateProject/build'
-    exclude stagingDirName + '/templateProject/production/build.gradle'
-    exclude stagingDirName + '/templateProject/production/settings.gradle'
-    exclude stagingDirName + '/templateProject/production/build'
-    exclude stagingDirName + '/templateProject/production/out'
-    exclude stagingDirName + '/templateProject/production/bin'
-    exclude stagingDirName + '/templateProject/production/eclipse-output'
-    exclude stagingDirName + '/templateProject/production/.classpath'
-    exclude stagingDirName + '/templateProject/production/.project'
-    exclude stagingDirName + '/templateProject/production/.settings'
-    exclude stagingDirName + '/templateProject/production/.gradle'
-    exclude stagingDirName + '/templateProject/development/build.gradle'
-    exclude stagingDirName + '/templateProject/development/settings.gradle'
-    exclude stagingDirName + '/templateProject/development/build'
-    exclude stagingDirName + '/templateProject/development/out'
-    exclude stagingDirName + '/templateProject/development/bin'
-    exclude stagingDirName + '/templateProject/development/webpiecesCache'
-    exclude stagingDirName + '/templateProject/development/eclipse-output'
-    exclude stagingDirName + '/templateProject/development/.classpath'
-    exclude stagingDirName + '/templateProject/development/.project'
-    exclude stagingDirName + '/templateProject/development/.settings'
-    exclude stagingDirName + '/templateProject/development/.gradle'
+    exclude stagingDirName + '/Template*/bin'
+    exclude stagingDirName + '/Template*/.classpath'
+    exclude stagingDirName + '/Template*/.project'
+    exclude stagingDirName + '/Template*/.settings'
+    exclude stagingDirName + '/Template*/build'
+    exclude stagingDirName + '/Template*/production/build.gradle'
+    exclude stagingDirName + '/Template*/production/settings.gradle'
+    exclude stagingDirName + '/Template*/production/build'
+    exclude stagingDirName + '/Template*/production/out'
+    exclude stagingDirName + '/Template*/production/bin'
+    exclude stagingDirName + '/Template*/production/eclipse-output'
+    exclude stagingDirName + '/Template*/production/.classpath'
+    exclude stagingDirName + '/Template*/production/.project'
+    exclude stagingDirName + '/Template*/production/.settings'
+    exclude stagingDirName + '/Template*/production/.gradle'
+    exclude stagingDirName + '/Template*/development/build.gradle'
+    exclude stagingDirName + '/Template*/development/settings.gradle'
+    exclude stagingDirName + '/Template*/development/build'
+    exclude stagingDirName + '/Template*/development/out'
+    exclude stagingDirName + '/Template*/development/bin'
+    exclude stagingDirName + '/Template*/development/webpiecesCache'
+    exclude stagingDirName + '/Template*/development/eclipse-output'
+    exclude stagingDirName + '/Template*/development/.classpath'
+    exclude stagingDirName + '/Template*/development/.project'
+    exclude stagingDirName + '/Template*/development/.settings'
+    exclude stagingDirName + '/Template*/development/.gradle'
 }
 
 task copyGradleTemplate(type: Copy, dependsOn: 'stageTemplate') {

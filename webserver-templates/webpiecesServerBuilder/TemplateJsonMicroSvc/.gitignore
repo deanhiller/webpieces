@@ -1,0 +1,32 @@
+# never check in class files
+*.class
+
+# eclipse output files
+**/eclipse-output
+**/.project
+**/.classpath
+**/.settings
+#This is only here as the gradle build plugin is ignore the eclipse defaultOutput
+**/bin
+
+# In starting ProdServerForIDE, it creates webpiecesCache in a not so good location so ignore from git in case this happens
+# ALSO, the location is different if you are in Intellij vs. eclipse as it doesn't use the BASE directory we use
+**/webpiecesCache
+
+#gradle output files
+**/output
+/.gradle/
+
+#Intellij Idea files
+*.iml
+.idea
+out/
+
+#Do I need these too...
+#*.iws
+#*.ipr
+
+# What is this.  it popped up on mac (not using intellij)
+.DS_Store
+
+build/
