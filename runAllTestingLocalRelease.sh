@@ -101,7 +101,7 @@ else
 fi
 
 mv ../webpiecesexample ../webpiecesexample-all
-ls ..
+ls ../webpiecesexample-all
 cd ../webpiecesexample-all
 printf "path=$PWD"
 printf "\n******** Running ./gradlew build assembleDist from webpiecesexample-all $PWD *********\n"
