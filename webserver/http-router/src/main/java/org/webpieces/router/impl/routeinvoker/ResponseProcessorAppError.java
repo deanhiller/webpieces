@@ -22,7 +22,8 @@ public class ResponseProcessorAppError implements Processor {
 	public XFuture<Void> continueProcessing(MethodMeta meta, Action controllerResponse, ProxyStreamHandle handle) {
 		if(!(controllerResponse instanceof RenderImpl)) {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed writing a "
-					+ "precondition check on error routes to assert the correct return types in ControllerLoader which is called from the RouteBuilders");
+					+ "precondition check on error routes to assert the correct return types in " +
+					"ControllerLoader which is called from the RouteBuilders.  controllerResponseType="+controllerResponse.getClass().getName()+" expecting="+RenderImpl.class);
 		}
 		return createRenderResponse(meta, (RenderImpl) controllerResponse, handle);
 	}
