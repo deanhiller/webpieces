@@ -16,7 +16,6 @@ apply from: '../../../../config/global.gradle'
 publishing.publications.mavenJava.pom.description='project only used in testing.  ignore this jar'
 
 dependencies {
-
   implementation deps['template-json-prod']
   //we start people off with the hibernate plugin
   implementation deps['http-router-dev']
