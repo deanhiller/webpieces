@@ -2,12 +2,8 @@ package org.webpieces.util.futures;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
-import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
-import javax.inject.Singleton;
-
-@Singleton
 public class FutureHelper {
 
 	/**
