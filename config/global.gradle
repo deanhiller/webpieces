@@ -60,6 +60,7 @@ ext {
             'core-logging'           : 'org.webpieces.core:core-logging',
             'core-metrics'           : 'org.webpieces.core:core-metrics',
             'core-jackson'           : 'org.webpieces.core:core-jackson',
+            'core-future'            : 'org.webpieces.core:core-future',
             'core-util'              : 'org.webpieces.core:core-util',
             'core-ddl'               : 'org.webpieces.core:core-ddl',
             'runtimecompile'         : 'org.webpieces.core:runtimecompile',
