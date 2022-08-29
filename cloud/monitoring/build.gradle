@@ -20,5 +20,7 @@ repositories {
 dependencies {
 
     api deps['micrometer']
+    api 'org.slf4j:slf4j-api'
+    api 'jakarta.inject:jakarta.inject-api'
 
 }

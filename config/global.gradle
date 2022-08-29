@@ -190,6 +190,12 @@ if (project.hasProperty('projVersion')) {
 
 dependencies {
 
+    /**************************************************************************
+     * DO NOT ADD HERE
+     * Adding here results in adding deps to EVERY project and we want
+     * lightweight re-usable jars
+     ***********************************************************************/
+
     implementation platform('com.google.api:gax-bom:1.63.0')
     implementation platform('com.google.auth:google-auth-library-bom:0.22.2') // Cloud SQL JDBC library...
     implementation platform('com.google.cloud:google-cloud-bom:0.152.0')
@@ -199,11 +205,6 @@ dependencies {
     implementation platform('com.google.protobuf:protobuf-bom:3.15.6')
     implementation platform('com.fasterxml.jackson:jackson-bom:2.12.2')
     implementation platform('io.grpc:grpc-bom:1.37.0')
-
-    implementation 'jakarta.inject:jakarta.inject-api'
-    implementation 'org.slf4j:slf4j-api'
-
-    runtimeOnly 'ch.qos.logback:logback-classic'
 
     testImplementation 'junit:junit'
     constraints {
