@@ -31,14 +31,14 @@ public class PersistenceHelper {
         this.meterRegistry = meterRegistry;
     }
 
-    public void execute(String executionId, Consumer<EntityManager> consumer) {
-        execute(executionId, entityManager -> {
+    public void executeRead(String executionId, Consumer<EntityManager> consumer) {
+        executeRead(executionId, entityManager -> {
             consumer.accept(entityManager);
             return null;
         });
     }
 
-    public <T> T execute(String executionId, Function<EntityManager, T> function) {
+    public <T> T executeRead(String executionId, Function<EntityManager, T> function) {
 
         if (Em.get() != null) {
             throw new IllegalStateException("Cannot open another entityManager when are already have one open");
@@ -70,17 +70,17 @@ public class PersistenceHelper {
 
     }
 
-    public void executeTransaction(String executionId, Consumer<EntityManager> consumer) {
-        executeTransaction(executionId, entityManager -> {
+    public void executeReadTransaction(String executionId, Consumer<EntityManager> consumer) {
+        executeReadTransaction(executionId, entityManager -> {
             consumer.accept(entityManager);
             return null;
         });
     }
 
-    public <T> T executeTransaction(String executionId, Function<EntityManager, T> function) {
+    public <T> T executeReadTransaction(String executionId, Function<EntityManager, T> function) {
 
         if(Em.get() == null) {
-            return execute(executionId, (Function<EntityManager,T>)(em) -> executeTransactionImpl(executionId, function));
+            return executeRead(executionId, (Function<EntityManager,T>)(em) -> executeTransactionImpl(executionId, function));
         } else {
             return executeTransactionImpl(executionId, function);
         }
