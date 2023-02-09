@@ -8,6 +8,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.webpieces.googlecloud.cloudtasks.api.QueueClientCreator;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.httpclientx.api.Http2to11ClientFactory;
+import org.webpieces.microsvc.client.api.HttpsConfig;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.plugin.json.ConverterConfig;
 import org.webpieces.util.context.ClientAssertions;
@@ -23,6 +24,7 @@ public class FakeProdModule implements Module{
         binder.bind(MeterRegistry.class).toInstance(new SimpleMeterRegistry());
         ConverterConfig converterConfig = new ConverterConfig(true);
         binder.bind(ConverterConfig.class).toInstance(converterConfig);
+        binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(true));
 
     }
 

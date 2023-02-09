@@ -25,11 +25,17 @@ import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
+import org.webpieces.microsvc.client.api.HttpsConfig;
 
 @Singleton
 public class HttpClientWrapper {
@@ -38,7 +44,7 @@ public class HttpClientWrapper {
 
     protected static final DataWrapperGenerator WRAPPER_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-    //private HttpsConfig httpsConfig;
+    private HttpsConfig httpsConfig;
     protected Http2Client client;
     protected ScheduledExecutorService schedulerSvc;
 
@@ -46,16 +52,16 @@ public class HttpClientWrapper {
 
     @Inject
     public HttpClientWrapper(
-            //HttpsConfig httpsConfig,
+            HttpsConfig httpsConfig,
              Http2Client client,
              FutureHelper futureUtil
     ) {
-        //this.httpsConfig = httpsConfig;
+        this.httpsConfig = httpsConfig;
 
         this.client = client;
         this.futureUtil = futureUtil;
 
-        //log.info("USING keyStoreLocation=" + httpsConfig.getKeyStoreLocation());
+        log.info("USING keyStoreLocation=" + httpsConfig.getKeyStoreLocation());
     }
 
     private void cancel(Http2Socket clientSocket) {
@@ -177,55 +183,55 @@ public class HttpClientWrapper {
     }
 
     protected Http2Socket createSocket(InetSocketAddress apiAddress, Http2SocketListener listener) {
-        //SSLEngine engine = createEngine(apiAddress.getHostName(), apiAddress.getPort());
-        //return client.createHttpsSocket(engine, listener);
-        return client.createHttpSocket(listener);
+        SSLEngine engine = createEngine(apiAddress.getHostName(), apiAddress.getPort());
+        return client.createHttpsSocket(engine, listener);
+        //return client.createHttpsSocket(listener);
     }
 
-//    public SSLEngine createEngine(String host, int port) {
-//
-//        try {
-//
-//            String keyStoreType = "JKS";
-//            if(httpsConfig.getKeyStoreLocation().endsWith(".p12")) {
-//                keyStoreType = "PKCS12";
-//            }
-//
-//            InputStream in = this.getClass().getResourceAsStream(httpsConfig.getKeyStoreLocation());
-//
-//            if (in == null) {
-//                throw new IllegalStateException("keyStoreLocation=" + httpsConfig.getKeyStoreLocation() + " was not found on classpath");
-//            }
-//
-//            //char[] passphrase = password.toCharArray();
-//            // First initialize the key and trust material.
-//            KeyStore ks = KeyStore.getInstance(keyStoreType);
-//            SSLContext sslContext = SSLContext.getInstance("TLS");
-//
-//            ks.load(in, httpsConfig.getKeyStorePassword().toCharArray());
-//
-//            //****************Client side specific*********************
-//
-//            // TrustManager's decide whether to allow connections.
-//            TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
-//
-//            tmf.init(ks);
-//
-//            sslContext.init(null, tmf.getTrustManagers(), null);
-//
-//            //****************Client side specific*********************
-//
-//            SSLEngine engine = sslContext.createSSLEngine(host, port);
-//
-//            engine.setUseClientMode(true);
-//
-//            return engine;
-//
-//        } catch (Exception ex) {
-//            throw new RuntimeException("Could not create SSLEngine", ex);
-//        }
-//
-//    }
+    public SSLEngine createEngine(String host, int port) {
+
+        try {
+
+            String keyStoreType = "JKS";
+            if(httpsConfig.getKeyStoreLocation().endsWith(".p12")) {
+                keyStoreType = "PKCS12";
+            }
+
+            InputStream in = this.getClass().getResourceAsStream(httpsConfig.getKeyStoreLocation());
+
+            if (in == null) {
+                throw new IllegalStateException("keyStoreLocation=" + httpsConfig.getKeyStoreLocation() + " was not found on classpath");
+            }
+
+            //char[] passphrase = password.toCharArray();
+            // First initialize the key and trust material.
+            KeyStore ks = KeyStore.getInstance(keyStoreType);
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+
+            ks.load(in, httpsConfig.getKeyStorePassword().toCharArray());
+
+            //****************Client side specific*********************
+
+            // TrustManager's decide whether to allow connections.
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
+
+            tmf.init(ks);
+
+            sslContext.init(null, tmf.getTrustManagers(), null);
+
+            //****************Client side specific*********************
+
+            SSLEngine engine = sslContext.createSSLEngine(host, port);
+
+            engine.setUseClientMode(true);
+
+            return engine;
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Could not create SSLEngine", ex);
+        }
+
+    }
 
     private String unmarshal(String jsonReq, Contexts contexts, FullRequest request, FullResponse httpResp, int port) {
 
