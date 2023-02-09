@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
+import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 import org.webpieces.microsvc.impl.EndpointInfo;
 import org.webpieces.microsvc.impl.TestCaseRecorder;
+import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
@@ -29,11 +31,17 @@ public class QueueInvokeHandler implements InvocationHandler {
     private InetSocketAddress addr;
     private RemoteInvoker remoteInvoker;
     private ClientAssertions clientAssertions;
+    private JacksonJsonConverter jsonMapper;
 
     @Inject
-    public QueueInvokeHandler(RemoteInvoker remoteInvoker, ClientAssertions clientAssertions) {
+    public QueueInvokeHandler(
+            RemoteInvoker remoteInvoker,
+            ClientAssertions clientAssertions,
+            JacksonJsonConverter jsonMapper
+    ) {
         this.remoteInvoker = remoteInvoker;
         this.clientAssertions = clientAssertions;
+        this.jsonMapper = jsonMapper;
     }
 
     public void initialize(InetSocketAddress addr) {
@@ -42,6 +50,11 @@ public class QueueInvokeHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+        ScheduleInfo info = Context.get("webpieces-scheduleInfo");
+        if(info == null)
+            throw new IllegalArgumentException("You must pass a lambda of the API to Scheduler.schedule or Scheduler.addToQueue");
+
 
         TestCaseRecorder recorder = (TestCaseRecorder) Context.get(RECORDER_KEY);
         EndpointInfo recordingInfo = null;
@@ -86,8 +99,10 @@ public class QueueInvokeHandler implements InvocationHandler {
         log.info("Sending http request to: " + addr.getHostName()+":"+addr.getPort() + path);
 
 
+
         Object body = args[0];
-        XFuture<Void> xFuture = remoteInvoker.invoke(path, httpMethod, body)
+        String bodyAsText = marshal(body);
+        XFuture<Void> xFuture = remoteInvoker.invoke(addr, path, httpMethod, bodyAsText, info)
 //        Endpoint endpoint = new Endpoint(addr, httpMethod.getCode(), path);
 //        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType)
                 .thenApply(retVal -> {
@@ -104,6 +119,18 @@ public class QueueInvokeHandler implements InvocationHandler {
         return xFuture
                 .handle( (resp, exc1) -> addTestRecordingInfo(finalInfo, resp, exc1))
                 .thenCompose(Function.identity());
+    }
+
+    private String  marshal(Object request) {
+
+        try {
+            //string comes in handy for debugging!!!
+            return jsonMapper.writeValueAsString(request);
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Bug in marshalling to json=" + request, ex);
+        }
+
     }
 
     private XFuture<Object> addTestRecordingInfo(EndpointInfo recordingInfo, Object resp, Throwable exc1) {

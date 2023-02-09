@@ -24,7 +24,7 @@ public class QueueClientCreator {
 
         Method[] methods = apiInterface.getMethods();
         for(Method method : methods) {
-            MethodValidator.validateApiConvention(apiInterface, method);
+            MethodValidator.validateApiConvention(apiInterface, method, true);
         }
 
         return (T) Proxy.newProxyInstance(apiInterface.getClassLoader(),

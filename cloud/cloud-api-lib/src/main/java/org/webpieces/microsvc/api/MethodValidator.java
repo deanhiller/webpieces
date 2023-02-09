@@ -16,7 +16,7 @@ import javax.ws.rs.Path;
 public class MethodValidator {
 
     // Similar to validateApiConvention in PubSubServiceRoutes
-    public static void validateApiConvention(Class<?> api, Method method) {
+    public static void validateApiConvention(Class<?> api, Method method, boolean forceVoid) {
 
         String methodName = method.getName();
 
@@ -32,10 +32,18 @@ public class MethodValidator {
             returnType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0].getTypeName();
             returnType = returnType.substring(returnType.lastIndexOf(".") + 1);
         }
-        if (!isDeprecated && (!returnType.endsWith("Response") || !returnType.toLowerCase().contains(methodName.toLowerCase()))) {
-            errorResponse.add(api.getName() + "::" + methodName + " return type does not follow Orderly REST API convention.\n" +
-                    "\tThe return type must have the format \"XFuture<" + pascalMethodName + "Response>\".\n" +
-                    "\tUse the new convention, or add @Legacy or @Deprecated on this method and add a ticket to change your API");
+        if(forceVoid) {
+            if (!returnType.equals("Void")) {
+                errorResponse.add(api.getName() + "::" + methodName + " return type does not follow forward compatible REST API convention so you can evolve the API.\n" +
+                        "\tThe return type must have the format \"XFuture<" + pascalMethodName + "Response>\".\n" +
+                        "\tUse the new convention, or add @Legacy or @Deprecated on this method and add a ticket to change your API");
+            }
+        } else {
+            if (!isDeprecated && (!returnType.endsWith("Response") || !returnType.toLowerCase().contains(methodName.toLowerCase()))) {
+                errorResponse.add(api.getName() + "::" + methodName + " return type does not follow forward compatible REST API convention so you can evolve the API.\n" +
+                        "\tThe return type must have the format \"XFuture<" + pascalMethodName + "Response>\".\n" +
+                        "\tUse the new convention, or add @Legacy or @Deprecated on this method and add a ticket to change your API");
+            }
         }
 
         // If it's not POST, don't worry about it for now
@@ -113,5 +121,18 @@ public class MethodValidator {
 
         return httpMethod;
 
+    }
+
+    public static boolean detectVoidOrElse(Method method) {
+        String returnType = "";
+        if (method.getGenericReturnType() instanceof ParameterizedType) {
+            returnType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0].getTypeName();
+            returnType = returnType.substring(returnType.lastIndexOf(".") + 1);
+        }
+
+        if(returnType.equals("Void"))
+            return true;
+
+        return false;
     }
 }

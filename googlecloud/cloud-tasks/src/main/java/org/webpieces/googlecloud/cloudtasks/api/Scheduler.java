@@ -1,20 +1,16 @@
 package org.webpieces.googlecloud.cloudtasks.api;
 
-import org.webpieces.googlecloud.cloudtasks.impl.ScheduleInfo;
-import org.webpieces.util.context.Context;
+import com.google.inject.ImplementedBy;
+import org.webpieces.googlecloud.cloudtasks.impl.SchedulerImpl;
+import org.webpieces.util.futures.XFuture;
 
 import java.util.concurrent.TimeUnit;
 
-public class Scheduler {
+@ImplementedBy(SchedulerImpl.class)
+public interface Scheduler {
+    JobReference schedule(Runnable runnable, int time, TimeUnit timeUnit);
 
-    public void schedule(Runnable runnable, int time, TimeUnit timeUnit) {
-        ScheduleInfo info = new ScheduleInfo(time, timeUnit);
-        Context.put("scheduleInfo", info);
+    JobReference addToQueue(Runnable runnable);
 
-        try {
-            runnable.run();
-        } finally {
-            Context.remove("scheduleInfo");
-        }
-    }
+    XFuture<Void> cancelJob(JobReference ref);
 }

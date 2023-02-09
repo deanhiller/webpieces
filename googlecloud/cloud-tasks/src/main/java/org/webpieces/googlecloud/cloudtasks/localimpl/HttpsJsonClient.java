@@ -1,4 +1,4 @@
-package org.webpieces.microsvc.client.impl;
+package org.webpieces.googlecloud.cloudtasks.localimpl;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.lowlevel.Http2Method;
@@ -17,12 +17,12 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
-import org.webpieces.microsvc.client.api.HttpsConfig;
 import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.Contexts;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
+import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -35,7 +35,6 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Map;
-import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
@@ -46,8 +45,7 @@ public class HttpsJsonClient {
 
     protected static final DataWrapperGenerator WRAPPER_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-    private HttpsConfig httpsConfig;
-    protected JacksonJsonConverter jsonMapper;
+    //private HttpsConfig httpsConfig;
     protected Http2Client client;
     protected ScheduledExecutorService schedulerSvc;
 
@@ -55,20 +53,18 @@ public class HttpsJsonClient {
 
     @Inject
     public HttpsJsonClient(
-            HttpsConfig httpsConfig,
-            JacksonJsonConverter jsonMapper,
+            //HttpsConfig httpsConfig,
              Http2Client client,
              FutureHelper futureUtil,
              ScheduledExecutorService schedulerSvc
     ) {
-        this.httpsConfig = httpsConfig;
+        //this.httpsConfig = httpsConfig;
 
-        this.jsonMapper = jsonMapper;
         this.client = client;
         this.futureUtil = futureUtil;
         this.schedulerSvc = schedulerSvc;
 
-        log.info("USING keyStoreLocation=" + httpsConfig.getKeyStoreLocation());
+        //log.info("USING keyStoreLocation=" + httpsConfig.getKeyStoreLocation());
     }
 
     private void cancel(Http2Socket clientSocket) {
@@ -108,7 +104,7 @@ public class HttpsJsonClient {
     /**
      * <b>DO NOT USE FOR PUBLIC HTTP REQUEST THIS IS FOR INTERNAL USE ONLY</b>
      */
-    public <T> XFuture<T> sendHttpRequest(Method method, Object request, Endpoint endpoint, Class<T> responseType) {
+    public XFuture<String> sendHttpRequest(String jsonRequest, Endpoint endpoint) {
 
         InetSocketAddress apiAddress = endpoint.getServerAddress();
         String httpMethod = endpoint.getHttpMethod();
@@ -118,7 +114,6 @@ public class HttpsJsonClient {
         Http2Socket httpSocket = createSocket(apiAddress, closeListener);
         XFuture<Void> connect = httpSocket.connect(apiAddress);
 
-        String jsonRequest = marshal(request);
         byte[] reqAsBytes = jsonRequest.getBytes(StandardCharsets.UTF_8);
         if (jsonRequest.equals("null")) { // hack
             reqAsBytes = new byte[0];
@@ -144,8 +139,8 @@ public class HttpsJsonClient {
         Contexts contexts = new Contexts(ctxMap, fullContext);
 
         long start = System.currentTimeMillis();
-        XFuture<T> future = futureUtil.catchBlockWrap(
-                () -> sendAndTranslate(contexts, apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
+        XFuture<String> future = futureUtil.catchBlockWrap(
+                () -> sendAndTranslate(contexts, apiAddress, httpSocket, connect, fullRequest, jsonRequest),
                 (t) -> translateException(httpReq, t)
         );
 
@@ -184,66 +179,64 @@ public class HttpsJsonClient {
 
     }
 
-    private <T> XFuture<T> sendAndTranslate(Contexts contexts, InetSocketAddress apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
+    private XFuture<String> sendAndTranslate(Contexts contexts, InetSocketAddress apiAddress, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
         return connect
                 .thenCompose(voidd -> httpSocket.send(fullRequest))
-                .thenApply(fullResponse -> unmarshal(jsonReq, contexts, fullRequest, fullResponse, apiAddress.getPort(), responseType));
+                .thenApply(fullResponse -> unmarshal(jsonReq, contexts, fullRequest, fullResponse, apiAddress.getPort()));
     }
 
     protected Http2Socket createSocket(InetSocketAddress apiAddress, Http2SocketListener listener) {
-
-        SSLEngine engine = createEngine(apiAddress.getHostName(), apiAddress.getPort());
-
-        return client.createHttpsSocket(engine, listener);
-
+        //SSLEngine engine = createEngine(apiAddress.getHostName(), apiAddress.getPort());
+        //return client.createHttpsSocket(engine, listener);
+        return client.createHttpSocket(listener);
     }
 
-    public SSLEngine createEngine(String host, int port) {
+//    public SSLEngine createEngine(String host, int port) {
+//
+//        try {
+//
+//            String keyStoreType = "JKS";
+//            if(httpsConfig.getKeyStoreLocation().endsWith(".p12")) {
+//                keyStoreType = "PKCS12";
+//            }
+//
+//            InputStream in = this.getClass().getResourceAsStream(httpsConfig.getKeyStoreLocation());
+//
+//            if (in == null) {
+//                throw new IllegalStateException("keyStoreLocation=" + httpsConfig.getKeyStoreLocation() + " was not found on classpath");
+//            }
+//
+//            //char[] passphrase = password.toCharArray();
+//            // First initialize the key and trust material.
+//            KeyStore ks = KeyStore.getInstance(keyStoreType);
+//            SSLContext sslContext = SSLContext.getInstance("TLS");
+//
+//            ks.load(in, httpsConfig.getKeyStorePassword().toCharArray());
+//
+//            //****************Client side specific*********************
+//
+//            // TrustManager's decide whether to allow connections.
+//            TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
+//
+//            tmf.init(ks);
+//
+//            sslContext.init(null, tmf.getTrustManagers(), null);
+//
+//            //****************Client side specific*********************
+//
+//            SSLEngine engine = sslContext.createSSLEngine(host, port);
+//
+//            engine.setUseClientMode(true);
+//
+//            return engine;
+//
+//        } catch (Exception ex) {
+//            throw new RuntimeException("Could not create SSLEngine", ex);
+//        }
+//
+//    }
 
-        try {
-
-            String keyStoreType = "JKS";
-            if(httpsConfig.getKeyStoreLocation().endsWith(".p12")) {
-                keyStoreType = "PKCS12";
-            }
-
-            InputStream in = this.getClass().getResourceAsStream(httpsConfig.getKeyStoreLocation());
-
-            if (in == null) {
-                throw new IllegalStateException("keyStoreLocation=" + httpsConfig.getKeyStoreLocation() + " was not found on classpath");
-            }
-
-            //char[] passphrase = password.toCharArray();
-            // First initialize the key and trust material.
-            KeyStore ks = KeyStore.getInstance(keyStoreType);
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-
-            ks.load(in, httpsConfig.getKeyStorePassword().toCharArray());
-
-            //****************Client side specific*********************
-
-            // TrustManager's decide whether to allow connections.
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
-
-            tmf.init(ks);
-
-            sslContext.init(null, tmf.getTrustManagers(), null);
-
-            //****************Client side specific*********************
-
-            SSLEngine engine = sslContext.createSSLEngine(host, port);
-
-            engine.setUseClientMode(true);
-
-            return engine;
-
-        } catch (Exception ex) {
-            throw new RuntimeException("Could not create SSLEngine", ex);
-        }
-
-    }
-
-    private <T> T unmarshal(String jsonReq, Contexts contexts, FullRequest request, FullResponse httpResp, int port, Class<T> type) {
+    private String unmarshal(String jsonReq, Contexts contexts, FullRequest request, FullResponse httpResp, int port) {
 
         Map<String, String> loggingCtxMap = contexts.getLoggingCtxMap();
         if(loggingCtxMap != null) {
@@ -264,10 +257,7 @@ public class HttpsJsonClient {
         log.info("unmarshalling response json='" + contents + "' http=" + httpResp.getHeaders() + " from request="+jsonReq+" to " + url);
 
         if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_200_OK) {
-            if (type == null) {
-                return null;
-            }
-            return unmarshalJson(type, contents);
+            throw new UnsupportedOperationException("fix this later");
         }
 
         String message = "\njson error='" + contents + "' fullResp=" + httpResp + " url='" + url + "' originalRequest="+jsonReq;
@@ -295,10 +285,6 @@ public class HttpsJsonClient {
             throw new InternalServerErrorException("\nRUN the curl request above to test this error!!!\n" + message);
         }
 
-    }
-
-    private <T> T unmarshalJson(Class<T> type, String contents) {
-        return jsonMapper.readValue(contents, type);
     }
 
     private String createCurl(FullRequest request, int port) {
@@ -338,18 +324,6 @@ public class HttpsJsonClient {
         s += "***************************************************************\n";
 
         return s;
-
-    }
-
-    private String  marshal(Object request) {
-
-        try {
-            //string comes in handy for debugging!!!
-            return jsonMapper.writeValueAsString(request);
-
-        } catch (Exception ex) {
-            throw new RuntimeException("Bug in marshalling to json=" + request, ex);
-        }
 
     }
 
