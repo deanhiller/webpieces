@@ -28,8 +28,8 @@ public class TestLocalCloudTasks {
 
     }
 
-    //@Test
-    public void testReadFromClasspath() {
+    @Test
+    public void testScheduledSend() {
 
         Map<String, String> headerMap = new HashMap<>();
         Context.put(Context.HEADERS, headerMap);

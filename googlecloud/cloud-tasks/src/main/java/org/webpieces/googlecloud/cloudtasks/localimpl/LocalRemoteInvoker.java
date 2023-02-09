@@ -17,11 +17,12 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     private final Logger log = LoggerFactory.getLogger(LocalRemoteInvoker.class);
 
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
-    private HttpsJsonClient client;
+    private HttpClientWrapper client;
 
     @Inject
-    public LocalRemoteInvoker(HttpsJsonClient client) {
+    public LocalRemoteInvoker(HttpClientWrapper client) {
         this.client = client;
+        this.client.init(executorService);
     }
 
     @Override

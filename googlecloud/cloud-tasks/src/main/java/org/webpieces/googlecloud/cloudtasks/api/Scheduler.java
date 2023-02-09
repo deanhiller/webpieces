@@ -5,12 +5,13 @@ import org.webpieces.googlecloud.cloudtasks.impl.SchedulerImpl;
 import org.webpieces.util.futures.XFuture;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 @ImplementedBy(SchedulerImpl.class)
 public interface Scheduler {
-    JobReference schedule(Runnable runnable, int time, TimeUnit timeUnit);
+    XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, int time, TimeUnit timeUnit);
 
-    JobReference addToQueue(Runnable runnable);
+    XFuture<JobReference> addToQueue(Supplier<XFuture<Void>> runnable);
 
     XFuture<Void> cancelJob(JobReference ref);
 }

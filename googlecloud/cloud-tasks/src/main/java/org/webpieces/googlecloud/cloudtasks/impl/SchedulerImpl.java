@@ -7,36 +7,29 @@ import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class SchedulerImpl implements Scheduler {
     @Override
-    public JobReference schedule(Runnable runnable, int time, TimeUnit timeUnit) {
+    public XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, int time, TimeUnit timeUnit) {
         ScheduleInfo info = new ScheduleInfo(time, timeUnit);
-        Context.put("webpieces-scheduleInfo", info);
-
-        try {
-            runnable.run();
-
-            JobReference reference = Context.get("webpieces-scheduleResponse");
-            return reference;
-        } finally {
-            Context.remove("scheduleInfo");
-        }
+        return executeIt(runnable, info);
     }
 
     @Override
-    public JobReference addToQueue(Runnable runnable) {
+    public XFuture<JobReference> addToQueue(Supplier<XFuture<Void>> runnable) {
         ScheduleInfo info = new ScheduleInfo();
+        return executeIt(runnable, info);
+    }
+
+    private XFuture<JobReference> executeIt(Supplier<XFuture<Void>> runnable, ScheduleInfo info) {
         Context.put("webpieces-scheduleInfo", info);
 
-        try {
-            runnable.run();
-
+        XFuture<Void> future = runnable.get();
+        return future.thenApply(v -> {
             JobReference reference = Context.get("webpieces-scheduleResponse");
             return reference;
-        } finally {
-            Context.remove("scheduleInfo");
-        }
+        });
     }
 
     @Override

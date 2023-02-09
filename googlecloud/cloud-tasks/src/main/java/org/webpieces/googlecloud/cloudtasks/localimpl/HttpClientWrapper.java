@@ -17,7 +17,6 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
-import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.Contexts;
 import org.webpieces.util.exceptions.NioClosedChannelException;
@@ -26,22 +25,16 @@ import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
 @Singleton
-public class HttpsJsonClient {
+public class HttpClientWrapper {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpsJsonClient.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpClientWrapper.class);
 
     protected static final DataWrapperGenerator WRAPPER_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
@@ -52,17 +45,15 @@ public class HttpsJsonClient {
     private FutureHelper futureUtil;
 
     @Inject
-    public HttpsJsonClient(
+    public HttpClientWrapper(
             //HttpsConfig httpsConfig,
              Http2Client client,
-             FutureHelper futureUtil,
-             ScheduledExecutorService schedulerSvc
+             FutureHelper futureUtil
     ) {
         //this.httpsConfig = httpsConfig;
 
         this.client = client;
         this.futureUtil = futureUtil;
-        this.schedulerSvc = schedulerSvc;
 
         //log.info("USING keyStoreLocation=" + httpsConfig.getKeyStoreLocation());
     }
@@ -327,4 +318,7 @@ public class HttpsJsonClient {
 
     }
 
+    public void init(ScheduledExecutorService executorService) {
+        this.schedulerSvc = executorService;
+    }
 }
