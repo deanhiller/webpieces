@@ -18,15 +18,22 @@ public class RESTClientCreator {
     public RESTClientCreator(Provider<HttpsJsonClientInvokeHandler> wrapperProvider) {
         this.wrapperProvider = wrapperProvider;
     }
-
     public <T> T createClient(Class<T> apiInterface, InetSocketAddress addr) {
+        return createClient(apiInterface, addr, false);
+    }
+
+    public <T> T createClient(Class<T> apiInterface, InetSocketAddress addr, boolean createForPubSub) {
         HttpsJsonClientInvokeHandler invokeHandler = wrapperProvider.get();
         boolean hasUrlParams = apiInterface.getAnnotation(NotEvolutionProof.class) != null;
         invokeHandler.initialize(addr, hasUrlParams);
 
+        boolean forceVoid = false;
+        if(createForPubSub)
+            forceVoid = true;
+
         Method[] methods = apiInterface.getMethods();
         for(Method method : methods) {
-            MethodValidator.validateApiConvention(apiInterface, method, false);
+            MethodValidator.validateApiConvention(apiInterface, method, forceVoid);
         }
 
         return (T) Proxy.newProxyInstance(apiInterface.getClassLoader(),
