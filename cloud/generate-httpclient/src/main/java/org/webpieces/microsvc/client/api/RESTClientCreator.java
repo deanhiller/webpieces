@@ -26,7 +26,7 @@ public class RESTClientCreator {
 
         Method[] methods = apiInterface.getMethods();
         for(Method method : methods) {
-            MethodValidator.validateApiConvention(apiInterface, method);
+            MethodValidator.validateApiConvention(apiInterface, method, false);
         }
 
         return (T) Proxy.newProxyInstance(apiInterface.getClassLoader(),

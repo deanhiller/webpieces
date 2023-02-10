@@ -47,6 +47,8 @@ public class RESTApiRoutes implements Routes {
     public void configure(DomainRouteBuilder domainRouteBldr) {
         RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
         Method[] methods = api.getMethods();
+        if(methods.length == 0)
+            throw new UnsupportedOperationException("you must have at least 1 method in your api");
 
         if (corsConfig != null) {
             Set<String> domains = Set.of(corsConfig.getDomains());
@@ -63,9 +65,10 @@ public class RESTApiRoutes implements Routes {
             );
         }
 
+        boolean forceVoidForAll = MethodValidator.detectVoidOrElse(methods[0]);
         for (Method m : methods) {
             configurePath(bldr, m);
-            MethodValidator.validateApiConvention(api, m);
+            MethodValidator.validateApiConvention(api, m, forceVoidForAll);
         }
     }
 
