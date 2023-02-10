@@ -87,12 +87,15 @@ public abstract class CompanyApiTest extends AbstractHttp2Test {
     }
 
     public <T> T createRestClient(Class<T> apiOfService) {
+        return createRestClient(apiOfService, false);
+    }
+    public <T> T createRestClient(Class<T> apiOfService, boolean createForPubSub) {
         if(!initialized)
             throw new IllegalStateException("call initialize method first");
 
         log.info("Setting up client for " + apiOfService.getSimpleName());
 
-        return restClientCreator.createClient(apiOfService, serverHttpsAddr);
+        return restClientCreator.createClient(apiOfService, serverHttpsAddr, createForPubSub);
     }
 
     public <T> T createPubSubClient(Class<T> apiOfService) {
