@@ -254,7 +254,7 @@ public class HttpClientWrapper {
         log.info("unmarshalling response json='" + contents + "' http=" + httpResp.getHeaders() + " from request="+jsonReq+" to " + url);
 
         if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_200_OK) {
-            throw new UnsupportedOperationException("fix this later");
+            return contents;
         }
 
         String message = "\njson error='" + contents + "' fullResp=" + httpResp + " url='" + url + "' originalRequest="+jsonReq;

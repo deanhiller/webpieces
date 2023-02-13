@@ -3,6 +3,7 @@ package org.webpieces.googlecloud.cloudtasks.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 import org.webpieces.microsvc.impl.EndpointInfo;
