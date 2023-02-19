@@ -135,7 +135,7 @@ public class WebpiecesServer {
 
 		String name = filePath.getName();
 
-		File locatorFile1 = FileFactory.newFile(filePath, "locatorFile.txt");
+		File locatorFile1 = FileFactory.newFile(filePath, "locatorfile.txt");
 		File locatorFile2 = FileFactory.newFile(filePath, "xLocatorFile.txt");
 
 		File bin = FileFactory.newFile(filePath, "bin");
