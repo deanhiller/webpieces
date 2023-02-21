@@ -27,7 +27,6 @@ import static org.webpieces.microsvc.impl.TestCaseRecorder.RECORDER_KEY;
 
 public class QueueInvokeHandler implements InvocationHandler {
     private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);
-
     private final Logger log = LoggerFactory.getLogger(QueueInvokeHandler.class);
     private InetSocketAddress addr;
     private RemoteInvoker remoteInvoker;
