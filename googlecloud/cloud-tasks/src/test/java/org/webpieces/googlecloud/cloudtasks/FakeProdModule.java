@@ -31,7 +31,7 @@ public class FakeProdModule implements Module{
     @Provides
     @Singleton
     public DeansApi provideDeansApi(QueueClientCreator creator) {
-        return creator.createClient(DeansApi.class, new InetSocketAddress(8080));
+        return creator.createClient(DeansApi.class, new InetSocketAddress("",8080));
     }
 
     @Provides

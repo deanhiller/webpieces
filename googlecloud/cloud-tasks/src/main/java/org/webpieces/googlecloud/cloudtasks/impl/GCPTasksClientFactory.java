@@ -20,11 +20,15 @@ public class GCPTasksClientFactory implements TasksClientFactory {
 
         //TODO : ask dean what to write here
 
+        /*
         return (T) Proxy.newProxyInstance(
                 apiInterface.getClassLoader(),
                 new Class[]{apiInterface},
-                new GCPTasksClient(cloudTasksClient)
+                new GCPTasksClient(createCloudTasksClient)
         );
+         */
+
+        return null;
     }
 
     private CloudTasksClient createCloudTasksClient() {

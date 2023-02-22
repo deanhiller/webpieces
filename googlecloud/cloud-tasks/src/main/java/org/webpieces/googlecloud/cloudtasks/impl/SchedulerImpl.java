@@ -10,6 +10,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class SchedulerImpl implements Scheduler {
+
+    public static final String WEBPIECES_SCHEDULE_RESPONSE = "webpieces-scheduleResponse";
+    public static final String WEBPIECES_SCHEDULE_INFO = "webpieces-scheduleInfo";
+
     @Override
     public XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, int time, TimeUnit timeUnit) {
         ScheduleInfo info = new ScheduleInfo(time, timeUnit);
@@ -23,12 +27,13 @@ public class SchedulerImpl implements Scheduler {
     }
 
     private XFuture<JobReference> executeIt(Supplier<XFuture<Void>> runnable, ScheduleInfo info) {
-        Context.put("webpieces-scheduleInfo", info);
+        Context.put(WEBPIECES_SCHEDULE_INFO, info);
         //response to be filled in.....
-        Context.put("webpieces-scheduleResponse", new JobReference());
+        //kamlesh - Commented to get actual job ref from gcpclient
+        //Context.put("webpieces-scheduleResponse", new JobReference());
         XFuture<Void> future = runnable.get();
         return future.thenApply(v -> {
-            JobReference reference = Context.get("webpieces-scheduleResponse");
+            JobReference reference = Context.get(WEBPIECES_SCHEDULE_RESPONSE);
             return reference;
         });
     }

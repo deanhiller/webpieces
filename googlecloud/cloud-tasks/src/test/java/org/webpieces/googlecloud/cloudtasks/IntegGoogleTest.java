@@ -5,14 +5,22 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Timestamp;
 import org.digitalforge.sneakythrow.SneakyThrow;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.QueueClientCreator;
+import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+import org.webpieces.googlecloud.cloudtasks.api.Scheduler;
+import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.XFuture;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is for when we have to talk to google to find out what google returns so we can
@@ -21,18 +29,25 @@ import java.nio.charset.Charset;
 public class IntegGoogleTest {
 
     private QueueClientCreator instance;
+    private UserApi userApi;
+    private Scheduler scheduler;
 
     @Before
     public void setup() {
         Module module = new FakeProdModule();
         Injector injector = Guice.createInjector(module);
+        scheduler = injector.getInstance(Scheduler.class);
         instance = injector.getInstance(QueueClientCreator.class);
+        userApi = instance.createClient(UserApi.class, new InetSocketAddress("reqres.in",443));
+
+        Map<String, String> headerMap = new HashMap<>();
+        Context.put(Context.HEADERS, headerMap);
     }
 
     @Test
     public void talkToGoogle() {
         //write simulation code here
-
+        /*
         String projectId = "tray-dineqa";
         String locationId = "us-west1";
         String queueId = "com-tray-api-publish-PublishApi-test";
@@ -42,7 +57,26 @@ public class IntegGoogleTest {
         } catch (IOException e) {
             throw SneakyThrow.sneak(e);
         }
+         */
 
+        ScheduleInfo scheduleInfo = new ScheduleInfo(20, TimeUnit.SECONDS);
+        Context.put("webpieces-scheduleInfo",scheduleInfo);
+
+        CreateRequest userRequest = new CreateRequest();
+        userRequest.setName("morpheus");
+        userRequest.setJob("leader");
+        XFuture<Void> voidXFuture = userApi.create(userRequest);
+
+        XFuture<JobReference> jobReference = scheduler.schedule(
+                () -> userApi.create(userRequest),
+                20,
+                TimeUnit.SECONDS);
+
+        try {
+            jobReference.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw SneakyThrow.sneak(e);
+        }
     }
 
     // Create a task with a HTTP target using the Cloud Tasks client.
