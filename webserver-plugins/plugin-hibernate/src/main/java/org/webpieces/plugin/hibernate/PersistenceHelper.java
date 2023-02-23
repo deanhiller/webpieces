@@ -31,24 +31,24 @@ public class PersistenceHelper {
         this.meterRegistry = meterRegistry;
     }
 
-    public void execute(String executionId, Consumer<EntityManager> consumer) {
-        execute(executionId, entityManager -> {
+    public void withVoidSession(String executionId, Consumer<EntityManager> consumer) {
+        withSession(executionId, entityManager -> {
             consumer.accept(entityManager);
             return null;
         });
     }
 
-    public <T> T execute(String executionId, Function<EntityManager, T> function) {
+    public <T> T withSession(String executionId, Function<EntityManager, T> function) {
 
         if (Em.get() != null) {
             throw new IllegalStateException("Cannot open another entityManager when are already have one open");
         }
 
-        return executeImpl(executionId, function);
+        return runWithHibernateSession(executionId, function);
 
     }
 
-    private <T> T executeImpl(String executionId, Function<EntityManager, T> function) {
+    private <T> T runWithHibernateSession(String executionId, Function<EntityManager, T> function) {
 
         EntityManager mgr = factory.createEntityManager();
         Em.set(mgr);
@@ -70,17 +70,17 @@ public class PersistenceHelper {
 
     }
 
-    public void executeTransaction(String executionId, Consumer<EntityManager> consumer) {
-        executeTransaction(executionId, entityManager -> {
+    public void withVoidTx(String executionId, Consumer<EntityManager> consumer) {
+        withTx(executionId, entityManager -> {
             consumer.accept(entityManager);
             return null;
         });
     }
 
-    public <T> T executeTransaction(String executionId, Function<EntityManager, T> function) {
+    public <T> T withTx(String executionId, Function<EntityManager, T> function) {
 
         if(Em.get() == null) {
-            return execute(executionId, (Function<EntityManager,T>)(em) -> executeTransactionImpl(executionId, function));
+            return withSession(executionId, (Function<EntityManager,T>)(em) -> executeTransactionImpl(executionId, function));
         } else {
             return executeTransactionImpl(executionId, function);
         }
