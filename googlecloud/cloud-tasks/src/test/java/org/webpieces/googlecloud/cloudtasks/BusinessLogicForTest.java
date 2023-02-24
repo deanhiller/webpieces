@@ -21,11 +21,11 @@ public class BusinessLogicForTest {
 
 
     public void runDeveloperExperience() {
-        SomeRequest req = new SomeRequest();
-        req.setId(5);
+        CreateRequest req = new CreateRequest();
+        req.setName("dean");
 
         XFuture<JobReference> jobReference = scheduler.schedule(
-                () -> api.some(req),
+                () -> api.create(req),
                 20,
                 TimeUnit.SECONDS);
 

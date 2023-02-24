@@ -12,24 +12,15 @@ import java.util.UUID;
 public class RemoteInvokerImpl implements RemoteInvoker {
 
     @Inject
-    private SchedulerFactory schedulerFactory;
-
-    @Inject
     private GCPTaskClient gcpTasksClient;
-    private Scheduler scheduler;
 
     @Inject
-    public RemoteInvokerImpl(SchedulerFactory schedulerFactory, GCPTaskClient gcpTaskClient) {
-        this.schedulerFactory = schedulerFactory;
+    public RemoteInvokerImpl(GCPTaskClient gcpTaskClient) {
         this.gcpTasksClient = gcpTaskClient;
     }
 
     @Override
     public XFuture<Void> invoke(InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
-
-        if(scheduler==null) {
-            scheduler = schedulerFactory.createScheduler();
-        }
 
         /*
         JobReference ref = (JobReference) Context.get("webpieces-scheduleResponse");
@@ -39,9 +30,6 @@ public class RemoteInvokerImpl implements RemoteInvoker {
 
         //TODO: implement Map and map jobId to scheduled task to allow deletion of tasks as well.
 
-        scheduler.schedule(
-                () -> gcpTasksClient.createTask(addr, httpMethod, path, bodyAsText, info),
-                info.getTime(), info.getTimeUnit());
 
         return XFuture.completedFuture(null);
     }

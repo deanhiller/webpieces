@@ -28,9 +28,6 @@ public class SchedulerImpl implements Scheduler {
 
     private XFuture<JobReference> executeIt(Supplier<XFuture<Void>> runnable, ScheduleInfo info) {
         Context.put(WEBPIECES_SCHEDULE_INFO, info);
-        //response to be filled in.....
-        //kamlesh - Commented to get actual job ref from gcpclient
-        //Context.put("webpieces-scheduleResponse", new JobReference());
         XFuture<Void> future = runnable.get();
         return future.thenApply(v -> {
             JobReference reference = Context.get(WEBPIECES_SCHEDULE_RESPONSE);

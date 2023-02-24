@@ -6,6 +6,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+import org.webpieces.googlecloud.cloudtasks.impl.SchedulerImpl;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
@@ -32,9 +33,7 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     @Override
     public XFuture<Void> invoke(InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
         Map<String, Object> copy = Context.copyContext();
-        JobReference ref = (JobReference) copy.get("webpieces-scheduleResponse");
-        String jobId = UUID.randomUUID().toString();
-        ref.setTaskId(jobId);
+
 
         //TODO: implement Map and map jobId to scheduled task to allow deletion of tasks as well.
 
@@ -47,6 +46,11 @@ public class LocalRemoteInvoker implements RemoteInvoker {
                     () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText)
             );
         }
+
+        String jobId = UUID.randomUUID().toString();
+        JobReference ref = new JobReference();
+        ref.setTaskId(jobId);
+        copy.put(SchedulerImpl.WEBPIECES_SCHEDULE_RESPONSE, ref);
 
         return XFuture.completedFuture(null);
     }

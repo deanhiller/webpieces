@@ -10,5 +10,5 @@ import javax.ws.rs.Path;
 public interface DeansApi {
     @POST
     @Path("/some")
-    XFuture<Void> some(SomeRequest request);
+    XFuture<Void> create(CreateRequest request);
 }
