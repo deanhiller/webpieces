@@ -15,14 +15,10 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
-import org.webpieces.util.context.Context;
-import org.webpieces.util.futures.XFuture;
 
 
 public class GCPTaskClient {
@@ -49,7 +45,7 @@ public class GCPTaskClient {
         return map;
     }
 
-    public XFuture<Void> createTask(InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
+    public JobReference createTask(InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
 
         Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
 
@@ -57,13 +53,13 @@ public class GCPTaskClient {
 
         QueueName queueName = QueueName.of(cloudConfig.get(PROJECT_ID), cloudConfig.get(LOCATION),"com-tray-api-publish-PublishApi-test");
 
-        XFuture<Void> jobReferenceXFuture = createTaskImpl(queueName, url, httpMethod, payload, scheduleInfo);
+        JobReference jobReference = createTaskImpl(queueName, url, httpMethod, payload, scheduleInfo);
 
-        return jobReferenceXFuture;
+        return jobReference;
     }
 
     // Create a task with a HTTP target using the Cloud Tasks client.
-    private XFuture<Void> createTaskImpl(QueueName queue, String url, HttpMethod httpMethod, String payload, ScheduleInfo scheduleInfo) {
+    private JobReference createTaskImpl(QueueName queue, String url, HttpMethod httpMethod, String payload, ScheduleInfo scheduleInfo) {
 
         // Instantiates a client.
         try(CloudTasksClient client = createCloudTasksClient()) {
@@ -86,23 +82,12 @@ public class GCPTaskClient {
                         .setDispatchDeadline(deadline);
 
             // Send create task request
-            CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(()-> {
-                Task task = client.createTask(queue, taskBuilder.build());
-                log.info("Task created: " + task.getName());
-                JobReference jobReference = new JobReference();
-                jobReference.setTaskId(task.getName());
-                Context.put(WEBPIECES_SCHEDULE_RESPONSE,jobReference);
-                return null;
-            });
-            completableFuture.exceptionally( (e) -> {
-                log.error("Exception queueing cloud-task for url {} {} ",httpMethod.name(),url, e);
-                return null;
-            });
+            Task task = client.createTask(queue, taskBuilder.build());
+            log.info("Task created: " + task.getName());
+            JobReference jobReference = new JobReference();
+            jobReference.setTaskId(task.getName());
 
-            XFuture<Void> jobReferenceXFuture = XFuture.convert(completableFuture,null);
-
-            return jobReferenceXFuture;
-
+            return jobReference;
         }
 
     }
