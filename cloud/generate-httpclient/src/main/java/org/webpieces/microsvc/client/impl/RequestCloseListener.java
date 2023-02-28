@@ -27,7 +27,7 @@ public class RequestCloseListener<T> implements Http2SocketListener {
         executorService.schedule(() -> {
             //cancel the responseFuture if not already cancelled...
             aFutureException.completeExceptionally(new SocketClosedException("Socket closed=" + socket));
-        }, 5, TimeUnit.SECONDS);
+        }, 2, TimeUnit.SECONDS);
 
     }
 
