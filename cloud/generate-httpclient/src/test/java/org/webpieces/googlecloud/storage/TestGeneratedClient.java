@@ -23,7 +23,7 @@ public class TestGeneratedClient {
     }
 
     //commented out for now...
-    @Test
+    //@Test
     public void testWithGoogle() {
 
         Map<String, String> headerMap = new HashMap<>();
