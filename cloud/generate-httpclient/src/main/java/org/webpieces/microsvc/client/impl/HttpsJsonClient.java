@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -201,10 +202,11 @@ public class HttpsJsonClient {
     public SSLEngine createEngine(String host, int port) {
 
         try {
-
             String keyStoreType = "JKS";
+            String type = "SunX509";
             if(httpsConfig.getKeyStoreLocation().endsWith(".p12")) {
                 keyStoreType = "PKCS12";
+                type = "PKIX";
             }
 
             InputStream in = this.getClass().getResourceAsStream(httpsConfig.getKeyStoreLocation());
@@ -221,6 +223,17 @@ public class HttpsJsonClient {
             ks.load(in, httpsConfig.getKeyStorePassword().toCharArray());
 
             //****************Client side specific*********************
+
+            log.info("USING type="+type);
+            // TrustManager's decide whether to allow connections.
+//            TrustManagerFactory tmf = TrustManagerFactory.getInstance(type);
+////            tmf.init(ks);
+//            TrustManagerComposite composite = new TrustManagerComposite();
+//            TrustManager[] trustMgr = new TrustManager[1];
+//            trustMgr[0] = composite;
+//
+//
+//            sslContext.init(null, trustMgr, null);
 
             // TrustManager's decide whether to allow connections.
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
