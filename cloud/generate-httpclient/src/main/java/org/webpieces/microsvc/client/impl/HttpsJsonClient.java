@@ -201,7 +201,6 @@ public class HttpsJsonClient {
     public SSLEngine createEngine(String host, int port) {
 
         try {
-
             String keyStoreType = "JKS";
             if(httpsConfig.getKeyStoreLocation().endsWith(".p12")) {
                 keyStoreType = "PKCS12";

@@ -24,6 +24,7 @@ dependencies {
     api deps['core-jackson']
     api deps['jakarta-rest-api']
 
+    testImplementation deps['guice']
     //implementation deps['javax-inject-api']
     //implementation deps['slf4j-api']
 
