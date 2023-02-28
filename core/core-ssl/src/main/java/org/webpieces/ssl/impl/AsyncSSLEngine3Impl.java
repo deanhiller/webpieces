@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -103,7 +104,12 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			//are resolved, the lower layers turn off the socket(deregister from selector) until quite a few are
 			//resolved and we catch up.  This prevents the server from tanking under load ;).  Yes, it's pretty
 			//fucking sick!!!  well, that's my opinion since I had fun adding shit that you'll never know about.
-			doWork(justStarted);
+			try {
+				doWork(justStarted);
+			} catch (AsyncSSLEngineException exc) {
+				log.error("Exception, close the connection", exc);
+				listener.closed(false, exc);
+			}
 	
 			return future;
 		} finally {
@@ -169,7 +175,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 				log.error("How can r be null. actions="+s, new RuntimeException("need task was the status but r="+r+" new state="+engine.getHandshakeStatus()));
 			} else {
-				r.run(); 
+				r.run();
 			}
 			
 			return XFuture.completedFuture(null);
@@ -391,6 +397,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		try {
 			return sendHandshakeMessageImpl(engine);
 		} catch (SSLException e) {
+			//
 			throw new AsyncSSLEngineException(e);
 		}
 	}
@@ -418,7 +425,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP2_START, sslEngine));
 			//KEEEEEP This very small.  wrap and then listener.packetEncrypted
-			SSLEngineResult result = sslEngine.wrap(SslMementoImpl.EMPTY, engineToSocketData);
+			SSLEngineResult result = runProtected(sslEngine, engineToSocketData);
 			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP2_END, sslEngine));
 
 
@@ -471,13 +478,60 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			throw new IllegalArgumentException(e);
 		}
 	}
-	
+
+	private SSLEngineResult runProtected(SSLEngine sslEngine, ByteBuffer engineToSocketData) throws SSLException {
+
+		//SSLEngine passes exception from thread to thread so when this throws, it throws with the WRONG stack trace
+		//leading you to believe the throw was from the task.run so try..catch this here.  In fact, this is the stack trace
+		//which pointed to r.run() call in doScheduleMethod but actualy was thrown here!!!
+					/*
+			Thought r.run was throwing this exception so we need to close the loop with the client and fail the request
+			r.run used to be located in this stack frame -> AsyncSSLEngine3Impl.doHandshakeWork(AsyncSSLEngine3Impl.java:172)
+			->
+			Caused by: javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+
+	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.consume(CertificateMessage.java:361)
+	at java.base/sun.security.ssl.SSLHandshake.consume(SSLHandshake.java:392)
+	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:444)
+	at java.base/sun.security.ssl.SSLEngineImpl$DelegatedTask$DelegatedAction.run(SSLEngineImpl.java:1065)
+	at java.base/sun.security.ssl.SSLEngineImpl$DelegatedTask$DelegatedAction.run(SSLEngineImpl.java:1052)
+	at java.base/java.security.AccessController.doPrivileged(Native Method)
+	at java.base/sun.security.ssl.SSLEngineImpl$DelegatedTask.run(SSLEngineImpl.java:999)
+	at org.webpieces.ssl.impl.AsyncSSLEngine3Impl.doHandshakeWork(AsyncSSLEngine3Impl.java:172)
+	... 10 common frames omitted
+Caused by: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:385)
+	at java.base/sun.security.validator.PKIXValidator.engineValidate(PKIXValidator.java:290)
+Caused by: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+
+	at java.base/sun.security.validator.Validator.validate(Validator.java:264)
+	at java.base/sun.security.ssl.X509TrustManagerImpl.validate(X509TrustManagerImpl.java:321)
+	at java.base/sun.security.ssl.X509TrustManagerImpl.checkTrusted(X509TrustManagerImpl.java:279)
+	at java.base/sun.security.ssl.X509TrustManagerImpl.checkServerTrusted(X509TrustManagerImpl.java:141)
+	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.checkServerCerts(CertificateMessage.java:620)
+	... 19 common frames omitted
+Caused by: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.provider.certpath.SunCertPathBuilder.build(SunCertPathBuilder.java:141)
+	at java.base/sun.security.provider.certpath.SunCertPathBuilder.engineBuild(SunCertPathBuilder.java:126)
+	at java.base/java.security.cert.CertPathBuilder.build(CertPathBuilder.java:297)
+	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:380)
+	... 25 common frames omitted
+
+			 */
+		try {
+			return sslEngine.wrap(SslMementoImpl.EMPTY, engineToSocketData);
+		} catch (SSLException exc) {
+			log.error("Stack trace potentially wrong as it might be filled in during r.run.  catch&rethrow next to have correct stack", exc);
+			throw new AsyncSSLEngineException(exc);
+		}
+	}
+
 	private void fireClose() {
 		//fire only ONCE...
 		boolean shouldFire = fireClosed.compareAndSet(false, true);
 		if(shouldFire) {
 			mem.compareSet(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED);
-			listener.closed(clientInitiated);
+			listener.closed(clientInitiated, null);
 		}
 	}
 	
@@ -563,7 +617,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 
 		clientInitiated = true;
 		if(mem.getConnectionState() == ConnectionState.NOT_STARTED) {
-			listener.closed(true);
+			listener.closed(true, null);
 			return;
 		}
 		

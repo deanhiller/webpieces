@@ -354,7 +354,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		boolean shouldFire = fireClosed.compareAndSet(false, true);
 		if(shouldFire) {
 			mem.compareSet(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED);
-			listener.closed(clientInitiated);
+			listener.closed(clientInitiated, null);
 		}
 	}
 
@@ -428,7 +428,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	public void close() {
 		clientInitiated = true;
 		if(mem.getConnectionState() == ConnectionState.NOT_STARTED) {
-			listener.closed(true);
+			listener.closed(true, null);
 			return;
 		}
 		
