@@ -66,7 +66,7 @@ public class ArgumentsImpl implements Arguments {
 		keyToAskedFor.put(argumentKey, list);
 
 		ValueHolder holder = mustMatchDefaults.putIfAbsent(argumentKey, new ValueHolder(defaultValueString));
-		if(holder != null && !holder.getValue().equals(defaultValueString)) {
+		if(holder != null && !valuesEqual(holder, defaultValueString)) {
 			String default1 = holder.getValue();
 			String default2 = defaultValueString;
 			UsageHelp usage = createUsage(valueHolder, defaultValueString, help);
@@ -102,6 +102,16 @@ public class ArgumentsImpl implements Arguments {
 		list.add(new UsageHelp(defaultValueString, help, true, true, valueHolder.getValue()));
 		T param = convert(argumentKey, converter, valueHolder.getValue());
 		return new SupplierImpl<T>(param, true, isConsumedAllArguments);
+	}
+
+	private boolean valuesEqual(ValueHolder holder, String defaultValueString) {
+		if(holder.getValue() == null) {
+			if(defaultValueString == null)
+				return true;
+			return false;
+		}
+
+		return holder.getValue().equals(defaultValueString);
 	}
 
 	private UsageHelp createUsage(ValueHolder valueHolder, String defaultValueString, String help) {
