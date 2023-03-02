@@ -28,7 +28,6 @@ public class ProxyDataListener implements DataListener {
 
 	@Override
 	public void farEndClosed(Channel channel) {
-		log.info("async server far end closed");
 		if(log.isDebugEnabled())
 			log.debug(channel+"far end closed");
 		dataListener.farEndClosed(channel);
