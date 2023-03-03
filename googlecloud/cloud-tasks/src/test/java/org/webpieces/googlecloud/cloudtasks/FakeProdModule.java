@@ -31,7 +31,7 @@ public class FakeProdModule implements Module{
         binder.bind(ConverterConfig.class).toInstance(converterConfig);
         binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(true));
 
-        binder.bind(GCPCloudTaskConfig.class).toInstance(new GCPCloudTaskConfig("projectId", "us-west1"));
+        binder.bind(GCPCloudTaskConfig.class).toInstance(new GCPCloudTaskConfig("tray-dineqa", "us-west1"));
     }
 
     @Provides

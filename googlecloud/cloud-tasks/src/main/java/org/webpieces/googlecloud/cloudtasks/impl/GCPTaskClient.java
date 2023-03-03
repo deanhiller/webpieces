@@ -2,7 +2,6 @@ package org.webpieces.googlecloud.cloudtasks.impl;
 
 import com.google.cloud.tasks.v2.*;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.digitalforge.sneakythrow.SneakyThrow;
 import org.slf4j.Logger;
@@ -41,6 +40,7 @@ public class GCPTaskClient {
         String url = getURL(endpoint,path);
 
         String queueNameStr = method.getDeclaringClass().getName()+"."+method.getName();
+        queueNameStr = queueNameStr.replaceAll("\\.","-");
         log.info("queueName="+queueNameStr);
 
         QueueName queueName = QueueName.of(config.getProjectId(), config.getLocation(),queueNameStr);
@@ -62,7 +62,7 @@ public class GCPTaskClient {
                 .setBody(ByteString.copyFrom(payload, Charset.defaultCharset()))
                 .setUrl(url)
                 .setHttpMethod(getCloudTaskHttpMethod(httpMethod))
-                //.putAllHeaders(headers)   //TODO: Kamlesh - Ask dean what to send in headers
+                //.putAllHeaders(headers)   //TODO: Ask dean what to send in headers
                 .build();
 
         Task.Builder taskBuilder = Task.newBuilder()
@@ -109,23 +109,25 @@ public class GCPTaskClient {
     }
 
     private Timestamp getTimeStamp(ScheduleInfo scheduleInfo) {
-        long currentTimeInSec = System.currentTimeMillis()/1000;
+        long currentTimeInMilliSeconds = System.currentTimeMillis();
 
         switch(scheduleInfo.getTimeUnit()) {
             case DAYS:
-                currentTimeInSec += scheduleInfo.getTime()*24*60*60*1000L;
+                currentTimeInMilliSeconds += scheduleInfo.getTime()*24*60*60*1000L;
                 break;
             case HOURS:
-                currentTimeInSec += scheduleInfo.getTime()*60*60*1000L;
+                currentTimeInMilliSeconds += scheduleInfo.getTime()*60*60*1000L;
                 break;
             case MINUTES:
-                currentTimeInSec += scheduleInfo.getTime()*60*1000L;
+                currentTimeInMilliSeconds += scheduleInfo.getTime()*60*1000L;
                 break;
             case SECONDS:
-                currentTimeInSec += scheduleInfo.getTime()*1000L;
+                currentTimeInMilliSeconds += scheduleInfo.getTime()*1000L;
                 break;
         }
 
-        return Timestamp.newBuilder().setSeconds(currentTimeInSec).build();
+        long currentTimeinSeconds = currentTimeInMilliSeconds/1000;
+
+        return Timestamp.newBuilder().setSeconds(currentTimeinSeconds).build();
     }
 }
