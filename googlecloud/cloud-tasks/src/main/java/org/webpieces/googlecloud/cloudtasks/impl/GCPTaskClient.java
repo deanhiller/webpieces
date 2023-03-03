@@ -65,12 +65,14 @@ public class GCPTaskClient {
                 //.putAllHeaders(headers)   //TODO: Kamlesh - Ask dean what to send in headers
                 .build();
 
-        Duration deadline = Duration.newBuilder().setSeconds(1020).build(); //set 17 minutes (longer than cloud run timeout)
+        Task.Builder taskBuilder = Task.newBuilder()
+                    .setHttpRequest(request);
 
-        final Task.Builder taskBuilder = Task.newBuilder()
-                    .setHttpRequest(request)
-                    .setScheduleTime(scheduleInfo.isScheduledInFuture() ? getTimeStamp(scheduleInfo): Timestamp.newBuilder().setSeconds(0L).build())
-                    .setDispatchDeadline(deadline);
+        if(scheduleInfo.isScheduledInFuture()) {
+            Timestamp timeStamp = getTimeStamp(scheduleInfo);
+            log.info("Timestamp="+timeStamp);
+            taskBuilder = taskBuilder.setScheduleTime(timeStamp);
+        }
 
         // Send create task request
         Task task = cloudTasksClient.createTask(queue, taskBuilder.build());
