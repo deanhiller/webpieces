@@ -32,6 +32,7 @@ import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Map;
@@ -201,11 +202,13 @@ public class HttpsJsonClient {
     public SSLEngine createEngine(String host, int port) {
 
         try {
-
             String keyStoreType = "JKS";
             if(httpsConfig.getKeyStoreLocation().endsWith(".p12")) {
                 keyStoreType = "PKCS12";
             }
+
+            URL resource = this.getClass().getClassLoader().getResource(httpsConfig.getKeyStoreLocation());
+
 
             InputStream in = this.getClass().getResourceAsStream(httpsConfig.getKeyStoreLocation());
 

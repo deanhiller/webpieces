@@ -39,6 +39,7 @@ public interface SslListener {
 	 *
 	 * @param clientInitiated true if client called close or initateClose.  false
 	 * if closed was caused by far end sending close handshake message.
+	 * @param exc Only filled in on failure
 	 */
-	void closed(boolean clientInitiated);
+	void closed(boolean clientInitiated, Exception exc);
 }

@@ -68,7 +68,7 @@ public class SSLParserImpl implements SSLParser {
 		}
 
 		@Override
-		public void closed(boolean clientInitiated) {
+		public void closed(boolean clientInitiated, Exception exc) {
 			isClosed = true;
 			isClientInitiatedClosed = clientInitiated;
 		}

@@ -58,7 +58,7 @@ public class MockSslListener extends MockSuperclass implements SslListener {
 	}
 
 	@Override
-	public void closed(boolean clientInitiated) {
+	public void closed(boolean clientInitiated, Exception exc) {
 		if(closed)
 			throw new RuntimeException("bug in implementation.  we should not fire closed twice");
 		closed = true;
