@@ -11,6 +11,7 @@ import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.UUID;
@@ -31,7 +32,7 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     }
 
     @Override
-    public XFuture<Void> invoke(InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
+    public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
         Map<String, Object> copy = Context.copyContext();
 
 

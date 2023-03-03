@@ -8,50 +8,42 @@ import org.digitalforge.sneakythrow.SneakyThrow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+
+import javax.inject.Inject;
 
 
 public class GCPTaskClient {
 
     private static Logger log = LoggerFactory.getLogger(GCPTaskClient.class);
+    private final GCPCloudTaskConfig config;
     private CloudTasksClient cloudTasksClient;
-    private static final String PROJECT_ID = "PROJECT_ID";
-    private static final String LOCATION = "LOCATION";
-    public static final String WEBPIECES_SCHEDULE_RESPONSE = "webpieces-scheduleResponse";
-    private Map<String, String> cloudConfig;
 
-    public GCPTaskClient(String projectId, String location) {
-        cloudConfig = setCloudSettings(projectId, location);
+    @Inject
+    public GCPTaskClient(GCPCloudTaskConfig config, CloudTasksClient cloudTasksClient) {
+        this.config = config;
+        this.cloudTasksClient = cloudTasksClient;
     }
 
-    public GCPTaskClient() {
-        cloudConfig = setCloudSettings("tray-dineqa", "us-west1");
-    }
-
-    private Map<String,String> setCloudSettings(String projectId, String location) {
-        Map<String,String> map = new HashMap<>();
-        map.put(PROJECT_ID,projectId);
-        map.put(LOCATION,location);
-        return map;
-    }
-
-    public JobReference createTask(InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
+    public JobReference createTask(Method method, InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
 
         Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
 
         String url = getURL(endpoint,path);
 
-        QueueName queueName = QueueName.of(cloudConfig.get(PROJECT_ID), cloudConfig.get(LOCATION),"com-tray-api-publish-PublishApi-test");
+        String queueNameStr = method.getDeclaringClass().getName()+"."+method.getName();
+        log.info("queueName="+queueNameStr);
+
+        QueueName queueName = QueueName.of(config.getProjectId(), config.getLocation(),queueNameStr);
 
         JobReference jobReference = createTaskImpl(queueName, url, httpMethod, payload, scheduleInfo);
 
@@ -62,45 +54,35 @@ public class GCPTaskClient {
     private JobReference createTaskImpl(QueueName queue, String url, HttpMethod httpMethod, String payload, ScheduleInfo scheduleInfo) {
 
         // Instantiates a client.
-        try(CloudTasksClient client = createCloudTasksClient()) {
 
-            log.info("Got queue: " + queue);
+        log.info("Got queue: " + queue);
 
-            // Construct the task body.
-            HttpRequest request = HttpRequest.newBuilder()
-                    .setBody(ByteString.copyFrom(payload, Charset.defaultCharset()))
-                    .setUrl(url)
-                    .setHttpMethod(getCloudTaskHttpMethod(httpMethod))
-                    //.putAllHeaders(headers)   //TODO: Kamlesh - Ask dean what to send in headers
-                    .build();
+        // Construct the task body.
+        HttpRequest request = HttpRequest.newBuilder()
+                .setBody(ByteString.copyFrom(payload, Charset.defaultCharset()))
+                .setUrl(url)
+                .setHttpMethod(getCloudTaskHttpMethod(httpMethod))
+                //.putAllHeaders(headers)   //TODO: Kamlesh - Ask dean what to send in headers
+                .build();
 
-            Duration deadline = Duration.newBuilder().setSeconds(1020).build(); //set 17 minutes (longer than cloud run timeout)
+        Duration deadline = Duration.newBuilder().setSeconds(1020).build(); //set 17 minutes (longer than cloud run timeout)
 
-            final Task.Builder taskBuilder = Task.newBuilder()
-                        .setHttpRequest(request)
-                        .setScheduleTime(scheduleInfo.isScheduledInFuture() ? getTimeStamp(scheduleInfo): Timestamp.newBuilder().setSeconds(0L).build())
-                        .setDispatchDeadline(deadline);
+        final Task.Builder taskBuilder = Task.newBuilder()
+                    .setHttpRequest(request)
+                    .setScheduleTime(scheduleInfo.isScheduledInFuture() ? getTimeStamp(scheduleInfo): Timestamp.newBuilder().setSeconds(0L).build())
+                    .setDispatchDeadline(deadline);
 
-            // Send create task request
-            Task task = client.createTask(queue, taskBuilder.build());
-            log.info("Task created: " + task.getName());
-            JobReference jobReference = new JobReference();
-            jobReference.setTaskId(task.getName());
+        // Send create task request
+        Task task = cloudTasksClient.createTask(queue, taskBuilder.build());
+        log.info("Task created: " + task.getName());
+        JobReference jobReference = new JobReference();
+        jobReference.setTaskId(task.getName());
 
-            return jobReference;
-        }
+        return jobReference;
 
     }
 
-    private CloudTasksClient createCloudTasksClient() {
 
-        try {
-            return CloudTasksClient.create(CloudTasksSettings.newBuilder().build());
-        } catch (IOException ex) {
-            throw SneakyThrow.sneak(ex);
-        }
-
-    }
 
     private com.google.cloud.tasks.v2.HttpMethod getCloudTaskHttpMethod(HttpMethod httpMethod) {
         if(httpMethod.equals(HttpMethod.POST))
@@ -125,7 +107,6 @@ public class GCPTaskClient {
     }
 
     private Timestamp getTimeStamp(ScheduleInfo scheduleInfo) {
-        Timestamp timestamp = null;
         long currentTimeInSec = System.currentTimeMillis()/1000;
 
         switch(scheduleInfo.getTimeUnit()) {
