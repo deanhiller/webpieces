@@ -8,11 +8,9 @@ import org.webpieces.util.futures.XFuture;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import static org.webpieces.googlecloud.cloudtasks.impl.Constants.*;
 
 public class SchedulerImpl implements Scheduler {
-
-    public static final String WEBPIECES_SCHEDULE_RESPONSE = "webpieces-scheduleResponse";
-    public static final String WEBPIECES_SCHEDULE_INFO = "webpieces-scheduleInfo";
 
     @Override
     public XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, int time, TimeUnit timeUnit) {
@@ -30,7 +28,7 @@ public class SchedulerImpl implements Scheduler {
         Context.put(WEBPIECES_SCHEDULE_INFO, info);
         XFuture<Void> future = runnable.get();
         return future.thenApply(v -> {
-            JobReference reference = Context.get(WEBPIECES_SCHEDULE_RESPONSE);
+            JobReference reference = Context.get(Constants.WEBPIECES_SCHEDULE_RESPONSE);
             return reference;
         });
     }

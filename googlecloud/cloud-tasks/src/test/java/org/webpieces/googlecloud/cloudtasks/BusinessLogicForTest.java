@@ -23,14 +23,15 @@ public class BusinessLogicForTest {
     public void runDeveloperExperience() {
         CreateRequest req = new CreateRequest();
         req.setName("dean");
+        req.setJob("engineering");
 
         XFuture<JobReference> jobReference = scheduler.schedule(
                 () -> api.create(req),
-                20,
-                TimeUnit.SECONDS);
+                1,
+                TimeUnit.MINUTES);
 
         try {
-            jobReference.get(5, TimeUnit.SECONDS);
+            jobReference.get(20, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw SneakyThrow.sneak(e);
         }

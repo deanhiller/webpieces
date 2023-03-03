@@ -3,10 +3,10 @@ package org.webpieces.googlecloud.cloudtasks.localimpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.googlecloud.cloudtasks.impl.Constants;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
-import org.webpieces.googlecloud.cloudtasks.impl.SchedulerImpl;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
@@ -50,7 +50,7 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         String jobId = UUID.randomUUID().toString();
         JobReference ref = new JobReference();
         ref.setTaskId(jobId);
-        copy.put(SchedulerImpl.WEBPIECES_SCHEDULE_RESPONSE, ref);
+        copy.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
 
         return XFuture.completedFuture(null);
     }

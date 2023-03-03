@@ -6,9 +6,9 @@ import org.webpieces.util.futures.XFuture;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
-@Path("/publishsvc")
+@Path("/api")
 public interface DeansApi {
     @POST
-    @Path("/some")
+    @Path("/create")
     XFuture<Void> create(CreateRequest request);
 }
