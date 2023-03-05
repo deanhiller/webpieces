@@ -24,7 +24,7 @@ dependencies {
     api deps['cloud-api-lib']
     api deps['core-jackson']
     api deps['http2to1_1-client']
-    implementation 'com.google.cloud:google-cloud-tasks:2.9.0'
+    api deps['gcp-cloud-task']
 
     //implementation deps['javax-inject-api']
     //implementation deps['slf4j-api']

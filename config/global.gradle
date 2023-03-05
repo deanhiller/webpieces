@@ -157,7 +157,8 @@ ext {
 
             'grpc-protobuf'          : 'io.grpc:grpc-protobuf',
             'grpc-stub'              : 'io.grpc:grpc-stub',
-            'grpc-json'              : 'com.google.protobuf:protobuf-java-util'
+            'grpc-json'              : 'com.google.protobuf:protobuf-java-util',
+            'gcp-cloud-task'         : 'com.google.cloud:google-cloud-tasks:2.9.0'
     ]
 
 }
