@@ -27,7 +27,6 @@ import static org.webpieces.microsvc.impl.TestCaseRecorder.RECORDER_KEY;
 
 public class QueueInvokeHandler implements InvocationHandler {
     private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);
-
     private final Logger log = LoggerFactory.getLogger(QueueInvokeHandler.class);
     private InetSocketAddress addr;
     private RemoteInvoker remoteInvoker;
@@ -52,7 +51,7 @@ public class QueueInvokeHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-        ScheduleInfo info = Context.get("webpieces-scheduleInfo");
+        ScheduleInfo info = Context.get(Constants.WEBPIECES_SCHEDULE_INFO);
         if(info == null)
             throw new IllegalArgumentException("You must pass a lambda of the API to Scheduler.schedule or Scheduler.addToQueue");
 
@@ -103,7 +102,7 @@ public class QueueInvokeHandler implements InvocationHandler {
 
         Object body = args[0];
         String bodyAsText = marshal(body);
-        XFuture<Void> xFuture = remoteInvoker.invoke(addr, path, httpMethod, bodyAsText, info)
+        XFuture<Void> xFuture = remoteInvoker.invoke(method, addr, path, httpMethod, bodyAsText, info)
 //        Endpoint endpoint = new Endpoint(addr, httpMethod.getCode(), path);
 //        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType)
                 .thenApply(retVal -> {

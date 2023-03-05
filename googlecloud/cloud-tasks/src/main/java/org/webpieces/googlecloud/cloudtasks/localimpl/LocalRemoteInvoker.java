@@ -3,6 +3,7 @@ package org.webpieces.googlecloud.cloudtasks.localimpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.googlecloud.cloudtasks.impl.Constants;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
@@ -10,6 +11,7 @@ import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.UUID;
@@ -30,11 +32,9 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     }
 
     @Override
-    public XFuture<Void> invoke(InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
+    public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
         Map<String, Object> copy = Context.copyContext();
-        JobReference ref = (JobReference) copy.get("webpieces-scheduleResponse");
-        String jobId = UUID.randomUUID().toString();
-        ref.setTaskId(jobId);
+
 
         //TODO: implement Map and map jobId to scheduled task to allow deletion of tasks as well.
 
@@ -47,6 +47,11 @@ public class LocalRemoteInvoker implements RemoteInvoker {
                     () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText)
             );
         }
+
+        String jobId = UUID.randomUUID().toString();
+        JobReference ref = new JobReference();
+        ref.setTaskId(jobId);
+        copy.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
 
         return XFuture.completedFuture(null);
     }

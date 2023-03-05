@@ -100,13 +100,7 @@ public abstract class CompanyApiTest extends AbstractHttp2Test {
 
     public <T> T createPubSubClient(Class<T> apiOfService) {
         log.info("Setting up PubSub client for " + apiOfService.getSimpleName());
-        throw new UnsupportedOperationException("not ported yet");
-    }
-
-    public <T> T createCloudTasksClient(Class<T> apiOfService) {
-        log.info("Setting up CloudTasks client for " + apiOfService.getSimpleName());
-        throw new UnsupportedOperationException("not ported yet");
-
+        return createRestClient(apiOfService, true);
     }
 
     protected abstract void startServer() throws IOException;

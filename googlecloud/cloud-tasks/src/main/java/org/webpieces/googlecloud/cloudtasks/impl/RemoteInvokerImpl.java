@@ -1,21 +1,30 @@
 package org.webpieces.googlecloud.cloudtasks.impl;
 
+import com.google.inject.Inject;
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.googlecloud.cloudtasks.api.JobReference;
-import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
-import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+import org.webpieces.googlecloud.cloudtasks.api.*;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 public class RemoteInvokerImpl implements RemoteInvoker {
-    @Override
-    public XFuture<Void> invoke(InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
-        JobReference ref = (JobReference) Context.get("webpieces-scheduleResponse");
-        //fill in ref.setTaskId()
 
-        return null;
+    @Inject
+    private GCPTaskClient gcpTasksClient;
+
+    @Inject
+    public RemoteInvokerImpl(GCPTaskClient gcpTaskClient) {
+        this.gcpTasksClient = gcpTaskClient;
+    }
+
+    @Override
+    public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
+
+        JobReference jobReference = gcpTasksClient.createTask(method, addr, httpMethod, path, bodyAsText, info);
+        Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE,jobReference);
+
+        return XFuture.completedFuture(null);
     }
 }

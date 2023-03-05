@@ -1,10 +1,14 @@
 package org.webpieces.googlecloud.cloudtasks;
 
+import com.google.cloud.tasks.v2.CloudTasksClient;
+import com.google.cloud.tasks.v2.CloudTasksSettings;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
 import org.webpieces.googlecloud.cloudtasks.api.QueueClientCreator;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.httpclientx.api.Http2to11ClientFactory;
@@ -14,6 +18,7 @@ import org.webpieces.plugin.json.ConverterConfig;
 import org.webpieces.util.context.ClientAssertions;
 
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class FakeProdModule implements Module{
@@ -26,12 +31,23 @@ public class FakeProdModule implements Module{
         binder.bind(ConverterConfig.class).toInstance(converterConfig);
         binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(true));
 
+        binder.bind(GCPCloudTaskConfig.class).toInstance(new GCPCloudTaskConfig("tray-dineqa", "us-west1"));
+    }
+
+    @Provides
+    @Singleton
+    private CloudTasksClient createCloudTasksClient() {
+        try {
+            return CloudTasksClient.create(CloudTasksSettings.newBuilder().build());
+        } catch (IOException ex) {
+            throw SneakyThrow.sneak(ex);
+        }
     }
 
     @Provides
     @Singleton
     public DeansApi provideDeansApi(QueueClientCreator creator) {
-        return creator.createClient(DeansApi.class, new InetSocketAddress(8080));
+        return creator.createClient(DeansApi.class, new InetSocketAddress("reqres.in",443));
     }
 
     @Provides
