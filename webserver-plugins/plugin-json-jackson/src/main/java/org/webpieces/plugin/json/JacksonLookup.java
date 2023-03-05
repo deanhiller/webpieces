@@ -1,6 +1,7 @@
 package org.webpieces.plugin.json;
 
 import java.lang.annotation.Annotation;
+import java.nio.charset.StandardCharsets;
 
 import javax.inject.Inject;
 
@@ -53,10 +54,11 @@ public class JacksonLookup implements BodyContentBinder {
 	@Override
 	public <T> RenderContent marshal(T bean) {
 		byte[] content;
-		if(bean == null)
-			content = new byte[0];
-		else
+		if(bean == null) {
+			content = "{}".getBytes(StandardCharsets.UTF_8);
+		} else {
 			content = mapper.writeValueAsBytes(bean);
+		}
 		return new RenderContent(content, KnownStatusCode.HTTP_200_OK.getCode(), KnownStatusCode.HTTP_200_OK.getReason(), JacksonCatchAllFilter.MIME_TYPE);
 	}
 

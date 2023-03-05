@@ -267,7 +267,7 @@ public class HttpsJsonClient {
         log.info("unmarshalling response json='" + contents + "' http=" + httpResp.getHeaders() + " from request="+jsonReq+" to " + url);
 
         if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_200_OK) {
-            if (type == null) {
+            if (type == null || Void.class == type) {
                 return null;
             }
             return unmarshalJson(type, contents);

@@ -166,7 +166,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		Assert.assertEquals("", response.getBodyAsString());
+		Assert.assertEquals("{}", response.getBodyAsString());
 	}
 	
 	@Test
@@ -238,7 +238,7 @@ public class TestJsonCustomFilter extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		Assert.assertEquals("", response.getBodyAsString());
+		Assert.assertEquals("{}", response.getBodyAsString());
 	}
 	
 	@Test

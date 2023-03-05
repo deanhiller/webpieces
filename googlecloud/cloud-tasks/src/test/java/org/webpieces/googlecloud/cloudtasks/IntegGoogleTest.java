@@ -38,7 +38,8 @@ public class IntegGoogleTest {
         businessLogic = injector.getInstance(BusinessLogicForTest.class);
     }
 
-    @Test
+    //use to test with google
+    //@Test
     public void talkToGoogle() {
         Map<String, String> headerMap = new HashMap<>();
         Context.put(Context.HEADERS, headerMap);
