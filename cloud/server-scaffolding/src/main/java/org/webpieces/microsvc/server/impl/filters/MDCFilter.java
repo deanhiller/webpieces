@@ -6,6 +6,7 @@ import org.webpieces.microsvc.server.api.HeaderCtxList;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
+import org.webpieces.util.context.Context;
 import org.webpieces.util.context.PlatformHeaders;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
@@ -17,20 +18,19 @@ import java.util.List;
 /**
  * MDCFilter adds information to the logs. This filter is strictly for logging
  */
-public class MDCFilter extends RouteFilter<Void> {
+public class MDCFilter extends RouteFilter<HeaderCtxList> {
 
     private FutureHelper futureUtil;
     private HeaderCtxList headerCollector;
 
     @Inject
-    public MDCFilter(FutureHelper futureUtil, HeaderCtxList headerCollector) {
+    public MDCFilter(FutureHelper futureUtil) {
         this.futureUtil = futureUtil;
-        this.headerCollector = headerCollector;
     }
 
     @Override
-    public void initialize(Void initialConfig) {
-
+    public void initialize(HeaderCtxList headerCollector) {
+        this.headerCollector = headerCollector;
     }
 
     @Override
@@ -43,9 +43,10 @@ public class MDCFilter extends RouteFilter<Void> {
             if(!key.isWantLogged()) {
                 continue;
             }
-            Object value = routerReq.getRequestState(key);
-            if(value != null) {
-                MDC.put(key.getLoggerMDCKey(), String.valueOf(value));
+
+            String magic = Context.getMagic(key);
+            if(magic != null) {
+                MDC.put(key.getLoggerMDCKey(), magic);
             }
         }
 

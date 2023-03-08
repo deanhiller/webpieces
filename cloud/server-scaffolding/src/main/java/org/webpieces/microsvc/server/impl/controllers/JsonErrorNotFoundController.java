@@ -1,6 +1,5 @@
 package org.webpieces.microsvc.server.impl.controllers;
 
-import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import org.webpieces.http.StatusCode;
 import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.router.api.controller.actions.RenderContent;

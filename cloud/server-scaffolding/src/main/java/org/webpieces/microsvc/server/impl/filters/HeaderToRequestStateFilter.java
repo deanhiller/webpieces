@@ -17,22 +17,20 @@ import org.webpieces.util.futures.XFuture;
 import javax.inject.Inject;
 import java.util.*;
 
-public class HeaderToRequestStateFilter extends RouteFilter<Void> {
+public class HeaderToRequestStateFilter extends RouteFilter<HeaderCtxList> {
 
     private static final Logger log = LoggerFactory.getLogger(HeaderToRequestStateFilter.class);
     private HeaderCtxList headerCtxList;
 
     @Inject
-    public HeaderToRequestStateFilter(HeaderCtxList headerCollector) {
-        this.headerCtxList = headerCollector;
-
-        List<PlatformHeaders> platformHeaders = headerCtxList.listHeaderCtxPairs();
-        Context.checkForDuplicates(platformHeaders);
+    public HeaderToRequestStateFilter() {
     }
 
     @Override
-    public void initialize(Void initialConfig) {
-
+    public void initialize(HeaderCtxList ctxList) {
+        this.headerCtxList = ctxList;
+        List<PlatformHeaders> platformHeaders = headerCtxList.listHeaderCtxPairs();
+        Context.checkForDuplicates(platformHeaders);
     }
 
     @Override

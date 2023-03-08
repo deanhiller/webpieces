@@ -26,21 +26,21 @@ public class JsonFilterRoutes implements Routes {
 
         String regex = config.getPackageRegEx();
 
-        builder.setInternalErrorRoute("JsonErrorNotFoundController.internalError");
-        builder.setPageNotFoundRoute("JsonErrorNotFoundController.notFound");
+        builder.setInternalErrorRoute("../impl/controllers/JsonErrorNotFoundController.internalError");
+        builder.setPageNotFoundRoute("../impl/controllers/JsonErrorNotFoundController.notFound");
 
 //        if(!isEntryPoint) {
 //            builder.addPackageFilter(regex, TokenFilter.class, null, FilterPortType.ALL_FILTER, 160);
 //        }
-        builder.addPackageFilter(regex, RequestIdFilter.class, null, FilterPortType.ALL_FILTER, 140);
-        builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, null, FilterPortType.ALL_FILTER, 120);
-        builder.addPackageFilter(regex, MDCFilter.class, null, FilterPortType.ALL_FILTER, 100);
+        builder.addPackageFilter(regex, RequestIdFilter.class, config.getSvcName(), FilterPortType.ALL_FILTER, 140);
+        builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, config.getHeaders(), FilterPortType.ALL_FILTER, 120);
+        builder.addPackageFilter(regex, MDCFilter.class, config.getHeaders(), FilterPortType.ALL_FILTER, 100);
 
         //complicate port as-is so we will do this in Tray for now until we can port this one too ->
         //builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 80);
 
         if(config.isEnableHealthCheckEndpoint())
-            builder.addContentRoute(BOTH, GET, "/health", "HealthController.health");
+            builder.addContentRoute(BOTH, GET, "/health", "../impl/controllers/HealthController.health");
     }
 
 }

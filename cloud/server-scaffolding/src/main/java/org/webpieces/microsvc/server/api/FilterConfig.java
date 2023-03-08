@@ -1,9 +1,19 @@
 package org.webpieces.microsvc.server.api;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 public class FilterConfig {
     private String packageRegEx;
-    private String svcName;
+    private HeaderCtxList headers;
+    private Supplier<String> lazySvcName;
     private boolean enableHealthCheckEndpoint = true;
+
+    public FilterConfig(String packageRegEx, HeaderCtxList headers, Supplier<String> lazySvcName) {
+        this.packageRegEx = packageRegEx;
+        this.headers = headers;
+        this.lazySvcName = lazySvcName;
+    }
 
     public String getPackageRegEx() {
         return packageRegEx;
@@ -13,12 +23,12 @@ public class FilterConfig {
         this.packageRegEx = packageRegEx;
     }
 
-    public String getSvcName() {
-        return svcName;
+    public Supplier<String> getSvcName() {
+        return lazySvcName;
     }
 
-    public void setSvcName(String svcName) {
-        this.svcName = svcName;
+    public void setLazySvcName(Supplier<String> lazySvcName) {
+        this.lazySvcName = lazySvcName;
     }
 
     public boolean isEnableHealthCheckEndpoint() {
@@ -27,5 +37,13 @@ public class FilterConfig {
 
     public void setEnableHealthCheckEndpoint(boolean enableHealthCheckEndpoint) {
         this.enableHealthCheckEndpoint = enableHealthCheckEndpoint;
+    }
+
+    public HeaderCtxList getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(HeaderCtxList headers) {
+        this.headers = headers;
     }
 }

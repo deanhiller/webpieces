@@ -11,11 +11,13 @@ import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class RequestIdFilter extends RouteFilter<String> {
+public class RequestIdFilter extends RouteFilter<Supplier<String>> {
 
     private final RequestIdGenerator requestIdGenerator;
-    private String svcName;
+    private Supplier<String> svcName;
 
     @Inject
     public RequestIdFilter(RequestIdGenerator requestIdGenerator) {
@@ -23,7 +25,7 @@ public class RequestIdFilter extends RouteFilter<String> {
     }
 
     @Override
-    public void initialize(String svcName) {
+    public void initialize(Supplier<String> svcName) {
         this.svcName = svcName;
     }
 
@@ -39,8 +41,9 @@ public class RequestIdFilter extends RouteFilter<String> {
         if(requestHeader != null) {
             requestId = requestHeader;
         } else {
+
             //prepent svcName so we know who generated it for debugging ->
-            requestId = svcName+"-"+requestIdGenerator.generate().toString();
+            requestId = svcName.get()+"-"+requestIdGenerator.generate().toString();
         }
 
         Context.putMagic(MicroSvcHeader.REQUEST_ID, requestId);
