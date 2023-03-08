@@ -11,8 +11,8 @@ import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.*;
 import org.hibernate.persister.entity.EntityPersister;
 
+import org.webpieces.microsvc.api.MicroSvcHeader;
 import org.webpieces.util.context.Context;
-import org.webpieces.util.context.WebpiecesContextKey;
 
 import javax.persistence.Entity;
 
@@ -51,7 +51,7 @@ public class HibernateEntityMeterBinder implements MeterBinder {
 
         private Tags getTags(String entityName) {
             try {
-                String requestPath = (String) Context.get(WebpiecesContextKey.REQUEST_PATH.toString());
+                String requestPath = Context.getMagic(MicroSvcHeader.REQUEST_PATH);
                 if (requestPath == null || requestPath.isBlank()) {
                     requestPath = "unknown";
                 }

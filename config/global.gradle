@@ -158,7 +158,9 @@ ext {
             'grpc-protobuf'          : 'io.grpc:grpc-protobuf',
             'grpc-stub'              : 'io.grpc:grpc-stub',
             'grpc-json'              : 'com.google.protobuf:protobuf-java-util',
-            'gcp-cloud-task'         : 'com.google.cloud:google-cloud-tasks:2.9.0'
+            'gcp-cloud-task'         : 'com.google.cloud:google-cloud-tasks:2.9.0',
+
+            'uuidgenerator'          : 'com.github.f4b6a3:uuid-creator:5.1.0'
     ]
 
 }

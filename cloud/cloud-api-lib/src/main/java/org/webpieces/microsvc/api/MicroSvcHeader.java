@@ -3,6 +3,9 @@ package org.webpieces.microsvc.api;
 import org.webpieces.util.context.PlatformHeaders;
 
 public enum MicroSvcHeader implements PlatformHeaders {
+
+    REQUEST_ID("x-webpieces-requestid", true, "requestId", true),
+    REQUEST_PATH(null, false, "requestPath", false),
     RECORDING("x-webpieces-recording", true, "recording", false);
 
     private final String headerName;
