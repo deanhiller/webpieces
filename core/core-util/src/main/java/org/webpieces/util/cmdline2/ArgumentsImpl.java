@@ -23,6 +23,7 @@ public class ArgumentsImpl implements Arguments {
 	private Map<String, List<UsageHelp>> keyToAskedFor = new HashMap<>();
 	private AtomicBoolean isConsumedAllArguments = new AtomicBoolean(false);
 	private Map<String, ValueHolder> mustMatchDefaults = new HashMap<>();
+	private Map<String, String> mustMatchEnvVars = new HashMap<>();
 
 	public ArgumentsImpl(Map<String, ValueHolder> args, List<Throwable> errors) {
 		this.errors = errors;
@@ -157,6 +158,43 @@ public class ArgumentsImpl implements Arguments {
 			return new SupplierImpl<T>(isConsumedAllArguments);
 		}
 		
+		list.add(new UsageHelp(help, true, true, valueHolder.getValue()));
+		T param = convert(argumentKey, converter, valueHolder.getValue());
+		return new SupplierImpl<T>(param, false, isConsumedAllArguments);
+	}
+
+	@Override
+	public <T> Supplier<T> createRequiredArgOrEnvVar(String argumentKey, String envVarName, String help, Function<String, T> converter) {
+		notConsumed.remove(argumentKey);
+
+		ValueHolder valueHolder = arguments.get(argumentKey);
+		List<UsageHelp> list = keyToAskedFor.getOrDefault(argumentKey, new ArrayList<UsageHelp>());
+		keyToAskedFor.put(argumentKey, list);
+
+		if (valueHolder == null && System.getenv(envVarName) != null) {
+			valueHolder = new ValueHolder(System.getenv(envVarName));
+
+			String previousValue = mustMatchEnvVars.putIfAbsent(argumentKey, envVarName);
+			if(previousValue != null && !previousValue.equals(envVarName)) {
+				UsageHelp usage = createUsage(valueHolder, envVarName, help);
+				list.add(usage);
+				errors.add(new IllegalStateException("Bug, two people consuming key -"+argumentKey+" but both provide different env vars.  envVar1="+previousValue+" envVar2="+envVarName));
+				return new SupplierImpl<T>(isConsumedAllArguments);
+			}
+		}
+
+		if(valueHolder == null) {
+			//key does not exist at all on command line
+			list.add(new UsageHelp(help, false, false, null));
+			errors.add(new IllegalArgumentException("Argument -"+argumentKey+" or env var "+envVarName+" is required but was not supplied.  help='"+help+"'"));
+			return new SupplierImpl<T>(isConsumedAllArguments);
+		} else if(valueHolder.getValue() == null) {
+			//key exists but there is no value
+			list.add(new UsageHelp(help, true, false, null));
+			errors.add(new IllegalArgumentException("key="+argumentKey+" and env var "+envVarName+" was supplied with no value.  A value is required"));
+			return new SupplierImpl<T>(isConsumedAllArguments);
+		}
+
 		list.add(new UsageHelp(help, true, true, valueHolder.getValue()));
 		T param = convert(argumentKey, converter, valueHolder.getValue());
 		return new SupplierImpl<T>(param, false, isConsumedAllArguments);

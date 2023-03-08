@@ -1,7 +1,9 @@
 package org.webpieces.util.cmdline;
 
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.junit.Assert;
@@ -189,6 +191,43 @@ public class CmdLineParser2Test {
 		Assert.assertEquals(Integer.valueOf(5), val1.get());
 		Assert.assertEquals(Integer.valueOf(5), val2.get());
 	}
+
+	@Test
+	public void testKeyOrEnvVarIsRequiredNotPassedInShouldFail() {
+		String[] args = new String[] { };
+
+		Arguments parse = new CommandLineParser().parse(args);
+
+		parse.createRequiredArgOrEnvVar("key1", "TEST_EMPTY", "key1 help", (s) -> convertInt(s));
+
+		try {
+			parse.checkConsumedCorrectly();
+			Assert.fail("Should fail since someone says key1 or TEST_EMPTY is required but it is not passed");
+		} catch(CommandLineException e) {
+			List<Throwable> errors = e.getErrors();
+			Assert.assertEquals(1, errors.size());
+			Assert.assertEquals("Argument -key1 or env var TEST_EMPTY is required but was not supplied.  help='key1 help'", errors.get(0).getMessage());
+		}
+
+	}
+
+	@Test
+	public void testKeyOrEnvVarIsRequiredPassedInShouldSucceed() {
+		String[] args = new String[] {"-key2=5"};
+		addEnv("TEST_NOT_EMPTY", "123");
+
+		Arguments parse = new CommandLineParser().parse(args);
+
+		//different default values not allowed.  both must default to same thing
+		//this is a weird case
+		Supplier<Integer> val1 = parse.createRequiredArgOrEnvVar("key1", "TEST_NOT_EMPTY", "key1 help", (s) -> convertInt(s));
+		Supplier<Integer> val2 = parse.createRequiredArgOrEnvVar("key2", "TEST_EMPTY", "key1 help", (s) -> convertInt(s));
+
+		parse.checkConsumedCorrectly();
+
+		Assert.assertEquals(Integer.valueOf(123), val1.get());
+		Assert.assertEquals(Integer.valueOf(5), val2.get());
+	}
 	
 	@Test
 	public void testFailWithNoDash() {
@@ -258,5 +297,18 @@ public class CmdLineParser2Test {
 	
 	private Integer convertInt(String s) {
 		return Integer.parseInt(s);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addEnv(String name, String val) {
+		Map<String, String> env = System.getenv();
+		Field field = null;
+		try {
+			field = env.getClass().getDeclaredField("m");
+			field.setAccessible(true);
+			((Map<String, String>) field.get(env)).put(name, val);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
