@@ -74,6 +74,9 @@ public abstract class Http2Headers implements Http2Msg {
 	}
 	
 	public String getSingleHeaderValue(String name) {
+		if(name == null)
+			throw new IllegalArgumentException("argument name cannot be null");
+		name = name.toLowerCase();
 		Http2Header header = getHeaderLookupStruct().getHeader(name);
 		if(header == null || header.getValue() == null)
 			return null;

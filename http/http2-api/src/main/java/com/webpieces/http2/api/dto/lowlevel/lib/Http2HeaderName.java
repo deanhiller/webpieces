@@ -98,7 +98,7 @@ public enum Http2HeaderName {
 	private HeaderType type;
 	
 	Http2HeaderName(String name, HeaderType type) {
-		this.name = name;
+		this.name = name.toLowerCase(); //in case developer types caps
 		this.type = type;
 	}
 	

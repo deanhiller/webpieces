@@ -290,6 +290,10 @@ public class RouterRequest {
 	}
 
 	public RouterHeader getSingleHeader(String headerName) {
+		if(headerName == null)
+			throw new IllegalArgumentException("headerName argument can't be null");
+		headerName = headerName.toLowerCase();
+
 		Map<String, List<RouterHeader>> headers = getHeaders();
 		List<RouterHeader> routerHeaders = headers.get(headerName);
 		if(routerHeaders == null)
@@ -348,12 +352,20 @@ public class RouterRequest {
 	}
 
 	public String getSingleHeaderValue(String headerName) {
+		if(headerName == null)
+			throw new IllegalArgumentException("headerName argument can't be null");
+		headerName = headerName.toLowerCase();
+
 		RouterHeader singleHeader = getSingleHeader(headerName);
 		if (singleHeader == null) return null;
 		return singleHeader.getValue();
 	}
 
 	public String getSingleHeaderValueOrDefault(String headerName, String def) {
+		if(headerName == null)
+			throw new IllegalArgumentException("headerName argument can't be null");
+		headerName = headerName.toLowerCase();
+		
 		String value = getSingleHeaderValue(headerName);
 		if (value == null) return def;
 		return value;
