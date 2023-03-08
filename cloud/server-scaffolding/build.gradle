@@ -26,5 +26,8 @@ dependencies {
 
     //implementation deps['javax-inject-api']
     //implementation deps['slf4j-api']
+    implementation deps['uuidgenerator']
+
+    implementation deps['plugin-json-jackson']
 
 }

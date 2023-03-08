@@ -1,7 +1,7 @@
 package org.webpieces.ctx.api;
 
+import org.webpieces.microsvc.api.MicroSvcHeader;
 import org.webpieces.util.context.Context;
-import org.webpieces.util.context.WebpiecesContextKey;
 import org.webpieces.util.context.PlatformHeaders;
 
 import java.util.ArrayList;
@@ -39,8 +39,7 @@ public class Current {
 		Map<String, String> headerMap = translateToSingleHeaders(requestCtx);
 		Context.put(Context.HEADERS, headerMap);
 		Context.put(Context.REQUEST, requestCtx);
-		Context.put(WebpiecesContextKey.REQUEST_PATH.toString(), requestCtx.getRequest().relativePath);
-
+		Context.putMagic(MicroSvcHeader.REQUEST_PATH, requestCtx.getRequest().relativePath);
 	}
 
 	private static Map<String, String> translateToSingleHeaders(RequestContext requestCtx) {

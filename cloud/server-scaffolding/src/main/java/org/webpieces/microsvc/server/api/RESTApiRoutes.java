@@ -39,6 +39,10 @@ public class RESTApiRoutes implements Routes {
             throw new IllegalArgumentException("api must be an interface and was not");
         }
 
+        if(!api.isAssignableFrom(controller)) {
+            throw new IllegalStateException("Controller="+controller.getClass().getName()+" must implement the api you passed in="+api.getClass().getName());
+        }
+
         this.api = api;
         this.controller = controller;
     }
