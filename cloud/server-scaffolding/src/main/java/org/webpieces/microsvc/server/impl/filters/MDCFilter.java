@@ -1,7 +1,6 @@
 package org.webpieces.microsvc.server.impl.filters;
 
 import org.slf4j.MDC;
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.microsvc.server.api.HeaderCtxList;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -35,8 +34,6 @@ public class MDCFilter extends RouteFilter<HeaderCtxList> {
 
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
-
-        RouterRequest routerReq = meta.getCtx().getRequest();
 
         List<PlatformHeaders> headersCtx = headerCollector.listHeaderCtxPairs();
         for(PlatformHeaders key : headersCtx) {
