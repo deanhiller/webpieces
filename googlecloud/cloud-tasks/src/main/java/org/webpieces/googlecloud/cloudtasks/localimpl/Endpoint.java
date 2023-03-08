@@ -24,4 +24,13 @@ public class Endpoint {
     public String getUrlPath() {
         return urlPath;
     }
+
+    @Override
+    public String toString() {
+        return "Endpoint{" +
+                "serverAddress=" + serverAddress +
+                ", httpMethod='" + httpMethod + '\'' +
+                ", urlPath='" + urlPath + '\'' +
+                '}';
+    }
 }

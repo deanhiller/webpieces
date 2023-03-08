@@ -38,11 +38,14 @@ public class LocalRemoteInvoker implements RemoteInvoker {
 
         //TODO: implement Map and map jobId to scheduled task to allow deletion of tasks as well.
 
+
         if(info.isScheduledInFuture()) {
+            log.info("scheduling in the future"+info.getTime()+" "+info.getTimeUnit());
             executorService.schedule(
                     () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText),
                     info.getTime(), info.getTimeUnit());
         } else {
+            log.info("adding to queue");
             executorService.execute(
                     () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText)
             );
@@ -59,6 +62,7 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     private void pretendToBeCallFromGCPCloudTasks(Map<String, Object> copy, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText) {
         Context.restoreContext(copy);
         Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
+        log.info("Running simulated call to remote endpoint="+endpoint);
         XFuture<String> stringXFuture = client.sendHttpRequest(bodyAsText, endpoint);
         stringXFuture.exceptionally( (e) -> {
             log.error("Exception queueing the request", e);
