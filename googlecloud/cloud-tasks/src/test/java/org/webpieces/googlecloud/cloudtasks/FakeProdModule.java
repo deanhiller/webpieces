@@ -1,5 +1,6 @@
 package org.webpieces.googlecloud.cloudtasks;
 
+import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.cloud.tasks.v2.CloudTasksClient;
 import com.google.cloud.tasks.v2.CloudTasksSettings;
 import com.google.inject.Binder;
@@ -20,6 +21,8 @@ import org.webpieces.util.context.ClientAssertions;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.io.FileInputStream;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 
 public class FakeProdModule implements Module{
     @Override
@@ -30,15 +33,25 @@ public class FakeProdModule implements Module{
         ConverterConfig converterConfig = new ConverterConfig(true);
         binder.bind(ConverterConfig.class).toInstance(converterConfig);
         binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(true));
-
-        binder.bind(GCPCloudTaskConfig.class).toInstance(new GCPCloudTaskConfig("tray-dineqa", "us-west1"));
+        binder.bind(GCPCloudTaskConfig.class).toInstance(
+            new GCPCloudTaskConfig(
+                    "tray-releasebranch",
+                    "us-west1"));
     }
 
     @Provides
     @Singleton
     private CloudTasksClient createCloudTasksClient() {
         try {
-            return CloudTasksClient.create(CloudTasksSettings.newBuilder().build());
+
+            return CloudTasksClient
+                    .create(CloudTasksSettings
+                            .newBuilder()
+                            .setCredentialsProvider(
+                                    FixedCredentialsProvider.create(
+                                            ServiceAccountCredentials.fromStream(
+                                                    new FileInputStream("/Users/emmanuelhadjistratis/Downloads/tray-releasebranch-c2975610b1c7.json"))))
+                            .build());
         } catch (IOException ex) {
             throw SneakyThrow.sneak(ex);
         }
