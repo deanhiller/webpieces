@@ -54,7 +54,7 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         String jobId = UUID.randomUUID().toString();
         JobReference ref = new JobReference();
         ref.setTaskId(jobId);
-        copy.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
+        Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
 
         return XFuture.completedFuture(null);
     }
