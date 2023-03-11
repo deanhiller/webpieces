@@ -18,10 +18,10 @@ public class RemoteInvokerImpl implements RemoteInvoker {
     @Inject
     public RemoteInvokerImpl(Provider<GCPTaskClient> gcpTaskClient)
     {
-        //constructors should never connect to remove services such
+        //constructors should never connect to remote services such
         // that TestBasicStart.java keeps working
         //instead, always have a start/stop method for a lifecycle (instead of constructor and stop method)
-        gcpTaskClient = () -> gcpTasksClient.get();
+        this.gcpTasksClient = new SingletonSupplier<>(() -> gcpTaskClient.get());
     }
 
     @Override
