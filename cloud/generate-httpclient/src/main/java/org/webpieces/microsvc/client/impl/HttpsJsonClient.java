@@ -109,14 +109,14 @@ public class HttpsJsonClient {
     /**
      * <b>DO NOT USE FOR PUBLIC HTTP REQUEST THIS IS FOR INTERNAL USE ONLY</b>
      */
-    public <T> XFuture<T> sendHttpRequest(Method method, Object request, Endpoint endpoint, Class<T> responseType) {
+    public <T> XFuture<T> sendHttpRequest(Method method, Object request, Endpoint endpoint, Class<T> responseType, boolean forHttp) {
 
         InetSocketAddress apiAddress = endpoint.getServerAddress();
         String httpMethod = endpoint.getHttpMethod();
         String endpointPath = endpoint.getUrlPath();
         Http2Request httpReq = createHttpReq(apiAddress, httpMethod, endpointPath);
         RequestCloseListener closeListener = new RequestCloseListener(schedulerSvc);
-        Http2Socket httpSocket = createSocket(apiAddress, closeListener);
+        Http2Socket httpSocket = createSocket(apiAddress, closeListener, forHttp);
         XFuture<Void> connect = httpSocket.connect(apiAddress);
 
         String jsonRequest = marshal(request);
@@ -191,12 +191,13 @@ public class HttpsJsonClient {
                 .thenApply(fullResponse -> unmarshal(jsonReq, contexts, fullRequest, fullResponse, apiAddress.getPort(), responseType));
     }
 
-    protected Http2Socket createSocket(InetSocketAddress apiAddress, Http2SocketListener listener) {
+    protected Http2Socket createSocket(InetSocketAddress apiAddress, Http2SocketListener listener, boolean forHttp) {
+        if(forHttp) {
+            return client.createHttpSocket(listener);
+        }
 
         SSLEngine engine = createEngine(apiAddress.getHostName(), apiAddress.getPort());
-
         return client.createHttpsSocket(engine, listener);
-
     }
 
     public SSLEngine createEngine(String host, int port) {

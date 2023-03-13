@@ -32,6 +32,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
     private ClientAssertions clientAssertions;
     private InetSocketAddress addr;
     private boolean hasUrlParams;
+    private boolean forHttp;
 
     @Inject
     public HttpsJsonClientInvokeHandler(HttpsJsonClient clientHelper, ClientAssertions clientAssertions) {
@@ -39,9 +40,10 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         this.clientAssertions = clientAssertions;
     }
 
-    public void initialize(InetSocketAddress addr, boolean hasUrlParams) {
+    public void initialize(InetSocketAddress addr, boolean hasUrlParams, boolean forHttp) {
         this.addr = addr;
         this.hasUrlParams = hasUrlParams;
+        this.forHttp = forHttp;
     }
 
     @Override
@@ -96,7 +98,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         }
 
         Endpoint endpoint = new Endpoint(addr, httpMethod.getCode(), path);
-        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType)
+        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType, forHttp)
                 .thenApply(retVal -> {
                     //Only needed by APIs/methods that return CompletableFuture :( not XFuture
                     Context.restoreContext(context);
