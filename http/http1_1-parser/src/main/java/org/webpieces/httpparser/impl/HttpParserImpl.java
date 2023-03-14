@@ -3,6 +3,8 @@ package org.webpieces.httpparser.impl;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class HttpParserImpl implements HttpParser {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
+
+	private static final Pattern p = Pattern.compile("^((HTTP|http)/(1|2)\\.\\d)\\s(\\d{3})(\\s*)(.*)");
 	private static final String TRAILER_STR = "\r\n";
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
@@ -783,40 +787,41 @@ public class HttpParserImpl implements HttpParser {
 	private HttpMessage parseResponse(MementoImpl memento, List<String> lines) {
 		//remove first line...
 		String firstLine = lines.remove(0);
-		//In the case of response, a reason may contain spaces so we must split on first and second
-		//whitespace only
-		int indexOf = firstLine.indexOf(" ");
-		if(indexOf < 0)
+
+		Matcher m = p.matcher(firstLine);
+
+		if (m.find()) {
+
+			String versionStr = m.group(1);
+			String codeStr = m.group(4);
+			String reason = m.group(6);
+
+			HttpVersion version2 = parserUtil.parseVersion(versionStr, firstLine);
+
+			HttpResponseStatus status = new HttpResponseStatus();
+			Integer codeVal = toInteger(codeStr, firstLine);
+			if(codeVal <= 0 || codeVal >= 1000) {
+				throw new IllegalArgumentException("invalid status code.  response line=" + firstLine);
+			}
+
+			status.setCode(codeVal);
+			status.setReason(reason);
+
+			HttpResponseStatusLine httpRequestLine = new HttpResponseStatusLine();
+			httpRequestLine.setStatus(status);
+			httpRequestLine.setVersion(version2);
+
+			HttpResponse response = new HttpResponse();
+			response.setStatusLine(httpRequestLine);
+
+			parserUtil.parseHeaders(lines, response);
+
+			memento.addMessage(response);
+			return response;
+
+		} else {
 			throw new IllegalArgumentException("The first line of http request is invalid="+ firstLine);
-		String versionStr = firstLine.substring(0, indexOf).trim();
-		String tail = firstLine.substring(indexOf).trim();
-		
-		int indexOf2 = tail.indexOf(" ");
-		if(indexOf2 < 0)
-			throw new IllegalArgumentException("The first line of http request is invalid="+ firstLine);
-		String codeStr = tail.substring(0, indexOf2).trim();
-		String reason = tail.substring(indexOf2).trim();
-		
-		HttpVersion version2 = parserUtil.parseVersion(versionStr, firstLine);
-
-		HttpResponseStatus status = new HttpResponseStatus();
-		Integer codeVal = toInteger(codeStr, firstLine);
-		if(codeVal <= 0 || codeVal >= 1000)
-			throw new IllegalArgumentException("invalid status code.  response line="+firstLine);
-		status.setCode(codeVal);
-		status.setReason(reason);
-		
-		HttpResponseStatusLine httpRequestLine = new HttpResponseStatusLine();
-		httpRequestLine.setStatus(status);
-		httpRequestLine.setVersion(version2);
-		
-		HttpResponse response = new HttpResponse();
-		response.setStatusLine(httpRequestLine);
-
-		parserUtil.parseHeaders(lines, response);
-
-		memento.addMessage(response);
-		return response;
+		}
 	}
 
 //	@Override

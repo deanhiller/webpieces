@@ -1,6 +1,8 @@
 package org.webpieces.httpparser.api;
 
 import java.nio.ByteBuffer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,14 +12,12 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpPayload;
-import org.webpieces.httpparser.api.dto.HttpResponse;
-import org.webpieces.httpparser.api.dto.HttpResponseStatus;
-import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.httpparser.impl.ConvertAscii;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
+import static org.junit.Assert.assertEquals;
 
 public class TestResponseParsing {
 	
@@ -47,8 +47,8 @@ public class TestResponseParsing {
 		String result2 = parser.marshalToString(response);
 		
 		String msg = "HTTP/1.1 200 OK\r\n\r\n";
-		Assert.assertEquals(msg, result1);
-		Assert.assertEquals(msg, result2);
+		assertEquals(msg, result1);
+		assertEquals(msg, result2);
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class TestResponseParsing {
 		byte[] payload = unwrap(parser.marshalToByteBuffer(state, response));
 		ConvertAscii converter = new ConvertAscii();
 		String readableForm = converter.convertToReadableForm(payload);
-		Assert.assertEquals(
+		assertEquals(
 				"HTTP/1.1\\s 200\\s OK\\r\\n\r\n"
 				+ "Accept:\\s CooolValue\\r\\n\r\n"
 				+ "CustomerHEADER:\\s betterValue\\r\\n\r\n"
@@ -77,8 +77,8 @@ public class TestResponseParsing {
 				+ "CustomerHEADER: betterValue\r\n"
 				+ "\r\n";
 		
-		Assert.assertEquals(msg, result1);
-		Assert.assertEquals(msg, result2);
+		assertEquals(msg, result1);
+		assertEquals(msg, result2);
 	}
 	
 	@Test
@@ -98,15 +98,15 @@ public class TestResponseParsing {
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, data1);
 		
-		Assert.assertEquals(0, memento.getParsedMessages().size());
+		assertEquals(0, memento.getParsedMessages().size());
 		
 		memento = parser.parse(memento, data2);
 		
-		Assert.assertEquals(1, memento.getParsedMessages().size());
+		assertEquals(1, memento.getParsedMessages().size());
 		
 		HttpPayload httpMessage = memento.getParsedMessages().get(0);
 		
-		Assert.assertEquals(response,  httpMessage);
+		assertEquals(response,  httpMessage);
 	}
 	
 	@Test
@@ -127,11 +127,11 @@ public class TestResponseParsing {
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, data1);
 		
-		Assert.assertEquals(2, memento.getParsedMessages().size());
+		assertEquals(2, memento.getParsedMessages().size());
 		
 		memento = parser.parse(memento, data2);
 		
-		Assert.assertEquals(1, memento.getParsedMessages().size());
+		assertEquals(1, memento.getParsedMessages().size());
 	}
 	
 	/**
@@ -160,18 +160,22 @@ public class TestResponseParsing {
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, data1);
 		
-		Assert.assertEquals(0, memento.getParsedMessages().size());
+		assertEquals(0, memento.getParsedMessages().size());
 		
 		memento = parser.parse(memento, data2);
 		
-		Assert.assertEquals(1, memento.getParsedMessages().size());
+		assertEquals(1, memento.getParsedMessages().size());
 		
 		memento = parser.parse(memento, data3);
 		
-		Assert.assertEquals(1, memento.getParsedMessages().size());
+		assertEquals(1, memento.getParsedMessages().size());
 	}
-	
+
 	static HttpResponse createOkResponse() {
+		return createOkResponse(KnownStatusCode.HTTP_200_OK);
+	}
+
+	static HttpResponse createOkResponse(KnownStatusCode statusCode) {
 		Header header1 = new Header();
 		header1.setName(KnownHeaderName.ACCEPT);
 		header1.setValue("CooolValue");
@@ -181,7 +185,7 @@ public class TestResponseParsing {
 		header2.setValue("betterValue");
 		
 		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(KnownStatusCode.HTTP_200_OK);
+		status.setKnownStatus(statusCode);
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);
 		
@@ -192,4 +196,27 @@ public class TestResponseParsing {
 		return resp;
 	}
 
+	/**
+	 * Fixed the Error
+	 * HTTP/1.1 200 => java.lang.IllegalArgumentException: The first line of http request is invalid=HTTP/1.1 200
+	 * https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+	 * Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
+	 */
+	@Test
+	public void testWithHeaders200WithoutOK() {
+		HttpResponse response = createOkResponse(KnownStatusCode.HTTP_200_WITHOUT_OK);
+		byte[] payload = unwrap(parser.marshalToByteBuffer(state, response));
+
+		byte[] first = new byte[2*payload.length + 20];
+		byte[] second = new byte[payload.length - 20];
+		System.arraycopy(payload, 0, first, 0, payload.length);
+		System.arraycopy(payload, 0, first, payload.length, payload.length);
+		System.arraycopy(payload, 0, first, 2*payload.length, 20);
+		System.arraycopy(payload, 20, second, 0, second.length);
+
+		DataWrapper data1 = dataGen.wrapByteArray(first);
+
+		Memento memento = parser.prepareToParse();
+		memento = parser.parse(memento, data1);
+	}
 }
