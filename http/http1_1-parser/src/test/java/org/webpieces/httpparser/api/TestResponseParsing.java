@@ -1,6 +1,7 @@
 package org.webpieces.httpparser.api;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -204,19 +205,21 @@ public class TestResponseParsing {
 	 */
 	@Test
 	public void testWithHeaders200WithoutOK() {
-		HttpResponse response = createOkResponse(KnownStatusCode.HTTP_200_WITHOUT_OK);
-		byte[] payload = unwrap(parser.marshalToByteBuffer(state, response));
+		String response = createGrailsOkResponseWithNoReason();
+		DataWrapper data = dataGen.wrapString(response);
 
-		byte[] first = new byte[2*payload.length + 20];
-		byte[] second = new byte[payload.length - 20];
-		System.arraycopy(payload, 0, first, 0, payload.length);
-		System.arraycopy(payload, 0, first, payload.length, payload.length);
-		System.arraycopy(payload, 0, first, 2*payload.length, 20);
-		System.arraycopy(payload, 20, second, 0, second.length);
+		Memento memento1 = parser.prepareToParse();
+		Memento parse = parser.parse(memento1, data);
+		List<HttpPayload> parsedMessages = parse.getParsedMessages();
 
-		DataWrapper data1 = dataGen.wrapByteArray(first);
+		Assert.assertEquals(1, parsedMessages.size());
+		HttpPayload httpPayload = parsedMessages.get(0);
+		Assert.assertEquals(HttpResponse.class, httpPayload.getClass());
+		HttpResponse resp = (HttpResponse) httpPayload;
+		Assert.assertEquals(KnownStatusCode.HTTP_200_OK, resp.getStatusLine().getStatus().getKnownStatus());
+	}
 
-		Memento memento = parser.prepareToParse();
-		memento = parser.parse(memento, data1);
+	private String createGrailsOkResponseWithNoReason() {
+		return "copy grails response herePRI * HTTP/2.0\r\n\r\nSM\r\n\r\n1111";
 	}
 }

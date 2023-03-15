@@ -10,7 +10,6 @@ public enum KnownStatusCode {
 	
 	HTTP_200_OK(200, "OK", HttpStatusType.Success),
 
-	HTTP_200_WITHOUT_OK(200, null, HttpStatusType.Success),
 	HTTP_204_NO_CONTENT(204, "No Content", HttpStatusType.Success),
 	
 	HTTP_300_MULTIPLE_CHOICES(300, "Multiple Choices", HttpStatusType.Redirection),
