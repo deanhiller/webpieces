@@ -220,6 +220,6 @@ public class TestResponseParsing {
 	}
 
 	private String createGrailsOkResponseWithNoReason() {
-		return "copy grails response herePRI * HTTP/2.0\r\n\r\nSM\r\n\r\n1111";
+		return "HTTP/1.1 200\r\n\r\nAccess-Control-Allow-Origin: *";
 	}
 }
