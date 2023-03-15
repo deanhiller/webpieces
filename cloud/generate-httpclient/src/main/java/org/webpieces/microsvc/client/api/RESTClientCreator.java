@@ -23,8 +23,12 @@ public class RESTClientCreator {
         return createClient(apiInterface, addr, false, false);
     }
 
-    public <T> T createClient(Class<T> apiInterface, InetSocketAddress addr, boolean forHttp) {
-        return createClient(apiInterface, addr, false, forHttp);
+    public <T> T createClientPubsub(Class<T> apiInterface, InetSocketAddress addr) {
+        return createClient(apiInterface, addr, true, false);
+    }
+
+    public <T> T createClientHttp(Class<T> apiInterface, InetSocketAddress addr) {
+        return createClient(apiInterface, addr, false, true);
     }
 
     public <T> T createClient(Class<T> apiInterface, InetSocketAddress addr, boolean createForPubSub, boolean forHttp) {
