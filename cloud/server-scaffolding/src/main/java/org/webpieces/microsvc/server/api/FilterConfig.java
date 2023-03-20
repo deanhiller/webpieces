@@ -4,8 +4,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class FilterConfig {
-
-    private String checkHeaderName;
     private boolean entryPoint;
     private String packageRegEx;
     private HeaderCtxList headers;
@@ -13,19 +11,14 @@ public class FilterConfig {
     private boolean enableHealthCheckEndpoint = true;
 
     public FilterConfig(String packageRegEx, HeaderCtxList headers, Supplier<String> lazySvcName) {
-        this(packageRegEx, headers, lazySvcName, true, "");
+        this(packageRegEx, headers, lazySvcName, true);
     }
 
-    public FilterConfig(String packageRegEx, HeaderCtxList headers, Supplier<String> lazySvcName, String checkHeaderName) {
-        this(packageRegEx, headers, lazySvcName, true, checkHeaderName);
-    }
-
-    public FilterConfig(String packageRegEx, HeaderCtxList headers, Supplier<String> lazySvcName, boolean entryPoint, String checkHeaderName) {
+    public FilterConfig(String packageRegEx, HeaderCtxList headers, Supplier<String> lazySvcName, boolean entryPoint) {
         this.packageRegEx = packageRegEx;
         this.headers = headers;
         this.lazySvcName = lazySvcName;
         this.entryPoint = entryPoint;
-        this.checkHeaderName = checkHeaderName;
     }
 
     public String getPackageRegEx() {
@@ -66,13 +59,5 @@ public class FilterConfig {
 
     public void setEntryPoint(boolean entryPoint) {
         this.entryPoint = entryPoint;
-    }
-
-    public String getCheckHeaderName() {
-        return checkHeaderName;
-    }
-
-    public void setCheckHeaderName(String checkHeaderName) {
-        this.checkHeaderName = checkHeaderName;
     }
 }

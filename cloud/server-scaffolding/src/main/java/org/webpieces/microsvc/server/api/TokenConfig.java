@@ -1,9 +1,9 @@
 package org.webpieces.microsvc.server.api;
 
-public class FiltersConfig {
+public class TokenConfig {
     private String token;
 
-    public FiltersConfig(String token) {
+    public TokenConfig(String token) {
         this.token = token;
     }
 

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.http.exception.UnauthorizedException;
 import org.webpieces.microsvc.api.MicroSvcHeader;
-import org.webpieces.microsvc.server.api.FiltersConfig;
+import org.webpieces.microsvc.server.api.TokenConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
@@ -17,11 +17,11 @@ import javax.inject.Inject;
 public class TokenSharingFilter extends RouteFilter<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(TokenSharingFilter.class);
-    private FiltersConfig filtersConfig;
+    private TokenConfig tokenConfig;
 
     @Inject
-    public TokenSharingFilter(FiltersConfig filtersConfig) {
-        this.filtersConfig = filtersConfig;
+    public TokenSharingFilter(TokenConfig tokenConfig) {
+        this.tokenConfig = tokenConfig;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class TokenSharingFilter extends RouteFilter<Void> {
 
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
-        String tokenSharing = filtersConfig.getToken();
+        String tokenSharing = tokenConfig.getToken();
         //Fail all requests if there is no http header X-Tray-Brand
         RouterRequest request = meta.getCtx().getRequest();
         String requestHeader = request.getSingleHeaderValue(MicroSvcHeader.SECURE_TOKEN.getHeaderName());
