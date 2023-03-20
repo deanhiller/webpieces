@@ -31,7 +31,7 @@ public class JsonFilterRoutes implements Routes {
         builder.setPageNotFoundRoute("../impl/controllers/JsonErrorNotFoundController.notFound");
 
         if(!config.isEntryPoint()) {
-            builder.addPackageFilter(regex, TokenSharingFilter.class, config.getCheckHeaderName(), FilterPortType.ALL_FILTER, 160);
+            builder.addPackageFilter(regex, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 160);
         }
         builder.addPackageFilter(regex, RequestIdFilter.class, config.getSvcName(), FilterPortType.ALL_FILTER, 140);
         builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, config.getHeaders(), FilterPortType.ALL_FILTER, 120);

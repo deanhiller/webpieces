@@ -4,34 +4,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.http.exception.UnauthorizedException;
+import org.webpieces.microsvc.api.MicroSvcHeader;
+import org.webpieces.microsvc.server.api.FiltersConfig;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.XFuture;
 
-public class TokenSharingFilter extends RouteFilter<String> {
+import javax.inject.Inject;
+
+public class TokenSharingFilter extends RouteFilter<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(TokenSharingFilter.class);
+    private FiltersConfig filtersConfig;
 
-    private final String tokenSharing;
-    private String checkHeaderName;
-
-    public TokenSharingFilter(String tokenSharing) {
-        this.tokenSharing = tokenSharing;
+    @Inject
+    public TokenSharingFilter(FiltersConfig filtersConfig) {
+        this.filtersConfig = filtersConfig;
     }
 
     @Override
-    public void initialize(String checkHeaderName) {
-        this.checkHeaderName = checkHeaderName;
+    public void initialize(Void nothing) {
     }
 
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+        String tokenSharing = filtersConfig.getToken();
         //Fail all requests if there is no http header X-Tray-Brand
         RouterRequest request = meta.getCtx().getRequest();
-        String requestHeader = request.getSingleHeaderValue(checkHeaderName);
-        log.info("TokenFilter checkHeaderName: {}, request: {}, requestHeader: {}", this.checkHeaderName, request, requestHeader);
+        String requestHeader = request.getSingleHeaderValue(MicroSvcHeader.SECURE_TOKEN.getHeaderName());
+        log.info("TokenFilter checkHeaderName: "+MicroSvcHeader.SECURE_TOKEN.getHeaderName()
+                +", request: "+request+", requestHeader: "+requestHeader);
         if(requestHeader == null) {
             log.error("There is no http header");
             throw new UnauthorizedException();
