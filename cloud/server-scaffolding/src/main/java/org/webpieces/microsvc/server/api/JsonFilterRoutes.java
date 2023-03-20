@@ -3,6 +3,7 @@ package org.webpieces.microsvc.server.api;
 import org.webpieces.microsvc.server.impl.filters.HeaderToRequestStateFilter;
 import org.webpieces.microsvc.server.impl.filters.MDCFilter;
 import org.webpieces.microsvc.server.impl.filters.RequestIdFilter;
+import org.webpieces.microsvc.server.impl.filters.TokenSharingFilter;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.FilterPortType;
@@ -29,9 +30,9 @@ public class JsonFilterRoutes implements Routes {
         builder.setInternalErrorRoute("../impl/controllers/JsonErrorNotFoundController.internalError");
         builder.setPageNotFoundRoute("../impl/controllers/JsonErrorNotFoundController.notFound");
 
-//        if(!isEntryPoint) {
-//            builder.addPackageFilter(regex, TokenFilter.class, null, FilterPortType.ALL_FILTER, 160);
-//        }
+        if(!config.isEntryPoint()) {
+            builder.addPackageFilter(regex, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 160);
+        }
         builder.addPackageFilter(regex, RequestIdFilter.class, config.getSvcName(), FilterPortType.ALL_FILTER, 140);
         builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, config.getHeaders(), FilterPortType.ALL_FILTER, 120);
         builder.addPackageFilter(regex, MDCFilter.class, config.getHeaders(), FilterPortType.ALL_FILTER, 100);
