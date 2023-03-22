@@ -92,13 +92,17 @@ public class Context {
     }
 
     public static void removeMagic(PlatformHeaders header) {
+        removeMagic(header, true);
+    }
+
+    public static void removeMagic(PlatformHeaders header, boolean shouldCleanUp) {
         Map<String, String> magicHeaders = get(HEADERS);
         if(magicHeaders == null)
             return;
 
         String key = findKey(header);
         magicHeaders.remove(key);
-        if(magicHeaders.size() == 0) {
+        if(shouldCleanUp && magicHeaders.size() == 0) {
             put(HEADERS, null); //clean up
         }
     }
