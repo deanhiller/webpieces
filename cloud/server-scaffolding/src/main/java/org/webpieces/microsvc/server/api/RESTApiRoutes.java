@@ -10,6 +10,7 @@ import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.Routes;
 import org.webpieces.router.impl.routebldr.CurrentRoutes;
+import org.webpieces.util.context.Context;
 
 import javax.ws.rs.Path;
 import java.lang.reflect.Method;
@@ -19,6 +20,10 @@ import java.util.regex.Pattern;
 public class RESTApiRoutes implements Routes {
 
     private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);
+    /**
+     * In general, these days, everything should be in https not http anymore.
+     */
+    public static final String HTTP_DO_NOT_USE_KEY = "x-webpieces-allow-http";
 
     private static final Logger log = LoggerFactory.getLogger(RESTApiRoutes.class);
 
@@ -87,8 +92,14 @@ public class RESTApiRoutes implements Routes {
 //            bldr.addStreamRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
 //        } else {
             //We do not want to deploy to production exposing over HTTP
-            bldr.addContentRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
 //        }
+
+        Object o = Context.get(HTTP_DO_NOT_USE_KEY);
+        if("true".equals(o)) {
+            bldr.addContentRoute(Port.BOTH, httpMethod, path, controller.getName() + "." + name);
+        } else {
+            bldr.addContentRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
+        }
     }
 
 
