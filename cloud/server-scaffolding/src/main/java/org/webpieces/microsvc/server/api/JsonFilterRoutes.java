@@ -32,7 +32,10 @@ public class JsonFilterRoutes implements Routes {
 
         if(!config.isEntryPoint()) {
             builder.addPackageFilter(regex, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 160);
+        } else {
+            //builder.addPackageFilter(regex, SetupSecureTokenFilter.class, null, FilterPortType.ALL_FILTER, 160);
         }
+
         builder.addPackageFilter(regex, RequestIdFilter.class, config.getSvcName(), FilterPortType.ALL_FILTER, 140);
         builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, config.getHeaders(), FilterPortType.ALL_FILTER, 120);
         builder.addPackageFilter(regex, MDCFilter.class, config.getHeaders(), FilterPortType.ALL_FILTER, 100);
