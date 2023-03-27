@@ -7,7 +7,8 @@ public enum MicroSvcHeader implements PlatformHeaders {
     REQUEST_ID("x-webpieces-requestid", true, "requestId", true),
     REQUEST_PATH(null, false, "requestPath", false),
     RECORDING("x-webpieces-recording", true, "recording", false),
-    SECURE_TOKEN("x-webpieces-secure-token", true, null, false);
+    SECURE_TOKEN("x-webpieces-secure-token", true, null, false),
+    FILTER_CHAIN("x-webpieces-svcchain", true, null, false);
 
     private final String headerName;
     private final boolean isTransfer;
