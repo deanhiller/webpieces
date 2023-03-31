@@ -50,6 +50,17 @@ public class GCPTaskClient {
         return jobReference;
     }
 
+    public void deleteTask(Method method, String taskId){
+        String queueId = method.getDeclaringClass().getName()+"."+method.getName();
+        queueId = queueId.replaceAll("\\.","-");
+        log.info("queueId="+queueId);
+
+        // Construct the fully qualified queue name.
+        String taskName = TaskName.of(config.getProjectId(), config.getLocation(), queueId, taskId).toString();
+        log.info("Task Deleted " + taskName);
+        cloudTasksClient.deleteTask(taskName);
+    }
+
     // Create a task with a HTTP target using the Cloud Tasks client.
     private JobReference createTaskImpl(QueueName queue, String url, HttpMethod httpMethod, String payload, ScheduleInfo scheduleInfo) {
 

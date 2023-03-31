@@ -6,6 +6,7 @@ import org.webpieces.googlecloud.cloudtasks.api.Scheduler;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import static org.webpieces.googlecloud.cloudtasks.impl.Constants.*;
@@ -26,6 +27,7 @@ public class SchedulerImpl implements Scheduler {
 
     private XFuture<JobReference> executeIt(Supplier<XFuture<Void>> runnable, ScheduleInfo info) {
         Context.put(WEBPIECES_SCHEDULE_INFO, info);
+        Context.put(Constants.WEBPIECES_SCHEDULE_ACTION, RemoteInvokerAction.GCP_CREATE_TASK);
         XFuture<Void> future = runnable.get();
         return future.thenApply(v -> {
             JobReference reference = Context.get(Constants.WEBPIECES_SCHEDULE_RESPONSE);
@@ -35,6 +37,10 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public XFuture<Void> cancelJob(JobReference ref) {
-        throw new UnsupportedOperationException("not implemented yet");
+        ScheduleInfo info = new ScheduleInfo();
+        Context.put(WEBPIECES_SCHEDULE_INFO, info);
+        Context.put(Constants.WEBPIECES_SCHEDULE_ACTION, RemoteInvokerAction.GCP_DELETE_TASK);
+        Context.put(Constants.WEBPIECES_SCHEDULE_DELETE_TASK, ref.getTaskId());
+        return new XFuture<>();
     }
 }

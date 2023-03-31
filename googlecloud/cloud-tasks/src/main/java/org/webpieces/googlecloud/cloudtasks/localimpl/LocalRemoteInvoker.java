@@ -7,6 +7,7 @@ import org.webpieces.googlecloud.cloudtasks.impl.Constants;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+import org.webpieces.googlecloud.cloudtasks.impl.RemoteInvokerAction;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
@@ -33,28 +34,39 @@ public class LocalRemoteInvoker implements RemoteInvoker {
 
     @Override
     public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
-        Map<String, Object> copy = Context.copyContext();
+        RemoteInvokerAction action = Context.get(Constants.WEBPIECES_SCHEDULE_ACTION);
 
-
-        //TODO: implement Map and map jobId to scheduled task to allow deletion of tasks as well.
-
-
-        if(info.isScheduledInFuture()) {
-            log.info("scheduling in the future"+info.getTime()+" "+info.getTimeUnit());
-            executorService.schedule(
-                    () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText),
-                    info.getTime(), info.getTimeUnit());
-        } else {
-            log.info("adding to queue");
-            executorService.execute(
-                    () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText)
-            );
+        if(action == null) {
+            return XFuture.completedFuture(null);
         }
 
-        String jobId = UUID.randomUUID().toString();
-        JobReference ref = new JobReference();
-        ref.setTaskId(jobId);
-        Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
+        Map<String, Object> copy = Context.copyContext();
+
+        switch (action) {
+            case GCP_CREATE_TASK:
+            case GCP_DELETE_TASK:
+                {
+                if(info.isScheduledInFuture()) {
+                    log.info("scheduling in the future"+info.getTime()+" "+info.getTimeUnit());
+                    executorService.schedule(
+                            () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText),
+                            info.getTime(), info.getTimeUnit());
+                } else {
+                    log.info("adding to queue");
+                    executorService.execute(
+                            () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText)
+                    );
+                }
+
+                String jobId = UUID.randomUUID().toString();
+                JobReference ref = new JobReference();
+                ref.setTaskId(jobId);
+                Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
+                break;
+          }
+          default:
+                log.info("this log should not appear !!!!!!");
+        }
 
         return XFuture.completedFuture(null);
     }

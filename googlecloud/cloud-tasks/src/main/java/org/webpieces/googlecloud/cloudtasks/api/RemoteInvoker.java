@@ -2,6 +2,7 @@ package org.webpieces.googlecloud.cloudtasks.api;
 
 import com.google.inject.ImplementedBy;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.googlecloud.cloudtasks.impl.RemoteInvokerAction;
 import org.webpieces.googlecloud.cloudtasks.impl.RemoteInvokerImpl;
 import org.webpieces.util.futures.XFuture;
 
