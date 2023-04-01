@@ -1,16 +1,25 @@
 package org.webpieces.googlecloud.cloudtasks.impl;
 
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
+import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 import org.webpieces.googlecloud.cloudtasks.api.Scheduler;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
+import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import static org.webpieces.googlecloud.cloudtasks.impl.Constants.*;
 
 public class SchedulerImpl implements Scheduler {
+
+    private RemoteInvoker invoker;
+
+    @Inject
+    public SchedulerImpl(RemoteInvoker invoker) {
+        this.invoker = invoker;
+    }
 
     @Override
     public XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, int time, TimeUnit timeUnit) {
@@ -35,6 +44,6 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public XFuture<Void> cancelJob(JobReference ref) {
-        throw new UnsupportedOperationException("not implemented yet");
+        return invoker.delete(ref);
     }
 }
