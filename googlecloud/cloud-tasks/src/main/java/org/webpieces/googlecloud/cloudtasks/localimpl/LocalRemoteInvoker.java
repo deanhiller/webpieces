@@ -59,6 +59,11 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         return XFuture.completedFuture(null);
     }
 
+    @Override
+    public XFuture<Void> delete(JobReference reference) {
+        return XFuture.completedFuture(null);
+    }
+
     private void pretendToBeCallFromGCPCloudTasks(Map<String, Object> copy, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText) {
         Context.restoreContext(copy);
         Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);

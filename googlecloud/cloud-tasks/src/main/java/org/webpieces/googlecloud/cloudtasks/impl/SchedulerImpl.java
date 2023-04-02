@@ -1,5 +1,7 @@
 package org.webpieces.googlecloud.cloudtasks.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
@@ -13,6 +15,8 @@ import java.util.function.Supplier;
 import static org.webpieces.googlecloud.cloudtasks.impl.Constants.*;
 
 public class SchedulerImpl implements Scheduler {
+
+    private static Logger log = LoggerFactory.getLogger(SchedulerImpl.class);
 
     private RemoteInvoker invoker;
 
@@ -38,6 +42,7 @@ public class SchedulerImpl implements Scheduler {
         XFuture<Void> future = runnable.get();
         return future.thenApply(v -> {
             JobReference reference = Context.get(Constants.WEBPIECES_SCHEDULE_RESPONSE);
+            log.info("executeIt reference "+reference);
             return reference;
         });
     }
