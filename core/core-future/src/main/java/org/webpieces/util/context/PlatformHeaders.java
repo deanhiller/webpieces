@@ -10,4 +10,5 @@ public interface PlatformHeaders {
 
     public boolean isWantTransferred();
 
+    public boolean isSecured();
 }
