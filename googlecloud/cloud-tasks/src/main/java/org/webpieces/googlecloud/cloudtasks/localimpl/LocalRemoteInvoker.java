@@ -1,5 +1,6 @@
 package org.webpieces.googlecloud.cloudtasks.localimpl;
 
+import com.google.cloud.tasks.v2.QueueName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
@@ -35,10 +36,6 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
         Map<String, Object> copy = Context.copyContext();
 
-
-        //TODO: implement Map and map jobId to scheduled task to allow deletion of tasks as well.
-
-
         if(info.isScheduledInFuture()) {
             log.info("scheduling in the future"+info.getTime()+" "+info.getTimeUnit());
             executorService.schedule(
@@ -61,6 +58,21 @@ public class LocalRemoteInvoker implements RemoteInvoker {
 
     @Override
     public XFuture<Void> delete(JobReference reference) {
+
+        Map<JobReference, QueueName> map = Context.get(Constants.WEBPIECES_SCHEDULE_GCP_TASKS);
+
+        log.info("deleteTask map "+map);
+
+        if(map == null) {
+            throw new IllegalArgumentException("Map is null and it should not be !!!!");
+        }
+
+        QueueName queueName = map.remove(reference);
+
+        log.info("deleteTask queueName "+queueName);
+
+        Context.put(Constants.WEBPIECES_SCHEDULE_GCP_TASKS, map);
+
         return XFuture.completedFuture(null);
     }
 

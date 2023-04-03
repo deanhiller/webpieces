@@ -88,24 +88,11 @@ public class GCPTaskClient {
         log.info("deleteTask queueName "+queueName);
 
         // Construct the fully qualified queue name.
-        log.info("deleteTask 1) queueName.getProject() "+queueName.getProject());
-        log.info("deleteTask 2) queueName.getLocation() "+ queueName.getLocation());
-        log.info("deleteTask 3) queueName.getQueue() "+queueName.getQueue());
-        log.info("deleteTask 4) reference.getTaskId() "+reference.getTaskId());
+        log.info("deleteTask queueName.getProject() "+ queueName.getProject() +" queueName.getLocation() "+ queueName.getLocation() + " queueName.getQueue() "+ queueName.getQueue() + " reference.getTaskId() "+ reference.getTaskId());
 
-        // projects/PROJECT_ID     /locations/LOCATION_ID/queues/QUEUE_ID                                 /tasks/TASK_ID
-        // projects/tray-mainbranch/locations/us-west1   /queues/com-tray-api-publish-PublishApi-testAsync/tasks/4309197329468237546
-
-        /*String taskName = TaskName.of(
-                queueName.getProject().replaceAll("\\/", ""),
-                queueName.getLocation().replaceAll("\\/", ""),
-                queueName.getQueue().replaceAll("\\/", ""),
-                reference.getTaskId().replaceAll("\\/", "")
-        ).toString();
-        log.info("deleteTask taskName " + taskName);*/
         cloudTasksClient.deleteTask(reference.getTaskId());
 
-        log.info("deleteTask 5) map " + map);
+        log.info("deleteTask map " + map);
 
         Context.put(Constants.WEBPIECES_SCHEDULE_GCP_TASKS, map);
 
