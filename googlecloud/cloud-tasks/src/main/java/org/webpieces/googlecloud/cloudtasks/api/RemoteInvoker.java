@@ -11,5 +11,8 @@ import java.net.InetSocketAddress;
 @ImplementedBy(RemoteInvokerImpl.class)
 public interface RemoteInvoker {
 
-    public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info);
+    XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info);
+
+    XFuture<Void> delete(JobReference reference);
+
 }

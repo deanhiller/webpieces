@@ -1,24 +1,25 @@
 package org.webpieces.googlecloud.cloudtasks.impl;
 
-import com.google.cloud.tasks.v2.*;
+import com.google.cloud.tasks.v2.CloudTasksClient;
+import com.google.cloud.tasks.v2.HttpRequest;
+import com.google.cloud.tasks.v2.QueueName;
+import com.google.cloud.tasks.v2.Task;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import org.digitalforge.sneakythrow.SneakyThrow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 
 import javax.inject.Inject;
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 
 
 public class GCPTaskClient {
@@ -47,7 +48,14 @@ public class GCPTaskClient {
 
         JobReference jobReference = createTaskImpl(queueName, url, httpMethod, payload, scheduleInfo);
 
+        log.info("createTask jobReference "+jobReference);
+
         return jobReference;
+    }
+
+    public void deleteTask(JobReference reference) {
+        log.info("deleteTask reference "+reference);
+        cloudTasksClient.deleteTask(reference.getTaskId());
     }
 
     // Create a task with a HTTP target using the Cloud Tasks client.
