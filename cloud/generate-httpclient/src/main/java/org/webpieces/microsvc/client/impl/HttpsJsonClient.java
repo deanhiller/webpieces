@@ -1,12 +1,15 @@
 package org.webpieces.microsvc.client.impl;
 
+import com.google.inject.Inject;
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.lowlevel.Http2Method;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
+import com.webpieces.http2engine.impl.shared.TempTimeoutSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -18,13 +21,15 @@ import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.microsvc.client.api.HttpsConfig;
+import org.webpieces.microsvc.server.api.HeaderCtxList;
+import org.webpieces.nio.api.Nullable;
 import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.Contexts;
+import org.webpieces.util.context.PlatformHeaders;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -35,8 +40,10 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
-import java.util.Map;
+import java.util.*;
+
 import org.webpieces.util.futures.XFuture;
+
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
@@ -47,27 +54,49 @@ public class HttpsJsonClient {
 
     protected static final DataWrapperGenerator WRAPPER_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
+    //temporary for backward compatible..
+    @Inject(optional = true)
+    private ClientServiceConfig clientServiceConfig;
+
     private HttpsConfig httpsConfig;
     protected JacksonJsonConverter jsonMapper;
     protected Http2Client client;
     protected ScheduledExecutorService schedulerSvc;
-
     private FutureHelper futureUtil;
+    private final Set<String> secureList;
+
+    private Masker masker;
 
     @Inject
     public HttpsJsonClient(
             HttpsConfig httpsConfig,
             JacksonJsonConverter jsonMapper,
-             Http2Client client,
-             FutureHelper futureUtil,
-             ScheduledExecutorService schedulerSvc
+            Http2Client client,
+            FutureHelper futureUtil,
+            ScheduledExecutorService schedulerSvc,
+            Masker masker
     ) {
+        List<PlatformHeaders> listHeaders;
+        if(clientServiceConfig == null)
+            listHeaders = Collections.emptyList();
+        else if(clientServiceConfig.getHcl() == null)
+            throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
+        else
+            listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
+
         this.httpsConfig = httpsConfig;
 
         this.jsonMapper = jsonMapper;
         this.client = client;
         this.futureUtil = futureUtil;
         this.schedulerSvc = schedulerSvc;
+        this.masker = masker;
+
+        secureList = new HashSet<>();
+        for(PlatformHeaders header : listHeaders) {
+            if(header.isSecured())
+                secureList.add(header.getHeaderName());
+        }
 
         log.info("USING keyStoreLocation=" + httpsConfig.getKeyStoreLocation());
     }
@@ -315,6 +344,7 @@ public class HttpsJsonClient {
 
     }
 
+
     private String createCurl2(int port, Http2Request req, Supplier<String> supplier) {
 
         String s = "";
@@ -330,7 +360,11 @@ public class HttpsJsonClient {
                 continue; //base headers we can discard
             }
 
-            s += "-H \"" + header.getName() + ":" + header.getValue() + "\" ";
+            if(secureList.contains(header.getName())) {
+                s += "-H \"" + header.getName() + ":" + masker.maskSensitiveData(header.getValue()) + "\" ";
+            } else {
+               s += "-H \"" + header.getName() + ":" + header.getValue() + "\" ";
+            }
 
         }
 

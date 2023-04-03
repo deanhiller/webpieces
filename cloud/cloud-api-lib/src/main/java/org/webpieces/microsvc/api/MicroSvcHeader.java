@@ -4,23 +4,22 @@ import org.webpieces.util.context.PlatformHeaders;
 
 public enum MicroSvcHeader implements PlatformHeaders {
 
-    REQUEST_ID("x-webpieces-requestid", true, "requestId", true),
-    REQUEST_PATH(null, false, "requestPath", false),
-    RECORDING("x-webpieces-recording", true, "recording", false),
-    SECURE_TOKEN("x-webpieces-secure-token", true, null, false);
+    REQUEST_ID("x-webpieces-requestid", "requestId", true, false),
+    REQUEST_PATH(null, "requestPath", false, false),
+    RECORDING("x-webpieces-recording","recording", false, false),
+    SECURE_TOKEN("x-webpieces-secure-token", null, false, true),
+    FILTER_CHAIN("x-webpieces-svcchain",null, false, false);
 
     private final String headerName;
-    private final boolean isTransfer;
     private final String mdcKey;
     private final boolean isLoggable;
-
-    MicroSvcHeader(String headerName, boolean isTransfer, String mdcKey, boolean isLoggable) {
+    private final boolean isSecured;
+    MicroSvcHeader(String headerName, String mdcKey, boolean isLoggable, boolean isSecured) {
         this.headerName = headerName;
-        this.isTransfer = isTransfer;
         this.mdcKey = mdcKey;
         this.isLoggable = isLoggable;
+        this.isSecured = isSecured;
     }
-
     @Override
     public String getHeaderName() {
         return headerName;
@@ -38,6 +37,11 @@ public enum MicroSvcHeader implements PlatformHeaders {
 
     @Override
     public boolean isWantTransferred() {
-        return isTransfer;
+        return this.headerName != null;
+    }
+
+    @Override
+    public boolean isSecured() {
+        return this.isSecured;
     }
 }
