@@ -1,27 +1,25 @@
 package org.webpieces.googlecloud.cloudtasks.impl;
 
-import com.google.cloud.tasks.v2.*;
+import com.google.cloud.tasks.v2.CloudTasksClient;
+import com.google.cloud.tasks.v2.HttpRequest;
+import com.google.cloud.tasks.v2.QueueName;
+import com.google.cloud.tasks.v2.Task;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import org.digitalforge.sneakythrow.SneakyThrow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
+import org.webpieces.googlecloud.cloudtasks.api.JobReference;
+import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 
+import javax.inject.Inject;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
-import org.webpieces.googlecloud.cloudtasks.api.JobReference;
-import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
-import org.webpieces.util.context.Context;
-
-import javax.inject.Inject;
 
 
 public class GCPTaskClient {
@@ -50,52 +48,14 @@ public class GCPTaskClient {
 
         JobReference jobReference = createTaskImpl(queueName, url, httpMethod, payload, scheduleInfo);
 
-        Map<JobReference, QueueName> map = Context.get(Constants.WEBPIECES_SCHEDULE_GCP_TASKS);
-
-        log.info("1 - createTask map "+map);
-
-        if(map == null) {
-            map = new HashMap<>();
-        }
-
-        log.info("2 - createTask jobReference "+jobReference+" queueName "+queueName);
-
-        map.put(jobReference, queueName);
-
-        log.info("3 - createTask map "+map);
-
-        Context.put(Constants.WEBPIECES_SCHEDULE_GCP_TASKS, map);
-
-        log.info("4 - createTask jobReference "+jobReference);
+        log.info("createTask jobReference "+jobReference);
 
         return jobReference;
     }
 
     public void deleteTask(JobReference reference) {
-
-        Map<JobReference, QueueName> map = Context.get(Constants.WEBPIECES_SCHEDULE_GCP_TASKS);
-
-        log.info("deleteTask map "+map);
-
-        if(map == null) {
-            throw new IllegalArgumentException("Map is null and it should not be !!!!");
-        }
-
         log.info("deleteTask reference "+reference);
-
-        QueueName queueName = map.remove(reference);
-
-        log.info("deleteTask queueName "+queueName);
-
-        // Construct the fully qualified queue name.
-        log.info("deleteTask queueName.getProject() "+ queueName.getProject() +" queueName.getLocation() "+ queueName.getLocation() + " queueName.getQueue() "+ queueName.getQueue() + " reference.getTaskId() "+ reference.getTaskId());
-
         cloudTasksClient.deleteTask(reference.getTaskId());
-
-        log.info("deleteTask map " + map);
-
-        Context.put(Constants.WEBPIECES_SCHEDULE_GCP_TASKS, map);
-
     }
 
     // Create a task with a HTTP target using the Cloud Tasks client.

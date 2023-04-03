@@ -1,23 +1,25 @@
 package org.webpieces.googlecloud.cloudtasks.localimpl;
 
-import com.google.cloud.tasks.v2.QueueName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.googlecloud.cloudtasks.impl.Constants;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+import org.webpieces.googlecloud.cloudtasks.impl.Constants;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 public class LocalRemoteInvoker implements RemoteInvoker {
 
@@ -25,6 +27,8 @@ public class LocalRemoteInvoker implements RemoteInvoker {
 
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
     private HttpClientWrapper client;
+
+    private Map<String, Future> refToJobToCancel = new HashMap<>();
 
     @Inject
     public LocalRemoteInvoker(HttpClientWrapper client) {
@@ -36,11 +40,20 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
         Map<String, Object> copy = Context.copyContext();
 
+        String jobId = UUID.randomUUID().toString();
+        JobReference ref = new JobReference();
+        ref.setTaskId(jobId);
+        Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
+
         if(info.isScheduledInFuture()) {
             log.info("scheduling in the future"+info.getTime()+" "+info.getTimeUnit());
-            executorService.schedule(
+
+            ScheduledFuture<?> schedule = executorService.schedule(
                     () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText),
                     info.getTime(), info.getTimeUnit());
+
+            refToJobToCancel.put(jobId, schedule);
+
         } else {
             log.info("adding to queue");
             executorService.execute(
@@ -48,30 +61,19 @@ public class LocalRemoteInvoker implements RemoteInvoker {
             );
         }
 
-        String jobId = UUID.randomUUID().toString();
-        JobReference ref = new JobReference();
-        ref.setTaskId(jobId);
-        Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
-
         return XFuture.completedFuture(null);
     }
 
     @Override
     public XFuture<Void> delete(JobReference reference) {
 
-        Map<JobReference, QueueName> map = Context.get(Constants.WEBPIECES_SCHEDULE_GCP_TASKS);
+        if(refToJobToCancel.containsKey(reference.getTaskId())) {
 
-        log.info("deleteTask map "+map);
+            log.info("delete reference "+reference+" for cancel");
 
-        if(map == null) {
-            throw new IllegalArgumentException("Map is null and it should not be !!!!");
+            Future future = refToJobToCancel.remove(reference.getTaskId());
+            future.cancel(true);
         }
-
-        QueueName queueName = map.remove(reference);
-
-        log.info("deleteTask queueName "+queueName);
-
-        Context.put(Constants.WEBPIECES_SCHEDULE_GCP_TASKS, map);
 
         return XFuture.completedFuture(null);
     }
