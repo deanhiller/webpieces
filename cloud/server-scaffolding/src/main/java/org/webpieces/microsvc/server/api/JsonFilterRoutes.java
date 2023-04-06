@@ -16,11 +16,9 @@ import static org.webpieces.router.api.routes.Port.BOTH;
 public class JsonFilterRoutes implements Routes {
 
     private FilterConfig config;
-    private ClientServiceConfig csc;
 
-    public JsonFilterRoutes(FilterConfig config, ClientServiceConfig csc) {
+    public JsonFilterRoutes(FilterConfig config) {
         this.config = config;
-        this.csc = csc;
     }
 
     @Override
@@ -39,9 +37,9 @@ public class JsonFilterRoutes implements Routes {
             //builder.addPackageFilter(regex, SetupSecureTokenFilter.class, null, FilterPortType.ALL_FILTER, 160);
         }
 
-        builder.addPackageFilter(regex, RequestIdFilter.class, () -> csc.getServiceName(), FilterPortType.ALL_FILTER, 140);
-        builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, csc.getHcl(), FilterPortType.ALL_FILTER, 120);
-        builder.addPackageFilter(regex, MDCFilter.class, csc.getHcl(), FilterPortType.ALL_FILTER, 100);
+        builder.addPackageFilter(regex, RequestIdFilter.class, null, FilterPortType.ALL_FILTER, 140);
+        builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, null, FilterPortType.ALL_FILTER, 120);
+        builder.addPackageFilter(regex, MDCFilter.class, null, FilterPortType.ALL_FILTER, 100);
 
         //complicate port as-is so we will do this in Tray for now until we can port this one too ->
         //builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 80);

@@ -2,6 +2,7 @@ package org.webpieces.webserver.api;
 
 import java.io.File;
 import java.util.Base64;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +33,28 @@ public class WebpiecesServer {
 		ServerConfig svrConfig, 
 		String ... args
 	) {
-		this(projectName, base64Key, null, platformOverrides, appOverrides, svrConfig, args);
+		this(projectName, base64Key, (arguments) -> null, platformOverrides, appOverrides, svrConfig, args);
 	}
-	
+
+	public WebpiecesServer(
+		String projectName,
+		String base64Key,
+		Module coreModule, //core additionalModule
+		Module platformOverrides,
+		Module appOverrides,
+		ServerConfig svrConfig,
+		String ... args
+	) {
+		this(
+				projectName,
+				base64Key,
+				(arguments) -> coreModule,
+				platformOverrides,
+				appOverrides,
+				svrConfig,
+				args
+		);
+	}
 	/**
 	 * @param platformOverrides For tests, DevelopmentServer to swap pieces out and for YOU so you can bug fix by just swapping a class and filing a ticket with the class you used to fix the bug!
 	 * @param appOverrides For unit testing so you can swap remote clients with mocks and simulate remote systems
@@ -42,10 +62,10 @@ public class WebpiecesServer {
 	public WebpiecesServer(
 		String projectName,
 		String base64Key,
-		Module coreModule, //core additionalModule
-		Module platformOverrides, 
-		Module appOverrides, 
-		ServerConfig svrConfig, 
+		Function<Arguments, Module> coreModuleCreator, //core additionalModule
+		Module platformOverrides,
+		Module appOverrides,
+		ServerConfig svrConfig,
 		String ... args
 	) {
 		
@@ -57,6 +77,10 @@ public class WebpiecesServer {
 		Arguments arguments = new CommandLineParser().parse(args);
 
 		File baseWorkingDir = modifyUserDirForManyEnvironments(projectName);
+
+		//If we allow lazy, app developers can validate arguments were supplied on startup or fail the startup
+		//correctly..
+		Module coreModule = coreModuleCreator.apply(arguments);
 
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
@@ -79,7 +103,6 @@ public class WebpiecesServer {
 										.setCorePlatformModule(coreModule)
 										.setPlatformOverrides(platformOverrides)
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup());
-										
 
 		TemplateConfig templateConfig = new TemplateConfig();
 		
