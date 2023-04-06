@@ -1,5 +1,6 @@
 package org.webpieces.microsvc.server.impl.filters;
 
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.microsvc.api.MicroSvcHeader;
 import org.webpieces.microsvc.server.impl.RequestIdGenerator;
@@ -14,19 +15,20 @@ import javax.inject.Inject;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class RequestIdFilter extends RouteFilter<Supplier<String>> {
+public class RequestIdFilter extends RouteFilter<Void> {
 
     private final RequestIdGenerator requestIdGenerator;
-    private Supplier<String> svcName;
+    private final String svcName;
 
     @Inject
-    public RequestIdFilter(RequestIdGenerator requestIdGenerator) {
+    public RequestIdFilter(RequestIdGenerator requestIdGenerator, ClientServiceConfig config) {
         this.requestIdGenerator = requestIdGenerator;
+        this.svcName = config.getServiceName();
     }
 
     @Override
-    public void initialize(Supplier<String> svcName) {
-        this.svcName = svcName;
+    public void initialize(Void v) {
+
     }
 
     @Override
@@ -43,7 +45,7 @@ public class RequestIdFilter extends RouteFilter<Supplier<String>> {
         } else {
 
             //prepent svcName so we know who generated it for debugging ->
-            requestId = svcName.get()+"-"+requestIdGenerator.generate().toString();
+            requestId = svcName+"-"+requestIdGenerator.generate().toString();
         }
 
         Context.putMagic(MicroSvcHeader.REQUEST_ID, requestId);

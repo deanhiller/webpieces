@@ -4,6 +4,7 @@ import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.microsvc.server.api.HeaderCtxList;
 import org.webpieces.router.api.controller.actions.Action;
@@ -17,20 +18,21 @@ import org.webpieces.util.futures.XFuture;
 import javax.inject.Inject;
 import java.util.*;
 
-public class HeaderToRequestStateFilter extends RouteFilter<HeaderCtxList> {
+public class HeaderToRequestStateFilter extends RouteFilter<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(HeaderToRequestStateFilter.class);
     private HeaderCtxList headerCtxList;
 
     @Inject
-    public HeaderToRequestStateFilter() {
+    public HeaderToRequestStateFilter(ClientServiceConfig config) {
+        headerCtxList = config.getHcl();
+        List<PlatformHeaders> platformHeaders = headerCtxList.listHeaderCtxPairs();
+        Context.checkForDuplicates(platformHeaders);
     }
 
     @Override
-    public void initialize(HeaderCtxList ctxList) {
-        this.headerCtxList = ctxList;
-        List<PlatformHeaders> platformHeaders = headerCtxList.listHeaderCtxPairs();
-        Context.checkForDuplicates(platformHeaders);
+    public void initialize(Void v) {
+
     }
 
     @Override
