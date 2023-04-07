@@ -46,7 +46,7 @@ public class ResponseCreator {
 	@Inject
 	public ResponseCreator(RouterConfig config, CookieTranslator cookieTranslator, MimeTypes mimeTypes) {
 		this.config = config;
-		this.version = "webpieces/"+getClass().getPackage().getImplementationVersion();
+		this.version = getClass().getPackage().getImplementationVersion();
 		this.cookieTranslator = cookieTranslator;
 		this.mimeTypes = mimeTypes;
 	}
@@ -159,8 +159,9 @@ public class ResponseCreator {
 		String dateStr = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC));
 
 
-		Http2Header versionHeader = new Http2Header(Http2HeaderName.SERVER, version);
-		response.addHeader(versionHeader);
+		//For security, do not tell hackers which server this is..
+		//Http2Header versionHeader = new Http2Header(Http2HeaderName.SERVER, version);
+		//response.addHeader(versionHeader);
 
 		//in general, nearly all these headers are desired..
 		Http2Header date = new Http2Header(Http2HeaderName.DATE, dateStr);
