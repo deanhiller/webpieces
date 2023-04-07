@@ -21,6 +21,7 @@ dependencies {
 
     //implementation 'com.google.cloud:google-cloud-core'
     implementation deps['guice']
+    api deps['generate-httpclient']
     api deps['cloud-api-lib']
     api deps['core-jackson']
     api deps['http2to1_1-client']
