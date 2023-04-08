@@ -16,7 +16,8 @@ dependencies {
 
     api deps['hibernate']
     api 'jakarta.persistence:jakarta.persistence-api'
-    
+    api 'org.webpieces.aws:monitoring'
+
     implementation deps['log4jdbc']
     implementation deps['http-router']
 }

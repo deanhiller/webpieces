@@ -1,6 +1,6 @@
 package org.webpieces.plugin.hibernate;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.inject.Inject;
@@ -9,10 +9,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tags;
-
 import org.webpieces.microsvc.api.MicroSvcHeader;
+import org.webpieces.microsvc.monitoring.api.Monitoring;
 import org.webpieces.plugin.hibernate.metrics.DatabaseMetric;
 import org.webpieces.plugin.hibernate.metrics.DatabaseTransactionTags;
 import org.webpieces.util.context.Context;
@@ -22,13 +20,16 @@ public class PersistenceHelper {
 
     private final EntityManagerFactory factory;
     private final TxCompleters txCompleters;
-    private final MeterRegistry meterRegistry;
+    private Monitoring monitoring;
 
     @Inject
-    public PersistenceHelper(EntityManagerFactory factory, TxCompleters txCompleters, MeterRegistry meterRegistry) {
+    public PersistenceHelper(
+            EntityManagerFactory factory,
+            TxCompleters txCompleters,
+            Monitoring monitoring) {
         this.factory = factory;
         this.txCompleters = txCompleters;
-        this.meterRegistry = meterRegistry;
+        this.monitoring = monitoring;
     }
 
     public void withVoidSession(String executionId, Consumer<EntityManager> consumer) {
@@ -120,14 +121,12 @@ public class PersistenceHelper {
             requestPath = "unknown";
         }
 
-        Tags transactionTags = Tags.of(
-            DatabaseTransactionTags.EXECUTION_ID, transactionName,
-            DatabaseTransactionTags.REQUEST, requestPath
+        Map<String, String> dimensions = Map.of(
+                DatabaseTransactionTags.EXECUTION_ID, transactionName,
+                DatabaseTransactionTags.REQUEST, requestPath
         );
 
-        meterRegistry.timer(DatabaseMetric.EXECUTION_TIME.getDottedMetricName(), transactionTags)
-                .record(end - start, TimeUnit.MILLISECONDS);
-
+        monitoring.duration(DatabaseMetric.EXECUTION_TIME, dimensions, start, end);
     }
 
 }

@@ -4,34 +4,59 @@ import com.google.cloud.tasks.v2.CloudTasksClient;
 import com.google.cloud.tasks.v2.HttpRequest;
 import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
+import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import org.digitalforge.sneakythrow.SneakyThrow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+import org.webpieces.util.context.Context;
+import org.webpieces.util.context.PlatformHeaders;
 
-import javax.inject.Inject;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.*;
 
 
 public class GCPTaskClient {
 
     private static Logger log = LoggerFactory.getLogger(GCPTaskClient.class);
+
+    @Inject(optional = true)
+    private ClientServiceConfig clientServiceConfig;
     private final GCPCloudTaskConfig config;
     private CloudTasksClient cloudTasksClient;
-
+    private final Set<String> secureList = new HashSet<>();
+    private final Set<PlatformHeaders> toTransfer = new HashSet<>();
     @Inject
-    public GCPTaskClient(GCPCloudTaskConfig config, CloudTasksClient cloudTasksClient) {
+    public GCPTaskClient(
+            GCPCloudTaskConfig config,
+            CloudTasksClient cloudTasksClient) {
         this.config = config;
         this.cloudTasksClient = cloudTasksClient;
+
+        List<PlatformHeaders> listHeaders;
+        if(clientServiceConfig == null)
+            listHeaders = Collections.emptyList();
+        else if(clientServiceConfig.getHcl() == null)
+            throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
+        else
+            listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
+
+        for(PlatformHeaders header : listHeaders) {
+            if(header.isSecured())
+                secureList.add(header.getHeaderName());
+            if(header.isWantTransferred())
+                toTransfer.add(header);
+        }
     }
 
     public JobReference createTask(Method method, InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
@@ -65,12 +90,20 @@ public class GCPTaskClient {
 
         log.info("Got queue: " + queue);
 
+        Map<String, String> headers = new HashMap<>();
+        for(PlatformHeaders header : toTransfer) {
+            String magic = Context.getMagic(header);
+            if(magic != null) {
+                headers.put(header.getHeaderName(), magic);
+            }
+        }
+
         // Construct the task body.
         HttpRequest request = HttpRequest.newBuilder()
                 .setBody(ByteString.copyFrom(payload, Charset.defaultCharset()))
                 .setUrl(url)
                 .setHttpMethod(getCloudTaskHttpMethod(httpMethod))
-                //.putAllHeaders(headers)   //TODO: Ask dean what to send in headers
+                .putAllHeaders(headers)   //TODO: Ask dean what to send in headers
                 .build();
 
         Task.Builder taskBuilder = Task.newBuilder()

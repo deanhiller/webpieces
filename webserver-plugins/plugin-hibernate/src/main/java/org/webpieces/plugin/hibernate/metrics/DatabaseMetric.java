@@ -1,6 +1,10 @@
 package org.webpieces.plugin.hibernate.metrics;
 
-public enum DatabaseMetric {
+import org.webpieces.microsvc.monitoring.api.Metric;
+
+import java.util.List;
+
+public enum DatabaseMetric implements Metric {
 
     DATABASE_ENTITY_LOADS("webpieces/database/entity/loads"),
     DATABASE_ENTITY_DELETES("webpieces/database/entity/deletes"),
@@ -25,6 +29,11 @@ public enum DatabaseMetric {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public List<String> getDimensions() {
+        return null;
     }
 
     public String getFullName() {

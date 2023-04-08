@@ -63,7 +63,8 @@ public class HttpsJsonClient {
     protected Http2Client client;
     protected ScheduledExecutorService schedulerSvc;
     private FutureHelper futureUtil;
-    private final Set<String> secureList;
+    private final Set<String> secureList = new HashSet<>();
+    private final Set<PlatformHeaders> transferHeaders = new HashSet<>();
 
     private Masker masker;
 
@@ -92,10 +93,15 @@ public class HttpsJsonClient {
         this.schedulerSvc = schedulerSvc;
         this.masker = masker;
 
-        secureList = new HashSet<>();
+
         for(PlatformHeaders header : listHeaders) {
-            if(header.isSecured())
+            if(header.isSecured()) {
                 secureList.add(header.getHeaderName());
+            }
+            //perhaps header needs to be transferred too...
+            if(header.isWantTransferred()) {
+                transferHeaders.add(header);
+            }
         }
 
         log.info("USING keyStoreLocation=" + httpsConfig.getKeyStoreLocation());
@@ -127,9 +133,10 @@ public class HttpsJsonClient {
         httpReq.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "application/json"));//Http2HeaderName.ACCEPT
         httpReq.addHeader(new Http2Header(Http2HeaderName.CONTENT_TYPE, "application/json"));
 
-        Map<String, String> headers = (Map<String, String>) Context.get(Context.HEADERS);
-        for(Map.Entry<String, String> entry : headers.entrySet()) {
-            httpReq.addHeader(new Http2Header(entry.getKey(), entry.getValue()));
+        for(PlatformHeaders header : transferHeaders) {
+            String magic = Context.getMagic(header);
+            if(magic != null)
+                httpReq.addHeader(new Http2Header(header.getHeaderName(), magic));
         }
 
         return httpReq;
