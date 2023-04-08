@@ -1,4 +1,4 @@
-package org.webpieces.microsvc.monitoring.impl;
+package org.webpieces.microsvc.monitoring.api;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -13,36 +13,39 @@ import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.webpieces.microsvc.monitoring.api.WebpiecesMetric;
-import org.webpieces.microsvc.monitoring.api.WebpiecesMonitoring;
+public class Monitoring {
 
-public class MicrometerMonitoring implements WebpiecesMonitoring {
-
-    private static final Logger log = LoggerFactory.getLogger(MicrometerMonitoring.class);
+    private static final Logger log = LoggerFactory.getLogger(Monitoring.class);
 
     private final MeterRegistry registry;
 
     @Inject
-    public MicrometerMonitoring(MeterRegistry registry) {
+    public Monitoring(MeterRegistry registry) {
         this.registry = registry;
     }
 
 
-    @Override
-    public void duration(WebpiecesMetric metric, Map<String, String> dimensions, Duration duration) {
+    public void duration(Metric metric, Map<String, String> dimensions, long startMillis, long endMillis) {
+        duration(metric, dimensions, Duration.ofMillis(endMillis - startMillis));
+    }
+
+    public void duration(Metric metric, Map<String, String> dimensions, Duration duration) {
         List<Tag> tags = convertToTags(metric, dimensions);
-        Timer timer = registry.timer(metric.getName(), tags);
+        Timer timer = Timer.builder(metric.getName()).tags(tags).publishPercentileHistogram().register(registry);
         timer.record(duration);
     }
 
-    @Override
-    public void increment(WebpiecesMetric metric, Map<String, String> dimensions, double increment) {
+    public void increment(Metric metric, Map<String, String> dimensions) {
+        increment(metric, dimensions, 1.0);
+    }
+
+    public void increment(Metric metric, Map<String, String> dimensions, double increment) {
         List<Tag> tags = convertToTags(metric, dimensions);
         Counter counter = registry.counter(metric.getName(), tags);
         counter.increment(increment);
     }
 
-    private List<Tag> convertToTags(WebpiecesMetric metric, Map<String, String> dimensions) {
+    private List<Tag> convertToTags(Metric metric, Map<String, String> dimensions) {
 
         List<Tag> tags = new ArrayList<>();
 
