@@ -22,6 +22,7 @@ import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
 import org.webpieces.util.context.ClientAssertions;
+import webpiecesxxxxxpackage.Server;
 import webpiecesxxxxxpackage.db.EducationEnum;
 import webpiecesxxxxxpackage.db.RoleEnum;
 import webpiecesxxxxxpackage.service.RemoteService;
@@ -72,7 +73,8 @@ public class GuiceModule implements Module {
 		binder.bind(ApplicationContext.class).to(GlobalAppContext.class).asEagerSingleton();
 
 		binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(true));
-		binder.bind(ClientServiceConfig.class).toInstance(new ClientServiceConfig(new HeadersCtx(), "fakeSvc"));
+
+		binder.bind(ClientServiceConfig.class).toInstance(HeadersCtx.createConfig(Server.APP_NAME));
 
 		binder.bind(ClientAssertions.class).to(ClientAssertionsImpl.class).asEagerSingleton();
 	}

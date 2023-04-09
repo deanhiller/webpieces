@@ -118,8 +118,6 @@ public abstract class CompanyApiTest extends AbstractHttp2Test {
         return TestMode.EMBEDDED_DIRET_NO_PARSING;
     }
 
-    protected ClientServiceConfig getConfig() {
-        return new ClientServiceConfig(new EmptyHeaderList(), "fakeSvc");
-    }
+    protected abstract ClientServiceConfig getConfig();
 }
 

@@ -7,10 +7,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.util.context.Context;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.http2.CompanyApiTest;
 import webpiecesxxxxxpackage.Server;
+import webpiecesxxxxxpackage.base.HeadersCtx;
 import webpiecesxxxxxpackage.deleteme.api.SaveApi;
 import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteService;
@@ -71,4 +73,8 @@ public class FeatureTest extends CompanyApiTest {
         }
     }
 
+    @Override
+    protected ClientServiceConfig getConfig() {
+        return HeadersCtx.createConfig(Server.APP_NAME);
+    }
 }
