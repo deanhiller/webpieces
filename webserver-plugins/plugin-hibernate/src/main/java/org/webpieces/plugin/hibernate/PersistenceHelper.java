@@ -65,8 +65,7 @@ public class PersistenceHelper {
             throw t;
         } finally {
             Em.set(null);
-            long end = System.currentTimeMillis();
-            monitorExecutionTime(executionId, start, end);
+            monitorExecutionTime(executionId, start);
         }
 
     }
@@ -108,12 +107,11 @@ public class PersistenceHelper {
             // Rethrow with suppressed exception if the rollback fails too
             throw e;
         } finally {
-            long end = System.currentTimeMillis();
-            monitorExecutionTime(executionId, start, end);
+            monitorExecutionTime(executionId, start);
         }
     }
 
-    private void monitorExecutionTime(String transactionName, long start, long end) {
+    private void monitorExecutionTime(String transactionName, long start) {
 
         String requestPath = Context.getMagic(MicroSvcHeader.REQUEST_PATH);
 
@@ -126,7 +124,7 @@ public class PersistenceHelper {
                 DatabaseTransactionTags.REQUEST, requestPath
         );
 
-        monitoring.duration(DatabaseMetric.EXECUTION_TIME, dimensions, start, end);
+        monitoring.duration(DatabaseMetric.EXECUTION_TIME, dimensions, start);
     }
 
 }
