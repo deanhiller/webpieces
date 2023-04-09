@@ -7,10 +7,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.util.context.Context;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.http2.CompanyApiTest;
 import webpiecesxxxxxpackage.Server;
+import webpiecesxxxxxpackage.base.HeadersCtx;
 import webpiecesxxxxxpackage.json.ExampleRestAPI;
 import webpiecesxxxxxpackage.json.SaveApi;
 import webpiecesxxxxxpackage.mock.JavaCache;
@@ -62,6 +64,11 @@ public class FeatureTest extends CompanyApiTest {
 
         serverHttpsAddr = new InetSocketAddress("localhost", webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort());
         serverHttpAddr = new InetSocketAddress("localhost", webserver.getUnderlyingHttpChannel().getLocalAddress().getPort());
+    }
+
+    @Override
+    protected ClientServiceConfig getConfig() {
+        return HeadersCtx.createConfig(Server.APP_NAME);
     }
 
     private class AppOverridesModule implements Module {

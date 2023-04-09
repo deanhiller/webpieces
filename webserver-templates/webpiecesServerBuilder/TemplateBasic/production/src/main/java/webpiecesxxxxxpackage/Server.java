@@ -23,7 +23,7 @@ public class Server extends YourCompanyServer {
 	 * When running the dev server, changes to this file AND to any files in this package
 	 * require a server restart(you can try not to but it won't work)
 	 *******************************************************************************/
-	
+	public static final String APP_NAME = "WEBPIECESxAPPNAME";
 	
 	/**
 	 * Welcome to YOUR main method as webpieces webserver is just a LIBRARY you use that you can
@@ -50,7 +50,7 @@ public class Server extends YourCompanyServer {
 		ServerConfig svrConfig, 
 		String ... args
 	) {
-		super("WEBPIECESxAPPNAME", platformOverrides,
+		super(APP_NAME, platformOverrides,
 				appOverrides, svrConfig, args);
 	}
 	

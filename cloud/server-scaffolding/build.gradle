@@ -22,6 +22,8 @@ dependencies {
     //api deps['guice']
     api deps['http-router']
     api deps['cloud-api-lib']
+    api 'org.webpieces.aws:monitoring'
+
     //api deps['core-jackson']
 
     //implementation deps['javax-inject-api']

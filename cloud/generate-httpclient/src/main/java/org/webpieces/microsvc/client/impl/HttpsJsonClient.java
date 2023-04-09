@@ -54,10 +54,6 @@ public class HttpsJsonClient {
 
     protected static final DataWrapperGenerator WRAPPER_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-    //temporary for backward compatible..
-    @Inject(optional = true)
-    private ClientServiceConfig clientServiceConfig;
-
     private HttpsConfig httpsConfig;
     protected JacksonJsonConverter jsonMapper;
     protected Http2Client client;
@@ -71,19 +67,17 @@ public class HttpsJsonClient {
     @Inject
     public HttpsJsonClient(
             HttpsConfig httpsConfig,
+            ClientServiceConfig clientServiceConfig,
             JacksonJsonConverter jsonMapper,
             Http2Client client,
             FutureHelper futureUtil,
             ScheduledExecutorService schedulerSvc,
             Masker masker
     ) {
-        List<PlatformHeaders> listHeaders;
-        if(clientServiceConfig == null)
-            listHeaders = Collections.emptyList();
-        else if(clientServiceConfig.getHcl() == null)
+        if(clientServiceConfig.getHcl() == null)
             throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
-        else
-            listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
+
+        List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
 
         this.httpsConfig = httpsConfig;
 

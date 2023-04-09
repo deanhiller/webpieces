@@ -8,6 +8,7 @@ import com.google.inject.Provides;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
 import org.webpieces.googlecloud.cloudtasks.api.QueueClientCreator;
 import org.webpieces.http2client.api.Http2Client;
@@ -30,6 +31,7 @@ public class FakeProdModule implements Module{
         ConverterConfig converterConfig = new ConverterConfig(true);
         binder.bind(ConverterConfig.class).toInstance(converterConfig);
         binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(true));
+        binder.bind(ClientServiceConfig.class).toInstance(new ClientServiceConfig(new HeadersCtx(), "fakeSvc"));
 
         binder.bind(GCPCloudTaskConfig.class).toInstance(new GCPCloudTaskConfig("tray-dineqa", "us-west1"));
     }
