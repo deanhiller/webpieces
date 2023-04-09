@@ -2,6 +2,7 @@ package org.webpieces.plugin.hibernate.metrics;
 
 import org.webpieces.microsvc.monitoring.api.Metric;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public enum DatabaseMetric implements Metric {
@@ -33,7 +34,7 @@ public enum DatabaseMetric implements Metric {
 
     @Override
     public List<String> getDimensions() {
-        return null;
+        return new ArrayList<>();
     }
 
     public String getFullName() {
