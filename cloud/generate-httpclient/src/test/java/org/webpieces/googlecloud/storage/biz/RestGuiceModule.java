@@ -5,6 +5,7 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.googlecloud.storage.api.DeansCoolApi;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.httpclientx.api.Http2to11ClientFactory;
@@ -28,6 +29,7 @@ public class RestGuiceModule implements Module {
         ConverterConfig converterConfig = new ConverterConfig(true);
         binder.bind(ConverterConfig.class).toInstance(converterConfig);
         binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(false));
+        binder.bind(ClientServiceConfig.class).toInstance(new ClientServiceConfig(new HeadersCtx(), "fakeSvc"));
         binder.bind(MeterRegistry.class).toInstance(new SimpleMeterRegistry());
     }
 

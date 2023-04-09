@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ApplicationContext;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.extension.HtmlTagCreator;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.httpclientx.api.Http2to11ClientFactory;
@@ -71,6 +72,7 @@ public class GuiceModule implements Module {
 		binder.bind(ApplicationContext.class).to(GlobalAppContext.class).asEagerSingleton();
 
 		binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(true));
+		binder.bind(ClientServiceConfig.class).toInstance(new ClientServiceConfig(new HeadersCtx(), "fakeSvc"));
 
 		binder.bind(ClientAssertions.class).to(ClientAssertionsImpl.class).asEagerSingleton();
 	}
