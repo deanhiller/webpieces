@@ -30,8 +30,6 @@ public class GCPTaskClient {
 
     private static Logger log = LoggerFactory.getLogger(GCPTaskClient.class);
 
-    @Inject(optional = true)
-    private ClientServiceConfig clientServiceConfig;
     private final GCPCloudTaskConfig config;
     private CloudTasksClient cloudTasksClient;
     private final Set<String> secureList = new HashSet<>();
@@ -39,17 +37,18 @@ public class GCPTaskClient {
     @Inject
     public GCPTaskClient(
             GCPCloudTaskConfig config,
-            CloudTasksClient cloudTasksClient) {
+            CloudTasksClient cloudTasksClient,
+            ClientServiceConfig clientServiceConfig
+    ) {
         this.config = config;
         this.cloudTasksClient = cloudTasksClient;
 
-        List<PlatformHeaders> listHeaders;
-        if(clientServiceConfig == null)
-            listHeaders = Collections.emptyList();
-        else if(clientServiceConfig.getHcl() == null)
+        if(clientServiceConfig.getHcl() == null)
             throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
-        else
-            listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
+
+        List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
+
+        Context.checkForDuplicates(listHeaders);
 
         for(PlatformHeaders header : listHeaders) {
             if(header.isSecured())

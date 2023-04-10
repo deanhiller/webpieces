@@ -9,18 +9,24 @@ public class Context {
 
     private static ThreadLocal<Map<String,Object>> context = ThreadLocal.withInitial(() -> new HashMap<>());
 
+    public static boolean wasDupsChecked = false;
     /**
      * We use header as the key unless null and then use mdc as the key.  Do not allow duplication
      * including mdc can't use a header name if used as the key.
      */
-    public static void checkForDuplicates(List<PlatformHeaders> platformHeaders) {
-        Map<String, PlatformHeaders> keyToHeader = new HashMap<>();
+    public synchronized static void checkForDuplicates(List<PlatformHeaders> platformHeaders) {
+        if(wasDupsChecked)
+            return;
+
+        Map<String, PlatformHeaders> headerKeyToHeader = new HashMap<>();
+        Map<String, PlatformHeaders> mdcKeyToHeader = new HashMap<>();
+
         for(PlatformHeaders header : platformHeaders) {
             if(header.getHeaderName() == null && header.getLoggerMDCKey() == null) {
                 throw new IllegalArgumentException("Either header or MDC must contain a value.  both cannot be null");
             }
-            PlatformHeaders existingFromHeader = keyToHeader.get(header.getHeaderName());
-            PlatformHeaders existingFromMdc = keyToHeader.get(header.getLoggerMDCKey());
+            PlatformHeaders existingFromHeader = headerKeyToHeader.get(header.getHeaderName());
+            PlatformHeaders existingFromMdc = mdcKeyToHeader.get(header.getLoggerMDCKey());
             if(existingFromHeader != null) {
                 throw new IllegalArgumentException("Duplicate in Platform headers not allowed. key="
                         +header.getHeaderName()+" exists in "+tuple(existingFromHeader)+" and in "+tuple(header));
@@ -28,6 +34,9 @@ public class Context {
                 throw new IllegalArgumentException("Duplicate in Platform headers not allowed. key="
                         +header.getHeaderName()+" exists in "+tuple(existingFromHeader)+" and in "+tuple(header));
             }
+
+            headerKeyToHeader.put(header.getHeaderName(), header);
+            mdcKeyToHeader.put(header.getLoggerMDCKey(), header);
         }
     }
 

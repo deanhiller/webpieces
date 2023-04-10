@@ -87,6 +87,7 @@ public class HttpsJsonClient {
         this.schedulerSvc = schedulerSvc;
         this.masker = masker;
 
+        Context.checkForDuplicates(listHeaders);
 
         for(PlatformHeaders header : listHeaders) {
             if(header.isSecured()) {
