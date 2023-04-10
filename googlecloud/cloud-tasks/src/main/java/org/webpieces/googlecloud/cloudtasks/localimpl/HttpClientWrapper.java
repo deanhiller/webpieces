@@ -67,9 +67,9 @@ public class HttpClientWrapper {
             Masker masker
     ) {
         this.httpsConfig = httpsConfig;
-
         this.client = client;
         this.futureUtil = futureUtil;
+        this.masker = masker;
 
         if(clientServiceConfig.getHcl() == null)
             throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");

@@ -74,11 +74,12 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			} catch (SSLException e) {
 				throw new AsyncSSLEngineException(e);
 			}
-	
-			if(sslEngine.getHandshakeStatus() != HandshakeStatus.NEED_WRAP)
+
+			HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
+			if(hsStatus != HandshakeStatus.NEED_WRAP)
 				throw new IllegalStateException("Dude, WTF, after beginHandshake, SSLEngine has to be NEED WRAP to send first hello message");
 	
-			return doHandshakeLoop();
+			return doHandshakeLoop(hsStatus);
 		} finally {
 			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.BEGIN_HANDSHAKE_END, sslEngine));
 		}
@@ -143,11 +144,11 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			HandshakeStatus hsStatus = engine.getHandshakeStatus();
 
 			if(needUnwrap(justStarted, hsStatus)) {
-				boolean isNotEnoughData = unwrapPacket();
+				boolean isNotEnoughData = unwrapPacket(hsStatus);
 				if(isNotEnoughData)
 					break;
 			} else if(hsStatus == HandshakeStatus.NEED_TASK || hsStatus == HandshakeStatus.NEED_WRAP) {
-				doHandshakeWork();
+				doHandshakeWork(hsStatus);
 			} else {
 				break;
 			}
@@ -162,9 +163,14 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		return (hsStatus == HandshakeStatus.NOT_HANDSHAKING || hsStatus == HandshakeStatus.NEED_UNWRAP) && mem.getCachedToProcess().hasRemaining();
 	}
 
-	private XFuture<Void> doHandshakeWork() {
+	private XFuture<Void> doHandshakeWork(HandshakeStatus hsStatus) {
 		SSLEngine engine = mem.getEngine();
-		HandshakeStatus hsStatus = engine.getHandshakeStatus();
+
+		/****************************************************************
+		 * MUST PASS in hsStatus, invoking a second time can change the result and make things whacky
+		 * I stepped through and 1st call yielded NEED_WRAP and second call right after changed to NEED_TASK before
+		 * we actually wrapped it :(
+		 ******************************************************************/
 		if(hsStatus == HandshakeStatus.NEED_TASK) {
 			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.NEED_TASK, engine));
 			Runnable r = engine.getDelegatedTask();
@@ -180,7 +186,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			
 			return XFuture.completedFuture(null);
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
-			return sendHandshakeMessage(engine);
+			return sendHandshakeMessage(engine, hsStatus);
 		}
 		
 		throw new UnsupportedOperationException("need to support state="+hsStatus+" circularbuffer="+circularBuffer);
@@ -194,9 +200,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		return s;
 	}
 
-	private boolean unwrapPacket() {
+	private boolean unwrapPacket(HandshakeStatus hsStatus) {
 		SSLEngine sslEngine = mem.getEngine();
-		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
 		Status status = null;
 
 		logTrace1(mem.getCachedToProcess(), hsStatus);
@@ -265,7 +270,7 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 				//THIS IS COMPLEX HERE.  In this case, we need to run a task and/or wrap data and need to
 				//ack the bytes we just processed ONLY if those things get sent out.  If the NIC is putting backpressure
 				//this then backpressures the incoming side until the peer can consumer our data first
-				doHandshakeLoop().handle((v, t) -> {
+				doHandshakeLoop(hsStatus).handle((v, t) -> {
 					if(t != null)
 						log.error("Exception in ssl listener", t);
 
@@ -366,13 +371,17 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		});
 	}
 
-	private XFuture<Void> doHandshakeLoop() {
+	private XFuture<Void> doHandshakeLoop(HandshakeStatus hsStatus) {
 		SSLEngine engine = mem.getEngine();
-		HandshakeStatus hsStatus = engine.getHandshakeStatus();
+		/****************************************************************
+		 * MUST PASS in hsStatus, invoking a second time can change the result and make things whacky
+		 * I stepped through and 1st call yielded NEED_WRAP and second call right after changed to NEED_TASK before
+		 * we actually wrapped it :(
+		 ******************************************************************/
 
 		List<XFuture<Void>> futures = new ArrayList<>();
 		while((hsStatus == HandshakeStatus.NEED_WRAP && !sslEngineIsFarting) || hsStatus == HandshakeStatus.NEED_TASK) {
-			XFuture<Void> future = doHandshakeWork();
+			XFuture<Void> future = doHandshakeWork(hsStatus);
 			futures.add(future);
 			hsStatus = engine.getHandshakeStatus();
 		}
@@ -393,16 +402,16 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 			log.trace(mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
 	}
 
-	private XFuture<Void> sendHandshakeMessage(SSLEngine engine) {
+	private XFuture<Void> sendHandshakeMessage(SSLEngine engine, HandshakeStatus hsStatus) {
 		try {
-			return sendHandshakeMessageImpl(engine);
+			return sendHandshakeMessageImpl(engine, hsStatus);
 		} catch (SSLException e) {
 			//
 			throw new AsyncSSLEngineException(e);
 		}
 	}
 	
-	private XFuture<Void> sendHandshakeMessageImpl(SSLEngine engine) throws SSLException {
+	private XFuture<Void> sendHandshakeMessageImpl(SSLEngine engine, HandshakeStatus beforeWrapHandshakeStatus ) throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
 		if(log.isTraceEnabled())
 			log.trace(mem+"sending handshake message");
@@ -413,21 +422,19 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 		//must synchronize on sslEngine.wrap
 		Status lastStatus;
 		HandshakeStatus hsStatus;
-		HandshakeStatus beforeWrapHandshakeStatus;
 		synchronized (wrapLock ) {
 			//this is in the sync block, so we are synchronized with the engine state!!! and get the actual
 			//state before calling wrap so we know the engine can't be switching states on us in another thread.
-			beforeWrapHandshakeStatus = sslEngine.getHandshakeStatus();
-			HandshakeStatus otherStatus = engine.getHandshakeStatus();
-			if (beforeWrapHandshakeStatus != HandshakeStatus.NEED_WRAP)
+			if(engine != sslEngine)
+				throw new IllegalStateException("engines should match and do not eng1="+sslEngine+" eng2="+engine);
+			else if (beforeWrapHandshakeStatus != HandshakeStatus.NEED_WRAP)
 				throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus=" 
-							+ beforeWrapHandshakeStatus+" connectionState="+mem.getConnectionState()+" otherStat="+otherStatus+" eng1="+sslEngine+" eng2="+engine);
+							+ beforeWrapHandshakeStatus+" connectionState="+mem.getConnectionState());
 
 			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP2_START, sslEngine));
 			//KEEEEEP This very small.  wrap and then listener.packetEncrypted
 			SSLEngineResult result = runProtected(sslEngine, engineToSocketData);
 			circularBuffer.add(new Action(Thread.currentThread().getName(), ActionEnum.WRAP2_END, sslEngine));
-
 
 			lastStatus = result.getStatus();
 			hsStatus = result.getHandshakeStatus();
@@ -629,7 +636,7 @@ Caused by: sun.security.provider.certpath.SunCertPathBuilderException: unable to
 		HandshakeStatus status = engine.getHandshakeStatus();
 		switch (status) {
 			case NEED_WRAP:
-				doHandshakeLoop();
+				doHandshakeLoop(status);
 				break;
 			case NOT_HANDSHAKING:
 				if(ConnectionState.DISCONNECTED != mem.getConnectionState() && ConnectionState.DISCONNECTING != mem.getConnectionState())
