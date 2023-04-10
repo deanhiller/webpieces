@@ -79,14 +79,20 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     }
 
     private void pretendToBeCallFromGCPCloudTasks(Map<String, Object> copy, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText) {
-        Context.restoreContext(copy);
-        Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
-        log.info("Running simulated call to remote endpoint="+endpoint);
-        XFuture<String> stringXFuture = client.sendHttpRequest(bodyAsText, endpoint);
-        stringXFuture.exceptionally( (e) -> {
+        XFuture<String> stringXFuture;
+        try {
+            Context.restoreContext(copy);
+            Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
+            log.info("Running simulated call to remote endpoint=" + endpoint);
+            stringXFuture = client.sendHttpRequest(bodyAsText, endpoint);
+            Context.clear();
+        } catch (Throwable e) {
+            stringXFuture = XFuture.failedFuture(e);
+        }
+
+        stringXFuture.exceptionally((e) -> {
             log.error("Exception queueing the request", e);
             return null;
         });
-        Context.clear();
     }
 }

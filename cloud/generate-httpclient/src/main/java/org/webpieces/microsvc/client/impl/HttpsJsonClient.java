@@ -80,7 +80,6 @@ public class HttpsJsonClient {
         List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
 
         this.httpsConfig = httpsConfig;
-
         this.jsonMapper = jsonMapper;
         this.client = client;
         this.futureUtil = futureUtil;
