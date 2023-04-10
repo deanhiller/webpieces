@@ -51,9 +51,6 @@ public class HttpClientWrapper {
     protected Http2Client client;
     protected ScheduledExecutorService schedulerSvc;
 
-    @Inject(optional = true)
-    private ClientServiceConfig clientServiceConfig;
-
     private FutureHelper futureUtil;
 
     private final Set<String> secureList = new HashSet<>();
@@ -64,6 +61,7 @@ public class HttpClientWrapper {
     @Inject
     public HttpClientWrapper(
             HttpsConfig httpsConfig,
+            ClientServiceConfig clientServiceConfig,
             Http2Client client,
             FutureHelper futureUtil,
             Masker masker
@@ -73,15 +71,12 @@ public class HttpClientWrapper {
         this.client = client;
         this.futureUtil = futureUtil;
 
-
-        List<PlatformHeaders> listHeaders;
-        if(clientServiceConfig == null)
-            listHeaders = Collections.emptyList();
-        else if(clientServiceConfig.getHcl() == null)
+        if(clientServiceConfig.getHcl() == null)
             throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
-        else
-            listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
 
+        List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
+
+        Context.checkForDuplicates(listHeaders);
 
         for(PlatformHeaders header : listHeaders) {
             if(header.isSecured())
