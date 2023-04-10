@@ -15,7 +15,7 @@ public class Context {
      * including mdc can't use a header name if used as the key.
      */
     public synchronized static void checkForDuplicates(List<PlatformHeaders> platformHeaders) {
-        if(wasDupsChecked)
+        if(wasDupsChecked) //only check once 
             return;
 
         Map<String, PlatformHeaders> headerKeyToHeader = new HashMap<>();
@@ -25,14 +25,19 @@ public class Context {
             if(header.getHeaderName() == null && header.getLoggerMDCKey() == null) {
                 throw new IllegalArgumentException("Either header or MDC must contain a value.  both cannot be null");
             }
-            PlatformHeaders existingFromHeader = headerKeyToHeader.get(header.getHeaderName());
-            PlatformHeaders existingFromMdc = mdcKeyToHeader.get(header.getLoggerMDCKey());
+            PlatformHeaders existingFromHeader = null;
+            if(header.getHeaderName() != null)
+                existingFromHeader = headerKeyToHeader.get(header.getHeaderName());
+            PlatformHeaders existingFromMdc = null;
+            if(header.getLoggerMDCKey() != null)
+                existingFromMdc = mdcKeyToHeader.get(header.getLoggerMDCKey());
+
             if(existingFromHeader != null) {
                 throw new IllegalArgumentException("Duplicate in Platform headers not allowed. key="
                         +header.getHeaderName()+" exists in "+tuple(existingFromHeader)+" and in "+tuple(header));
             } else if(existingFromMdc != null) {
                 throw new IllegalArgumentException("Duplicate in Platform headers not allowed. key="
-                        +header.getHeaderName()+" exists in "+tuple(existingFromHeader)+" and in "+tuple(header));
+                        +header.getHeaderName()+" exists in "+tuple(existingFromMdc)+" and in "+tuple(header));
             }
 
             headerKeyToHeader.put(header.getHeaderName(), header);
