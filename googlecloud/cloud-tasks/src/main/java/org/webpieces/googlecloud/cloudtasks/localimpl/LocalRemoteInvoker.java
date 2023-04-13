@@ -16,10 +16,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.*;
 
 public class LocalRemoteInvoker implements RemoteInvoker {
 
@@ -48,9 +45,15 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         if(info.isScheduledInFuture()) {
             log.info("scheduling in the future"+info.getTime()+" "+info.getTimeUnit());
 
+            long epochMs = TimeUnit.MILLISECONDS.convert(info.getTime(), info.getTimeUnit());
+            long numDays = TimeUnit.DAYS.convert(info.getTime(), info.getTimeUnit());
+            if(numDays > 30)
+                throw new IllegalArgumentException("GCP does not support tasks scheduled more than 30 days in the future");
+            long delay = epochMs - System.currentTimeMillis();
+
             ScheduledFuture<?> schedule = executorService.schedule(
                     () -> pretendToBeCallFromGCPCloudTasks(copy, addr, path, httpMethod, bodyAsText),
-                    info.getTime(), info.getTimeUnit());
+                    delay, TimeUnit.MILLISECONDS);
 
             refToJobToCancel.put(jobId, schedule);
 

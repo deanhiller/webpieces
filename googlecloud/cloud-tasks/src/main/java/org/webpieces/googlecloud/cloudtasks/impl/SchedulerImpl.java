@@ -26,7 +26,7 @@ public class SchedulerImpl implements Scheduler {
     }
 
     @Override
-    public XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, int time, TimeUnit timeUnit) {
+    public XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, long time, TimeUnit timeUnit) {
         ScheduleInfo info = new ScheduleInfo(time, timeUnit);
         return executeIt(runnable, info);
     }

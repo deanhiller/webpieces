@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 public class GCPTaskClient {
@@ -149,25 +150,7 @@ public class GCPTaskClient {
     }
 
     private Timestamp getTimeStamp(ScheduleInfo scheduleInfo) {
-        long currentTimeInMilliSeconds = System.currentTimeMillis();
-
-        switch(scheduleInfo.getTimeUnit()) {
-            case DAYS:
-                currentTimeInMilliSeconds += scheduleInfo.getTime()*24*60*60*1000L;
-                break;
-            case HOURS:
-                currentTimeInMilliSeconds += scheduleInfo.getTime()*60*60*1000L;
-                break;
-            case MINUTES:
-                currentTimeInMilliSeconds += scheduleInfo.getTime()*60*1000L;
-                break;
-            case SECONDS:
-                currentTimeInMilliSeconds += scheduleInfo.getTime()*1000L;
-                break;
-        }
-
-        long currentTimeinSeconds = currentTimeInMilliSeconds/1000;
-
-        return Timestamp.newBuilder().setSeconds(currentTimeinSeconds).build();
+        long epochMs = TimeUnit.SECONDS.convert(scheduleInfo.getTime(), scheduleInfo.getTimeUnit());
+        return Timestamp.newBuilder().setSeconds(epochMs).build();
     }
 }
