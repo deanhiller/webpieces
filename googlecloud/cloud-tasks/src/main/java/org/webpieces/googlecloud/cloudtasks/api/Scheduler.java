@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 
 @ImplementedBy(SchedulerImpl.class)
 public interface Scheduler {
-    XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, int time, TimeUnit timeUnit);
+    XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, long time, TimeUnit timeUnit);
 
     XFuture<JobReference> addToQueue(Supplier<XFuture<Void>> runnable);
 

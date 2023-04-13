@@ -4,10 +4,10 @@ import java.util.concurrent.TimeUnit;
 
 public class ScheduleInfo {
     private boolean scheduledInFuture = false;
-    private int time;
+    private long time;
     private TimeUnit timeUnit;
 
-    public ScheduleInfo(int time, TimeUnit timeUnit) {
+    public ScheduleInfo(long time, TimeUnit timeUnit) {
         this.scheduledInFuture = true;
         this.time = time;
         this.timeUnit = timeUnit;
@@ -16,7 +16,7 @@ public class ScheduleInfo {
     public ScheduleInfo() {
     }
 
-    public int getTime() {
+    public long getTime() {
         return time;
     }
 

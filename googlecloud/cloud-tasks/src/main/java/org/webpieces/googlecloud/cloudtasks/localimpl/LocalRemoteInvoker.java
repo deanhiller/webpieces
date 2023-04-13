@@ -45,10 +45,8 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         if(info.isScheduledInFuture()) {
             log.info("scheduling in the future"+info.getTime()+" "+info.getTimeUnit());
 
-            TimeUnit time = TimeUnit.MILLISECONDS;
-            long epochMs = time.convert(info.getTime(), info.getTimeUnit());
-            TimeUnit days = TimeUnit.DAYS;
-            long numDays = days.convert(info.getTime(), info.getTimeUnit());
+            long epochMs = TimeUnit.MILLISECONDS.convert(info.getTime(), info.getTimeUnit());
+            long numDays = TimeUnit.DAYS.convert(info.getTime(), info.getTimeUnit());
             if(numDays > 30)
                 throw new IllegalArgumentException("GCP does not support tasks scheduled more than 30 days in the future");
             long delay = epochMs - System.currentTimeMillis();
