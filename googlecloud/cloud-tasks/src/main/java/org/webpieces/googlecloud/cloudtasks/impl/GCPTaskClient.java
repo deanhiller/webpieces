@@ -65,15 +65,19 @@ public class GCPTaskClient {
 
         String url = getURL(endpoint,path);
 
-        String queueNameStr = method.getDeclaringClass().getName()+"."+method.getName();
-        queueNameStr = queueNameStr.replaceAll("\\.","-");
+        String queueNameStr;
+        org.webpieces.googlecloud.cloudtasks.api.QueueName annotation = method.getAnnotation(org.webpieces.googlecloud.cloudtasks.api.QueueName.class);
+        if(annotation == null) {
+            queueNameStr = method.getDeclaringClass().getName() + "." + method.getName();
+            queueNameStr = queueNameStr.replaceAll("\\.","-");
+        } else {
+            queueNameStr = annotation.value();
+        }
         log.info("queueName="+queueNameStr);
 
         QueueName queueName = QueueName.of(config.getProjectId(), config.getLocation(),queueNameStr);
 
         JobReference jobReference = createTaskImpl(queueName, url, httpMethod, payload, scheduleInfo);
-
-        log.info("createTask jobReference "+jobReference);
 
         return jobReference;
     }
@@ -85,10 +89,6 @@ public class GCPTaskClient {
 
     // Create a task with a HTTP target using the Cloud Tasks client.
     private JobReference createTaskImpl(QueueName queue, String url, HttpMethod httpMethod, String payload, ScheduleInfo scheduleInfo) {
-
-        // Instantiates a client.
-
-        log.info("Got queue: " + queue);
 
         Map<String, String> headers = new HashMap<>();
         for(PlatformHeaders header : toTransfer) {
