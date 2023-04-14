@@ -5,12 +5,10 @@ import java.util.concurrent.TimeUnit;
 public class ScheduleInfo {
     private boolean scheduledInFuture = false;
     private long time;
-    private TimeUnit timeUnit;
 
-    public ScheduleInfo(long time, TimeUnit timeUnit) {
+    public ScheduleInfo(long epochMsToRun) {
         this.scheduledInFuture = true;
-        this.time = time;
-        this.timeUnit = timeUnit;
+        this.time = epochMsToRun;
     }
 
     public ScheduleInfo() {
@@ -18,10 +16,6 @@ public class ScheduleInfo {
 
     public long getTime() {
         return time;
-    }
-
-    public TimeUnit getTimeUnit() {
-        return timeUnit;
     }
 
     public boolean isScheduledInFuture() {
