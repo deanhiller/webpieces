@@ -29,8 +29,8 @@ public class RemoteInvokerImpl implements RemoteInvoker {
     }
 
     @Override
-    public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
-        JobReference jobReference = gcpTasksClient.get().createTask(method, addr, httpMethod, path, bodyAsText, info);
+    public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info, QueueLookup lookup) {
+        JobReference jobReference = gcpTasksClient.get().createTask(method, addr, httpMethod, path, bodyAsText, info, lookup);
         log.info("invoke jobReference "+jobReference);
         Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, jobReference);
         return XFuture.completedFuture(null);

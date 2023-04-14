@@ -12,9 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
-import org.webpieces.googlecloud.cloudtasks.api.JobReference;
-import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+import org.webpieces.googlecloud.cloudtasks.api.*;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.PlatformHeaders;
 
@@ -59,19 +57,22 @@ public class GCPTaskClient {
         }
     }
 
-    public JobReference createTask(Method method, InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
+    public JobReference createTask(Method method, InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo, QueueLookup lookup) {
 
         Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
 
         String url = getURL(endpoint,path);
 
         String queueNameStr;
-        org.webpieces.googlecloud.cloudtasks.api.QueueName annotation = method.getAnnotation(org.webpieces.googlecloud.cloudtasks.api.QueueName.class);
+        QueueKey annotation = method.getAnnotation(QueueKey.class);
         if(annotation == null) {
             queueNameStr = method.getDeclaringClass().getName() + "." + method.getName();
             queueNameStr = queueNameStr.replaceAll("\\.","-");
+        } else if(lookup == null) {
+            throw new IllegalStateException("should not be possible as we put precondition on createClient");
         } else {
-            queueNameStr = annotation.value();
+            String key = annotation.value();
+            queueNameStr = lookup.fetchQueueName(key);
         }
         log.info("queueName="+queueNameStr);
 

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
+import org.webpieces.googlecloud.cloudtasks.api.QueueLookup;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 import org.webpieces.microsvc.impl.EndpointInfo;
@@ -29,6 +30,7 @@ public class QueueInvokeHandler implements InvocationHandler {
     private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);
     private final Logger log = LoggerFactory.getLogger(QueueInvokeHandler.class);
     private InetSocketAddress addr;
+    private QueueLookup lookup;
     private RemoteInvoker remoteInvoker;
     private ClientAssertions clientAssertions;
     private JacksonJsonConverter jsonMapper;
@@ -44,8 +46,9 @@ public class QueueInvokeHandler implements InvocationHandler {
         this.jsonMapper = jsonMapper;
     }
 
-    public void initialize(InetSocketAddress addr) {
+    public void initialize(InetSocketAddress addr, QueueLookup lookup) {
         this.addr = addr;
+        this.lookup = lookup;
     }
 
     @Override
@@ -102,7 +105,7 @@ public class QueueInvokeHandler implements InvocationHandler {
 
         Object body = args[0];
         String bodyAsText = marshal(body);
-        XFuture<Void> xFuture = remoteInvoker.invoke(method, addr, path, httpMethod, bodyAsText, info)
+        XFuture<Void> xFuture = remoteInvoker.invoke(method, addr, path, httpMethod, bodyAsText, info, lookup)
 //        Endpoint endpoint = new Endpoint(addr, httpMethod.getCode(), path);
 //        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType)
                 .thenApply(retVal -> {
@@ -225,4 +228,5 @@ public class QueueInvokeHandler implements InvocationHandler {
         return httpMethod;
 
     }
+
 }

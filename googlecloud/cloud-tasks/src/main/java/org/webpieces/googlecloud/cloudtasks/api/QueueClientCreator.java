@@ -19,12 +19,25 @@ public class QueueClientCreator {
     }
 
     public <T> T createClient(Class<T> apiInterface, InetSocketAddress addr) {
+        return createClient(apiInterface, addr, null);
+    }
+
+    public <T> T createClient(Class<T> apiInterface, InetSocketAddress addr, QueueLookup lookup) {
         QueueInvokeHandler invokeHandler = wrapperProvider.get();
-        invokeHandler.initialize(addr);
+        invokeHandler.initialize(addr, lookup);
 
         Method[] methods = apiInterface.getMethods();
         for(Method method : methods) {
             MethodValidator.validateApiConvention(apiInterface, method, true);
+        }
+
+        if(lookup == null) {
+            for(Method method : methods) {
+                QueueKey annotation = method.getAnnotation(QueueKey.class);
+                if(annotation != null) {
+                    throw new IllegalStateException("QueueKey found on method but you did not pass QueueLookup to lookup the name fo the queue. method="+method);
+                }
+            }
         }
 
         return (T) Proxy.newProxyInstance(apiInterface.getClassLoader(),

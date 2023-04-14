@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
+import org.webpieces.googlecloud.cloudtasks.api.QueueLookup;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 import org.webpieces.googlecloud.cloudtasks.impl.Constants;
@@ -34,7 +35,7 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     }
 
     @Override
-    public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
+    public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info, QueueLookup lookup) {
         Map<String, Object> copy = Context.copyContext();
 
         String jobId = UUID.randomUUID().toString();
