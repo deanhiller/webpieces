@@ -150,7 +150,7 @@ public class GCPTaskClient {
     }
 
     private Timestamp getTimeStamp(ScheduleInfo scheduleInfo) {
-        long epochMs = TimeUnit.SECONDS.convert(scheduleInfo.getTime(), scheduleInfo.getTimeUnit());
-        return Timestamp.newBuilder().setSeconds(epochMs).build();
+        long epochSeconds = TimeUnit.SECONDS.convert(scheduleInfo.getTime(), TimeUnit.MILLISECONDS);
+        return Timestamp.newBuilder().setSeconds(epochSeconds).build();
     }
 }

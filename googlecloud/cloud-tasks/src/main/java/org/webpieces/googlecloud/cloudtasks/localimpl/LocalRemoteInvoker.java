@@ -43,9 +43,9 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
 
         if(info.isScheduledInFuture()) {
-            log.info("scheduling in the future"+info.getTime()+" "+info.getTimeUnit());
+            log.info("scheduling in the future"+info.getTime());
 
-            long epochMs = TimeUnit.MILLISECONDS.convert(info.getTime(), info.getTimeUnit());
+            long epochMs = info.getTime();
             long delay = epochMs - System.currentTimeMillis();
 
             long numDays = TimeUnit.DAYS.convert(delay, TimeUnit.MILLISECONDS);
