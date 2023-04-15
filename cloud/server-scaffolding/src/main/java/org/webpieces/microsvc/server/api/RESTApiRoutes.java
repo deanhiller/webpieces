@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.microsvc.api.MethodValidator;
+import org.webpieces.plugin.json.JacksonLookup;
 import org.webpieces.router.api.routebldr.DefaultCorsProcessor;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
@@ -96,9 +97,9 @@ public class RESTApiRoutes implements Routes {
 
         Object o = Context.get(HTTP_DO_NOT_USE_KEY);
         if("true".equals(o)) {
-            bldr.addContentRoute(Port.BOTH, httpMethod, path, controller.getName() + "." + name);
+            bldr.addContentRoute(Port.BOTH, httpMethod, path, controller.getName() + "." + name, JacksonLookup.class);
         } else {
-            bldr.addContentRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name);
+            bldr.addContentRoute(Port.HTTPS, httpMethod, path, controller.getName() + "." + name, JacksonLookup.class);
         }
     }
 

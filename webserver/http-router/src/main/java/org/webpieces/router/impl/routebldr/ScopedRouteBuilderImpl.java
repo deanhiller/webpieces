@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routebldr.ScopedRouteBuilder;
 import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Port;
@@ -65,17 +66,26 @@ public class ScopedRouteBuilderImpl extends SharedMatchUtil implements ScopedRou
 
 	@Override
 	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod) {
-		addContentRoute(port, method, path, controllerMethod, null);
+		addContentRoute(port, method, path, controllerMethod, null, null);
 	}
-	
+
 	@Override
 	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId) {
+		addContentRoute(port, method, path, controllerMethod, routeId, null);
+	}
+
+	@Override
+	public void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod, Class<? extends BodyContentBinder> binder) {
+		addContentRoute(port, method, path, controllerMethod, null, binder);
+	}
+
+	private void addContentRoute(Port port, HttpMethod method, String path, String controllerMethod, RouteId routeId, Class<? extends BodyContentBinder> binder) {
 		UrlPath p = new UrlPath(routerInfo, path);
 		RouteModuleInfo moduleInfo = CurrentRoutes.get();
 		RouteInfo routeInfo = new RouteInfo(moduleInfo, controllerMethod);
 		//MUST DO loadControllerIntoMeta HERE so stack trace has customer's line in it so he knows EXACTLY what 
 		//he did wrong when reading the exception!!
-		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo);
+		BinderAndLoader container = holder.getFinder().loadContentController(resettingLogic.getInjector(), routeInfo, binder);
 		
 		MatchInfo matchInfo = createMatchInfo(p, port, method, holder.getUrlEncoding());
 		LoadedController loadedController = container.getMetaAndController().getLoadedController();

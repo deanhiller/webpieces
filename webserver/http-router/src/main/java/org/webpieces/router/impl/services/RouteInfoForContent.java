@@ -16,8 +16,4 @@ public class RouteInfoForContent implements RouteData {
 		return bodyContentBinder;
 	}
 	
-	public void setBodyContentBinder(BodyContentBinder binder) {
-		this.bodyContentBinder = binder;
-	}
-
 }

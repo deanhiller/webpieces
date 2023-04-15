@@ -20,7 +20,7 @@ public class JsonRESTController implements ExampleRestAPI {
     }
 
     @Override
-    public XFuture<PostTestResponse> postTest(String id, int number, @Jackson PostTestRequest request) {
+    public XFuture<PostTestResponse> postTest(String id, int number, PostTestRequest request) {
         return XFuture.completedFuture(new PostTestResponse(id, number, request.getSomething()));
     }
 

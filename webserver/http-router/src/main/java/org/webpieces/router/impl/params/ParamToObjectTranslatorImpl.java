@@ -105,7 +105,7 @@ public class ParamToObjectTranslatorImpl {
 			String name = fieldMeta.getName();
 			ParamNode paramNode = paramTree.get(name);
 			XFuture<Object> beanFuture;
-			if(binder != null && isManagedBy(binder, fieldMeta)) {
+			if(binder != null && binder.canTransform(fieldMeta.getFieldClass())) {
 				Object bean = binder.unmarshal(ctx, fieldMeta, req.body.createByteArray());
 				beanFuture = XFuture.completedFuture(bean);
 			} else {
@@ -121,16 +121,6 @@ public class ParamToObjectTranslatorImpl {
 			
 		}
 		return future;
-	}
-
-	private boolean isManagedBy(BodyContentBinder binder, ParamMeta fieldMeta) {
-		Class<?> fieldClass = fieldMeta.getFieldClass();
-		Annotation[] annotations = fieldMeta.getAnnotations();
-		for(Annotation anno : annotations) {
-			if(binder.isManaged(fieldClass, anno.annotationType()))
-				return true;
-		}
-		return false;
 	}
 
 	private Map<String, String> translate(Map<String, List<String>> queryParams) {
