@@ -7,12 +7,13 @@ import org.webpieces.router.api.controller.actions.RenderContent;
 
 public interface BodyContentBinder {
 
-	<T> boolean isManaged(Class<T> entityClass, Class<? extends Annotation> paramAnnotation);
+	boolean canTransform(Class<?> paramClass);
 
 	<T> T unmarshal(RequestContext ctx, ParamMeta paramTypeToCreate, byte[] data);
 
 	<T> RenderContent marshal(T bean);
 
 	Class<? extends Annotation> getAnnotation();
-	
+
+
 }

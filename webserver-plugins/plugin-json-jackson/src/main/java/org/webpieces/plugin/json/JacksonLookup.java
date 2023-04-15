@@ -2,9 +2,12 @@ package org.webpieces.plugin.json;
 
 import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.http.exception.BadRequestException;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -17,21 +20,35 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class JacksonLookup implements BodyContentBinder {
 
 	private JacksonJsonConverter mapper;
+	private Set<Class> primitives = new HashSet<>();
 
 	@Inject
 	public JacksonLookup(JacksonJsonConverter mapper) {
 		this.mapper = mapper;
+
+		primitives.add(Boolean.class);
+		primitives.add(Byte.class);
+		primitives.add(Short.class);
+		primitives.add(Integer.class);
+		primitives.add(Long.class);
+		primitives.add(Float.class);
+		primitives.add(Double.class);
+		primitives.add(String.class);
+		primitives.add(Boolean.TYPE);
+		primitives.add(Byte.TYPE);
+		primitives.add(Short.TYPE);
+		primitives.add(Integer.TYPE);
+		primitives.add(Long.TYPE);
+		primitives.add(Float.TYPE);
+		primitives.add(Double.TYPE);
 	}
 
 	@Override
-	public <T> boolean isManaged(Class<T> entityClass, Class<? extends Annotation> paramAnnotation) {
-		boolean isJnode = false;
-		if(entityClass != null) //if this is null, next line will NullPointer instead of return false
-			isJnode = JsonNode.class.isAssignableFrom(entityClass);
+	public boolean canTransform(Class<?> paramClass) {
+		if(primitives.contains(paramClass))
+			return false;
 
-		if(paramAnnotation == Jackson.class || isJnode)
-			return true;
-		return false;
+		return true;
 	}
 
 	@SuppressWarnings("unchecked")

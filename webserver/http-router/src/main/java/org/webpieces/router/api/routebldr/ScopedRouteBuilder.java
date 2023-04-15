@@ -1,6 +1,7 @@
 package org.webpieces.router.api.routebldr;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.routes.CrudRouteIds;
 import org.webpieces.router.api.routes.Port;
 import org.webpieces.router.api.routes.RouteId;
@@ -30,6 +31,13 @@ public interface ScopedRouteBuilder {
 	 * In this way, the url only exists in one place in your entire app. 
 	 */
 	void addContentRoute(Port port, HttpMethod method, String urlPath, String controllerMethod, RouteId routeId);
+
+	/**
+	 * Re-usable components like RESTApiRoutes.java can force using a certain binder which leads to
+	 * 100% pure java and no dependencies on the platform.
+	 */
+	void addContentRoute(Port port, HttpMethod method, String urlPath, String controllerMethod,
+						 Class<? extends BodyContentBinder> binder);
 
 	/**
 	 * Adds a streaming route where the method in the controller should be of the form

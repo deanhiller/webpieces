@@ -72,12 +72,18 @@ public class ControllerLoader {
 			throw new IllegalArgumentException("This error route has a method that MUST return a type 'Render' or 'XFuture<Render>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 	}
 	
-	public BinderAndLoader loadContentController(Injector injector, RouteInfo routeInfo) {
+	public BinderAndLoader loadContentController(Injector injector, RouteInfo routeInfo, Class<? extends BodyContentBinder> binderClazz) {
 		MethodMetaAndController mAndC = loadGenericController(injector, routeInfo);
-		BodyContentBinder binder = null;
 		LoadedController loadedController = mAndC.getLoadedController();
-		
-		binder = binderChecker.contentPreconditionCheck(injector, routeInfo, loadedController.getControllerMethod(), loadedController.getParameters());
+
+		BodyContentBinder binder;
+		if(binderClazz != null) {
+			binder = binderChecker.lookup(binderClazz);
+			if(binder == null)
+				throw new IllegalArgumentException("You are trying to use a BodyContentBinder that is not installed");
+		} else {
+			binder = binderChecker.contentPreconditionCheck(injector, routeInfo, loadedController.getControllerMethod(), loadedController.getParameters());
+		}
 
 		return new BinderAndLoader(mAndC, binder);
 	}

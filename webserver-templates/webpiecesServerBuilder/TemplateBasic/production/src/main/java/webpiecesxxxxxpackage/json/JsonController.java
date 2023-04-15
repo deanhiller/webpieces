@@ -30,7 +30,7 @@ import webpiecesxxxxxpackage.service.RemoteService;
 import webpiecesxxxxxpackage.service.SendDataRequest;
 
 @Singleton
-public class JsonController implements SaveApi, ClientApi {
+public class JsonController implements ClientApi {
 	
 	private static final Logger log = LoggerFactory.getLogger(JsonController.class);
 
@@ -104,17 +104,6 @@ public class JsonController implements SaveApi, ClientApi {
 		
 		XFuture<StreamWriter> responseWriter = handle.process(response);
 		return new RequestStreamEchoWriter(requestCtx, handle, responseWriter);
-	}
-
-	@Override
-	public XFuture<SearchResponse> search(@Jackson SearchRequest request) {
-		counter.increment();
-
-		//so we can test out mocking remote services
-		remoteService.sendData(new SendDataRequest(6)).join();
-
-		SearchResponse resp = postJson(request);
-		return XFuture.completedFuture(resp);
 	}
 
 	private static class RequestStreamEchoWriter implements StreamWriter, StreamRef {
