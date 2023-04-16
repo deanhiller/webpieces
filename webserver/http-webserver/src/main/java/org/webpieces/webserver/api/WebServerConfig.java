@@ -27,7 +27,7 @@ public class WebServerConfig {
 	private Http2Config http2Config = new Http2Config();
 	private BackpressureConfig backpressureConfig = new BackpressureConfig();
 	private Module coreModule;
-	
+
 	public String getId() {
 		return id;
 	}

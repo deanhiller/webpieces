@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.cmdline2.ArgumentsCheck;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
@@ -25,7 +26,7 @@ public class RouterServiceFactory {
 
     public static RouterService create(String testName, MeterRegistry metrics, VirtualFile routersFile, TemplateApi templateApi, Module ... routerOverrides) {
     		File baseWorkingDir = FileFactory.getBaseWorkingDir();
-    		Arguments arguments = new CommandLineParser().parse();
+    		ArgumentsCheck arguments = new CommandLineParser().parse();
     		RouterConfig config = new RouterConfig(baseWorkingDir, testName)
     									.setMetaFile(routersFile)
     									.setSecretKey(SecretKeyInfo.generateForTest());

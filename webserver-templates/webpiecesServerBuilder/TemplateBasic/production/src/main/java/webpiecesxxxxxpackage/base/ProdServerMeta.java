@@ -56,7 +56,7 @@ public class ProdServerMeta implements WebAppMeta {
 	@Override
     public List<Module> getGuiceModules() {
 		return Lists.newArrayList(
-				new GuiceModule(),
+				new GuiceModule(pluginConfig.getCmdLineArguments()),
 				new YourGlobalModule()
 		);
 	}

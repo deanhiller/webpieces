@@ -45,8 +45,6 @@ public class WebserverForTest {
 	}
 	
 	public WebserverForTest(TestConfig testConfig, String ...args) {
-		Arguments cmdLineArgs = new CommandLineParser().parse(args);
-
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
 		
@@ -72,9 +70,7 @@ public class WebserverForTest {
 											.setTokenCheckOn(testConfig.isUseTokenCheck());
 		TemplateConfig templateConfig = new TemplateConfig();
 		
-		webServer = WebServerFactory.create(config, routerConfig, templateConfig, cmdLineArgs);
-		
-		cmdLineArgs.checkConsumedCorrectly();
+		webServer = WebServerFactory.create(config, routerConfig, templateConfig, args);
 	}
 	
 	public void configure(ServerSocketChannel channel) throws SocketException {

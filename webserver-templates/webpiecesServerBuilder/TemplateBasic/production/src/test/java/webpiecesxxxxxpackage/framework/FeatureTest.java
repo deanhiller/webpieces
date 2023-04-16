@@ -33,7 +33,12 @@ import java.util.concurrent.TimeoutException;
 public class FeatureTest extends CompanyApiTest {
 
     private final static Logger log = LoggerFactory.getLogger(FeatureTest.class);
-    private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
+    private String[] args = {
+            "-http.port=:0",
+            "-https.port=:0",
+            "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory",
+            "-hibernate.loadclassmeta=true"
+    };
 
     protected SaveApi saveApi;
     protected ExampleRestAPI exampleRestAPI;

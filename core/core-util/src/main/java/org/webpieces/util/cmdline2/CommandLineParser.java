@@ -1,5 +1,6 @@
 package org.webpieces.util.cmdline2;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,22 @@ import java.util.Map;
  */
 public class CommandLineParser {
 
-	public Arguments parse(String ... args) {
+	private JvmEnv environment;
+
+	@Inject
+	public CommandLineParser(JvmEnv environment) {
+		this.environment = environment;
+	}
+
+	@Deprecated
+	public CommandLineParser() {
+		this.environment = new RealJvmEnv();
+	}
+	/**
+	 * @param args - cmdline arguments
+	 * @return
+	 */
+	public ArgumentsCheck parse(String ... args) {
 		Map<String, ValueHolder> arguments = new HashMap<>();
 		List<Throwable> errors = new ArrayList<Throwable>();
 		for(String arg: args) {
@@ -36,7 +52,7 @@ public class CommandLineParser {
 			String value = arg.substring(index+1);
 			arguments.put(key, new ValueHolder(value));
 		}
-		return new ArgumentsImpl(arguments, errors);
+		return new ArgumentsImpl(arguments, errors, environment);
 	}
 	
 }

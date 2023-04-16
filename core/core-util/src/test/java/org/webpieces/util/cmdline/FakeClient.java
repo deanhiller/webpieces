@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.function.Supplier;
 
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.cmdline2.ArgumentsCheck;
 import org.webpieces.util.cmdline2.CommandLineParser;
 
 public class FakeClient {
@@ -19,12 +20,17 @@ public class FakeClient {
 	private Supplier<String> key5b;
 	private Supplier<Integer> key6a;
 	private Supplier<Boolean> key6b;
-	private Arguments parse;
+	private ArgumentsCheck parse;
 	private Supplier<InetSocketAddress> key7;
+	private CommandLineParser cmdLineParser;
+
+	public FakeClient(CommandLineParser cmdLineParser) {
+		this.cmdLineParser = cmdLineParser;
+	}
 
 	public void fakeMain(String[] args) {
 		
-		parse = new CommandLineParser().parse(args);
+		parse = cmdLineParser.parse(args);
 
 		//These lines are spread throughout Plugins/Modules/Routes so that as you add plugins/modules/routes
 		//your command line dynamically changes

@@ -24,37 +24,6 @@ public class WebpiecesServer {
 
 	private final boolean isRunningServerMainMethod;
 
-	@Deprecated
-	public WebpiecesServer(
-		String projectName,
-		String base64Key,
-		Module platformOverrides, 
-		Module appOverrides, 
-		ServerConfig svrConfig, 
-		String ... args
-	) {
-		this(projectName, base64Key, (arguments) -> null, platformOverrides, appOverrides, svrConfig, args);
-	}
-
-	public WebpiecesServer(
-		String projectName,
-		String base64Key,
-		Module coreModule, //core additionalModule
-		Module platformOverrides,
-		Module appOverrides,
-		ServerConfig svrConfig,
-		String ... args
-	) {
-		this(
-				projectName,
-				base64Key,
-				(arguments) -> coreModule,
-				platformOverrides,
-				appOverrides,
-				svrConfig,
-				args
-		);
-	}
 	/**
 	 * @param platformOverrides For tests, DevelopmentServer to swap pieces out and for YOU so you can bug fix by just swapping a class and filing a ticket with the class you used to fix the bug!
 	 * @param appOverrides For unit testing so you can swap remote clients with mocks and simulate remote systems
@@ -62,7 +31,7 @@ public class WebpiecesServer {
 	public WebpiecesServer(
 		String projectName,
 		String base64Key,
-		Function<Arguments, Module> coreModuleCreator, //core additionalModule
+		Module coreModule,
 		Module platformOverrides,
 		Module appOverrides,
 		ServerConfig svrConfig,
@@ -73,14 +42,8 @@ public class WebpiecesServer {
 		Thread.setDefaultUncaughtExceptionHandler(new WebpiecesExceptionHandler());
 		
 		isRunningServerMainMethod = svrConfig.isRunningServerMainMethod();
-		//read here and checked for correctness on last line of server construction
-		Arguments arguments = new CommandLineParser().parse(args);
 
 		File baseWorkingDir = modifyUserDirForManyEnvironments(projectName);
-
-		//If we allow lazy, app developers can validate arguments were supplied on startup or fail the startup
-		//correctly..
-		Module coreModule = coreModuleCreator.apply(arguments);
 
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
@@ -108,11 +71,7 @@ public class WebpiecesServer {
 		
 		//Notice that there is a WebServerConfig, a RouterConfig, and a TemplateConfig making up
 		//3 of the major pieces of webpieces.
-		webServer = WebServerFactory.create(config, routerConfig, templateConfig, arguments);
-
-		//Before this line, every module calls into arguments telling it help and required or not and ZERO
-		//arguments can be read in this phase.  After this is called, all arguments can be read
-		arguments.checkConsumedCorrectly();
+		webServer = WebServerFactory.create(config, routerConfig, templateConfig, args);
 	}
 
 	private byte[] fetchKey(String base64Key) {
