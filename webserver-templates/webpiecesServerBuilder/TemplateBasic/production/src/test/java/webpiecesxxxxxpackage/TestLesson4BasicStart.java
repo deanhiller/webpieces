@@ -16,7 +16,12 @@ import webpiecesxxxxxpackage.mock.JavaCache;
 public class TestLesson4BasicStart {
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
-	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true"};
+	private String[] args = {
+			"-http.port=:0",
+			"-https.port=:0",
+			"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory",
+			"-hibernate.loadclassmeta=true"
+	};
 
 	//This exercises full startup with no mocking in place whatsoever BUT as you add remote systems to 
 	//talk to, you will need to change this test and pass in appOverridesModule to override those 

@@ -2,6 +2,8 @@ package org.webpieces.webserver.test.http2;
 
 import java.net.InetSocketAddress;
 import org.webpieces.util.futures.XFuture;
+
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -71,12 +73,16 @@ public abstract class AbstractHttp2Test {
 	}
 
 	protected Module getOverrides(MeterRegistry metrics) {
+		return getOverrides(metrics, null);
+	}
+
+	protected Module getOverrides(MeterRegistry metrics, Map<String, String> simulatedEnv) {
 		if(getTestMode() == TestMode.REMOTE) //need full server
-			return new OverridesForTestRealServer(metrics);
+			return new OverridesForTestRealServer(metrics, simulatedEnv);
 		else if(getTestMode() == TestMode.EMBEDDED_DIRET_NO_PARSING)
-			return new OverridesForEmbeddedSvrNoParsing(frontEnd, time, mockTimer, metrics);
+			return new OverridesForEmbeddedSvrNoParsing(frontEnd, time, mockTimer, metrics, simulatedEnv);
 		else //slower with parsing BUT closer to what platform does in production with no need to bind sockets
-			return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics);
+			return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics, simulatedEnv);
 	}
 
 	protected Http2Client getClient() {

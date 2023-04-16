@@ -9,6 +9,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -33,6 +34,7 @@ public abstract class YourCompanyAbstractDevServer {
     protected VirtualFile directory;
     protected ArrayList<VirtualFile> srcPaths;
     protected String[] args;
+    protected final Map<String, String> simulatedEnvironmentProperties;
 
     private ExecutorService fileWatchThread = Executors.newFixedThreadPool(1, new MyFileWatchThreadFactory());
 
@@ -52,8 +54,6 @@ public abstract class YourCompanyAbstractDevServer {
         DevConfig config = getConfig();
         
         directory = IDESupport.modifyForIDE(name);
-
-        
 
         //list all source paths here(DYNAMIC html files and java) as you add them(or just create for loop)
         //These are the list of directories that we detect java file changes under.  static source files(html, css, etc) do
@@ -84,7 +84,6 @@ public abstract class YourCompanyAbstractDevServer {
 //                srcPaths.add(child);
 //        }
 
-
         List<String> tempArgs = new ArrayList<>();
         if(usePortZero) {
             tempArgs.add("-http.port=:0");
@@ -99,6 +98,7 @@ public abstract class YourCompanyAbstractDevServer {
             tempArgs.add("-hibernate.persistenceunit=" + config.getHibernateSettingsClazz());
 
         String[] args = config.getExtraArguments();
+        simulatedEnvironmentProperties = config.getSimulatedEnvironmentProperties();
 
         if(args != null) {
             for (String a : args) {

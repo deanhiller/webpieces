@@ -323,16 +323,21 @@ public class ArgumentsImpl implements ArgumentsCheck {
 		for(Entry<String, List<UsageHelp>> entry : vars.entrySet()) {
 			fullHelp += "\t";
 			if(isCmdLine) {
-				fullHelp += "\t-";
+				fullHelp += "-";
 			}
-			fullHelp += entry.getKey()+" following usages:\n";
+
+			fullHelp += entry.getKey() + " ";
+			UsageHelp usageHelp = entry.getValue().get(0);
+			if(usageHelp.isHasDefaultValue()) {
+				fullHelp += "(optional, default: "+usageHelp.getDefaultValue()+")";
+			}
+			fullHelp+=":\n";
+
+			int counter = 1;
 			for(UsageHelp usage : entry.getValue()) {
-				fullHelp += "\t\t";
-				if(usage.isHasDefaultValue()) {
-					fullHelp += "(optional, default: "+usage.getDefaultValue()+")";
-				}
-				fullHelp += usage.getHelp()+"\n";
+				fullHelp += "\t\tUsage #"+counter+":"+usage.getHelp()+"\n";
 				fullHelp += "\t\t\t\tValue Parsed:"+usage.getValueParsed()+" foundKey:"+usage.isCmdLineContainsKey()+" foundValue:"+usage.isCmdLineContainsValue()+"\n";
+				counter++;
 			}
 		}
 		return fullHelp;
