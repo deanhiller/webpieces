@@ -40,7 +40,7 @@ public class FeatureTest extends CompanyApiTest {
             "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory",
             "-hibernate.loadclassmeta=true"
     };
-    
+
     private Map<String, String> simulatedEnv = Map.of(
             "REQ_ENV_VAR", "somevalue"
     );

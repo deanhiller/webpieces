@@ -6,6 +6,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
+
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -119,9 +121,12 @@ public class AbstractWebpiecesTest {
 	}
 
 	protected Module getOverrides(MeterRegistry metrics) {
+		return getOverrides(metrics, null);
+	}
+	protected Module getOverrides(MeterRegistry metrics, Map<String, String> simulatedEnv) {
 		if(isRemote())
-			return new OverridesForTestRealServer(metrics);
-		return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics);
+			return new OverridesForTestRealServer(metrics, simulatedEnv);
+		return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics, simulatedEnv);
 	}
 	
 	/**

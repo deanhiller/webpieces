@@ -12,9 +12,7 @@ import java.util.Map;
 public interface DevConfig {
     String[] getExtraArguments();
 
-    default Map<String, String> getSimulatedEnvironmentProperties() {
-        return new HashMap<>();
-    }
+    Map<String, String> getSimulatedEnvironmentProperties();
 
     String getHibernateSettingsClazz();
 

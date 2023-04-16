@@ -19,6 +19,7 @@ import webpiecesxxxxxpackage.mock.MockRemoteService;
 import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -32,7 +33,16 @@ import java.util.concurrent.TimeoutException;
 public class FeatureTest extends CompanyApiTest {
 
     private final static Logger log = LoggerFactory.getLogger(FeatureTest.class);
-    private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
+    private String[] args = {
+            "-http.port=:0",
+            "-https.port=:0",
+            "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory",
+            "-hibernate.loadclassmeta=true"
+    };
+
+    private Map<String, String> simulatedEnv = Map.of(
+            "REQ_ENV_VAR", "somevalue"
+    );
 
     protected SaveApi saveApi;
     //protected ExampleRestAPI api2IfSvcHas2Apis;  //sometimes desired before splitting into 2 microservices prematurely
@@ -57,7 +67,7 @@ public class FeatureTest extends CompanyApiTest {
     @Override
     protected void startServer() {
         metrics = new SimpleMeterRegistry();
-        Server webserver = new Server(getOverrides(metrics),new AppOverridesModule(),
+        Server webserver = new Server(getOverrides(metrics, simulatedEnv),new AppOverridesModule(),
                 new ServerConfig(JavaCache.getCacheLocation()), args
         );
         webserver.start();

@@ -2,6 +2,8 @@ package webpiecesxxxxxpackage;
 
 import java.io.IOException;
 import org.webpieces.util.futures.XFuture;
+
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -59,7 +61,17 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 	private final static Logger log = LoggerFactory.getLogger(TestLesson8JsonHttp2.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
-	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
+	private String[] args = {
+			"-http.port=:0",
+			"-https.port=:0",
+			"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory",
+			"-hibernate.loadclassmeta=true"
+	};
+
+	private Map<String, String> simulatedEnv = Map.of(
+			"REQ_ENV_VAR", "somevalue"
+	);
+
 	private Http2Socket http2Socket;
 	private ObjectMapper mapper = new ObjectMapper();
 	private SimpleMeterRegistry metrics;
@@ -93,7 +105,7 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(metrics), new AppOverridesModule(), 
+		Server webserver = new Server(getOverrides(metrics, simulatedEnv), new AppOverridesModule(),
 			new ServerConfig(JavaCache.getCacheLocation()), args
 		);
 		webserver.start();

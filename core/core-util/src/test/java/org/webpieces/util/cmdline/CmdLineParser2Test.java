@@ -152,10 +152,10 @@ public class CmdLineParser2Test {
 					"\n" +
 					"Dynamically generated help(depends on which plugins you pull in):\n" +
 					"CMD LINE ARG HELP FIRST------------------------------------------\n" +
-					"\t\t-key1 following usages:\n" +
-					"\t\t(optional, default: 123)key1 help\n" +
+					"\t-key1 (optional, default: 123):\n" +
+					"\t\tUsage #1:key1 help\n" +
 					"\t\t\t\tValue Parsed:null foundKey:false foundValue:false\n" +
-					"\t\tkey1 help from different plugin, and reasons are different\n" +
+					"\t\tUsage #2:key1 help from different plugin, and reasons are different\n" +
 					"\t\t\t\tValue Parsed:null foundKey:false foundValue:false\n" +
 					"ENV VARS HELP------------------------------------------\n" +
 					"END---------------------------------------------------\n", e.getMessage());

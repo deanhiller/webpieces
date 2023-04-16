@@ -54,7 +54,17 @@ public class OverridesForEmbeddedSvrWithParsing implements Module {
  	) {
 		this(mgr, time, mockTimer, new TemplateCompileConfig(isGradleRunning()), metrics, simulatedEnv);
 	}
-	
+
+	public OverridesForEmbeddedSvrWithParsing(
+			MockChannelManager mgr,
+			MockTime time,
+			MockTimer mockTimer,
+			TemplateCompileConfig config,
+			MeterRegistry metrics
+	) {
+		this(mgr, time, mockTimer, config, metrics, null);
+	}
+
 	public OverridesForEmbeddedSvrWithParsing(
 			MockChannelManager mgr,
 			MockTime time,
