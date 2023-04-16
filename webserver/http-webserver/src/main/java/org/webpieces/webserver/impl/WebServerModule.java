@@ -1,12 +1,9 @@
 package org.webpieces.webserver.impl;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import javax.inject.Singleton;
 
@@ -20,10 +17,7 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
-import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.metrics.MetricsCreator;
-import org.webpieces.util.cmdline2.JvmEnv;
-import org.webpieces.util.cmdline2.RealJvmEnv;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.util.time.Time;
 import org.webpieces.util.time.TimeImpl;
@@ -68,8 +62,6 @@ public class WebServerModule implements Module {
 
 		//what the webserver writes to
 		binder.bind(WebServerPortInformation.class).toInstance(portLookup);
-
-		binder.bind(JvmEnv.class).to(RealJvmEnv.class).asEagerSingleton();
 
 		if(!hasCoreModule)
 			binder.bind(MeterRegistry.class).to(SimpleMeterRegistry.class);

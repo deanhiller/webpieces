@@ -38,7 +38,7 @@ public class FakeClient {
 		//consume once optional
 		key1 = parse.createOptionalArg("key1", ":0", "This is key1", (s) -> convertInet(s));
 		//consume once required
-		key2 = parse.createRequiredArg("key2", "This is key2", (s) -> s);
+		key2 = parse.createRequiredArg("key2", "testDefault", "This is key2", (s) -> s);
 		//consume once check exist
 		key3 = parse.createDoesExistArg("key3", "This is key3");
 		
@@ -47,8 +47,8 @@ public class FakeClient {
 		key4b = parse.createOptionalArg("key4", "456", "This is key4 second one", (s) -> convertInt(s));
 		
 		//consume twice required
-		key5a = parse.createRequiredArg("key5", "This is key5", (s) -> s);
-		key5b = parse.createRequiredArg("key5", "This is key5 second one", (s) -> s);
+		key5a = parse.createRequiredArg("key5", "testDefault", "This is key5", (s) -> s);
+		key5b = parse.createRequiredArg("key5", "testDefault", "This is key5 second one", (s) -> s);
 
 		//consume optional and check boolean
 		key6a = parse.createOptionalArg("key6", "789", "This is key6", (s) -> convertInt(s));

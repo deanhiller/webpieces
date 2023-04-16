@@ -15,17 +15,21 @@ import java.util.Map;
  */
 public class CommandLineParser {
 
+	private FetchValue fetchValue;
 	private JvmEnv environment;
 
 	@Inject
-	public CommandLineParser(JvmEnv environment) {
+	public CommandLineParser(JvmEnv environment, FetchValue fetchValue) {
 		this.environment = environment;
+		this.fetchValue = fetchValue;
 	}
 
 	@Deprecated
 	public CommandLineParser() {
-		this.environment = new RealJvmEnv();
+		this.environment = new JvmEnv();
+		this.fetchValue = new FetchValue();
 	}
+
 	/**
 	 * @param args - cmdline arguments
 	 * @return

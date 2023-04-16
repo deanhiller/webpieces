@@ -20,7 +20,7 @@ public class CmdLineParser2Test {
 
 	@Before
 	public void setup() {
-		commandLineParse = new CommandLineParser(new RealJvmEnv());
+		commandLineParse = new CommandLineParser();
 		fakeClient = new FakeClient(commandLineParse);
 	}
 	
@@ -33,7 +33,7 @@ public class CmdLineParser2Test {
 		try {
 			fakeClient.readKey1();
 			Assert.fail("Should have thrown.  this is not allowed so we can discover ALL arguments");
-		} catch(IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			Assert.assertEquals("Bug in that you are consuming this too early before we are done creating all arguments", e.getMessage());
 		}
 	}
@@ -103,28 +103,12 @@ public class CmdLineParser2Test {
 		//different default values not allowed.  both must default to same thing
 		//this is a weird case
 		parse.createOptionalArg("key1", "123", "key1 help", (s) -> convertInt(s));
-		parse.createOptionalArg("key1", "555", "help for different use of same key to give info on his need", (s) -> convertInt(s));
-		
+
 		try {
-			parse.checkConsumedCorrectly();
-			Assert.fail("Should fail since defaults are different");
-		} catch(CommandLineException e) {
-			Assert.assertEquals("Errors converting command line arguments:\n" +
-					"(Call CommandLineException.getErrors to get the stack trace of each failure)\n" +
-					"java.lang.IllegalStateException: Bug, two people consuming key -key1 but both provide different defaults.  default1=123 default2=555\n" +
-					"\n" +
-					"Dynamically generated help(depends on which plugins you pull in):\n" +
-					"CMD LINE ARG HELP FIRST------------------------------------------\n" +
-					"\t\t-key1 following usages:\n" +
-					"\t\t(optional, default: 123)key1 help\n" +
-					"\t\t\t\tValue Parsed:5 foundKey:true foundValue:true\n" +
-					"\t\t(optional, default: 555)help for different use of same key to give info on his need\n" +
-					"\t\t\t\tValue Parsed:5 foundKey:true foundValue:true\n" +
-					"ENV VARS HELP------------------------------------------\n" +
-					"END---------------------------------------------------\n", e.getMessage());
-			List<Throwable> errors = e.getErrors();
-			Assert.assertEquals(1, errors.size());
-			Assert.assertEquals("Bug, two people consuming key -key1 but both provide different defaults.  default1=123 default2=555", errors.get(0).getMessage());
+			parse.createOptionalArg("key1", "555", "help for different use of same key to give info on his need", (s) -> convertInt(s));
+			Assert.fail("Should throw a failure exception");
+		} catch (IllegalStateException e) {
+			Assert.assertEquals("You have a bug, two people consuming key -key1 but both provide different defaults.  default1=123 default2=555", e.getMessage());
 		}
 	}
 	
@@ -157,7 +141,7 @@ public class CmdLineParser2Test {
 		//different default values not allowed.  both must default to same thing
 		//this is a weird case
 		parse.createOptionalArg("key1", "123", "key1 help", (s) -> convertInt(s));
-		parse.createRequiredArg("key1", "key1 help from different plugin, and reasons are different", (s) -> convertInt(s));
+		parse.createRequiredArg("key1", 345, "key1 help from different plugin, and reasons are different", (s) -> convertInt(s));
 		
 		try {
 			parse.checkConsumedCorrectly();
@@ -189,7 +173,7 @@ public class CmdLineParser2Test {
 		//different default values not allowed.  both must default to same thing
 		//this is a weird case
 		Supplier<Integer> val1 = parse.createOptionalArg("key1", "123", "key1 help", (s) -> convertInt(s));
-		Supplier<Integer> val2 = parse.createRequiredArg("key1", "key1 help", (s) -> convertInt(s));
+		Supplier<Integer> val2 = parse.createRequiredArg("key1", 234, "key1 help", (s) -> convertInt(s));
 		
 		parse.checkConsumedCorrectly();
 		
@@ -243,7 +227,7 @@ public class CmdLineParser2Test {
 		//different default values not allowed.  both must default to same thing
 		//this is a weird case
 		parse.createOptionalArg("key1", "123", "key1 help", (s) -> convertInt(s));
-		parse.createRequiredArg("key2", "key2 help", (s) -> convertInt(s));
+		parse.createRequiredArg("key2", 345, "key2 help", (s) -> convertInt(s));
 		
 		try {
 			parse.checkConsumedCorrectly();
@@ -265,6 +249,7 @@ public class CmdLineParser2Test {
 		try {
 			//we want to fail fast on these since TestBasicDevStart.java will catch this error instead of startup in the cloud..
 			parse.createOptionalArg("key1", "invalid", "key1 help", (s) -> convertInt(s));
+			Assert.fail("Should have had an exception but success. fix that");
 		} catch (IllegalArgumentException e) {
 			Assert.assertEquals("Bug in your code.  You are trying to convert value='invalid' found in key=key1.  Fix your converter or your defaultValue that you passed in", e.getMessage());
 		}

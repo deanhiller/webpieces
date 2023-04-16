@@ -4,7 +4,7 @@ import org.webpieces.util.cmdline2.JvmEnv;
 
 import java.util.Map;
 
-public class MockEnv implements JvmEnv {
+public class MockEnv extends JvmEnv {
 
     private Map<String, String> environment;
 

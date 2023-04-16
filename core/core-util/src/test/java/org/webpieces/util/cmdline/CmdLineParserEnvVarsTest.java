@@ -24,7 +24,8 @@ public class CmdLineParserEnvVarsTest {
 	@Before
 	public void setup() {
 		mockEnv = new MockEnv();
-		cmdLineParser = new CommandLineParser(mockEnv);
+		FetchValue fetchValue = new FetchValue();
+		cmdLineParser = new CommandLineParser(mockEnv, fetchValue);
 	}
 
 	private Integer convertInt(String s) {
@@ -76,7 +77,7 @@ public class CmdLineParserEnvVarsTest {
 
 		ArgumentsCheck parse = cmdLineParser.parse();
 
-		Supplier<String> requiredEnvVar = parse.createRequiredEnvVar("REQUIRED_ENV_VAR", "help msg");
+		Supplier<String> requiredEnvVar = parse.createRequiredEnvVar("REQUIRED_ENV_VAR", null, "help msg");
 
 		try {
 			parse.checkConsumedCorrectly();
@@ -91,7 +92,7 @@ public class CmdLineParserEnvVarsTest {
 
 		ArgumentsCheck parse = cmdLineParser.parse();
 
-		Supplier<Integer> requiredEnvVar = parse.createRequiredEnvVar("REQUIRED_ENV_VAR", "help msg", (s) -> convertInt(s));
+		Supplier<Integer> requiredEnvVar = parse.createRequiredEnvVar("REQUIRED_ENV_VAR", null, "help msg", (s) -> convertInt(s));
 
 		parse.checkConsumedCorrectly();
 

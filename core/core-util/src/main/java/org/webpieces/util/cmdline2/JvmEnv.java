@@ -1,5 +1,10 @@
 package org.webpieces.util.cmdline2;
 
-public interface JvmEnv {
-    public String readEnvVar(String name);
+import javax.inject.Singleton;
+
+@Singleton
+public class JvmEnv {
+    public String readEnvVar(String name) {
+        return System.getenv(name);
+    }
 }

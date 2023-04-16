@@ -96,21 +96,21 @@ public class ArgumentsImpl implements ArgumentsCheck {
 			Variables vars
 	) {
 		Map<String, List<UsageHelp>> keyToAskedFor = vars.keyToAskedFor;
-		Map<String, ValueHolder> mustMatchDefaults = vars.mustMatchDefaults;
+		Map<String, ValueHolder<String>> mustMatchDefaults = vars.mustMatchDefaults;
 
-		ValueHolder valueHolder = vars.fetch(argumentKey);
+		ValueHolder<String> valueHolder = vars.fetch(argumentKey);
 
 		List<UsageHelp> list = keyToAskedFor.getOrDefault(argumentKey, new ArrayList<UsageHelp>());
 		keyToAskedFor.put(argumentKey, list);
 
-		ValueHolder holder = mustMatchDefaults.putIfAbsent(argumentKey, new ValueHolder(defaultValueString));
+		ValueHolder<String> holder = mustMatchDefaults.putIfAbsent(argumentKey, new ValueHolder(defaultValueString));
 		if(holder != null && !valuesEqual(holder, defaultValueString)) {
 			String default1 = holder.getValue();
 			String default2 = defaultValueString;
 			UsageHelp usage = createUsage(valueHolder, defaultValueString, help);
 			list.add(usage);
-			errors.add(new IllegalStateException("Bug, two people consuming key -"+argumentKey+" but both provide different defaults.  default1="+default1+" default2="+default2));
-			return new SupplierImpl<T>(isConsumedAllArguments);
+			//fail fast here as TestBasicStart.java will catch the issue
+			throw new IllegalStateException("You have a bug, two people consuming key -"+argumentKey+" but both provide different defaults.  default1="+default1+" default2="+default2);
 		}
 		
 		//test defaultValue conversion so we throw so whoever adds this new argument knows right away if
@@ -144,7 +144,7 @@ public class ArgumentsImpl implements ArgumentsCheck {
 		return new SupplierImpl<T>(param, true, isConsumedAllArguments);
 	}
 
-	private boolean valuesEqual(ValueHolder holder, String defaultValueString) {
+	private <T> boolean valuesEqual(ValueHolder<T> holder, T defaultValueString) {
 		if(holder.getValue() == null) {
 			if(defaultValueString == null)
 				return true;
@@ -154,7 +154,7 @@ public class ArgumentsImpl implements ArgumentsCheck {
 		return holder.getValue().equals(defaultValueString);
 	}
 
-	private UsageHelp createUsage(ValueHolder valueHolder, String defaultValueString, String help) {
+	private UsageHelp createUsage(ValueHolder<String> valueHolder, String defaultValueString, String help) {
 		if(valueHolder == null) {
 			return new UsageHelp(defaultValueString, help, false, false, null);
 		} else if(valueHolder.getValue() == null) {
@@ -186,26 +186,45 @@ public class ArgumentsImpl implements ArgumentsCheck {
 
 
 	@Override
-	public Supplier<String> createRequiredArg(String argumentKey, String help) {
-		return createRequiredArg(argumentKey, help, (s) -> s);
+	public Supplier<String> createRequiredArg(String argumentKey, String testDefault, String help) {
+		return createRequiredArg(argumentKey, testDefault, help, (s) -> s);
 	}
 
 	@Override
-	public <T> Supplier<T> createRequiredArg(String argumentKey, String help, Function<String, T> converter) {
+	public <T> Supplier<T> createRequiredArg(String argumentKey, T testDefault, String help, Function<String, T> converter) {
 		notConsumed.remove(argumentKey);
-
-		return createRequiredVarImpl(argumentKey, help, converter, this.cmdLineArgs);
+		return createRequiredVarImpl(argumentKey, testDefault, help, converter, this.cmdLineArgs);
 	}
 
-	private <T> Supplier<T> createRequiredVarImpl(String argumentKey, String help, Function<String, T> converter, Variables vars) {
+	@Override
+	public Supplier<String> createRequiredEnvVar(String envVarName, String testDefault, String help) {
+		return createRequiredEnvVar(envVarName, testDefault, help, (s) -> s);
+	}
+
+	@Override
+	public <T> Supplier<T> createRequiredEnvVar(String envVarName, T testDefault, String help, Function<String, T> converter) {
+		return createRequiredVarImpl(envVarName, testDefault, help, converter, this.envArgs);
+	}
+
+	private <T> Supplier<T> createRequiredVarImpl(String argumentKey, T testDefault, String help, Function<String, T> converter, Variables vars) {
 
 		Map<String, List<UsageHelp>> keyToAskedFor = vars.keyToAskedFor;
-		Map<String, ValueHolder> mustMatchDefaults = vars.mustMatchDefaults;
+		Map<String, ValueHolder<Object>> mustMatchDefaults = vars.mustMatchTestDefaults;
 
-		ValueHolder valueHolder = vars.fetch(argumentKey);
+		ValueHolder<String> valueHolder = vars.fetch(argumentKey);
 
 		List<UsageHelp> list = keyToAskedFor.getOrDefault(argumentKey, new ArrayList<UsageHelp>());
 		keyToAskedFor.put(argumentKey, list);
+
+		ValueHolder<T> holder = mustMatchDefaults.putIfAbsent(argumentKey, new ValueHolder(testDefault));
+		if(holder != null && !valuesEqual(holder, testDefault)) {
+			T default1 = holder.getValue();
+			T default2 = testDefault;
+			UsageHelp usage = createUsage(valueHolder, testDefault+"", help);
+			list.add(usage);
+			//fail fast here as TestBasicStart.java will catch the issue
+			throw new IllegalStateException("Bug, two people consuming key -"+argumentKey+" but both provide different defaults.  default1="+default1+" default2="+default2);
+		}
 
 		if(valueHolder == null) {
 			//key does not exist at all on command line
@@ -218,27 +237,18 @@ public class ArgumentsImpl implements ArgumentsCheck {
 			errors.add(new IllegalArgumentException("key="+argumentKey+" was supplied with no value.  A value is required"));
 			return new SupplierImpl<T>(isConsumedAllArguments);
 		}
-		
+
 		list.add(new UsageHelp(help, true, true, valueHolder.getValue()));
 		T param = convert(argumentKey, converter, valueHolder.getValue());
 		return new SupplierImpl<T>(param, false, isConsumedAllArguments);
 	}
 
-	@Override
-	public Supplier<String> createRequiredEnvVar(String envVarName, String help) {
-		return createRequiredEnvVar(envVarName, help, (s) -> s);
-	}
-
-	@Override
-	public <T> Supplier<T> createRequiredEnvVar(String envVarName, String help, Function<String, T> converter) {
-		return createRequiredVarImpl(envVarName, help, converter, this.envArgs);
-	}
-
+	@Deprecated
 	@Override
 	public <T> Supplier<T> createRequiredArgOrEnvVar(String argumentKey, String envVarName, String help, Function<String, T> converter) {
 		notConsumed.remove(argumentKey);
 
-		ValueHolder valueHolder = arguments.get(argumentKey);
+		ValueHolder<String> valueHolder = arguments.get(argumentKey);
 		List<UsageHelp> list = cmdLineArgs.keyToAskedFor.getOrDefault(argumentKey, new ArrayList<UsageHelp>());
 		cmdLineArgs.keyToAskedFor.put(argumentKey, list);
 
@@ -275,7 +285,7 @@ public class ArgumentsImpl implements ArgumentsCheck {
 	public Supplier<Boolean> createDoesExistArg(String argumentKey, String help) {
 		notConsumed.remove(argumentKey);
 		
-		ValueHolder valueHolder = arguments.get(argumentKey);
+		ValueHolder<String> valueHolder = arguments.get(argumentKey);
 		List<UsageHelp> list = cmdLineArgs.keyToAskedFor.getOrDefault(argumentKey, new ArrayList<UsageHelp>());
 		cmdLineArgs.keyToAskedFor.put(argumentKey, list);
 
