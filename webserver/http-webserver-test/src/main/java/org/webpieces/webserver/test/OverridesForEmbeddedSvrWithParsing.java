@@ -34,25 +34,14 @@ public class OverridesForEmbeddedSvrWithParsing implements Module {
 	private MockTime time;
 	private MockTimer mockTimer;
 	private MeterRegistry metrics;
-	private Map<String, String> simulatedEnv;
 
 	public OverridesForEmbeddedSvrWithParsing(
 			MockChannelManager mgr,
 			MockTime time,
 			MockTimer mockTimer,
 			MeterRegistry metrics
-	) {
-		this(mgr, time, mockTimer, metrics, null);
-	}
-
-	public OverridesForEmbeddedSvrWithParsing(
-			MockChannelManager mgr,
-			MockTime time,
-			MockTimer mockTimer,
-			MeterRegistry metrics,
-			Map<String, String> simulatedEnv
  	) {
-		this(mgr, time, mockTimer, new TemplateCompileConfig(isGradleRunning()), metrics, simulatedEnv);
+		this(mgr, time, mockTimer, new TemplateCompileConfig(isGradleRunning()), metrics);
 	}
 
 	public OverridesForEmbeddedSvrWithParsing(
@@ -61,24 +50,12 @@ public class OverridesForEmbeddedSvrWithParsing implements Module {
 			MockTimer mockTimer,
 			TemplateCompileConfig config,
 			MeterRegistry metrics
-	) {
-		this(mgr, time, mockTimer, config, metrics, null);
-	}
-
-	public OverridesForEmbeddedSvrWithParsing(
-			MockChannelManager mgr,
-			MockTime time,
-			MockTimer mockTimer,
-			TemplateCompileConfig config,
-			MeterRegistry metrics,
-			Map<String, String> simulatedEnv
 	) {
 		this.mgr = mgr;
 		this.time = time;
 		this.mockTimer = mockTimer;
 		templateConfig = config;
 		this.metrics = metrics;
-		this.simulatedEnv = simulatedEnv;
 	}
 	
 	@Override
@@ -88,9 +65,6 @@ public class OverridesForEmbeddedSvrWithParsing implements Module {
 		binder.bind(Time.class).toInstance(time);
 		binder.bind(ScheduledExecutorService.class).toInstance(mockTimer);
 
-		if(simulatedEnv != null) {
-			binder.bind(JvmEnv.class).toInstance(new SimulatedEnv(simulatedEnv));
-		}
         //By using the DevTemplateService, we do not need to re-run the gradle build and generate html
         //files every time we change the html code AND instead can just run the test in our IDE.
         //That said, there is a setting when this test runs in gradle that skips this step and runs the

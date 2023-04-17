@@ -65,7 +65,7 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 
 		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		Module platformOverrides = Modules.combine(
-				new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, templateConfig, metrics, null),
+				new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, templateConfig, metrics),
 				new ForTestingStaticDevelopmentModeModule());
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your

@@ -56,13 +56,14 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 
-	private Map<String, String> simulatedEnv = Map.of(
-			"REQ_ENV_VAR", "somevalue"
-	);
+	public void initEnvironment() {
+		simulatedEnv =Map.of(
+				"REQ_ENV_VAR","somevalue"
+		);
+	}
 
 	private HttpSocket http11Socket;
-	private SimpleMeterRegistry metrics;
-	
+
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
 		log.info("Setting up test");
@@ -70,14 +71,13 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 		
 		//clear in-memory database
 		jdbc.dropAllTablesFromDatabase();
-		
-		metrics = new SimpleMeterRegistry();
-		boolean isRemote = false;
+
+		initEnvironment();
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(
-				getOverrides(metrics, simulatedEnv), new AppOverridesModule(),
+				getOverrides(), new AppOverridesModule(),
 				new ServerConfig(JavaCache.getCacheLocation()), args);
 		
 		webserver.start();

@@ -41,14 +41,16 @@ public class FeatureTest extends CompanyApiTest {
             "-hibernate.loadclassmeta=true"
     };
 
-    private Map<String, String> simulatedEnv = Map.of(
-            "REQ_ENV_VAR", "somevalue"
-    );
+    @Override
+    public Map<String, String> initEnvironmentVars() {
+        return Map.of(
+                "REQ_ENV_VAR","somevalue"
+        );
+    }
 
     protected SaveApi saveApi;
     protected ExampleRestAPI exampleRestAPI;
     protected MockRemoteService mockRemoteService = new MockRemoteService();
-    protected SimpleMeterRegistry metrics;
 
     @Before
     public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
@@ -67,7 +69,7 @@ public class FeatureTest extends CompanyApiTest {
     @Override
     protected void startServer() {
         metrics = new SimpleMeterRegistry();
-        Server webserver = new Server(getOverrides(metrics, simulatedEnv),new AppOverridesModule(),
+        Server webserver = new Server(getOverrides(),new AppOverridesModule(),
                 new ServerConfig(JavaCache.getCacheLocation()), args
         );
         webserver.start();

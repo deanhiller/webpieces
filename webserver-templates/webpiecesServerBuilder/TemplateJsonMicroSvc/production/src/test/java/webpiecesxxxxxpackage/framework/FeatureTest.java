@@ -48,7 +48,6 @@ public class FeatureTest extends CompanyApiTest {
     //protected ExampleRestAPI api2IfSvcHas2Apis;  //sometimes desired before splitting into 2 microservices prematurely
 
     protected MockRemoteService mockRemoteService = new MockRemoteService();
-    protected SimpleMeterRegistry metrics;
 
     @Before
     public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
@@ -67,7 +66,7 @@ public class FeatureTest extends CompanyApiTest {
     @Override
     protected void startServer() {
         metrics = new SimpleMeterRegistry();
-        Server webserver = new Server(getOverrides(metrics, simulatedEnv),new AppOverridesModule(),
+        Server webserver = new Server(getOverrides(),new AppOverridesModule(),
                 new ServerConfig(JavaCache.getCacheLocation()), args
         );
         webserver.start();

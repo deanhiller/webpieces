@@ -34,22 +34,18 @@ public class OverridesForEmbeddedSvrNoParsing implements Module {
 	private MockTime time;
 	private MockTimer mockTimer;
 	private MeterRegistry metrics;
-	private Map<String, String> simulatedEnv;
-
 	private TemplateCompileConfig templateConfig;
 
 	public OverridesForEmbeddedSvrNoParsing(
 			MockFrontendManager frontEnd,
 			MockTime time,
 			MockTimer mockTimer,
-			MeterRegistry metrics,
-			Map<String, String> simulatedEnv
+			MeterRegistry metrics
 	) {
 		this.frontEnd = frontEnd;
 		this.time = time;
 		this.mockTimer = mockTimer;
 		this.metrics = metrics;
-		this.simulatedEnv = simulatedEnv;
 		templateConfig = new TemplateCompileConfig(isGradleRunning());
 	}
 
@@ -61,9 +57,6 @@ public class OverridesForEmbeddedSvrNoParsing implements Module {
 		binder.bind(Time.class).toInstance(time);
 		binder.bind(ScheduledExecutorService.class).toInstance(mockTimer);
 
-		if(simulatedEnv != null) {
-			binder.bind(JvmEnv.class).toInstance(new SimulatedEnv(simulatedEnv));
-		}
         //By using the DevTemplateService, we do not need to re-run the gradle build and generate html
         //files every time we change the html code AND instead can just run the test in our IDE.
         //That said, there is a setting when this test runs in gradle that skips this step and runs the

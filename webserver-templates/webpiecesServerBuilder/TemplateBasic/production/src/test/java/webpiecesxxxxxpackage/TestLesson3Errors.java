@@ -54,13 +54,15 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 
-	private Map<String, String> simulatedEnv = Map.of(
-			"REQ_ENV_VAR", "somevalue"
-	);
+	@Override
+	public Map<String, String> initEnvironmentVars() {
+		return Map.of(
+				"REQ_ENV_VAR","somevalue"
+		);
+	}
 
 	private HttpSocket http11Socket;
-	private SimpleMeterRegistry metrics;
-	
+
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
 		Asserts.assertWasCompiledWithParamNames("test");
@@ -68,11 +70,10 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 		//clear in-memory database
 		jdbc.dropAllTablesFromDatabase();
 		
-		metrics = new SimpleMeterRegistry();
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(metrics, simulatedEnv), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()), args);
+		Server webserver = new Server(getOverrides(), new AppOverridesModule(), new ServerConfig(JavaCache.getCacheLocation()), args);
 		webserver.start();
 		http11Socket = connectHttp(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

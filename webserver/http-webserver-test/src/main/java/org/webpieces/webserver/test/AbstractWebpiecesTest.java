@@ -2,11 +2,14 @@ package org.webpieces.webserver.test;
 
 import java.net.InetSocketAddress;
 
+import com.google.inject.util.Modules;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.After;
 import org.junit.Assert;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +37,10 @@ public class AbstractWebpiecesTest {
 	protected MockChannelManager mgr = new MockChannelManager();
 	protected MockTime time = new MockTime(true);
 	protected MockTimer mockTimer = new MockTimer();
+
+	protected SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+
+	protected Map<String, String> simulatedEnv = initEnvironmentVars();
 
 //	public HttpSocket connectHttpLocal() {
 //		try {
@@ -120,15 +127,27 @@ public class AbstractWebpiecesTest {
 		return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics);
 	}
 
+	protected Module getOverrides() {
+		Module overrides = getOverridesImpl(metrics);
+		Module combined = Modules.combine(overrides, new EnvSimModule(simulatedEnv));
+		return combined;
+	}
+
+	@Deprecated
 	protected Module getOverrides(MeterRegistry metrics) {
-		return getOverrides(metrics, null);
+		return getOverridesImpl(metrics);
 	}
-	protected Module getOverrides(MeterRegistry metrics, Map<String, String> simulatedEnv) {
+
+	private Module getOverridesImpl(MeterRegistry metrics) {
 		if(isRemote())
-			return new OverridesForTestRealServer(metrics, simulatedEnv);
-		return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics, simulatedEnv);
+			return new OverridesForTestRealServer(metrics);
+		return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics);
 	}
-	
+
+	protected Map<String, String> initEnvironmentVars() {
+		return new HashMap<>();
+	}
+
 	/**
 	 * @deprecated Use getClient() instead and override isRemote() instead of this method 
 	 */
