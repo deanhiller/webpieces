@@ -336,7 +336,9 @@ public class ArgumentsImpl implements ArgumentsCheck {
 			int counter = 1;
 			for(UsageHelp usage : entry.getValue()) {
 				fullHelp += "\t\tUsage #"+counter+":"+usage.getHelp()+"\n";
-				fullHelp += "\t\t\t\tValue Parsed:"+usage.getValueParsed()+" foundKey:"+usage.isCmdLineContainsKey()+" foundValue:"+usage.isCmdLineContainsValue()+"\n";
+				//We can't print security tokens in the logs
+				//Value Parsed:"+usage.getValueParsed()+
+				fullHelp += "\t\t\t\tFoundKey:"+usage.isCmdLineContainsKey()+" foundValue:"+usage.isCmdLineContainsValue()+"\n";
 				counter++;
 			}
 		}
