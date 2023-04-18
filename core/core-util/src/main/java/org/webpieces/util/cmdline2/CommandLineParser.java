@@ -56,7 +56,7 @@ public class CommandLineParser {
 			String value = arg.substring(index+1);
 			arguments.put(key, new ValueHolder(value));
 		}
-		return new ArgumentsImpl(arguments, errors, environment);
+		return new ArgumentsImpl(arguments, errors, environment, fetchValue);
 	}
 	
 }

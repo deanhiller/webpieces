@@ -154,9 +154,9 @@ public class CmdLineParser2Test {
 					"CMD LINE ARG HELP FIRST------------------------------------------\n" +
 					"\t-key1 (optional, default: 123):\n" +
 					"\t\tUsage #1:key1 help\n" +
-					"\t\t\t\tValue Parsed:null foundKey:false foundValue:false\n" +
+					"\t\t\t\tFoundKey:false foundValue:false\n" +
 					"\t\tUsage #2:key1 help from different plugin, and reasons are different\n" +
-					"\t\t\t\tValue Parsed:null foundKey:false foundValue:false\n" +
+					"\t\t\t\tFoundKey:false foundValue:false\n" +
 					"ENV VARS HELP------------------------------------------\n" +
 					"END---------------------------------------------------\n", e.getMessage());
 		}

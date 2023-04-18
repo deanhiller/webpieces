@@ -23,6 +23,7 @@ public class ArgumentsImpl implements ArgumentsCheck {
 	private InetConverter inetConverter = new InetConverter(); //hmm, I hate not doing DI here!!
 	private boolean calledAlready = false;
 	private Map<String, ValueHolder> arguments;
+	private FetchValue valueFetcher;
 	private JvmEnv environment;
 	private Set<String> notConsumed = new HashSet<String>(); 
 	private List<Throwable> errors = new ArrayList<>();
@@ -34,9 +35,15 @@ public class ArgumentsImpl implements ArgumentsCheck {
 
 	private Map<String, String> mustMatchEnvVars = new HashMap<>();
 
-	public ArgumentsImpl(Map<String, ValueHolder> args, List<Throwable> errors, JvmEnv environment) {
+	public ArgumentsImpl(
+			Map<String, ValueHolder> args,
+			List<Throwable> errors,
+			JvmEnv environment,
+			FetchValue valueFetcher
+	) {
 		this.errors = errors;
 		this.arguments = args;
+		this.valueFetcher = valueFetcher;
 		cmdLineArgs = new Variables((name) -> arguments.get(name));
 		envArgs = new Variables((name) -> {
 			String val = environment.readEnvVar(name);
@@ -227,10 +234,8 @@ public class ArgumentsImpl implements ArgumentsCheck {
 		}
 
 		if(valueHolder == null) {
-			//key does not exist at all on command line
-			list.add(new UsageHelp(help, false, false, null));
-			errors.add(new IllegalArgumentException("Argument -"+argumentKey+" is required but was not supplied.  help='"+help+"'"));
-			return new SupplierImpl<T>(isConsumedAllArguments);
+			//key does not exist at all on (cmd line or environment)
+			return createSupplier(argumentKey, testDefault, help, list);
 		} else if(valueHolder.getValue() == null) {
 			//key exists but there is no value
 			list.add(new UsageHelp(help, true, false, null));
@@ -241,6 +246,24 @@ public class ArgumentsImpl implements ArgumentsCheck {
 		list.add(new UsageHelp(help, true, true, valueHolder.getValue()));
 		T param = convert(argumentKey, converter, valueHolder.getValue());
 		return new SupplierImpl<T>(param, false, isConsumedAllArguments);
+	}
+
+	private <T> Supplier<T> createSupplier(String argumentKey, T testDefault, String help, List<UsageHelp> list) {
+		return valueFetcher.fetchFinalValue(testDefault,
+				() -> reqArgMissing(argumentKey, help, list),
+				() -> fillDefaultIn(testDefault, help, list)
+		);
+	}
+
+	private <T> SupplierImpl<T> fillDefaultIn(T testDefault, String help, List<UsageHelp> list) {
+		list.add(new UsageHelp(help, true, true, testDefault.toString()));
+		return new SupplierImpl<>(testDefault, false, isConsumedAllArguments);
+	}
+
+	private <T> SupplierImpl<T> reqArgMissing(String argumentKey, String help, List<UsageHelp> list) {
+		list.add(new UsageHelp(help, false, false, null));
+		errors.add(new IllegalArgumentException("Argument -" + argumentKey + " is required but was not supplied.  help='" + help + "'"));
+		return new SupplierImpl<T>(isConsumedAllArguments);
 	}
 
 	@Deprecated
