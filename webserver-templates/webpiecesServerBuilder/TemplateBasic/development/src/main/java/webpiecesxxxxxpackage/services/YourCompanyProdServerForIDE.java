@@ -25,7 +25,10 @@ public abstract class YourCompanyProdServerForIDE extends YourCompanyAbstractDev
         //html and json template file encoding...
         TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths);
 
-        Module platformOverrides = Modules.combine(new DevTemplateModule(templateConfig));
+        Module platformOverrides = Modules.combine(
+                new EnvironmentOverrides(simulatedEnvironmentProperties),
+                new DevTemplateModule(templateConfig)
+        );
 
         ServerConfig config = new ServerConfig(false);
 

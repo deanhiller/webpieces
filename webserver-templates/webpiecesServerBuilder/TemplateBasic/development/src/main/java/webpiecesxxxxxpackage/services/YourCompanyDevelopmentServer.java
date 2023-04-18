@@ -43,6 +43,7 @@ public abstract class YourCompanyDevelopmentServer extends YourCompanyAbstractDe
         devConfig.setFailIfNotInSourcePaths("WEBPIECESxPACKAGE"); //FAIL FAST if a class with this package is not in our source directories so we can fix it!!
         
         Module platformOverrides = Modules.combine(
+                new EnvironmentOverrides(simulatedEnvironmentProperties),
                 new DevRouterModule(devConfig),
                 new DevTemplateModule(templateConfig));
 

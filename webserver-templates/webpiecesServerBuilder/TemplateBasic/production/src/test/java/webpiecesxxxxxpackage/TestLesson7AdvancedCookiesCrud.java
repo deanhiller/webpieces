@@ -1,5 +1,6 @@
 package webpiecesxxxxxpackage;
 
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -46,6 +47,13 @@ public class TestLesson7AdvancedCookiesCrud extends AbstractWebpiecesTest {
 	private WebBrowserSimulator webBrowser;
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 
+	@Override
+	public Map<String, String> initEnvironmentVars() {
+		return Map.of(
+				"REQ_ENV_VAR","somevalue"
+		);
+	}
+
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
 		log.info("Setting up test");
@@ -54,11 +62,10 @@ public class TestLesson7AdvancedCookiesCrud extends AbstractWebpiecesTest {
 		//clear in-memory database
 		jdbc.dropAllTablesFromDatabase();
 		
-		SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(metrics), null, new ServerConfig(JavaCache.getCacheLocation()), args);
+		Server webserver = new Server(getOverrides(), null, new ServerConfig(JavaCache.getCacheLocation()), args);
 		webserver.start();
 		HttpSocket https11Socket = connectHttps(null, webserver.getUnderlyingHttpChannel().getLocalAddress());
 		webBrowser = new WebBrowserSimulator(https11Socket);

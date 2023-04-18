@@ -9,6 +9,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -30,6 +31,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 public abstract class YourCompanyAbstractDevServer {
 
 	private static final Logger log = LoggerFactory.getLogger(YourCompanyAbstractDevServer.class);
+    protected final Map<String, String> simulatedEnvironmentProperties;
     protected VirtualFile directory;
     protected ArrayList<VirtualFile> srcPaths;
     protected String[] args;
@@ -99,6 +101,7 @@ public abstract class YourCompanyAbstractDevServer {
             tempArgs.add("-hibernate.persistenceunit=" + config.getHibernateSettingsClazz());
 
         String[] args = config.getExtraArguments();
+        simulatedEnvironmentProperties = config.getSimulatedEnvironmentProperties();
 
         if(args != null) {
             for (String a : args) {

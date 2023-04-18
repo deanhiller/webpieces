@@ -1,14 +1,14 @@
 package org.webpieces.util.cmdline2;
 
-public class ValueHolder {
+public class ValueHolder<T> {
 
-	private String value;
+	private T value;
 
-	public ValueHolder(String value) {
+	public ValueHolder(T value) {
 		this.value = value;
 	}
 
-	public String getValue() {
+	public T getValue() {
 		return value;
 	}
 

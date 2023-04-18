@@ -21,6 +21,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
+import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.context.ClientAssertions;
 import webpiecesxxxxxpackage.Server;
 import webpiecesxxxxxpackage.db.EducationEnum;
@@ -34,12 +35,36 @@ import webpiecesxxxxxpackage.web.login.BackendLoginImpl;
 import webpiecesxxxxxpackage.web.tags.MyHtmlTagCreator;
 
 import javax.inject.Singleton;
+import java.util.function.Supplier;
 
 public class GuiceModule implements Module {
 
 	private static final Logger log = LoggerFactory.getLogger(GuiceModule.class);
-	
-	//This is where you would put the guice bindings you need though generally if done
+	private final Supplier<String> optionalArg;
+	private final Supplier<String> reqEnvVar;
+	private Supplier<String> reqArg;
+
+	public GuiceModule(Arguments cmdLineArguments) {
+		optionalArg = cmdLineArguments.createOptionalArg("optionalArg", "default", "Your help message", (s) -> s);
+		reqEnvVar = cmdLineArguments.createRequiredEnvVar("REQ_ENV_VAR", "testDefault", "some help");
+
+		/**
+		 * Args are LAZY checked so in the cloud, we can fail ONCE and tell you ALL the errors regarding missing
+		 * arguments at once, rather than this ->
+		 * 1. boot up
+		 * 2. fail on arg1 and print arg1 is required
+		 * 3. boot up
+		 * 4. fail on arg2 and pring arg2 is required or format is wrong
+		 * 5. boot up..fail again
+		 *
+		 * Instead, we do this
+		 * 1. boot up
+		 * 2. fail on arg1, arg2, arg3, all failed and the reasons they all failed, missing, conversion error, etc.
+		 */
+		//reqArg = cmdLineArguments.createRequiredArg("reqArg", "Your help", (s) -> s);
+	}
+
+    //This is where you would put the guice bindings you need though generally if done
 	//right, you won't have much in this file.
 	
 	//If you need more Guice Modules as you want to scale, just modify ServerMeta which returns

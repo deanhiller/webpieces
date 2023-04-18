@@ -1,5 +1,6 @@
 package org.webpieces.webserver.test.http2.directfast;
 
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -14,6 +15,7 @@ import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
+import org.webpieces.util.cmdline2.JvmEnv;
 import org.webpieces.util.threading.DirectExecutorService;
 import org.webpieces.util.time.Time;
 
@@ -22,6 +24,7 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import org.webpieces.webserver.test.SimulatedEnv;
 
 public class OverridesForEmbeddedSvrNoParsing implements Module {
 
@@ -31,10 +34,14 @@ public class OverridesForEmbeddedSvrNoParsing implements Module {
 	private MockTime time;
 	private MockTimer mockTimer;
 	private MeterRegistry metrics;
-
 	private TemplateCompileConfig templateConfig;
 
-	public OverridesForEmbeddedSvrNoParsing(MockFrontendManager frontEnd, MockTime time, MockTimer mockTimer, MeterRegistry metrics) {
+	public OverridesForEmbeddedSvrNoParsing(
+			MockFrontendManager frontEnd,
+			MockTime time,
+			MockTimer mockTimer,
+			MeterRegistry metrics
+	) {
 		this.frontEnd = frontEnd;
 		this.time = time;
 		this.mockTimer = mockTimer;
@@ -49,7 +56,7 @@ public class OverridesForEmbeddedSvrNoParsing implements Module {
 		binder.bind(MeterRegistry.class).toInstance(metrics);
 		binder.bind(Time.class).toInstance(time);
 		binder.bind(ScheduledExecutorService.class).toInstance(mockTimer);
-		
+
         //By using the DevTemplateService, we do not need to re-run the gradle build and generate html
         //files every time we change the html code AND instead can just run the test in our IDE.
         //That said, there is a setting when this test runs in gradle that skips this step and runs the

@@ -3,6 +3,8 @@ package org.webpieces.router.api.simplesvr;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+
+import org.webpieces.util.cmdline2.ArgumentsCheck;
 import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
@@ -54,7 +56,7 @@ public class TestSimpleRoutes {
 		
 		TestModule module = new TestModule();
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
-		Arguments args = new CommandLineParser().parse();
+		ArgumentsCheck args = new CommandLineParser().parse();
 		RouterConfig config = new RouterConfig(baseWorkingDir, "TestSimpleRoutes")
 										.setMetaFile(f)
 										.setWebappOverrides(module)
@@ -73,7 +75,7 @@ public class TestSimpleRoutes {
 		File myCodePath = new File(filePath + "/src/test/java");
 		VirtualFile cacheLocation = new VirtualFileImpl(FileFactory.newCacheLocation("webpieces/"+TestSimpleRoutes.class.getSimpleName()+"/bytecode"));
 		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), cacheLocation);
-		Arguments args2 = new CommandLineParser().parse();
+		ArgumentsCheck args2 = new CommandLineParser().parse();
 		SimpleMeterRegistry metrics2 = new SimpleMeterRegistry();
 		RouterService devSvc = DevRouterFactory.create(metrics2, config, compileConfig, nullApi);
 		devSvc.configure(args2);

@@ -13,29 +13,73 @@ public interface Arguments {
 	 * @param argumentKey The cmdLine key as in db.port=0 (db.port is the key)
 	 * @param defaultValue Default value if argumentKey is not found on command line
 	 * @param help The help to show the user when missing arguments (or too many arguments)
-	 * @param converter Converts the cmd line String into the correct type or fails with the Help message to the user
+	 * @param converter Validator and converter that throws exception if invalid or converts it string to string or string to another type
 	 * @return a function that will be called later to get the cmd line argument
 	 */
 	<T> Supplier<T> createOptionalArg(String argumentKey, String defaultValue, String help, Function<String, T> converter);
 
 	/**
-	 * @param <T> The type the argument will be converted to
+	 * Do not use if you need to validate the string coming in.  This function just
+	 * call createOptionaArg(......, (s) -> s) doing no validation and no conversion
+	 *
 	 * @param argumentKey The cmdLine key as in db.port=0 (db.port is the key)
+	 * @param defaultValue Default value if argumentKey is not found on command line
 	 * @param help The help to show the user when missing arguments (or too many arguments)
-	 * @param converter Converts the cmd line String into the correct type or fails with the Help message to the user
 	 * @return a function that will be called later to get the cmd line argument
 	 */
-	<T> Supplier<T> createRequiredArg(String argumentKey, String help, Function<String, T> converter);
+	Supplier<String> createOptionalArg(String argumentKey, String defaultValue, String help);
+
+	/**
+	 * Environment variables are more secure in that if a hacker gets on the system and lists the
+	 * processes, environment variables are not shown with the command.  Passwords/SecureTokens are
+	 * best passed in as environment variables
+	 */
+	<T> Supplier<T> createOptionalEnvVar(String envVarName, String defaultValue, String help, Function<String, T> converter);
+
+	/**
+	 * Does NO validation and simply calls createOptionalEnvVar(envVarName, help, (s) -> s);
+	 * Normally, you should pass in a function that validates and throws exception to fail startup.
+	 */
+	<T> Supplier<T> createOptionalEnvVar(String envVarName, String defaultValue, String help);
 
 	/**
 	 * @param <T> The type the argument will be converted to
 	 * @param argumentKey The cmdLine key as in db.port=0 (db.port is the key)
-	 * @param envVarName The env var key as in DB_PASSWORD=PASSOWRD (DB_PASSWORD is the key)
 	 * @param help The help to show the user when missing arguments (or too many arguments)
-	 * @param converter Converts the cmd line String into the correct type or fails with the Help message to the user
+	 * @param converter Validator and converter that throws exception if invalid or converts it string to string or string to another type
 	 * @return a function that will be called later to get the cmd line argument
 	 */
+	<T> Supplier<T> createRequiredArg(String argumentKey, T testDefault, String help, Function<String, T> converter);
+
+	/**
+	 * Do not use if you need to validate the string coming in.  This function just
+	 * call createRequiredArg(......, (s) -> s) doing no validation and no conversion
+	 *
+	 * @param argumentKey The cmdLine key as in db.port=0 (db.port is the key)
+	 * @param help The help to show the user when missing arguments (or too many arguments)
+	 * @return a function that will be called later to get the cmd line argument
+	 */
+	Supplier<String> createRequiredArg(String argumentKey, String testDefault, String help);
+
+	/**
+	 * Environment variables are more secure in that if a hacker gets on the system and lists the
+	 * processes, environment variables are not shown with the command.  Passwords/SecureTokens are
+	 * best passed in as environment variables
+	 */
+	<T> Supplier<T> createRequiredEnvVar(String envVarName, T testDefault, String help, Function<String, T> converter);
+
+	/**
+	 * Does NO validation and simply calls createRequiredEnvVar(envVarName, help, (s) -> s);
+	 * Normally, you should pass in a function that validates and throws exception to fail startup.
+	 */
+	Supplier<String> createRequiredEnvVar(String envVarName, String testDefault, String help);
+
+	/**
+	 * @deprecated READ createRequiredEnvVar instead or use createRequiredArg
+	 */
+	@Deprecated
 	<T> Supplier<T> createRequiredArgOrEnvVar(String argumentKey, String envVarName, String help, Function<String, T> converter);
+
 
 	/**
 	 * Special case convience method converting :{port} or {host}:{port} to InetSocketAddress
@@ -47,16 +91,4 @@ public interface Arguments {
 	 */
 	Supplier<Boolean> createDoesExistArg(String key, String help);
 
-	/**
-	 * After all the modules/routesFiles/plugins call the above methods, the main program then
-	 * can call this method to check that the command line had no errors and all arguments that
-	 * need to exist actually exist
-	 */
-	void checkConsumedCorrectly();
-
-	/**
-	 * If you run just construction to call all the consumeXXX methods, then you can call this
-	 * to print commandline help
-	 */
-	String commandLineHelpMessage();
 }

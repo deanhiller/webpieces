@@ -14,6 +14,7 @@ import org.digitalforge.sneakythrow.SneakyThrow;
 import org.webpieces.util.filters.Filter;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.webserver.impl.PortConfigLookupImpl;
+import org.webpieces.webserver.impl.PortConfiguration;
 import org.webpieces.webserver.impl.WebServerImpl;
 import org.webpieces.webserver.impl.WebServerModule;
 
@@ -28,7 +29,7 @@ public abstract class WebServerFactory {
 
     protected WebServerFactory() {}
 
-	public static WebServer create(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig, Arguments args) {
+	public static WebServer create(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig, String ... args) {
 		if(!routerConfig.getMetaFile().exists())
 			throw new RuntimeException("file not found="+routerConfig.getMetaFile());
 
@@ -50,7 +51,7 @@ public abstract class WebServerFactory {
 			throw SneakyThrow.sneak(e);
 		}
 		
-		Module allModules = getModules(config, routerConfig, templateConfig, args);
+		Module allModules = getModules(config, routerConfig, templateConfig);
 
 		Module platformOverrides = config.getPlatformOverrides();
 		if(platformOverrides != null)
@@ -63,13 +64,17 @@ public abstract class WebServerFactory {
 		//this literally just sets the same FutureUtil into the filters
 		FutureHelper util = injector.getInstance(FutureHelper.class);
 		Filter.setFutureUtil(util);
-		
-		serverImpl.configureSync(args); //configure must be called as after configured, Arguments.checkConsumedCorrectly must
+
+		//ANYTHING in webpieces that needs command line arguments, we get through injector here and pass
+		//to the method that wires args to fields with validation
+		PortConfiguration instance = injector.getInstance(PortConfiguration.class);
+
+		serverImpl.configureSync(instance, args); //configure must be called as after configured, Arguments.checkConsumedCorrectly must
 		  						//be called before start is called on the webserver
 		return serverImpl;
 	}
 
-	private static Module getModules(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig, Arguments args) {
+	private static Module getModules(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig) {
 
 		//Special wiring needed between webserver and router due to order of start.  See
 		//PortConfigLookupImpl javadoc for more info
@@ -78,7 +83,7 @@ public abstract class WebServerFactory {
 		boolean hasCoreModule = config.getCoreModule() != null;
 		
 		Module m = Modules.combine(
-			new WebServerModule(config, portLookup, hasCoreModule, args),
+			new WebServerModule(config, portLookup, hasCoreModule),
 			new ProdRouterModule(routerConfig, portLookup),
 			new ProdTemplateModule(templateConfig)
 		);

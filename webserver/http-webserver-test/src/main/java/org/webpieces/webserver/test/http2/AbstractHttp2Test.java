@@ -1,7 +1,13 @@
 package org.webpieces.webserver.test.http2;
 
 import java.net.InetSocketAddress;
+
+import com.google.inject.util.Modules;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.webpieces.util.futures.XFuture;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -16,9 +22,7 @@ import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.digitalforge.sneakythrow.SneakyThrow;
-import org.webpieces.webserver.test.MockChannelManager;
-import org.webpieces.webserver.test.OverridesForEmbeddedSvrWithParsing;
-import org.webpieces.webserver.test.OverridesForTestRealServer;
+import org.webpieces.webserver.test.*;
 import org.webpieces.webserver.test.http2.direct.DirectHttp2Client;
 import org.webpieces.webserver.test.http2.directfast.DirectFastClient;
 import org.webpieces.webserver.test.http2.directfast.MockFrontendManager;
@@ -35,6 +39,10 @@ public abstract class AbstractHttp2Test {
 	protected MockFrontendManager frontEnd = new MockFrontendManager();
 	protected MockTime time = new MockTime(true);
 	protected MockTimer mockTimer = new MockTimer();
+
+	protected SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+
+	protected Map<String, String> simulatedEnv = initEnvironmentVars();
 
 	public Http2Socket connectHttp(InetSocketAddress addr) {
 		return connectHttp(addr, null);
@@ -70,6 +78,13 @@ public abstract class AbstractHttp2Test {
 		}
 	}
 
+	protected Module getOverrides() {
+		Module m = getOverrides(metrics);
+		Module combined = Modules.combine(m, new EnvSimModule(simulatedEnv));
+		return combined;
+	}
+
+	@Deprecated
 	protected Module getOverrides(MeterRegistry metrics) {
 		if(getTestMode() == TestMode.REMOTE) //need full server
 			return new OverridesForTestRealServer(metrics);
@@ -77,6 +92,10 @@ public abstract class AbstractHttp2Test {
 			return new OverridesForEmbeddedSvrNoParsing(frontEnd, time, mockTimer, metrics);
 		else //slower with parsing BUT closer to what platform does in production with no need to bind sockets
 			return new OverridesForEmbeddedSvrWithParsing(mgr, time, mockTimer, metrics);
+	}
+
+	protected Map<String, String> initEnvironmentVars() {
+		return new HashMap<>();
 	}
 
 	protected Http2Client getClient() {

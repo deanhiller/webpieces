@@ -3,8 +3,10 @@ package webpiecesxxxxxpackage;
 import java.awt.AWTException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.google.inject.util.Modules;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,6 +23,7 @@ import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.Asserts;
+import org.webpieces.webserver.test.EnvSimModule;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
 
 import com.google.inject.Binder;
@@ -44,13 +47,17 @@ public class TestLesson5WithSelenium {
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true"};
 
+	private Map<String, String> simulatedEnv = Map.of(
+			"REQ_ENV_VAR", "somevalue"
+	);
+
 	//see below comments in AppOverrideModule
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //or your favorite mock library
 	
 	private int httpPort;
 	private int httpsPort;
-	private SimpleMeterRegistry metrics;
-	
+	private SimpleMeterRegistry metrics = new SimpleMeterRegistry();
+
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		driver = new FirefoxDriver();
@@ -58,12 +65,16 @@ public class TestLesson5WithSelenium {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		jdbc.dropAllTablesFromDatabase();
-		
-		metrics = new SimpleMeterRegistry();
+
+		Module overrides = Modules.combine(
+				new OverridesForTestRealServer(metrics),
+				new EnvSimModule(simulatedEnv)
+		);
+
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test and NOT drop tables but clear and re-populate
 		Server webserver = new Server(
-				new OverridesForTestRealServer(metrics), new AppOverridesModule(), 
+				overrides, new AppOverridesModule(),
 				new ServerConfig(JavaCache.getCacheLocation()), args);
 		
 		webserver.start();

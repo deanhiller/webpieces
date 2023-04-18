@@ -22,16 +22,23 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
+import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.context.ClientAssertions;
 import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
 import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteServiceSimulator;
 import webpiecesxxxxxpackage.deleteme.service.SimpleStorageImpl;
 
 import javax.inject.Singleton;
+import java.util.function.Supplier;
 
 public class GuiceModule implements Module {
 
 	private static final Logger log = LoggerFactory.getLogger(GuiceModule.class);
+	private final Supplier<Integer> secureToken;
+
+	public GuiceModule(Arguments args) {
+		secureToken = args.createRequiredEnvVar("DEANS_SECURITY_TOKEN", 12345, "Some help", (s) -> Integer.parseInt(s));
+	}
 	
 	//This is where you would put the guice bindings you need though generally if done
 	//right, you won't have much in this file.

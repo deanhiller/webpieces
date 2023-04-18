@@ -63,8 +63,6 @@ public class PrivateWebserverForTest {
 	}
 
 	private void init(PrivateTestConfig testConfig, String ... args) {
-		//read here and checked for correctness on last line of server construction
-		Arguments arguments = new CommandLineParser().parse(args);
 		
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
@@ -84,9 +82,7 @@ public class PrivateWebserverForTest {
 											.setTokenCheckOn(testConfig.isUseTokenCheck());
 		TemplateConfig templateConfig = new TemplateConfig();
 		
-		webServer = WebServerFactory.create(config, routerConfig, templateConfig, arguments);
-		
-		arguments.checkConsumedCorrectly();
+		webServer = WebServerFactory.create(config, routerConfig, templateConfig, args);
 	}
 
 	public void start() {

@@ -2,6 +2,8 @@ package webpiecesxxxxxpackage;
 
 import java.io.IOException;
 import org.webpieces.util.futures.XFuture;
+
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -58,12 +60,23 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 
 	private final static Logger log = LoggerFactory.getLogger(TestLesson8JsonHttp2.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	
-	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
+
+	private String[] args = {
+			"-http.port=:0",
+			"-https.port=:0",
+			"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory",
+			"-hibernate.loadclassmeta=true"
+	};
+
+	@Override
+	public Map<String, String> initEnvironmentVars() {
+		return Map.of(
+			"REQ_ENV_VAR","somevalue"
+		);
+	}
+
 	private Http2Socket http2Socket;
 	private ObjectMapper mapper = new ObjectMapper();
-	private SimpleMeterRegistry metrics;
-
 
 	@Override
 	protected TestMode getTestMode() {
@@ -87,13 +100,11 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 		log.info("Setting up test");
 		//This line is not really needed but ensures you do not run a test without param names compiled in(which will fail).
 		Asserts.assertWasCompiledWithParamNames("test");
-		
-		metrics = new SimpleMeterRegistry();
-		
+
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(metrics), new AppOverridesModule(), 
+		Server webserver = new Server(getOverrides(), new AppOverridesModule(),
 			new ServerConfig(JavaCache.getCacheLocation()), args
 		);
 		webserver.start();

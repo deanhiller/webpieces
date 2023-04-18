@@ -3,6 +3,8 @@ package org.webpieces.router.api.simplesvr;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+
+import org.webpieces.util.cmdline2.ArgumentsCheck;
 import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
@@ -52,7 +54,7 @@ public class TestProdRouter {
 		
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		TestModule module = new TestModule();
-		Arguments args = new CommandLineParser().parse();
+		ArgumentsCheck args = new CommandLineParser().parse();
 		RouterConfig config = new RouterConfig(baseWorkingDir, "TestProdRouter")
 										.setMetaFile(f)
 										.setWebappOverrides(module)

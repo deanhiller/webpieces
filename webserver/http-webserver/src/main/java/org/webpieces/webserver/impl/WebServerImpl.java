@@ -12,6 +12,9 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.webpieces.util.cmdline2.ArgumentsCheck;
+import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +53,7 @@ public class WebServerImpl implements WebServer {
 	private final RouterService routingService;
 	private final WebServerPortInformation portConfig;
 	private final PortConfiguration portAddresses;
+	private CommandLineParser cmdLineParser;
 
 	private HttpServer httpServer;
 	private HttpServer httpsServer;
@@ -64,7 +68,8 @@ public class WebServerImpl implements WebServer {
 			RequestReceiver serverListener,
 			RouterService routingService,
 			WebServerPortInformation portConfig,
-			PortConfiguration portAddresses
+			PortConfiguration portAddresses,
+			CommandLineParser cmdLineParser
 	) {
 		this.config = config;
 		this.serverMgr = serverMgr;
@@ -72,13 +77,25 @@ public class WebServerImpl implements WebServer {
 		this.routingService = routingService;
 		this.portConfig = portConfig;
 		this.portAddresses = portAddresses;
+		this.cmdLineParser = cmdLineParser;
 	}
 	
-	public void configureSync(Arguments arguments) {
+	public void configureSync(PortConfiguration instance, String ... args) {
+
 		if(isConfigured)
 			throw new IllegalStateException("Can't call configure twice");
+
+		ArgumentsCheck arguments = cmdLineParser.parse(args);
+
+		instance.runArguments(arguments);
 		routingService.configure(arguments);
-		
+
+		//Before this line, every module calls into arguments telling it the 'help msg' and required or not and ZERO
+		//arguments can be read in this phase.  After this is called, all arguments can be read
+		//this allows a situation where failing on startup tells you all N errors as doing 1 startup
+		//in the cloud is very slow so iterating is slow if you only tell people 1 error at a time.
+		arguments.checkConsumedCorrectly();
+
 		isConfigured = true;
 	}
 	
