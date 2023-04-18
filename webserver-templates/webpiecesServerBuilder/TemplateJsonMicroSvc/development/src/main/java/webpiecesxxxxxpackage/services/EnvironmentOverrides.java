@@ -6,6 +6,7 @@ import org.webpieces.util.cmdline2.AllowDefaultingRequiredVars;
 import org.webpieces.util.cmdline2.FetchValue;
 import org.webpieces.util.cmdline2.JvmEnv;
 
+import javax.inject.Singleton;
 import java.util.Map;
 
 public class EnvironmentOverrides implements Module {
@@ -22,6 +23,7 @@ public class EnvironmentOverrides implements Module {
         binder.bind(FetchValue.class).to(AllowDefaultingRequiredVars.class).asEagerSingleton();
     }
 
+    @Singleton
     private class SimulatedEnvironment extends JvmEnv {
         @Override
         public String readEnvVar(String name) {
@@ -29,3 +31,4 @@ public class EnvironmentOverrides implements Module {
         }
     }
 }
+
