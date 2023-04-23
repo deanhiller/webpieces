@@ -15,6 +15,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+import org.webpieces.microsvc.client.impl.Masker;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.PlatformHeaders;
 
@@ -25,7 +26,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
+import java.util.function.Supplier;
 
 public class GCPTaskClient {
 
@@ -35,14 +36,19 @@ public class GCPTaskClient {
     private CloudTasksClient cloudTasksClient;
     private final Set<String> secureList = new HashSet<>();
     private final Set<PlatformHeaders> toTransfer = new HashSet<>();
+
+    private Masker masker;
+
     @Inject
     public GCPTaskClient(
             GCPCloudTaskConfig config,
             CloudTasksClient cloudTasksClient,
-            ClientServiceConfig clientServiceConfig
+            ClientServiceConfig clientServiceConfig,
+            Masker masker
     ) {
         this.config = config;
         this.cloudTasksClient = cloudTasksClient;
+        this.masker = masker;
 
         if(clientServiceConfig.getHcl() == null)
             throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
@@ -115,6 +121,8 @@ public class GCPTaskClient {
             taskBuilder = taskBuilder.setScheduleTime(timeStamp);
         }
 
+        log.info("curl request " + createCurl(request, () -> ("--data '" + payload + "'")));
+
         // Send create task request
         Task task = cloudTasksClient.createTask(queue, taskBuilder.build());
         log.info("Task created: " + task.getName());
@@ -124,8 +132,6 @@ public class GCPTaskClient {
         return jobReference;
 
     }
-
-
 
     private com.google.cloud.tasks.v2.HttpMethod getCloudTaskHttpMethod(HttpMethod httpMethod) {
         if(httpMethod.equals(HttpMethod.POST))
@@ -152,5 +158,36 @@ public class GCPTaskClient {
     private Timestamp getTimeStamp(ScheduleInfo scheduleInfo) {
         long epochSeconds = TimeUnit.SECONDS.convert(scheduleInfo.getTime(), TimeUnit.MILLISECONDS);
         return Timestamp.newBuilder().setSeconds(epochSeconds).build();
+    }
+
+    private String createCurl(HttpRequest req, Supplier<String> supplier) {
+
+        String s = "";
+
+        s += "\n\n************************************************************\n";
+        s += "            CURL REQUEST\n";
+        s += "***************************************************************\n";
+
+        s += "curl -k --request " + req.getHttpMethod().name() + " ";
+
+        for (Map.Entry<String, String> entry : req.getHeaders().entrySet()) {
+
+            if (entry.getKey().startsWith(":")) {
+                continue; //base headers we can discard
+            }
+
+            if(secureList.contains(entry.getKey())) {
+                s += "-H \"" + entry.getKey() + ":" + masker.maskSensitiveData(entry.getValue()) + "\" ";
+            } else {
+                s += "-H \"" + entry.getKey() + ":" + entry.getValue() + "\" ";
+            }
+        }
+
+        s += supplier.get();
+        s += " \"" + req.getUrl() + "\"\n";
+        s += "***************************************************************\n";
+
+        return s;
+
     }
 }
