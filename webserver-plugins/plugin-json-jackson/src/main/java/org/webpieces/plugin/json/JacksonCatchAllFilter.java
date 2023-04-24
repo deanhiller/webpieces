@@ -87,6 +87,11 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
             byte[] obj = meta.getCtx().getRequest().body.createByteArray();
             String json = new String(obj, 0, Math.min(obj.length, 100));
 
+            if(t instanceof javax.ws.rs.BadRequestException) {
+                log.info("Translating javax.ws.rs.BadRequestException");
+                t = new BadRequestException(t.getMessage());
+            }
+
             if(t instanceof HttpException) {
                 int httpCode = ((HttpException) t).getHttpCode();
                 if (httpCode >= 500 && httpCode < 600) {
