@@ -63,6 +63,7 @@ ext {
             'core-future'            : 'org.webpieces.core:core-future',
             'core-util'              : 'org.webpieces.core:core-util',
             'core-ddl'               : 'org.webpieces.core:core-ddl',
+            'core-persistence'       : 'org.webpieces.core:core-persistence',
             'runtimecompile'         : 'org.webpieces.core:runtimecompile',
             'core-datawrapper'       : 'org.webpieces.core:core-datawrapper',
             'core-mock'              : 'org.webpieces.core:core-mock',

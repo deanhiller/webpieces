@@ -1,11 +1,9 @@
 package org.webpieces.plugin.hibernate.metrics;
 
-import org.webpieces.microsvc.monitoring.api.Metric;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public enum DatabaseMetric implements Metric {
+public enum DatabaseMetric {
 
     DATABASE_ENTITY_LOADS("webpieces/database/entity/loads"),
     DATABASE_ENTITY_DELETES("webpieces/database/entity/deletes"),
@@ -30,11 +28,6 @@ public enum DatabaseMetric implements Metric {
 
     public String getName() {
         return name;
-    }
-
-    @Override
-    public List<String> getDimensions() {
-        return new ArrayList<>();
     }
 
     public String getFullName() {

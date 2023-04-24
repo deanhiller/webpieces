@@ -14,9 +14,7 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['hibernate']
-    api 'jakarta.persistence:jakarta.persistence-api'
-    api 'org.webpieces.aws:monitoring'
+    api deps['core-persistence']
 
     implementation deps['log4jdbc']
     implementation deps['http-router']
