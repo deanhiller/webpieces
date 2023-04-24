@@ -41,12 +41,12 @@ public class GuiceModule implements Module {
 
 	private static final Logger log = LoggerFactory.getLogger(GuiceModule.class);
 	private final Supplier<String> optionalArg;
-	private final Supplier<String> reqEnvVar;
+	//private final Supplier<String> reqEnvVar;
 	private Supplier<String> reqArg;
 
 	public GuiceModule(Arguments cmdLineArguments) {
 		optionalArg = cmdLineArguments.createOptionalArg("optionalArg", "default", "Your help message", (s) -> s);
-		reqEnvVar = cmdLineArguments.createRequiredEnvVar("REQ_ENV_VAR", "testDefault", "some help");
+		//reqEnvVar = cmdLineArguments.createRequiredEnvVar("REQ_ENV_VAR", "testDefault", "some help");
 
 		/**
 		 * Args are LAZY checked so in the cloud, we can fail ONCE and tell you ALL the errors regarding missing
