@@ -30,7 +30,7 @@ public class TxCompleters {
 			t.addSuppressed(e);
 		}
 	}
-	
+
 	public void closeEm(Throwable t, EntityManager em) {
 		try {
 			em.close();
