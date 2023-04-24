@@ -34,10 +34,10 @@ import java.util.function.Supplier;
 public class GuiceModule implements Module {
 
 	private static final Logger log = LoggerFactory.getLogger(GuiceModule.class);
-	private final Supplier<Integer> secureToken;
+	//private final Supplier<Integer> secureToken;
 
 	public GuiceModule(Arguments args) {
-		secureToken = args.createRequiredEnvVar("DEANS_SECURITY_TOKEN", 12345, "Some help", (s) -> Integer.parseInt(s));
+		//secureToken = args.createRequiredEnvVar("DEANS_SECURITY_TOKEN", 12345, "Some help", (s) -> Integer.parseInt(s));
 	}
 	
 	//This is where you would put the guice bindings you need though generally if done
