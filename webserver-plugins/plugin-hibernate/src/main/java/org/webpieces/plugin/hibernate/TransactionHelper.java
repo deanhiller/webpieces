@@ -1,19 +1,10 @@
 package org.webpieces.plugin.hibernate;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tags;
-
-import org.webpieces.microsvc.api.MicroSvcHeader;
-import org.webpieces.plugin.hibernate.metrics.DatabaseMetric;
-import org.webpieces.plugin.hibernate.metrics.DatabaseTransactionTags;
-import org.webpieces.util.context.Context;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -25,15 +16,17 @@ public class TransactionHelper {
 
     private final EntityManagerFactory factory;
     private final TxCompleters txCompleters;
-    private final MeterRegistry meterRegistry;
 
     @Inject
-    public TransactionHelper(EntityManagerFactory factory, TxCompleters txCompleters, MeterRegistry meterRegistry) {
+    public TransactionHelper(EntityManagerFactory factory, TxCompleters txCompleters) {
         this.factory = factory;
         this.txCompleters = txCompleters;
-        this.meterRegistry = meterRegistry;
     }
 
+    /**
+     * Use PersistenceHelper instead
+     */
+    @Deprecated
     public <Resp> Resp runWithEm(Supplier<Resp> function) {
         if (Em.get() != null) {
             throw new IllegalStateException("Cannot open another entityManager when are already have one open");
@@ -54,13 +47,17 @@ public class TransactionHelper {
     }
 
     /**
-     * @deprecated Use {@link #runTransaction(String, Supplier)} instead where you can supply a name for the transaction
+     * Use PersistenceHelper instead
      */
     @Deprecated
     public <Resp> Resp runTransaction(Supplier<Resp> supplier) {
         return runTransaction("unknown", supplier);
     }
 
+    /**
+     * Use PersistenceHelper instead
+     */
+    @Deprecated
     public <Resp> Resp runTransaction(String transactionName, Supplier<Resp> supplier) {
         if (Em.get() == null) {
             return runWithEm(() -> runTransactionImpl(transactionName, supplier));
@@ -69,6 +66,10 @@ public class TransactionHelper {
         }
     }
 
+    /**
+     * Use PersistenceHelper instead
+     */
+    @Deprecated
     private <Resp> Resp runTransactionImpl(String transactionName, Supplier<Resp> supplier) {
         long begin = System.currentTimeMillis();
 
@@ -92,18 +93,20 @@ public class TransactionHelper {
         }
     }
 
+    /**
+     * Use PersistenceHelper instead
+     */
+    @Deprecated
     private void monitorTransactionTime(String transactionName, long begin) {
-        String requestPath = Context.getMagic(MicroSvcHeader.REQUEST_PATH);
-        if (requestPath == null || requestPath.isBlank()) {
-            requestPath = "unknown";
-        }
-        Tags transactionTags = Tags.of(
-                DatabaseTransactionTags.EXECUTION_ID, transactionName,
-                DatabaseTransactionTags.REQUEST, requestPath
-        );
+//        String requestPath = Context.getMagic(MicroSvcHeader.REQUEST_PATH);
+//        if (requestPath == null || requestPath.isBlank()) {
+//            requestPath = "unknown";
+//        }
+//        Tags transactionTags = Tags.of(
+//                DatabaseTransactionTags.EXECUTION_ID, transactionName,
+//                DatabaseTransactionTags.REQUEST, requestPath
+//        );
 
-        meterRegistry.timer(DatabaseMetric.EXECUTION_TIME.getDottedMetricName(), transactionTags)
-                .record(System.currentTimeMillis() - begin, TimeUnit.MILLISECONDS);
     }
 
 }

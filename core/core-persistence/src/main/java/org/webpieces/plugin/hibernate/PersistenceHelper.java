@@ -1,6 +1,5 @@
 package org.webpieces.plugin.hibernate;
 
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.inject.Inject;
@@ -10,9 +9,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
 import org.webpieces.microsvc.api.MicroSvcHeader;
-import org.webpieces.microsvc.monitoring.api.Monitoring;
-import org.webpieces.plugin.hibernate.metrics.DatabaseMetric;
-import org.webpieces.plugin.hibernate.metrics.DatabaseTransactionTags;
 import org.webpieces.util.context.Context;
 
 @Singleton
@@ -20,16 +16,14 @@ public class PersistenceHelper {
 
     private final EntityManagerFactory factory;
     private final TxCompleters txCompleters;
-    private Monitoring monitoring;
 
     @Inject
     public PersistenceHelper(
             EntityManagerFactory factory,
-            TxCompleters txCompleters,
-            Monitoring monitoring) {
+            TxCompleters txCompleters
+    ) {
         this.factory = factory;
         this.txCompleters = txCompleters;
-        this.monitoring = monitoring;
     }
 
     public void withVoidSession(String executionId, Consumer<EntityManager> consumer) {
@@ -114,17 +108,17 @@ public class PersistenceHelper {
     private void monitorExecutionTime(String transactionName, long start) {
 
         String requestPath = Context.getMagic(MicroSvcHeader.REQUEST_PATH);
+//
+//        if((requestPath == null ) || requestPath.isBlank()) {
+//            requestPath = "unknown";
+//        }
+//
+//        Map<String, String> dimensions = Map.of(
+//                DatabaseTransactionTags.EXECUTION_ID, transactionName,
+//                DatabaseTransactionTags.REQUEST, requestPath
+//        );
 
-        if((requestPath == null ) || requestPath.isBlank()) {
-            requestPath = "unknown";
-        }
-
-        Map<String, String> dimensions = Map.of(
-                DatabaseTransactionTags.EXECUTION_ID, transactionName,
-                DatabaseTransactionTags.REQUEST, requestPath
-        );
-
-        monitoring.duration(DatabaseMetric.EXECUTION_TIME, dimensions, start);
+        //monitoring.duration(DatabaseMetric.EXECUTION_TIME, dimensions, start);
     }
 
 }

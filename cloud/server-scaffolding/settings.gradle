@@ -1,9 +1,9 @@
 includeBuild '../cloud-api-lib'
 includeBuild '../../webserver/http-router'
-includeBuild '../monitoring'
+//includeBuild '../../core/core-metrics'
+
 
 //includeBuild '../../core/core-util'
-//includeBuild '../../core/core-metrics'
 //includeBuild '../../core/core-logging'
 //includeBuild '../../core/core-jackson'
 
