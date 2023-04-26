@@ -47,31 +47,37 @@ public class LogExceptionFilter extends RouteFilter<Void> {
                 + "unnecessary you can disable it in your logging config by filtering out this logger: "+preRequestLog.getName();
         preRequestLog.info(logMsg);
 
+        long start = System.currentTimeMillis();
         return nextFilter.invoke(meta)
-                .handle((resp, e) -> record(preRequestLog, meta, resp, e))
+                .handle((resp, e) -> record(preRequestLog, meta, resp, e, start))
                 .thenCompose(Function.identity());
     }
 
 
 
-    private XFuture<Action> record(Logger preRequestLog, MethodMeta meta, Action resp, Throwable e) {
+    private XFuture<Action> record(Logger preRequestLog, MethodMeta meta, Action resp, Throwable e, long start) {
 
+        long total = System.currentTimeMillis()-start;
         if (e == null) {
-            log.debug("Call to method complete");
+            preRequestLog.info("Call to method complete(success). time="+total+"ms");
             return XFuture.completedFuture(resp);
         } else if (exceptionCheck.exceptionIsSuccess(e)) {
-            return XFuture.completedFuture(resp);
+            preRequestLog.info("Call to method complete(success exception like BadClientRequestException) time="+total+"ms");
+            //still return the failed exception..
+            return XFuture.failedFuture(e);
         }
 
-        String msg = "";
+        String errorMsg = "Exception for request(time=\"+total+\"ms). ";
         if(!preRequestLog.isInfoEnabled()) {
             //if info is not enabled for prerequest log, add the original request as it was not logged
-            msg = printPreRequestLog(meta);
+            errorMsg += "Original req=\n"+printPreRequestLog(meta);
+        } else {
+            errorMsg += "Follow trace id for original request";
         }
 
         ReportingHolderInfo holder = Context.get(JacksonCatchAllFilter.REPORTING_INFO);
         holder.setReportedException(true);
-        log.error("Exception for request=\n"+msg, e);
+        log.error(errorMsg, e);
 
         return XFuture.failedFuture(e);
     }
