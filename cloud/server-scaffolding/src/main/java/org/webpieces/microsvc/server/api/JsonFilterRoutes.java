@@ -31,15 +31,17 @@ public class JsonFilterRoutes implements Routes {
         builder.setInternalErrorRoute("../impl/controllers/JsonErrorNotFoundController.internalError");
         builder.setPageNotFoundRoute("../impl/controllers/JsonErrorNotFoundController.notFound");
 
-        if(!config.isEntryPoint()) {
-            builder.addPackageFilter(regex, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 160);
-        } else {
-            //builder.addPackageFilter(regex, SetupSecureTokenFilter.class, null, FilterPortType.ALL_FILTER, 160);
-        }
-
         builder.addPackageFilter(regex, RequestIdFilter.class, null, FilterPortType.ALL_FILTER, 140);
         builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, null, FilterPortType.ALL_FILTER, 120);
         builder.addPackageFilter(regex, MDCFilter.class, null, FilterPortType.ALL_FILTER, 100);
+        builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 90);
+        builder.addPackageFilter(regex, LogExceptionFilter.class, null, FilterPortType.ALL_FILTER, 80);
+
+        if(!config.isEntryPoint()) {
+            builder.addPackageFilter(regex, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 70);
+        } else {
+            //builder.addPackageFilter(regex, SetupSecureTokenFilter.class, null, FilterPortType.ALL_FILTER, 160);
+        }
 
         //complicate port as-is so we will do this in Tray for now until we can port this one too ->
         //builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 80);
