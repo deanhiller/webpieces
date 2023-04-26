@@ -2,6 +2,7 @@ package org.webpieces.plugin.json;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.http.StatusCode;
 import org.webpieces.http.exception.BadRequestException;
@@ -13,6 +14,7 @@ import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
+import org.webpieces.util.context.Context;
 import org.webpieces.util.filters.Service;
 
 import javax.inject.Inject;
@@ -21,6 +23,8 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.webpieces.util.futures.XFuture;
+
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,6 +33,8 @@ import java.util.stream.Collectors;
 public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(JacksonCatchAllFilter.class);
+    public static final String MDC_INFO = "webpieces-mdcInfoHolder";
+
     public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
     private final JacksonJsonConverter mapper;
 
@@ -42,10 +48,18 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 
+        /**
+         * Since magic headers come in through http and are set in HeaderToRequestStateFilter.java
+         * which is MUCH after this filter, this filter has no context so we give the MDCFilter.java
+         * a chance to store the info in MDCHolder so we can read and add that MDC to the logs when
+         * requests fail so we can trace through MicroSvcHeaders.REQUEST_ID for example.
+         */
+        MDCHolder holder = new MDCHolder();
+        Context.put(MDC_INFO, holder);
+
         printPreRequestLog(meta);
 
-        return nextFilter.invoke(meta).handle((a, t) -> translateFailure(meta, a, t));
-
+        return nextFilter.invoke(meta).handle((a, t) -> translateFailure(meta, a, t, holder));
     }
 
     @Override
@@ -56,6 +70,8 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
     }
 
     protected void printPreRequestLog(MethodMeta meta) {
+        if(!log.isDebugEnabled())
+            return;
 
         Method method = meta.getLoadedController().getControllerMethod();
         RouterRequest request = meta.getCtx().getRequest();
@@ -71,17 +87,30 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
                 .collect(Collectors.toList());
         String json = new String(request.body.createByteArray());
 
-        // Print a pre-request log that describes the request
-        preRequestLog.info("The following log is the original request body and its headers. If this log is spammy or " +
-                        "unnecessary you can disable it in your logging config by filtering out this logger: {}",
-                preRequestLog.getName());
-        preRequestLog.info("{}:\n\n" +
-                "Headers: {}\n\n" +
-                "Request Body JSON:\n{}", endpoint, headers, json);
+        preRequestLog.debug(endpoint+":\n\n"
+                + "Headers: "+headers+"\n\n"
+                + "Request Body JSON:\n"+json+"\n\n"
+                + "The following log is the original request body and its headers. If this log is spammy or "
+                + "unnecessary you can disable it in your logging config by filtering out this logger: "+preRequestLog.getName()
+        );
 
     }
+    protected Action translateFailure(MethodMeta meta, Action action, Throwable t, MDCHolder holder) {
+        Map<String, String> previous = MDC.getCopyOfContextMap();
+        Map<String, String> mdcWithMagicCtx = holder.getMDCMap();
 
-    protected Action translateFailure(MethodMeta meta, Action action, Throwable t) {
+        try {
+            if(mdcWithMagicCtx != null)
+                MDC.setContextMap(holder.getMDCMap());
+
+            return translateFailureImpl(meta, action, t);
+        } finally {
+            if(mdcWithMagicCtx != null)
+                MDC.setContextMap(previous);
+        }
+    }
+
+    protected Action translateFailureImpl(MethodMeta meta, Action action, Throwable t) {
         if (t != null) {
 
             byte[] obj = meta.getCtx().getRequest().body.createByteArray();

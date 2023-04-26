@@ -89,9 +89,11 @@ public class LocalRemoteInvoker implements RemoteInvoker {
             Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
             log.info("Running simulated call to remote endpoint=" + endpoint);
             stringXFuture = client.sendHttpRequest(bodyAsText, endpoint);
-            Context.clear();
+
         } catch (Throwable e) {
             stringXFuture = XFuture.failedFuture(e);
+        } finally {
+            Context.clear();
         }
 
         stringXFuture.exceptionally((e) -> {
