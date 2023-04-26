@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(JacksonCatchAllFilter.class);
-    public static final String MDC_INFO = "webpieces-mdcInfoHolder";
+    public static final String REPORTING_INFO = "webpieces-reportingInfoHolder";
 
     public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
     private final JacksonJsonConverter mapper;
@@ -54,8 +54,8 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
          * a chance to store the info in MDCHolder so we can read and add that MDC to the logs when
          * requests fail so we can trace through MicroSvcHeaders.REQUEST_ID for example.
          */
-        MDCHolder holder = new MDCHolder();
-        Context.put(MDC_INFO, holder);
+        ReportingHolderInfo holder = new ReportingHolderInfo();
+        Context.put(REPORTING_INFO, holder);
 
         printPreRequestLog(meta);
 
@@ -95,22 +95,7 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
         );
 
     }
-    protected Action translateFailure(MethodMeta meta, Action action, Throwable t, MDCHolder holder) {
-        Map<String, String> previous = MDC.getCopyOfContextMap();
-        Map<String, String> mdcWithMagicCtx = holder.getMDCMap();
-
-        try {
-            if(mdcWithMagicCtx != null)
-                MDC.setContextMap(holder.getMDCMap());
-
-            return translateFailureImpl(meta, action, t);
-        } finally {
-            if(mdcWithMagicCtx != null)
-                MDC.setContextMap(previous);
-        }
-    }
-
-    protected Action translateFailureImpl(MethodMeta meta, Action action, Throwable t) {
+    protected Action translateFailure(MethodMeta meta, Action action, Throwable t, ReportingHolderInfo holder) {
         if (t != null) {
 
             byte[] obj = meta.getCtx().getRequest().body.createByteArray();
@@ -124,17 +109,24 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
             if(t instanceof HttpException) {
                 int httpCode = ((HttpException) t).getHttpCode();
                 if (httpCode >= 500 && httpCode < 600) {
-                    log.error("Request failed for json=" + json + "\n500 Internal Server Error method=" + meta.getLoadedController().getControllerMethod(), t);
+                    reportException(holder.isReportedException(), "Request failed for json=" + json + "\n500 Internal Server Error method=" + meta.getLoadedController().getControllerMethod(), t);
                 }
                 return translate(meta, (HttpException)t);
             }
 
-            log.error("Request failed for json=" + json + "\nInternal Server Error method=" + meta.getLoadedController().getControllerMethod(), t);
+            reportException(holder.isReportedException(), "Request failed for json=" + json + "\nInternal Server Error method=" + meta.getLoadedController().getControllerMethod(), t);
             return translateError(t);
 
         } else {
             return action;
         }
+    }
+
+    private void reportException(boolean reportedException, String errorMsg, Throwable t) {
+        if(reportedException)
+            return;
+
+        log.error(errorMsg, t);
     }
 
     protected Action translate(MethodMeta meta, HttpException t) {
