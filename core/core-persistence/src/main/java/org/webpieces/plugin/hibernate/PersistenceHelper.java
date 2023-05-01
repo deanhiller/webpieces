@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
+import org.webpieces.metrics.Monitoring;
 import org.webpieces.microsvc.api.MicroSvcHeader;
 import org.webpieces.util.context.Context;
 
