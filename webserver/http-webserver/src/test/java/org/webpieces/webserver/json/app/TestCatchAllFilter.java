@@ -2,10 +2,13 @@ package org.webpieces.webserver.json.app;
 
 import javax.inject.Inject;
 
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.http.exception.HttpException;
 import org.webpieces.plugin.json.JacksonCatchAllFilter;
+import org.webpieces.plugin.json.JacksonConfig;
 import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.http.exception.NotFoundException;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routes.MethodMeta;
 
 public class TestCatchAllFilter extends JacksonCatchAllFilter {
@@ -13,8 +16,8 @@ public class TestCatchAllFilter extends JacksonCatchAllFilter {
 	private JacksonJsonConverter mapper;
 
 	@Inject
-	public TestCatchAllFilter(JacksonJsonConverter mapper) {
-		super(mapper);
+	public TestCatchAllFilter(ClientServiceConfig config, JacksonJsonConverter mapper, JacksonConfig jacksonConfig) {
+		super(config, mapper, jacksonConfig);
 		this.mapper = mapper;
 	}
 
