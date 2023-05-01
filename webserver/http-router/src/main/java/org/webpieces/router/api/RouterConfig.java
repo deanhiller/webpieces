@@ -16,6 +16,7 @@ import com.google.inject.Module;
 
 public class RouterConfig {
 
+	private String name;
 	private VirtualFile metaFile;
 	
 	private Charset fileEncoding = StandardCharsets.UTF_8;
@@ -61,7 +62,8 @@ public class RouterConfig {
 		if(!workingDirectory.isAbsolute())
 			throw new IllegalArgumentException("baseDirectory must be absolute and can typically be FileFactory.getBaseDirectory()");
 		this.workingDirectory = workingDirectory;		
-		
+		this.name = name;
+
 		//default location is the user's home directory BUT production server overrides to it's working dir by setting it after
 		cachedCompressedDirectory = PrecompressedCache2.getCacheLocation(name);
 	}
@@ -204,5 +206,13 @@ public class RouterConfig {
 		this.scheduledThreadPoolSize = scheduledThreadPoolSize;
 		return this;
 	}
-	
+
+	public String getName() {
+		return name;
+	}
+
+	public RouterConfig setName(String name) {
+		this.name = name;
+		return this;
+	}
 }

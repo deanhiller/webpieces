@@ -8,7 +8,8 @@ public class JacksonConfig {
 	private Class<? extends JacksonNotFoundFilter> notFoundFilterClazz = JacksonNotFoundFilter.class;
 	private int filterApplyLevel = 1000000;
 	private int notFoudFilterLevel = 1000000;
-	
+
+	private boolean maskErrorResponses = false;
 	//SQL makes life in java/hibernate HARD UNLESS you default all incoming data to be "" instead of null
 	//Advantages
 	//1. SQL constraints on "" work!!!  you cannot have John "" Smith twice in DB while you can have John null Smith twice when there is a first, middle, last name not null constraint
@@ -88,5 +89,13 @@ public class JacksonConfig {
 	public JacksonConfig setPackageFilterPattern(String packageFilterPattern) {
 		this.packageFilterPattern = packageFilterPattern;
 		return this;
+	}
+
+	public boolean isMaskErrorResponses() {
+		return maskErrorResponses;
+	}
+
+	public void setMaskErrorResponses(boolean maskErrorResponses) {
+		this.maskErrorResponses = maskErrorResponses;
 	}
 }

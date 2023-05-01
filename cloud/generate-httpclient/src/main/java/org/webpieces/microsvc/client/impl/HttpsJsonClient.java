@@ -24,6 +24,7 @@ import org.webpieces.microsvc.client.api.HttpsConfig;
 import org.webpieces.microsvc.server.api.HeaderCtxList;
 import org.webpieces.nio.api.Nullable;
 import org.webpieces.plugin.json.JacksonJsonConverter;
+import org.webpieces.plugin.json.JsonError;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.Contexts;
 import org.webpieces.util.context.PlatformHeaders;
@@ -53,6 +54,7 @@ public class HttpsJsonClient {
     private static final Logger log = LoggerFactory.getLogger(HttpsJsonClient.class);
 
     protected static final DataWrapperGenerator WRAPPER_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+    private final String serviceName;
 
     private HttpsConfig httpsConfig;
     protected JacksonJsonConverter jsonMapper;
@@ -76,6 +78,8 @@ public class HttpsJsonClient {
     ) {
         if(clientServiceConfig.getHcl() == null)
             throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
+
+        this.serviceName = clientServiceConfig.getServiceName();
 
         List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
 
@@ -304,7 +308,12 @@ public class HttpsJsonClient {
             return unmarshalJson(type, contents);
         }
 
-        String message = "\njson error='" + contents + "' fullResp=" + httpResp + " url='" + url + "' originalRequest="+jsonReq;
+        JsonError errorIfCanRead = failOpenForSomeServices(contents);
+        if(errorIfCanRead != null) {
+            errorIfCanRead.getServiceFailureChain().add(0, serviceName);
+        }
+
+        String message = formMessage(contents, httpResp, url, jsonReq, errorIfCanRead);
 
         if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_400_BAD_REQUEST) {
             //MUST translate to http 500 for this server.  ie. If the downstream servers tell US that
@@ -316,9 +325,9 @@ public class HttpsJsonClient {
         } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_403_FORBIDDEN) {
             throw new ForbiddenException("Forbidden " + message);
         } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_500_INTERNAL_SERVER_ERROR) {
-            throw new BadGatewayException("Bad Gateway " + message);
+            throw new BadGatewayException(message, errorIfCanRead);
         } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_502_BAD_GATEWAY) {
-            throw new BadGatewayException("Bad Gateway of Bad Gateway " + message);
+            throw new BadGatewayException(message, errorIfCanRead);
         } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_504_GATEWAY_TIMEOUT) {
             throw new GatewayTimeoutException("Gateway Timeout " + message);
         } else if (httpResp.getHeaders().getStatus() == 429) {
@@ -329,6 +338,33 @@ public class HttpsJsonClient {
             throw new InternalServerErrorException("\nRUN the curl request above to test this error!!!\n" + message);
         }
 
+    }
+
+    private String formMessage(String contents, FullResponse httpResp, String url, String jsonReq, JsonError errorIfCanRead) {
+        if(errorIfCanRead == null) {
+            return "\nresponse body='" + contents + "'" +
+                    "\nfullResp=" + httpResp +
+                    "\nurl='" + url + "'" +
+                    "\noriginalRequestBody=" + jsonReq;
+        }
+
+        String serviceWithError = errorIfCanRead.getServiceWithError();
+        String message = serviceWithError+" had an error. msg="+errorIfCanRead.getError()+"  Full svc chain="+errorIfCanRead.getServiceFailureChain()+
+                "\nfullResp=" + httpResp +
+                "\nurl='" + url + "'" +
+                "\noriginalRequestBody=" + jsonReq;
+
+        return message;
+    }
+
+    private JsonError failOpenForSomeServices(String contents) {
+        try {
+            return unmarshalJson(JsonError.class, contents);
+        } catch (Throwable e) {
+            //silently fail
+            log.trace("Failed unmarshalling(incompatible service)", e);
+            return null;
+        }
     }
 
     private <T> T unmarshalJson(Class<T> type, String contents) {

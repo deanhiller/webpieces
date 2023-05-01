@@ -2,9 +2,10 @@ package org.webpieces.plugin.json;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.http.StatusCode;
+import org.webpieces.http.exception.BadGatewayException;
 import org.webpieces.http.exception.BadRequestException;
 import org.webpieces.http.exception.HttpException;
 import org.webpieces.http.exception.Violation;
@@ -24,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.webpieces.util.futures.XFuture;
 
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -37,12 +37,16 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
     public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
     private final JacksonJsonConverter mapper;
+    private final String svcName;
+    private JacksonConfig jacksonConfig;
 
     private Pattern pattern;
 
     @Inject
-    public JacksonCatchAllFilter(JacksonJsonConverter mapper) {
+    public JacksonCatchAllFilter(ClientServiceConfig config, JacksonJsonConverter mapper, JacksonConfig jacksonConfig) {
         this.mapper = mapper;
+        this.svcName = config.getServiceName();
+        this.jacksonConfig = jacksonConfig;
     }
 
     @Override
@@ -161,7 +165,24 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
     }
 
     protected byte[] translateHttpException(MethodMeta meta, HttpException t) {
+        if(jacksonConfig.isMaskErrorResponses()) {
+            JsonError error = new JsonError();
+            error.setError("There was an error");
+            error.setCode(t.getHttpCode());
+            return translateJson(mapper, error);
+        }
+
+        if(t instanceof BadGatewayException) {
+            //server this server called fail or further, just report that servers failure
+            byte[] respBody = processBadGateway((BadGatewayException) t);
+            if(respBody != null)
+                return respBody;
+        }
+
         JsonError error = new JsonError();
+        error.setServiceWithError(svcName);
+        error.getServiceFailureChain().add(svcName);
+
         StatusCode statusCode = t.getStatusCode();
         if (statusCode != null) {
             String message = t.getStatusCode().getReason() + " : " + t.getMessage();
@@ -183,6 +204,16 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
         return translateJson(mapper, error);
     }
 
+    private byte[] processBadGateway(BadGatewayException badGateway) {
+        JsonError error = (JsonError) badGateway.getJsonError();
+        //If some app developer throws BadGatewayException, there is no JsonError object...
+        if(error == null)
+            return null;
+
+        error.setCode(badGateway.getHttpCode());
+
+        return translateJson(mapper, error);
+    }
 
     protected String translateViolations(BadRequestException t, String defaultMessage) {
         if (t.getViolations() == null || t.getViolations().size() == 0) {
@@ -212,6 +243,10 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
         JsonError error = new JsonError();
         error.setError("Server ran into a bug, please report");
         error.setCode(500);
+        error.setServiceWithError(svcName);
+        //always prepend so the order is from top service to the last one..
+        error.getServiceFailureChain().add(0, svcName);
+
         return translateJson(mapper, error);
     }
 

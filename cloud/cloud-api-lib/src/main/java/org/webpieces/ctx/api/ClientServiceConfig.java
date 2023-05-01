@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * configuration for clients and for service as they share all this information and both need it
+ */
 public class ClientServiceConfig {
     private HeaderCtxList hcl;
     private List<Class> successExceptions;

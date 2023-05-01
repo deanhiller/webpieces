@@ -79,7 +79,7 @@ public class TestJsonStdFilter extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
-		response.assertContains("{`error`:`Your request is bad. Violation #1:'must not be blank' path=request.testValidation`,`code`:400}".replace("`", "\""));
+		response.assertContains("{`error`:`Your request is bad. Violation #1:'must not be blank' path=request.testValidation`,`code`:400,`serviceWithError`:`deansTestSvc`,`serviceFailureChain`:[`deansTestSvc`]}".replace("`", "\""));
 		response.assertContentType("application/json");
 	}
 	
