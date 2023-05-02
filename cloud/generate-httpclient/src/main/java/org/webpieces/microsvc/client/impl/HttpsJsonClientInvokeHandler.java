@@ -49,6 +49,10 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
+        if(method.getDeclaringClass() == Object.class) {
+            return method.invoke(this);
+        }
+
         TestCaseRecorder recorder = (TestCaseRecorder) Context.get(RECORDER_KEY);
         EndpointInfo recordingInfo = null;
         if(recorder != null) {

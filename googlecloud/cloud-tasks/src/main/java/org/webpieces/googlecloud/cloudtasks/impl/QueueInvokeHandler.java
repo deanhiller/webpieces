@@ -51,6 +51,10 @@ public class QueueInvokeHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
+        if(method.getDeclaringClass() == Object.class) {
+            return method.invoke(this);
+        }
+
         ScheduleInfo info = Context.get(Constants.WEBPIECES_SCHEDULE_INFO);
         if(info == null)
             throw new IllegalArgumentException("You must pass a lambda of the API to Scheduler.schedule or Scheduler.addToQueue");
