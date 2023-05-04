@@ -30,6 +30,25 @@ if [[ "$NUM_FILES" == "*" ]]; then
    exit 1
 fi
 
+
+function evil_git_dirty2 {
+  [[ $(git diff --cached --shortstat 2> /dev/null | tail -n1) != "" ]] && echo "*"
+}
+
+NUM_FILES2="$(evil_git_dirty2)"
+echo "Num files not committed=$NUM_FILES2"
+if [[ "$NUM_FILES2" == "*" ]]; then
+   echo ""
+   echo "You have outstanding files that are not committed.  commit first or stash, then you can release off master branch"
+   echo ""
+   git status
+   echo "----------------------------------------------------------------------------------------------"
+   echo "You have outstanding files that are not committed.  commit first or stash, then you can push"
+   echo "----------------------------------------------------------------------------------------------"
+   exit 1
+fi
+
+
 ver=$@
 res="${ver//[^.]}"
 if [ "${#res}" -lt 2 ]; then
