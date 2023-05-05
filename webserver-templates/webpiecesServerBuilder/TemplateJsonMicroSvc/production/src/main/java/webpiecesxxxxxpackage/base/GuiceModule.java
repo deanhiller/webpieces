@@ -24,6 +24,7 @@ import com.google.inject.multibindings.Multibinder;
 
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.context.ClientAssertions;
+import webpiecesxxxxxpackage.db.DbCredentials;
 import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
 import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteServiceSimulator;
 import webpiecesxxxxxpackage.deleteme.service.SimpleStorageImpl;
@@ -36,10 +37,28 @@ public class GuiceModule implements Module {
 	private static final Logger log = LoggerFactory.getLogger(GuiceModule.class);
 	//private final Supplier<Integer> secureToken;
 
+	private final Supplier<String> jdbcUrl;
+	private final Supplier<String> user;
+	private final Supplier<String> password;
+
 	public GuiceModule(Arguments args) {
 		//secureToken = args.createRequiredEnvVar("DEANS_SECURITY_TOKEN", 12345, "Some help", (s) -> Integer.parseInt(s));
+
+		//MODIFY these to createRequiredEnvVar so if not supplied, server will not startup.
+		//set to optional so server starts with in-memory database out of the box
+		jdbcUrl = args.createOptionalEnvVar("DB_URL", "noDefault", "JDBC url including host, port, database", (s) -> s);
+		user = args.createOptionalEnvVar("DB_USER", "noDefault", "JDBC url including host, port, database", (s) -> s);
+		password = args.createOptionalEnvVar("DB_PASSWORD", "noDefault", "JDBC url including host, port, database", (s) -> s);
+
 	}
-	
+
+	@Provides
+	@Singleton
+	public DbCredentials dbCredentials() {
+		log.info("running in new world");
+		return new DbCredentials(jdbcUrl.get(), user.get(), password.get());
+	}
+
 	//This is where you would put the guice bindings you need though generally if done
 	//right, you won't have much in this file.
 	

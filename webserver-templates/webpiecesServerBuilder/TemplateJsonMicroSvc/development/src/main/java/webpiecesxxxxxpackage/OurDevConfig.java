@@ -15,7 +15,9 @@ public class OurDevConfig implements DevConfig {
 	@Override
 	public Map<String, String> getSimulatedEnvironmentProperties() {
 		return Map.of(
-				"REQ_ENV_VAR", "my value"
+				"DB_URL", "jdbc:log4jdbc:h2:mem:test",
+				"DB_USER", "sa",
+				"DB_PASSWORD", ""
 		);
 	}
 

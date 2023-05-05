@@ -57,8 +57,11 @@ public class TestLesson2Html extends AbstractWebpiecesTest {
 	private String[] args = { "-http.port=:0", "-https.port=:0", "-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsInMemory", "-hibernate.loadclassmeta=true" };
 
 	public void initEnvironment() {
-		simulatedEnv =Map.of(
-				"REQ_ENV_VAR","somevalue"
+		simulatedEnv = Map.of(
+				//use a different in-memory db each test class so we can be multi-threaded
+				"DB_URL","jdbc:log4jdbc:h2:mem:"+getClass().getSimpleName(),
+				"DB_USER", "sa",
+				"DB_PASSWORD", ""
 		);
 	}
 

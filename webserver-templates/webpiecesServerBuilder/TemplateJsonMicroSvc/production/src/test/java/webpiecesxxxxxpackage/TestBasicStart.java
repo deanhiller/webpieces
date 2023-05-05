@@ -27,7 +27,10 @@ public class TestBasicStart {
 	};
 
 	private Map<String, String> simulatedEnv = Map.of(
-			"REQ_ENV_VAR", "somevalue"
+			//use a different in-memory db each test class so we can be multi-threaded
+			"DB_URL","jdbc:log4jdbc:h2:mem:"+getClass().getSimpleName(),
+			"DB_USER", "sa",
+			"DB_PASSWORD", ""
 	);
 
 	//This exercises full startup with no mocking in place whatsoever BUT as you add remote systems to 

@@ -1,4 +1,4 @@
-package webpiecesxxxxxpackage;
+package webpiecesxxxxxpackage.framework;
 
 import java.io.IOException;
 import java.util.Map;
@@ -13,9 +13,10 @@ import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.Asserts;
 
 import org.webpieces.webserver.test.EnvSimModule;
+import webpiecesxxxxxpackage.Server;
 import webpiecesxxxxxpackage.mock.JavaCache;
 
-public class TestLesson4BasicStart {
+public class TestBasicStart {
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 	private String[] args = {
@@ -26,7 +27,10 @@ public class TestLesson4BasicStart {
 	};
 
 	private Map<String, String> simulatedEnv = Map.of(
-			"REQ_ENV_VAR", "somevalue"
+			//use a different in-memory db each test class so we can be multi-threaded
+			"DB_URL","jdbc:log4jdbc:h2:mem:"+getClass().getSimpleName(),
+			"DB_USER", "sa",
+			"DB_PASSWORD", ""
 	);
 
 	//This exercises full startup with no mocking in place whatsoever BUT as you add remote systems to 
