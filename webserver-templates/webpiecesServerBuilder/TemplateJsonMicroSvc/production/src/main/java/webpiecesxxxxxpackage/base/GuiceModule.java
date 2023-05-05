@@ -46,9 +46,9 @@ public class GuiceModule implements Module {
 
 		//MODIFY these to createRequiredEnvVar so if not supplied, server will not startup.
 		//set to optional so server starts with in-memory database out of the box
-		jdbcUrl = args.createOptionalEnvVar("DB_URL", "noDefault", "JDBC url including host, port, database", (s) -> s);
-		user = args.createOptionalEnvVar("DB_USER", "noDefault", "JDBC url including host, port, database", (s) -> s);
-		password = args.createOptionalEnvVar("DB_PASSWORD", "noDefault", "JDBC url including host, port, database", (s) -> s);
+		jdbcUrl = args.createOptionalEnvVar("DB_URL", "jdbc:log4jdbc:h2:mem:test", "JDBC url including host, port, database", (s) -> s);
+		user = args.createOptionalEnvVar("DB_USER", "sa", "user to login to database", (s) -> s);
+		password = args.createOptionalEnvVar("DB_PASSWORD", "", "password to login to database", (s) -> s);
 
 	}
 
