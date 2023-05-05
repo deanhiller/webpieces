@@ -57,7 +57,10 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 	@Override
 	public Map<String, String> initEnvironmentVars() {
 		return Map.of(
-				"REQ_ENV_VAR","somevalue"
+				//use a different in-memory db each test class so we can be multi-threaded
+				"DB_URL","jdbc:log4jdbc:h2:mem:"+getClass().getSimpleName(),
+				"DB_USER", "sa",
+				"DB_PASSWORD", ""
 		);
 	}
 

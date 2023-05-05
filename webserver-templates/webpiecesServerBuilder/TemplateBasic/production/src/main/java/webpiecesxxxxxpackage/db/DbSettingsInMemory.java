@@ -36,7 +36,7 @@ public class DbSettingsInMemory implements PersistenceUnitInfo {
 	private HikariDataSource dataSource;
 
 	@Inject
-	public DbSettingsInMemory(MeterRegistry metrics) {
+	public DbSettingsInMemory(DbCredentials dbCredentials, MeterRegistry metrics) {
 
 		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
 		properties.setProperty("hibernate.hbm2ddl.auto", "update");
@@ -49,9 +49,9 @@ public class DbSettingsInMemory implements PersistenceUnitInfo {
 
 		HikariConfig config = new HikariConfig();
 		config.setDriverClassName("org.digitalforge.log4jdbc.LoggingDriver");
-		config.setJdbcUrl("jdbc:log4jdbc:h2:mem:test");
-		config.setUsername("sa");
-		config.setPassword("");
+		config.setJdbcUrl(dbCredentials.getJdbcUrl());
+		config.setUsername(dbCredentials.getUsername());
+		config.setPassword(dbCredentials.getPassword());
 		config.setMetricRegistry(metrics);
 
 		dataSource = new HikariDataSource(config);

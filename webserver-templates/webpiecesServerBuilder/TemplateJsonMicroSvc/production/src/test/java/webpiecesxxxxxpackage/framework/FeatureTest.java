@@ -40,9 +40,15 @@ public class FeatureTest extends CompanyApiTest {
             "-hibernate.loadclassmeta=true"
     };
 
-    private Map<String, String> simulatedEnv = Map.of(
-            "REQ_ENV_VAR", "somevalue"
-    );
+    @Override
+    public Map<String, String> initEnvironmentVars() {
+        return Map.of(
+                //use a different in-memory db each test class so we can be multi-threaded
+                "DB_URL","jdbc:log4jdbc:h2:mem:"+getClass().getSimpleName(),
+                "DB_USER", "sa",
+                "DB_PASSWORD", ""
+        );
+    }
 
     protected SaveApi saveApi;
     //protected ExampleRestAPI api2IfSvcHas2Apis;  //sometimes desired before splitting into 2 microservices prematurely
