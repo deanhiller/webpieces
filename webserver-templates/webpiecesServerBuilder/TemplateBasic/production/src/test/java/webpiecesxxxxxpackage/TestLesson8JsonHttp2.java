@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
@@ -98,7 +98,7 @@ public class TestLesson8JsonHttp2 extends AbstractHttp2Test {
 		return Http2ClientFactory.createHttpClient(config, metrics);		
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		log.info("Setting up test");
 		//This line is not really needed but ensures you do not run a test without param names compiled in(which will fail).

@@ -4,7 +4,8 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;
@@ -55,7 +56,7 @@ public class FeatureTest extends CompanyApiTest {
 
     protected MockRemoteService mockRemoteService = new MockRemoteService();
 
-    @Before
+    @BeforeEach
     public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
         log.info("Setting up test");
         super.initialize();
@@ -63,7 +64,7 @@ public class FeatureTest extends CompanyApiTest {
         //exampleRestAPI = super.createRestClient(ExampleRestAPI.class);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         //do not leak context between tests
         Context.clear();

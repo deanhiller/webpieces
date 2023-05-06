@@ -58,16 +58,11 @@ ext {
 }
 
 allprojects {
-   apply plugin: 'jacoco' //code coverage
-
    repositories {
        mavenCentral()
        maven { url uri('/tmp/myRepo/') } //For testing locally
    }
 
-   jacoco {
-      toolVersion = '0.8.7'
-   }
 }
 
 subprojects {
@@ -126,40 +121,8 @@ subprojects {
       systemProperty "gradle.running", "true"
    }
 
-    jacocoTestReport {
-        additionalSourceDirs.from files(sourceSets.main.allSource.srcDirs)
-        sourceDirectories.from files(sourceSets.main.allSource.srcDirs)
-        classDirectories.from files(sourceSets.main.output)
-        reports {
-            html.required = true
-            xml.required = true
-            csv.required = false
-        }
-    }
 
-    jacocoTestReport.dependsOn test
-    check.dependsOn jacocoTestReport
 }
-
-task codeCoverage(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
-    dependsOn = subprojects.test
-    additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories.from  files(subprojects.sourceSets.main.output)
-    executionData.from files(subprojects.jacocoTestReport.executionData)
-    reports {
-        html.required = true
-        xml.required = true
-        csv.required = false
-    }
-    onlyIf = {
-        true
-    }
-}
-
-//we don't do java plugin on top level on purpose as it is not a java
-//project BUT we need build and clean to work inline with the java projects
-task build(dependsOn: ':codeCoverage')
 
 task clean {
    description= "Deletes ${buildDir}"
