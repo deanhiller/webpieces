@@ -5,8 +5,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ddl.api.JdbcApi;
@@ -57,7 +57,7 @@ public class TestLesson7AdvancedCookiesCrud extends AbstractWebpiecesTest {
 		);
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
 		log.info("Setting up test");
 		Asserts.assertWasCompiledWithParamNames("test");

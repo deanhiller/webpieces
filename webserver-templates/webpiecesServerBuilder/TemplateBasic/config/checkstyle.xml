@@ -209,6 +209,21 @@ page at http://checkstyle.sourceforge.net/config.html -->
       <property name="severity" value="error"/>
     </module>
 
+    <module name="IllegalImport">
+      <property name="illegalClasses" value="org.junit.Test, org.junit.After, org.junit.Before"/>
+      <message key="import.illegal" value="Use the junit 5 imports instead"/>
+    </module>
+
+    <module name="IllegalImport">
+      <property name="illegalClasses" value="com.google.inject.Inject, com.google.inject.Named, com.google.inject.BindingAnnotation, com.google.inject.ScopeAnnotation, com.google.inject.Singleton, com.google.inject.Provider, org.springframework.beans.factory.annotation.Autowired"/>
+      <message key="import.illegal" value="Use the javax.inject version instead. "/>
+    </module>
+
+    <module name="IllegalImport">
+      <property name="illegalPkgs" value="org.joda"/>
+      <message key="import.illegal" value="Use java.time instead."/>
+    </module>
+
   </module>
 </module>
 

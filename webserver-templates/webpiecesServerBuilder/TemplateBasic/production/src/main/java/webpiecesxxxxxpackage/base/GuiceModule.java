@@ -47,15 +47,14 @@ public class GuiceModule implements Module {
 	private final Supplier<String> user;
 	private final Supplier<String> password;
 
-	public GuiceModule(Arguments cmdLineArguments) {
-		optionalArg = cmdLineArguments.createOptionalArg("optionalArg", "default", "Your help message", (s) -> s);
+	public GuiceModule(Arguments args) {
+		optionalArg = args.createOptionalArg("optionalArg", "default", "Your help message", (s) -> s);
 
 		//MODIFY these to createRequiredEnvVar so if not supplied, server will not startup.
 		//set to optional so server starts with in-memory database out of the box
-		jdbcUrl = cmdLineArguments.createOptionalEnvVar("DB_URL", "noDefault", "JDBC url including host, port, database", (s) -> s);
-		user = cmdLineArguments.createOptionalEnvVar("DB_USER", "noDefault", "JDBC url including host, port, database", (s) -> s);
-		password = cmdLineArguments.createOptionalEnvVar("DB_PASSWORD", "noDefault", "JDBC url including host, port, database", (s) -> s);
-
+		jdbcUrl = args.createOptionalEnvVar("DB_URL", "jdbc:log4jdbc:h2:mem:test", "JDBC url including host, port, database", (s) -> s);
+		user = args.createOptionalEnvVar("DB_USER", "sa", "user to login to database", (s) -> s);
+		password = args.createOptionalEnvVar("DB_PASSWORD", "", "password to login to database", (s) -> s);
 		/**
 		 * Args are LAZY checked so in the cloud, we can fail ONCE and tell you ALL the errors regarding missing
 		 * arguments at once, rather than this ->

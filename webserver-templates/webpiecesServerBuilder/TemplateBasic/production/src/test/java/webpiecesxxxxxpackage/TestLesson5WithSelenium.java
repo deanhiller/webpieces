@@ -7,10 +7,11 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.google.inject.util.Modules;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -40,7 +41,7 @@ import webpiecesxxxxxpackage.mock.JavaCache;
  * 
  * @author dhiller
  */
-//@Ignore
+@Disabled
 public class TestLesson5WithSelenium {
 	
 	private static WebDriver driver;
@@ -61,7 +62,7 @@ public class TestLesson5WithSelenium {
 	private int httpsPort;
 	private SimpleMeterRegistry metrics = new SimpleMeterRegistry();
 
-	@Before
+	@BeforeEach
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		driver = new FirefoxDriver();
 		
@@ -85,7 +86,7 @@ public class TestLesson5WithSelenium {
 		httpsPort = webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort();
 	}
 	
-	@After
+	@AfterEach
 	public void tearDown() {
 		Options manage = driver.manage();
 		manage.deleteAllCookies();

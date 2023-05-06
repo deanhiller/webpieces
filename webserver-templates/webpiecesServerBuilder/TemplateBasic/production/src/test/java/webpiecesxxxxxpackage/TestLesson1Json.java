@@ -3,7 +3,7 @@ package webpiecesxxxxxpackage;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.search.RequiredSearch;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.util.futures.XFuture;
