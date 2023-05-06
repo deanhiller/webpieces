@@ -3,7 +3,6 @@ package webpiecesxxxxxpackage.framework;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.junit.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
