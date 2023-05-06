@@ -210,8 +210,8 @@ page at http://checkstyle.sourceforge.net/config.html -->
     </module>
 
     <module name="IllegalImport">
-      <property name="illegalClasses" value="org.junit.Test"/>
-      <message key="import.illegal" value="Use the junit 5 import instead"/>
+      <property name="illegalClasses" value="org.junit.Test, org.junit.After, org.junit.Before"/>
+      <message key="import.illegal" value="Use the junit 5 imports instead"/>
     </module>
 
     <module name="IllegalImport">
