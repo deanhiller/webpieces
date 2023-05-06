@@ -8,8 +8,11 @@ import org.webpieces.util.file.VirtualFileImpl;
 public class IDESupport {
 
 	private static final Logger log = LoggerFactory.getLogger(WebpiecesServer.class);
-
-	public static VirtualFileImpl modifyForIDE(String name) {
+	private static String filePathForWebpiecesDevelopers;
+    public static VirtualFileImpl modifyForIDE(String name) {
+		return modifyForIDE(name, null);
+	}
+	public static VirtualFileImpl modifyForIDE(String name, String projectIfDebugInWebpieces) {
 		String filePath1 = System.getProperty("user.dir");
 		log.info("running from dir="+filePath1);
 		
@@ -20,11 +23,18 @@ public class IDESupport {
 			//THIS works in BOTH webpieces/..../template and in the code generated for webapp projects
             directory = directory+"/..";
         } else if(filePath1.endsWith("webpieces")) {
+			if(projectIfDebugInWebpieces == null)
+				throw new IllegalArgumentException("Must pass in project name to run out of webpieces git repository");
         	//intellij is more annoying since it runs in webpieces for the template project we use to generate
 			//AND THEN runs in the webapp directory which is way different path than the template directory
-			directory = directory+"/webserver-templates/webpiecesServerBuilder/templateProject";
+			directory = directory+"/webserver-templates/webpiecesServerBuilder/"+projectIfDebugInWebpieces;
+			filePathForWebpiecesDevelopers = directory;
 		}
         
 		return VirtualFileFactory.newAbsoluteFile(directory);
+	}
+
+	public static String fetchPath() {
+		return filePathForWebpiecesDevelopers;
 	}
 }

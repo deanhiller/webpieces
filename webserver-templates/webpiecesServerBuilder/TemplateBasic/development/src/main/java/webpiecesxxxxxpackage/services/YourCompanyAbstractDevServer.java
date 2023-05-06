@@ -53,7 +53,7 @@ public abstract class YourCompanyAbstractDevServer {
     	
         DevConfig config = getConfig();
         
-        directory = IDESupport.modifyForIDE(name);
+        directory = IDESupport.modifyForIDE(name, "TemplateBasic");
 
         //list all source paths here(DYNAMIC html files and java) as you add them(or just create for loop)
         //These are the list of directories that we detect java file changes under.  static source files(html, css, etc) do
