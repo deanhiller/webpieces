@@ -70,7 +70,10 @@ dependencies {
   testImplementation deps['selenium']
 }
 
+distributions.main.distributionBaseName = "${rootProject.name}"
+
 application {
+    applicationName = "${rootProject.name}"
     mainClassName = "webpiecesxxxxxpackage.Server"
     applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
 }
