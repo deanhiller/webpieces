@@ -6,3 +6,5 @@ includeBuild '../../../../webserver-plugins/plugin-documentation'
 includeBuild '../../../../webserver-plugins/plugin-json-jackson'
 includeBuild '../../../../webserver-plugins/plugin-properties'
 includeBuild '../../../../webserver-plugins/plugin-install-sslcert'
+
+rootProject.name = 'basic-development'
