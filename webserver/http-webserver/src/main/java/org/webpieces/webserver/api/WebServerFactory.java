@@ -38,13 +38,13 @@ public abstract class WebServerFactory {
 			//H2 called getLocalHost like 3 times(resulting in 15 more seconds)
 			//overall, it really screwed the startup time!!
 			//https://stackoverflow.com/questions/33289695/inetaddress-getlocalhost-slow-to-run-30-seconds/33289897#33289897
-			log.info("Checking timing on getLocalHost (seems very bad on many MAC computers) which makes webpieces startup look slow(and we like a fast startup");
+			log.info("Checking timing on getLocalHost (seems very bad on many MAC computers) which makes webpieces startup look slow(and we like a fast startup)");
 			long start = System.currentTimeMillis();
 			InetAddress.getLocalHost();
 			long totalTimeSeconds = (System.currentTimeMillis() - start) / 1000;
 			if(totalTimeSeconds > 3)
 				throw new IllegalStateException("Your computer configuration is messed up.  getLocalHost "
-						+ "is taking longer\nthan 3 seconds.  FIX THIS NOW!!!  You can typically edit your hosts file\n"
+						+ "is taking longer\nthan 3 seconds (it took="+totalTimeSeconds+" seconds).  FIX THIS NOW!!!  You can typically edit your hosts file\n"
 						+ "to do so.  See https://stackoverflow.com/questions/33289695/inetaddress-getlocalhost-slow-to-run-30-seconds/33289897#33289897 for more info");
 			
 		} catch (UnknownHostException e) {

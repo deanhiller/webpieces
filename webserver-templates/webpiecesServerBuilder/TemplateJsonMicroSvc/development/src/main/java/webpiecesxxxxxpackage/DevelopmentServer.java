@@ -31,7 +31,7 @@ public class DevelopmentServer extends YourCompanyDevelopmentServer {
 	}
 	
 	public DevelopmentServer(boolean usePortZero) {
-		super("WEBPIECESxAPPNAME", usePortZero);
+		super(Server.APP_NAME, usePortZero);
 	}
 
 	@Override

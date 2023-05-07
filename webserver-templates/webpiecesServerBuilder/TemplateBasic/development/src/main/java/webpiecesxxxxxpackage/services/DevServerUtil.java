@@ -18,8 +18,9 @@ public class DevServerUtil {
 	public static void start(Supplier<YourCompanyAbstractDevServer> function) {
 		try {
 			String version = System.getProperty("java.version");
+			log.info("Starting under java version="+version);
+
 			YourCompanyAbstractDevServer server = function.get();
-			log.info("Starting "+server.getClass().getSimpleName()+" under java version="+version);
 
 			server.start();
 			
@@ -31,7 +32,7 @@ public class DevServerUtil {
 				YourCompanyAbstractDevServer.class.wait();
 			}
 		} catch(Throwable e) {
-			log.error("Failed to startup.  exiting jvm. msg="+e.getMessage(), e);
+			log.error("Failed to startup.  exiting jvm.", e);
 			System.exit(1); // should not be needed BUT some 3rd party libraries start non-daemon threads :(
 		}		
 	}

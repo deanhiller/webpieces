@@ -28,7 +28,7 @@ public class ProdServerForIDE extends YourCompanyProdServerForIDE {
 	}
 	
 	public ProdServerForIDE(boolean usePortZero) {
-		super("WEBPIECESxAPPNAME", usePortZero);
+		super(Server.APP_NAME, usePortZero);
 	}
 
 	@Override

@@ -182,7 +182,14 @@ public class WebpiecesServer {
 				throw new NoRunningServerMainInIDEException();
 			} else {
 				log.info("You appear to be running DevelopmentServer.java/ProdServerForIDE.java in webpieces project from Intellij");
-				return FileFactory.newFile(filePath, "webserver-templates/webpiecesServerBuilder/templateProject/production/src/dist");
+				String path1 = IDESupport.fetchPath();
+				if(path1 == null)
+					throw new IllegalStateException("IDESupport.modifyForIDE was not called from CompanyDevServer for some reason");
+
+				File theDir = FileFactory.newAbsoluteFile(path1 +"/production/src/dist");
+				if(!theDir.exists())
+					throw new IllegalStateException("Can't find file="+theDir.getAbsolutePath());
+				return theDir;
 			}
 		} else if((projectName+"-dev").equals(name) || "development".equals(name)) {
 			//TEST CASE 1(webpieces):

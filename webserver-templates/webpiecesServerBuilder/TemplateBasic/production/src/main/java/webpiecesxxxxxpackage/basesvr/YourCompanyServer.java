@@ -28,8 +28,9 @@ public abstract class YourCompanyServer {
 
 	public static void main(Function<ServerConfig, YourCompanyServer> yourServer) {
 		try {
-			String version = System.getProperty("java.version");
-			log.info("Starting Production Server under java version="+version);
+			String jdkVersion = System.getProperty("java.version");
+			String user = System.getProperty("user.name");
+			log.info("Starting Production Server user="+user+" under java version="+jdkVersion);
 
 
 			ServerConfig config = new ServerConfig(true);
