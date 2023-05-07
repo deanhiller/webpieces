@@ -58,7 +58,7 @@ public class ProdServerMeta implements WebAppMeta {
     public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
 				new MainRoutes(),
-				new RESTApiRoutes(SaveApi.class, JsonController.class)
+				new RESTApiRoutes(SaveApi.class, SaveController.class)
 				);
 	}
 

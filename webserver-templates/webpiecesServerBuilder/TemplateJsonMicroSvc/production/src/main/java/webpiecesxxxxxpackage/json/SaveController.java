@@ -19,15 +19,15 @@ import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueResponse;
 import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
 
 @Singleton
-public class JsonController implements SaveApi {
+public class SaveController implements SaveApi {
 	
-	private static final Logger log = LoggerFactory.getLogger(JsonController.class);
+	private static final Logger log = LoggerFactory.getLogger(SaveController.class);
 
 	private Counter counter;
 	private RemoteService remoteService;
 
 	@Inject
-	public JsonController(MeterRegistry metrics, RemoteService remoteService) {
+	public SaveController(MeterRegistry metrics, RemoteService remoteService) {
 		counter = metrics.counter("testCounter");
 		this.remoteService = remoteService;
 	}

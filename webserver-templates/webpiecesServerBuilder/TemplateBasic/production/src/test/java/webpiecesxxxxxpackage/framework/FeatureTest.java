@@ -14,7 +14,7 @@ import org.webpieces.webserver.test.http2.CompanyApiTest;
 import webpiecesxxxxxpackage.Server;
 import webpiecesxxxxxpackage.base.HeadersCtx;
 import webpiecesxxxxxpackage.json.ExampleRestAPI;
-import webpiecesxxxxxpackage.json.SaveApi;
+import webpiecesxxxxxpackage.json.SearchApi;
 import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteService;
 import webpiecesxxxxxpackage.service.RemoteService;
@@ -51,7 +51,7 @@ public class FeatureTest extends CompanyApiTest {
         );
     }
 
-    protected SaveApi saveApi;
+    protected SearchApi saveApi;
     protected ExampleRestAPI exampleRestAPI;
     protected MockRemoteService mockRemoteService = new MockRemoteService();
 
@@ -59,7 +59,7 @@ public class FeatureTest extends CompanyApiTest {
     public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
         log.info("Setting up test");
         super.initialize();
-        saveApi = super.createRestClient(SaveApi.class);
+        saveApi = super.createRestClient(SearchApi.class);
         exampleRestAPI = super.createRestClient(ExampleRestAPI.class);
     }
 

@@ -7,4 +7,3 @@ includeBuild '../../../../webserver-plugins/plugin-install-sslcert'
 includeBuild '../../../../cloud/generate-httpclient'
 includeBuild '../../../../cloud/server-scaffolding'
 
-rootProject.name = 'production2'

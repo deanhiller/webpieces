@@ -4,7 +4,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import org.webpieces.util.futures.XFuture;
 
-public interface SaveApi {
+public interface SearchApi {
 
     @POST
     @Path("/search/item")
