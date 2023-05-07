@@ -11,8 +11,8 @@ includeBuild('webpiecesServerBuilder/TemplateBasic/development') {
 }
 
 includeBuild('webpiecesServerBuilder/TemplateJsonMicroSvc/production') {
-    name = 'production2'
+    name = 'microsvc-production'
 }
 includeBuild('webpiecesServerBuilder/TemplateJsonMicroSvc/development') {
-    name = 'development2'
+    name = 'microsvc-development'
 }
