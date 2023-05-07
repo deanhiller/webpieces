@@ -64,7 +64,7 @@ public class ProdServerMeta implements WebAppMeta {
 	@Override
     public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
-				new RESTApiRoutes(SaveApi.class, SaveController.class),
+				new RESTApiRoutes(SearchApi.class, SearchController.class),
 				new RESTApiRoutes(ExampleRestAPI.class, JsonRESTController.class),
 				new MainRoutes(),
 				//The Controller package regex is webpiecesxxxxxpackage.web.secure\..* so that we match webpiecesxxxxxpackage.web.secure.* Controllers 
