@@ -3,6 +3,7 @@ package org.webpieces.microsvc.server.impl;
 import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.recorder.impl.EndpointInfo;
 import org.webpieces.recorder.impl.TestCaseRecorder;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -45,6 +46,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         testCase += addRequestCreators(svcMeta);
         testCase += "\n\n";
 
+        MDC.getMDCAdapter()
         log.info("Logging test case below\n***********************************************\n\n"+testCase);
     }
 
