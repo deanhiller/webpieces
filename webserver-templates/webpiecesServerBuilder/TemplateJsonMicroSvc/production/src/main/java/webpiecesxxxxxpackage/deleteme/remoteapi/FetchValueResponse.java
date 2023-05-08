@@ -1,7 +1,11 @@
 package webpiecesxxxxxpackage.deleteme.remoteapi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FetchValueResponse {
     private int num;
+    private List<TempAnswer> answers = new ArrayList();
 
     public FetchValueResponse() {}
     public FetchValueResponse(int num) {
@@ -14,5 +18,13 @@ public class FetchValueResponse {
 
     public void setNum(int num) {
         this.num = num;
+    }
+
+    public List<TempAnswer> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<TempAnswer> answers) {
+        this.answers = answers;
     }
 }

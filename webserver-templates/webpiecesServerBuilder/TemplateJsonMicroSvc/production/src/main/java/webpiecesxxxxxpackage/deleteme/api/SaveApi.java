@@ -8,7 +8,6 @@ public interface SaveApi {
 
     @POST
     @Path("/search/item")
-    public XFuture<SearchResponse> search(SearchRequest request);
-
+    public XFuture<SaveResponse> save(SaveRequest request);
 
 }

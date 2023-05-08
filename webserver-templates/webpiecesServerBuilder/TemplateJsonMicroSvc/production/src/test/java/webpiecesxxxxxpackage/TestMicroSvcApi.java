@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.util.futures.XFuture;
-import webpiecesxxxxxpackage.deleteme.api.SearchRequest;
-import webpiecesxxxxxpackage.deleteme.api.SearchResponse;
+import webpiecesxxxxxpackage.deleteme.api.SaveRequest;
+import webpiecesxxxxxpackage.deleteme.api.SaveResponse;
 import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueResponse;
 import webpiecesxxxxxpackage.framework.FeatureTest;
 import webpiecesxxxxxpackage.framework.Requests;
@@ -32,7 +32,7 @@ public class TestMicroSvcApi extends FeatureTest {
 	@Test
 	public void testSynchronousController() throws ExecutionException, InterruptedException, TimeoutException {
 		//move complex request building out of the test...
-		SearchRequest req = Requests.createSearchRequest();
+		SaveRequest req = Requests.createSearchRequest();
 
 		mockRemoteService.addValueToReturn(XFuture.completedFuture(new FetchValueResponse()));
 
@@ -41,12 +41,12 @@ public class TestMicroSvcApi extends FeatureTest {
 		//and is the whole key point of the test)
 		//Think of writing a book and the table of contents(TOC) and saveApi.search is in the middle of
 		//the TOC with a big huge section of code under it(arguable the biggest since validate() will be small)
-		SearchResponse resp = saveApi.search(req).get(5, TimeUnit.SECONDS);
+		SaveResponse resp = saveApi.save(req).get(5, TimeUnit.SECONDS);
 
 		validate(resp);
 	}
 
-	private void validate(SearchResponse resp) {
+	private void validate(SaveResponse resp) {
 		Assert.assertEquals(5, resp.getSearchTime());
 	}
 

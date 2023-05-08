@@ -1,6 +1,6 @@
 package webpiecesxxxxxpackage.deleteme.api;
 
-public class SearchRequest {
+public class SaveRequest {
 
 	private SearchMeta meta;
 	private String query;
