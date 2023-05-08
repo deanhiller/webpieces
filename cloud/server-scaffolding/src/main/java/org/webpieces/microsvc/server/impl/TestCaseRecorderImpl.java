@@ -46,7 +46,6 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         testCase += addRequestCreators(svcMeta);
         testCase += "\n\n";
 
-        MDC.getMDCAdapter()
         log.info("Logging test case below\n***********************************************\n\n"+testCase);
     }
 
