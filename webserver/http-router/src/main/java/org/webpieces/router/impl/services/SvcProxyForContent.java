@@ -121,8 +121,11 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 	private XFuture<Action> marshalAndRecord(Throwable t, LoadedController loadedController, BodyContentBinder binder, Object retVal, Object[] args) {
 		Method method = loadedController.getControllerMethod();
 		RecordingInfo recordingInfo = Context.get(RecordingInfo.JSON_ENDPOINT_RESULT);
-		recordingInfo.setMethod(method);
-		recordingInfo.setArgs(args);
+		if(recordingInfo != null) {
+			//if recording is on, set it up...
+			recordingInfo.setMethod(method);
+			recordingInfo.setArgs(args);
+		}
 
 		if(t != null) {
 			recordingInfo.setFailureResponse(t);

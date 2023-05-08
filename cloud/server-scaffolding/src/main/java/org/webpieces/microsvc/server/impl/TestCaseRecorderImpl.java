@@ -16,14 +16,10 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
 
     private static final Logger log = LoggerFactory.getLogger(TestCaseRecorderImpl.class);
 
-    private MethodMeta meta;
     private Map<String, Object> fullRequestContext;
-    private Http2Request originalRequest;
     private List<EndpointInfo> endpointInfo = new ArrayList<>();
 
-    public TestCaseRecorderImpl(Http2Request originalRequest, MethodMeta meta, Map<String, Object> fullRequestContext) {
-        this.originalRequest = originalRequest;
-        this.meta = meta;
+    public TestCaseRecorderImpl(Map<String, Object> fullRequestContext) {
         this.fullRequestContext = fullRequestContext;
     }
 

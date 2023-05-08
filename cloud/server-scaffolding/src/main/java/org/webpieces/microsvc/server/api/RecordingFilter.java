@@ -27,7 +27,7 @@ public class RecordingFilter extends RouteFilter<Void> {
 
         Map<String, Object> fullRequestContext = Context.copyContext();
         //let the recording begin...
-        Context.put(TestCaseRecorder.RECORDER_KEY, new TestCaseRecorderImpl(Current.getContext().getRequest().originalRequest, meta, fullRequestContext));
+        Context.put(TestCaseRecorder.RECORDER_KEY, new TestCaseRecorderImpl(fullRequestContext));
         Context.put(RecordingInfo.JSON_ENDPOINT_RESULT, new RecordingInfo());
         return nextFilter.invoke(meta)
                 .thenApply((resp) -> writeOutTestCase(resp, fullRequestContext));
