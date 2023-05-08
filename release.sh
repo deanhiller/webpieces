@@ -88,9 +88,9 @@ else
 fi
 
 #TODO: startup the server in background and run test to grep out success in log files
-cd production
-printf "\n************* Run ./bin/production to start server ***********\n"
-./bin/production &
+cd webpiecesexample-all
+printf "\n************* Run ./bin/webpiecesexample-all to start server ***********\n"
+./bin/webpiecesexample-all &
 server_pid=$!
 
 #AHHHHH, my computer with this code is clocking 5 seconds to lookup localhost all of the sudden...
