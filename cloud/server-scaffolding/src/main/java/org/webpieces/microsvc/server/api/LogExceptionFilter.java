@@ -57,29 +57,35 @@ public class LogExceptionFilter extends RouteFilter<Void> {
 
     private XFuture<Action> record(Logger preRequestLog, MethodMeta meta, Action resp, Throwable e, long start) {
 
+        ReportingHolderInfo holder = Context.get(JacksonCatchAllFilter.REPORTING_INFO);
+        holder.setReportedException(true);
+
         long total = System.currentTimeMillis()-start;
         if (e == null) {
             preRequestLog.info("Call to method complete(success). time="+total+"ms");
             return XFuture.completedFuture(resp);
         } else if (exceptionCheck.exceptionIsSuccess(e)) {
-            preRequestLog.info("Call to method complete(success exception like BadClientRequestException) time="+total+"ms");
+            preRequestLog.info("Call to method complete(success exception like BadClientRequestException) time="
+                    +total+"ms.  "+ getOrigRequest(preRequestLog, meta), e);
             //still return the failed exception..
             return XFuture.failedFuture(e);
         }
 
-        String errorMsg = "Exception for request(time=\"+total+\"ms). ";
-        if(!preRequestLog.isInfoEnabled()) {
-            //if info is not enabled for prerequest log, add the original request as it was not logged
-            errorMsg += "Original req=\n"+printPreRequestLog(meta);
-        } else {
-            errorMsg += "Follow trace id for original request";
-        }
-
-        ReportingHolderInfo holder = Context.get(JacksonCatchAllFilter.REPORTING_INFO);
-        holder.setReportedException(true);
+        String errorMsg = "Exception for request(time=\"+total+\"ms). "+getOrigRequest(preRequestLog, meta);
         log.error(errorMsg, e);
 
         return XFuture.failedFuture(e);
+    }
+
+    private String getOrigRequest(Logger preRequestLog, MethodMeta meta) {
+        String errorMsg;
+        if(!preRequestLog.isInfoEnabled()) {
+            //if info is not enabled for prerequest log, add the original request as it was not logged
+            errorMsg = "Original req=\n"+printPreRequestLog(meta);
+        } else {
+            errorMsg = "Follow trace id for original request";
+        }
+        return errorMsg;
     }
 
     protected String printPreRequestLog(MethodMeta meta) {
