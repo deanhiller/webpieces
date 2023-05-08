@@ -29,6 +29,7 @@ public class ControllerInvoker {
 	public Object invokeController(LoadedController meta, Object[] args) throws IllegalAccessException, InvocationTargetException {
 		Method m = meta.getControllerMethod();
 		Object obj = meta.getControllerInstance();
+
 		return m.invoke(obj, args);
 	}
 

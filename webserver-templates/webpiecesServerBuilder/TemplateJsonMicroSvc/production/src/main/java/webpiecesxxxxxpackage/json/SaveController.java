@@ -16,7 +16,7 @@ import webpiecesxxxxxpackage.deleteme.api.SearchRequest;
 import webpiecesxxxxxpackage.deleteme.api.SearchResponse;
 import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueRequest;
 import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueResponse;
-import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
+import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteApi;
 
 @Singleton
 public class SaveController implements SaveApi {
@@ -24,10 +24,10 @@ public class SaveController implements SaveApi {
 	private static final Logger log = LoggerFactory.getLogger(SaveController.class);
 
 	private Counter counter;
-	private RemoteService remoteService;
+	private RemoteApi remoteService;
 
 	@Inject
-	public SaveController(MeterRegistry metrics, RemoteService remoteService) {
+	public SaveController(MeterRegistry metrics, RemoteApi remoteService) {
 		counter = metrics.counter("testCounter");
 		this.remoteService = remoteService;
 	}

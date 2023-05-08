@@ -1,4 +1,4 @@
-package org.webpieces.microsvc.impl;
+package org.webpieces.recorder.impl;
 
 public interface TestCaseRecorder {
 

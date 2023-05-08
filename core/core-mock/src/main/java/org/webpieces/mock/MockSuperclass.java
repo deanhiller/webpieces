@@ -13,12 +13,12 @@ public abstract class MockSuperclass {
 	protected Map<MethodEnum, List<ParametersPassedIn>> calledMethods = new HashMap<>();
 	protected Map<MethodEnum, ValueToReturn> defaultReturnValues = new HashMap<>();
 	
-	protected void addValueToReturn(MethodEnum method, Object toReturn) {
+	public void addValueToReturn(MethodEnum method, Object toReturn) {
 		ValueToReturn valueToReturn = new ValueToReturn(() -> toReturn);
 		addValueToReturn(method, valueToReturn);
 	}
 
-	private void addValueToReturn(MethodEnum method, ValueToReturn valueToReturn) {
+	public void addValueToReturn(MethodEnum method, ValueToReturn valueToReturn) {
 		List<ValueToReturn> currentValues = returnValues.get(method);
 		if(currentValues == null) {
 			currentValues = new ArrayList<>();
@@ -27,12 +27,12 @@ public abstract class MockSuperclass {
 		currentValues.add(valueToReturn);
 	}
 	
-	protected void addExceptionToThrow(MethodEnum method, Supplier<?> throwableSupplier) {
+	public void addExceptionToThrow(MethodEnum method, Supplier<?> throwableSupplier) {
 		ValueToReturn valueToReturn = new ValueToReturn(throwableSupplier);
 		addValueToReturn(method, valueToReturn);
 	}
 	
-	protected Object calledMethod(MethodEnum method, Object ... args) {
+	public Object calledMethod(MethodEnum method, Object ... args) {
 		addCalledMethod(method, args);
 		
 		List<ValueToReturn> list = returnValues.get(method);
@@ -48,13 +48,13 @@ public abstract class MockSuperclass {
 		return toReturn.returnOrThrowValue();
 	}
 	
-	protected void calledVoidMethod(MethodEnum method, Object ... args) {
+	public void calledVoidMethod(MethodEnum method, Object ... args) {
 		addCalledMethod(method, args);
 
 		throwExceptionIfNeeded(method);
 	}
 
-	private void throwExceptionIfNeeded(MethodEnum method) {
+	public void throwExceptionIfNeeded(MethodEnum method) {
 		List<ValueToReturn> list = returnValues.get(method);
 		ValueToReturn toReturn;
 		if(list == null || list.size() == 0) {
@@ -67,7 +67,7 @@ public abstract class MockSuperclass {
 			toReturn.returnOrThrowValue();
 	}
 
-	private void addCalledMethod(MethodEnum method, Object[] args) {
+	public void addCalledMethod(MethodEnum method, Object[] args) {
 		List<ParametersPassedIn> list = calledMethods.get(method);
 		if(list == null) {
 			list = new ArrayList<>();
@@ -76,11 +76,11 @@ public abstract class MockSuperclass {
 		list.add(new ParametersPassedIn(args));
 	}
 
-	protected Stream<ParametersPassedIn> getCalledMethods(MethodEnum method) {
+	public Stream<ParametersPassedIn> getCalledMethods(MethodEnum method) {
 		 return getCalledMethodList(method).stream();
 	}
 	
-	protected List<ParametersPassedIn> getCalledMethodList(MethodEnum method) {
+	public List<ParametersPassedIn> getCalledMethodList(MethodEnum method) {
 		List<ParametersPassedIn> params = calledMethods.get(method);
 		if(params == null) {
 			return new ArrayList<>();
@@ -97,7 +97,7 @@ public abstract class MockSuperclass {
 		returnValues = new HashMap<>();
 	}
 
-	protected void setDefaultReturnValue(MethodEnum method, Object retVal) {
+	public void setDefaultReturnValue(MethodEnum method, Object retVal) {
 		defaultReturnValues.put(method, new ValueToReturn(() -> retVal));
 	}
 }

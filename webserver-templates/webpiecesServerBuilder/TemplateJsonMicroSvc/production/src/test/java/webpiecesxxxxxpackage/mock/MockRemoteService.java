@@ -5,9 +5,9 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.util.futures.XFuture;
 import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueRequest;
 import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueResponse;
-import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
+import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteApi;
 
-public class MockRemoteService extends MockSuperclass implements RemoteService {
+public class MockRemoteService extends MockSuperclass implements RemoteApi {
 
 	public static enum Method implements MethodEnum {
 		FETCH_REMOTE_VAL, SEND_DATA

@@ -17,8 +17,6 @@ public class MainRoutes implements Routes {
 
 		bldr.addStaticDir(BOTH, "/assets/", "public/", false);
 
-		bldr.setPageNotFoundRoute("MainController.notFound");
-		bldr.setInternalErrorRoute("MainController.internalError");
 	}
 
 }
