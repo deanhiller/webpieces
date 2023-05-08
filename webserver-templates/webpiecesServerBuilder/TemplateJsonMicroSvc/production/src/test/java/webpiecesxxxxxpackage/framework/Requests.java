@@ -1,10 +1,10 @@
 package webpiecesxxxxxpackage.framework;
 
-import webpiecesxxxxxpackage.deleteme.api.SearchRequest;
+import webpiecesxxxxxpackage.deleteme.api.SaveRequest;
 
 public class Requests {
-    public static SearchRequest createSearchRequest() {
-        SearchRequest req = new SearchRequest();
+    public static SaveRequest createSearchRequest() {
+        SaveRequest req = new SaveRequest();
         req.setQuery("my query");
         return req;
     }

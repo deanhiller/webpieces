@@ -4,6 +4,8 @@ public class FetchValueRequest {
     private String name;
     private int number;
 
+    private MyThing thing;
+
     public FetchValueRequest() {}
     public FetchValueRequest(String name, int number) {
         this.name = name;
@@ -24,5 +26,13 @@ public class FetchValueRequest {
 
     public void setNumber(int number) {
         this.number = number;
+    }
+
+    public MyThing getThing() {
+        return thing;
+    }
+
+    public void setThing(MyThing thing) {
+        this.thing = thing;
     }
 }
