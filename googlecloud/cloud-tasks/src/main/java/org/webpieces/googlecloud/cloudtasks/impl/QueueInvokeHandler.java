@@ -138,11 +138,11 @@ public class QueueInvokeHandler implements InvocationHandler {
 
     private XFuture<Object> addTestRecordingInfo(EndpointInfo recordingInfo, Object resp, Throwable exc1) {
         if(exc1 != null) {
-            recordingInfo.addFailure(exc1);
+            recordingInfo.setFailureResponse(exc1);
             return XFuture.failedFuture(exc1);
         }
 
-        recordingInfo.addSuccessResponse(resp);
+        recordingInfo.setSuccessResponse(resp);
         return XFuture.completedFuture(resp);
     }
 
