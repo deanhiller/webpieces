@@ -73,7 +73,7 @@ else
 fi
 
 cd ../webpiecesexample-all/production/build/distributions
-unzip production.zip
+unzip webpiecesexample-all.zip
 test_result=$?
 if [ $test_result -eq 0 ]
 then
