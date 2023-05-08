@@ -43,6 +43,10 @@ public class JsonFilterRoutes implements Routes {
             //builder.addPackageFilter(regex, SetupSecureTokenFilter.class, null, FilterPortType.ALL_FILTER, 160);
         }
 
+        if(config.isRecordingEnabled())
+            builder.addPackageFilter(regex, RecordingFilter.class, null, FilterPortType.ALL_FILTER, 60);
+
+
         //complicate port as-is so we will do this in Tray for now until we can port this one too ->
         //builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 80);
 

@@ -16,7 +16,7 @@ import webpiecesxxxxxpackage.base.HeadersCtx;
 import webpiecesxxxxxpackage.deleteme.api.SaveApi;
 import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteService;
-import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
+import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteApi;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -84,7 +84,7 @@ public class FeatureTest extends CompanyApiTest {
     private class AppOverridesModule implements Module {
         @Override
         public void configure(Binder binder) {
-            binder.bind(RemoteService.class).toInstance(mockRemoteService);
+            binder.bind(RemoteApi.class).toInstance(mockRemoteService);
         }
     }
 

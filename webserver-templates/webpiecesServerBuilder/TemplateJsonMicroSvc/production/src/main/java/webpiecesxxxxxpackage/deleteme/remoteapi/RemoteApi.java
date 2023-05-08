@@ -5,7 +5,7 @@ import org.webpieces.util.futures.XFuture;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
-public interface RemoteService {
+public interface RemoteApi {
 
 	@POST
 	@Path("/fetch/value")

@@ -4,7 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
+import org.webpieces.router.api.RecordingInfo;
+import org.webpieces.router.impl.loader.LoadedController;
+import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http.exception.BadRequestException;
@@ -56,7 +60,7 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		XFuture<List<Object>> futureArgs = translator.createArgs(m, meta.getCtx(), info.getBodyContentBinder())
 														.thenApply ( args -> validate(obj, m, args));
 		
-		return futureArgs.thenCompose( argsResult -> invokeAndCoerce(meta, info, m, argsResult));
+		return futureArgs.thenCompose( argsResult -> invokeAndCoerce(meta, info, argsResult));
 	}
 
 	private List<Object> validate(Object controller, Method m, List<Object> args) {
@@ -69,11 +73,12 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		return args;
 	}
 
-	private XFuture<Action> invokeAndCoerce(MethodMeta meta, RouteInfoForContent info, Method m,
-			List<Object> argsResult) {
+	private XFuture<Action> invokeAndCoerce(MethodMeta meta, RouteInfoForContent info, List<Object> argsResult) {
 		Object retVal;
+		LoadedController loadedController = meta.getLoadedController();
+		Object[] args = argsResult.toArray();
 		try {
-			retVal = invoker.invokeController(meta.getLoadedController(), argsResult.toArray());
+			retVal = invoker.invokeController(loadedController, args);
 		} catch (InvocationTargetException e) {
 			if(e.getCause() instanceof WebpiecesException)
 				throw (WebpiecesException)e.getCause();
@@ -83,30 +88,55 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		}
 		
 		if(info.getBodyContentBinder() != null)
-			return unwrapResult(m, retVal, info.getBodyContentBinder());
+			return unwrapResult(loadedController, retVal, info.getBodyContentBinder(), args);
 
 		return invoker.coerceReturnValue(retVal);
 	}
 
 	@SuppressWarnings("unchecked")
-	private XFuture<Action> unwrapResult(Method method, Object retVal, BodyContentBinder binder) {
+	private XFuture<Action> unwrapResult(LoadedController loadedController, Object retVal, BodyContentBinder binder, Object[] args) {
+		Method method = loadedController.getControllerMethod();
 		Class<?> returnType = method.getReturnType();
 
 		if(XFuture.class.isAssignableFrom(returnType)) {
 			if(retVal == null)
 				throw new IllegalStateException("Your method returned a null XFuture which it not allowed.  method="+method);
 			XFuture<Object> future = (XFuture<Object>) retVal;
-			return future.thenApply((bean) -> marshal(method, binder, bean));
+			return future.handle((beanResp, e) -> marshalAndRecord(e, loadedController, binder, beanResp, args))
+					.thenCompose(Function.identity());
 		} else if(CompletableFuture.class.isAssignableFrom(returnType)) {
 			if(retVal == null)
 				throw new IllegalStateException("Your method returned a null XFuture which it not allowed.  method="+method);
 			CompletableFuture<Object> future = (CompletableFuture<Object>) retVal;
 			XFuture<Object> xFuture = XFuture.completedFuture(null).thenCompose((voi) -> future);
-			return xFuture.thenApply((bean) -> marshal(method, binder, bean));
+			return xFuture.handle((beanResp, e) -> marshalAndRecord(e, loadedController, binder, beanResp, args))
+					.thenCompose(Function.identity());
 		} else {
 			RenderContent content = marshal(method, binder, retVal);
 			//binder.marshal(retVal);
 			return XFuture.completedFuture(content);
+		}
+	}
+
+	private XFuture<Action> marshalAndRecord(Throwable t, LoadedController loadedController, BodyContentBinder binder, Object retVal, Object[] args) {
+		Method method = loadedController.getControllerMethod();
+		RecordingInfo recordingInfo = Context.get(RecordingInfo.JSON_ENDPOINT_RESULT);
+		recordingInfo.setMethod(method);
+		recordingInfo.setArgs(args);
+
+		if(t != null) {
+			recordingInfo.setFailureResponse(t);
+			return XFuture.failedFuture(t);
+		}
+
+		recordingInfo.setResponse(retVal);
+
+		//record
+		try {
+			RenderContent content = binder.marshal(retVal);
+			return XFuture.completedFuture(content);
+		} catch(RuntimeException e) {
+			throw new IllegalReturnValueException("Exception marshaling retVal="+retVal+" from method="+method, e);
 		}
 	}
 

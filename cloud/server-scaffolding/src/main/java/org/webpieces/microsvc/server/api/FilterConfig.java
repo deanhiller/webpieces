@@ -5,6 +5,8 @@ public class FilterConfig {
     private String packageRegEx;
     private boolean enableHealthCheckEndpoint = true;
 
+    private boolean recordingEnabled = false;
+
     public FilterConfig(String packageRegEx) {
         this(packageRegEx, true);
     }
@@ -36,5 +38,13 @@ public class FilterConfig {
 
     public void setEntryPoint(boolean entryPoint) {
         this.entryPoint = entryPoint;
+    }
+
+    public boolean isRecordingEnabled() {
+        return recordingEnabled;
+    }
+
+    public void setRecordingEnabled(boolean recordingEnabled) {
+        this.recordingEnabled = recordingEnabled;
     }
 }

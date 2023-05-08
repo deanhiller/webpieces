@@ -3,11 +3,10 @@ package org.webpieces.googlecloud.cloudtasks.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
-import org.webpieces.microsvc.impl.EndpointInfo;
-import org.webpieces.microsvc.impl.TestCaseRecorder;
+import org.webpieces.recorder.impl.EndpointInfo;
+import org.webpieces.recorder.impl.TestCaseRecorder;
 import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
@@ -23,7 +22,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static org.webpieces.microsvc.impl.TestCaseRecorder.RECORDER_KEY;
+import static org.webpieces.recorder.impl.TestCaseRecorder.RECORDER_KEY;
 
 public class QueueInvokeHandler implements InvocationHandler {
     private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);

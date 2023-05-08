@@ -15,6 +15,7 @@ import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.SSLConfiguration;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.plugin.secure.sslcert.WebSSLFactory;
+import org.webpieces.recorder.api.ApiRecorderCreator;
 import org.webpieces.router.api.extensions.SimpleStorage;
 import org.webpieces.router.api.extensions.Startable;
 
@@ -25,7 +26,7 @@ import com.google.inject.multibindings.Multibinder;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.context.ClientAssertions;
 import webpiecesxxxxxpackage.db.DbCredentials;
-import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteService;
+import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteApi;
 import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteServiceSimulator;
 import webpiecesxxxxxpackage.deleteme.service.SimpleStorageImpl;
 
@@ -95,8 +96,8 @@ public class GuiceModule implements Module {
 
 	@Provides
 	@Singleton
-	public RemoteService createRemoteSvc(RESTClientCreator factory) {
-		return new RemoteServiceSimulator();
+	public RemoteApi createRemoteSvc(ApiRecorderCreator recorderCreator, RESTClientCreator factory) {
+		return recorderCreator.createClient(RemoteApi.class, new RemoteServiceSimulator());
 
 		//normally you would do something like this....
 //		InetSocketAddress addr = new InetSocketAddress(9091);

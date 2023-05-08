@@ -3,8 +3,8 @@ package org.webpieces.microsvc.client.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.microsvc.impl.EndpointInfo;
-import org.webpieces.microsvc.impl.TestCaseRecorder;
+import org.webpieces.recorder.impl.EndpointInfo;
+import org.webpieces.recorder.impl.TestCaseRecorder;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static org.webpieces.microsvc.impl.TestCaseRecorder.RECORDER_KEY;
+import static org.webpieces.recorder.impl.TestCaseRecorder.RECORDER_KEY;
 
 public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
@@ -121,11 +121,11 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
     private XFuture<Object> addTestRecordingInfo(EndpointInfo recordingInfo, Object resp, Throwable exc1) {
         if(exc1 != null) {
-            recordingInfo.addFailure(exc1);
+            recordingInfo.setXfutureFailedResponse(exc1);
             return XFuture.failedFuture(exc1);
         }
 
-        recordingInfo.addSuccessResponse(resp);
+        recordingInfo.setSuccessResponse(resp);
         return XFuture.completedFuture(resp);
     }
 
