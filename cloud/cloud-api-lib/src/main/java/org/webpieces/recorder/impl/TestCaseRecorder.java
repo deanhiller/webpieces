@@ -6,4 +6,6 @@ public interface TestCaseRecorder {
 
     public void addEndpointInfo(EndpointInfo info);
 
+    public EndpointInfo getLastEndpointInfo();
+
 }

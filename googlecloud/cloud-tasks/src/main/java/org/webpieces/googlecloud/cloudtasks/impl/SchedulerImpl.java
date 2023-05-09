@@ -6,6 +6,8 @@ import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 import org.webpieces.googlecloud.cloudtasks.api.Scheduler;
+import org.webpieces.recorder.impl.EndpointInfo;
+import org.webpieces.recorder.impl.TestCaseRecorder;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
@@ -13,6 +15,7 @@ import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import static org.webpieces.googlecloud.cloudtasks.impl.Constants.*;
+import static org.webpieces.recorder.impl.TestCaseRecorder.RECORDER_KEY;
 
 public class SchedulerImpl implements Scheduler {
 
@@ -42,6 +45,12 @@ public class SchedulerImpl implements Scheduler {
         XFuture<Void> future = runnable.get();
         return future.thenApply(v -> {
             JobReference reference = Context.get(Constants.WEBPIECES_SCHEDULE_RESPONSE);
+            TestCaseRecorder recorder = Context.get(RECORDER_KEY);
+            if(recorder != null) {
+                EndpointInfo lastEndpointInfo = recorder.getLastEndpointInfo();
+                lastEndpointInfo.setJobRefId(reference.getTaskId());
+                lastEndpointInfo.setQueueApi(true);
+            }
             log.info("executeIt reference "+reference);
             return reference;
         });

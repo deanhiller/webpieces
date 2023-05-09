@@ -8,6 +8,10 @@ public class EndpointInfo {
     private final Object[] args;
     private final Map<String, Object> ctxSnapshot;
 
+    private boolean queueApi = false;
+    //very special case for queue APIs
+    private String jobRefId;
+
     //This can be a Throwable OR an XFuture.failedFuture() response...
     private Throwable failureResponse;
 
@@ -56,4 +60,19 @@ public class EndpointInfo {
         this.successResponse = successResponse;
     }
 
+    public String getJobRefId() {
+        return jobRefId;
+    }
+
+    public void setJobRefId(String jobRefId) {
+        this.jobRefId = jobRefId;
+    }
+
+    public boolean isQueueApi() {
+        return queueApi;
+    }
+
+    public void setQueueApi(boolean queueApi) {
+        this.queueApi = queueApi;
+    }
 }

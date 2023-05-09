@@ -11,6 +11,7 @@ import org.webpieces.util.futures.XFuture;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Supplier;
 
 public class TestCaseRecorderImpl implements TestCaseRecorder {
 
@@ -44,6 +45,11 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         endpointInfo.add(info);
     }
 
+    @Override
+    public EndpointInfo getLastEndpointInfo() {
+        return endpointInfo.get(endpointInfo.size()-1);
+    }
+
     public void spitOutTestCase(EndpointInfo microSvcEndpoint) {
 
         List<MetaVarInfo> metaInfos = new ArrayList<>();
@@ -69,9 +75,10 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         String testCase = "public class Requests {\n";
 
         MetaVarInfo info = microSvcEndpoint;
+        String requestClass = info.getRequestClassName();
         String varName = "request";
-        testCase += "\tpublic "+info.getRequestClassName()+" create"+info.getSvcName()+"Request() {\n";
-        testCase += "\t\t"+info.getRequestClassName()+" "+varName+" = new "+info.getRequestClassName()+"()\n";
+        testCase += "\tpublic static "+requestClass+" create"+requestClass+"() {\n";
+        testCase += "\t\t"+requestClass+" "+varName+" = new "+requestClass+"();\n";
         testCase += writeFillInBeanCode(info.getInfo().getArgs()[0], varName, 0);
         testCase += "\t\treturn "+varName+";\n";
         testCase += "\t}\n";
@@ -194,7 +201,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
     private String writeTestCaseToString(EndpointInfo microSvcEndpoint, List<MetaVarInfo> metaInfo, MetaVarInfo svcMeta) {
         String testCase = "public class TestSomething extends FeatureTest {\n\n";
         testCase += "\t@Test\n";
-        testCase += "\tpublic void testSomething() {\n";
+        testCase += "\tpublic void testSomething() throws Exception {\n";
 
         testCase += fillInTestCase(microSvcEndpoint, metaInfo, svcMeta);
 
@@ -260,10 +267,11 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
             Throwable failureResponse = info.getFailureResponse();
             if(failureResponse != null) {
                 String simpleName = failureResponse.getClass().getSimpleName();
-                testCase += "\t\t"+ varName + ".addValueToReturn(XFuture.failedFuture(new "+simpleName+"()));\n";
+                String method = info.getMethod().getName().toUpperCase();
+                String enumName = metaVarInfo.getSvcName()+"Method."+method;
+                testCase += "\t\t"+ varName + ".addValueToReturn("+enumName+", XFuture.failedFuture(new "+simpleName+"()));\n";
             } else {
-                Object successResponse = info.getSuccessResponse();
-                testCase = printSuccess(successResponse, metaVarInfo.getResponseBeanClassName(), varName, i);
+                testCase += printSuccess(metaVarInfo, varName, i);
            }
         }
 
@@ -271,7 +279,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         String svcVarName = svcMeta.getSvcVarName();
         String requestClassName = svcMeta.getRequestClassName();
 
-        testCase += "\t\t"+requestClassName+" request = Requests.createSomethingRequest();\n";
+        testCase += "\t\t"+requestClassName+" request = Requests.create"+requestClassName+"();\n";
         testCase += "\n";
         testCase += "\t\tXFuture<"+svcMeta.getResponseBeanClassName()+"> future = "+svcVarName+"."+ microSvcEndpoint.getMethod().getName()+"(request);\n";
         testCase += "\t\t"+svcMeta.getResponseBeanClassName()+" respObj = future.get(5, TimeUnit.SECONDS);\n";
@@ -279,7 +287,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
 
         //validate response object
         if(!svcMeta.isReturnVoid()) {
-            testCase += "\t\tvalidateResponse(respObj)\n";
+            testCase += "\t\tvalidateResponse(respObj);\n";
             testCase += "\n";
         }
 
@@ -287,7 +295,8 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         for(int i = 0; i < metaInfos.size(); i++) {
             MetaVarInfo info = metaInfos.get(i);
             String variableName = "req"+i;
-            testCase += "\t\t"+info.getRequestClassName()+" "+variableName+" = ("+info.getRequestClassName()+")"+info.getSvcVarName()+".getCalledMethodList().get(0);\n";
+            String enumName = getEnumStr(info);
+            testCase += "\t\t"+info.getRequestClassName()+" "+variableName+" = ("+info.getRequestClassName()+")"+info.getSvcVarName()+".getSingleRequestList("+enumName+").get(0);\n";
             testCase += "\t\tvalidate"+info.getRequestClassName()+"("+variableName+");\n";
         }
 
@@ -304,8 +313,8 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                 continue; //skip generating method
 
             String varName = "resp";
-            testCase += "\tpublic XFuture<"+info.getResponseBeanClassName()+"> create"+info.getResponseBeanClassName()+"() {\n";
-            testCase += "\t\t"+info.getResponseBeanClassName()+" "+varName+" = new "+info.getResponseBeanClassName()+"()\n";
+            testCase += "\tpublic static XFuture<"+info.getResponseBeanClassName()+"> create"+info.getResponseBeanClassName()+"() {\n";
+            testCase += "\t\t"+info.getResponseBeanClassName()+" "+varName+" = new "+info.getResponseBeanClassName()+"();\n";
             testCase += writeFillInBeanCode(info.getInfo().getSuccessResponse(), varName, 0);
             testCase += "\t\treturn XFuture.completedFuture("+varName+");\n";
             testCase += "\t}\n";
@@ -315,18 +324,33 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         return testCase;
     }
 
-    private String printSuccess(Object successResponse, String respBeanName, String apiVarName, int i) {
+    private String printSuccess(MetaVarInfo info, String apiVarName, int i) {
+        String respBeanName = info.getResponseBeanClassName();
+        String enumName = getEnumStr(info);
+
         String testCase = "";
-        if(successResponse == null) {
-            testCase += "\t\t" + apiVarName + ".addValueToReturn(XFuture.completedFuture(null));\n";
+        if(info.getInfo().isQueueApi()) {
+            String jobRefId = info.getInfo().getJobRefId();
+            if(jobRefId == null)
+                throw new IllegalStateException("jobRefId should not be null on queue api method");
+
+            testCase += "\t\tSupplier<Object> "  + apiVarName + "Sup = () -> {\n";
+            testCase += "\t\t\tContext.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, new JobReference(\""+jobRefId+"\"));\n";
+            testCase += "\t\t\treturn XFuture.completedFuture(null);\n";
+            testCase += "\t\t};\n";
+            testCase += "\t\t" + apiVarName + ".addCalculateRetValue("+enumName+", "+apiVarName+"Sup);\n";
             return testCase;
         }
 
-        Class<?> aClass = successResponse.getClass();
-        String variableName = "var"+i;
-        testCase += "\t\t" + apiVarName + ".addValueToReturn(Responses.create"+respBeanName+"());\n";
+        testCase += "\t\t" + apiVarName + ".addValueToReturn("+enumName+", Responses.create"+respBeanName+"());\n";
 
         return testCase;
+    }
+
+    private String getEnumStr(MetaVarInfo info) {
+        String method = info.getInfo().getMethod().getName().toUpperCase();
+        String enumName = info.getSvcName()+"Method."+method;
+        return enumName;
     }
 
     private Class findApi(Class<?> svc) {

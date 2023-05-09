@@ -2,8 +2,6 @@ package org.webpieces.microsvc.server.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.ctx.api.Current;
-import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.microsvc.api.MicroSvcHeader;
 import org.webpieces.recorder.impl.EndpointInfo;
 import org.webpieces.recorder.impl.TestCaseRecorder;

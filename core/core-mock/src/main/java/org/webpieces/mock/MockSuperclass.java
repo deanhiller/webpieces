@@ -12,7 +12,12 @@ public abstract class MockSuperclass {
 	protected Map<MethodEnum, List<ValueToReturn>> returnValues = new HashMap<>();
 	protected Map<MethodEnum, List<ParametersPassedIn>> calledMethods = new HashMap<>();
 	protected Map<MethodEnum, ValueToReturn> defaultReturnValues = new HashMap<>();
-	
+
+	public void addCalculateRetValue(MethodEnum method, Supplier<Object> toReturn) {
+		ValueToReturn valueToReturn = new ValueToReturn(toReturn);
+		addValueToReturn(method, valueToReturn);
+	}
+
 	public void addValueToReturn(MethodEnum method, Object toReturn) {
 		ValueToReturn valueToReturn = new ValueToReturn(() -> toReturn);
 		addValueToReturn(method, valueToReturn);
@@ -79,7 +84,16 @@ public abstract class MockSuperclass {
 	public Stream<ParametersPassedIn> getCalledMethods(MethodEnum method) {
 		 return getCalledMethodList(method).stream();
 	}
-	
+
+	public <T> List<T> getSingleRequestList(MethodEnum method) {
+		List<ParametersPassedIn> list = getCalledMethodList(method);
+		List<T> requests = new ArrayList<>();
+		for(ParametersPassedIn p : list) {
+			requests.add((T) p.getArgs()[0]);
+		}
+		return requests;
+	}
+
 	public List<ParametersPassedIn> getCalledMethodList(MethodEnum method) {
 		List<ParametersPassedIn> params = calledMethods.get(method);
 		if(params == null) {
