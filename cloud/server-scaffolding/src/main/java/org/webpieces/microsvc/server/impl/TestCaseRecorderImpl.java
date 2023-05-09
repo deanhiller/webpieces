@@ -278,8 +278,10 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         testCase += "\n";
 
         //validate response object
-        testCase += "\t\tvalidateResponse(respObj)\n";
-        testCase += "\n";
+        if(!svcMeta.isReturnVoid()) {
+            testCase += "\t\tvalidateResponse(respObj)\n";
+            testCase += "\n";
+        }
 
         //validate requests to mock objects...
         for(int i = 0; i < metaInfos.size(); i++) {
@@ -298,11 +300,14 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
 
         for(int i = 0; i < metaInfos.size(); i++) {
             MetaVarInfo info = metaInfos.get(i);
+            if(info.isReturnVoid())
+                continue; //skip generating method
+
             String varName = "resp";
-            testCase += "\tpublic "+info.getResponseBeanClassName()+" create"+info.getResponseBeanClassName()+"() {\n";
+            testCase += "\tpublic XFuture<"+info.getResponseBeanClassName()+"> create"+info.getResponseBeanClassName()+"() {\n";
             testCase += "\t\t"+info.getResponseBeanClassName()+" "+varName+" = new "+info.getResponseBeanClassName()+"()\n";
             testCase += writeFillInBeanCode(info.getInfo().getSuccessResponse(), varName, 0);
-            testCase += "\t\treturn "+varName+";\n";
+            testCase += "\t\treturn XFuture.completedFuture("+varName+");\n";
             testCase += "\t}\n";
         }
 
@@ -319,8 +324,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
 
         Class<?> aClass = successResponse.getClass();
         String variableName = "var"+i;
-        testCase += "\t\t"+aClass.getSimpleName()+" "+variableName+" = Responses.create" + respBeanName + "();\n";
-        testCase += "\t\t" + apiVarName + ".addValueToReturn(XFuture.completedFuture("+variableName+"));\n";
+        testCase += "\t\t" + apiVarName + ".addValueToReturn(XFuture.completedFuture(Responses.create"+respBeanName+"()));\n";
 
         return testCase;
     }

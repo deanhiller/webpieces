@@ -1,5 +1,7 @@
 package org.webpieces.microsvc.server.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.microsvc.api.MicroSvcHeader;
@@ -17,6 +19,7 @@ import org.webpieces.util.futures.XFuture;
 import java.util.Map;
 
 public class RecordingFilter extends RouteFilter<Void> {
+    private static final Logger log = LoggerFactory.getLogger(RecordingFilter.class.getName());
 
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
@@ -33,13 +36,18 @@ public class RecordingFilter extends RouteFilter<Void> {
     }
 
     private Action writeOutTestCase(Action resp, Map<String, Object> fullRequestContext) {
-        TestCaseRecorderImpl recorder = (TestCaseRecorderImpl) Context.get(TestCaseRecorder.RECORDER_KEY);
-        RecordingInfo info = Context.get(RecordingInfo.JSON_ENDPOINT_RESULT);
-        EndpointInfo microSvcEndpoint = new EndpointInfo(info.getMethod(), info.getArgs(), fullRequestContext);
-        microSvcEndpoint.setSuccessResponse(info.getResponse());
-        microSvcEndpoint.setFailureResponse(info.getFailureResponse());
+        try {
+            TestCaseRecorderImpl recorder = (TestCaseRecorderImpl) Context.get(TestCaseRecorder.RECORDER_KEY);
+            RecordingInfo info = Context.get(RecordingInfo.JSON_ENDPOINT_RESULT);
+            EndpointInfo microSvcEndpoint = new EndpointInfo(info.getMethod(), info.getArgs(), fullRequestContext);
+            microSvcEndpoint.setSuccessResponse(info.getResponse());
+            microSvcEndpoint.setFailureResponse(info.getFailureResponse());
 
-        recorder.spitOutTestCase(microSvcEndpoint);
+            recorder.spitOutTestCase(microSvcEndpoint);
+        } catch (Throwable t) {
+            //silently fail but log the issue so we do not impact production with a bug from generating test
+            log.error("Failed to generate test case", t);
+        }
         return resp;
     }
 
