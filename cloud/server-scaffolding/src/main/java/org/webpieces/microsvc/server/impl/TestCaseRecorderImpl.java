@@ -324,7 +324,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
 
         Class<?> aClass = successResponse.getClass();
         String variableName = "var"+i;
-        testCase += "\t\t" + apiVarName + ".addValueToReturn(XFuture.completedFuture(Responses.create"+respBeanName+"()));\n";
+        testCase += "\t\t" + apiVarName + ".addValueToReturn(Responses.create"+respBeanName+"());\n";
 
         return testCase;
     }
