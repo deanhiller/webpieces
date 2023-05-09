@@ -20,7 +20,6 @@ public class RecordingFilter extends RouteFilter<Void> {
 
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
-        RequestContext context = Current.getContext();
         String magic = Context.getMagic(MicroSvcHeader.RECORDING);
         if(magic == null)
             return nextFilter.invoke(meta);
