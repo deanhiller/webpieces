@@ -15,7 +15,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
-import org.webpieces.microsvc.client.impl.Masker;
+import org.webpieces.util.security.Masker;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.PlatformHeaders;
 
