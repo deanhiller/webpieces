@@ -12,7 +12,7 @@ import javax.inject.Inject;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.templatingdev.impl.source.GroovyScriptGenerator;
 import org.webpieces.templatingdev.impl.source.ScriptOutputImpl;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.file.FileFactory;
 
 import groovy.lang.GroovyClassLoader;

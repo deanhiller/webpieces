@@ -17,7 +17,7 @@ import org.webpieces.templating.api.Template;
 import org.webpieces.templating.impl.ProdTemplateService;
 import org.webpieces.templating.impl.TemplateImpl;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 

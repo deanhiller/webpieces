@@ -24,7 +24,7 @@ import org.webpieces.httpclient11.api.HttpSocketListener;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.BackpressureConfig;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.webserver.test.http11.DirectHttp11Client;
 
 import com.google.inject.Module;

@@ -1,6 +1,6 @@
 package org.webpieces.googlecloud.storage.biz;
 
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.googlecloud.storage.api.DeanRequest;
 import org.webpieces.googlecloud.storage.api.DeanResponse;
 import org.webpieces.googlecloud.storage.api.DeansCoolApi;

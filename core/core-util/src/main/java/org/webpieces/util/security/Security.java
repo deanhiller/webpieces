@@ -9,7 +9,7 @@ import java.util.Base64;
 import javax.crypto.Mac;
 import javax.inject.Singleton;
 
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 @Singleton
 public class Security {

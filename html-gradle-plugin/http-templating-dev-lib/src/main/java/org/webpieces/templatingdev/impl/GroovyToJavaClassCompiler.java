@@ -8,7 +8,7 @@ import org.codehaus.groovy.tools.GroovyClass;
 import org.webpieces.templatingdev.api.CompileCallback;
 import org.webpieces.templatingdev.impl.source.ScriptOutputImpl;
 import org.webpieces.util.compiling.GroovyCompiling;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 import groovy.lang.GroovyClassLoader;
 

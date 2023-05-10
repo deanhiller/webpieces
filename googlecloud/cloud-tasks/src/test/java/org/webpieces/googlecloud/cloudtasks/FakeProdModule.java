@@ -7,7 +7,7 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.googlecloud.cloudtasks.api.GCPCloudTaskConfig;
 import org.webpieces.googlecloud.cloudtasks.api.QueueClientCreator;

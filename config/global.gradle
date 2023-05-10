@@ -141,8 +141,6 @@ ext {
             'log4jdbc'               : 'org.digitalforge:log4jdbc',
             'h2db'                   : 'com.h2database:h2',
 
-            'sneakythrow'            : 'org.digitalforge:sneakythrow:1.0.1',
-
             'acme-sslcerts'          : 'org.shredzone.acme4j:acme4j-client',
             'acme-utils'             : 'org.shredzone.acme4j:acme4j-utils',
 

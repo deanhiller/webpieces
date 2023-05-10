@@ -10,7 +10,7 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.OverwritePlatformResponse;
 import org.webpieces.ctx.api.RequestContext;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 import java.util.List;
 import java.util.Locale;

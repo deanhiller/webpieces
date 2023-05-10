@@ -1,7 +1,7 @@
 package org.webpieces.recorder.impl;
 
 import jdk.management.jfr.RecordingInfo;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
