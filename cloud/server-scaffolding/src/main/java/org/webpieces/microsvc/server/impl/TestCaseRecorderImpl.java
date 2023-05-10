@@ -202,17 +202,18 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         String testCase = "public class TestSomething extends FeatureTest {\n\n";
         testCase += "\t@Test\n";
         testCase += "\tpublic void testSomething() throws Exception {\n";
-
         testCase += fillInTestCase(microSvcEndpoint, metaInfo, svcMeta);
+        testCase += "\t}\n\n";
 
         EndpointInfo info = svcMeta.getInfo();
-        Object successResponse = info.getSuccessResponse();
+        if(!svcMeta.isReturnVoid()) {
+            Object successResponse = info.getSuccessResponse();
 
-        testCase += "\t}\n\n";
-        testCase += "\tpublic void validateResponse("+svcMeta.getResponseBeanClassName()+" response) {\n";
-        //testCase += "\t\t   //next generate validation based on response="+ successResponse +"\n";
-        testCase += writeValidateCode(successResponse, "response", 0);
-        testCase += "\t}\n\n";
+            testCase += "\tpublic void validateResponse(" + svcMeta.getResponseBeanClassName() + " response) {\n";
+            //testCase += "\t\t   //next generate validation based on response="+ successResponse +"\n";
+            testCase += writeValidateCode(successResponse, "response", 0);
+            testCase += "\t}\n\n";
+        }
 
         for(int i = 0; i < metaInfo.size(); i++) {
             MetaVarInfo info1 = metaInfo.get(i);
