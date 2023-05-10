@@ -1,21 +1,31 @@
 package org.webpieces.microsvc.server.api;
 
+import com.webpieces.http2.api.dto.highlevel.Http2Request;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.plugin.json.JacksonCatchAllFilter;
 import org.webpieces.plugin.json.ReportingHolderInfo;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.util.context.Context;
+import org.webpieces.util.context.PlatformHeaders;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.XFuture;
+import org.webpieces.util.security.Masker;
 
 import javax.inject.Inject;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class LogExceptionFilter extends RouteFilter<Void> {
@@ -23,10 +33,24 @@ public class LogExceptionFilter extends RouteFilter<Void> {
     private static final Logger log = LoggerFactory.getLogger(LogExceptionFilter.class);
 
     private IgnoreExceptions exceptionCheck;
+    private Masker masker;
+    private final Set<String> secureList = new HashSet<>();
 
     @Inject
-    public LogExceptionFilter(IgnoreExceptions exceptionCheck) {
+    public LogExceptionFilter(
+            IgnoreExceptions exceptionCheck,
+            Masker masker,
+            ClientServiceConfig clientServiceConfig
+    ) {
         this.exceptionCheck = exceptionCheck;
+        this.masker = masker;
+        List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
+
+        for(PlatformHeaders header : listHeaders) {
+            if(header.isSecured()) {
+                secureList.add(header.getHeaderName());
+            }
+        }
     }
 
     @Override
@@ -42,10 +66,12 @@ public class LogExceptionFilter extends RouteFilter<Void> {
         final Logger preRequestLog = LoggerFactory.getLogger(getClass().getSimpleName() + "." +
                 method.getDeclaringClass().getName() + "." + method.getName());
 
-        String s = printPreRequestLog(meta);
-        String logMsg = s+ "The following log is the original request body and its headers. If this log is spammy or "
-                + "unnecessary you can disable it in your logging config by filtering out this logger: "+preRequestLog.getName();
-        preRequestLog.info(logMsg);
+        if(preRequestLog.isInfoEnabled()) {
+            String s = printPreRequestLog(meta);
+            String logMsg = s + "The following log is the original request body and its headers. If this log is spammy or "
+                    + "unnecessary you can disable it in your logging config by filtering out this logger: " + preRequestLog.getName();
+            preRequestLog.info(logMsg);
+        }
 
         long start = System.currentTimeMillis();
         return nextFilter.invoke(meta)
@@ -91,17 +117,59 @@ public class LogExceptionFilter extends RouteFilter<Void> {
     protected String printPreRequestLog(MethodMeta meta) {
         RouterRequest request = meta.getCtx().getRequest();
 
-        String httpMethod = request.method.getCode();
-        String endpoint = httpMethod + " " + request.domain + ":" + request.port + request.relativePath;
-        List<String> headers = meta.getCtx().getRequest().originalRequest.getHeaders().stream()
-                .map(h -> h.getName() + ": " + h.getValue())
-                .collect(Collectors.toList());
-        String json = new String(request.body.createByteArray());
+//        String httpMethod = request.method.getCode();
+//        String endpoint = httpMethod + " " + request.domain + ":" + request.port + request.relativePath;
+//        List<String> headers = meta.getCtx().getRequest().originalRequest.getHeaders().stream()
+//                .map(h -> h.getName() + ": " + h.getValue())
+//                .collect(Collectors.toList());
+//        String json = new String(request.body.createByteArray());
+//
+//        String msg = endpoint+":\n\n"
+//                + "Headers: "+headers+"\n\n"
+//                + "Request Body JSON:\n"+json+"\n\n";
 
-        String msg = endpoint+":\n\n"
-                + "Headers: "+headers+"\n\n"
-                + "Request Body JSON:\n"+json+"\n\n";
+        Http2Request originalRequest = meta.getCtx().getRequest().originalRequest;
+        return createCurl(originalRequest, request.body, request.port);
+    }
 
-        return msg;
+    private String createCurl(Http2Request req, DataWrapper data, int port) {
+        String body = data.createStringFromUtf8(0, data.getReadableSize());
+
+        return createCurl2(port, req, () -> ("--data '" + body + "'"));
+    }
+
+
+    private String createCurl2(int port, Http2Request req, Supplier<String> supplier) {
+
+        String s = "";
+
+        s += "\n\n************************************************************\n";
+        s += "            HTTP REQUEST RECEIVED\n";
+        s += "***************************************************************\n";
+
+        s += "curl -k --request " + req.getKnownMethod().getCode() + " ";
+        for (Http2Header header : req.getHeaders()) {
+
+            if (header.getName().startsWith(":")) {
+                continue; //base headers we can discard
+            }
+
+            if(secureList.contains(header.getName())) {
+                s += "-H \"" + header.getName() + ":" + masker.maskSensitiveData(header.getValue()) + "\" ";
+            } else {
+                s += "-H \"" + header.getName() + ":" + header.getValue() + "\" ";
+            }
+
+        }
+
+        String host = req.getSingleHeaderValue(Http2HeaderName.AUTHORITY);
+        String path = req.getSingleHeaderValue(Http2HeaderName.PATH);
+
+        s += supplier.get();
+        s += " \"https://" + host + ":" + port + path + "\"\n";
+        s += "***************************************************************\n";
+
+        return s;
+
     }
 }

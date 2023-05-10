@@ -1,4 +1,4 @@
-package org.webpieces.microsvc.client.impl;
+package org.webpieces.util.security;
 
 public class Masker {
 

@@ -19,7 +19,7 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
-import org.webpieces.microsvc.client.impl.Masker;
+import org.webpieces.util.security.Masker;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.Contexts;
 import org.webpieces.util.context.PlatformHeaders;
