@@ -108,7 +108,7 @@ public class HttpClientWrapper {
         Http2Request httpReq = new Http2Request();
 
         httpReq.addHeader(new Http2Header(Http2HeaderName.METHOD, method));
-        httpReq.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, apiAddress.getHostString()));
+        httpReq.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, apiAddress.getHostString()+":"+apiAddress.getPort()));
         httpReq.addHeader(new Http2Header(Http2HeaderName.PATH, path));
         httpReq.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "Webpieces Generated API Client"));
         httpReq.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "application/json"));//Http2HeaderName.ACCEPT
@@ -149,7 +149,7 @@ public class HttpClientWrapper {
 
         FullRequest fullRequest = new FullRequest(httpReq, data, null);
 
-        log.info("curl request on socket(" + httpSocket + ")" + createCurl(fullRequest, apiAddress.getPort()));
+        log.info("curl request on socket(" + httpSocket + ")" + createCurl(fullRequest));
 
         Map<String, Object> fullContext = Context.getContext();
         if(fullContext == null) {
@@ -309,17 +309,17 @@ public class HttpClientWrapper {
 
     }
 
-    private String createCurl(FullRequest request, int port) {
+    private String createCurl(FullRequest request) {
 
         DataWrapper data = request.getPayload();
         String body = data.createStringFromUtf8(0, data.getReadableSize());
         Http2Request req = request.getHeaders();
 
-        return createCurl2(port, req, () -> ("--data '" + body + "'"));
+        return createCurl2(req, () -> ("--data '" + body + "'"));
 
     }
 
-    private String createCurl2(int port, Http2Request req, Supplier<String> supplier) {
+    private String createCurl2(Http2Request req, Supplier<String> supplier) {
 
         String s = "";
 
@@ -346,7 +346,7 @@ public class HttpClientWrapper {
         String path = req.getSingleHeaderValue(Http2HeaderName.PATH);
 
         s += supplier.get();
-        s += " \"https://" + host + ":" + port + path + "\"\n";
+        s += " \"https://" + host + path + "\"\n";
         s += "***************************************************************\n";
 
         return s;

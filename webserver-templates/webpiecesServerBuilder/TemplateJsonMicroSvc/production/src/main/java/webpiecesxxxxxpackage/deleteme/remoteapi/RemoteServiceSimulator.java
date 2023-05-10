@@ -20,6 +20,11 @@ public class RemoteServiceSimulator implements RemoteApi {
         list.add(answer1);
         list.add(answer2);
         resp.setAnswers(list);
+
+        List<MyEnum> enumList = new ArrayList<>();
+        enumList.add(MyEnum.ENUMCASE);
+        enumList.add(MyEnum.DEAN);
+        resp.setEnumList(enumList);
         return XFuture.completedFuture(resp);
     }
 }
