@@ -124,7 +124,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                             Object listBean = list.get(i);
                             if(beanClazz.isEnum()) {
                                 test.add("\t\t" + listVarName + ".add(" + beanType + "." + listBean + ");\n");
-                            } else if(wrapperTypes.contains(beanType)) {
+                            } else if(wrapperTypes.contains(beanClazz)) {
                                 test.add("\t\t" + listVarName + ".add(" + listBean + ");\n");
                             } else {
                                 test.add("\t\t" + beanType + " " + itemInListVarName + " = new " + beanType + "();\n");
