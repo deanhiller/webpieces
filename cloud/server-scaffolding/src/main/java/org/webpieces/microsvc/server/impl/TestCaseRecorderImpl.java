@@ -7,6 +7,7 @@ import org.webpieces.recorder.impl.TestCaseRecorder;
 import org.webpieces.util.futures.XFuture;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class TestCaseRecorderImpl implements TestCaseRecorder {
@@ -135,6 +136,12 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                     }
                 } else if (Set.class.isAssignableFrom(type)) {
                     test.add("\t\t//We need to implement the one for Set. field=\"+f.getName()+\"\n");
+                } else if(UUID.class.isAssignableFrom(type)) {
+                    test.add("\t\t UUID uuid = UUID.fromString(\"" +  value+"\");\n");
+                    test.add("\t\t" + varName + "." + setMethodName + "(uuid);\n");
+                } else if(LocalDateTime.class.isAssignableFrom(type)) {
+                    test.add("\t\tLocalDateTime time = FIX THIS-> '" +  value+"';\n");
+                    test.add("\t\t" + varName + "." + setMethodName + "(time);\n");
                 } else {
                     String fieldVarName = f.getName() + recurseLevel;
                     //assume another bean and recurse
@@ -192,7 +199,11 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                     }
 
                 } else if (Set.class.isAssignableFrom(type)) {
-                    test.add("\t\t//We need to implement the one for Set. field="+f.getName()+"\n");
+                    test.add("\t\t//We need to implement the one for Set. field=" + f.getName() + "\n");
+                } else if(UUID.class.isAssignableFrom(type)) {
+                    test.add("\t\tAssertions.assertEquals(\"" + value + "\", " + varName + "." +getMethodName+"().toString());\n");
+                } else if(LocalDateTime.class.isAssignableFrom(type)) {
+                    test.add("\t\tAssertions.assertEquals(\"" + value + "\", " + varName + "." +getMethodName+"().toString());\n");
                 } else {
                     String fieldVarName = f.getName() + recurseLevel;
                     //assume another bean and recurse
