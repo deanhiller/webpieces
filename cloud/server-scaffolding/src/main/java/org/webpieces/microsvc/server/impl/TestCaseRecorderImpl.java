@@ -1,17 +1,13 @@
 package org.webpieces.microsvc.server.impl;
 
-import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.webpieces.recorder.impl.EndpointInfo;
 import org.webpieces.recorder.impl.TestCaseRecorder;
-import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.util.futures.XFuture;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Supplier;
 
 public class TestCaseRecorderImpl implements TestCaseRecorder {
 
@@ -52,51 +48,51 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
 
     public void spitOutTestCase(EndpointInfo microSvcEndpoint) {
 
-        List<MetaVarInfo> metaInfos = new ArrayList<>();
-        for(EndpointInfo info : endpointInfo) {
-            MetaVarInfo meta = convert(info, true);
-            metaInfos.add(meta);
+        TestCaseHolder test = new TestCaseHolder();
+
+        try {
+            List<MetaVarInfo> metaInfos = new ArrayList<>();
+            for (EndpointInfo info : endpointInfo) {
+                MetaVarInfo meta = convert(info, true);
+                metaInfos.add(meta);
+            }
+
+            MetaVarInfo svcMeta = convert(microSvcEndpoint, false);
+
+            //1. print out the bootstrap of test case that extends base FeatureTest.java(all FeatureTest.java are the same)
+            writeTestCaseToString(microSvcEndpoint, metaInfos, svcMeta, test);
+            test.add("\n\n");
+            addResponseCreators(metaInfos, test);
+            test.add("\n\n");
+            addRequestCreators(svcMeta, test);
+            test.add("\n\n");
+
+            log.info("Logging test case below\n***********************************************\n\n" + test);
+        } catch (Throwable t) {
+            //silently fail but log the issue so we do not impact production with a bug from generating test
+            log.error("Failed to generate test case.  partial testcase=\n\n"+test, t);
         }
-
-        MetaVarInfo svcMeta = convert(microSvcEndpoint, false);
-
-        //1. print out the bootstrap of test case that extends base FeatureTest.java(all FeatureTest.java are the same)
-        String testCase = writeTestCaseToString(microSvcEndpoint, metaInfos, svcMeta);
-        testCase += "\n\n";
-        testCase += addResponseCreators(metaInfos);
-        testCase += "\n\n";
-        testCase += addRequestCreators(svcMeta);
-        testCase += "\n\n";
-
-        log.info("Logging test case below\n***********************************************\n\n"+testCase);
     }
 
-    private String addRequestCreators(MetaVarInfo microSvcEndpoint) {
-        String testCase = "public class Requests {\n";
+    private void addRequestCreators(MetaVarInfo microSvcEndpoint, TestCaseHolder test) {
+        test.add("public class Requests {\n");
 
         MetaVarInfo info = microSvcEndpoint;
         String requestClass = info.getRequestClassName();
         String varName = "request";
-        testCase += "\tpublic static "+requestClass+" create"+requestClass+"() {\n";
-        testCase += "\t\t"+requestClass+" "+varName+" = new "+requestClass+"();\n";
-        testCase += writeFillInBeanCode(info.getInfo().getArgs()[0], varName, 0);
-        testCase += "\t\treturn "+varName+";\n";
-        testCase += "\t}\n";
+        test.add("\tpublic static "+requestClass+" create"+requestClass+"() {\n");
+        test.add("\t\t"+requestClass+" "+varName+" = new "+requestClass+"();\n");
+        writeFillInBeanCode(info.getInfo().getArgs()[0], varName, test, 0);
+        test.add("\t\treturn "+varName+";\n");
+        test.add("\t}\n");
 
-        testCase += "}";
-        return testCase;
+        test.add("}");
+        
     }
 
-    private String writeFillInBeanCode(Object bean, String varName, int recurseLevel) {
+    private void writeFillInBeanCode(Object bean, String varName, TestCaseHolder test, int recurseLevel) {
         if(recurseLevel > 10)
             throw new IllegalStateException("Recursion greater than 10, probably a bug as beans are not that big(they shouldn't be)");
-
-        String testCase = "";
-        if(bean.getClass().isEnum()) {
-            String value = bean.getClass().getSimpleName()+"."+bean;
-            testCase += "\t\tAssertions.assertEquals(" + value + ", " + varName +");\n";
-            return testCase;
-        }
 
         //excludes inherited fields for now...(KISS until we need it)
         Field[] fields = bean.getClass().getDeclaredFields();
@@ -108,58 +104,62 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                 if(value == null) {
                     //do nothing but skip for deep beans so we don't nullpointer
                 } else if(type == String.class) {
-                    testCase += "\t\t" + varName + "." + setMethodName + "(\"" +value+"\");\n";
+                    test.add("\t\t" + varName + "." + setMethodName + "(\"" +value+"\");\n");
                 } else if (type.isPrimitive() || wrapperTypes.contains(type)) {
-                    testCase += "\t\t" + varName + "." + setMethodName + "(" + value + ");\n";
+                    test.add("\t\t" + varName + "." + setMethodName + "(" + value + ");\n");
                 } else if (Map.class.isAssignableFrom(type)) {
-                    testCase += "\t\t//We need to implement the one for Map. field=\"+f.getName()+\"\n";
+                    test.add("\t\t//We need to implement the one for Map. field=\"+f.getName()+\"\n");
                 } else if (List.class.isAssignableFrom(type)) {
                     List<Object> list = (List<Object>) value;
                     if(list.size() == 0) {
-                        testCase += "\t\t" + varName + "." + setMethodName + "(new ArrayList());\n";
+                        test.add("\t\t" + varName + "." + setMethodName + "(new ArrayList());\n");
                     } else {
                         Class<?> beanClazz = list.get(0).getClass();
                         String beanType = beanClazz.getSimpleName();
                         String listVarName = f.getName()+recurseLevel+"List";
-                        testCase += "\t\tList<"+beanType+"> "+listVarName+" = new ArrayList<>();\n";
-                        testCase += "\t\t"+varName+"."+setMethodName+"("+listVarName+");\n";
+                        test.add("\t\tList<"+beanType+"> "+listVarName+" = new ArrayList<>();\n");
+                        test.add("\t\t"+varName+"."+setMethodName+"("+listVarName+");\n");
                         for(int i = 0; i < list.size(); i++) {
                             String itemInListVarName = f.getName()+recurseLevel+"_"+i;
                             Object listBean = list.get(i);
                             if(beanClazz.isEnum()) {
-                                testCase += "\t\t"+listVarName+".add("+beanType+"."+listBean+");\n";
+                                test.add("\t\t" + listVarName + ".add(" + beanType + "." + listBean + ");\n");
+                            } else if(wrapperTypes.contains(beanType)) {
+                                test.add("\t\t" + listVarName + ".add(" + listBean + ");\n");
                             } else {
-                                testCase += "\t\t" + beanType + " " + itemInListVarName + " = new " + beanType + "();\n";
-                                testCase += "\t\t" + listVarName + ".add(" + itemInListVarName + ");\n";
-                                testCase += writeFillInBeanCode(listBean, itemInListVarName, recurseLevel+1);
+                                test.add("\t\t" + beanType + " " + itemInListVarName + " = new " + beanType + "();\n");
+                                test.add("\t\t" + listVarName + ".add(" + itemInListVarName + ");\n");
+                                writeFillInBeanCode(listBean, itemInListVarName, test, recurseLevel+1);
                             }
                         }
                     }
                 } else if (Set.class.isAssignableFrom(type)) {
-                    testCase += "\t\t//We need to implement the one for Set. field=\"+f.getName()+\"\n";
+                    test.add("\t\t//We need to implement the one for Set. field=\"+f.getName()+\"\n");
                 } else {
                     String fieldVarName = f.getName() + recurseLevel;
                     //assume another bean and recurse
-                    testCase += "\t\t" + type.getSimpleName() + " " + fieldVarName + " = new " + type.getSimpleName() + "();\n";
-                    testCase += "\t\t" + varName + "." + setMethodName + "(" +fieldVarName+");\n";
-                    testCase += writeFillInBeanCode(value, fieldVarName, recurseLevel+1);
+                    test.add("\t\t" + type.getSimpleName() + " " + fieldVarName + " = new " + type.getSimpleName() + "();\n");
+                    test.add("\t\t" + varName + "." + setMethodName + "(" +fieldVarName+");\n");
+                    writeFillInBeanCode(value, fieldVarName, test, recurseLevel+1);
                 }
             } catch (Throwable t) {
                 throw new RuntimeException("Failed on field="+f.getName()+" on varname="+varName+" of class type="+bean.getClass(), t);
             }
         }
-        return testCase;
+        
     }
 
-    private String writeValidateCode(Object bean, String varName, int recurseLevel) {
+    private void writeValidateCode(Object bean, String varName, TestCaseHolder test, int recurseLevel) {
         if(recurseLevel > 10)
             throw new IllegalStateException("Recursion greater than 10, probably a bug as beans are not that big(they shouldn't be)");
-        String testCase = "";
 
         if(bean.getClass().isEnum()) {
             String value = bean.getClass().getSimpleName()+"."+bean;
-            testCase += "\t\tAssertions.assertEquals(" + value + ", " + varName +");\n";
-            return testCase;
+            test.add("\t\tAssertions.assertEquals(" + value + ", " + varName +");\n");
+            return;
+        } else if(wrapperTypes.contains(bean.getClass())) {
+            test.add("\t\tAssertions.assertEquals(" + bean + ", " + varName +");\n");
+            return;
         }
 
         //excludes inherited fields for now...(KISS until we need it)
@@ -170,40 +170,40 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                 Object value = getValue(bean, f);
                 String getMethodName = fixName("get", f.getName());
                 if(value == null) {
-                    testCase += "\t\tAssertions.assertNull(" + varName + "." + getMethodName + "());\n";
+                    test.add("\t\tAssertions.assertNull(" + varName + "." + getMethodName + "());\n");
                 } else if(type == String.class) {
-                    testCase += "\t\tAssertions.assertEquals(\"" + value + "\", " + varName + "." +getMethodName+"());\n";
+                    test.add("\t\tAssertions.assertEquals(\"" + value + "\", " + varName + "." +getMethodName+"());\n");
                 } else if (type.isPrimitive() || wrapperTypes.contains(type)) {
-                    testCase += "\t\tAssertions.assertEquals(" + value + ", " + varName + "." +getMethodName+"());\n";
+                    test.add("\t\tAssertions.assertEquals(" + value + ", " + varName + "." +getMethodName+"());\n");
                 } else if (Map.class.isAssignableFrom(type)) {
-                    testCase += "\t\t//We need to implement the one for Map. field="+f.getName()+"\n";
+                    test.add("\t\t//We need to implement the one for Map. field="+f.getName()+"\n");
                 } else if (List.class.isAssignableFrom(type)) {
                     List<Object> list = (List<Object>) value;
                     if(list.size() == 0) {
-                        testCase += "\t\tAssertions.assertEquals(0, " + varName + "." + getMethodName + "().size());\n";
+                        test.add("\t\tAssertions.assertEquals(0, " + varName + "." + getMethodName + "().size());\n");
                     } else {
                         String beanType = list.get(0).getClass().getSimpleName();
                         String listVarName = f.getName()+recurseLevel+"List";
-                        testCase += "\t\tList<"+beanType+"> "+listVarName+" = "+varName + "." + getMethodName + "();\n";
+                        test.add("\t\tList<"+beanType+"> "+listVarName+" = "+varName + "." + getMethodName + "();\n");
                         for(int i = 0; i < list.size(); i++) {
                             Object listBean = list.get(i);
-                            testCase += writeValidateCode(listBean, listVarName+".get("+i+")", recurseLevel+1);
+                            writeValidateCode(listBean, listVarName+".get("+i+")", test, recurseLevel+1);
                         }
                     }
 
                 } else if (Set.class.isAssignableFrom(type)) {
-                    testCase += "\t\t//We need to implement the one for Set. field="+f.getName()+"\n";
+                    test.add("\t\t//We need to implement the one for Set. field="+f.getName()+"\n");
                 } else {
                     String fieldVarName = f.getName() + recurseLevel;
                     //assume another bean and recurse
-                    testCase += "\t\t" + type.getSimpleName() + " " + fieldVarName + " = " + varName +"."+getMethodName + "();\n";
-                    testCase += writeValidateCode(value, fieldVarName, recurseLevel+1);
+                    test.add("\t\t" + type.getSimpleName() + " " + fieldVarName + " = " + varName +"."+getMethodName + "();\n");
+                    writeValidateCode(value, fieldVarName, test,  recurseLevel+1);
                 }
             } catch (Throwable t) {
                 throw new RuntimeException("Exception processing field="+f.getName()+" on varName="+varName+" of class type="+bean.getClass(), t);
             }
         }
-        return testCase;
+        
     }
 
     private String fixName(String prefix, String name) {
@@ -215,33 +215,32 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         return f.get(bean);
     }
 
-    private String writeTestCaseToString(EndpointInfo microSvcEndpoint, List<MetaVarInfo> metaInfo, MetaVarInfo svcMeta) {
-        String testCase = "public class TestSomething extends FeatureTest {\n\n";
-        testCase += "\t@Test\n";
-        testCase += "\tpublic void testSomething() throws Exception {\n";
-        testCase += fillInTestCase(microSvcEndpoint, metaInfo, svcMeta);
-        testCase += "\t}\n\n";
+    private void writeTestCaseToString(EndpointInfo microSvcEndpoint, List<MetaVarInfo> metaInfo, MetaVarInfo svcMeta, TestCaseHolder test) {
+        test.add("public class TestSomething extends FeatureTest {\n\n");
+        test.add("\t@Test\n");
+        test.add("\tpublic void testSomething() throws Exception {\n");
+        fillInTestCase(microSvcEndpoint, metaInfo, svcMeta, test);
+        test.add("\t}\n\n");
 
         EndpointInfo info = svcMeta.getInfo();
         if(!svcMeta.isReturnVoid()) {
             Object successResponse = info.getSuccessResponse();
 
-            testCase += "\tpublic void validateResponse(" + svcMeta.getResponseBeanClassName() + " response) {\n";
-            //testCase += "\t\t   //next generate validation based on response="+ successResponse +"\n";
-            testCase += writeValidateCode(successResponse, "response", 0);
-            testCase += "\t}\n\n";
+            test.add("\tpublic void validateResponse(" + svcMeta.getResponseBeanClassName() + " response) {\n");
+            //test.add("\t\t   //next generate validation based on response="+ successResponse +"\n");
+            writeValidateCode(successResponse, "response", test, 0);
+            test.add("\t}\n\n");
         }
 
         for(int i = 0; i < metaInfo.size(); i++) {
             MetaVarInfo info1 = metaInfo.get(i);
             String requestClassName = info1.getRequestClassName();
-            testCase += "\tpublic void validate"+requestClassName+"("+info1.getRequestClassName()+" request) {\n";
-            testCase += writeValidateCode(info1.getInfo().getArgs()[0], "request", 0);
-            testCase += "\t}\n\n";
+            test.add("\tpublic void validate"+requestClassName+"("+info1.getRequestClassName()+" request) {\n");
+            writeValidateCode(info1.getInfo().getArgs()[0], "request", test, 0);
+            test.add("\t}\n\n");
         }
 
-        testCase += "}";
-        return testCase;
+        test.add("}");
     }
 
     private MetaVarInfo convert(EndpointInfo info, boolean isMock) {
@@ -273,8 +272,8 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         return new MetaVarInfo(varName, svcName, requestClassName, responseBeanClassName, info);
     }
 
-    private String fillInTestCase(EndpointInfo microSvcEndpoint, List<MetaVarInfo> metaInfos, MetaVarInfo svcMeta) {
-        String testCase = "";
+    private void fillInTestCase(EndpointInfo microSvcEndpoint, List<MetaVarInfo> metaInfos, MetaVarInfo svcMeta, TestCaseHolder test) {
+
 
         //2. fill in mock success or failure responses
         for(int i = 0; i < metaInfos.size(); i++) {
@@ -287,9 +286,9 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                 String simpleName = failureResponse.getClass().getSimpleName();
                 String method = info.getMethod().getName().toUpperCase();
                 String enumName = metaVarInfo.getSvcName()+"Method."+method;
-                testCase += "\t\t"+ varName + ".addValueToReturn("+enumName+", XFuture.failedFuture(new "+simpleName+"()));\n";
+                test.add("\t\t"+ varName + ".addValueToReturn("+enumName+", XFuture.failedFuture(new "+simpleName+"()));\n");
             } else {
-                testCase += printSuccess(metaVarInfo, varName, i);
+                printSuccess(metaVarInfo, varName, test, i);
            }
         }
 
@@ -297,16 +296,16 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         String svcVarName = svcMeta.getSvcVarName();
         String requestClassName = svcMeta.getRequestClassName();
 
-        testCase += "\t\t"+requestClassName+" request = Requests.create"+requestClassName+"();\n";
-        testCase += "\n";
-        testCase += "\t\tXFuture<"+svcMeta.getResponseBeanClassName()+"> future = "+svcVarName+"."+ microSvcEndpoint.getMethod().getName()+"(request);\n";
-        testCase += "\t\t"+svcMeta.getResponseBeanClassName()+" respObj = future.get(5, TimeUnit.SECONDS);\n";
-        testCase += "\n";
+        test.add("\t\t"+requestClassName+" request = Requests.create"+requestClassName+"();\n");
+        test.add("\n");
+        test.add("\t\tXFuture<"+svcMeta.getResponseBeanClassName()+"> future = "+svcVarName+"."+ microSvcEndpoint.getMethod().getName()+"(request);\n");
+        test.add("\t\t"+svcMeta.getResponseBeanClassName()+" respObj = future.get(5, TimeUnit.SECONDS);\n");
+        test.add("\n");
 
         //validate response object
         if(!svcMeta.isReturnVoid()) {
-            testCase += "\t\tvalidateResponse(respObj);\n";
-            testCase += "\n";
+            test.add("\t\tvalidateResponse(respObj);\n");
+            test.add("\n");
         }
 
         //validate requests to mock objects...
@@ -314,16 +313,16 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
             MetaVarInfo info = metaInfos.get(i);
             String variableName = "req"+i;
             String enumName = getEnumStr(info);
-            testCase += "\t\t"+info.getRequestClassName()+" "+variableName+" = ("+info.getRequestClassName()+")"+info.getSvcVarName()+".getSingleRequestList("+enumName+").get(0);\n";
-            testCase += "\t\tvalidate"+info.getRequestClassName()+"("+variableName+");\n";
+            test.add("\t\t"+info.getRequestClassName()+" "+variableName+" = ("+info.getRequestClassName()+")"+info.getSvcVarName()+".getSingleRequestList("+enumName+").get(0);\n");
+            test.add("\t\tvalidate"+info.getRequestClassName()+"("+variableName+");\n");
         }
 
 
-        return testCase;
+        
     }
 
-    private String addResponseCreators(List<MetaVarInfo> metaInfos) {
-        String testCase = "public class Responses {\n";
+    private void addResponseCreators(List<MetaVarInfo> metaInfos, TestCaseHolder test) {
+        test.add("public class Responses {\n");
 
         for(int i = 0; i < metaInfos.size(); i++) {
             MetaVarInfo info = metaInfos.get(i);
@@ -331,38 +330,34 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                 continue; //skip generating method
 
             String varName = "resp";
-            testCase += "\tpublic static XFuture<"+info.getResponseBeanClassName()+"> create"+info.getResponseBeanClassName()+"() {\n";
-            testCase += "\t\t"+info.getResponseBeanClassName()+" "+varName+" = new "+info.getResponseBeanClassName()+"();\n";
-            testCase += writeFillInBeanCode(info.getInfo().getSuccessResponse(), varName, 0);
-            testCase += "\t\treturn XFuture.completedFuture("+varName+");\n";
-            testCase += "\t}\n";
+            test.add("\tpublic static XFuture<"+info.getResponseBeanClassName()+"> create"+info.getResponseBeanClassName()+"() {\n");
+            test.add("\t\t"+info.getResponseBeanClassName()+" "+varName+" = new "+info.getResponseBeanClassName()+"();\n");
+            writeFillInBeanCode(info.getInfo().getSuccessResponse(), varName, test, 0);
+            test.add("\t\treturn XFuture.completedFuture("+varName+");\n");
+            test.add("\t}\n");
         }
 
-        testCase += "}";
-        return testCase;
+        test.add("}");
     }
 
-    private String printSuccess(MetaVarInfo info, String apiVarName, int i) {
+    private void printSuccess(MetaVarInfo info, String apiVarName, TestCaseHolder test, int i) {
         String respBeanName = info.getResponseBeanClassName();
         String enumName = getEnumStr(info);
 
-        String testCase = "";
         if(info.getInfo().isQueueApi()) {
             String jobRefId = info.getInfo().getJobRefId();
             if(jobRefId == null)
                 throw new IllegalStateException("jobRefId should not be null on queue api method");
 
-            testCase += "\t\tSupplier<Object> "  + apiVarName + "Sup = () -> {\n";
-            testCase += "\t\t\tContext.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, new JobReference(\""+jobRefId+"\"));\n";
-            testCase += "\t\t\treturn XFuture.completedFuture(null);\n";
-            testCase += "\t\t};\n";
-            testCase += "\t\t" + apiVarName + ".addCalculateRetValue("+enumName+", "+apiVarName+"Sup);\n";
-            return testCase;
+            test.add("\t\tSupplier<Object> "  + apiVarName + "Sup = () -> {\n");
+            test.add("\t\t\tContext.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, new JobReference(\""+jobRefId+"\"));\n");
+            test.add("\t\t\treturn XFuture.completedFuture(null);\n");
+            test.add("\t\t};\n");
+            test.add("\t\t" + apiVarName + ".addCalculateRetValue("+enumName+", "+apiVarName+"Sup);\n");
+            return;
         }
 
-        testCase += "\t\t" + apiVarName + ".addValueToReturn("+enumName+", Responses.create"+respBeanName+"());\n";
-
-        return testCase;
+        test.add("\t\t" + apiVarName + ".addValueToReturn("+enumName+", Responses.create"+respBeanName+"());\n");
     }
 
     private String getEnumStr(MetaVarInfo info) {

@@ -97,7 +97,7 @@ public class LogExceptionFilter extends RouteFilter<Void> {
             return XFuture.failedFuture(e);
         }
 
-        String errorMsg = "Exception for request(time=\"+total+\"ms). "+getOrigRequest(preRequestLog, meta);
+        String errorMsg = "Exception for request(time="+total+"ms). "+getOrigRequest(preRequestLog, meta);
         log.error(errorMsg, e);
 
         return XFuture.failedFuture(e);
