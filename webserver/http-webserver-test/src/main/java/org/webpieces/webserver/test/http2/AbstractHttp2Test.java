@@ -21,7 +21,7 @@ import org.webpieces.httpclientx.api.Http2to11ClientFactory;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.BackpressureConfig;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.webserver.test.*;
 import org.webpieces.webserver.test.http2.direct.DirectHttp2Client;
 import org.webpieces.webserver.test.http2.directfast.DirectFastClient;

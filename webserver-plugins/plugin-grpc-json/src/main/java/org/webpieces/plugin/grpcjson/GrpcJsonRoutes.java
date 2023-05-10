@@ -12,7 +12,7 @@ import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
 import org.webpieces.router.api.routes.FilterPortType;
 import org.webpieces.router.api.routes.Routes;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 import io.grpc.MethodDescriptor;
 import io.grpc.ServiceDescriptor;

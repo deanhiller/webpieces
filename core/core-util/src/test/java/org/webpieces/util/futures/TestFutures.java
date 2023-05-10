@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 public class TestFutures {
 

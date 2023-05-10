@@ -15,7 +15,7 @@ import org.webpieces.router.api.controller.actions.RenderContent;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.filters.Service;
 
 import com.fasterxml.jackson.core.JsonGenerationException;

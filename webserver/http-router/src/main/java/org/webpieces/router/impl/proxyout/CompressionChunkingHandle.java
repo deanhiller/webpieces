@@ -17,7 +17,7 @@ import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.routeinvoker.WebSettings;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Headers;
 import com.webpieces.http2.api.dto.highlevel.Http2Request;

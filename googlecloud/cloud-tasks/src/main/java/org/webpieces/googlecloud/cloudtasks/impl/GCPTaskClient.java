@@ -7,7 +7,7 @@ import com.google.cloud.tasks.v2.Task;
 import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;

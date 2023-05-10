@@ -6,7 +6,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import com.google.protobuf.ByteString;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;

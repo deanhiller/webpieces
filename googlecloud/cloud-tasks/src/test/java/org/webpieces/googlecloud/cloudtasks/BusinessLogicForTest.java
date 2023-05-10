@@ -1,6 +1,6 @@
 package org.webpieces.googlecloud.cloudtasks;
 
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.Scheduler;
 import org.webpieces.util.futures.XFuture;

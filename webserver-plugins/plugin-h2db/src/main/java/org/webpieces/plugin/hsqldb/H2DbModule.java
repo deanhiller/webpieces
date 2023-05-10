@@ -6,7 +6,7 @@ import org.h2.tools.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.plugin.backend.spi.BackendGuiDescriptor;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;

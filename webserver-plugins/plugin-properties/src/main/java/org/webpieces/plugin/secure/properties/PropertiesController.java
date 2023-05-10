@@ -25,7 +25,7 @@ import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.controller.actions.Render;
 import org.webpieces.router.api.extensions.ObjectStringConverter;
 import org.webpieces.router.api.extensions.SimpleStorage;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 import com.google.common.collect.Lists;
 

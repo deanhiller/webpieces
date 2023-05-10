@@ -8,7 +8,7 @@ import org.webpieces.util.futures.XFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.extensions.SimpleStorage;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 class ApplyDatabaseProperties implements Runnable {
 	

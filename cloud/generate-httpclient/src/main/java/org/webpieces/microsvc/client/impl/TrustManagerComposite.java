@@ -1,6 +1,6 @@
 package org.webpieces.microsvc.client.impl;
 
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 import javax.net.ssl.*;
 import java.io.InputStream;

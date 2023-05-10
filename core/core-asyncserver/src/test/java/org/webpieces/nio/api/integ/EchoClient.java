@@ -9,7 +9,7 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.throughput.BytesRecorder;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 public class EchoClient {
 

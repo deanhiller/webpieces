@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.router.impl.routers.FStaticRouter;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.Security;

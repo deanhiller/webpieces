@@ -15,7 +15,7 @@ import org.webpieces.http.exception.HttpException;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.filters.Service;
 
 @Singleton

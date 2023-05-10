@@ -22,7 +22,7 @@ import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.httpfrontend2.api.http2.Http2Requests;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.http2.api.dto.highlevel.Http2Request;

@@ -22,7 +22,7 @@ import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.impl.model.SvcProxyLogic;
 import org.webpieces.router.impl.params.BeanValidator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 

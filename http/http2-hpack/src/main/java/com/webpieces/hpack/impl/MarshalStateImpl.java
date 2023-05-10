@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.twitter.hpack.Encoder;
 import com.webpieces.hpack.api.MarshalState;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 public class MarshalStateImpl implements MarshalState {
 

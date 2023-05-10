@@ -1,6 +1,6 @@
 package org.webpieces.nio.api;
 
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.file.FileFactory;
 
 import javax.net.ssl.KeyManagerFactory;

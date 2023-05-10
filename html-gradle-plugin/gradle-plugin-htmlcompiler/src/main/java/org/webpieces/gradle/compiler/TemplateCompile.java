@@ -32,7 +32,7 @@ import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.StubModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.templatingdev.impl.HtmlToJavaClassCompiler;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.net.URLEncoder;
 
 import com.google.inject.Guice;

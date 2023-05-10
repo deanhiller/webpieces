@@ -9,7 +9,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.webpieces.nio.api.SSLEngineFactory;
-import org.digitalforge.sneakythrow.SneakyThrow;
+import org.webpieces.util.SneakyThrow;
 
 
 public class SSLEngineFactoryForTest implements SSLEngineFactory {
