@@ -15,10 +15,7 @@ import webpiecesxxxxxpackage.deleteme.api.SaveApi;
 import webpiecesxxxxxpackage.deleteme.api.SaveRequest;
 import webpiecesxxxxxpackage.deleteme.api.SaveResponse;
 import webpiecesxxxxxpackage.deleteme.api.TheMatch;
-import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueRequest;
-import webpiecesxxxxxpackage.deleteme.remoteapi.FetchValueResponse;
-import webpiecesxxxxxpackage.deleteme.remoteapi.MyThing;
-import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteApi;
+import webpiecesxxxxxpackage.deleteme.remoteapi.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +39,11 @@ public class SaveController implements SaveApi {
 	public XFuture<SaveResponse> save(@Jackson SaveRequest request) {
 
 		FetchValueRequest fetchReq = new FetchValueRequest();
+
+		List<MyEnum> enumList = new ArrayList<>();
+		enumList.add(MyEnum.DEAN);
+		enumList.add(MyEnum.DEAN);
+		fetchReq.setTestEnumList(enumList);
 		fetchReq.setName(request.getQuery());
 		MyThing thing = new MyThing();
 		thing.setThingsName("deano");

@@ -88,7 +88,15 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
     }
 
     private String writeFillInBeanCode(Object bean, String varName, int recurseLevel) {
+        if(recurseLevel > 30)
+            throw new IllegalStateException("Recursion too deep, probably a bug");
+
         String testCase = "";
+        if(bean.getClass().isEnum()) {
+            String value = bean.getClass().getSimpleName()+"."+bean.toString();
+            testCase += "\t\tAssertions.assertEquals(" + value + ", " + varName +");\n";
+            return testCase;
+        }
 
         //excludes inherited fields for now...(KISS until we need it)
         Field[] fields = bean.getClass().getDeclaredFields();
@@ -110,16 +118,21 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                     if(list.size() == 0) {
                         testCase += "\t\t" + varName + "." + setMethodName + "(new ArrayList());\n";
                     } else {
-                        String beanType = list.get(0).getClass().getSimpleName();
+                        Class<?> beanClazz = list.get(0).getClass();
+                        String beanType = beanClazz.getSimpleName();
                         String listVarName = f.getName()+recurseLevel+"List";
                         testCase += "\t\tList<"+beanType+"> "+listVarName+" = new ArrayList<>();\n";
                         testCase += "\t\t"+varName+"."+setMethodName+"("+listVarName+");\n";
                         for(int i = 0; i < list.size(); i++) {
                             String itemInListVarName = f.getName()+recurseLevel+"_"+i;
-                            testCase += "\t\t"+beanType+" "+itemInListVarName+" = new "+beanType+"();\n";
-                            testCase += "\t\t"+listVarName+".add("+itemInListVarName+");\n";
                             Object listBean = list.get(i);
-                            testCase += writeFillInBeanCode(listBean, itemInListVarName, recurseLevel+1);
+                            if(beanClazz.isEnum()) {
+                                testCase += "\t\t"+listVarName+".add("+beanType+"."+listBean+");\n";
+                            } else {
+                                testCase += "\t\t" + beanType + " " + itemInListVarName + " = new " + beanType + "();\n";
+                                testCase += "\t\t" + listVarName + ".add(" + itemInListVarName + ");\n";
+                                testCase += writeFillInBeanCode(listBean, itemInListVarName, recurseLevel+1);
+                            }
                         }
                     }
                 } else if (Set.class.isAssignableFrom(type)) {
@@ -132,16 +145,22 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                     testCase += writeFillInBeanCode(value, fieldVarName, recurseLevel+1);
                 }
             } catch (Throwable t) {
-                //one of the rare times I cath and swallow
-                log.error("Exception, failing open", t);
-                testCase += "\t\t//EXCEPTION on code gen on field="+f;
+                throw new RuntimeException("Failed on field="+f.getName()+" on varname="+varName+" of class type="+bean.getClass(), t);
             }
         }
         return testCase;
     }
 
     private String writeValidateCode(Object bean, String varName, int recurseLevel) {
+        if(recurseLevel > 40)
+            throw new IllegalStateException("Recursion greater than 50, probably a bug");
         String testCase = "";
+
+        if(bean.getClass().isEnum()) {
+            String value = bean.getClass().getSimpleName()+"."+bean.toString();
+            testCase += "\t\tAssertions.assertEquals(" + value + ", " + varName +");\n";
+            return testCase;
+        }
 
         //excludes inherited fields for now...(KISS until we need it)
         Field[] fields = bean.getClass().getDeclaredFields();
@@ -181,9 +200,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                     testCase += writeValidateCode(value, fieldVarName, recurseLevel+1);
                 }
             } catch (Throwable t) {
-                //one of the rare times I cath and swallow
-                log.error("Exception, failing open", t);
-                testCase += "\t\t//EXCEPTION on code gen on field="+f;
+                throw new RuntimeException("Exception processing field="+f.getName()+" on varName="+varName+" of class type="+bean.getClass(), t);
             }
         }
         return testCase;

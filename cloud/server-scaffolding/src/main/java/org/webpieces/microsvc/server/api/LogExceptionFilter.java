@@ -166,7 +166,7 @@ public class LogExceptionFilter extends RouteFilter<Void> {
         String path = req.getSingleHeaderValue(Http2HeaderName.PATH);
 
         s += supplier.get();
-        s += " \"https://" + host + ":" + port + path + "\"\n";
+        s += " \"https://" + host + path + "\"\n";
         s += "***************************************************************\n";
 
         return s;
