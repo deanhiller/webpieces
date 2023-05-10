@@ -93,7 +93,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
 
         String testCase = "";
         if(bean.getClass().isEnum()) {
-            String value = bean.getClass().getSimpleName()+"."+bean.toString();
+            String value = bean.getClass().getSimpleName()+"."+bean;
             testCase += "\t\tAssertions.assertEquals(" + value + ", " + varName +");\n";
             return testCase;
         }
@@ -157,7 +157,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         String testCase = "";
 
         if(bean.getClass().isEnum()) {
-            String value = bean.getClass().getSimpleName()+"."+bean.toString();
+            String value = bean.getClass().getSimpleName()+"."+bean;
             testCase += "\t\tAssertions.assertEquals(" + value + ", " + varName +");\n";
             return testCase;
         }
