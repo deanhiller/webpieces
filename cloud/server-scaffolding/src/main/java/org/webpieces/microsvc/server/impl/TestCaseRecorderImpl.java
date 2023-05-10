@@ -88,8 +88,8 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
     }
 
     private String writeFillInBeanCode(Object bean, String varName, int recurseLevel) {
-        if(recurseLevel > 30)
-            throw new IllegalStateException("Recursion too deep, probably a bug");
+        if(recurseLevel > 10)
+            throw new IllegalStateException("Recursion greater than 10, probably a bug as beans are not that big(they shouldn't be)");
 
         String testCase = "";
         if(bean.getClass().isEnum()) {
@@ -152,8 +152,8 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
     }
 
     private String writeValidateCode(Object bean, String varName, int recurseLevel) {
-        if(recurseLevel > 40)
-            throw new IllegalStateException("Recursion greater than 50, probably a bug");
+        if(recurseLevel > 10)
+            throw new IllegalStateException("Recursion greater than 10, probably a bug as beans are not that big(they shouldn't be)");
         String testCase = "";
 
         if(bean.getClass().isEnum()) {
