@@ -37,4 +37,8 @@ public class MetaVarInfo {
     public String getResponseBeanClassName() {
         return responseBeanClassName;
     }
+
+    public boolean isReturnVoid() {
+        return "Void".equals(responseBeanClassName);
+    }
 }

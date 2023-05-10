@@ -5,7 +5,9 @@ public class FilterConfig {
     private String packageRegEx;
     private boolean enableHealthCheckEndpoint = true;
 
-    private boolean recordingEnabled = false;
+    //Turning this off is an EXTREMELY minor performance improvement so default to on because only
+    //requests with MicroSvcHeaders.RECORDING header will actually do recording
+    private boolean recordingEnabled = true;
 
     public FilterConfig(String packageRegEx) {
         this(packageRegEx, true);
