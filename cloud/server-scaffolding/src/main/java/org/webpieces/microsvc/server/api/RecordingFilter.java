@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.microsvc.api.MicroSvcHeader;
 import org.webpieces.recorder.impl.EndpointInfo;
 import org.webpieces.recorder.impl.TestCaseRecorder;
-import org.webpieces.microsvc.server.impl.TestCaseRecorderImpl;
+import org.webpieces.recorder.impl.TestCaseRecorderImpl;
 import org.webpieces.router.api.RecordingInfo;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
