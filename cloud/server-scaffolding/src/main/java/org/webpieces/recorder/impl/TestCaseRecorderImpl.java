@@ -110,6 +110,8 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                     //do nothing but skip for deep beans so we don't nullpointer
                 } else if(type == String.class) {
                     test.add("\t\t" + varName + "." + setMethodName + "(\"" +value+"\");\n");
+                } else if(type.isEnum()) {
+                    test.add("\t\t" + varName + "." + setMethodName + "(" +type.getSimpleName()+"."+value+");\n");
                 } else if (type.isPrimitive() || wrapperTypes.contains(type)) {
                     test.add("\t\t" + varName + "." + setMethodName + "(" + value + ");\n");
                 } else if (Map.class.isAssignableFrom(type)) {
@@ -186,6 +188,8 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                 String getMethodName = fixName("get", f.getName());
                 if(value == null) {
                     test.add("\t\tAssertions.assertNull(" + varName + "." + getMethodName + "());\n");
+                } else if(type.isEnum()) {
+                    test.add("\t\tAssertions.assertEquals(" + type.getSimpleName()+"."+value + ", " + varName + "." +getMethodName+"());\n");
                 } else if(type == String.class) {
                     test.add("\t\tAssertions.assertEquals(\"" + value + "\", " + varName + "." +getMethodName+"());\n");
                 } else if (type.isPrimitive() || wrapperTypes.contains(type)) {
