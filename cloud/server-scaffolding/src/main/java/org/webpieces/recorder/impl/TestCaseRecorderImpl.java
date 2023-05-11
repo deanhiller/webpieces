@@ -1,9 +1,9 @@
-package org.webpieces.microsvc.server.impl;
+package org.webpieces.recorder.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.recorder.impl.EndpointInfo;
-import org.webpieces.recorder.impl.TestCaseRecorder;
+import org.webpieces.microsvc.server.impl.MetaVarInfo;
+import org.webpieces.recorder.api.DoNotRecord;
 import org.webpieces.util.futures.XFuture;
 
 import java.lang.reflect.Field;
@@ -98,6 +98,10 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         //excludes inherited fields for now...(KISS until we need it)
         Field[] fields = bean.getClass().getDeclaredFields();
         for(Field f : fields) {
+            DoNotRecord annotation = f.getAnnotation(DoNotRecord.class);
+            if(annotation != null) {
+                continue; //skip this one
+            }
             Class<?> type = f.getType();
             try {
                 Object value = getValue(bean, f);
@@ -150,7 +154,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                     writeFillInBeanCode(value, fieldVarName, test, recurseLevel+1);
                 }
             } catch (Throwable t) {
-                throw new RuntimeException("Failed on field="+f.getName()+" on varname="+varName+" of class type="+bean.getClass(), t);
+                throw new RuntimeException("Failed on field="+bean.getClass().getName()+"."+f.getName()+" and field type="+type.getSimpleName(), t);
             }
         }
         
@@ -172,6 +176,10 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         //excludes inherited fields for now...(KISS until we need it)
         Field[] fields = bean.getClass().getDeclaredFields();
         for(Field f : fields) {
+            DoNotRecord annotation = f.getAnnotation(DoNotRecord.class);
+            if(annotation != null) {
+                continue; //skip this one
+            }
             Class<?> type = f.getType();
             try {
                 Object value = getValue(bean, f);
@@ -211,7 +219,7 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                     writeValidateCode(value, fieldVarName, test,  recurseLevel+1);
                 }
             } catch (Throwable t) {
-                throw new RuntimeException("Exception processing field="+f.getName()+" on varName="+varName+" of class type="+bean.getClass(), t);
+                throw new RuntimeException("Failed on field="+bean.getClass().getName()+"."+f.getName()+" and field type="+type.getSimpleName(), t);
             }
         }
         
