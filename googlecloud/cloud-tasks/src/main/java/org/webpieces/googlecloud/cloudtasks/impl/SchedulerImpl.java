@@ -51,7 +51,7 @@ public class SchedulerImpl implements Scheduler {
                 lastEndpointInfo.setJobRefId(reference.getTaskId());
                 lastEndpointInfo.setQueueApi(true);
             }
-            log.info("executeIt reference "+reference);
+            log.info("executeIt reference "+reference.getTaskId());
             return reference;
         });
     }
