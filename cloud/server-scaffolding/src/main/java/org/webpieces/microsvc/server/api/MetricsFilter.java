@@ -36,8 +36,6 @@ public class MetricsFilter extends RouteFilter<Void> {
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 
-        log.info("Implement metrics here");
-
         log.info("method call coming in="+meta.getLoadedController().getControllerMethod().getName());
 
         Method method = meta.getLoadedController().getControllerMethod();

@@ -99,8 +99,7 @@ public class QueueInvokeHandler implements InvocationHandler {
             throw new IllegalStateException("Context.HEADERS is not a Map<String, String> and is setup incorrectly");
         }
 
-        log.info("Sending http request to: " + addr.getHostName()+":"+addr.getPort() + path);
-
+        log.info("Scheduling http request at "+info.getTime()+" to: " + addr.getHostName()+":"+addr.getPort() + path);
 
 
         Object body = args[0];
