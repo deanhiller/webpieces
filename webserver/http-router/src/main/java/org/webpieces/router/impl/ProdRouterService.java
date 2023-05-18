@@ -58,8 +58,13 @@ public class ProdRouterService extends AbstractRouterService {
 
 	@Override
 	public RouterStreamRef incomingRequestImpl(RequestContext ctx, ProxyStreamHandle handler) {
-		if(log.isDebugEnabled())
+		if(log.isTraceEnabled())
 			router.printAllRoutes();
+
+		if(log.isDebugEnabled()) {
+			log.debug("Router request recieved="+ctx.getRequest());
+		}
+
 	
 		return router.invoke(ctx, handler);
 	}

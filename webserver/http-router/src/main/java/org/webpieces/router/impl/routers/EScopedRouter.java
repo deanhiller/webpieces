@@ -113,14 +113,27 @@ public class EScopedRouter {
 	private RouterStreamRef findAndInvokeImpl(RequestContext ctx, ProxyStreamHandle handler, String subPath, boolean isCorsRequest) {
 		for(AbstractRouter router : routers) {
 			MatchResult2 result = router.matches(ctx.getRequest(), subPath);
+
 			if(result.isMatches()) {
+				if(log.isTraceEnabled()) {
+					logDetail("FOUND MATCH.", ctx, router);
+				}
+
 				ctx.setPathParams(result.getPathParams());
 				return invokeRouter(router, ctx, handler, isCorsRequest);
+			} else if(log.isTraceEnabled()) {
+				logDetail("DOES NOT MATCH.", ctx, router);
 			}
 		}
 
 		XFuture<StreamWriter> failedFuture = futureUtil.failedFuture(new NotFoundException("route not found"));
 		return new RouterStreamRef("notFoundEScope", failedFuture, null);
+	}
+
+	private void logDetail(String prefix, RequestContext ctx, AbstractRouter router) {
+		MatchInfo matchInfo = router.getMatchInfo();
+		RouterRequest req = ctx.getRequest();
+		log.trace(prefix+"   matchInfo=\n"+matchInfo+"\n\nRouterReq="+req);
 	}
 
 	private RouterStreamRef respondToOptionsRequest(RequestContext ctx, ProxyStreamHandle handler, String subPath) {
