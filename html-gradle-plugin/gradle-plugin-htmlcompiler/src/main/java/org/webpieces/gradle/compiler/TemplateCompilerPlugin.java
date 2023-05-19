@@ -4,21 +4,11 @@ import java.io.File;
 
 import javax.inject.Inject;
 
-import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ConfigurationContainer;
-import org.gradle.api.attributes.LibraryElements;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileCopyDetails;
-import org.gradle.api.file.FileTreeElement;
 import org.gradle.api.file.SourceDirectorySet;
-import org.gradle.api.internal.ConventionMapping;
-import org.gradle.api.internal.IConventionAware;
-import org.gradle.api.internal.artifacts.configurations.ConfigurationInternal;
 import org.gradle.api.internal.classpath.ModuleRegistry;
 import org.gradle.api.internal.lambdas.SerializableLambdas;
 import org.gradle.api.internal.plugins.DslObject;
@@ -31,15 +21,9 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.*;
 import org.gradle.api.plugins.jvm.internal.JvmEcosystemUtilities;
 import org.gradle.api.plugins.jvm.internal.JvmPluginServices;
-import org.gradle.api.provider.Provider;
-import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.*;
-import org.gradle.api.tasks.compile.GroovyCompile;
 import org.gradle.internal.Cast;
 import org.gradle.api.plugins.internal.JvmPluginsHelper;
-import org.gradle.internal.deprecation.DeprecatableConfiguration;
-import org.gradle.jvm.toolchain.JavaToolchainService;
-import org.gradle.language.jvm.tasks.ProcessResources;
 
 /**
  * Based off GroovyBasePlugin.java 
