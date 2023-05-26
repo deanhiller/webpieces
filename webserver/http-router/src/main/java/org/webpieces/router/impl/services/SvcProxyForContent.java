@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 import org.webpieces.router.api.RecordingInfo;
@@ -26,8 +27,12 @@ import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SvcProxyForContent implements Service<MethodMeta, Action> {
 
+	private static final Logger log = LoggerFactory.getLogger(SvcProxyForContent.class);
 	private final ParamToObjectTranslatorImpl translator;
 	private final ControllerInvoker invoker;
 	private FutureHelper futureUtil;
@@ -45,21 +50,21 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		return futureUtil.syncToAsyncException(() -> invokeMethod(meta));
 	}
 
-	private XFuture<Action> invokeMethod(MethodMeta meta) 
+	private XFuture<Action> invokeMethod(MethodMeta meta)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		RouteInfoForContent info = (RouteInfoForContent) meta.getRoute();
-		
+
 		Method m = meta.getLoadedController().getControllerMethod();
 		Object obj = meta.getLoadedController().getControllerInstance();
-		
-		//We chose to do this here so any filters ESPECIALLY API filters 
+
+		//We chose to do this here so any filters ESPECIALLY API filters
 		//can catch and translate api errors and send customers a logical response
 		//On top of that ORM plugins can have a transaction filter and then in this
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
 		XFuture<List<Object>> futureArgs = translator.createArgs(m, meta.getCtx(), info.getBodyContentBinder())
-														.thenApply ( args -> validate(obj, m, args));
-		
+				.thenApply ( args -> validate(obj, m, args));
+
 		return futureArgs.thenCompose( argsResult -> invokeAndCoerce(meta, info, argsResult));
 	}
 
@@ -69,7 +74,7 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		if(violations.size() > 0) {
 			throw new BadRequestException(violations);
 		}
-		
+
 		return args;
 	}
 
@@ -80,13 +85,24 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 		try {
 			retVal = invoker.invokeController(loadedController, args);
 		} catch (InvocationTargetException e) {
-			if(e.getCause() instanceof WebpiecesException)
+			if(e.getCause() instanceof ExecutionException)
+			{
+				Throwable cause = e.getCause();
+				if (cause.getCause() instanceof WebpiecesException )
+				{
+					throw (WebpiecesException)cause.getCause();
+				}
+			}
+
+			if(e.getCause() instanceof WebpiecesException){
 				throw (WebpiecesException)e.getCause();
+			}
+
 			throw SneakyThrow.sneak(e);
 		} catch (IllegalAccessException e) {
 			throw SneakyThrow.sneak(e);
 		}
-		
+
 		if(info.getBodyContentBinder() != null)
 			return unwrapResult(loadedController, retVal, info.getBodyContentBinder(), args);
 
@@ -152,6 +168,4 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 			throw new IllegalReturnValueException("Exception marshaling retVal="+retVal+" from method="+method, e);
 		}
 	}
-	
-	
 }
