@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.plugin.json.JacksonCatchAllFilter;
 import org.webpieces.plugin.json.ReportingHolderInfo;
 import org.webpieces.router.api.controller.actions.Action;
@@ -31,6 +32,9 @@ import java.util.stream.Collectors;
 public class LogExceptionFilter extends RouteFilter<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(LogExceptionFilter.class);
+
+    protected static final int UNSECURE_PORT = 80;
+    protected static final int SECURE_PORT = 443;
 
     private IgnoreExceptions exceptionCheck;
     private Masker masker;
@@ -161,6 +165,12 @@ public class LogExceptionFilter extends RouteFilter<Void> {
             }
 
         }
+
+        final String hostHeader = (req.getSingleHeaderValue(Http2HeaderName.AUTHORITY).endsWith(":"+UNSECURE_PORT) ||
+                req.getSingleHeaderValue(Http2HeaderName.AUTHORITY).endsWith(":"+SECURE_PORT)) ?
+                req.getSingleHeaderValue(Http2HeaderName.AUTHORITY).split(":")[0] : req.getSingleHeaderValue(Http2HeaderName.AUTHORITY);
+
+        s += "-H \"" + KnownHeaderName.HOST + ":" + hostHeader + "\" ";
 
         String host = req.getSingleHeaderValue(Http2HeaderName.AUTHORITY);
         String path = req.getSingleHeaderValue(Http2HeaderName.PATH);

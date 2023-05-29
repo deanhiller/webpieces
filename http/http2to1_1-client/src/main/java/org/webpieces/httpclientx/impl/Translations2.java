@@ -26,6 +26,9 @@ public class Translations2 {
 
 	private static final Logger log = LoggerFactory.getLogger(Translations2.class);
 
+	protected static final int UNSECURE_PORT = 80;
+	protected static final int SECURE_PORT = 443;
+
 	public static HttpFullRequest translate(FullRequest request) {
 		//String scheme = request.getHeaders().getScheme();
 		Http2Request headers = request.getHeaders();
@@ -53,7 +56,9 @@ public class Translations2 {
 				httpReq.addHeader(new Header(header.getName(), header.getValue()));
 		}
 
-		httpReq.addHeader(new Header(KnownHeaderName.HOST, authority));
+		final String hostHeader = (authority.endsWith(":"+UNSECURE_PORT) || authority.endsWith(":"+SECURE_PORT)) ? authority.split(":")[0] : authority;
+
+		httpReq.addHeader(new Header(KnownHeaderName.HOST, hostHeader));
 
 		HttpFullRequest req = new HttpFullRequest(httpReq, data);
 		return req;

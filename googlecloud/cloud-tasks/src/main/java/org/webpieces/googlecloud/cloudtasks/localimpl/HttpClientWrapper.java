@@ -19,6 +19,8 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.util.security.Masker;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.Contexts;
@@ -46,6 +48,9 @@ public class HttpClientWrapper {
     private static final Logger log = LoggerFactory.getLogger(HttpClientWrapper.class);
 
     protected static final DataWrapperGenerator WRAPPER_GEN = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+
+    protected static final int UNSECURE_PORT = 80;
+    protected static final int SECURE_PORT = 443;
 
     private HttpsConfig httpsConfig;
     protected Http2Client client;
@@ -341,6 +346,12 @@ public class HttpClientWrapper {
             }
 
         }
+
+        final String hostHeader = (req.getSingleHeaderValue(Http2HeaderName.AUTHORITY).endsWith(":"+UNSECURE_PORT) ||
+                req.getSingleHeaderValue(Http2HeaderName.AUTHORITY).endsWith(":"+SECURE_PORT)) ?
+                req.getSingleHeaderValue(Http2HeaderName.AUTHORITY).split(":")[0] : req.getSingleHeaderValue(Http2HeaderName.AUTHORITY);
+
+        s += "-H \"" + KnownHeaderName.HOST + ":" + hostHeader + "\" ";
 
         String host = req.getSingleHeaderValue(Http2HeaderName.AUTHORITY);
         String path = req.getSingleHeaderValue(Http2HeaderName.PATH);
