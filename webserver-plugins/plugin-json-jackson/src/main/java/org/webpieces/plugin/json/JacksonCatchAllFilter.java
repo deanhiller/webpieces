@@ -185,7 +185,7 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
         StatusCode statusCode = t.getStatusCode();
         if (statusCode != null) {
-            String message = t.getStatusCode().getReason() + " : " + t.getMessage();
+            String message = t.getMessage();
             if (t instanceof BadRequestException) {
                 message = translateViolations((BadRequestException) t, message);
             }

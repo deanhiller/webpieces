@@ -304,10 +304,10 @@ public class HttpClientWrapper {
             throw new BadGatewayException("Bad Gateway of Bad Gateway " + message);
         } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_504_GATEWAY_TIMEOUT) {
             throw new GatewayTimeoutException("Gateway Timeout " + message);
-        } else if (httpResp.getHeaders().getStatus() == 429) {
+        } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_429_TOO_MANY_REQUESTS) {
             throw new TooManyRequestsException("Exceeded Rate " + message);
-        } else if (httpResp.getHeaders().getStatus() == 491) {
-            throw new BadCustomerRequestException("Bad customer request");
+        } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_491_BAD_CUSTOMER_REQUEST) {
+            throw new BadCustomerRequestException(message);
         } else {
             throw new InternalServerErrorException("\nRUN the curl request above to test this error!!!\n" + message);
         }
