@@ -1,7 +1,6 @@
 package org.webpieces.util.threading;
 
 import org.webpieces.metrics.Monitoring;
-import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import java.util.HashMap;
@@ -21,8 +20,8 @@ public class FutureExecutorImpl implements FutureExecutor {
     }
 
     @Override
-    public <RESP> XFuture<RESP> execute(Supplier<RESP> function) {
-        Map<String, String> tags = formTags(function.getClass());
+    public <RESP> XFuture<RESP> execute(Supplier<RESP> function, Map<String, String> extraTags) {
+        Map<String, String> tags = formTags(function.getClass(), extraTags);
         XFuture<RESP> future = new XFuture<>();
 
         MetricsSupplier runnable = new MetricsSupplier(monitoring, function, future, tags);
@@ -30,10 +29,9 @@ public class FutureExecutorImpl implements FutureExecutor {
         return future;
     }
 
-    private <RESP> Map<String, String> formTags(Class<?> clazz) {
+    private <RESP> Map<String, String> formTags(Class<?> clazz, Map<String, String> extraTags) {
         Map<String, String> tags = new HashMap<>();
         tags.put("type", clazz.getSimpleName());
-        Map<String, String> extraTags = (Map<String, String>) Context.getContext().get("metrics.dimensions");
         if(extraTags != null) {
             tags.putAll(extraTags);
         }
@@ -44,8 +42,9 @@ public class FutureExecutorImpl implements FutureExecutor {
     public <T> ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
                                                       long initialDelay,
                                                       long period,
-                                                      TimeUnit unit) {
-        Map<String, String> tags = formTags(command.getClass());
+                                                      TimeUnit unit,
+                                                      Map<String, String> extraTags) {
+        Map<String, String> tags = formTags(command.getClass(), extraTags);
         MetricsRunnable r = new MetricsRunnable<Void>(monitoring, command, tags);
         return svc.scheduleAtFixedRate(r, initialDelay, period, unit);
     }
