@@ -16,6 +16,13 @@ public interface FutureExecutor {
                                                long initialDelay,
                                                long period,
                                                TimeUnit unit,
-                                               Map<String, String> extraTags
+                                               Map<String, String> extraMetricTags
+    );
+
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
+                                                     long initialDelay,
+                                                     long delay,
+                                                     TimeUnit unit,
+                                                     Map<String, String> extraMetricTags
     );
 }

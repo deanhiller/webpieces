@@ -5,18 +5,24 @@ import org.webpieces.util.futures.XFuture;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 public class FutureExecutorImpl implements FutureExecutor {
     private Monitoring monitoring;
     private ScheduledExecutorService svc;
 
-    public FutureExecutorImpl(Monitoring monitoring, ScheduledExecutorService svc) {
+    public FutureExecutorImpl(Monitoring monitoring, ScheduledExecutorService svc, String name) {
         this.monitoring = monitoring;
         this.svc = svc;
+
+        if(svc instanceof ThreadPoolExecutor) {
+            ThreadPoolExecutor exec = (ThreadPoolExecutor) svc;
+            BlockingQueue<Runnable> queue = exec.getQueue();
+            Map<String, String> tag = Map.of("executorName", name);
+            //every minute, metrics will call queue.size ->
+            monitoring.gauge("event.queue.size", tag, queue, (q) -> queue.size());
+        }
     }
 
     @Override
@@ -25,6 +31,7 @@ public class FutureExecutorImpl implements FutureExecutor {
         XFuture<RESP> future = new XFuture<>();
 
         MetricsSupplier runnable = new MetricsSupplier(monitoring, function, future, tags);
+        monitoring.incrementMetric("event.queued", tags);
         svc.execute(runnable);
         return future;
     }
@@ -49,5 +56,11 @@ public class FutureExecutorImpl implements FutureExecutor {
         return svc.scheduleAtFixedRate(r, initialDelay, period, unit);
     }
 
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit, Map<String, String> extraMetricTags) {
+        Map<String, String> tags = formTags(command.getClass(), extraMetricTags);
+        MetricsRunnable r = new MetricsRunnable<Void>(monitoring, command, tags);
+        return svc.scheduleAtFixedRate(r, initialDelay, delay, unit);
+    }
 
 }

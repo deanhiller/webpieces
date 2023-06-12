@@ -28,7 +28,7 @@ public class MetricsSupplier<RESP> implements Runnable {
     public void run() {
         long startTime = System.currentTimeMillis();
         try {
-            monitoring.incrementMetric("event.count", tags);
+            monitoring.incrementMetric("event.started", tags);
 
             RESP resp = function.get();
 
