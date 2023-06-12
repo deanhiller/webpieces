@@ -11,7 +11,7 @@ public class UncaughtExceptHandler implements UncaughtExceptionHandler {
 	
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
-		log.error("Uncaught exception on thread="+t.getName(), e);
+		log.error("THREAD DYING: Uncaught exception on thread ( you really should try..catch stuff!! ) ="+t.getName(), e);
 	}
 
 }
