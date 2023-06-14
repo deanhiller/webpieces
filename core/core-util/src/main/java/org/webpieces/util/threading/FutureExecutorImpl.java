@@ -9,12 +9,14 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 public class FutureExecutorImpl implements FutureExecutor {
+    private final String name;
     private Monitoring monitoring;
     private ScheduledExecutorService svc;
 
     public FutureExecutorImpl(Monitoring monitoring, ScheduledExecutorService svc, String name) {
         this.monitoring = monitoring;
         this.svc = svc;
+        this.name = name;
 
         if(svc instanceof ThreadPoolExecutor) {
             ThreadPoolExecutor exec = (ThreadPoolExecutor) svc;
@@ -38,6 +40,7 @@ public class FutureExecutorImpl implements FutureExecutor {
 
     private <RESP> Map<String, String> formTags(Class<?> clazz, Map<String, String> extraTags) {
         Map<String, String> tags = new HashMap<>();
+        tags.put("executorName", name);
         tags.put("type", clazz.getSimpleName());
         if(extraTags != null) {
             tags.putAll(extraTags);

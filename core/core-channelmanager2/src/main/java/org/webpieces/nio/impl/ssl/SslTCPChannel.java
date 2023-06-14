@@ -167,7 +167,8 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			try {
 				return realChannel.write(engineToSocketData);
 			} catch(NioClosedChannelException e) {
-				log.info("Remote end closed before handshake was finished.  (nothing we can do about that)");
+				if(log.isDebugEnabled())
+					log.debug("Remote end closed before handshake was finished.  (nothing we can do about that)");
 				return XFuture.completedFuture(null);
 			}
 		}

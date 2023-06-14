@@ -6,10 +6,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NamedThreadFactory implements ThreadFactory {
 
 	private AtomicInteger count = new AtomicInteger(0);
-	private String threadNamePrefix;
+	private String threadGrpName;
 	
-	public NamedThreadFactory(String threadNamePrefix) {
-		this.threadNamePrefix = threadNamePrefix;
+	public NamedThreadFactory(String threadGrpName) {
+		this.threadGrpName = threadGrpName;
 	}
 
 	private int getNextCount() {
@@ -18,7 +18,9 @@ public class NamedThreadFactory implements ThreadFactory {
 	
 	@Override
 	public Thread newThread(Runnable r) {
-		Thread t = new Thread(r, threadNamePrefix+getNextCount());
+		ThreadGroup grp = new ThreadGroup(threadGrpName);
+		grp.setDaemon(true);
+		Thread t = new Thread(grp, r, threadGrpName +getNextCount());
 		t.setDaemon(true);
 		t.setUncaughtExceptionHandler(new UncaughtExceptHandler());
 		return t;
