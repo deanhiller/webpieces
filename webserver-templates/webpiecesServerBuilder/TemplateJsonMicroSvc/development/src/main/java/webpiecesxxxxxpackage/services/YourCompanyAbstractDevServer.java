@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.futures.Logging;
 import org.webpieces.webserver.api.IDESupport;
 import org.webpieces.webserver.api.WebpiecesServer;
 
@@ -29,6 +30,10 @@ import static java.nio.file.StandardWatchEventKinds.*;
  *
  */
 public abstract class YourCompanyAbstractDevServer {
+
+    static {
+        Logging.setupMDCForLogging();
+    }
 
 	private static final Logger log = LoggerFactory.getLogger(YourCompanyAbstractDevServer.class);
     protected final Map<String, String> simulatedEnvironmentProperties;

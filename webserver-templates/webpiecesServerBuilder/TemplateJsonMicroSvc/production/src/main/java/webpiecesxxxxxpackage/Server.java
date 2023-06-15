@@ -2,6 +2,7 @@ package webpiecesxxxxxpackage;
 
 import java.util.ArrayList;
 
+import org.slf4j.MDC;
 import org.webpieces.webserver.api.ServerConfig;
 
 import com.google.common.collect.Lists;
@@ -34,7 +35,7 @@ public class Server extends YourCompanyServer {
 		//We typically move this to the command line so staging can have
 		//-hibernate.persistenceunit=stagingdb instead but to help people startup, we add the arg
 		String[] newArgs = addArgs(new String[] {"-hibernate.persistenceunit=webpiecesxxxxxpackage.db.DbSettingsProd"});
-		
+
 		YourCompanyServer.main( (config) -> new Server(null, null, config, newArgs));
 	}
 

@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.futures.Logging;
 import org.webpieces.webserver.api.IDESupport;
 import org.webpieces.webserver.api.WebpiecesServer;
 
@@ -30,7 +31,13 @@ import static java.nio.file.StandardWatchEventKinds.*;
  */
 public abstract class YourCompanyAbstractDevServer {
 
-	private static final Logger log = LoggerFactory.getLogger(YourCompanyAbstractDevServer.class);
+    static {
+        //MUST run before you create ANY Logger so that ASYNC mdcAdapter is installed first
+        Logging.setupMDCForLogging();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(YourCompanyAbstractDevServer.class);
+
     protected VirtualFile directory;
     protected ArrayList<VirtualFile> srcPaths;
     protected String[] args;

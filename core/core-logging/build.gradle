@@ -14,7 +14,7 @@ apply from: '../../config/global.gradle'
 
 dependencies {
     api 'org.slf4j:slf4j-api'
-    implementation 'ch.qos.logback:logback-classic'
+    api 'ch.qos.logback:logback-classic'
 }
 
 publishing {

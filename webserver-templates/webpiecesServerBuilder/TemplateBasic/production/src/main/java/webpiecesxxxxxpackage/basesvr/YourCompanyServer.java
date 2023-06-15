@@ -6,6 +6,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.util.futures.Logging;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.api.WebpiecesServer;
 
@@ -21,6 +22,10 @@ import webpiecesxxxxxpackage.Server;
  *
  */
 public abstract class YourCompanyServer {
+
+	static {
+		Logging.setupMDCForLogging();
+	}
 
 	private static final Logger log = LoggerFactory.getLogger(Server.class);
 

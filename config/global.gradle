@@ -217,7 +217,7 @@ dependencies {
         implementation 'jakarta.validation:jakarta.validation-api:2.0.1'
         implementation 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
 
-        implementation 'ch.qos.logback:logback-classic:1.2.3'
+        implementation 'ch.qos.logback:logback-classic:1.4.8'
         implementation 'com.google.inject:guice:5.1.0'
         implementation 'org.digitalforge:log4jdbc:1.0.2'
         implementation 'com.h2database:h2:1.4.200'
@@ -234,7 +234,7 @@ dependencies {
         implementation 'org.seleniumhq.selenium:selenium-java:4.0.0-alpha-7'
         implementation 'org.shredzone.acme4j:acme4j-client:2.11'
         implementation 'org.shredzone.acme4j:acme4j-utils:2.11'
-        implementation 'org.slf4j:slf4j-api:1.7.30'
+        implementation 'org.slf4j:slf4j-api:2.0.7'
 
         testImplementation 'junit:junit:4.13.2'
 

@@ -20,6 +20,8 @@ dependencies {
     //crap but everyone is using this anyways or at least should be just like logging
 
     api 'jakarta.inject:jakarta.inject-api'
+    //api 'ch.qos.logback:logback-classic'
+
     api deps['core-future']
     api deps['core-metrics']
     api deps['core-logging']
