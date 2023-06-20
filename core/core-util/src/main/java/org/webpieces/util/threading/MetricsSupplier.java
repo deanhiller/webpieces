@@ -36,7 +36,7 @@ public class MetricsSupplier<RESP> implements Runnable {
             completeSafely(resp);
 
         } catch (Throwable e) {
-            tags.put("exception-type", e.getClass().getSimpleName());
+            tags.put("exception", e.getClass().getSimpleName());
             monitoring.incrementMetric("event.exception", tags);
             log.error("Exception", e);
             completeExceptionSafely(e);
