@@ -8,7 +8,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public interface FutureExecutor {
-
+    
+    XFuture<Void> executeRunnable(Runnable function, Map<String, String> extraTags);
 
     <RESP> XFuture<RESP> execute(Supplier<RESP> function, Map<String, String> extraTags);
 

@@ -28,6 +28,15 @@ public class FutureExecutorImpl implements FutureExecutor {
     }
 
     @Override
+    public XFuture<Void> executeRunnable(Runnable function, Map<String, String> extraTags) {
+        Supplier<Void> supplier = () -> {
+            function.run();
+            return null;
+        };
+        return execute(supplier, extraTags);
+    }
+
+    @Override
     public <RESP> XFuture<RESP> execute(Supplier<RESP> function, Map<String, String> extraTags) {
         Map<String, String> tags = formTags(function.getClass(), extraTags);
         XFuture<RESP> future = new XFuture<>();
