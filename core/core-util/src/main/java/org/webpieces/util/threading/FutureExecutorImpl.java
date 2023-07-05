@@ -29,11 +29,17 @@ public class FutureExecutorImpl implements FutureExecutor {
 
     @Override
     public XFuture<Void> executeRunnable(Runnable function, Map<String, String> extraTags) {
+        Map<String, String> tags = formTags(function.getClass(), extraTags);
+        XFuture<Void> future = new XFuture<>();
+
         Supplier<Void> supplier = () -> {
             function.run();
             return null;
         };
-        return execute(supplier, extraTags);
+        MetricsSupplier runnable = new MetricsSupplier(monitoring, supplier, future, tags);
+        monitoring.incrementMetric("event.queued", tags);
+        svc.execute(runnable);
+        return future;
     }
 
     @Override
