@@ -69,7 +69,15 @@ public class Context {
         return context.get();
     }
 
+    /**
+     * @deprecated
+     */
+    @Deprecated
     public static void restoreContext(Map<String, Object> props) {
+        context.set(props);
+    }
+
+    public static void setContext(Map<String, Object> props) {
         context.set(props);
     }
 
