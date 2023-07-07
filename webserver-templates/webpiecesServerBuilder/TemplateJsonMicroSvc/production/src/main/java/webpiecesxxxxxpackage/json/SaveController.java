@@ -38,6 +38,7 @@ public class SaveController implements SaveApi {
 	@Override
 	public XFuture<SaveResponse> save(@Jackson SaveRequest request) {
 
+		log.info("hi there");
 		FetchValueRequest fetchReq = new FetchValueRequest();
 
 		List<MyEnum> enumList = new ArrayList<>();

@@ -3,10 +3,7 @@ package org.webpieces.util.futures;
 import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import org.webpieces.util.context.Context;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class XFutureMDCAdapter extends LogbackMDCAdapter {
 
@@ -40,6 +37,12 @@ public class XFutureMDCAdapter extends LogbackMDCAdapter {
     public void clear() {
         Map<String, String> map = fetchOrUseEmptyMap();
         map.clear();
+    }
+
+    @Override
+    public Map<String, String> getPropertyMap() {
+        Map<String, String> map = fetchOrUseEmptyMap();
+        return map;
     }
 
     @Override
