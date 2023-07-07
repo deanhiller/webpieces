@@ -14,11 +14,11 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['http1_1-parser']
+    api libs.webpieces.http.http1parser
 
-    implementation deps['core-channelmanager2']
+    implementation libs.webpieces.core.channelmanager2
 
-    testImplementation deps['core-mock']
+    testImplementation libs.webpieces.core.mock
 
 }
 

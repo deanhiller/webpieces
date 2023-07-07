@@ -20,16 +20,16 @@ repositories {
 dependencies {
 
     //implementation 'com.google.cloud:google-cloud-core'
-    implementation deps['guice']
-    api deps['generate-httpclient']
-    api deps['cloud-api-lib']
-    api deps['core-jackson']
-    api deps['http2to1_1-client']
-    api deps['gcp-cloud-task']
+    implementation libs.google.guice
+    api libs.webpieces.microservice.clientgenerator
+    api libs.webpieces.microservice.api.lib
+    api libs.webpieces.core.jackson
+    api libs.webpieces.http.client
+    api libs.google.cloud.tasks
 
-    //implementation deps['javax-inject-api']
-    //implementation deps['slf4j-api']
+    //implementation libs.jakarta.inject.api
+    //implementation libs.slf4j.api
 
-    api deps['core-util']
+    api libs.webpieces.core.util
 
 }

@@ -14,9 +14,9 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['http2-api']
+    api libs.webpieces.http.http2api
 
-    testImplementation deps['core-metrics']
+    testImplementation libs.webpieces.core.metrics
 
 }
 

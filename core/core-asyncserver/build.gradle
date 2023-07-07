@@ -13,9 +13,9 @@ group = 'org.webpieces.core'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['core-channelmanager2']
+    api libs.webpieces.core.channelmanager2
 
-    testImplementation deps['core-mock']
+    testImplementation libs.webpieces.core.mock
 }
 
 publishing {

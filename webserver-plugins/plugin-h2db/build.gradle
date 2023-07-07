@@ -14,8 +14,8 @@ group = 'org.webpieces.server.plugin'
 apply from: '../../config/global.gradle'
 
 dependencies {
-	implementation deps['plugin-backend']
-	implementation deps['h2db']
+	implementation libs.webpieces.plugin.backend
+	implementation libs.h2
 }
 
 publishing {

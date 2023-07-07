@@ -13,8 +13,7 @@ group = 'org.webpieces.server.plugin'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    implementation deps['http-router']
-    implementation deps['log4jdbc']
+    implementation libs.webpieces.http.router
 }
 
 publishing {

@@ -15,13 +15,13 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['grpc-stub']
+    api libs.google.grpc.stub
 
-    implementation deps['http1_1-parser']
-    implementation deps['http-router']
+    implementation libs.webpieces.http.http1parser
+    implementation libs.webpieces.http.router
 
-    implementation deps['grpc-json']
-    implementation deps['grpc-protobuf']
+    implementation libs.google.grpc.json
+    implementation libs.google.grpc.protobuf
 
 }
 

@@ -19,11 +19,11 @@ apply from: '../config/global.gradle'
 //})
 
 dependencies {
-    implementation deps['http-webserver']
-    implementation deps['template-basic-prod']
-    implementation deps['template-basic-dev']
-    implementation deps['template-json-prod']
-    implementation deps['template-json-dev']
+    implementation 'org.webpieces.server:http-webserver'
+    implementation 'org.webpieces.server.templates:basic-production'
+    implementation 'org.webpieces.server.templates:basic-development'
+    implementation 'org.webpieces.server.templates:production'
+    implementation 'org.webpieces.server.templates:development'
 }
 
 project.ext {
