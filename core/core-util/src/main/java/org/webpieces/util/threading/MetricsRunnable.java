@@ -34,8 +34,8 @@ public class MetricsRunnable<RESP> implements Runnable {
         long startTime = System.currentTimeMillis();
         Map<String, Object> previously = Context.getContext();
         Map<String, String> previousLogMap = MDC.getCopyOfContextMap();
-        Context.setContext(context);
-        MDC.setContextMap(loggingMdcMap);
+        Context.setContext(this.context);
+        MDC.setContextMap(this.loggingMdcMap);
 
         try {
             monitoring.incrementMetric("event.count", tags);
@@ -51,7 +51,7 @@ public class MetricsRunnable<RESP> implements Runnable {
         } finally {
             monitoring.endTimer("event.time", tags, startTime);
             Context.setContext(previously);
-            MDC.setContextMap(loggingMdcMap);
+            MDC.setContextMap(previousLogMap);
         }
     }
 
