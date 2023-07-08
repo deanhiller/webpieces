@@ -53,7 +53,7 @@ public class FutureExecutorImpl implements FutureExecutor {
         return future;
     }
 
-    private <RESP> Map<String, String> formTags(Class<?> clazz, Map<String, String> extraTags) {
+    private Map<String, String> formTags(Class<?> clazz, Map<String, String> extraTags) {
         Map<String, String> tags = new HashMap<>();
         tags.put("executorName", name);
         tags.put("type", clazz.getSimpleName());
@@ -63,22 +63,6 @@ public class FutureExecutorImpl implements FutureExecutor {
         return tags;
     }
 
-    @Override
-    public <T> ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
-                                                      long initialDelay,
-                                                      long period,
-                                                      TimeUnit unit,
-                                                      Map<String, String> extraTags) {
-        Map<String, String> tags = formTags(command.getClass(), extraTags);
-        MetricsRunnable r = new MetricsRunnable<Void>(monitoring, command, tags);
-        return svc.scheduleAtFixedRate(r, initialDelay, period, unit);
-    }
 
-    @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit, Map<String, String> extraMetricTags) {
-        Map<String, String> tags = formTags(command.getClass(), extraMetricTags);
-        MetricsRunnable r = new MetricsRunnable<Void>(monitoring, command, tags);
-        return svc.scheduleAtFixedRate(r, initialDelay, delay, unit);
-    }
 
 }

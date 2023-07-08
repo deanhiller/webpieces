@@ -18,4 +18,12 @@ public class FutureExecutors {
     public FutureExecutor create(Monitoring monitoring, ScheduledExecutorService svc, String name) {
         return new FutureExecutorImpl(monitoring, svc, name);
     }
+
+    public FutureScheduledExecutor createScheduledExecutor(Monitoring monitoring, ScheduledExecutorService svc, String name) {
+        return new FutureScheduledExecutorImpl(monitoring, svc, name);
+    }
+
+    public FutureExecutor createDirect(Monitoring m) {
+        return new DirectFutureExecutor();
+    }
 }

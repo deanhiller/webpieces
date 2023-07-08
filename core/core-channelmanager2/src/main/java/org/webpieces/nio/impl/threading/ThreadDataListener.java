@@ -64,7 +64,7 @@ public class ThreadDataListener implements DataListener {
 				log.error("Uncaught Exception", e);
 				future.completeExceptionally(e);
 			} finally {
-				MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
+				MDCUtil.clearMDC(proxy.isServerSide());
 			}
 		}
 	}

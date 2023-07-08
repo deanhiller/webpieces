@@ -9,7 +9,7 @@
 		</filter>-->
     
 		<encoder>
-			<pattern>%date{ISO8601} [%thread] %caller{1} %-4level: %message%n</pattern>
+			<pattern>%date{ISO8601} [%thread] %caller{1} %X{txId}:%X{txId2} %-4level: %message%n</pattern>
 		</encoder>
 	</appender>
 
