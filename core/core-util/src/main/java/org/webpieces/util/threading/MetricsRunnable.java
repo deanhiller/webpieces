@@ -15,6 +15,13 @@ public class MetricsRunnable extends MetricsSupplier<Void> {
         super(monitoring, function, null, tags, legacyMdcHack);
     }
 
+    @Override
+    protected void completeExceptionSafely(Throwable e) {
+        //short circuit
+    }
 
-
+    @Override
+    protected void completeSafely(Void unused) {
+        //short circuit
+    }
 }

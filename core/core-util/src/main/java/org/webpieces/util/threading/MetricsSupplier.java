@@ -18,19 +18,19 @@ public class MetricsSupplier<RESP> implements Runnable {
     private final Supplier<RESP> function;
     private final XFuture<RESP> future;
     private Map<String, String> tags;
-    private boolean legacyMdcHack;
+    private boolean isXFutureMDCAdapterInstalled;
     private final Map<String, Object> context;
     private Map<String, String> loggingMdcMap;
 
-    public MetricsSupplier(Monitoring monitoring, Supplier<RESP> function, XFuture<RESP> future, Map<String, String> tags, boolean legacyMdcHack) {
+    public MetricsSupplier(Monitoring monitoring, Supplier<RESP> function, XFuture<RESP> future, Map<String, String> tags, boolean isXFutureMDCAdapterInstalled) {
         this.monitoring = monitoring;
         this.function = function;
         this.future = future;
         this.tags = tags;
-        this.legacyMdcHack = legacyMdcHack;
+        this.isXFutureMDCAdapterInstalled = isXFutureMDCAdapterInstalled;
         context = Context.copyContext();
 
-        if(legacyMdcHack) {
+        if(!this.isXFutureMDCAdapterInstalled) {
             //hack mdc until we fix
             loggingMdcMap = MDC.getCopyOfContextMap();
         }
@@ -42,7 +42,7 @@ public class MetricsSupplier<RESP> implements Runnable {
         Map<String, Object> previously = Context.getContext();
         Map<String, String> previousLogMap = MDC.getCopyOfContextMap();
         Context.setContext(this.context);
-        if(legacyMdcHack)
+        if(!isXFutureMDCAdapterInstalled)
             MDC.setContextMap(this.loggingMdcMap);
 
         try {
@@ -61,12 +61,12 @@ public class MetricsSupplier<RESP> implements Runnable {
         } finally {
             monitoring.endTimer("event.time", tags, startTime);
             Context.setContext(previously);
-            if(legacyMdcHack)
+            if(!isXFutureMDCAdapterInstalled)
                 MDC.setContextMap(previousLogMap);
         }
     }
 
-    private void completeExceptionSafely(Throwable e) {
+    protected void completeExceptionSafely(Throwable e) {
         try {
             future.completeExceptionally(e);
         } catch (Throwable exc) {
@@ -74,7 +74,7 @@ public class MetricsSupplier<RESP> implements Runnable {
         }
     }
 
-    private void completeSafely(RESP resp) {
+    protected void completeSafely(RESP resp) {
         try {
             future.complete(resp);
         } catch (Throwable e) {
