@@ -10,13 +10,15 @@ import java.util.function.Supplier;
 
 public class FutureExecutorImpl implements FutureExecutor {
     private final String name;
+    private boolean legacyMdcHack;
     private Monitoring monitoring;
     private ScheduledExecutorService svc;
 
-    public FutureExecutorImpl(Monitoring monitoring, ScheduledExecutorService svc, String name) {
+    public FutureExecutorImpl(Monitoring monitoring, ScheduledExecutorService svc, String name, boolean legacyMdcHack) {
         this.monitoring = monitoring;
         this.svc = svc;
         this.name = name;
+        this.legacyMdcHack = legacyMdcHack;
 
         if(svc instanceof ThreadPoolExecutor) {
             ThreadPoolExecutor exec = (ThreadPoolExecutor) svc;
@@ -36,7 +38,7 @@ public class FutureExecutorImpl implements FutureExecutor {
             function.run();
             return null;
         };
-        MetricsSupplier runnable = new MetricsSupplier(monitoring, supplier, future, tags);
+        MetricsSupplier runnable = new MetricsSupplier(monitoring, supplier, future, tags, legacyMdcHack);
         monitoring.incrementMetric("event.queued", tags);
         svc.execute(runnable);
         return future;
@@ -47,7 +49,7 @@ public class FutureExecutorImpl implements FutureExecutor {
         Map<String, String> tags = formTags(function.getClass(), extraTags);
         XFuture<RESP> future = new XFuture<>();
 
-        MetricsSupplier runnable = new MetricsSupplier(monitoring, function, future, tags);
+        MetricsSupplier runnable = new MetricsSupplier(monitoring, function, future, tags, legacyMdcHack);
         monitoring.incrementMetric("event.queued", tags);
         svc.execute(runnable);
         return future;
@@ -70,14 +72,22 @@ public class FutureExecutorImpl implements FutureExecutor {
                                                       TimeUnit unit,
                                                       Map<String, String> extraTags) {
         Map<String, String> tags = formTags(command.getClass(), extraTags);
-        MetricsRunnable r = new MetricsRunnable<Void>(monitoring, command, tags);
+        Supplier<Void> supplier = () -> {
+            command.run();
+            return null;
+        };
+        MetricsRunnable r = new MetricsRunnable(monitoring, supplier, tags, legacyMdcHack);
         return svc.scheduleAtFixedRate(r, initialDelay, period, unit);
     }
 
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit, Map<String, String> extraMetricTags) {
         Map<String, String> tags = formTags(command.getClass(), extraMetricTags);
-        MetricsRunnable r = new MetricsRunnable<Void>(monitoring, command, tags);
+        Supplier<Void> supplier = () -> {
+            command.run();
+            return null;
+        };
+        MetricsRunnable r = new MetricsRunnable(monitoring, supplier, tags, legacyMdcHack);
         return svc.scheduleAtFixedRate(r, initialDelay, delay, unit);
     }
 

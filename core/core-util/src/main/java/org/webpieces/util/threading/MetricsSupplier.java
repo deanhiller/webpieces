@@ -2,7 +2,9 @@ package org.webpieces.util.threading;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.webpieces.metrics.Monitoring;
+import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import java.util.Map;
@@ -16,17 +18,33 @@ public class MetricsSupplier<RESP> implements Runnable {
     private final Supplier<RESP> function;
     private final XFuture<RESP> future;
     private Map<String, String> tags;
+    private boolean legacyMdcHack;
+    private final Map<String, Object> context;
+    private Map<String, String> loggingMdcMap;
 
-    public MetricsSupplier(Monitoring monitoring, Supplier<RESP> function, XFuture<RESP> future, Map<String, String> tags) {
+    public MetricsSupplier(Monitoring monitoring, Supplier<RESP> function, XFuture<RESP> future, Map<String, String> tags, boolean legacyMdcHack) {
         this.monitoring = monitoring;
         this.function = function;
         this.future = future;
         this.tags = tags;
+        this.legacyMdcHack = legacyMdcHack;
+        context = Context.copyContext();
+
+        if(legacyMdcHack) {
+            //hack mdc until we fix
+            loggingMdcMap = MDC.getCopyOfContextMap();
+        }
     }
 
     @Override
     public void run() {
         long startTime = System.currentTimeMillis();
+        Map<String, Object> previously = Context.getContext();
+        Map<String, String> previousLogMap = MDC.getCopyOfContextMap();
+        Context.setContext(this.context);
+        if(legacyMdcHack)
+            MDC.setContextMap(this.loggingMdcMap);
+
         try {
             monitoring.incrementMetric("event.started", tags);
 
@@ -42,6 +60,9 @@ public class MetricsSupplier<RESP> implements Runnable {
             completeExceptionSafely(e);
         } finally {
             monitoring.endTimer("event.time", tags, startTime);
+            Context.setContext(previously);
+            if(legacyMdcHack)
+                MDC.setContextMap(previousLogMap);
         }
     }
 
