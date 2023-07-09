@@ -13,23 +13,23 @@ group = 'org.webpieces.server'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['guice']
+    api libs.google.guice
 
-    api deps['generate-httpclient']
-    api deps['http2to1_1-client']
+    api libs.webpieces.microservice.clientgenerator
+    api libs.webpieces.http.client
 
-    api deps['core-mock']
-    api deps['http-frontend2']
-    api deps['http1_1-client']
-    api deps['http-shared']
+    api libs.webpieces.core.mock
+    api libs.webpieces.http.frontend2
+    api libs.webpieces.http.http1client
+    api libs.webpieces.http.shared
 
     //really need to remove this one...
-    implementation deps['jul-to-slf4j']
+    implementation libs.slf4j.jul
 
     //For testing, swap in just templating-dev such that we can debug test failures in an IDE without some
     //need for a generate html to class files each time (it uses the same template compiler that the
     //webpieces gradle plugin uses so it tests a bit more anyways which is good)
-    api deps['http-templating-dev-lib']
+    api libs.webpieces.template.devlib
 
 }
 

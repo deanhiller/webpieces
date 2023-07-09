@@ -40,29 +40,29 @@ if(project.hasProperty('projVersion')) {
 
 
 dependencies {
-    api deps['http-webserver']
-    api deps['webserver-templates']
-    api deps['http2to1_1-client']
+    api libs.webpieces.server.webserver
+    api libs.webpieces.server.templates
+    api libs.webpieces.http.client
 
-    api deps['plugin-backend']
-    api deps['plugin-documentation']
-    api deps['plugin-dto']
+    api libs.webpieces.plugin.backend
+    api libs.webpieces.plugin.documentation
+    api libs.webpieces.plugin.dto
     //failed build right now
-    //api deps['plugin-grpc-json']
-    api deps['plugin-h2db']
-    api deps['plugin-hibernate']
-    api deps['plugin-install-sslcert']
-    api deps['plugin-json-jackson']
-    api deps['plugin-properties']
+    //api libs.webpieces.plugin.grpc
+    api libs.webpieces.plugin.h2db
+    api libs.webpieces.plugin.hibernate
+    api libs.webpieces.plugin.sslcert
+    api libs.webpieces.plugin.jackson
+    api libs.webpieces.plugin.properties
 
-    api deps['generate-httpclient']
-    api deps['server-scaffolding']
+    api libs.webpieces.microservice.clientgenerator
+    api libs.webpieces.microservice.scaffold
 
-    api deps['elastic-lib']
+    api libs.webpieces.library.elasticsearch
 
-    api deps['projectcreator']
+    api libs.webpieces.projectcreator
 
-    api deps['gcp-cloud-storage']
+    api libs.webpieces.googlecloud.storage
 }
 
 publishing {

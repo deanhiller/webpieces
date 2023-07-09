@@ -1,2 +1,10 @@
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            from(files("../../config/libs.versions.toml"))
+        }
+    }
+}
+
 includeBuild '../core-ssl'
 includeBuild '../core-mock'

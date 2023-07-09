@@ -1,3 +1,11 @@
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            from(files("../../config/libs.versions.toml"))
+        }
+    }
+}
+
 includeBuild '../../html-gradle-plugin/http-shared'
 includeBuild '../../html-gradle-plugin/http-templating-dev-lib'
 includeBuild '../../http/http2to1_1-client'

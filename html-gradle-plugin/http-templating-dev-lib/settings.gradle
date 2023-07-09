@@ -1,3 +1,11 @@
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            from(files("../../config/libs.versions.toml"))
+        }
+    }
+}
+
 includeBuild '../http-shared'
 includeBuild '../http-templating-lib'
 includeBuild '../../core/core-util'

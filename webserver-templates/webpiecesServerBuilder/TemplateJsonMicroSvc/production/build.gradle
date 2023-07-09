@@ -37,25 +37,25 @@ if (System.getProperty('idea.active')) {
 }
 
 dependencies {
-    api deps['http-webserver']
+    api 'org.webpieces.server:http-webserver'
     //we start people off with the hibernate plugin
-    implementation deps['plugin-hibernate']
-    implementation deps['plugin-json-jackson']
-    implementation deps['plugin-backend']
-    implementation deps['plugin-install-sslcert']
-    implementation deps['plugin-properties']
-    implementation deps['generate-httpclient']
-    implementation deps['server-scaffolding']
-    implementation deps['jul-to-slf4j']
+    implementation 'org.webpieces.server.plugin:plugin-hibernate'
+    implementation 'org.webpieces.server.plugin:plugin-json-jackson'
+    implementation 'org.webpieces.server.plugin:plugin-backend'
+    implementation 'org.webpieces.server.plugin:plugin-install-sslcert'
+    implementation 'org.webpieces.server.plugin:plugin-properties'
+    implementation 'org.webpieces.cloud:generate-httpclient'
+    implementation 'org.webpieces.cloud:server-scaffolding'
+    implementation libs.slf4j.api
 
-    implementation deps['commons-lang'] //used in json escaping
-    implementation 'jakarta.validation:jakarta.validation-api'
+    implementation libs.apache.commons.lang3
+    implementation libs.jakarta.validation.api
 
-    testImplementation deps['core-ddl']
-    testImplementation deps['core-mock']
-    testImplementation deps['plugin-h2db']
-    testImplementation deps['http-webserver-test']
-    testImplementation deps['selenium']
+    testImplementation 'org.webpieces.core:core-ddl'
+    testImplementation 'org.webpieces.core:core-mock'
+    testImplementation 'org.webpieces.server.plugin:plugin-h2db'
+    testImplementation 'org.webpieces.server:http-webserver-test'
+    testImplementation libs.selenium
 }
 
 //NOTE: jar section has to go AFTER dependencies section to read all dependencies

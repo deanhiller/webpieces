@@ -15,13 +15,13 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    implementation deps['acme-sslcerts']
-    implementation deps['acme-utils']
-    implementation deps['http-router']
-    implementation deps['plugin-backend']
+    implementation libs.acme4j.client
+    implementation libs.acme4j.utils
+    implementation libs.webpieces.http.router
+    implementation libs.webpieces.plugin.backend
     
-    testImplementation deps['http-fortesting-plugins']
-    testImplementation deps['http-webserver-test']
+    testImplementation libs.webpieces.server.httpfortestingplugins
+    testImplementation libs.webpieces.server.webserver.test
 
 }
 

@@ -26,12 +26,12 @@ sourceSets {
 
 dependencies {
 
-    api deps['http-router']
+    api libs.webpieces.http.router
 
-    api deps['runtimecompile']
-    implementation deps['logback-classic']
+    api libs.webpieces.core.runtimecompile
+    implementation libs.logback
 
-    testImplementation deps['core-mock']
+    testImplementation libs.webpieces.core.mock
 
 }
 

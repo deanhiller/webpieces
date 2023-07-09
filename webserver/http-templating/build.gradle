@@ -15,14 +15,14 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['groovy']
-    implementation deps['guice']
-    implementation deps['commons-beans']
+    api libs.groovy
+    implementation libs.google.guice
+    implementation libs.apache.commons.beanutils
 
-    api deps['core-util']
-    api deps['http-templating-lib']
+    api libs.webpieces.core.util
+    api libs.webpieces.template.lib
 
-    testImplementation deps['http-templating-dev-lib']
+    testImplementation libs.webpieces.template.devlib
 }
 
 publishing {

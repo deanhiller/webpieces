@@ -13,8 +13,8 @@ group = 'org.webpieces.core'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api 'org.slf4j:slf4j-api'
-    implementation 'ch.qos.logback:logback-classic'
+    api libs.slf4j.api
+    implementation libs.logback
 }
 
 publishing {

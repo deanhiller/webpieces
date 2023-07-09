@@ -13,9 +13,9 @@ group = 'org.webpieces.core'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['core-ssl']
+    api libs.webpieces.core.ssl
 	
-    testImplementation deps['core-mock']
+    testImplementation libs.webpieces.core.mock
 }
 
 publishing {

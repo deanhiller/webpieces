@@ -19,10 +19,10 @@ dependencies {
     //well, MANY clients are NOT using that package and now they have to drag along extra baggage....instead, create another util or something
     //crap but everyone is using this anyways or at least should be just like logging
 
-    api 'jakarta.inject:jakarta.inject-api'
-    api deps['core-future']
-    api deps['core-metrics']
-    api deps['core-logging']
+    api libs.jakarta.inject.api
+    api libs.webpieces.core.future
+    api libs.webpieces.core.metrics
+    api libs.webpieces.core.logging
 }
 
 publishing {

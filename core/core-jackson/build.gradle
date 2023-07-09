@@ -14,13 +14,10 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['core-util']
+    api libs.webpieces.core.util
 
-    api 'com.fasterxml.jackson.core:jackson-annotations'
-    api 'com.fasterxml.jackson.core:jackson-databind'
+    api libs.bundles.jackson
 
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
 }
 
 publishing {

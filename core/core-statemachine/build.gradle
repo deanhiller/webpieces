@@ -13,8 +13,8 @@ group = 'org.webpieces.core'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['core-util']
-    testImplementation deps['core-mock']
+    api libs.webpieces.core.util
+    testImplementation libs.webpieces.core.mock
 }
 
 publishing {

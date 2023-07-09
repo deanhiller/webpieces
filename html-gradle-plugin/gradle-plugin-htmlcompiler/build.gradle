@@ -14,12 +14,12 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    implementation deps['commons-io']
-    implementation deps['guice']
-    api deps['core-util']
-    api deps['http-templating-dev-lib']
+    implementation libs.apache.commons.io
+    implementation libs.google.guice
+    api libs.webpieces.core.util
+    api libs.webpieces.template.devlib
 	
-    testImplementation 'junit:junit'
+    testImplementation libs.junit
 
 }
 

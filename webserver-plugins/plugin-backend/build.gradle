@@ -14,10 +14,10 @@ group = 'org.webpieces.server.plugin'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['http-webserver']
+    api libs.webpieces.server.webserver
     
-    testImplementation deps['http-webserver-test']
-    testImplementation deps['http-fortesting-plugins']
+    testImplementation libs.webpieces.server.webserver.test
+    testImplementation libs.webpieces.server.httpfortestingplugins
 }
 
 //This allows the tests to use *_html.class templates since for some reason, I was having trouble

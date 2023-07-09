@@ -14,16 +14,17 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['guice']
-    api deps['http-shared']
-    api deps['jakarta-rest-api']
+    api libs.google.guice
+    api libs.webpieces.http.shared
+    api libs.jakarta.rest.api
 
     //these 2 for validation...(which don't depend on anything)
-    implementation deps['hibernate-validator']
-    implementation deps['el-for-validator']
-    implementation deps['micrometer']
+    implementation libs.hibernate.validator
+    implementation libs.jakarta.el
+
+    implementation libs.micrometer.core
     
-    testImplementation deps['commons-io']
+    testImplementation libs.apache.commons.io
 }
 
 publishing {

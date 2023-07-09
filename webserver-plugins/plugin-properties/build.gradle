@@ -15,11 +15,11 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    implementation deps['http-router']
-    implementation deps['plugin-backend']
+    implementation libs.webpieces.http.router
+    implementation libs.webpieces.plugin.backend
 
-    testImplementation deps['http-webserver-test']
-    testImplementation deps['http-fortesting-plugins']
+    testImplementation libs.webpieces.server.webserver.test
+    testImplementation libs.webpieces.server.httpfortestingplugins
 }
 
 publishing {
