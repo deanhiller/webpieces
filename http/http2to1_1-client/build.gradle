@@ -13,16 +13,16 @@ group = 'org.webpieces.http'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['http2-client']
-    api deps['http1_1-client']
-    api deps['http2-translations']
+    api libs.webpieces.http.http1client
+    api libs.webpieces.http.http2client
+    api libs.webpieces.http.http2translations
 
-    testImplementation deps['core-mock']
+    testImplementation libs.webpieces.core.mock
 
-    testImplementation deps['guava']
-    testImplementation deps['plugin-json-jackson']
+    testImplementation libs.google.guava
+    testImplementation libs.webpieces.plugin.jackson
     testImplementation 'com.google.auth:google-auth-library-oauth2-http:0.25.2'
-    testImplementation 'com.google.cloud:google-cloud-monitoring:2.1.0'
+    testImplementation libs.google.cloud.monitoring
     testImplementation 'com.auth0:java-jwt:3.14.0'
 }
 

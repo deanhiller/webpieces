@@ -13,8 +13,8 @@ group = 'org.webpieces.http'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['core-datawrapper']
-    api deps['http-api']
+    api libs.webpieces.core.datawrapper
+    api libs.webpieces.http.api
 }
 
 publishing {

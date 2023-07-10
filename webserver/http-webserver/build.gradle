@@ -51,25 +51,25 @@ test.dependsOn ("copyPersistenceXml")
 
 dependencies {
 
-    api deps['guice']
-    implementation deps['acme-sslcerts']
-    api deps['http-frontend2']
-    api deps['http-templating']
-    api deps['http-router']
+    api libs.google.guice
+    implementation libs.acme4j.client
+    api libs.webpieces.http.frontend2
+    api libs.webpieces.template
+    api libs.webpieces.http.router
 
-    testImplementation deps['core-mock']
-    testImplementation deps['core-ddl']
-    testImplementation deps['runtimecompile']
-    testImplementation deps['http-webserver-test']
-    testImplementation deps['http-router-dev']
-    testImplementation deps['plugin-hibernate']
-    testImplementation deps['plugin-json-jackson']
+    testImplementation libs.webpieces.core.mock
+    testImplementation libs.webpieces.core.ddl
+    testImplementation libs.webpieces.core.runtimecompile
+    testImplementation libs.webpieces.server.webserver.test
+    testImplementation libs.webpieces.http.router.dev
+    testImplementation libs.webpieces.plugin.hibernate
+    testImplementation libs.webpieces.plugin.jackson
 
-    testImplementation deps['h2db']
+    testImplementation libs.h2
 
-    testImplementation 'commons-io:commons-io'
-    testImplementation 'jakarta.validation:jakarta.validation-api'
-    testImplementation deps['selenium']
+    testImplementation libs.apache.commons.io
+    testImplementation libs.jakarta.validation.api
+    testImplementation libs.selenium
 }
 
 publishing {

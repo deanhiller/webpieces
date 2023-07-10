@@ -14,11 +14,11 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['http1_1-parser']
-    api deps['http-router']
-    api deps['core-jackson']
+    api libs.webpieces.http.http1parser
+    api libs.webpieces.http.router
+    api libs.webpieces.core.jackson
 
-    implementation 'jakarta.validation:jakarta.validation-api'
+    implementation libs.jakarta.validation.api
 
 }
 

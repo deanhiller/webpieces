@@ -14,10 +14,10 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['core-asyncserver']
-    api deps['http2-translations']
+    api libs.webpieces.core.asyncserver
+    api libs.webpieces.http.http2translations
 
-    testImplementation deps['core-mock']
+    testImplementation libs.webpieces.core.mock
 
 }
 

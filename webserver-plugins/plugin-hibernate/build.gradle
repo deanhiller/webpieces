@@ -14,10 +14,9 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['core-persistence']
+    api libs.webpieces.core.persistence
 
-    implementation deps['log4jdbc']
-    implementation deps['http-router']
+    implementation libs.webpieces.http.router
 }
 
 publishing {

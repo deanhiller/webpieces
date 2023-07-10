@@ -14,10 +14,10 @@ group = 'org.webpieces.server.plugin'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    implementation deps['plugin-backend']
+    implementation libs.webpieces.plugin.backend
 
-    testImplementation deps['http-webserver-test']
-    testImplementation deps['http-fortesting-plugins']
+    testImplementation libs.webpieces.server.webserver.test
+    testImplementation libs.webpieces.server.httpfortestingplugins
 }
 
 publishing {

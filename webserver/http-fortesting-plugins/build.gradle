@@ -14,9 +14,8 @@ group = 'org.webpieces.server'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    implementation deps['guice']
-    api deps['http-webserver']
-    //implementation project(':core:core-datawrapper')
+    implementation libs.google.guice
+    api libs.webpieces.server.webserver
 	
     //DO NOT DEPEND ON HTTP1.1 NOR HTTP2 here!!!!!
     //this keeps us pluggable with ANY http parser implementation

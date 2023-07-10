@@ -14,9 +14,9 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api 'jakarta.inject:jakarta.inject-api'
-    api deps['micrometer']
-    api deps['core-logging']
+    api libs.jakarta.inject.api
+    api libs.micrometer.core
+    api libs.webpieces.core.logging
 
 }
 
