@@ -56,6 +56,8 @@ public class TestCustomFutures {
 		f6.cancelChain("Reason for cancel");
 
 		Assert.assertEquals(1, nums.size()); //cancel function above fills in the nums
+
+		Context.remove("test");
 	}
 
 	private Integer myLocalCall(int i, List<Integer> list) {

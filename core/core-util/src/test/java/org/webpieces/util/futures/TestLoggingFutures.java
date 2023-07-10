@@ -159,5 +159,5 @@ public class TestLoggingFutures {
 		future.complete(counter);
 		return future;
 	}
-	
+
 }

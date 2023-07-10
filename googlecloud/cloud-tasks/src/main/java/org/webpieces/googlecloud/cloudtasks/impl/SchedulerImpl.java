@@ -42,6 +42,8 @@ public class SchedulerImpl implements Scheduler {
 
     private XFuture<JobReference> executeIt(Supplier<XFuture<Void>> runnable, ScheduleInfo info) {
         Context.put(WEBPIECES_SCHEDULE_INFO, info);
+        Context.put(WEBPIECES_SCHEDULE_RESPONSE, new JobReference());
+
         try {
             XFuture<Void> future = runnable.get();
             return future.thenApply(v -> {
@@ -57,6 +59,7 @@ public class SchedulerImpl implements Scheduler {
             });
         } finally {
             Context.remove(WEBPIECES_SCHEDULE_INFO);
+            Context.remove(WEBPIECES_SCHEDULE_RESPONSE);
         }
     }
 

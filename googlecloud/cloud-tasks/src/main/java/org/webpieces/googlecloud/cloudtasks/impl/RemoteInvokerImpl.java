@@ -1,5 +1,6 @@
 package org.webpieces.googlecloud.cloudtasks.impl;
 
+import com.google.cloud.tasks.v2.Task;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,8 @@ import org.webpieces.util.futures.XFuture;
 import javax.inject.Provider;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+
+import static org.webpieces.util.context.Context.get;
 
 public class RemoteInvokerImpl implements RemoteInvoker {
 
@@ -30,9 +33,10 @@ public class RemoteInvokerImpl implements RemoteInvoker {
 
     @Override
     public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
-        JobReference jobReference = gcpTasksClient.get().createTask(method, addr, httpMethod, path, bodyAsText, info);
+        Task task = gcpTasksClient.get().createTask(method, addr, httpMethod, path, bodyAsText, info);
+        JobReference jobReference = Context.get(Constants.WEBPIECES_SCHEDULE_RESPONSE);
+        jobReference.setTaskId(task.getName());
         log.info("invoke jobReference "+jobReference);
-        Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, jobReference);
         return XFuture.completedFuture(null);
     }
 

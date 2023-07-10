@@ -29,8 +29,13 @@ public class RecordingFilter extends RouteFilter<Void> {
         //let the recording begin...
         Context.put(TestCaseRecorder.RECORDER_KEY, new TestCaseRecorderImpl(fullRequestContext));
         Context.put(RecordingInfo.JSON_ENDPOINT_RESULT, new RecordingInfo());
-        return nextFilter.invoke(meta)
-                .thenApply((resp) -> writeOutTestCase(resp, fullRequestContext));
+        try {
+            return nextFilter.invoke(meta)
+                    .thenApply((resp) -> writeOutTestCase(resp, fullRequestContext));
+        } finally {
+            Context.remove(TestCaseRecorder.RECORDER_KEY);
+            Context.remove(RecordingInfo.JSON_ENDPOINT_RESULT);
+        }
     }
 
     private Action writeOutTestCase(Action resp, Map<String, Object> fullRequestContext) {

@@ -38,9 +38,8 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         Map<String, Object> copy = Context.copyContext();
 
         String jobId = UUID.randomUUID().toString();
-        JobReference ref = new JobReference();
+        JobReference ref = Context.get(Constants.WEBPIECES_SCHEDULE_RESPONSE);
         ref.setTaskId(jobId);
-        Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
 
         if(info.isScheduledInFuture()) {
             log.info("scheduling in the future"+info.getTime());

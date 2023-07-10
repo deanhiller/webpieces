@@ -65,7 +65,7 @@ public class GCPTaskClient {
         }
     }
 
-    public JobReference createTask(Method method, InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
+    public Task createTask(Method method, InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
 
         Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
 
@@ -83,9 +83,9 @@ public class GCPTaskClient {
 
         QueueName queueName = QueueName.of(config.getProjectId(), config.getLocation(),queueNameStr);
 
-        JobReference jobReference = createTaskImpl(queueName, url, httpMethod, payload, scheduleInfo);
+        Task task = createTaskImpl(queueName, url, httpMethod, payload, scheduleInfo);
 
-        return jobReference;
+        return task;
     }
 
     public void deleteTask(JobReference reference) {
@@ -94,7 +94,7 @@ public class GCPTaskClient {
     }
 
     // Create a task with a HTTP target using the Cloud Tasks client.
-    private JobReference createTaskImpl(QueueName queue, String url, HttpMethod httpMethod, String payload, ScheduleInfo scheduleInfo) {
+    private Task createTaskImpl(QueueName queue, String url, HttpMethod httpMethod, String payload, ScheduleInfo scheduleInfo) {
 
         Map<String, String> headers = new HashMap<>();
         for(PlatformHeaders header : toTransfer) {
@@ -126,11 +126,8 @@ public class GCPTaskClient {
         // Send create task request
         Task task = cloudTasksClient.createTask(queue, taskBuilder.build());
         log.info("Task created: " + task.getName());
-        JobReference jobReference = new JobReference();
-        jobReference.setTaskId(task.getName());
 
-        return jobReference;
-
+        return task;
     }
 
     private com.google.cloud.tasks.v2.HttpMethod getCloudTaskHttpMethod(HttpMethod httpMethod) {
