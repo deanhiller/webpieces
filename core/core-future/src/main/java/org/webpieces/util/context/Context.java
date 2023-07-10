@@ -6,6 +6,7 @@ public class Context {
 
     public static final String HEADERS = "__headers";
     public static final String REQUEST = "__request";
+    public static final String MDC_KEY = "webpieces.logback.async.mdc";
 
     private static ThreadLocal<Map<String,Object>> context = ThreadLocal.withInitial(() -> new HashMap<>());
 
@@ -83,7 +84,16 @@ public class Context {
 
     public static Map<String, Object> copyContext() {
         Map<String, Object> stringObjectMap = context.get();
-        return new HashMap<>(stringObjectMap);
+        HashMap<String, Object> copiedMap = new HashMap<>(stringObjectMap);
+
+        //special case as we need a deep copy of MDC if in use
+        Map<String, String> mdc = (Map<String, String>) stringObjectMap.get(MDC_KEY);
+        if(mdc != null) {
+            Map<String, String> copiedMdc = new HashMap<>(mdc);
+            copiedMap.put(MDC_KEY, copiedMdc);
+        }
+
+        return copiedMap;
     }
 
     public static void putMagic(PlatformHeaders header, String value) {

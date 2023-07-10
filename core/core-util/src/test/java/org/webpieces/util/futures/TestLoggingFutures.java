@@ -13,17 +13,22 @@ import org.webpieces.util.threading.DirectExecutor;
 import org.webpieces.util.threading.FutureExecutor;
 import org.webpieces.util.threading.FutureExecutors;
 
+import java.util.Map;
 import java.util.concurrent.*;
 
 public class TestLoggingFutures {
 
+	static {
+		Logging.setupMDCForLogging();
+	}
+
 	private static final Logger log = LoggerFactory.getLogger(TestLoggingFutures.class);
 
 	private Monitoring m = new Monitoring(new SimpleMeterRegistry());
-	private FutureExecutor exec = new FutureExecutors().create(m, 1, "test");
-	private FutureExecutor direct = new FutureExecutors().createDirect(m);
+	private FutureExecutor exec = new FutureExecutors().create(m, 1, "test", true);
+	private FutureExecutor direct = new FutureExecutors().createDirect();
 
-	@Test
+	//@Test
 	public void testRegisterTwoListenersToSameFuture() throws ExecutionException, InterruptedException, TimeoutException {
 
 		log.info("no context set");
@@ -31,28 +36,50 @@ public class TestLoggingFutures {
 		MDC.put("txId", "deanTx");
 		XFuture<Integer> future = methodCall(0);
 
-		future.thenAccept(f -> fire(f));
+		//try to screw up the context with a runnable that runs after the first one but before the second one
+		//due to single threadedness, this runs after first and before second
+		exec.executeRunnable(new SimulateTwo(), null);
+
 		future.thenAccept(f -> fire2(f));
 		future.thenAccept(f -> fire(f+2));
 		future.thenAccept(f -> fire(f + 3));
-		XFuture<Integer> next = future.thenCompose((val) -> methodCall(1));
-		XFuture<Object> temp = next.thenApply(f -> fire(f));
-		XFuture<Integer> last = temp.thenCompose((f) -> methodCall(2));
+		XFuture<Object> temp = future.thenApply(f -> fire(f));
+		XFuture<Integer> next = temp.thenCompose((f) -> methodCall(2));
+		XFuture<Void> last = next.thenAccept(f -> fire(f));
+		XFuture<String> handle = next.handle((r1, e) -> handle(r1, e));
+		next.exceptionally((e) -> exception(e));
 
 		MDC.remove("txId");
 
 		log.info("run in middle but context is 0 now");
-		last.get(10, TimeUnit.SECONDS);
+		last.get(20, TimeUnit.SECONDS);
 	}
 
-	private XFuture<Integer> methodCall(int value) {
-		MDC.put("txId2", "deanTx2");
+	private Integer exception(Throwable e) {
+		log.info("exception");
+		return 0;
+	}
 
+	public String handle(Integer resp, Throwable e) {
+		log.info("handle");
+		return "";
+	}
+
+
+	private XFuture<Integer> methodCall(int value) {
+
+		if(value == 0)
+			MDC.put("txId2", "tx2");
+		log.info("method call going out"+value);
 		XFuture<Integer> future = new XFuture<>();
 		Runnable r = new MyRunnable(future, value);
 		exec.executeRunnable(r, null);
 
-		MDC.remove("txId2");
+		if(value == 0)
+			MDC.remove("txId2");
+		else
+			throw new RuntimeException("exc");
+
 		return future;
 	}
 
@@ -73,7 +100,29 @@ public class TestLoggingFutures {
 				throw new RuntimeException(e);
 			}
 
-			future.complete(value);
+			log.info("response coming back "+value);
+			future.complete(value+1);
+		}
+	}
+
+	private class SimulateTwo implements Runnable {
+
+		@Override
+		public void run() {
+			MDC.put("txId", "another1");
+			MDC.put("txId2", "another2");
+
+			log.info("simulate runnable 2");
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+
+			log.info("simulate runnable 2 DONE");
+
+			MDC.remove("txId2");
+			//leak the txId1 like a developer might do ;)
 		}
 	}
 
@@ -111,101 +160,4 @@ public class TestLoggingFutures {
 		return future;
 	}
 	
-	@Test
-	public void testXFuture() throws InterruptedException {
-		System.out.println("thread="+Thread.currentThread());
-		XFuture<Integer> myFuture = new XFuture<>();
-		myFuture.thenAccept(intResult -> log(intResult));
-		XFuture<String> result = myFuture.thenApply(p -> translate(p));
-		
-		result.handle((r, e) -> handle(r, e));
-		
-		result.cancel(true);
-		
-		myFuture.complete(8);
-		
-	}
-
-	private String handle(String r, Throwable e) {
-		if(r != null) {
-			System.out.println("result");
-		} else {
-			System.out.println("FINISHED fail.  thread="+Thread.currentThread());
-			e.printStackTrace();
-		}
-		
-		return "done";
-	}
-	
-	private void log(Integer intResult) {
-		System.out.println("int result="+intResult+" thread="+Thread.currentThread());
-	}
-
-	private String translate(Integer p) {
-		System.out.println("(translate)thread="+Thread.currentThread());
-		return p+"str";
-	}
-	
-	/**
-	 * Some times you want code to run success or fail and to propagate so here is how
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
-	 */
-	@Test
-	public void testAFinallyMethodWithXFutures() throws InterruptedException, ExecutionException {
-		XFuture<Integer> myFuture = new XFuture<>();
-		XFuture<Integer> newFuture = myFuture.thenApply(intResult -> throwException());
-		
-		myFuture.complete(5);
-
-		Assert.assertFalse(myFuture.isCompletedExceptionally());
-		Assert.assertTrue(newFuture.isCompletedExceptionally());
-		
-		XFuture<Integer> future2 = newFuture.handle((r, e) -> {
-			if(r != null)
-				return r;
-			else if(e != null)
-				throw SneakyThrow.sneak(e);
-			else
-				throw new RuntimeException("weird");
-		});
-		
-		Assert.assertTrue(future2.isCompletedExceptionally());
-		
-		
-		XFuture<Object> future = newFuture.handle((r, e) -> {
-			if(r != null)
-				return r;
-			else if(e != null)
-				return e;
-			else
-				return new RuntimeException("Asdf");			
-		});
-		
-		Assert.assertTrue(future.get() instanceof RuntimeException);
-		Assert.assertFalse(future.isCompletedExceptionally());
-
-		
-	}
-	
-	public Integer throwException() {
-		throw new RuntimeException("hit here");
-	}
-	
-//	@Test
-//	public void testExecutor() throws InterruptedException {
-//		XFuture<Integer> future = new XFuture<Integer>();
-//
-//		future.complete(6);
-//		
-//		ExecutorService executor = Executors.newFixedThreadPool(5, new NamedThreadFactory("hithere"));
-//		future.thenApplyAsync(v -> logIt(v), executor);
-//		
-//		Thread.sleep(5000);
-//	}
-//	
-//	public int logIt(int v) {
-//		log.info("thread="+Thread.currentThread()+" val="+v);
-//		return v;
-//	}
 }

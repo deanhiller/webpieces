@@ -42,18 +42,22 @@ public class SchedulerImpl implements Scheduler {
 
     private XFuture<JobReference> executeIt(Supplier<XFuture<Void>> runnable, ScheduleInfo info) {
         Context.put(WEBPIECES_SCHEDULE_INFO, info);
-        XFuture<Void> future = runnable.get();
-        return future.thenApply(v -> {
-            JobReference reference = Context.get(Constants.WEBPIECES_SCHEDULE_RESPONSE);
-            TestCaseRecorder recorder = Context.get(RECORDER_KEY);
-            if(recorder != null) {
-                EndpointInfo lastEndpointInfo = recorder.getLastEndpointInfo();
-                lastEndpointInfo.setJobRefId(reference.getTaskId());
-                lastEndpointInfo.setQueueApi(true);
-            }
-            log.info("executeIt reference "+reference.getTaskId());
-            return reference;
-        });
+        try {
+            XFuture<Void> future = runnable.get();
+            return future.thenApply(v -> {
+                JobReference reference = Context.get(Constants.WEBPIECES_SCHEDULE_RESPONSE);
+                TestCaseRecorder recorder = Context.get(RECORDER_KEY);
+                if (recorder != null) {
+                    EndpointInfo lastEndpointInfo = recorder.getLastEndpointInfo();
+                    lastEndpointInfo.setJobRefId(reference.getTaskId());
+                    lastEndpointInfo.setQueueApi(true);
+                }
+                log.info("executeIt reference " + reference.getTaskId());
+                return reference;
+            });
+        } finally {
+            Context.remove(WEBPIECES_SCHEDULE_INFO);
+        }
     }
 
     @Override

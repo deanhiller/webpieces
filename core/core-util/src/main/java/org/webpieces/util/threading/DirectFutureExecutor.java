@@ -25,5 +25,4 @@ public class DirectFutureExecutor implements FutureExecutor {
             return XFuture.failedFuture(e);
         }
     }
-
 }

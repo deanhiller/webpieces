@@ -1,6 +1,8 @@
 package org.webpieces.util.futures;
 
 import ch.qos.logback.classic.util.LogbackMDCAdapter;
+import org.slf4j.MDC;
+import org.slf4j.spi.MDCAdapter;
 import org.webpieces.util.context.Context;
 
 import java.util.*;
@@ -8,10 +10,17 @@ import java.util.*;
 public class XFutureMDCAdapter extends LogbackMDCAdapter {
 
     //then we don't have to construct/gc all the time ...
-    private static final String MDC_KEY = "webpieces.logback.async.mdc";
+    private static final String MDC_KEY = Context.MDC_KEY;
+
     private static final String MDC_DEQUE_KEY = "webpieces.logback.async.mdc.deque";
     private static final Map<String, String> DEFAULT_EMPTY = new HashMap<>();
     private static final Map<String, Deque<String>> DEFAULT_DEQUE_EMPTY = new HashMap<>();
+
+    public static Map<String, String> fetchCurrentMap() {
+        MDCAdapter mdcAdapter = MDC.getMDCAdapter();
+        XFutureMDCAdapter mdcAdapt = (XFutureMDCAdapter) mdcAdapter;
+        return mdcAdapt.getPropertyMap();
+    }
 
     @Override
     public void put(String key, String val) {

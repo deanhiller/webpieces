@@ -1,13 +1,10 @@
 package org.webpieces.util.threading;
 
-import org.webpieces.util.futures.XFuture;
-
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
-public interface FutureScheduledExecutor {
+public interface MetricsScheduleExecutor {
 
     <T> ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
                                                long initialDelay,
