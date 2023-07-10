@@ -13,17 +13,4 @@ public interface FutureExecutor {
 
     <RESP> XFuture<RESP> execute(Supplier<RESP> function, Map<String, String> extraTags);
 
-    <T> ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
-                                               long initialDelay,
-                                               long period,
-                                               TimeUnit unit,
-                                               Map<String, String> extraMetricTags
-    );
-
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
-                                                     long initialDelay,
-                                                     long delay,
-                                                     TimeUnit unit,
-                                                     Map<String, String> extraMetricTags
-    );
 }
