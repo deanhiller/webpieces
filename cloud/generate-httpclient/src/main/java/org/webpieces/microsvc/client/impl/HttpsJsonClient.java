@@ -7,7 +7,6 @@ import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -24,7 +23,6 @@ import org.webpieces.microsvc.client.api.HttpsConfig;
 import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.plugin.json.JsonError;
 import org.webpieces.util.context.Context;
-import org.webpieces.util.context.Contexts;
 import org.webpieces.util.context.PlatformHeaders;
 import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
@@ -173,16 +171,11 @@ public class HttpsJsonClient {
 
         Map<String, Object> fullContext = Context.getContext();
         if(fullContext == null) {
-            throw new IllegalStateException("Missing webserver filters? Context.getFullContext() must contain data");
+            throw new IllegalStateException("Missing webserver filters? Context.getContext() must contain data");
         }
 
-        Map<String, String> ctxMap = MDC.getCopyOfContextMap();
-
-        Contexts contexts = new Contexts(ctxMap, fullContext);
-
-        long start = System.currentTimeMillis();
         XFuture<T> future = futureUtil.catchBlockWrap(
-                () -> sendAndTranslate(contexts, apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
+                () -> sendAndTranslate(apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
                 (t) -> translateException(httpReq, t)
         );
 
@@ -221,10 +214,10 @@ public class HttpsJsonClient {
 
     }
 
-    private <T> XFuture<T> sendAndTranslate(Contexts contexts, InetSocketAddress apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
+    private <T> XFuture<T> sendAndTranslate(InetSocketAddress apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
         return connect
                 .thenCompose(voidd -> httpSocket.send(fullRequest))
-                .thenApply(fullResponse -> unmarshal(jsonReq, contexts, fullRequest, fullResponse, apiAddress.getPort(), responseType));
+                .thenApply(fullResponse -> unmarshal(jsonReq, fullRequest, fullResponse, apiAddress.getPort(), responseType));
     }
 
     protected Http2Socket createSocket(InetSocketAddress apiAddress, Http2SocketListener listener, boolean forHttp) {
@@ -283,19 +276,7 @@ public class HttpsJsonClient {
 
     }
 
-    private <T> T unmarshal(String jsonReq, Contexts contexts, FullRequest request, FullResponse httpResp, int port, Class<T> type) {
-
-        Map<String, String> loggingCtxMap = contexts.getLoggingCtxMap();
-        if(loggingCtxMap != null) {
-            for (Map.Entry<String, String> entry : loggingCtxMap.entrySet()) {
-                MDC.put(entry.getKey(), entry.getValue());
-            }
-        }
-        //SINCE 99% of the time, we don't change threads on executing resolution of a future, we can set the ThreadLocal
-        //for the RequestContext here to transfer that info to this thread AFTER a remote server responds
-        //Of course, we have no way of resetting it, but the platform does initialize it on every request and every
-        //client sets it like this too so we should be good
-        Context.restoreContext(contexts.getWebserverContext());
+    private <T> T unmarshal(String jsonReq, FullRequest request, FullResponse httpResp, int port, Class<T> type) {
 
         DataWrapper payload = httpResp.getPayload();
         String contents = payload.createStringFromUtf8(0, payload.getReadableSize());

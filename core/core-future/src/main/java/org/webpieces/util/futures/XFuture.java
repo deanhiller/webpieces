@@ -86,12 +86,12 @@ public class XFuture<T> extends CompletableFuture<T> {
 
 			Map<String, Object> prevState = Context.copyContext();
 			try {
-				Context.restoreContext(state);
+				Context.setContext(state);
 
 				originalFunction.accept(t);
 
 			} finally {
-				Context.restoreContext(prevState);
+				Context.setContext(prevState);
 			}
 		}
 	}
@@ -114,12 +114,12 @@ public class XFuture<T> extends CompletableFuture<T> {
 
 			Map<String, Object> prevState = Context.copyContext();
 			try {
-				Context.restoreContext(state);
+				Context.setContext(state);
 				
 				return originalFunction.apply(t);
 				
 			} finally {
-				Context.restoreContext(prevState);
+				Context.setContext(prevState);
 			}
 		}
 	}
@@ -138,12 +138,12 @@ public class XFuture<T> extends CompletableFuture<T> {
 		public R apply(T o, U o2) {
 			Map<String, Object> prevState = Context.copyContext();
 			try {
-				Context.restoreContext(state);
+				Context.setContext(state);
 
 				return originalFunction.apply(o, o2);
 
 			} finally {
-				Context.restoreContext(prevState);
+				Context.setContext(prevState);
 			}
 		}
 	}

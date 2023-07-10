@@ -21,14 +21,14 @@ public class MockStreamWriter implements StreamWriter {
     @Override
     public XFuture<Void> processPiece(StreamMsg data) {
 
-        Map<String, Object> context = Context.copyContext();
+        Map<String, Object> previous = Context.copyContext();
 
         //clear context for server side since client context does not leak there across socket
-        Context.restoreContext(new HashMap<>());
+        Context.setContext(new HashMap<>());
         try {
             return writer.processPiece(data);
         } finally {
-            Context.restoreContext(context);
+            Context.setContext(previous);
         }
     }
 }

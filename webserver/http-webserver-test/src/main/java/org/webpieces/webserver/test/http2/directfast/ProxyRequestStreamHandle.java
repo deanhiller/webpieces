@@ -25,17 +25,17 @@ public class ProxyRequestStreamHandle implements RequestStreamHandle {
 	public StreamRef process(Http2Request request, ResponseStreamHandle responseListener) {
 		ProxyResponseStream proxyResponse = new ProxyResponseStream(responseListener, frontendSocket);
 
-		Map<String, Object> context = Context.copyContext();
+		Map<String, Object> previous = Context.copyContext();
 
 		//clear context so server uses a clean context
-		Context.restoreContext(new HashMap<>());
+		Context.setContext(new HashMap<>());
 		try {
 			StreamRef streamRef = stream.incomingRequest(request, proxyResponse);
 
 			return new MockProxyStreamRef(streamRef);
 		} finally {
 			//client still in this context
-			Context.restoreContext(context);
+			Context.setContext(previous);
 		}
 	}
 

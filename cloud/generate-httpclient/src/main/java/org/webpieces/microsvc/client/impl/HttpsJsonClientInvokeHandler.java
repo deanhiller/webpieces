@@ -102,12 +102,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         }
 
         Endpoint endpoint = new Endpoint(addr, httpMethod.getCode(), path);
-        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType, forHttp)
-                .thenApply(retVal -> {
-                    //Only needed by APIs/methods that return CompletableFuture :( not XFuture
-                    Context.restoreContext(context);
-                    return retVal;
-                });
+        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType, forHttp);
 
         if(recorder == null) {
             return xFuture;
