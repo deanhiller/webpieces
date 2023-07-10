@@ -13,8 +13,8 @@ group = 'org.webpieces.http'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['http2-engine']
-    api deps['http1_1-parser']
+    api libs.webpieces.http.http2engine
+    api libs.webpieces.http.http1parser
 }
 
 publishing {

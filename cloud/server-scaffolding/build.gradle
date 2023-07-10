@@ -19,16 +19,16 @@ repositories {
 
 dependencies {
 
-    //api deps['guice']
-    api deps['http-router']
-    api deps['cloud-api-lib']
+    //api libs.google.guice
+    api libs.webpieces.http.router
+    api libs.webpieces.microservice.api.lib
 
-    //api deps['core-jackson']
+    //api libs.webpieces.core.jackson
 
-    //implementation deps['javax-inject-api']
-    //implementation deps['slf4j-api']
-    implementation deps['uuidgenerator']
+    //implementation libs.jakarta.inject.api
+    //implementation libs.slf4j.api
+    implementation libs.uuidgenerator
 
-    implementation deps['plugin-json-jackson']
+    implementation libs.webpieces.plugin.jackson
 
 }

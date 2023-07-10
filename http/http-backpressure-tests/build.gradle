@@ -14,10 +14,10 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-	implementation deps['http2to1_1-client']
-	implementation deps['http-frontend2']
+	implementation libs.webpieces.http.client
+	implementation libs.webpieces.http.frontend2
 	
-	testImplementation deps['core-mock']
+	testImplementation libs.webpieces.core.mock
 
 }
 

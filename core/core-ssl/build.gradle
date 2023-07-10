@@ -13,11 +13,11 @@ group = 'org.webpieces.core'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['core-datawrapper']
+    api libs.webpieces.core.datawrapper
 
-    implementation deps['guava']
+    implementation libs.google.guava
 
-    testImplementation deps['core-mock']
+    testImplementation libs.webpieces.core.mock
 
 }
 

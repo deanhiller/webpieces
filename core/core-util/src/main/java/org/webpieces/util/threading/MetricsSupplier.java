@@ -42,7 +42,6 @@ public class MetricsSupplier<RESP> implements Runnable {
         long startTime = System.currentTimeMillis();
         Map<String, Object> previously = Context.getContext();
         Map<String, String> previousLogMap = MDC.getCopyOfContextMap();
-
         Context.setContext(this.context);
         if(!isXFutureMDCAdapterInstalled)
             MDC.setContextMap(this.loggingMdcMap);

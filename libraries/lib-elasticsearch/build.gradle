@@ -14,11 +14,11 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['elastic-search']
-    api deps['jackson']
-    api deps['core-util']
+    api libs.elasticsearch.client
+    api libs.bundles.jackson
+    api libs.webpieces.core.util
 
-    implementation deps['micrometer']
+    implementation libs.micrometer.core
 
 }
 

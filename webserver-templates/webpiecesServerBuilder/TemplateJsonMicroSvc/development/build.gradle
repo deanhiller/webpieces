@@ -16,20 +16,20 @@ apply from: '../../../../config/global.gradle'
 publishing.publications.mavenJava.pom.description='project only used in testing.  ignore this jar'
 
 dependencies {
-  implementation deps['template-json-prod']
+  implementation 'org.webpieces.server.templates:production'
   //we start people off with the hibernate plugin
-  implementation deps['http-router-dev']
-  implementation deps['http-templating-dev-lib']
+  implementation 'org.webpieces.server:http-router-dev'
+  implementation 'org.webpieces.template:http-templating-dev-lib'
 
-  implementation deps['plugin-install-sslcert']
-  implementation deps['plugin-properties']
+  implementation 'org.webpieces.server.plugin:plugin-install-sslcert'
+  implementation 'org.webpieces.server.plugin:plugin-properties'
 
   //we start people off with h2 plugin in dev mode that they can delete later if they want(easier to delete then to setup)
   //h2 works well for in-memory testing if using jdbc.  if using nosql, just delete this and code that no longer compiles after that
-  implementation deps['plugin-h2db']
+  implementation 'org.webpieces.server.plugin:plugin-h2db'
 
   //we load the documentation plugin in the development server (not the production server)
-  implementation deps['plugin-documentation']
+  implementation 'org.webpieces.server.plugin:plugin-documentation'
 }
 
 tasks.whenTaskAdded {task ->

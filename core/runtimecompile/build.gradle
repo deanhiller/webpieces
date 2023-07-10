@@ -13,7 +13,7 @@ group = 'org.webpieces.core'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    implementation deps['core-util']
+    implementation libs.webpieces.core.util
 }
 
 publishing {

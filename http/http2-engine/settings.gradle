@@ -1,2 +1,10 @@
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            from(files("../../config/libs.versions.toml"))
+        }
+    }
+}
+
 includeBuild '../http2-hpack'
 includeBuild '../../core/core-statemachine'

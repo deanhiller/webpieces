@@ -14,8 +14,8 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
-    api deps['http2-hpack']
-    api deps['core-statemachine']
+    api libs.webpieces.http.http2hpack
+    api libs.webpieces.core.statemachine
 
 }
 

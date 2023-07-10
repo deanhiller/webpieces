@@ -1,0 +1,119 @@
+[versions]
+acme4j          = "2.11"
+grpc            = "1.37.0"
+guava           = "31.1-jre"
+jackson         = "2.13.3"
+junit           = "4.13.2"
+micrometer      = "1.9.4"
+opensearch      = "2.1.0"
+slf4j           = "1.7.36"
+
+#implementation platform('com.google.cloud:google-cloud-bom:0.152.0')
+#implementation platform('com.google.cloud:google-cloud-core-bom:1.94.7')
+
+[libraries]
+jakarta-annotation-api          = { module = "jakarta.annotation:jakarta.annotation-api", version = "1.3.5" }
+jakarta-el                      = { module = "org.glassfish:jakarta.el", version = "3.0.3" }
+jakarta-inject-api              = { module = "jakarta.inject:jakarta.inject-api", version = "1.0.5" }
+jakarta-mail-api                = { module = "jakarta.mail:jakarta.mail-api", version = "1.6.7" }
+jakarta-persistence-api         = { module = "jakarta.persistence:jakarta.persistence-api", version = "2.2.3" }
+jakarta-rest-api                = { module = "jakarta.ws.rs:jakarta.ws.rs-api", version = "2.1.6" }
+jakarta-validation-api          = { module = "jakarta.validation:jakarta.validation-api", version = "2.0.2" }
+acme4j-client                   = { module = "org.shredzone.acme4j:acme4j-client", version.ref = "acme4j" }
+acme4j-utils                    = { module = "org.shredzone.acme4j:acme4j-utils", version.ref = "acme4j" }
+apache-commons-beanutils        = { module = "commons-beanutils:commons-beanutils", version = "1.9.4" }
+apache-commons-io               = { module = "commons-io:commons-io", version = "2.8.0" }
+apache-commons-lang3            = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
+apache-commons-text             = { module = "org.apache.commons:commons-text", version = "1.9" }
+aws-secretsmanager              = { module = "software.amazon.awssdk:secretsmanager", version = "2.18.6"}
+digitalforge-log4jdbc           = { module = "org.digitalforge:log4jdbc", version = "1.0.2" }
+disruptor                       = { module = "com.conversantmedia:disruptor", version = "1.2.21" }
+elasticsearch-client            = { module = "org.elasticsearch.client:elasticsearch-rest-client", version = "7.6.1" }
+google-cloud-core               = { module = "com.google.cloud:google-cloud-core", version = "1.94.7"}
+google-cloud-logging            = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.127.5-alpha" }
+google-cloud-monitoring         = { module = "com.google.cloud:google-cloud-monitoring", version = "2.1.0" }
+google-cloud-storage            = { module = "com.google.cloud:google-cloud-storage", version = "1.113.15" }
+google-cloud-tasks              = { module = "com.google.cloud:google-cloud-tasks", version = "2.9.0" }
+google-grpc-json                = { module = "com.google.protobuf:protobuf-java-util", version = "3.15.6" }
+google-grpc-protobuf            = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
+google-grpc-stub                = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
+google-guava                    = { module = "com.google.guava:guava", version.ref = "guava" }
+google-guice                    = { module = "com.google.inject:guice", version = '5.1.0' }
+groovy                          = { module = "org.codehaus.groovy:groovy-all", version = "3.0.8" }
+h2                              = { module = "com.h2database:h2", version = "1.4.200" }
+hibernate-hikaricp              = { module = "org.hibernate:hibernate-hikaricp", version = "5.6.15.Final" }
+hibernate-validator             = { module = "org.hibernate.validator:hibernate-validator", version = "6.2.0.Final" }
+jackson-annotations             = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
+jackson-core                    = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-datatype-jsr310         = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+jackson-module-parameter-names  = { module = "com.fasterxml.jackson.module:jackson-module-parameter-names", version.ref = "jackson" }
+junit                           = { module = "junit:junit", version.ref = "junit" }
+logback                         = { module = "ch.qos.logback:logback-classic", version = "1.2.11" }
+micrometer-core                 = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
+micrometer-datadog              = { module = "io.micrometer:micrometer-registry-datadog", version.ref = "micrometer"}
+mysql                           = { module = "mysql:mysql-connector-java", version = "8.0.31" }
+opensearch-client               = { module = "org.opensearch.client:opensearch-rest-client", version.ref = "opensearch" }
+opensearch-java                 = { module = "org.opensearch.client:opensearch-java", version.ref = "opensearch" }
+selenium                        = { module = "org.seleniumhq.selenium:selenium-java", version = "4.0.0-alpha-7" }
+slf4j-api                       = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+slf4j-jul                       = { module = "org.slf4j:jul-to-slf4j", version.ref = "slf4j" }
+twitter-hpack                   = { module = "com.twitter:hpack", version = "1.0.2" }
+uuidgenerator                   = { module = "com.github.f4b6a3:uuid-creator", version = "5.1.0" }
+webpieces-core-asyncserver      = { module = "org.webpieces.core:core-asyncserver" }
+webpieces-core-channelmanager2  = { module = "org.webpieces.core:core-channelmanager2" }
+webpieces-core-datawrapper      = { module = "org.webpieces.core:core-datawrapper" }
+webpieces-core-ddl              = { module = "org.webpieces.core:core-ddl" }
+webpieces-core-future           = { module = "org.webpieces.core:core-future" }
+webpieces-core-jackson          = { module = "org.webpieces.core:core-jackson" }
+webpieces-core-logging          = { module = "org.webpieces.core:core-logging" }
+webpieces-core-metrics          = { module = "org.webpieces.core:core-metrics" }
+webpieces-core-mock             = { module = "org.webpieces.core:core-mock" }
+webpieces-core-persistence      = { module = "org.webpieces.core:core-persistence" }
+webpieces-core-runtimecompile   = { module = "org.webpieces.core:runtimecompile" }
+webpieces-core-ssl              = { module = "org.webpieces.core:core-ssl" }
+webpieces-core-statemachine     = { module = "org.webpieces.core:core-statemachine" }
+webpieces-core-util             = { module = "org.webpieces.core:core-util" }
+webpieces-googlecloud-storage   = { module = "org.webpieces.googlecloud:cloudstorage-client" }
+webpieces-googlecloud-tasks     = { module = "org.webpieces.googlecloud:cloud-tasks" }
+webpieces-http-api              = { module = "org.webpieces.http:http-api" }
+webpieces-http-client           = { module = "org.webpieces.http:http2to1_1-client" }
+webpieces-http-frontend2        = { module = "org.webpieces.http:http-frontend2" }
+webpieces-http-http1client      = { module = "org.webpieces.http:http1_1-client" }
+webpieces-http-http1parser      = { module = "org.webpieces.http:http1_1-parser" }
+webpieces-http-http2api         = { module = "org.webpieces.http:http2-api" }
+webpieces-http-http2client      = { module = "org.webpieces.http:http2-client" }
+webpieces-http-http2engine      = { module = "org.webpieces.http:http2-engine" }
+webpieces-http-http2hpack       = { module = "org.webpieces.http:http2-hpack" }
+webpieces-http-http2parser      = { module = "org.webpieces.http:http2-parser" }
+webpieces-http-http2translations = { module = "org.webpieces.http:http2-translations" }
+webpieces-http-router           = { module = "org.webpieces.server:http-router" }
+webpieces-http-router-dev       = { module = "org.webpieces.server:http-router-dev" }
+webpieces-http-shared           = { module = "org.webpieces.http:http-shared" }
+webpieces-library-elasticsearch = { module = "org.webpieces.lib:lib-elasticsearch" }
+webpieces-microservice-api-lib  = { module = "org.webpieces.cloud:cloud-api-lib" }
+webpieces-microservice-clientgenerator  = { module = "org.webpieces.cloud:generate-httpclient" }
+webpieces-microservice-scaffold = { module = "org.webpieces.cloud:server-scaffolding" }
+webpieces-plugin-backend        = { module = "org.webpieces.server.plugin:plugin-backend" }
+webpieces-plugin-documentation  = { module = "org.webpieces.server.plugin:plugin-documentation" }
+webpieces-plugin-dto            = { module = "org.webpieces.server.plugin:plugin-dto" }
+webpieces-plugin-h2db           = { module = "org.webpieces.server.plugin:plugin-h2db" }
+webpieces-plugin-hibernate      = { module = "org.webpieces.server.plugin:plugin-hibernate" }
+webpieces-plugin-jackson        = { module = "org.webpieces.server.plugin:plugin-json-jackson" }
+webpieces-plugin-properties     = { module = "org.webpieces.server.plugin:plugin-properties" }
+webpieces-plugin-sslcert        = { module = "org.webpieces.server.plugin:plugin-install-sslcert" }
+webpieces-projectcreator        = { module = "org.webpieces:projectcreator" }
+webpieces-server-httpfortestingplugins = { module = "org.webpieces.server:http-fortesting-plugins" }
+webpieces-server-templates      = { module = "org.webpieces:webserver-templates" }
+webpieces-server-webserver      = { module = "org.webpieces.server:http-webserver" }
+webpieces-server-webserver-test = { module = "org.webpieces.server:http-webserver-test" }
+webpieces-template              = { module = "org.webpieces.template:http-templating" }
+webpieces-template-devlib       = { module = "org.webpieces.template:http-templating-dev-lib"}
+webpieces-template-lib          = { module = "org.webpieces.template:http-templating-lib"}
+
+[bundles]
+jackson = ["jackson-annotations", "jackson-core", "jackson-datatype-jsr310", "jackson-module-parameter-names"]
+opensearch = ["opensearch-client", "opensearch-java"]
+micrometer = ["micrometer-core", "micrometer-datadog"]
+
+[plugins]
+jib                             = { id = "com.google.cloud.tools.jib", version = "3.3.1" }

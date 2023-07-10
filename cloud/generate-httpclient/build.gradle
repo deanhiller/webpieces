@@ -19,13 +19,13 @@ repositories {
 
 dependencies {
 
-    api deps['cloud-api-lib']
-    api deps['http2to1_1-client']
-    api deps['core-jackson']
-    api deps['jakarta-rest-api']
+    api libs.webpieces.microservice.api.lib
+    api libs.webpieces.http.client
+    api libs.webpieces.core.jackson
+    api libs.jakarta.rest.api
 
-    api deps['guice']
-    //implementation deps['javax-inject-api']
-    //implementation deps['slf4j-api']
+    api libs.google.guice
+    //implementation libs.jakarta.inject.api
+    //implementation libs.slf4j.api
 
 }

@@ -13,8 +13,8 @@ group = 'org.webpieces.http'
 apply from: '../../config/global.gradle'
 
 dependencies {
-    api deps['http2-parser']
-    api deps['twitter-hpack']
+    api libs.webpieces.http.http2parser
+    api libs.twitter.hpack
 }
 
 publishing {

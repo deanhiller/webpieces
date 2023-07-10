@@ -19,13 +19,13 @@ repositories {
 
 dependencies {
 
-    implementation 'com.google.cloud:google-cloud-core'
-    implementation 'com.google.cloud:google-cloud-storage'
-    implementation deps['guice']
+    implementation libs.google.cloud.core
+    implementation libs.google.cloud.storage
+    implementation libs.google.guice
 
-    //implementation deps['javax-inject-api']
-    //implementation deps['slf4j-api']
+    //implementation libs.jakarta.inject.api
+    //implementation libs.slf4j.api
 
-    api deps['core-util']
+    api libs.webpieces.core.util
 
 }

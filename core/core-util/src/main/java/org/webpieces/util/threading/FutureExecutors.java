@@ -35,8 +35,4 @@ public class FutureExecutors {
         return new FutureExecutorImpl(monitoring, svc, name, isXFutureMDCAdapterInstalled);
     }
 
-    public MetricsScheduleExecutor createScheduledExecutor(Monitoring monitoring, ScheduledExecutorService svc, String name, boolean isXFutureMDCAdapterInstalled) {
-        return new MetricsScheduleExecutorImpl(monitoring, svc, name, isXFutureMDCAdapterInstalled);
-    }
-
 }
