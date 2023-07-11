@@ -12,6 +12,7 @@ import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.cmdline2.Arguments;
 import org.webpieces.util.cmdline2.CommandLineParser;
 import org.webpieces.util.file.FileFactory;
+import org.webpieces.util.futures.Logging;
 import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.inject.Module;
@@ -37,7 +38,10 @@ public class WebpiecesServer {
 		ServerConfig svrConfig,
 		String ... args
 	) {
-		
+
+		if(!Logging.mdcSetup())
+			throw new IllegalStateException("Your code must call Logging.setupMDCForLogging so MDC works through async functions in a static block before any Loggers are created");
+
 		//ALWAYS install a catch all on all threads
 		Thread.setDefaultUncaughtExceptionHandler(new WebpiecesExceptionHandler());
 		
