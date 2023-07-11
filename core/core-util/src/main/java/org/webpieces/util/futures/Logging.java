@@ -78,4 +78,7 @@ public class Logging {
         }
     }
 
+    public static boolean mdcSetup() {
+        return alreadyRun;
+    }
 }
