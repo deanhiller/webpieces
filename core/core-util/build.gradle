@@ -23,7 +23,9 @@ dependencies {
     api libs.webpieces.core.future
     api libs.webpieces.core.metrics
     api libs.webpieces.core.logging
+
     implementation libs.logback
+
 }
 
 publishing {

@@ -6,7 +6,7 @@ jackson         = "2.13.3"
 junit           = "4.13.2"
 micrometer      = "1.9.4"
 opensearch      = "2.1.0"
-slf4j           = "1.7.36"
+slf4j           = "2.0.7"
 
 #implementation platform('com.google.cloud:google-cloud-bom:0.152.0')
 #implementation platform('com.google.cloud:google-cloud-core-bom:1.94.7')
@@ -48,7 +48,7 @@ jackson-core                    = { module = "com.fasterxml.jackson.core:jackson
 jackson-datatype-jsr310         = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
 jackson-module-parameter-names  = { module = "com.fasterxml.jackson.module:jackson-module-parameter-names", version.ref = "jackson" }
 junit                           = { module = "junit:junit", version.ref = "junit" }
-logback                         = { module = "ch.qos.logback:logback-classic", version = "1.2.11" }
+logback                         = { module = "ch.qos.logback:logback-classic", version = "1.4.8" }
 micrometer-core                 = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometer-datadog              = { module = "io.micrometer:micrometer-registry-datadog", version.ref = "micrometer"}
 mysql                           = { module = "mysql:mysql-connector-java", version = "8.0.31" }
