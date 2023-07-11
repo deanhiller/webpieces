@@ -5,6 +5,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.file.Path;
+import java.util.Map;
+
+import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
@@ -28,11 +31,9 @@ public class ChunkFileSystemReader implements ChunkReader {
 		return "ChunkFileSystemReader="+file;
 	}
 	private static class OurCompletionHandler implements CompletionHandler<Integer, String> {
+		private final Map<String, Object> context;
 		private XFuture<Integer> future;
 		private int remaining;
-		private String socket;
-		private String txId;
-		private String user;
 		private Path file;
 		private ByteBuffer buf;
 		private String filePathForLogging;
@@ -43,35 +44,32 @@ public class ChunkFileSystemReader implements ChunkReader {
 			this.file = file;
 			this.buf = buf;
 			this.filePathForLogging = filePathForLogging;
-			socket = MDC.get("svrSocket");
-			txId = MDC.get("txId");
-			user = MDC.get("userId");
+			context = Context.copyContext();
 		}
+
 		@Override
 		public void completed(Integer result, String attachment) {
+			Map<String, Object> previous = Context.getContext();
 			try {
-				MDC.put("svrSocket", socket);
-				MDC.put("txId", txId);
-				MDC.put("userId", user);
+				Context.setContext(context);
 				if(result.intValue() == -1 && remaining != buf.remaining()) {
 					future.completeExceptionally(new XFileReadException("Async reader returned -1 but apparently wrote some data too.  buf="+buf+" remainingPrevious="+remaining));
 				} else {
 					future.complete(result);
 				}
 			} finally {
-				MDC.clear();
+				Context.setContext(previous);
 			}
 		}
 		@Override
 		public void failed(Throwable exc, String attachment) {
+			Map<String, Object> previous = Context.getContext();
 			try {
-				MDC.put("svrSocket", socket);
-				MDC.put("txId", txId);
-				MDC.put("userId", user);				
+				Context.setContext(context);
 				log.error("Failed to read file="+file, exc);
 				future.completeExceptionally(new XFileReadException("Failed to read file="+filePathForLogging, exc));
 			} finally {
-				MDC.clear();
+				Context.setContext(previous);
 			}
 		}		
 	}

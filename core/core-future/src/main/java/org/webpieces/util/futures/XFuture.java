@@ -21,21 +21,8 @@ public class XFuture<T> extends CompletableFuture<T> {
 	}
 	
     public XFuture<Void> thenAccept(Consumer<? super T> originalFunction) {
-		Map<String, Object> state = Context.getContext();
-    	
-    	Consumer<? super T> c2 = (s) -> {
-			Map<String, Object> prevState = Context.getContext();
-			try {
-				Context.restoreContext(state);
-				
-				originalFunction.accept(s);
-				
-			} finally {
-				Context.restoreContext(prevState);
-			}
-    	};
-
-    	return (XFuture<Void>) super.thenAccept(c2);
+		MyConsumer<? super T> consumer = new MyConsumer<>(originalFunction);
+    	return (XFuture<Void>) super.thenAccept(consumer);
     }
 
 	public T join() {
@@ -45,45 +32,35 @@ public class XFuture<T> extends CompletableFuture<T> {
     @SuppressWarnings("unchecked")
 	public <U> XFuture<U> thenApplyAsync(
             Function<? super T,? extends U> fn, Executor executor) {
-		Map<String, Object> state = Context.getContext();
-		MyFunction f = new MyFunction(state, fn);		
-		
-		return (XFuture<U>) super.thenApplyAsync(f, executor);    	
+		MyFunction<? super T,? extends U> f = new MyFunction<>(fn);
+		return (XFuture<U>) super.thenApplyAsync(f, executor);
     }
     
 	@SuppressWarnings("unchecked")
 	@Override
 	public <U> XFuture<U> thenApply(Function<? super T, ? extends U> fn) {
-		Map<String, Object> state = Context.getContext();
-		MyFunction f = new MyFunction(state, fn);		
-		
+		MyFunction<? super T, ? extends U> f = new MyFunction<>(fn);
 		return (XFuture<U>) super.thenApply(f);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <U> XFuture<U> thenCompose(Function<? super T, ? extends CompletionStage<U>> fn) {
-		Map<String, Object> state = Context.getContext();
-		MyFunction f = new MyFunction(state, fn);
-		
+		MyFunction<? super T, ? extends CompletionStage<U>> f = new MyFunction<>(fn);
 		return (XFuture<U>) super.thenCompose(f);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <U> XFuture<U> handle(BiFunction<? super T, Throwable, ? extends U> fn) {
-		Map<String, Object> state = Context.getContext();
-		MyBiFunction f = new MyBiFunction(state, fn);
-
+		MyBiFunction<? super T, Throwable, ? extends U> f = new MyBiFunction<>(fn);
 		return (XFuture<U>) super.handle(f);
 	}
 
     @SuppressWarnings("unchecked")
 	public XFuture<T> exceptionally(
             Function<Throwable, ? extends T> fn) {
-		Map<String, Object> state = Context.getContext();
-		MyFunction f = new MyFunction(state, fn);
-
+		MyFunction<Throwable, ? extends T> f = new MyFunction<>(fn);
 		return (XFuture<T>) super.exceptionally(f);
     }
 	
@@ -92,59 +69,81 @@ public class XFuture<T> extends CompletableFuture<T> {
 		return new XFuture<U>(cancelFunction);
 	}
 
-	@SuppressWarnings("rawtypes")
-	private class MyFunction implements Function {
+	private class MyConsumer<T> implements Consumer<T> {
 
 		private Map<String, Object> state;
-		private Function originalFunction;
+		private Consumer<T> originalFunction;
 
-		public MyFunction(Map<String, Object> state, Function originalFunction) {
-			this.state = state;
+		public MyConsumer(Consumer<T> originalFunction) {
+			//if you do not copy, the MDC.remove in the finally blocks run LONG before using this so
+			//the state becomes corrupted.  you must copy it
+			this.state = Context.copyContext();
 			this.originalFunction = originalFunction;
-			
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public Object apply(Object t) {
+		public void accept(T t) {
 
 			Map<String, Object> prevState = Context.copyContext();
 			try {
-				Context.restoreContext(state);
+				Context.setContext(state);
+
+				originalFunction.accept(t);
+
+			} finally {
+				Context.setContext(prevState);
+			}
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	private class MyFunction<REQ,  RESP> implements Function<REQ, RESP> {
+
+		private Map<String, Object> state;
+		private Function<REQ, RESP> originalFunction;
+
+		public MyFunction(Function<REQ, RESP> originalFunction) {
+			//if you do not copy, the MDC.remove in the finally blocks run LONG before using this so
+			//the state becomes corrupted.  you must copy it
+			this.state = Context.copyContext();
+			this.originalFunction = originalFunction;
+		}
+
+		@Override
+		public RESP apply(REQ t) {
+
+			Map<String, Object> prevState = Context.copyContext();
+			try {
+				Context.setContext(state);
 				
 				return originalFunction.apply(t);
 				
 			} finally {
-				Context.restoreContext(prevState);
+				Context.setContext(prevState);
 			}
-			
-			
 		}
-		
 	}
 
-	private class MyBiFunction implements BiFunction {
+	private class MyBiFunction<T, U, R> implements BiFunction<T, U, R> {
 
 		private Map<String, Object> state;
-		private BiFunction originalFunction;
+		private BiFunction<T, U, R> originalFunction;
 
-		public MyBiFunction(Map<String, Object> state, BiFunction originalFunction) {
-			this.state = state;
+		public MyBiFunction(BiFunction<T, U, R> originalFunction) {
+			this.state = Context.copyContext();
 			this.originalFunction = originalFunction;
-
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public Object apply(Object o, Object o2) {
+		public R apply(T o, U o2) {
 			Map<String, Object> prevState = Context.copyContext();
 			try {
-				Context.restoreContext(state);
+				Context.setContext(state);
 
 				return originalFunction.apply(o, o2);
 
 			} finally {
-				Context.restoreContext(prevState);
+				Context.setContext(prevState);
 			}
 		}
 	}

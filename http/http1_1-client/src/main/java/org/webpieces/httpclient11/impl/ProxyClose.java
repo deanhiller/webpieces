@@ -23,7 +23,7 @@ public class ProxyClose implements HttpSocketListener {
             log.info("far end closed. socket("+socket+")");
             socketListener.socketClosed(socket);
         } finally {
-            MDC.put("svrSocket", null);
+            MDC.remove("svrSocket");
         }
     }
 }

@@ -14,4 +14,15 @@ public class MDCUtil {
 			MDC.put("clntSocket", value);
 		}			
 	}
+
+	public static void clearMDC(Boolean isServerSide) {
+		if(isServerSide == null)
+			return;
+
+		if(isServerSide) {
+			MDC.remove("svrSocket");
+		} else {
+			MDC.remove("clntSocket");
+		}
+	}
 }

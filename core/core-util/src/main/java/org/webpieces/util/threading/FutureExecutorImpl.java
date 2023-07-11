@@ -55,7 +55,7 @@ public class FutureExecutorImpl implements FutureExecutor {
         return future;
     }
 
-    private <RESP> Map<String, String> formTags(Class<?> clazz, Map<String, String> extraTags) {
+    private Map<String, String> formTags(Class<?> clazz, Map<String, String> extraTags) {
         Map<String, String> tags = new HashMap<>();
         tags.put("executorName", name);
         tags.put("type", clazz.getSimpleName());

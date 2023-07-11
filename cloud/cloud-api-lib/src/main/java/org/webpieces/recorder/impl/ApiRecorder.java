@@ -1,6 +1,5 @@
 package org.webpieces.recorder.impl;
 
-import jdk.management.jfr.RecordingInfo;
 import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
@@ -21,10 +20,10 @@ public class ApiRecorder implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         TestCaseRecorder recorder = Context.get(RECORDER_KEY);
-        EndpointInfo recordingInfo = null;
+        EndpointInfo recordingInfo = new EndpointInfo(method, args);
         if(recorder != null) {
             Map<String, Object> ctxSnapshot = Context.copyContext();
-            recordingInfo = new EndpointInfo(method, args, ctxSnapshot);
+            recordingInfo.setCtxSnapshot(ctxSnapshot);
             recorder.addEndpointInfo(recordingInfo);
         }
 

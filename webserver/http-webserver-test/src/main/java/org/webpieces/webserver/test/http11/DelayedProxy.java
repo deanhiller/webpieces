@@ -35,13 +35,13 @@ public class DelayedProxy implements ChannelProxy {
 
 	@Override
 	public XFuture<Void> write(ByteBuffer buffer) {
-		Map<String, Object> clientContext = Context.getContext();
+		Map<String, Object> previous = Context.getContext();
 		//put a blank server context...
-		Context.restoreContext(new HashMap<>());
+		Context.setContext(new HashMap<>());
 		try {
 			return toServerDataListener.incomingData(channel, buffer);
 		} finally {
-			Context.restoreContext(clientContext);
+			Context.setContext(previous);
 		}
 	}
 

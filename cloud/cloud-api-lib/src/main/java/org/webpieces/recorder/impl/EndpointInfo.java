@@ -6,7 +6,7 @@ import java.util.Map;
 public class EndpointInfo {
     private final Method method;
     private final Object[] args;
-    private final Map<String, Object> ctxSnapshot;
+    private Map<String, Object> ctxSnapshot;
 
     private boolean queueApi = false;
     //very special case for queue APIs
@@ -24,12 +24,19 @@ public class EndpointInfo {
         this.ctxSnapshot = ctxSnapshot;
     }
 
+    public EndpointInfo(Method method, Object[] args) {
+        this(method, args, null);
+    }
     public Method getMethod() {
         return method;
     }
 
     public Object[] getArgs() {
         return args;
+    }
+
+    public void setCtxSnapshot(Map<String, Object> ctxSnapshot) {
+        this.ctxSnapshot = ctxSnapshot;
     }
 
     public Map<String, Object> getCtxSnapshot() {

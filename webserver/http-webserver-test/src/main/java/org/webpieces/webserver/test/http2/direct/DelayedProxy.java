@@ -34,13 +34,13 @@ public class DelayedProxy implements Http2ChannelProxy {
 
 	@Override
 	public XFuture<Void> write(ByteBuffer buffer) {
-		Map<String, Object> context = Context.copyContext();
+		Map<String, Object> previous = Context.copyContext();
 		//no context server side...
-		Context.restoreContext(new HashMap<>());
+		Context.setContext(new HashMap<>());
 		try {
 			return toServerDataListener.incomingData(channel, buffer);
 		} finally {
-			Context.restoreContext(context);
+			Context.setContext(previous);
 		}
 	}
 

@@ -30,16 +30,14 @@ public class Current {
 	}
 
 	public static void setContext(RequestContext requestCtx) {
-
-		if(requestCtx == null) {
-			Context.clear();
-			return;
-		}
-
 		Map<String, String> headerMap = translateToSingleHeaders(requestCtx);
 		Context.put(Context.HEADERS, headerMap);
 		Context.put(Context.REQUEST, requestCtx);
-		Context.putMagic(MicroSvcHeader.REQUEST_PATH, requestCtx.getRequest().relativePath);
+	}
+
+	public static void removeContext() {
+		Context.remove(Context.HEADERS);
+		Context.remove(Context.REQUEST);
 	}
 
 	private static Map<String, String> translateToSingleHeaders(RequestContext requestCtx) {

@@ -38,9 +38,8 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         Map<String, Object> copy = Context.copyContext();
 
         String jobId = UUID.randomUUID().toString();
-        JobReference ref = new JobReference();
+        JobReference ref = Context.get(Constants.WEBPIECES_SCHEDULE_RESPONSE);
         ref.setTaskId(jobId);
-        Context.put(Constants.WEBPIECES_SCHEDULE_RESPONSE, ref);
 
         if(info.isScheduledInFuture()) {
             log.info("scheduling in the future"+info.getTime());
@@ -83,17 +82,25 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     }
 
     private void pretendToBeCallFromGCPCloudTasks(Map<String, Object> copy, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText) {
+        Map<String, Object> previous = Context.getContext();
+        try {
+            Context.setContext(copy);
+            sendHttpReq(addr, path, httpMethod, bodyAsText);
+        } finally {
+            //restore
+            Context.setContext(previous);
+        }
+    }
+
+    private void sendHttpReq(InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText) {
         XFuture<String> stringXFuture;
         try {
-            Context.restoreContext(copy);
             Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
             log.info("Running simulated call to remote endpoint=" + endpoint);
             stringXFuture = client.sendHttpRequest(bodyAsText, endpoint);
 
         } catch (Throwable e) {
             stringXFuture = XFuture.failedFuture(e);
-        } finally {
-            Context.clear();
         }
 
         stringXFuture.exceptionally((e) -> {

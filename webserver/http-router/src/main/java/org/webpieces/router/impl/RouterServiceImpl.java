@@ -149,8 +149,6 @@ public class RouterServiceImpl implements RouterService {
 		MDC.put("txId", txId);
 		//top level handler...
 		try {
-			
-
 			RouterStreamRef streamRef = incomingRequestProtected(req, proxyHandler);
 			XFuture<StreamWriter> writer = streamRef.getWriter().thenApply(w -> new TxStreamWriter(txId, w));
 

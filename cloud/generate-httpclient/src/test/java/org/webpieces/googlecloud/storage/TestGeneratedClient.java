@@ -29,7 +29,11 @@ public class TestGeneratedClient {
         Map<String, String> headerMap = new HashMap<>();
         Context.put(Context.HEADERS, headerMap);
 
-        business.runTest();
+        try {
+            business.runTest();
+        } finally {
+            Context.remove(Context.HEADERS);
+        }
     }
 
 }

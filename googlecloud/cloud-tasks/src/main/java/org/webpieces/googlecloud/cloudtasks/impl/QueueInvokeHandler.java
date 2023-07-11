@@ -104,15 +104,7 @@ public class QueueInvokeHandler implements InvocationHandler {
 
         Object body = args[0];
         String bodyAsText = marshal(body);
-        XFuture<Void> xFuture = remoteInvoker.invoke(method, addr, path, httpMethod, bodyAsText, info)
-//        Endpoint endpoint = new Endpoint(addr, httpMethod.getCode(), path);
-//        XFuture<Object> xFuture = clientHelper.sendHttpRequest(method, body, endpoint, retType)
-                .thenApply(retVal -> {
-                    //Only needed by APIs/methods that return CompletableFuture :( not XFuture
-                    Context.restoreContext(context);
-                    return retVal;
-                });
-
+        XFuture<Void> xFuture = remoteInvoker.invoke(method, addr, path, httpMethod, bodyAsText, info);
         if(recorder == null) {
             return xFuture;
         }

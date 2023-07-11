@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration scan="true" scanPeriod="30 seconds" debug="true">
 
-	<property name="CONSOLE_PREFIX" value="%date{yyyy-MM-dd HH:mm:ss.SSS} %-4level [%thread][%X{svrSocket}][%X{txId}:%X{userId}]"/>
+	<property name="CONSOLE_PREFIX" value="%date{yyyy-MM-dd HH:mm:ss.SSS} %-4level [%thread][%X{svrSocket}][%X{txId}:%X{requestId}:%X{userId}]"/>
 	<property name="CONSOLE_PATTERN" value="${CONSOLE_PREFIX} %wpCaller:%n%message%n"/>
 
 	<conversionRule conversionWord="wpCaller" converterClass="org.webpieces.logging.logback.WebpiecesCallerDataConverter" />

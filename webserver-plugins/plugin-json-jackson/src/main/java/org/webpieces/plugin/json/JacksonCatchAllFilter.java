@@ -61,9 +61,13 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
         ReportingHolderInfo holder = new ReportingHolderInfo();
         Context.put(REPORTING_INFO, holder);
 
-        printPreRequestLog(meta);
+        try {
+            printPreRequestLog(meta);
 
-        return nextFilter.invoke(meta).handle((a, t) -> translateFailure(meta, a, t, holder));
+            return nextFilter.invoke(meta).handle((a, t) -> translateFailure(meta, a, t, holder));
+        } finally {
+            Context.remove(REPORTING_INFO);
+        }
     }
 
     @Override

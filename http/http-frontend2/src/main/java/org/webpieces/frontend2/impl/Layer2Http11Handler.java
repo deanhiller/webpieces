@@ -119,7 +119,7 @@ public class Layer2Http11Handler {
 				socket.close("Exception so closing http1.1 socket="+t.getMessage());
 				return null;
 			} finally {
-				MDCUtil.setMDC(true, null);
+				MDCUtil.clearMDC(true);
 			}
 		});
 	}
@@ -181,7 +181,7 @@ public class Layer2Http11Handler {
 				throw new IllegalArgumentException("payload not supported="+payload);
 			}
 		} finally {
-			MDC.put("svrSocket", "");			
+			MDC.remove("svrSocket");
 		}
 	}
 

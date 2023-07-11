@@ -64,7 +64,7 @@ public class ProxyExecutor implements Executor {
 
 				runnable.run();
 			} finally {
-				MDCUtil.setMDC(isServerSide, channel.getChannelId());
+				MDCUtil.clearMDC(isServerSide);
 			}
 		}
 

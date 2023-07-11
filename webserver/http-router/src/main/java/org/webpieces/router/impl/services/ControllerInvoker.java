@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
@@ -18,6 +20,8 @@ import org.webpieces.util.futures.FutureHelper;
 
 @Singleton
 public class ControllerInvoker {
+
+	private static final Logger log = LoggerFactory.getLogger(ControllerInvoker.class);
 
 	private FutureHelper futureUtil;
 
@@ -38,19 +42,10 @@ public class ControllerInvoker {
 		if(retVal instanceof XFuture) {
 			return (XFuture<Action>) retVal;
 		} else if(retVal instanceof CompletableFuture) {
-			//SPECIAL case...cache MDC to make exist over threads so if the future 'completes' on another thread(very typical)
-			//then the function in the finallyBlock below will run on that thread..
-			Map<String, String> mdcCopy = MDC.getCopyOfContextMap();
-
-			//special case, IF the controller is returning a future, then later when he responds, the MDC is LOST BECAUSE
-			//Java will not implement scalas Local.scala(like a ThreadLocal but for futures so you can have state follow
-			//the request.  This means, logging breaks over some threads in the controller and we CANNOT fix that!!!
-			XFuture<Action> future = XFuture.completedFuture(null).thenCompose((nothing) -> (CompletableFuture<Action>) retVal);
-			return futureUtil.finallyBlock( () -> future, () -> {
-				for(Entry<String, String> entry : mdcCopy.entrySet()) {
-					MDC.put(entry.getKey(), entry.getValue());
-				}
-			});
+			//well, shit, the MDC is lost since they use CompletableFuture
+			//this means anything stored in MDC for logging can't be logged
+			log.warn("function returned CompletableFuture instead of XFuture, MDC for logging is lost since CompletableFutures do not transfer MDC");
+			return XFuture.completedFuture(null).thenCompose((nothing) -> (CompletableFuture<Action>) retVal);
 		} else {
 			Action action = (Action) retVal;
 			return XFuture.completedFuture(action);

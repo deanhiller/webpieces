@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 
 import com.google.inject.util.Modules;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.webpieces.util.futures.Logging;
 import org.webpieces.util.futures.XFuture;
 
 import java.util.HashMap;
@@ -34,6 +35,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 
 public abstract class AbstractHttp2Test {
+
+	static {
+		Logging.setupMDCForLogging();
+	}
 
 	protected MockChannelManager mgr = new MockChannelManager();
 	protected MockFrontendManager frontEnd = new MockFrontendManager();

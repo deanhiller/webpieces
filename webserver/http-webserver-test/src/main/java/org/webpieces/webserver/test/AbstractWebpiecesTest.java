@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.After;
 import org.junit.Assert;
 import org.webpieces.util.context.Context;
+import org.webpieces.util.futures.Logging;
 import org.webpieces.util.futures.XFuture;
 
 import java.util.HashMap;
@@ -33,6 +34,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 
 public class AbstractWebpiecesTest {
+
+	static {
+		Logging.setupMDCForLogging();
+	}
 
 	protected MockChannelManager mgr = new MockChannelManager();
 	protected MockTime time = new MockTime(true);

@@ -6,6 +6,7 @@ import org.slf4j.MDC;
 import org.webpieces.metrics.Monitoring;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
+import org.webpieces.util.futures.XFutureMDCAdapter;
 
 import java.util.Map;
 import java.util.function.Supplier;

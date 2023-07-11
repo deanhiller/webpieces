@@ -154,18 +154,19 @@ public class TestKeepContextHttp2 extends AbstractHttp2Test {
 		String json = "{ `meta`: { `numResults`: 4 }, `testValidation`:`notBlank` }".replace("`", "\"");
 		FullRequest req = org.webpieces.webserver.test.http2.Requests.createJsonRequest("POST", "/json/simple", json);
 
-		MDC.put(mdcKey, mdcValue);
-
 		//not exactly part of this test but checking for leak of server context into client
 		// (only in embedded modes does this occur)
 		Assert.assertEquals(0, Context.getContext().size());
+		MDC.put(mdcKey, mdcValue);
+		//MDC writes into XFutureMDCAdapter
+		Assert.assertEquals(1, Context.getContext().size());
 
 		XFuture<FullResponse> respFuture = http2Socket.send(req);
 		ResponseWrapperHttp2 response = ResponseExtract.waitAndWrap(respFuture);
 
 		//not exactly part of this test but checking for leak of server context into client
 		// (only in embedded modes does this occur)
-		Assert.assertEquals(0, Context.getContext().size());
+		Assert.assertEquals(1, Context.getContext().size());
 
 		//validate that MDC was not blown away
 		Assert.assertEquals(mdcValue, MDC.get(mdcKey));

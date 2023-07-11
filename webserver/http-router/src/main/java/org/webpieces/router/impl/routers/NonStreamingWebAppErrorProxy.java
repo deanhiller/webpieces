@@ -44,7 +44,7 @@ public class NonStreamingWebAppErrorProxy implements StreamWriter {
                     (t) -> runRenderErrorPageIfNonStreaming(t)
             );
     	} finally {
-			Current.setContext(null);
+			Current.removeContext();
 		}
     }
 

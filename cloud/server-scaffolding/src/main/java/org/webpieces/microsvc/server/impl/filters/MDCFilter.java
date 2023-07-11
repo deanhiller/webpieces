@@ -13,7 +13,9 @@ import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * MDCFilter adds information to the logs. This filter is strictly for logging
@@ -36,23 +38,27 @@ public class MDCFilter extends RouteFilter<Void> {
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 
-        List<PlatformHeaders> headersCtx = headerCollector.listHeaderCtxPairs();
-        for(PlatformHeaders key : headersCtx) {
-            if(!key.isWantLogged()) {
-                continue;
+        Set<String> keys = new HashSet<>();
+        try {
+            List<PlatformHeaders> headersCtx = headerCollector.listHeaderCtxPairs();
+            for (PlatformHeaders key : headersCtx) {
+                if (!key.isWantLogged()) {
+                    continue;
+                }
+
+                String magic = Context.getMagic(key);
+                if (magic != null) {
+                    MDC.put(key.getLoggerMDCKey(), magic);
+                }
             }
 
-            String magic = Context.getMagic(key);
-            if(magic != null) {
-                MDC.put(key.getLoggerMDCKey(), magic);
+            return nextFilter.invoke(meta);
+
+        } finally {
+            for(String key : keys) {
+                MDC.remove(key);
             }
         }
-
-        return futureUtil.finallyBlock(
-                () -> nextFilter.invoke(meta),
-                () -> clearMDC(headersCtx)
-        );
-
     }
 
     private void clearMDC(List<PlatformHeaders> headersCtx) {
