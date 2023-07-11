@@ -35,7 +35,7 @@ public class CatchResponseListener implements HttpResponseListener {
 			future.completeExceptionally(e);
 			return future;
 		} finally {
-			MDC.put("svrSocket", null);
+			MDC.remove("svrSocket");
 		}
 	}
 
@@ -58,7 +58,7 @@ public class CatchResponseListener implements HttpResponseListener {
 				future.completeExceptionally(e);
 				return future;
 			} finally {
-				MDC.put("svrSocket", null);
+				MDC.remove("svrSocket");
 			}
 		}
 	}
@@ -71,7 +71,7 @@ public class CatchResponseListener implements HttpResponseListener {
 		} catch(Throwable ee) {
 			log.error("exception", ee);
 		} finally {
-			MDC.put("svrSocket", null);			
+			MDC.remove("svrSocket");
 		}
 	}
 

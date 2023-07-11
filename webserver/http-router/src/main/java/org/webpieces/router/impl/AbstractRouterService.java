@@ -65,7 +65,8 @@ public abstract class AbstractRouterService {
 			try {
 				return incomingRequestImpl(requestCtx, handler);
 			} finally {
-				Current.setContext(null);
+				Current.removeContext();
+				MDC.remove("userId");
 			}
 
 		} catch(BadCookieException e) {

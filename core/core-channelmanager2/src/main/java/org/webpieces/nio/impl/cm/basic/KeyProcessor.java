@@ -190,7 +190,7 @@ public final class KeyProcessor {
             
             callback.completeExceptionally(e);
 		} finally {
-			MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
+			MDCUtil.clearMDC(channel.isServerSide());
 		}
 	}
 
@@ -290,7 +290,7 @@ public final class KeyProcessor {
 			} else
 				throw e;
 		} finally {
-			MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
+			MDCUtil.clearMDC(channel.isServerSide());
 		}
 	}
 
@@ -430,7 +430,7 @@ public final class KeyProcessor {
 			//since it may close while someone is async writing, this is normal behavior so we swallow it and log as info
 			log.info(channel+" Channel is closed so discarding the async writes");
 		} finally {
-			MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
+			MDCUtil.clearMDC(channel.isServerSide());
 		}
 	}
 	

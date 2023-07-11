@@ -25,7 +25,7 @@ public class SessionRunnable implements Runnable {
 
 			runnable.run();
 		} finally {
-			MDCUtil.setMDC(isServerSide, channel.getChannelId());
+			MDCUtil.clearMDC(isServerSide);
 		}
 	}
 

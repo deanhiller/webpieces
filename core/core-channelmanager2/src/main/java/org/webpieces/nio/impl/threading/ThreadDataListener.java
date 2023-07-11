@@ -80,7 +80,7 @@ public class ThreadDataListener implements DataListener {
 				} catch(RuntimeException e) {
 					throw e;
 				} finally {
-					MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
+					MDCUtil.clearMDC(proxy.isServerSide());
 				}
 			}
 		});
@@ -97,7 +97,7 @@ public class ThreadDataListener implements DataListener {
 				} catch(RuntimeException e) {
 					throw e;
 				} finally {
-					MDCUtil.setMDC(proxy.isServerSide(), proxy.getChannelId());
+					MDCUtil.clearMDC(proxy.isServerSide());
 				}
 			}
 		});

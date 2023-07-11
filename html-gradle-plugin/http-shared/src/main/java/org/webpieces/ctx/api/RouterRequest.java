@@ -331,17 +331,9 @@ public class RouterRequest {
 	}
 
 	public void setRequestState(final Object key, final Object value) {
-    	setRequestState(key, value, false);
-	}
-
-	public void setRequestState(final Object key, final Object value, final boolean addToMDC) {
 		requestState.put(key.toString(), value);
-		if(addToMDC) {
-			MDC.put(key.toString(), String.valueOf(value));
-		}
 	}
 
-	
 	@Override
 	public String toString() {
 		return "\nRouterRequest [\nisHttps=" + isHttps + ", \nisBackendRequest=" + isBackendRequest

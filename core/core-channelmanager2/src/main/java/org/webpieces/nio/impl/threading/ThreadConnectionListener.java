@@ -65,7 +65,7 @@ public class ThreadConnectionListener implements ConnectionListener {
 						return null;
 					});
 			} finally {
-				MDCUtil.setMDC(channel.isServerSide(), channel.getChannelId());
+				MDCUtil.clearMDC(channel.isServerSide());
 			}
 		}
 		
