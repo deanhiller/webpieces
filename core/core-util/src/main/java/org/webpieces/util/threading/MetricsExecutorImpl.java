@@ -5,20 +5,18 @@ import org.webpieces.util.futures.XFuture;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Supplier;
 
-/**
- * @deprecated Use MetricsExecutorImpl instead
- */
-@Deprecated
-public class FutureExecutorImpl implements FutureExecutor {
+public class MetricsExecutorImpl implements MetricsExecutor {
     private final String name;
     private boolean isXFutureMDCAdapterInstalled;
     private Monitoring monitoring;
     private ScheduledExecutorService svc;
 
-    public FutureExecutorImpl(Monitoring monitoring, ScheduledExecutorService svc, String name, boolean isXFutureMDCAdapterInstalled) {
+    public MetricsExecutorImpl(Monitoring monitoring, ScheduledExecutorService svc, String name, boolean isXFutureMDCAdapterInstalled) {
         this.monitoring = monitoring;
         this.svc = svc;
         this.name = name;
