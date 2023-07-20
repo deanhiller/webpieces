@@ -5,6 +5,8 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.security.KeyStore;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
@@ -64,6 +66,18 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		this.sslFactory = sslFactory;
 	}
 
+	@Override
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		clientDataListener = new SslTryCatchListener(listener);
+		XFuture<Void> future = realChannel.connect(addr, socketDataListener);
+
+		return future.thenCompose( c -> beginHandshake());
+	}
+
+	/**
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		clientDataListener = new SslTryCatchListener(listener);

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -108,7 +110,7 @@ public class IntegMultiThreaded {
 
         log.info("starting socket");
 
-        InetSocketAddress addr = new InetSocketAddress(host, port);
+		HostWithPort addr = new HostWithPort(host, port);
         Http2Socket socket = IntegSingleRequest.createHttpClient("clientSocket", isHttp, addr);
         
         socket

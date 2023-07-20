@@ -1,6 +1,8 @@
 package org.webpieces.httpclient.api;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
@@ -36,7 +38,7 @@ public class TestConnecting {
 
 		XFuture<Void> future1 = new XFuture<Void>();
 		mockChannel.setConnectFuture(future1);
-		XFuture<Void> future = socket.connect(new InetSocketAddress(8080));
+		XFuture<Void> future = socket.connect(new HostWithPort(8080));
 		
 		Assert.assertFalse(future.isDone());
 		

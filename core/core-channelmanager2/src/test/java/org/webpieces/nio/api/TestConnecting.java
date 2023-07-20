@@ -2,6 +2,8 @@ package org.webpieces.nio.api;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +46,7 @@ public class TestConnecting {
 		
 		mockChannel.addConnectReturnValue(true);
 		mockJdk.setThread(Thread.currentThread());
-		XFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
+		XFuture<Void> future = channel.connect(new HostWithPort(4444), listener);
 		Assert.assertTrue(future.isDone());
 		Assert.assertTrue(mockChannel.isRegisteredForReads());
 	}
@@ -56,7 +58,7 @@ public class TestConnecting {
 		TCPChannel channel = mgr.createTCPChannel("myid");
 		
 		mockChannel.addConnectReturnValue(true);
-		XFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
+		XFuture<Void> future = channel.connect(new HostWithPort(4444), listener);
 		Assert.assertFalse(future.isDone());
 		Assert.assertFalse(mockChannel.isRegisteredForReads());
 		
@@ -74,7 +76,7 @@ public class TestConnecting {
 		
 		mockChannel.addConnectReturnValue(false);
 		mockJdk.setThread(Thread.currentThread());
-		XFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
+		XFuture<Void> future = channel.connect(new HostWithPort(4444), listener);
 		Assert.assertFalse(future.isDone());
 		
 		Assert.assertFalse(mockChannel.isRegisteredForReads());
@@ -96,7 +98,7 @@ public class TestConnecting {
 		TCPChannel channel = mgr.createTCPChannel("myid");
 		
 		mockChannel.addConnectReturnValue(false);
-		XFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
+		XFuture<Void> future = channel.connect(new HostWithPort(4444), listener);
 		
 		Assert.assertEquals(1, mockJdk.getNumTimesWokenUp());
 		Assert.assertFalse(future.isDone());
@@ -126,7 +128,7 @@ public class TestConnecting {
 		TCPChannel channel = mgr.createTCPChannel("myid");
 		
 		mockChannel.addConnectReturnValue(false);
-		XFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
+		XFuture<Void> future = channel.connect(new HostWithPort(4444), listener);
 		
 		Assert.assertEquals(1, mockJdk.getNumTimesWokenUp());
 		Assert.assertFalse(future.isDone());

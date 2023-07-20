@@ -20,6 +20,7 @@ import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.security.Masker;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.PlatformHeaders;
@@ -106,12 +107,12 @@ public class HttpClientWrapper {
 
     }
 
-    public Http2Request createHttpReq(InetSocketAddress apiAddress, String method, String path) {
+    public Http2Request createHttpReq(HostWithPort apiAddress, String method, String path) {
 
         Http2Request httpReq = new Http2Request();
 
         httpReq.addHeader(new Http2Header(Http2HeaderName.METHOD, method));
-        httpReq.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, apiAddress.getHostString()+":"+apiAddress.getPort()));
+        httpReq.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, apiAddress.getHostOrIpAddress()+":"+apiAddress.getPort()));
         httpReq.addHeader(new Http2Header(Http2HeaderName.PATH, path));
         httpReq.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "Webpieces Generated API Client"));
         httpReq.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "application/json"));//Http2HeaderName.ACCEPT
@@ -131,7 +132,7 @@ public class HttpClientWrapper {
      */
     public XFuture<String> sendHttpRequest(String jsonRequest, Endpoint endpoint) {
 
-        InetSocketAddress apiAddress = endpoint.getServerAddress();
+        HostWithPort apiAddress = endpoint.getServerAddress();
         String httpMethod = endpoint.getHttpMethod();
         String endpointPath = endpoint.getUrlPath();
         Http2Request httpReq = createHttpReq(apiAddress, httpMethod, endpointPath);
@@ -199,14 +200,14 @@ public class HttpClientWrapper {
 
     }
 
-    private XFuture<String> sendAndTranslate(InetSocketAddress apiAddress, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
+    private XFuture<String> sendAndTranslate(HostWithPort apiAddress, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
         return connect
                 .thenCompose(voidd -> httpSocket.send(fullRequest))
                 .thenApply(fullResponse -> unmarshal(jsonReq, fullRequest, fullResponse, apiAddress.getPort()));
     }
 
-    protected Http2Socket createSocket(InetSocketAddress apiAddress, Http2SocketListener listener) {
-        SSLEngine engine = createEngine(apiAddress.getHostName(), apiAddress.getPort());
+    protected Http2Socket createSocket(HostWithPort apiAddress, Http2SocketListener listener) {
+        SSLEngine engine = createEngine(apiAddress.getHostOrIpAddress(), apiAddress.getPort());
         return client.createHttpsSocket(engine, listener);
         //return client.createHttpsSocket(listener);
     }

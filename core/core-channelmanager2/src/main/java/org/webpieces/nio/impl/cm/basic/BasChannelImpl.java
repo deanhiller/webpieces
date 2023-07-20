@@ -1,14 +1,13 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.io.IOException;
-import java.net.BindException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -83,9 +82,34 @@ public abstract class BasChannelImpl
 
 	public abstract int readImpl(ByteBuffer b);
 	protected abstract int writeImpl(ByteBuffer b);
-   
+
+	/**
+	 * Because people re-use SocketAddress which is dangerous as java reads DNS once and then
+	 * if ips are changed, everyone is screwed basically.  Instead, we now take
+	 * an oject with host or ip and a port (pure data object)
+	 */
+	@Override
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		InetSocketAddress socketAddress;
+		if(addr.getHostOrIpAddress() == null) {
+			socketAddress = new InetSocketAddress(addr.getPort());
+		} else {
+			socketAddress = new InetSocketAddress(addr.getHostOrIpAddress(), addr.getPort());
+		}
+		return connectReuse(socketAddress, listener);
+	}
+
+	/**
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
+		//delete later
+		return connectReuse(addr, listener);
+	}
+
+	public XFuture<Void> connectReuse(SocketAddress addr, DataListener listener) {
 		this.dataListener = listener;
 		
 		if(isRecording) 

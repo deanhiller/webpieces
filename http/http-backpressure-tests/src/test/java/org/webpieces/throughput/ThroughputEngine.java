@@ -1,6 +1,8 @@
 package org.webpieces.throughput;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -43,17 +45,18 @@ public class ThroughputEngine {
 			ServerHttp2Sync svr = new ServerHttp2Sync();
 			future = svr.start();
 		}
-		
+
 		InetSocketAddress addr = future.get(2, TimeUnit.SECONDS);
-		
-		runClient(addr, config, clientConfig, protocol);
+
+		HostWithPort newAddr = new HostWithPort(addr.getAddress().getHostName(), addr.getPort());
+		runClient(newAddr, config, clientConfig, protocol);
 
 		synchronized(this) {
 			this.wait(); //wait forever
 		}
 	}
 	
-	private Void runClient(InetSocketAddress svrAddress, AsyncConfig config, Mode clientConfig, Protocol protocol) {
+	private Void runClient(HostWithPort svrAddress, AsyncConfig config, Mode clientConfig, Protocol protocol) {
 		Clients creator;
 		if(protocol == Protocol.HTTP11)
 			creator = new Http11Clients(config, metrics);
@@ -68,7 +71,7 @@ public class ThroughputEngine {
 		return null;
 	}
 
-	private void runSyncClient2(InetSocketAddress svrAddress, Protocol protocol, Clients creator) {
+	private void runSyncClient2(HostWithPort svrAddress, Protocol protocol, Clients creator) {
 		SynchronousClient client = creator.createSyncClient();
 		//If in single threaded mode, we cannot block the server selector thread so start a thread up
 		Runnable r = new Runnable() {
@@ -82,7 +85,7 @@ public class ThroughputEngine {
 		t.start();
 	}
 
-	private void runAsyncClient(InetSocketAddress svrAddress, Protocol protocol, Clients creator) {
+	private void runAsyncClient(HostWithPort svrAddress, Protocol protocol, Clients creator) {
 		Http2Client client = creator.createClient();
 		ClientAsync async = new ClientAsync(client, config, protocol);
 		async.runAsyncClient(svrAddress);

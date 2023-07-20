@@ -55,11 +55,25 @@ public interface Channel extends RegisterableChannel {
      * 4. Finally, data comes in and invokes the Future so Future.complete(xxx) is called
      * 5. Now, since the Future is in old gen, it will pull xxx and everything else into old gen along with
      *    it which you should not do causing a very hard to figure out memory issue
-     *     
+     *
+	 * This method does not take InetSocketAddress but 100% guarantees a lookup from the java DNS
+	 * cache or OS host cache.  If a client accidentally re-uses InetSocketAddress for 1 year, it will
+	 * never every refresh the ip (and ips change frequently in serverless environments)
+	 *
 	 * @param addr The address to connect to
 	 * @param listener Once connected, this is the listener that will start receiving data
 	 * @return
 	 */
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener);
+
+	/**
+	 * Deprecated because people are not RECREATING InetSocketAddress and then end up with stale
+	 * ip.  InetSocketAddress with a hostname MUST be recreated for each connect or the ip is looked up
+	 * once and forever cached.
+	 *
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener);
 	public XFuture<Void> write(ByteBuffer b);
 	public XFuture<Void> close();

@@ -1,6 +1,9 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
+
+import com.google.common.net.HostAndPort;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
@@ -33,7 +36,7 @@ public class IntegColoradoEdu {
 		log.info("starting socket");
 		ChunkedResponseListener listener = new ChunkedResponseListener();
 		
-		InetSocketAddress addr = new InetSocketAddress(host, port);
+		HostWithPort addr = new HostWithPort(host, port);
 		Http2Socket socket = IntegSingleRequest.createHttpClient("oneTimerHttp2Socket", isHttp, addr);
 		
 		socket

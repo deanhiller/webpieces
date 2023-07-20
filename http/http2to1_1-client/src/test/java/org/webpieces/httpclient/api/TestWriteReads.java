@@ -1,6 +1,8 @@
 package org.webpieces.httpclient.api;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +45,7 @@ public class TestWriteReads {
 		socket = httpClient.createHttpSocket(new Http2CloseListener());
 
 		mockChannel.setConnectFuture(XFuture.completedFuture(null));
-		XFuture<Void> future = socket.connect(new InetSocketAddress(8080));
+		XFuture<Void> future = socket.connect(new HostWithPort(8080));
 		
 		future.get(2, TimeUnit.SECONDS);
 	}

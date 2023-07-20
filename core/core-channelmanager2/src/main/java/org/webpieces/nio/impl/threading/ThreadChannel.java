@@ -3,6 +3,8 @@ package org.webpieces.nio.impl.threading;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
@@ -21,7 +23,20 @@ public class ThreadChannel implements Channel {
 		this.sessionExecutor = executor2;
 		this.executor =  new ProxyExecutor(channel, executor2);
 	}
-	
+
+	@Override
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		DataListener threaded = new ThreadDataListener(this, listener, sessionExecutor);
+		XFuture<Void> future = tcpChannel.connect(addr, threaded);
+		//transfer this to the SessionExecutor properly such that clients do
+		//not need to synchronize the ChannelSession writes/reads
+		return future.thenApplyAsync(p -> null, executor);
+	}
+
+	/**
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		DataListener threaded = new ThreadDataListener(this, listener, sessionExecutor);

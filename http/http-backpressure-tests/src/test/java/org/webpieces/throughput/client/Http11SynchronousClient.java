@@ -21,6 +21,7 @@ import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.throughput.RequestCreator;
 import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.time.RateRecorder;
@@ -37,7 +38,7 @@ public class Http11SynchronousClient implements SynchronousClient {
 	private HttpStatefulParser parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 
 	@Override
-	public void start(InetSocketAddress svrAddress) {
+	public void start(HostWithPort svrAddress) {
 		try {
 	    	log.error("SYNC HTTP1.1 CLIENT: logging will log every 10 seconds as ERROR so it shows up in red");
 	    	log.info("info messages automatically show up in black");
@@ -48,9 +49,9 @@ public class Http11SynchronousClient implements SynchronousClient {
 		}
 	}
 	
-	public void startImpl(InetSocketAddress svrAddress) throws UnknownHostException, IOException {
+	public void startImpl(HostWithPort svrAddress) throws UnknownHostException, IOException {
         @SuppressWarnings("resource")
-		Socket socket = new Socket(svrAddress.getHostName(), svrAddress.getPort());
+		Socket socket = new Socket(svrAddress.getHostOrIpAddress(), svrAddress.getPort());
         OutputStream output = socket.getOutputStream();
         
         Runnable client = new ClientWriter(parser, output);

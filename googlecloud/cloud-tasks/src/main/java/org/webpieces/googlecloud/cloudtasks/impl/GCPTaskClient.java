@@ -7,6 +7,7 @@ import com.google.cloud.tasks.v2.Task;
 import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.SneakyThrow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public class GCPTaskClient {
         }
     }
 
-    public Task createTask(Method method, InetSocketAddress addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
+    public Task createTask(Method method, HostWithPort addr, HttpMethod httpMethod, String path, String payload, ScheduleInfo scheduleInfo) {
 
         Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);
 
@@ -141,11 +142,11 @@ public class GCPTaskClient {
     }
 
     private String getURL(Endpoint endpoint,String path) {
-        InetSocketAddress socketAddress = endpoint.getServerAddress();
+        HostWithPort socketAddress = endpoint.getServerAddress();
         String scheme = (socketAddress.getPort() != 443) ? "http" : "https";
         URI uri = null;
         try {
-            uri = new URI(scheme, null, socketAddress.getHostName(), socketAddress.getPort(), path, null, null);
+            uri = new URI(scheme, null, socketAddress.getHostOrIpAddress(), socketAddress.getPort(), path, null, null);
         } catch (URISyntaxException e) {
             throw SneakyThrow.sneak(e);
         }

@@ -3,6 +3,7 @@ package org.webpieces.microsvc.client.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.recorder.impl.EndpointInfo;
 import org.webpieces.recorder.impl.TestCaseRecorder;
 import org.webpieces.util.context.ClientAssertions;
@@ -30,7 +31,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
     private final Logger log = LoggerFactory.getLogger(HttpsJsonClientInvokeHandler.class);
     private final HttpsJsonClient clientHelper;
     private ClientAssertions clientAssertions;
-    private InetSocketAddress addr;
+    private HostWithPort addr;
     private boolean hasUrlParams;
     private boolean forHttp;
 
@@ -40,7 +41,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         this.clientAssertions = clientAssertions;
     }
 
-    public void initialize(InetSocketAddress addr, boolean hasUrlParams, boolean forHttp) {
+    public void initialize(HostWithPort addr, boolean hasUrlParams, boolean forHttp) {
         this.addr = addr;
         this.hasUrlParams = hasUrlParams;
         this.forHttp = forHttp;
@@ -93,7 +94,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
             throw new IllegalStateException("Context.HEADERS is not a Map<String, String> and is setup incorrectly");
         }
 
-        log.info("Sending http request to: " + addr.getHostName()+":"+addr.getPort() + path);
+        log.info("Sending http request to: " + addr.getHostOrIpAddress()+":"+addr.getPort() + path);
 
         Object body = args[0];
         if(hasUrlParams) {

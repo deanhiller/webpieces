@@ -7,6 +7,7 @@ import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 import org.webpieces.googlecloud.cloudtasks.impl.Constants;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
@@ -34,7 +35,7 @@ public class LocalRemoteInvoker implements RemoteInvoker {
     }
 
     @Override
-    public XFuture<Void> invoke(Method method, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
+    public XFuture<Void> invoke(Method method, HostWithPort addr, String path, HttpMethod httpMethod, String bodyAsText, ScheduleInfo info) {
         Map<String, Object> copy = Context.copyContext();
 
         String jobId = UUID.randomUUID().toString();
@@ -81,7 +82,7 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         return XFuture.completedFuture(null);
     }
 
-    private void pretendToBeCallFromGCPCloudTasks(Map<String, Object> copy, InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText) {
+    private void pretendToBeCallFromGCPCloudTasks(Map<String, Object> copy, HostWithPort addr, String path, HttpMethod httpMethod, String bodyAsText) {
         Map<String, Object> previous = Context.getContext();
         try {
             Context.setContext(copy);
@@ -92,7 +93,7 @@ public class LocalRemoteInvoker implements RemoteInvoker {
         }
     }
 
-    private void sendHttpReq(InetSocketAddress addr, String path, HttpMethod httpMethod, String bodyAsText) {
+    private void sendHttpReq(HostWithPort addr, String path, HttpMethod httpMethod, String bodyAsText) {
         XFuture<String> stringXFuture;
         try {
             Endpoint endpoint = new Endpoint(addr, httpMethod.toString(), path);

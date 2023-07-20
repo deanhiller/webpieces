@@ -14,6 +14,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.data.api.TwoPools;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.throughput.RequestCreator;
 import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.time.RateRecorder;
@@ -37,7 +38,7 @@ public class Http2SynchronousClient implements SynchronousClient {
 
 	@SuppressWarnings("unused")
 	@Override
-	public void start(InetSocketAddress svrAddress) {
+	public void start(HostWithPort svrAddress) {
 		if(true)
 			throw new UnsupportedOperationException("This is broken and needs ot use the http2 engine to work");
 		try {
@@ -50,9 +51,9 @@ public class Http2SynchronousClient implements SynchronousClient {
 		}
 	}
 	
-	public void startImpl(InetSocketAddress svrAddress) throws UnknownHostException, IOException {
+	public void startImpl(HostWithPort svrAddress) throws UnknownHostException, IOException {
         @SuppressWarnings("resource")
-		Socket socket = new Socket(svrAddress.getHostName(), svrAddress.getPort());
+		Socket socket = new Socket(svrAddress.getHostOrIpAddress(), svrAddress.getPort());
         OutputStream output = socket.getOutputStream();
         
         Runnable client = new ClientWriter(parser, output);

@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.data.api.DataWrapper;
@@ -36,7 +38,19 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	public MockChannel() {
 		parser = HttpParserFactory.createStatefulParser("a", new SimpleMeterRegistry(), new TwoPools("pl", new SimpleMeterRegistry()));
 	}
-	
+
+	@Override
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		if(this.listener != null)
+			throw new IllegalStateException("connect should only be called once");
+		this.listener = listener;
+		return (XFuture<Void>) super.calledMethod(Method.CONNECT, addr, listener);
+	}
+
+	/**
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	@Override
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {

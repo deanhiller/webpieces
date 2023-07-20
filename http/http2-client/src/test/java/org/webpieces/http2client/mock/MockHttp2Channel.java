@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -59,7 +61,23 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		BufferPool pool = new TwoPools("pl", new SimpleMeterRegistry());
 		frameParser = Http2ParserFactory.createParser(pool);
 	}
-	
+
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		if(connected)
+			throw new IllegalStateException("already connected");
+		else if(listener == null)
+			throw new IllegalArgumentException("listener can't be null");
+
+		connected = true;
+		this.marshalState = parser.prepareToMarshal(4096, 4096);
+		this.listener = listener;
+		return XFuture.completedFuture(null);
+	}
+
+	/**
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		if(connected)

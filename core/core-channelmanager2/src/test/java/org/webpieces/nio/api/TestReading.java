@@ -1,6 +1,8 @@
 package org.webpieces.nio.api;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +45,7 @@ public class TestReading {
 		
 		mockChannel.addConnectReturnValue(true);
 		mockJdk.setThread(Thread.currentThread());
-		XFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
+		XFuture<Void> future = channel.connect(new HostWithPort(4444), listener);
 		future.get(2, TimeUnit.SECONDS);
 		Assert.assertTrue(mockChannel.isRegisteredForReads());
 	}

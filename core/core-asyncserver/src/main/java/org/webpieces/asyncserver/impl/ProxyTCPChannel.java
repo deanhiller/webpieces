@@ -3,6 +3,8 @@ package org.webpieces.asyncserver.impl;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.ChannelSession;
@@ -19,6 +21,14 @@ public class ProxyTCPChannel implements TCPChannel {
 		this.connectedChannels = connectedChannels;
 	}
 
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		return channel.connect(addr, listener);
+	}
+
+	/**
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		return channel.connect(addr, listener);
 	}

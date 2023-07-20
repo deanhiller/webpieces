@@ -1,6 +1,8 @@
 package org.webpieces.http2client.impl;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
@@ -28,6 +30,22 @@ public class Http2SocketImpl implements Http2Socket {
 		incoming = new Layer1Incoming(parseLayer, socketListener, this);
 	}
 
+	public XFuture<Void> connect(HostWithPort addr) {
+		if(addr == null)
+			throw new IllegalArgumentException("addr cannot be null");
+
+		return outgoing.connect(addr, incoming)
+				.thenCompose(c -> incoming.sendInitialFrames())  //make sure 'sending' initial frames is part of connecting
+				.thenApply(f -> {
+					log.info("connecting complete as initial frames sent");
+					return null;
+				});
+	}
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(InetSocketAddress addr) {
 		if(addr == null)
