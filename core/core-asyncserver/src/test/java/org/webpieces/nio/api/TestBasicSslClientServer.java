@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -60,9 +62,10 @@ public class TestBasicSslClientServer {
 
 		InetSocketAddress bound = svr.getUnderlyingChannel().getLocalAddress();
 		System.out.println("port="+bound.getPort());
-		
+
+		HostWithPort newAddr = new HostWithPort(bound.getAddress().getHostName(), bound.getPort());
 		TCPChannel channel = mgr.createTCPChannel("client", f.createEngineForSocket());
-		XFuture<Void> connect = channel.connect(bound, new ClientListener());
+		XFuture<Void> connect = channel.connect(newAddr, new ClientListener());
 		connect.get(10000000, TimeUnit.SECONDS);
 		writeData(channel);
 		
