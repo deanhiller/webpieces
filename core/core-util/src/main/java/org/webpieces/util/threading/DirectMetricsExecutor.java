@@ -5,11 +5,7 @@ import org.webpieces.util.futures.XFuture;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * @deprecated Use DirectMetricsExecutor instead
- */
-@Deprecated
-public class DirectFutureExecutor implements FutureExecutor {
+public class DirectMetricsExecutor implements MetricsExecutor {
     @Override
     public XFuture<Void> executeRunnable(Runnable function, Map<String, String> extraTags) {
         try {
