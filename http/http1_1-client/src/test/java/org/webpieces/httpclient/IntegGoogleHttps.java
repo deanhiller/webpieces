@@ -1,6 +1,8 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -63,7 +65,7 @@ public class IntegGoogleHttps {
 		
 		HttpSocket socket = createSocket(isHttp, host, port);
 		socket
-			.connect(new InetSocketAddress(host, port))
+			.connect(new HostWithPort(host, port))
 			.thenAccept(p -> sendRequest(socket, req))
 			.exceptionally(e -> reportException(socket, e));
 		

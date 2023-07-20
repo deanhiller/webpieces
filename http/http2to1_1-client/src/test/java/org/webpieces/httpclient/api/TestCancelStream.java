@@ -1,6 +1,8 @@
 package org.webpieces.httpclient.api;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.junit.Assert;
@@ -56,7 +58,7 @@ public class TestCancelStream {
 
 	@Test
 	public void testClientCancelWithKeepAlive() {
-		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+		XFuture<Void> connect = httpSocket.connect(new HostWithPort(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		Http2Request req = Requests.createRequest(false);
@@ -76,7 +78,7 @@ public class TestCancelStream {
 
 	@Test
 	public void testClientCancelNoKeepAlive() {
-		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+		XFuture<Void> connect = httpSocket.connect(new HostWithPort(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		Http2Request req = Requests.createRequest(false);
@@ -94,7 +96,7 @@ public class TestCancelStream {
 
 	@Test
 	public void testServerCloseSocket() {
-		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+		XFuture<Void> connect = httpSocket.connect(new HostWithPort(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		Http2Request req = Requests.createRequest(false);

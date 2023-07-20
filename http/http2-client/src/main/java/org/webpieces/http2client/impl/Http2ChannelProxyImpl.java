@@ -2,6 +2,8 @@ package org.webpieces.http2client.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -20,6 +22,18 @@ public class Http2ChannelProxyImpl implements Http2ChannelProxy {
 		return channel.write(data);
 	}
 
+	@Override
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		if(addr == null)
+			throw new IllegalArgumentException("addr cannot be null");
+
+		return channel.connect(addr, listener);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(InetSocketAddress addr, DataListener listener) {
 		if(addr == null)

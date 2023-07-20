@@ -5,6 +5,8 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,7 +48,16 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 		parser = HpackParserFactory.createParser(bufferPool, false);
 		unmarshalState = parser.prepareToUnmarshal("mockChannel", 4096, 4096, 4096);
 	}
-	
+
+	@Override
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
+	}
+
+	/**
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");

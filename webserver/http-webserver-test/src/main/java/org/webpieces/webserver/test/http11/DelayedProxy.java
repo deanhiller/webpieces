@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
@@ -24,6 +25,19 @@ public class DelayedProxy implements ChannelProxy {
 		this.channel = channel;
 	}
 
+	@Override
+	public XFuture<Void> connect(HostWithPort addr, DataListener dataListener) {
+		channel.setDataListener(dataListener);
+		return listener.connected(channel, true).thenApply( d -> {
+			toServerDataListener = d;
+			return null;
+		});
+	}
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(InetSocketAddress addr, DataListener dataListener) {
 		channel.setDataListener(dataListener);

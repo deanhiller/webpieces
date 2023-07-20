@@ -1,6 +1,8 @@
 package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +56,7 @@ public class TestC6x5SettingsFrameErrors {
         mockChanMgr.addTCPChannelToReturn(mockChannel);
 		socket = client.createHttpSocket(new SocketListener());
 		
-		XFuture<Void> connect = socket.connect(new InetSocketAddress(555));
+		XFuture<Void> connect = socket.connect(new HostWithPort(555));
 		connect.get(2, TimeUnit.SECONDS);
 
 		//clear preface and settings frame from client

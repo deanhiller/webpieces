@@ -3,6 +3,8 @@ package org.webpieces.httpclient;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -69,8 +71,8 @@ public class IntegSingleRequest {
 		List<Http2Header> req = createRequest(host, isHttp);
 		Http2Request request = new Http2Request(req);
         request.setEndOfStream(true);
-        
-		InetSocketAddress addr = new InetSocketAddress(host, port);
+
+		HostWithPort addr = new HostWithPort(host, port);
 		Http2Socket socket = createHttpClient("testRunSocket", isHttp, addr);
 		
 		socket
@@ -81,7 +83,7 @@ public class IntegSingleRequest {
 		Thread.sleep(10000000);
 	}
 
-	public static Http2Socket createHttpClient(String id, boolean isHttp, InetSocketAddress addr) {
+	public static Http2Socket createHttpClient(String id, boolean isHttp, HostWithPort addr) {
 		BufferPool pool2 = new TwoPools("pl", new SimpleMeterRegistry());
 		HpackParser hpackParser = HpackParserFactory.createParser(pool2, false);
 
@@ -91,7 +93,7 @@ public class IntegSingleRequest {
 		
 		InjectionConfig injConfig = new InjectionConfig(hpackParser);
 		
-		String host = addr.getHostName();
+		String host = addr.getHostOrIpAddress();
 		int port = addr.getPort();
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);

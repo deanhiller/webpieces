@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -66,7 +68,7 @@ public class IntegTestClientNotRead {
 			}
 		}, 1000, 5000);
 		
-		XFuture<Void> connect = channel.connect(new InetSocketAddress(8080), new ClientDataListener());
+		XFuture<Void> connect = channel.connect(new HostWithPort(8080), new ClientDataListener());
 		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);

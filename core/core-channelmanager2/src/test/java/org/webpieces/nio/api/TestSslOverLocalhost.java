@@ -2,6 +2,8 @@ package org.webpieces.nio.api;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -39,7 +41,7 @@ public class TestSslOverLocalhost {
 		//don't really need to use a separate chan mgr but we will here..
 		ChannelManager chanMgr = createSvrChanMgr("client");
 		TCPChannel channel = chanMgr.createTCPChannel("client", sslFactory.createEngineForClient("cvs.xsoftware.biz", port));
-		XFuture<Void> future = channel.connect(new InetSocketAddress("localhost", port), mockClientDataListener);
+		XFuture<Void> future = channel.connect(new HostWithPort("localhost", port), mockClientDataListener);
 		future.get();
 
 		byte[] data = new byte[] {0, 2, 4, 6, 8, 10};

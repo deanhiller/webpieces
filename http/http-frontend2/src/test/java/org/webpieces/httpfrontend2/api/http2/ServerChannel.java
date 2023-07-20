@@ -3,6 +3,8 @@ package org.webpieces.httpfrontend2.api.http2;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.ChannelSession;
@@ -21,6 +23,14 @@ public class ServerChannel implements TCPChannel {
 		this.listener = listener;
 	}
 
+	@Override
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		throw new IllegalStateException("should be already connected");
+	}
+	/**
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		throw new IllegalStateException("should be already connected");

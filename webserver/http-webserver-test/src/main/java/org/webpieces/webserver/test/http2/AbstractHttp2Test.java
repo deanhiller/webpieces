@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 
 import com.google.inject.util.Modules;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.Logging;
 import org.webpieces.util.futures.XFuture;
 
@@ -57,8 +58,9 @@ public abstract class AbstractHttp2Test {
 		try {
 			if(listener == null)
 				listener = new NullCloseListener();
+			HostWithPort newAddr = new HostWithPort(addr.getAddress().getHostName(), addr.getPort());
 			Http2Socket socket = getClient().createHttpSocket(listener);
-			XFuture<Void> connect = socket.connect(addr);
+			XFuture<Void> connect = socket.connect(newAddr);
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -74,8 +76,9 @@ public abstract class AbstractHttp2Test {
 		try {
 			if(listener == null)
 				listener = new NullCloseListener();
+			HostWithPort newAddr = new HostWithPort(addr.getAddress().getHostName(), addr.getPort());
 			Http2Socket socket = getClient().createHttpsSocket(engine, listener);
-			XFuture<Void> connect = socket.connect(addr);
+			XFuture<Void> connect = socket.connect(newAddr);
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {

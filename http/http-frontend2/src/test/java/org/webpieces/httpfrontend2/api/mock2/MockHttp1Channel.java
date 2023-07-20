@@ -5,6 +5,8 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +56,15 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 		memento = parser.prepareToParse();
 		marshalState = parser.prepareToMarshal();
 	}
-	
+
+	public XFuture<Void> connect(HostWithPort addr, DataListener listener) {
+		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
+	}
+
+	/**
+	 * @deprecated Use connect(HostWithPort, DataListener) or connect(IpWithPort, DataListener) instead
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");

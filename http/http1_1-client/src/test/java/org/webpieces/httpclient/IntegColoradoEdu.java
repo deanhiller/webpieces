@@ -1,6 +1,6 @@
 package org.webpieces.httpclient;
 
-import java.net.InetSocketAddress;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class IntegColoradoEdu {
 		HttpSocket socket = IntegGoogleHttps.createSocket(isHttp, host, port);
 		
 		socket
-			.connect(new InetSocketAddress(host, port))
+			.connect(new HostWithPort(host, port))
 			.thenAccept(p -> socket.send(req, listener))
 			.exceptionally(e -> reportException(socket, e));
 		

@@ -1,12 +1,20 @@
 package org.webpieces.httpclient11.api;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
 public interface HttpSocket {
 
+	public XFuture<Void> connect(HostWithPort addr);
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	public XFuture<Void> connect(InetSocketAddress addr);
 
 	/**

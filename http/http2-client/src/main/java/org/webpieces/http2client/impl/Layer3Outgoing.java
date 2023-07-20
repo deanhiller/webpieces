@@ -2,6 +2,8 @@ package org.webpieces.http2client.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
@@ -33,6 +35,14 @@ public class Layer3Outgoing implements ClientEngineListener {
 		channel.write(buf);
 	}
 
+	public XFuture<Void> connect(HostWithPort addr, Layer1Incoming incoming) {
+		return channel.connect(addr, incoming);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	public XFuture<Void> connect(InetSocketAddress addr, Layer1Incoming incoming) {
 		return channel.connect(addr, incoming);
 	}

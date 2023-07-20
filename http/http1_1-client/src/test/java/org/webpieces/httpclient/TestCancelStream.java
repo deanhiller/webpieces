@@ -1,6 +1,8 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +61,7 @@ public class TestCancelStream {
 
 	@Test
 	public void testClientCancelWithKeepAlive() {
-		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+		XFuture<Void> connect = httpSocket.connect(new HostWithPort(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home", false);
@@ -77,7 +79,7 @@ public class TestCancelStream {
 
 	@Test
 	public void testClientCancelNoKeepAlive() {
-		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+		XFuture<Void> connect = httpSocket.connect(new HostWithPort(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home", false);
@@ -93,7 +95,7 @@ public class TestCancelStream {
 
 	@Test
 	public void testServerCloseSocket() throws InterruptedException, ExecutionException, TimeoutException {
-		XFuture<Void> connect = httpSocket.connect(new InetSocketAddress(8555));
+		XFuture<Void> connect = httpSocket.connect(new HostWithPort(8555));
 		MockResponseListener mockListener = new MockResponseListener();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home", false);

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.recorder.impl.EndpointInfo;
 import org.webpieces.recorder.impl.TestCaseRecorder;
 import org.webpieces.plugin.json.JacksonJsonConverter;
@@ -27,7 +28,7 @@ import static org.webpieces.recorder.impl.TestCaseRecorder.RECORDER_KEY;
 public class QueueInvokeHandler implements InvocationHandler {
     private static final Pattern REGEX_SLASH_MERGE = Pattern.compile("/{2,}", Pattern.CASE_INSENSITIVE);
     private final Logger log = LoggerFactory.getLogger(QueueInvokeHandler.class);
-    private InetSocketAddress addr;
+    private HostWithPort addr;
     private RemoteInvoker remoteInvoker;
     private ClientAssertions clientAssertions;
     private JacksonJsonConverter jsonMapper;
@@ -43,7 +44,7 @@ public class QueueInvokeHandler implements InvocationHandler {
         this.jsonMapper = jsonMapper;
     }
 
-    public void initialize(InetSocketAddress addr) {
+    public void initialize(HostWithPort addr) {
         this.addr = addr;
     }
 
@@ -99,7 +100,7 @@ public class QueueInvokeHandler implements InvocationHandler {
             throw new IllegalStateException("Context.HEADERS is not a Map<String, String> and is setup incorrectly");
         }
 
-        log.info("Scheduling http request at "+info.getTime()+" to: " + addr.getHostName()+":"+addr.getPort() + path);
+        log.info("Scheduling http request at "+info.getTime()+" to: " + addr.getHostOrIpAddress()+":"+addr.getPort() + path);
 
 
         Object body = args[0];

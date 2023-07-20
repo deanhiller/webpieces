@@ -1,6 +1,8 @@
 package org.webpieces.httpclientx.impl;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http2client.api.Http2Socket;
@@ -28,6 +30,15 @@ public class Http2SocketImpl implements Http2Socket {
 		this.socket11 = socket11;
 	}
 
+	@Override
+	public XFuture<Void> connect(HostWithPort addr) {
+		return socket11.connect(addr);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(InetSocketAddress addr) {
 		return socket11.connect(addr);

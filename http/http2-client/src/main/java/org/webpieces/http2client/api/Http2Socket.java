@@ -1,6 +1,8 @@
 package org.webpieces.http2client.api;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.http2client.api.dto.FullRequest;
@@ -9,7 +11,13 @@ import org.webpieces.http2client.api.dto.FullResponse;
 import com.webpieces.http2.api.streaming.RequestStreamHandle;
 
 public interface Http2Socket {
-	
+
+    XFuture<Void> connect(HostWithPort addr);
+
+    /**
+     * @deprecated
+     */
+    @Deprecated
 	XFuture<Void> connect(InetSocketAddress addr);
 	
     /**
@@ -41,7 +49,6 @@ public interface Http2Socket {
      *  4. send request headers and send data chunks, then receive response headers
      *  5. send request headers and send data chunks, then receive response headers and data chunks
      *  
-     *  @param isComplete true if you are only sending request headers with content-length = 0
      */
     RequestStreamHandle openStream();
     

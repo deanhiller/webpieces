@@ -2,6 +2,8 @@ package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -53,9 +55,9 @@ public class TestC3InitialHttpsConnections {
         Http2Client client = Http2ClientFactory.createHttpClient("test2Client", mockChanMgr, injConfig);
         
         mockChanMgr.addSSLChannelToReturn(mockChannel);
-		
-        InetSocketAddress addr = new InetSocketAddress("somehost.com", 555);
-		String host = addr.getHostName();
+
+		HostWithPort addr = new HostWithPort("somehost.com", 555);
+		String host = addr.getHostOrIpAddress();
 		int port = addr.getPort();
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);

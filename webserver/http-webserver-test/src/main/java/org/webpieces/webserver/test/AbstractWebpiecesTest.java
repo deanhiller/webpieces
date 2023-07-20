@@ -6,6 +6,7 @@ import com.google.inject.util.Modules;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.After;
 import org.junit.Assert;
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.Logging;
 import org.webpieces.util.futures.XFuture;
@@ -68,9 +69,10 @@ public class AbstractWebpiecesTest {
 	 */
 	@Deprecated
 	public HttpSocket connectHttp(boolean isRemote, InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
+		HostWithPort newAddr = new HostWithPort(addr.getAddress().getHostAddress(), addr.getPort());
 		NullHttp1CloseListener listener = new NullHttp1CloseListener();
 		HttpSocket socket = getClient(isRemote).createHttpSocket(listener);
-		XFuture<Void> connect = socket.connect(addr);
+		XFuture<Void> connect = socket.connect(newAddr);
 		connect.get(2, TimeUnit.SECONDS);
 		return socket;
 	}
@@ -82,8 +84,10 @@ public class AbstractWebpiecesTest {
 	public HttpSocket connectHttp(InetSocketAddress addr, HttpSocketListener listener) {
 		if(listener == null)
 			listener = new NullHttp1CloseListener();
+
+		HostWithPort newAddr = new HostWithPort(addr.getAddress().getHostAddress(), addr.getPort());
 		HttpSocket socket = getClient().createHttpSocket(listener);
-		XFuture<Void> connect = socket.connect(addr);
+		XFuture<Void> connect = socket.connect(newAddr);
 		try {
 			connect.get(2, TimeUnit.SECONDS);
 
@@ -98,9 +102,10 @@ public class AbstractWebpiecesTest {
 	 */
 	@Deprecated
 	public HttpSocket connectHttps(boolean isRemote, SSLEngine engine, InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
+		HostWithPort newAddr = new HostWithPort(addr.getAddress().getHostAddress(), addr.getPort());
 		NullHttp1CloseListener listener = new NullHttp1CloseListener();
 		HttpSocket socket = getClient(isRemote).createHttpsSocket(engine, listener);
-		XFuture<Void> connect = socket.connect(addr);
+		XFuture<Void> connect = socket.connect(newAddr);
 		connect.get(2, TimeUnit.SECONDS);
 		return socket;
 	}
@@ -112,9 +117,10 @@ public class AbstractWebpiecesTest {
 	public HttpSocket connectHttps(SSLEngine engine, InetSocketAddress addr, HttpSocketListener listener) {
 		if(listener == null)
 			listener = new NullHttp1CloseListener();
-		
+
+		HostWithPort newAddr = new HostWithPort(addr.getAddress().getHostAddress(), addr.getPort());
 		HttpSocket socket = getClient().createHttpsSocket(engine, listener);
-		XFuture<Void> connect = socket.connect(addr);
+		XFuture<Void> connect = socket.connect(newAddr);
 		try {
 			connect.get(2, TimeUnit.SECONDS);
 			return socket;

@@ -3,6 +3,8 @@ package org.webpieces.throughput.client;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +38,7 @@ public class ClientAsync {
 		this.protocol = protocol;
 	}
 
-	public void runAsyncClient(InetSocketAddress svrAddress) {
+	public void runAsyncClient(HostWithPort svrAddress) {
 		ResponseStreamHandle responseListener = new ResponseCounterListener();
     	log.error("ASYNC "+protocol+" CLIENT: logging will log every 10 seconds as ERROR so it shows up in red");
     	log.info("info messages automatically show up in black");

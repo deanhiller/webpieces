@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +58,7 @@ public class TestSslCloseClient {
 		mockChannel.setNumBytesToConsume(100000);
 		mockChannel.addConnectReturnValue(true);
 		mockJdk.setThread(Thread.currentThread()); //trick the selector into thinking we are on the selector thread
-		connectFuture = channel.connect(new InetSocketAddress("localhost", port), mockClientDataListener);
+		connectFuture = channel.connect(new HostWithPort("localhost", port), mockClientDataListener);
 		Assert.assertFalse(connectFuture.isDone()); //not connected until ssl handshake is complete
 
 		SslAction result = parseIncoming();

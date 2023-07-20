@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CancellationException;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -71,6 +73,19 @@ public class HttpSocketImpl implements HttpSocket {
 		state = parser.prepareToMarshal();
 	}
 
+	@Override
+	public XFuture<Void> connect(HostWithPort addr) {
+		if(isRecording ) {
+			dataListener = new RecordingDataListener("httpSock-", dataListener);
+		}
+
+		return channel.connect(addr, dataListener).thenApply(channel -> connected());
+	}
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(InetSocketAddress addr) {
 		if(isRecording ) {

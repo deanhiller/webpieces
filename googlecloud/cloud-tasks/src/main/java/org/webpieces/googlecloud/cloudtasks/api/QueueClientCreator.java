@@ -2,6 +2,7 @@ package org.webpieces.googlecloud.cloudtasks.api;
 
 import org.webpieces.googlecloud.cloudtasks.impl.QueueInvokeHandler;
 import org.webpieces.microsvc.api.MethodValidator;
+import org.webpieces.nio.api.channels.HostWithPort;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -18,7 +19,16 @@ public class QueueClientCreator {
         this.wrapperProvider = wrapperProvider;
     }
 
+    /**
+     * @deprecated
+     */
+    @Deprecated
     public <T> T createClient(Class<T> apiInterface, InetSocketAddress addr) {
+        HostWithPort newAddr = new HostWithPort(addr.getAddress().getHostName(), addr.getPort());
+        return createClient(apiInterface, newAddr);
+    }
+
+    public <T> T createClient(Class<T> apiInterface, HostWithPort addr) {
         QueueInvokeHandler invokeHandler = wrapperProvider.get();
         invokeHandler.initialize(addr);
 

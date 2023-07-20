@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +57,7 @@ public class TestHttp1Backpressure {
 		socket = httpClient.createHttpSocket(new Http2CloseListener());
 
 		mockChannel.setConnectFuture(XFuture.completedFuture(null));
-		XFuture<Void> future = socket.connect(new InetSocketAddress(8080));
+		XFuture<Void> future = socket.connect(new HostWithPort(8080));
 		
 		future.get(2, TimeUnit.SECONDS);
 	}

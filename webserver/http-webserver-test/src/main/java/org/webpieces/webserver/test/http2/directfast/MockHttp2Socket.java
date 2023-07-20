@@ -1,6 +1,8 @@
 package org.webpieces.webserver.test.http2.directfast;
 
 import java.net.InetSocketAddress;
+
+import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.HttpStream;
@@ -23,6 +25,15 @@ public class MockHttp2Socket implements Http2Socket {
 		frontendSocket = new MockFrontendSocket(isHttps, new ProxyClose(closeListener, this));
 	}
 
+	@Override
+	public XFuture<Void> connect(HostWithPort addr) {
+		return XFuture.completedFuture(null); //pretend we connected
+	}
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	@Override
 	public XFuture<Void> connect(InetSocketAddress addr) {
 		return XFuture.completedFuture(null); //pretend we connected
