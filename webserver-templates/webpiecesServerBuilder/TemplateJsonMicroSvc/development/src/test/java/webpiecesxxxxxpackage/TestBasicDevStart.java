@@ -7,8 +7,13 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.webpieces.util.futures.Logging;
 
 public class TestBasicDevStart {
+
+	static {
+		Logging.setupMDCForLogging();
+	}
 
 	//We normally don't need to test the development server, but we at least make sure developers are 
 	//not breaking the startup of the development server here...
