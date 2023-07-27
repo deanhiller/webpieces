@@ -88,7 +88,9 @@ public class LogExceptionFilter extends RouteFilter<Void> {
     private XFuture<Action> record(Logger preRequestLog, MethodMeta meta, Action resp, Throwable e, long start) {
 
         ReportingHolderInfo holder = Context.get(JacksonCatchAllFilter.REPORTING_INFO);
-        holder.setReportedException(true);
+        if(holder != null) {
+            holder.setReportedException(true);
+        }
 
         long total = System.currentTimeMillis()-start;
         if (e == null) {
