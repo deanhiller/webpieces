@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.microsvc.server.api.HeaderCtxList;
+import org.webpieces.recorder.impl.TestCaseHolder;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
@@ -21,6 +22,7 @@ import java.util.*;
 public class HeaderToRequestStateFilter extends RouteFilter<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(HeaderToRequestStateFilter.class);
+    private final Set<PlatformHeaders> transferKeys = new HashSet<>();
     private HeaderCtxList headerCtxList;
 
     @Inject
@@ -28,6 +30,13 @@ public class HeaderToRequestStateFilter extends RouteFilter<Void> {
         headerCtxList = config.getHcl();
         List<PlatformHeaders> platformHeaders = headerCtxList.listHeaderCtxPairs();
         Context.checkForDuplicates(platformHeaders);
+
+        List<PlatformHeaders> headers = headerCtxList.listHeaderCtxPairs();
+        for (PlatformHeaders contextKey : headers) {
+            if (!contextKey.isWantTransferred())
+                continue;
+            transferKeys.add(contextKey);
+        }
     }
 
     @Override
@@ -38,15 +47,7 @@ public class HeaderToRequestStateFilter extends RouteFilter<Void> {
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 
-        //*********************************************
-        // Move HeaderCollector to webpieces
-        //*****************************************************
-        List<PlatformHeaders> headers = headerCtxList.listHeaderCtxPairs();
-
-        for (PlatformHeaders contextKey : headers) {
-            if(!contextKey.isWantTransferred())
-                continue;
-
+        for (PlatformHeaders contextKey : transferKeys) {
             List<Http2Header> values = Current.request().originalRequest.getHeaderLookupStruct().getHeaders(contextKey.getHeaderName());
 
             if ((values == null) || values.isEmpty()) {
@@ -63,10 +64,15 @@ public class HeaderToRequestStateFilter extends RouteFilter<Void> {
             if (value != null) {
                 Context.putMagic(contextKey, value);
             }
-
         }
 
-        return nextFilter.invoke(meta);
+        try {
+            return nextFilter.invoke(meta);
+        } finally {
+            for(PlatformHeaders key : transferKeys) {
+                Context.removeMagic(key);
+            }
+        }
 
     }
 

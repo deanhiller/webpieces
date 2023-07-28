@@ -9,6 +9,8 @@ public class FilterConfig {
     //requests with MicroSvcHeaders.RECORDING header will actually do recording
     private boolean recordingEnabled = true;
 
+    private boolean enableErrorHandling = true;
+
     public FilterConfig(String packageRegEx) {
         this(packageRegEx, true);
     }
@@ -24,6 +26,15 @@ public class FilterConfig {
 
     public void setPackageRegEx(String packageRegEx) {
         this.packageRegEx = packageRegEx;
+    }
+
+    public FilterConfig setEnableErrorHandling(boolean enable) {
+        this.enableErrorHandling = enable;
+        return this;
+    }
+
+    public boolean isEnableErrorHandling() {
+        return enableErrorHandling;
     }
 
     public boolean isEnableHealthCheckEndpoint() {

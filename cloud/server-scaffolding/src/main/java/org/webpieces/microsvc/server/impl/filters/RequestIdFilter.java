@@ -33,24 +33,26 @@ public class RequestIdFilter extends RouteFilter<Void> {
 
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
-
         RouterRequest request = meta.getCtx().getRequest();
 
         Context.putMagic(MicroSvcHeader.REQUEST_PATH, request.relativePath);
-        String requestHeader = request.getSingleHeaderValue(MicroSvcHeader.REQUEST_ID.getHeaderName());
-        String requestId;
+        String existingReqId = Context.getMagic(MicroSvcHeader.REQUEST_ID);
 
-        if(requestHeader != null) {
-            requestId = requestHeader;
-        } else {
-
+        if(existingReqId == null) {
             //prepent svcName so we know who generated it for debugging ->
-            requestId = svcName+"-"+requestIdGenerator.generate().toString();
+            String requestId = svcName+"-"+requestIdGenerator.generate().toString();
+            Context.putMagic(MicroSvcHeader.REQUEST_ID, requestId);
         }
 
-        Context.putMagic(MicroSvcHeader.REQUEST_ID, requestId);
-
-        return nextFilter.invoke(meta);
+        try {
+            return nextFilter.invoke(meta);
+        } finally {
+            Context.removeMagic(MicroSvcHeader.REQUEST_PATH);
+            if(existingReqId == null) {
+                //only clear magic if we set the magic in this filter in the first place
+                Context.removeMagic(MicroSvcHeader.REQUEST_ID);
+            }
+        }
     }
 
 }

@@ -13,45 +13,14 @@ import org.webpieces.router.api.routes.Routes;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.router.api.routes.Port.BOTH;
 
-public class JsonFilterRoutes implements Routes {
-
-    private FilterConfig config;
+/**
+ * Switch to FilterRoutes which is used by web and json now
+ */
+@Deprecated
+public class JsonFilterRoutes extends FilterRoutes implements Routes {
 
     public JsonFilterRoutes(FilterConfig config) {
-        this.config = config;
-    }
-
-    @Override
-    public void configure(DomainRouteBuilder domainRouteBldr) {
-
-        RouteBuilder builder = domainRouteBldr.getAllDomainsRouteBuilder();
-
-        String regex = config.getPackageRegEx();
-
-        builder.setInternalErrorRoute("../impl/controllers/JsonErrorNotFoundController.internalError");
-        builder.setPageNotFoundRoute("../impl/controllers/JsonErrorNotFoundController.notFound");
-
-        builder.addPackageFilter(regex, RequestIdFilter.class, null, FilterPortType.ALL_FILTER, 140);
-        builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, null, FilterPortType.ALL_FILTER, 120);
-        builder.addPackageFilter(regex, MDCFilter.class, null, FilterPortType.ALL_FILTER, 100);
-        builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 90);
-        builder.addPackageFilter(regex, LogExceptionFilter.class, null, FilterPortType.ALL_FILTER, 80);
-
-        if(!config.isEntryPoint()) {
-            builder.addPackageFilter(regex, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 70);
-        } else {
-            //builder.addPackageFilter(regex, SetupSecureTokenFilter.class, null, FilterPortType.ALL_FILTER, 160);
-        }
-
-        if(config.isRecordingEnabled())
-            builder.addPackageFilter(regex, RecordingFilter.class, null, FilterPortType.ALL_FILTER, 60);
-
-
-        //complicate port as-is so we will do this in Tray for now until we can port this one too ->
-        //builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 80);
-
-        if(config.isEnableHealthCheckEndpoint())
-            builder.addContentRoute(BOTH, GET, "/health", "../impl/controllers/HealthController.health");
+        super(config);
     }
 
 }
