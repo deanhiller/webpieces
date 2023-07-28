@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
+import org.webpieces.util.futures.Logging;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.Asserts;
 
@@ -17,6 +18,10 @@ import org.webpieces.webserver.test.SimulatedEnv;
 import webpiecesxxxxxpackage.mock.JavaCache;
 
 public class TestBasicStart {
+
+	static {
+		Logging.setupMDCForLogging();
+	}
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 	private String[] args = {

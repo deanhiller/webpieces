@@ -47,7 +47,8 @@ public class AsyncSSLEngine3Impl implements AsyncSSLEngine {
 	private EvictingQueue<Action> circularBuffer = EvictingQueue.create(64);
 	
 	public AsyncSSLEngine3Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener, SSLMetrics metrics) {
-		log.info("CREATE async ssl engine");
+		if(log.isDebugEnabled())
+			log.debug("CREATE async ssl engine");
 		if(listener == null)
 			throw new IllegalArgumentException("listener cannot be null");
 		encryptionTracker = new ByteAckTracker(metrics.getEncryptionAckMetrics(), false);
