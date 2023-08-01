@@ -26,7 +26,9 @@ public class BusinessLogicForTest {
         req.setJob("engineering");
 
         XFuture<JobReference> jobReference = scheduler.schedule(
-                () -> api.create(req), System.currentTimeMillis()+60000
+                () -> api.create(req),
+                System.currentTimeMillis()+60000,
+                10
         );
 
         try {
