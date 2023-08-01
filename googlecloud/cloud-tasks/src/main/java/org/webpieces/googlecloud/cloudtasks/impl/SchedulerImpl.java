@@ -35,8 +35,22 @@ public class SchedulerImpl implements Scheduler {
     }
 
     @Override
+    public XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, long epochMsToRunAt, long taskTimeout) {
+        ScheduleInfo info = new ScheduleInfo(epochMsToRunAt);
+        info.setTaskTimeoutSeconds(taskTimeout);
+        return executeIt(runnable, info);
+    }
+
+    @Override
     public XFuture<JobReference> addToQueue(Supplier<XFuture<Void>> runnable) {
         ScheduleInfo info = new ScheduleInfo();
+        return executeIt(runnable, info);
+    }
+
+    @Override
+    public XFuture<JobReference> addToQueue(Supplier<XFuture<Void>> runnable, long taskTimeout) {
+        ScheduleInfo info = new ScheduleInfo();
+        info.setTaskTimeoutSeconds(taskTimeout);
         return executeIt(runnable, info);
     }
 

@@ -6,6 +6,7 @@ import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
 import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.util.SneakyThrow;
@@ -115,6 +116,12 @@ public class GCPTaskClient {
 
         Task.Builder taskBuilder = Task.newBuilder()
                     .setHttpRequest(request);
+
+        if(scheduleInfo.getTaskTimeoutSeconds() != null) {
+            long taskTimeOut = scheduleInfo.getTaskTimeoutSeconds();
+            Duration duration = Duration.newBuilder().setSeconds(taskTimeOut).build();
+            taskBuilder = taskBuilder.setDispatchDeadline(duration);
+        }
 
         if(scheduleInfo.isScheduledInFuture()) {
             Timestamp timeStamp = getTimeStamp(scheduleInfo);

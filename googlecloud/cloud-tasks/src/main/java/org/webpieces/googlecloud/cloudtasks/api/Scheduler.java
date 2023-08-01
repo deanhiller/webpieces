@@ -9,9 +9,16 @@ import java.util.function.Supplier;
 
 @ImplementedBy(SchedulerImpl.class)
 public interface Scheduler {
+
+    @Deprecated
     XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, long epochMsToRunAt);
 
+    XFuture<JobReference> schedule(Supplier<XFuture<Void>> runnable, long epochMsToRunAt, long taskTimeoutSeconds);
+
+    @Deprecated
     XFuture<JobReference> addToQueue(Supplier<XFuture<Void>> runnable);
+
+    XFuture<JobReference> addToQueue(Supplier<XFuture<Void>> runnable, long taskTimeoutSeconds);
 
     XFuture<Void> cancelJob(JobReference ref);
 }
