@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class GCPTaskClient {
@@ -114,25 +115,33 @@ public class GCPTaskClient {
                 .putAllHeaders(headers)   //TODO: Ask dean what to send in headers
                 .build();
 
+
         Task.Builder taskBuilder = Task.newBuilder()
                     .setHttpRequest(request);
 
-        if(scheduleInfo.getTaskTimeoutSeconds() != null) {
-            long taskTimeOut = scheduleInfo.getTaskTimeoutSeconds();
-            Duration duration = Duration.newBuilder().setSeconds(taskTimeOut).build();
-            taskBuilder = taskBuilder.setDispatchDeadline(duration);
-        }
+        Task task1;
+        if(scheduleInfo.getTaskCreator() != null) {
+            Function<HttpRequest, Task> createTask = scheduleInfo.getTaskCreator();
+            task1 = createTask.apply(request);
+        } else {
+            if (scheduleInfo.getTaskTimeoutSeconds() != null) {
+                long taskTimeOut = scheduleInfo.getTaskTimeoutSeconds();
+                Duration duration = Duration.newBuilder().setSeconds(taskTimeOut).build();
+                taskBuilder = taskBuilder.setDispatchDeadline(duration);
+            }
 
-        if(scheduleInfo.isScheduledInFuture()) {
-            Timestamp timeStamp = getTimeStamp(scheduleInfo);
-            log.info("Timestamp="+timeStamp);
-            taskBuilder = taskBuilder.setScheduleTime(timeStamp);
+            if (scheduleInfo.isScheduledInFuture()) {
+                Timestamp timeStamp = getTimeStamp(scheduleInfo);
+                log.info("Timestamp=" + timeStamp);
+                taskBuilder = taskBuilder.setScheduleTime(timeStamp);
+            }
+            task1 = taskBuilder.build();
         }
 
         log.info("curl request " + createCurl(request, () -> ("--data '" + payload + "'")));
 
         // Send create task request
-        Task task = cloudTasksClient.createTask(queue, taskBuilder.build());
+        Task task = cloudTasksClient.createTask(queue, task1);
         log.info("Task created: " + task.getName());
 
         return task;
