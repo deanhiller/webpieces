@@ -1,5 +1,6 @@
 [versions]
 acme4j          = "2.11"
+aws             = "2.20.110"
 grpc            = "1.37.0"
 guava           = "31.1-jre"
 jackson         = "2.13.3"
@@ -25,7 +26,8 @@ apache-commons-beanutils        = { module = "commons-beanutils:commons-beanutil
 apache-commons-io               = { module = "commons-io:commons-io", version = "2.8.0" }
 apache-commons-lang3            = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
 apache-commons-text             = { module = "org.apache.commons:commons-text", version = "1.9" }
-aws-secretsmanager              = { module = "software.amazon.awssdk:secretsmanager", version = "2.18.6"}
+aws-s3                          = { module = "software.amazon.awssdk:s3", version.ref = "aws" }
+aws-secretsmanager              = { module = "software.amazon.awssdk:secretsmanager", version.ref = "aws"}
 digitalforge-log4jdbc           = { module = "org.digitalforge:log4jdbc", version = "1.0.2" }
 disruptor                       = { module = "com.conversantmedia:disruptor", version = "1.2.21" }
 elasticsearch-client            = { module = "org.elasticsearch.client:elasticsearch-rest-client", version = "7.6.1" }
