@@ -3,6 +3,8 @@ package org.webpieces.asyncserver.impl;
 import java.util.ArrayList;
 import java.util.List;
 import org.webpieces.util.futures.XFuture;
+
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.webpieces.nio.api.channels.Channel;
@@ -13,7 +15,11 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 public class ConnectedChannels {
 
-	private ConcurrentHashMap<Channel, Boolean> connectedChannels = new ConcurrentHashMap<>();
+	/**
+	 * This will leak as removeChannel is not guaranteed (for some reason :( ).
+	 */
+	private WeakHashMap<Channel, Boolean> connectedChannels = new WeakHashMap<>();
+
 	private volatile boolean closed;
 	private Counter addedCounter;
 	private Counter removedCounter;
@@ -26,7 +32,7 @@ public class ConnectedChannels {
 		removedCounter = MetricsCreator.createCounter(metrics, id, "connectionsRemoved", false);
 	}
 
-	public boolean addChannel(Channel channel) {
+	public synchronized boolean addChannel(Channel channel) {
 		if(closed) {
 			channel.close();
 			return false;
@@ -37,7 +43,7 @@ public class ConnectedChannels {
 		return true;
 	}
 	
-	public void removeChannel(Channel channel) {
+	public synchronized void removeChannel(Channel channel) {
 		if(closed) {
 			return; //don't allow any threads to modify as closeChannels will be doing it
 		}
@@ -45,7 +51,7 @@ public class ConnectedChannels {
 		this.connectedChannels.remove(channel);
 	}
 
-	public XFuture<Void> closeChannels() {
+	public synchronized XFuture<Void> closeChannels() {
 		//first prevent other threads from calling above functions ever again
 		closed = true;
 
