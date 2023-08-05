@@ -4,6 +4,8 @@ import org.webpieces.data.api.TwoPools;
 
 public class BackpressureConfig {
 
+	private Throttler throttler;
+
 	/**
 	 * The maximum bytes that can be unacked.  After this, we stop reading from the socket putting backpressure on the
 	 * remote end that is talking to you.  
@@ -42,6 +44,14 @@ public class BackpressureConfig {
 
 	public void setStartReadingThreshold(Integer startReadingThreshold) {
 		this.startReadingThreshold = startReadingThreshold;
+	}
+
+	public Throttler getThrottler() {
+		return throttler;
+	}
+
+	public void setThrottler(Throttler throttler) {
+		this.throttler = throttler;
 	}
 
 }

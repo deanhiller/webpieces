@@ -1,9 +1,6 @@
 package org.webpieces.webserver.impl;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.*;
 
 import javax.inject.Singleton;
 
@@ -12,8 +9,10 @@ import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.nio.api.Throttler;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
@@ -44,6 +43,10 @@ public class WebServerModule implements Module {
 		this.config = config;
 		this.portLookup = portLookup;
 		this.hasCoreModule = hasCoreModule;
+
+		if(config.getBackpressureConfig().getThrottler() == null) {
+			config.getBackpressureConfig().setThrottler(new Throttler());
+		}
 	}
 
 	@Override
@@ -51,7 +54,9 @@ public class WebServerModule implements Module {
 		binder.bind(WebServer.class).to(WebServerImpl.class);
 
 		binder.bind(WebServerConfig.class).toInstance(config);
-		
+
+		binder.bind(BackpressureConfig.class).toInstance(config.getBackpressureConfig());
+
 		binder.bind(RouterLookup.class).to(RouterLookupProxy.class).asEagerSingleton();
 		
 		binder.bind(ConverterLookup.class).to(ConverterLookupProxy.class).asEagerSingleton();

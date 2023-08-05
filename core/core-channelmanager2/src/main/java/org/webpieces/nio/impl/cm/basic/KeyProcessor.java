@@ -6,8 +6,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.webpieces.nio.api.Throttle;
+import org.webpieces.nio.api.Throttler;
+import org.webpieces.util.SneakyThrow;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,10 +40,13 @@ public final class KeyProcessor {
 
 	private static final Logger apiLog = LoggerFactory.getLogger(DataListener.class);
 	private static final Logger log = LoggerFactory.getLogger(KeyProcessor.class);
+	private static final Logger throttleLogger = LoggerFactory.getLogger(Throttler.class);
+
 	//private static BufferHelper helper = ChannelManagerFactory.bufferHelper(null);
 	private static boolean logBufferNextRead = false;
 	private JdkSelect selector;
 	private BufferPool pool;
+	private Throttle throttler;
 
 	private Counter connectionClosed;
 	private Counter connectionOpen;
@@ -51,10 +59,20 @@ public final class KeyProcessor {
 	private Counter readErrorType2Close;
 	private AtomicLong totalBackupCounter = new AtomicLong();
 
-	public KeyProcessor(String id, JdkSelect selector, BufferPool pool, MeterRegistry metrics) {
+	private Set<CachedKey> outstandingSvrSockets = new HashSet<>();
+	private long connectionCounter;
+	private int counter;
+
+	public KeyProcessor(String id, JdkSelect selector, BufferPool pool, MeterRegistry metrics, Throttle throttler) {
 		this.selector = selector;
 		this.pool = pool;
-		
+
+		if(throttler == null) {
+			this.throttler = new NoThrottle();
+		} else {
+			this.throttler = throttler;
+		}
+
 		connectionClosed = MetricsCreator.createCounter(metrics, id, "connectionsClosed", false);
 		connectionOpen = MetricsCreator.createCounter(metrics, id, "connectionsOpened", false);
 		connectionErrors = MetricsCreator.createCounter(metrics, id, "connectionErrors1", true);
@@ -70,7 +88,8 @@ public final class KeyProcessor {
 	}
 	
 	public void processKeys(Set<SelectionKey> keySet) {
-		Iterator<SelectionKey> iter = keySet.iterator();
+		Set<SelectionKey> copy = new HashSet<>(keySet);
+		Iterator<SelectionKey> iter = copy.iterator();
 		while (iter.hasNext()) {
 			SelectionKey key = null;
 			RegisterableChannel channel = null;
@@ -82,9 +101,9 @@ public final class KeyProcessor {
 				final SelectionKey current = key;
 				final RegisterableChannel finalChannel = channel;
 				if(log.isTraceEnabled())
-				log.trace(finalChannel+" ops="+OpType.opType(current.readyOps())
+					log.trace(finalChannel+" ops="+OpType.opType(current.readyOps())
 											+" acc="+current.isAcceptable()+" read="+current.isReadable()+" write"+current.isWritable());
-				processKey(key, struct);
+				processKey(keySet, key, struct);
 				
 			} catch(IOException e) {
 				connectionErrors.increment();
@@ -124,19 +143,53 @@ public final class KeyProcessor {
 		keySet.clear();
 	}
 	
-	private void processKey(SelectionKey key, ChannelInfo info) throws IOException, InterruptedException {
+	private void processKey(Set<SelectionKey> keySet, SelectionKey key, ChannelInfo info) throws IOException, InterruptedException {
 		if(log.isTraceEnabled())
 			log.trace(key.attachment()+" proccessing");
 
 		//This is code to try to avoid the CancelledKeyExceptions as it makes the chances tighter
 		if(!selector.isChannelOpen(key) || !key.isValid())
 			return;
-		
+
 		//if isAcceptable, than is a ServerSocketChannel
-		if(key.isAcceptable()) {
-			acceptSocket(key, info);
-		} 
-		
+		if (key.isAcceptable()) {
+			if(throttler.isThrottling()) {
+				//sleepForCtxSwitch(); //prefer other threads so try to context switch out
+				outstandingSvrSockets.add(new CachedKey(key, info));
+				int current = key.interestOps();
+				counter++;
+				log.info("Throttling incoming due to load.  not accepting YET key="+key.hashCode()+" size="+ outstandingSvrSockets.size()+" count="+connectionCounter+" ops="+current);
+				key.interestOps(current & ~SelectionKey.OP_ACCEPT);
+				//keySet.remove(key);
+			} else {
+				connectionCounter++;
+				if(throttleLogger.isDebugEnabled()) {
+					if (connectionCounter % 10 == 0)
+						throttleLogger.debug("connection counter=" + connectionCounter);
+				}
+				outstandingSvrSockets.remove(key);
+				acceptSocket(key, info);
+			}
+		}
+
+		if(!throttler.isThrottling()) {
+			//revive the 1 or 2 server sockets and re-enable them..
+			for (CachedKey pausedKey : outstandingSvrSockets) {
+				SelectionKey svrSocketKey = pausedKey.getKey();
+				log.info("UNPAUSING key="+pausedKey.hashCode()+"  size set="+ outstandingSvrSockets.size());
+				connectionCounter++;
+				if(throttleLogger.isDebugEnabled()) {
+					if (connectionCounter % 10 == 0)
+						log.debug("connection counter=" + connectionCounter);
+				}
+				acceptSocket(svrSocketKey, pausedKey.getInfo());
+				//re-enable all
+				int current = svrSocketKey.interestOps();
+				svrSocketKey.interestOps(current | SelectionKey.OP_ACCEPT);
+			}
+			outstandingSvrSockets.clear(); //processed all server sockets
+		}
+
 		if(key.isConnectable())
 			connect(key, info);
 		
@@ -150,7 +203,15 @@ public final class KeyProcessor {
 			read(key, info);
 		}                   
 	}
-	
+
+//	private void sleepForCtxSwitch() {
+//		try {
+//			Thread.sleep(1);
+//		} catch (InterruptedException e) {
+//			throw SneakyThrow.sneak(e);
+//		}
+//	}
+
 	//each of these functions should be a handler for a new type that we set up
 	//on the outside of this thing.  The signature is the same thing every time
 	// and we pass key and the Channel.  We can cast to the proper one.

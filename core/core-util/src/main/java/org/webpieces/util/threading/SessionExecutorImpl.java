@@ -79,9 +79,10 @@ public class SessionExecutorImpl implements SessionExecutor {
 			} else {
 				currentlyRunning.add(key);
 			}
-			
-			if(counter >= 10000)
-				log.warn("Session executor is falling behind on incoming data, possibly add back pressure", new RuntimeException());
+
+			if (counter >= 10000)
+				log.warn("Session executor is falling behind on incoming data, possibly configure\n" +
+						"BackpressureConfig.setThrottler on the server frontend(not http client). counter=" + counter, new RuntimeException());
 		}
 
 		executor.execute(new RunnableWithKey(key, r));

@@ -1,6 +1,11 @@
 package org.webpieces.webserver.impl;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.webpieces.nio.api.Throttler;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
@@ -11,20 +16,40 @@ import org.webpieces.router.api.RouterResponseHandler;
 import com.webpieces.http2.api.dto.highlevel.Http2Response;
 import com.webpieces.http2.api.dto.lowlevel.CancelReason;
 import com.webpieces.http2.api.streaming.PushStreamHandle;
-import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class RouterResponseHandlerImpl implements RouterResponseHandler {
-	
-    private ResponseStream stream;
 
-    public RouterResponseHandlerImpl(ResponseStream stream) {
+	private static final Logger log = LoggerFactory.getLogger(RouterResponseHandlerImpl.class);
+	private static final Logger throttleLogger = LoggerFactory.getLogger(Throttler.class);
+
+    private ResponseStream stream;
+	private Throttler throttler;
+
+	private AtomicInteger count = new AtomicInteger();
+
+	public RouterResponseHandlerImpl(ResponseStream stream, Throttler throttler) {
         this.stream = stream;
-    }
+		this.throttler = throttler;
+	}
 
     @Override
     public XFuture<StreamWriter> process(Http2Response response) {
-        return stream.process(response);
+        return stream.process(response).thenApply((str) -> {
+			boolean decremented = false;
+			if(response.isEndOfStream()) {
+				throttler.decrement();
+
+				if(throttleLogger.isDebugEnabled()) {
+					int i = count.addAndGet(1);
+					if (i % 10 == 0) {
+						log.debug("Response Headers EOM=" + i);
+					}
+				}
+				decremented = true;
+			}
+			return new ThrottleProxy(str, throttler, decremented);
+		});
     }
 
 	@Override
