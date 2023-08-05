@@ -153,41 +153,9 @@ public final class KeyProcessor {
 
 		//if isAcceptable, than is a ServerSocketChannel
 		if (key.isAcceptable()) {
-			if(throttler.isThrottling()) {
-				//sleepForCtxSwitch(); //prefer other threads so try to context switch out
-				outstandingSvrSockets.add(new CachedKey(key, info));
-				int current = key.interestOps();
-				counter++;
-				log.info("Throttling incoming due to load.  not accepting YET key="+key.hashCode()+" size="+ outstandingSvrSockets.size()+" count="+connectionCounter+" ops="+current);
-				key.interestOps(current & ~SelectionKey.OP_ACCEPT);
-				//keySet.remove(key);
-			} else {
-				connectionCounter++;
-				if(throttleLogger.isDebugEnabled()) {
-					if (connectionCounter % 10 == 0)
-						throttleLogger.debug("connection counter=" + connectionCounter);
-				}
-				outstandingSvrSockets.remove(key);
-				acceptSocket(key, info);
-			}
-		}
-
-		if(!throttler.isThrottling()) {
-			//revive the 1 or 2 server sockets and re-enable them..
-			for (CachedKey pausedKey : outstandingSvrSockets) {
-				SelectionKey svrSocketKey = pausedKey.getKey();
-				log.info("UNPAUSING key="+pausedKey.hashCode()+"  size set="+ outstandingSvrSockets.size());
-				connectionCounter++;
-				if(throttleLogger.isDebugEnabled()) {
-					if (connectionCounter % 10 == 0)
-						log.debug("connection counter=" + connectionCounter);
-				}
-				acceptSocket(svrSocketKey, pausedKey.getInfo());
-				//re-enable all
-				int current = svrSocketKey.interestOps();
-				svrSocketKey.interestOps(current | SelectionKey.OP_ACCEPT);
-			}
-			outstandingSvrSockets.clear(); //processed all server sockets
+			throttleOrProcessSvrSocket(key, info);
+		} else if(!throttler.isThrottling()) {
+			maybeTurnBackOnServerSocketIfInSet();
 		}
 
 		if(key.isConnectable())
@@ -202,6 +170,44 @@ public final class KeyProcessor {
 		if(key.isReadable()) {
 			read(key, info);
 		}                   
+	}
+
+	private void throttleOrProcessSvrSocket(SelectionKey key, ChannelInfo info) throws IOException {
+		if(throttler.isThrottling()) {
+			//sleepForCtxSwitch(); //prefer other threads so try to context switch out
+			outstandingSvrSockets.add(new CachedKey(key, info));
+			int current = key.interestOps();
+			counter++;
+			log.info("Throttling incoming due to load.  not accepting YET key="+ key.hashCode()+" size="+ outstandingSvrSockets.size()+" count="+connectionCounter+" ops="+current);
+			key.interestOps(current & ~SelectionKey.OP_ACCEPT);
+			//keySet.remove(key);
+		} else {
+			connectionCounter++;
+			if(throttleLogger.isDebugEnabled()) {
+				if (connectionCounter % 10 == 0)
+					throttleLogger.debug("connection counter=" + connectionCounter);
+			}
+			outstandingSvrSockets.remove(key);
+			acceptSocket(key, info);
+		}
+	}
+
+	private void maybeTurnBackOnServerSocketIfInSet() throws IOException {
+		//revive the 1 or 2 server sockets and re-enable them..
+		for (CachedKey pausedKey : outstandingSvrSockets) {
+			SelectionKey svrSocketKey = pausedKey.getKey();
+			log.info("UNPAUSING key="+pausedKey.hashCode()+"  size set="+ outstandingSvrSockets.size());
+			connectionCounter++;
+			if(throttleLogger.isDebugEnabled()) {
+				if (connectionCounter % 10 == 0)
+					log.debug("connection counter=" + connectionCounter);
+			}
+			acceptSocket(svrSocketKey, pausedKey.getInfo());
+			//re-enable all
+			int current = svrSocketKey.interestOps();
+			svrSocketKey.interestOps(current | SelectionKey.OP_ACCEPT);
+		}
+		outstandingSvrSockets.clear(); //processed all server sockets
 	}
 
 //	private void sleepForCtxSwitch() {
