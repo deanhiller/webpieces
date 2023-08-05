@@ -16,6 +16,8 @@ abstract class RegisterableChannelImpl implements RegisterableChannel {
 	protected SelectorManager2 selMgr;
 	private SelectionKey key;
 
+	private long lastUnregistrationTime = 0;
+
 	public RegisterableChannelImpl(String id, SelectorManager2 selMgr) {
 		if(id == null)
 			throw new IllegalArgumentException("id cannot be null");		
@@ -76,5 +78,12 @@ abstract class RegisterableChannelImpl implements RegisterableChannel {
 	public SelectorManager2 getSelectorManager() {
 		return selMgr;
 	}
-	
+
+	public long getLastUnregistrationTime() {
+		return lastUnregistrationTime;
+	}
+
+	public void setLastUnregistrationTime(long lastUnregistrationTime) {
+		this.lastUnregistrationTime = lastUnregistrationTime;
+	}
 }

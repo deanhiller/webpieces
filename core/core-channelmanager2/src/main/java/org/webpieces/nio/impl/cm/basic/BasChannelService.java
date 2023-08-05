@@ -39,8 +39,8 @@ class BasChannelService implements ChannelManager {
 			throw new IllegalArgumentException("config must be supplied");
 		this.pool = pool;
 		this.config = config;
-		processor = new KeyProcessor(name, apis, pool, metrics);
-		selMgr = new SelectorManager2(apis, processor, name);
+		processor = new KeyProcessor(name, apis, pool, metrics, config.getThrottler());
+		selMgr = new SelectorManager2(apis, processor, name, config.getThrottler());
         this.selector = apis;
         start();
 	}

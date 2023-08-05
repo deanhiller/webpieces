@@ -29,6 +29,8 @@ package org.webpieces.nio.impl.cm.basic;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.util.Set;
+
+import org.webpieces.nio.api.Throttler;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Supplier;
@@ -48,10 +50,16 @@ public class SelectorManager2 implements SelectorListener {
 //	FIELDS/MEMBERS
 //--------------------------------------------------------------------
 	private static final Logger log = LoggerFactory.getLogger(SelectorManager2.class);
-	
-    private JdkSelect selector;
+	private static final Logger throttleLogger = LoggerFactory.getLogger(Throttler.class);
+
+	private final Throttler throttler;
+
+	private JdkSelect selector;
 
 	private ConcurrentLinkedDeque<ChannelRegistrationListener> listenerList = new ConcurrentLinkedDeque<>();
+
+	private DelayedRunnables backpressureLog = new DelayedRunnables();
+
     //flag for logs so we know that the selector was woken up to close a socket.
     //this is needed as we want to see in the logs the reason of every selector fire clearly
 	private boolean needCloseOrRegister;
@@ -66,12 +74,18 @@ public class SelectorManager2 implements SelectorListener {
 //	CONSTRUCTORS
 //--------------------------------------------------------------------
 
-	public SelectorManager2(JdkSelect select, KeyProcessor helper, String threadName) {
+	public SelectorManager2(JdkSelect select, KeyProcessor helper, String threadName, Throttler throttler) {
         this.selector = select;
 		this.helper = helper;
         this.threadName = threadName;
+		this.throttler = throttler;
+
+		if(throttler != null) {
+			throttler.setFunctionToInvoke(() -> turnThrottlingOff());
+		}
 	}
-//--------------------------------------------------------------------
+
+	//--------------------------------------------------------------------
 //	BUSINESS METHODS
 //--------------------------------------------------------------------
 	public synchronized void start() {        
@@ -95,7 +109,14 @@ public class SelectorManager2 implements SelectorListener {
 	JdkSelect getSelector() {
 		return selector;
 	}
-	
+
+	private void turnThrottlingOff() {
+		//transfer delays to
+
+		//wake up to process registrations
+		wakeUpSelector();
+	}
+
 	public XFuture<Void> registerServerSocketChannel(BasTCPServerChannel s, ConnectionListener listener) 
 					throws IOException, InterruptedException {
 		return asyncRegister(s, SelectionKey.OP_ACCEPT, listener, () -> true);
@@ -122,7 +143,7 @@ public class SelectorManager2 implements SelectorListener {
 		else if(!isRunning())
 			throw new IllegalStateException("ChannelMgr is not running, call ChannelManager.start first");
 		else if(Thread.currentThread().equals(selector.getThread())) {
-			helper.unregisterSelectableChannel(channel, ops);
+			helper.unregisterSelectableChannel(channel, ops, null);
 			return XFuture.completedFuture(null);
 		} else
 			return asynchUnregister(channel, ops);			
@@ -136,52 +157,13 @@ public class SelectorManager2 implements SelectorListener {
 		} else if(!isRunning())
 			throw new IllegalStateException("ChannelMgr is not running, call ChannelManager.start first");
 		else if(Thread.currentThread().equals(selector.getThread())) {
-			registerChannelOnThisThread(s, validOps, listener, shouldRegister);
+			helper.registerChannelOnThisThread(s, validOps, listener, shouldRegister);
 			return XFuture.completedFuture(null);
 		} else
 			return asyncRegister(s, validOps, listener, shouldRegister);
 	}
 
-	private void registerChannelOnThisThread(
-			RegisterableChannelImpl channel, int validOps, Object listener, Supplier<Boolean> shouldRegister) {
-		if(channel == null)
-			throw new IllegalArgumentException("cannot register a null channel");
-		else if(!Thread.currentThread().equals(selector.getThread()))
-			throw new IllegalArgumentException("This function can only be invoked on PollingThread");
-		else if(channel.isClosed())
-			return; //do nothing if the channel is closed
-		else if(!selector.isRunning())
-			return; //do nothing if the selector is not running
-		
-		if(!shouldRegister.get())
-			return;	
-		
-		ChannelInfo struct;
-		
-		int previousOps = 0;
-		if(log.isTraceEnabled())
-			log.trace(channel+" registering ops="+OpType.opType(validOps));
-        
-		SelectionKey previous = channel.keyFor();
-		if(previous == null) {
-			struct = new ChannelInfo(channel);
-		}else if(previous.attachment() == null) {
-			struct = new ChannelInfo(channel);
-			previousOps = previous.interestOps();
-		} else {
-			struct = (ChannelInfo)previous.attachment();
-			previousOps = previous.interestOps();
-		}
-		struct.addListener(listener, validOps);
-		int allOps = previousOps | validOps;
-		SelectionKey key = channel.register(allOps, struct);
-		channel.setKey(key);
-		
-		//log.info("registering="+Helper.opType(allOps)+" opsToAdd="+Helper.opType(validOps)+" previousOps="+Helper.opType(previousOps)+" type="+type);
-		//log.info(channel+"registered2="+s+" allOps="+Helper.opType(allOps)+" k="+Helper.opType(key.interestOps()));	
-		if(log.isTraceEnabled())
-			log.trace(channel+"registered2 allOps="+OpType.opType(allOps));		
-	}
+
 
 	private XFuture<Void> asynchUnregister(final RegisterableChannelImpl s, final int validOps) 
 									throws IOException, InterruptedException {
@@ -200,7 +182,7 @@ public class SelectorManager2 implements SelectorListener {
 		// the register can grab the lock.
 		ChannelRegistrationListener r = new ChannelRegistrationListener(future, validOps) {
 			public void run() {
-				helper.unregisterSelectableChannel(s, validOps);
+				helper.unregisterSelectableChannel(s, validOps, null);
 			}
 		};
         
@@ -231,7 +213,7 @@ public class SelectorManager2 implements SelectorListener {
 			public void run() {
 //				if((validOps & SelectionKey.OP_READ) > 0)
 //					log.info("really registering for reads");
-				registerChannelOnThisThread(s, validOps, listener, causedByBackPressureForReads);
+				helper.registerChannelOnThisThread(s, validOps, listener, causedByBackPressureForReads);
 			}
 		};
 		
@@ -258,7 +240,7 @@ public class SelectorManager2 implements SelectorListener {
 		final Keys keys = selector.select();
 
 		if(log.isTraceEnabled())
-		log.trace("coming out of select with newkeys="+keys.getKeyCount()+" setSize="+keys.getSelectedKeys().size()+
+			log.trace("coming out of select with newkeys="+keys.getKeyCount()+" setSize="+keys.getSelectedKeys().size()+
 							" regCnt="+listenerList.size()+" needCloseOrRegister="+needCloseOrRegister+
 							" wantShutdown="+selector.isWantShutdown());
         
@@ -266,7 +248,7 @@ public class SelectorManager2 implements SelectorListener {
         
         needCloseOrRegister = false;
         if(keySet.size() > 0) {
-        	helper.processKeys(keySet);
+        	helper.processKeys(backpressureLog, keys);
         }
     }
 	
@@ -276,7 +258,19 @@ public class SelectorManager2 implements SelectorListener {
 //			listenerList.remove(ChannelRegistrationListener.class, listeners[i]);
 //			listeners[i].processRegistrations();
 //		}
-		
+
+		if(throttler != null && !throttler.isThrottling()) {
+			//wake up backpressure stuff first if we are done throttling!!
+			for (Runnable r : backpressureLog.getDelayedReads().values()) {
+				r.run();
+			}
+			for (Runnable r : backpressureLog.getDelayedSvrSockets().values()) {
+				r.run();
+			}
+			backpressureLog.getDelayedReads().clear();
+			backpressureLog.getDelayedSvrSockets().clear();
+		}
+
 		while(!listenerList.isEmpty()) {
 			ChannelRegistrationListener l = listenerList.poll();
 			l.processRegistrations();

@@ -4,6 +4,8 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.nio.channels.SelectionKey;
+
+import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.nio.api.channels.Channel;
@@ -15,10 +17,11 @@ public class ChannelInfo {
 
 	//private static final Logger log = LoggerFactory.getLogger(WrapperAndListener.class);
 	private String channelName;
-	private RegisterableChannel channel;
+	private RegisterableChannelImpl channel;
 	private DataListener dataHandler;
 	private XFuture<Channel> connectCallback;
-	
+	private ConnectionListener connectionListener;
+
 	public ChannelInfo(RegisterableChannelImpl r) {
 		if(r == null)
 			throw new IllegalArgumentException("r cannot be null, bug");
@@ -36,10 +39,14 @@ public class ChannelInfo {
 		//could be set wrong or twice.....ie. we can't tell.  instead use validOps
 		switch(validOps) {
 		case SelectionKey.OP_ACCEPT:
+			if(connectionListener !=null) {
+				throw new RuntimeException(channel + "ConnectionListener is already set");
+			}
+			connectionListener = (ConnectionListener) l;
 			break;
 		case SelectionKey.OP_CONNECT:
 			if(connectCallback != null)
-				throw new RuntimeException(channel+"ConnectionListener is already set, cannot be set again");
+				throw new RuntimeException(channel+"ConnectionCallback is already set, cannot be set again");
 			connectCallback = (XFuture<Channel>)l;
 			break;
 		case SelectionKey.OP_READ:
@@ -59,14 +66,22 @@ public class ChannelInfo {
 		default:
 			throw new IllegalArgumentException("type="+l.getClass().getName()+" is not allowed");
 		}
+
+		if(validOps != SelectionKey.OP_WRITE) {
+			if(dataHandler == null && connectCallback == null && connectionListener == null)
+				throw new IllegalArgumentException("Missing a handler to call back to");
+		}
 	}
 
 	public void removeListener(int ops) {
 		if((ops & SelectionKey.OP_READ) > 0)
 			dataHandler = null;
+		else if((ops & SelectionKey.OP_ACCEPT) > 0) {
+			connectionListener = null;
+		}
 	}
 	
-	public RegisterableChannel getChannel() {
+	public RegisterableChannelImpl getChannel() {
 		return channel;
 	}
 
@@ -78,4 +93,7 @@ public class ChannelInfo {
 		return dataHandler;
 	}
 
+	public ConnectionListener getConnectionListener() {
+		return connectionListener;
+	}
 }

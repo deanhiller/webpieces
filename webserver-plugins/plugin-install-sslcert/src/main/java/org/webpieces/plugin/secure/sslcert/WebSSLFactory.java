@@ -38,6 +38,8 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 	
 	private static final Logger log = LoggerFactory.getLogger(WebSSLFactory.class);
 
+	private int counter = 0;
+
 	private String serverKeystore = "/keystore.jks";
 	private	String password = "password";
 	private char[] passphrase = password.toCharArray();
@@ -75,7 +77,11 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 		//configured it)
 		String cert = properties.get(InstallSslCertPlugin.CERT_CHAIN_PREFIX+0);
 		if(cert == null) {
-			log.warn("No cert for SSL installed yet, using self signed cert");
+			counter++;
+			if(counter < 10) {
+				//only log this 10 times... we do not need to keep logging it
+				log.warn("No cert for SSL installed yet, using self signed cert");
+			}
 			return null;
 		}
 		

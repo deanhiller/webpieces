@@ -241,11 +241,11 @@ public abstract class BasChannelImpl
      * did not get written out when client called write.
      *
      */
-	 void writeAll() {
+	 void writeAll(SelectionKey key) {
 		List<XFuture<Void>> finishedPromises = new ArrayList<>();
 		synchronized(writeLock) {
 	        if(dataToBeWritten.isEmpty())
-	        	throw new IllegalStateException(this+"bug, I am not sure this is possible..it shouldn't be...look into");
+	        	throw new IllegalStateException(this+"bug, I am not sure this is possible..it shouldn't be...look into. channel="+this);
 	
 	        while(!dataToBeWritten.isEmpty()) {
 	            WriteInfo writer = dataToBeWritten.peek();
@@ -254,7 +254,7 @@ public abstract class BasChannelImpl
 	    		int wroteOut = this.writeImpl(buffer);
 	            if(buffer.hasRemaining()) {
 					if(buffer.remaining() + wroteOut != initialSize)
-						throw new IllegalStateException(this+"Something went wrong.  b.remaining()="+buffer.remaining()+" written="+wroteOut+" total="+initialSize);
+						throw new IllegalStateException(this+"Something went wrong.  b.remaining()="+buffer.remaining()+" written="+wroteOut+" total="+initialSize+" this="+this);
 					
 	                if(log.isTraceEnabled())
 						log.trace(this+"Did not write all data out");
@@ -277,7 +277,7 @@ public abstract class BasChannelImpl
 	        	inDelayedWriteMode = false;
 	        	if(log.isTraceEnabled())
 					log.trace(this+"unregister writes");
-	            router.unregisterSelectableChannel(this, SelectionKey.OP_WRITE);
+	            router.unregisterSelectableChannel(this, SelectionKey.OP_WRITE, key);
 	        }
 		}
 		
