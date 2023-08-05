@@ -56,7 +56,7 @@ public class Throttler implements Throttle {
 
         if(outstandingRequests < minRequestsTurnOffThrottle) {
             if(isThrottling)
-                log.warn("TURNING OFF THROTTLING requests. count="+outstandingRequests);
+                log.info("TURNING OFF THROTTLING requests. count="+outstandingRequests);
             isThrottling = false;
         }
     }
