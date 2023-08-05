@@ -8,4 +8,9 @@ public class NoThrottle implements Throttle {
     public boolean isThrottling() {
         return false;
     }
+
+    @Override
+    public void setFunctionToInvoke(Runnable turnThrottlingOff) {
+        //ignore - we never turn it on.
+    }
 }

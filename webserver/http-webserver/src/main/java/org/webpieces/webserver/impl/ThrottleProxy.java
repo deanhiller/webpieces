@@ -38,7 +38,7 @@ public class ThrottleProxy implements StreamWriter {
                 if(throttleLogger.isDebugEnabled()) {
                     int i = count.addAndGet(1);
                     if (i % 10 == 0) {
-                        log.debug("Response data EOM=" + i);
+                        throttleLogger.debug("Response data EOM=" + i);
                     }
                 }
                 decremented = true;

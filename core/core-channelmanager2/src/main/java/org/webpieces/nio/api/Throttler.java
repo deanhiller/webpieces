@@ -21,8 +21,10 @@ public class Throttler implements Throttle {
     private int outstandingRequests = 0;
 
     private boolean isThrottling;
+    private Runnable turnThrottlingOff;
 
-    public Throttler() {}
+    public Throttler() {
+    }
 
     public Throttler(int maxConcurrentRequestThrottle, int minRequestsTurnOffThrottle) {
         this.maxConcurrentRequestThrottle = maxConcurrentRequestThrottle;
@@ -58,11 +60,22 @@ public class Throttler implements Throttle {
             if(isThrottling)
                 log.info("TURNING OFF THROTTLING requests. count="+outstandingRequests);
             isThrottling = false;
+
+            if(turnThrottlingOff != null) {
+                turnThrottlingOff.run();
+            } else {
+                log.warn("FAIL, could not turn off throttling as no function installed - perhaps you are in embeeded test mode");
+            }
         }
     }
 
     public boolean isThrottling() {
         return isThrottling;
+    }
+
+    @Override
+    public void setFunctionToInvoke(Runnable turnThrottlingOff) {
+        this.turnThrottlingOff = turnThrottlingOff;
     }
 
 

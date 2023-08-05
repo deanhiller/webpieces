@@ -43,7 +43,7 @@ public class RouterResponseHandlerImpl implements RouterResponseHandler {
 				if(throttleLogger.isDebugEnabled()) {
 					int i = count.addAndGet(1);
 					if (i % 10 == 0) {
-						log.debug("Response Headers EOM=" + i);
+						throttleLogger.debug("Response Headers EOM=" + i);
 					}
 				}
 				decremented = true;

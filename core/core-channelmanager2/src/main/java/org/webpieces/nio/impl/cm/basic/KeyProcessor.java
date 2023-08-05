@@ -6,17 +6,17 @@ import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import org.webpieces.nio.api.Throttle;
 import org.webpieces.nio.api.Throttler;
-import org.webpieces.util.SneakyThrow;
+import org.webpieces.nio.api.handlers.ConnectionListener;
+import org.webpieces.nio.api.jdk.Keys;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,9 +59,7 @@ public final class KeyProcessor {
 	private Counter readErrorType2Close;
 	private AtomicLong totalBackupCounter = new AtomicLong();
 
-	private Set<CachedKey> outstandingSvrSockets = new HashSet<>();
 	private long connectionCounter;
-	private int counter;
 
 	public KeyProcessor(String id, JdkSelect selector, BufferPool pool, MeterRegistry metrics, Throttle throttler) {
 		this.selector = selector;
@@ -87,9 +85,11 @@ public final class KeyProcessor {
 		MetricsCreator.createGauge(metrics, id+".allChannelsBackPressure", totalBackupCounter, (c) -> c.get());
 	}
 	
-	public void processKeys(Set<SelectionKey> keySet) {
-		Set<SelectionKey> copy = new HashSet<>(keySet);
-		Iterator<SelectionKey> iter = copy.iterator();
+	public void processKeys(DelayedRunnables delayedRunnables, Keys keys) {
+		Set<SelectionKey> keySet = keys.getSelectedKeys();
+		int initialSize = keySet.size();
+		Iterator<SelectionKey> iter = keySet.iterator();
+		Counts counts = new Counts();
 		while (iter.hasNext()) {
 			SelectionKey key = null;
 			RegisterableChannel channel = null;
@@ -103,7 +103,7 @@ public final class KeyProcessor {
 				if(log.isTraceEnabled())
 					log.trace(finalChannel+" ops="+OpType.opType(current.readyOps())
 											+" acc="+current.isAcceptable()+" read="+current.isReadable()+" write"+current.isWritable());
-				processKey(keySet, key, struct);
+				processKey(delayedRunnables, key, struct, counts);
 				
 			} catch(IOException e) {
 				connectionErrors.increment();
@@ -141,9 +141,12 @@ public final class KeyProcessor {
 		//goes off again and has the stale key plus the new key and the stale key
 		//is processed again.
 		keySet.clear();
+
+		if(throttleLogger.isTraceEnabled() && throttler.isThrottling())
+			throttleLogger.trace("DONE processing keys. "+counts+" toProcess="+keys.getKeyCount()+" setSize="+initialSize+" now="+keySet.size());
 	}
 	
-	private void processKey(Set<SelectionKey> keySet, SelectionKey key, ChannelInfo info) throws IOException, InterruptedException {
+	private void processKey(DelayedRunnables delayedRunnables, SelectionKey key, ChannelInfo info, Counts counts) throws IOException, InterruptedException {
 		if(log.isTraceEnabled())
 			log.trace(key.attachment()+" proccessing");
 
@@ -153,78 +156,112 @@ public final class KeyProcessor {
 
 		//if isAcceptable, than is a ServerSocketChannel
 		if (key.isAcceptable()) {
-			throttleOrProcessSvrSocket(key, info);
-		} else if(!throttler.isThrottling()) {
-			maybeTurnBackOnServerSocketIfInSet();
+			throttleOrProcessSvrSocket(delayedRunnables.getDelayedSvrSockets(), new CachedKey(key, info));
+			counts.addAccept();
 		}
 
-		if(key.isConnectable())
+		if(key.isConnectable()) {
 			connect(key, info);
+			counts.addConnect();
+		}
 		
 		if(key.isWritable()) {
 			write(key, info);
+			counts.addWrite();
 		}
             
 		//The read MUST be after the write as a call to key.isWriteable is invalid if the
 		//read resulted in the far end closing the socket.
 		if(key.isReadable()) {
-			read(key, info);
+			throttleOrProcess(delayedRunnables.getDelayedReads(), new CachedKey(key, info));
+			counts.addRead();
 		}                   
 	}
 
-	private void throttleOrProcessSvrSocket(SelectionKey key, ChannelInfo info) throws IOException {
+	private void throttleOrProcess(Map<SelectionKey, Runnable> delayedReads, CachedKey cachedKey) throws IOException {
+		SelectionKey key = cachedKey.getKey();
 		if(throttler.isThrottling()) {
-			//sleepForCtxSwitch(); //prefer other threads so try to context switch out
-			outstandingSvrSockets.add(new CachedKey(key, info));
-			int current = key.interestOps();
-			counter++;
-			log.info("Throttling incoming due to load.  not accepting YET key="+ key.hashCode()+" size="+ outstandingSvrSockets.size()+" count="+connectionCounter+" ops="+current);
-			key.interestOps(current & ~SelectionKey.OP_ACCEPT);
-			//keySet.remove(key);
+			if(delayedReads.size() < 1) {
+				//only log first one each time we turn on..
+				throttleLogger.info("START Throttling reads until server caught up on responding. chan="+cachedKey.getInfo().getChannel()+" delReads="+delayedReads.size());
+			}
+
+			DataListener dataHandler = cachedKey.getInfo().getDataHandler();
+			if(dataHandler == null)
+				throw new IllegalStateException("bug, should not be null here");
+
+			RegisterableChannelImpl channel = cachedKey.getInfo().getChannel();
+			unregisterSelectableChannel(channel, SelectionKey.OP_READ, key);
+
+			Runnable r = () -> runDelayedTurnOnReading(cachedKey, dataHandler);
+			delayedReads.put(key, r);
+
 		} else {
-			connectionCounter++;
-			if(throttleLogger.isDebugEnabled()) {
-				if (connectionCounter % 10 == 0)
-					throttleLogger.debug("connection counter=" + connectionCounter);
-			}
-			outstandingSvrSockets.remove(key);
-			acceptSocket(key, info);
+			read(cachedKey);
 		}
 	}
 
-	private void maybeTurnBackOnServerSocketIfInSet() throws IOException {
-		//revive the 1 or 2 server sockets and re-enable them..
-		for (CachedKey pausedKey : outstandingSvrSockets) {
-			SelectionKey svrSocketKey = pausedKey.getKey();
-			log.info("UNPAUSING key="+pausedKey.hashCode()+"  size set="+ outstandingSvrSockets.size());
-			connectionCounter++;
-			if(throttleLogger.isDebugEnabled()) {
-				if (connectionCounter % 10 == 0)
-					log.debug("connection counter=" + connectionCounter);
-			}
-			acceptSocket(svrSocketKey, pausedKey.getInfo());
-			//re-enable all
-			int current = svrSocketKey.interestOps();
-			svrSocketKey.interestOps(current | SelectionKey.OP_ACCEPT);
+	private void throttleOrProcessSvrSocket(Map<SelectionKey, Runnable> delayedRunnables, CachedKey cachedKey) throws IOException {
+		SelectionKey key = cachedKey.getKey();
+		if(throttler.isThrottling()) {
+			throttleLogger.info("Throttling incoming connections to load.  not accepting YET. size="
+					+ delayedRunnables.size()+" count="+connectionCounter+" chan="+cachedKey.getInfo().getChannel()
+					+ " key="+key);
+
+			ConnectionListener connectionListener = cachedKey.getInfo().getConnectionListener();
+			if(connectionListener == null)
+				throw new IllegalStateException("bug, should have a connection listener");
+
+			RegisterableChannelImpl channel = cachedKey.getInfo().getChannel();
+			unregisterSelectableChannel(channel, SelectionKey.OP_ACCEPT, key);
+
+			Runnable r = () -> runDelayedAcceptSocket(cachedKey, connectionListener);
+			delayedRunnables.put(key, r);
+
+		} else {
+			acceptSocket(cachedKey);
 		}
-		outstandingSvrSockets.clear(); //processed all server sockets
 	}
 
-//	private void sleepForCtxSwitch() {
-//		try {
-//			Thread.sleep(1);
-//		} catch (InterruptedException e) {
-//			throw SneakyThrow.sneak(e);
-//		}
-//	}
+	public void runDelayedTurnOnReading(CachedKey cached, DataListener dataHandler) {
+		try {
+			RegisterableChannelImpl channel = cached.getInfo().getChannel();
+			registerChannelOnThisThread(channel, SelectionKey.OP_READ, dataHandler, () -> true);
+		} catch (Throwable e) {
+			log.error("Fatal excception trying to turn back on reading from socket: "+cached.getInfo().getChannel(), e);
+		}
+	}
+
+	public void runDelayedAcceptSocket(CachedKey cached, ConnectionListener connectionListener) {
+		try {
+			RegisterableChannelImpl channel = cached.getInfo().getChannel();
+			registerChannelOnThisThread(channel, SelectionKey.OP_ACCEPT, connectionListener, () -> true);
+		} catch (Throwable e) {
+			log.error("Fatal excception trying to turn back on accepting connections on server socket", e);
+		}
+
+		try {
+			acceptSocket(cached);
+		} catch (Throwable e) {
+			log.error("Excception trying to accept incoming connection. moving on...", e);
+		}
+	}
 
 	//each of these functions should be a handler for a new type that we set up
 	//on the outside of this thing.  The signature is the same thing every time
 	// and we pass key and the Channel.  We can cast to the proper one.
-	private void acceptSocket(SelectionKey key, ChannelInfo info) throws IOException {
+	private void acceptSocket(CachedKey cached) throws IOException {
+		SelectionKey key = cached.getKey();
+		ChannelInfo info = cached.getInfo();
 		if(log.isTraceEnabled())
 			log.trace(info.getChannel()+" Incoming Connection="+key);
-		
+
+		connectionCounter++;
+		if(throttleLogger.isDebugEnabled()) {
+			if (connectionCounter % 10 == 0)
+				throttleLogger.debug("connection counter=" + connectionCounter);
+		}
+
 		BasTCPServerChannel channel = (BasTCPServerChannel)info.getChannel();
 		channel.accept(channel.getChannelCount());
 	}
@@ -261,7 +298,9 @@ public final class KeyProcessor {
 		}
 	}
 
-	private void read(SelectionKey key, ChannelInfo info) throws IOException {
+	private void read(CachedKey cachedKey) throws IOException {
+		SelectionKey key = cachedKey.getKey();
+		ChannelInfo info = cachedKey.getInfo();
 		if(log.isTraceEnabled())
 			log.trace(info.getChannel()+"reading data");
 		
@@ -438,7 +477,7 @@ public final class KeyProcessor {
 		if(unregister) {
 			backPressureUnregisterSocket.increment();
 			log.warn(channel + " Overloaded channel.  unregistering until YOU catch up you slowass(lol). num=" + unackedByteCnt + " max=" + channel.getMaxUnacked());
-			unregisterSelectableChannel(channel, SelectionKey.OP_READ);
+			unregisterSelectableChannel(channel, SelectionKey.OP_READ, key);
 		}
 
 		future.handle((v, t) -> {
@@ -492,7 +531,7 @@ public final class KeyProcessor {
 			log.trace(channel+"notifying channel of write");
 
 		try {
-			channel.writeAll();
+			channel.writeAll(key);
 		} catch(NioClosedChannelException e) {
 			//since it may close while someone is async writing, this is normal behavior so we swallow it and log as info
 			log.info(channel+" Channel is closed so discarding the async writes");
@@ -500,24 +539,73 @@ public final class KeyProcessor {
 			MDCUtil.clearMDC(channel.isServerSide());
 		}
 	}
-	
-	void unregisterSelectableChannel(RegisterableChannelImpl channel, int ops) {
-		SelectorManager2 mgr = channel.getSelectorManager();		
-		if(!Thread.currentThread().equals(mgr.getThread()))
-			throw new RuntimeException(channel+"Bug, changing selector keys can only be done " +
+
+	public void registerChannelOnThisThread(
+			RegisterableChannelImpl channel, int validOps, Object listener, Supplier<Boolean> shouldRegister) {
+		if(channel == null)
+			throw new IllegalArgumentException("cannot register a null channel");
+		else if(!Thread.currentThread().equals(selector.getThread()))
+			throw new IllegalArgumentException("This function can only be invoked on PollingThread");
+		else if(channel.isClosed())
+			return; //do nothing if the channel is closed
+		else if(!selector.isRunning())
+			return; //do nothing if the selector is not running
+
+		if(!shouldRegister.get())
+			return;
+
+		ChannelInfo struct;
+
+		int previousOps = 0;
+		if(log.isTraceEnabled())
+			log.trace(channel+" registering ops="+OpType.opType(validOps));
+
+		SelectionKey previous = channel.keyFor();
+		if(previous == null) {
+			struct = new ChannelInfo(channel);
+		}else if(previous.attachment() == null) {
+			struct = new ChannelInfo(channel);
+			previousOps = previous.interestOps();
+		} else {
+			struct = (ChannelInfo)previous.attachment();
+			previousOps = previous.interestOps();
+		}
+		struct.addListener(listener, validOps);
+		int allOps = previousOps | validOps;
+		SelectionKey key = channel.register(allOps, struct);
+		channel.setKey(key);
+
+		//log.info("registering="+Helper.opType(allOps)+" opsToAdd="+Helper.opType(validOps)+" previousOps="+Helper.opType(previousOps)+" type="+type);
+		//log.info(channel+"registered2="+s+" allOps="+Helper.opType(allOps)+" k="+Helper.opType(key.interestOps()));
+		if(log.isTraceEnabled())
+			log.trace(channel+"registered2 allOps="+OpType.opType(allOps));
+	}
+
+	void unregisterSelectableChannel(RegisterableChannelImpl channel, int ops, SelectionKey theKey) {
+		SelectorManager2 mgr = channel.getSelectorManager();
+		SelectionKey key = channel.keyFor();
+		long now = System.currentTimeMillis();
+		long timeFromLastUnreg = now - channel.getLastUnregistrationTime();
+		if(!Thread.currentThread().equals(mgr.getThread())) {
+			throw new RuntimeException(channel + "Bug, changing selector keys can only be done " +
 					"on registration thread because there is not synchronization");
+		} else if(theKey != null) {
+			if(theKey != key)
+				throw new IllegalStateException("these keys should match");
+		} else if(timeFromLastUnreg < 100) {
+			throw new IllegalStateException("Time since last unrgister="+timeFromLastUnreg+" which should not be possible, possible bug?");
+		}
 
 		//this could be dangerous and result in deadlock....may want
 		//to move this to the selector thread from jdk bugs!!!
 		//but alas, follow KISS, move on...
-        SelectionKey key = channel.keyFor();
         if(key == null || !key.isValid()) //no need to unregister, key is cancelled
             return;
 
 		int previous = key.interestOps();
 		int opsNow = previous & ~ops; //subtract out the operation
 		key.interestOps(opsNow);
-		
+
 		//log.info(channel+" unregistering="+Helper.opType(opsNow)+" opToSubtract="+Helper.opType(ops)+" previous="+Helper.opType(previous)+" type="+type);
 		
 		//make sure we remove the appropriate listener and clean up
