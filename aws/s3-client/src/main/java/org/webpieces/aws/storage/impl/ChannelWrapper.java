@@ -1,14 +1,9 @@
 package org.webpieces.aws.storage.impl;
 
-import com.google.cloud.storage.Blob;
-import org.webpieces.util.context.ClientAssertions;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.lang.reflect.Proxy;
 import java.nio.channels.Channel;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class ChannelWrapper {
 
@@ -17,15 +12,6 @@ public class ChannelWrapper {
     @Inject
     public ChannelWrapper(Provider<ChannelInvocationHandler> invocHandlerProvider) {
         this.invocHandlerProvider = invocHandlerProvider;
-    }
-
-    public ReadableByteChannel createReader(Blob blob) {
-        return newChannelProxy(ReadableByteChannel.class, blob.reader());
-    }
-
-    public WritableByteChannel createWriter(Blob blob) {
-        //any code in here is a delayed call
-        return newChannelProxy(WritableByteChannel.class, blob.writer());
     }
 
     public <T extends Channel> T newChannelProxy(Class<T> intf, T channel) {

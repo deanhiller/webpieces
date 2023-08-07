@@ -1,140 +1,186 @@
-package org.webpieces.googlecloud.storage.impl.local;
+package org.webpieces.aws.storage.impl.local;
 
-import com.google.api.gax.paging.Page;
-import com.google.cloud.storage.*;
-import org.webpieces.googlecloud.storage.api.CopyInterface;
-import org.webpieces.googlecloud.storage.api.GCPBlob;
-import org.webpieces.googlecloud.storage.api.GCPRawStorage;
+
+import org.webpieces.aws.storage.api.AWSBlob;
+import org.webpieces.aws.storage.api.AWSRawStorage;
+import org.webpieces.aws.storage.impl.raw.AWSBlobImpl;
 import org.webpieces.util.SneakyThrow;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.stream.Stream;
 
 @Singleton
-public class LocalStorage implements GCPRawStorage {
-    public static final String LOCAL_BUILD_DIR = "build/local-cloudstorage/";
+public class LocalStorage implements AWSRawStorage {
+    public static final String LOCAL_BUILD_DIR = "build/local-s3storage/";
 
     @Inject
     public LocalStorage() {
     }
 
     @Override
-    public Bucket get(String bucket, Storage.BucketGetOption... options) {
-        throw new UnsupportedOperationException("Need to implement this still");
-    }
+    public AWSBlob get(String bucket, String key) {
 
-    @Override
-    public GCPBlob get(String bucket, String blob, Storage.BlobGetOption... options) {
-        // If we find bucket and blob, we will return the value. Otherwise, we will return null.
-        InputStream in = this.getClass().getClassLoader()
-                .getResourceAsStream(bucket + "/" + blob);
+        InputStream in = getInputStream(bucket, key);
         if(in != null) {
-            return new LocalAWSBlobImpl(bucket, blob);
+            return new LocalAWSBlobImpl(bucket, key, null, -1);
         }
 
-        File file = new File(LOCAL_BUILD_DIR + bucket + "/" + blob);
-        if(file.exists()) {
-            return new LocalAWSBlobImpl(bucket, blob);
+        Path path = getFilePath(bucket, key);
+
+        if(Files.exists(path)) {
+            long size = -1;
+            try {
+                size = Files.size(path);
+            } catch(IOException ex) {
+                throw SneakyThrow.sneak(ex);
+            }
+            return new LocalAWSBlobImpl(bucket, key, null, size);
         }
 
         return null;
     }
 
     @Override
-    public Page<GCPBlob> list(String bucket, Storage.BlobListOption... options) {
-        File file = new File(LOCAL_BUILD_DIR+bucket);
-        if(!file.exists())
-            file.mkdirs();
-        return new LocalPage(bucket, file);
+    public Stream<AWSBlob> list(String bucket) {
+
+        Path bucketPath = getBucketPath(bucket);
+
+        try {
+
+            if(!Files.exists(bucketPath)) {
+                Files.createDirectories(bucketPath);
+            }
+
+            return Files.find(bucketPath, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).map(p -> {
+                long size = -1;
+                try {
+                    size = Files.size(p);
+                } catch (IOException ex) {
+                    throw SneakyThrow.sneak(ex);
+                }
+                return new AWSBlobImpl(bucket, bucketPath.relativize(p).toString(), null, size);
+            });
+
+        } catch(IOException ex) {
+            throw SneakyThrow.sneak(ex);
+        }
+
     }
 
     @Override
-    public boolean delete(String bucket, String blob, Storage.BlobSourceOption... options)
-    {
-        //check if the bucket and blob exists.
-        String dir = LOCAL_BUILD_DIR + bucket + "/" + blob;
-        File file = new File(dir);
-        return file.delete();
+    public boolean delete(String bucket, String key) {
+
+        Path file = getFilePath(bucket, key);
+
+        try {
+            return Files.deleteIfExists(file);
+        } catch(IOException ex) {
+            throw SneakyThrow.sneak(ex);
+        }
+
     }
 
     @Override
-    public byte[] readAllBytes(String bucket, String blob, Storage.BlobSourceOption... options) {
-        throw new UnsupportedOperationException("Need to implement this still");
+    public byte[] readAllBytes(String bucket, String key) {
+
+        Path file = getFilePath(bucket, key);
+
+        if(!Files.exists(file)) {
+            return null;
+        }
+
+        try {
+            return Files.readAllBytes(file);
+        } catch(IOException ex) {
+            throw SneakyThrow.sneak(ex);
+        }
+
     }
 
     @Override
-    public ReadableByteChannel reader(String bucket, String blob, Storage.BlobSourceOption... options) {
-        InputStream in = this.getClass().getClassLoader()
-                .getResourceAsStream(bucket + "/" + blob);
+    public ReadableByteChannel reader(String bucket, String key) {
+
+        InputStream in = getInputStream(bucket, key);
         if(in != null) {
             ReadableByteChannel channel = Channels.newChannel(in);
             return channel;
         }
 
-        //read from build directory
-        File file = new File(LOCAL_BUILD_DIR + bucket + "/" + blob);
-        try {
-            InputStream i = new FileInputStream(file);
-            ReadableByteChannel channel = Channels.newChannel(i);
-            return channel;
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+        Path path = getFilePath(bucket, key);
+
+        if(!Files.exists(path)) {
+            return null;
         }
+
+        try {
+            return FileChannel.open(path, StandardOpenOption.READ);
+        }
+        catch(IOException ex) {
+            throw SneakyThrow.sneak(ex);
+        }
+
     }
 
     @Override
-    public WritableByteChannel writer(BlobInfo blobInfo, Storage.BlobWriteOption... options) {
-        String bucket = blobInfo.getBlobId().getBucket();
-        String name = blobInfo.getBlobId().getName();
-        File file = new File(LOCAL_BUILD_DIR + bucket + "/" + name);
+    public WritableByteChannel writer(String bucket, String key) {
+
+        Path path = getFilePath(bucket, key);
+
         try {
-            File dir = file.getParentFile();
-            if(!dir.exists())
-                dir.mkdirs();
-//            if(!file.exists())
-//                file.createNewFile();
-            OutputStream o = new FileOutputStream(file);
-            WritableByteChannel writableByteChannel = Channels.newChannel(o);
-            return writableByteChannel;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            Files.createDirectories(path.getParent());
+        } catch(IOException ex) {
+            throw SneakyThrow.sneak(ex);
         }
+
+        try {
+            return FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        } catch(IOException ex) {
+            throw SneakyThrow.sneak(ex);
+        }
+
     }
 
     @Override
-    public CopyInterface copy(Storage.CopyRequest copyRequest) {
+    public boolean copy(String sourceBucket, String sourceKey, String destBucket, String destKey) {
+
+        ReadableByteChannel source = reader(sourceBucket, sourceKey);
+        Path dest = getFilePath(destBucket, destKey);
+
         try {
-            LocalCopyWriter cp = new LocalCopyWriter(copyRequest);
-            BlobId source = copyRequest.getSource();
-            BlobInfo target = copyRequest.getTarget();
-
-            ReadableByteChannel inFile = reader(source.getBucket(), source.getName());
-
-            File outFile = new File(LOCAL_BUILD_DIR + "copybucket" + "/" + target.getName());
-
-            FileOutputStream out = new FileOutputStream(outFile);
-            WritableByteChannel targetChannel = out.getChannel();
-
-            ByteBuffer byteBuffer = ByteBuffer.allocate(10240); //Had to import ByteBuffer to make it work.
-            int read;
-            read = inFile.read(byteBuffer);
-            if (read > 0) {
-                byteBuffer.limit(byteBuffer.position());
-                byteBuffer.rewind();
-                targetChannel.write(byteBuffer);
-                byteBuffer.clear();
-            }
-                inFile.close();
-                targetChannel.close();
-            return cp;
+            Files.createDirectories(dest.getParent());
+        } catch(IOException ex) {
+            throw SneakyThrow.sneak(ex);
         }
-        catch (IOException e){
-            throw SneakyThrow.sneak(e);
+
+        try(FileChannel fc = FileChannel.open(dest, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+            fc.transferFrom(source, 0, Long.MAX_VALUE);
+        } catch(IOException ex) {
+            throw SneakyThrow.sneak(ex);
         }
+
+        return true;
+
     }
+
+    private Path getBucketPath(String bucket) {
+        return Path.of(LOCAL_BUILD_DIR, bucket);
+    }
+
+    private Path getFilePath(String bucket, String key) {
+        return getBucketPath(bucket).resolve(key);
+    }
+
+    private InputStream getInputStream(String bucket, String key) {
+        return this.getClass().getClassLoader().getResourceAsStream(bucket + "/" + key);
+    }
+
 }

@@ -4,19 +4,18 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.stream.Stream;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.async.AsyncRequestBody;
-import software.amazon.awssdk.core.async.BlockingInputStreamAsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import org.webpieces.aws.storage.api.AWSBlob;
 import org.webpieces.aws.storage.api.AWSRawStorage;
+import org.webpieces.aws.storage.impl.S3WritableByteChannel;
+import org.webpieces.aws.storage.impl.StorageSupplier;
 import org.webpieces.util.SingletonSupplier;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * ADD NO CODE to this class as it is not tested until integration time.  If it is 1 to 1,
@@ -35,11 +34,17 @@ public class AWSRawStorageImpl implements AWSRawStorage { //implements Storage {
     @Override
     public AWSBlob get(String bucket, String key) {
 
-        HeadObjectResponse response = storage.get().headObject(HeadObjectRequest.builder().bucket(bucket).key(key).build());
-        String contentType = response.contentType();
-        long size = response.contentLength();
+        try {
 
-        return new AWSBlobImpl(bucket, key, contentType, size);
+            HeadObjectResponse response = storage.get().headObject(HeadObjectRequest.builder().bucket(bucket).key(key).build());
+            String contentType = response.contentType();
+            long size = response.contentLength();
+
+            return new AWSBlobImpl(bucket, key, contentType, size);
+        } catch(NoSuchKeyException ex) {
+            return null;
+        }
+
     }
 
     @Override
@@ -69,12 +74,7 @@ public class AWSRawStorageImpl implements AWSRawStorage { //implements Storage {
 
     @Override
     public WritableByteChannel writer(String bucket, String key) {
-
-        BlockingInputStreamAsyncRequestBody body = AsyncRequestBody.forBlockingInputStream(null);
-
-
-        storage.get().putObject(PutObjectRequest.builder().bucket(bucket).key(key).build())
-        return storage.get().writer(blobInfo, options);
+        return new S3WritableByteChannel(storage.get(), bucket, key);
     }
 
     @Override

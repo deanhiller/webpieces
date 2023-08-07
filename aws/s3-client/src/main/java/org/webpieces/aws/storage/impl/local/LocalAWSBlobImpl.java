@@ -1,16 +1,18 @@
-package org.webpieces.googlecloud.storage.impl.local;
+package org.webpieces.aws.storage.impl.local;
 
-import org.webpieces.googlecloud.storage.api.GCPBlob;
+import org.webpieces.aws.storage.api.AWSBlob;
 
-public class LocalAWSBlobImpl implements GCPBlob {
+public class LocalAWSBlobImpl implements AWSBlob {
     String bucket;
-    String name;
+    String key;
     String contentType;
     long size;
 
-    public LocalAWSBlobImpl(String bucket, String name) {
+    public LocalAWSBlobImpl(String bucket, String key, String contentType, long size) {
         this.bucket = bucket;
-        this.name = name;
+        this.key = key;
+        this.contentType = contentType;
+        this.size = size;
     }
 
     @Override
@@ -19,8 +21,8 @@ public class LocalAWSBlobImpl implements GCPBlob {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getKey() {
+        return key;
     }
 
     @Override

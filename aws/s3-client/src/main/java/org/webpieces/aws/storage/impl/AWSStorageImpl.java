@@ -1,15 +1,8 @@
 package org.webpieces.aws.storage.impl;
 
-import com.google.api.gax.paging.Page;
-import com.google.cloud.storage.*;
-
 import org.webpieces.aws.storage.api.AWSBlob;
 import org.webpieces.aws.storage.api.AWSRawStorage;
 import org.webpieces.aws.storage.api.AWSStorage;
-import org.webpieces.googlecloud.storage.api.CopyInterface;
-import org.webpieces.googlecloud.storage.api.GCPBlob;
-import org.webpieces.googlecloud.storage.api.GCPRawStorage;
-import org.webpieces.googlecloud.storage.api.GCPStorage;
 import org.webpieces.util.context.ClientAssertions;
 
 import javax.inject.Inject;
