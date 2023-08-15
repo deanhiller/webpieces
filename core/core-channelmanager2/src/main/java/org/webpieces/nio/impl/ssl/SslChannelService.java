@@ -7,6 +7,7 @@ import javax.net.ssl.SSLEngine;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.nio.api.Throttle;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -89,6 +90,11 @@ public class SslChannelService implements ChannelManager {
 	@Override
 	public String getName() {
 		return mgr.getName();
+	}
+
+	@Override
+	public Throttle getThrottle() {
+		return mgr.getThrottle();
 	}
 
 }

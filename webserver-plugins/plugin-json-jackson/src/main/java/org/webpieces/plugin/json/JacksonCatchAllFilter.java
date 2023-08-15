@@ -45,7 +45,7 @@ public class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
     @Inject
     public JacksonCatchAllFilter(ClientServiceConfig config, JacksonJsonConverter mapper, JacksonConfig jacksonConfig) {
         this.mapper = mapper;
-        this.svcName = config.getServiceName();
+        this.svcName = config.getServersName();
         this.jacksonConfig = jacksonConfig;
     }
 

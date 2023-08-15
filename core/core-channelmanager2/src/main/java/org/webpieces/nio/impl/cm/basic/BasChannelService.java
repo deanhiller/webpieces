@@ -3,9 +3,7 @@ package org.webpieces.nio.impl.cm.basic;
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.nio.api.BackpressureConfig;
-import org.webpieces.nio.api.ChannelManager;
-import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.nio.api.*;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -25,6 +23,7 @@ import io.micrometer.core.instrument.MeterRegistry;
  */
 class BasChannelService implements ChannelManager {
 
+	private final Throttler throttler;
 	private SelectorManager2 selMgr;
     private JdkSelect selector;
 	private boolean started;
@@ -33,15 +32,16 @@ class BasChannelService implements ChannelManager {
 	private BackpressureConfig config;
 	private String name;
 
-	BasChannelService(String name, JdkSelect apis, BufferPool pool, BackpressureConfig config, MeterRegistry metrics) {
+	BasChannelService(String name, JdkSelect apis, BufferPool pool, Throttler throttler, BackpressureConfig config, MeterRegistry metrics) {
 		this.name = name;
 		if(config == null)
 			throw new IllegalArgumentException("config must be supplied");
 		this.pool = pool;
 		this.config = config;
-		processor = new KeyProcessor(name, apis, pool, metrics, config.getThrottler());
-		selMgr = new SelectorManager2(apis, processor, name, config.getThrottler());
+		processor = new KeyProcessor(name, apis, pool, metrics, throttler);
+		selMgr = new SelectorManager2(apis, processor, name, throttler);
         this.selector = apis;
+		this.throttler = throttler;
         start();
 	}
 	
@@ -115,6 +115,11 @@ class BasChannelService implements ChannelManager {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public Throttle getThrottle() {
+		return throttler;
 	}
 
 	@Override

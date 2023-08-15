@@ -3,11 +3,14 @@ package org.webpieces.webserver.api;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 
 public class ServerConfig {
+
+	private BackpressureConfig backpressureConfig = new BackpressureConfig();
 
 	/**
 	 * The bootstrap file that separates code that can't be recompiled from all the code
@@ -125,5 +128,13 @@ public class ServerConfig {
 	public ServerConfig setValidateFlash(boolean isValidateFlash) {
 		this.isValidateFlash = isValidateFlash;
 		return this;
+	}
+
+	public BackpressureConfig getBackpressureConfig() {
+		return backpressureConfig;
+	}
+
+	public void setBackpressureConfig(BackpressureConfig backpressureConfig) {
+		this.backpressureConfig = backpressureConfig;
 	}
 }
