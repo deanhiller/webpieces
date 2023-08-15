@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.Throttle;
-import org.webpieces.nio.impl.cm.basic.Throttler;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
@@ -23,7 +22,7 @@ public class RouterResponseHandlerImpl implements RouterResponseHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(RouterResponseHandlerImpl.class);
 
-	public static final Logger throttleLogger = Throttle.log;
+	public static final Logger THROTTLE_LOGGER = Throttle.LOG;
 
     private ResponseStream stream;
 	private Throttle throttler;
@@ -42,10 +41,10 @@ public class RouterResponseHandlerImpl implements RouterResponseHandler {
 			if(response.isEndOfStream()) {
 				throttler.decrement();
 
-				if(throttleLogger.isDebugEnabled()) {
+				if(THROTTLE_LOGGER.isDebugEnabled()) {
 					int i = count.addAndGet(1);
 					if (i % 10 == 0) {
-						throttleLogger.debug("Response Headers EOM=" + i);
+						THROTTLE_LOGGER.debug("Response Headers EOM=" + i);
 					}
 				}
 				decremented = true;

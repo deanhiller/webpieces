@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public interface Throttle {
 
-    static final Logger log = LoggerFactory.getLogger(Throttle.class);
+    static final Logger LOG = LoggerFactory.getLogger(Throttle.class);
 
     public void increment();
 

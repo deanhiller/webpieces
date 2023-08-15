@@ -3,16 +3,13 @@ package org.webpieces.nio.impl.cm.basic;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.MaxRequestConfig;
 import org.webpieces.nio.api.Throttle;
 
-import javax.inject.Inject;
-
 public class Throttler implements Throttle {
-    public static final Logger log = Throttle.log;
-    
+    public static final Logger LOG = Throttle.LOG;
+
     private final MaxRequestConfig maxRequestConfig;
     private final MeterRegistry metrics;
     private final Counter incrementCounter;
@@ -41,9 +38,9 @@ public class Throttler implements Throttle {
         incrementCounter.increment();
         //record metrics here still
 
-        if(log.isDebugEnabled()) {
+        if(LOG.isDebugEnabled()) {
             if (outstandingRequests % 10 == 0)
-                log.debug("throttler value=" + outstandingRequests);
+                LOG.debug("throttler value=" + outstandingRequests);
         }
 
         if(maxRequestConfig == null)
@@ -52,7 +49,7 @@ public class Throttler implements Throttle {
 
         if(outstandingRequests > maxRequestConfig.getStartThrottlingAtRequestCount()) {
             if(!isThrottling)
-                log.info("NOW THROTTLING requests. count="+outstandingRequests);
+                LOG.info("NOW THROTTLING requests. count="+outstandingRequests);
             isThrottling = true;
         }
     }
@@ -62,11 +59,11 @@ public class Throttler implements Throttle {
         decrementCounter.increment();
 
         if(outstandingRequests < 0 && outstandingRequests % 10 == 0)
-            log.error("Bug, cannot go less than 0.  count="+outstandingRequests);
+            LOG.error("Bug, cannot go less than 0.  count="+outstandingRequests);
 
-        if(log.isDebugEnabled()) {
+        if(LOG.isDebugEnabled()) {
             if (outstandingRequests % 10 == 0)
-                log.debug("throttler value=" + outstandingRequests);
+                LOG.debug("throttler value=" + outstandingRequests);
         }
 
         if(maxRequestConfig == null)
@@ -74,13 +71,13 @@ public class Throttler implements Throttle {
 
         if(outstandingRequests < maxRequestConfig.getStopThrottlingatRequestCount()) {
             if(isThrottling)
-                log.info("TURNING OFF THROTTLING requests. count="+outstandingRequests);
+                LOG.info("TURNING OFF THROTTLING requests. count="+outstandingRequests);
             isThrottling = false;
 
             if(turnThrottlingOff != null) {
                 turnThrottlingOff.run();
             } else {
-                log.warn("FAIL, could not turn off throttling as no function installed - perhaps you are in embeeded test mode");
+                LOG.warn("FAIL, could not turn off throttling as no function installed - perhaps you are in embeeded test mode");
             }
         }
     }

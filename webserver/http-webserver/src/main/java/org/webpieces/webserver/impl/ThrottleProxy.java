@@ -5,14 +5,13 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.Throttle;
-import org.webpieces.nio.impl.cm.basic.Throttler;
 import org.webpieces.util.futures.XFuture;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThrottleProxy implements StreamWriter {
     private static final Logger log = LoggerFactory.getLogger(ThrottleProxy.class);
-    public static final Logger throttleLogger = Throttle.log;
+    public static final Logger THROTTLE_LOGGER = Throttle.LOG;
 
     private StreamWriter str;
     private Throttle throttler;
@@ -36,10 +35,10 @@ public class ThrottleProxy implements StreamWriter {
                     throttler.decrement();
                 }
 
-                if(throttleLogger.isDebugEnabled()) {
+                if(THROTTLE_LOGGER.isDebugEnabled()) {
                     int i = count.addAndGet(1);
                     if (i % 10 == 0) {
-                        throttleLogger.debug("Response data EOM=" + i);
+                        THROTTLE_LOGGER.debug("Response data EOM=" + i);
                     }
                 }
                 decremented = true;
