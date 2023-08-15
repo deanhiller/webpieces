@@ -156,7 +156,6 @@ public class HttpsJsonClient {
      */
     public <T> XFuture<T> sendHttpRequest(Method method, Object request, Endpoint endpoint, Class<T> responseType, boolean forHttp) {
 
-        String clientsName = method.getDeclaringClass().getSimpleName();
         HostWithPort apiAddress = endpoint.getServerAddress();
         String httpMethod = endpoint.getHttpMethod();
         String endpointPath = endpoint.getUrlPath();
@@ -187,7 +186,7 @@ public class HttpsJsonClient {
         }
 
         XFuture<T> future = futureUtil.catchBlockWrap(
-                () -> sendAndTranslate(clientsName, apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
+                () -> sendAndTranslate(method, apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
                 (t) -> translateException(httpReq, t)
         );
 
@@ -226,8 +225,14 @@ public class HttpsJsonClient {
 
     }
 
-    private <T> XFuture<T> sendAndTranslate(String clientsName, HostWithPort apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
-        Iterable<Tag> tags = List.of(Tag.of("name", clientsName));
+    private <T> XFuture<T> sendAndTranslate(Method method, HostWithPort apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
+        String clientsName = method.getDeclaringClass().getSimpleName();
+        String methodName = method.getName();
+
+        Iterable<Tag> tags = List.of(
+                Tag.of("api", clientsName),
+                Tag.of("method", methodName)
+        );
         AtomicInteger inFlightCounter = clientToCounter.compute(clientsName, (k, v) -> computeLazyToAvoidOOM(k, v, tags));
 
         return connect

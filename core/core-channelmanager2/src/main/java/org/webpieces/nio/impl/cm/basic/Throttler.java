@@ -2,10 +2,14 @@ package org.webpieces.nio.impl.cm.basic;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import org.slf4j.Logger;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.MaxRequestConfig;
 import org.webpieces.nio.api.Throttle;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Throttler implements Throttle {
     public static final Logger LOG = Throttle.LOG;
@@ -23,9 +27,11 @@ public class Throttler implements Throttle {
     public Throttler(BackpressureConfig backpressureConfig, MeterRegistry metrics) {
         this.maxRequestConfig = backpressureConfig.getMaxRequestConfig();
         this.metrics = metrics;
-        incrementCounter = metrics.counter("webpieces.requests", "name", backpressureConfig.getName());
-        decrementCounter = metrics.counter("webpieces.responses", "name", backpressureConfig.getName());
-        metrics.gauge("webpieces.requests.inflight", outstandingRequests, (val) -> getValue(val));
+        List<Tag> tags = List.of(Tag.of("api", backpressureConfig.getName()));
+
+        incrementCounter = metrics.counter("webpieces.requests", tags);
+        decrementCounter = metrics.counter("webpieces.responses", tags);
+        metrics.gauge("webpieces.requests.inflight", tags, outstandingRequests, (val) -> getValue(val));
     }
 
     private synchronized double getValue(Integer count) {
