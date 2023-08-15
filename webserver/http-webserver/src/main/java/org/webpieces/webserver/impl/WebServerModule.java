@@ -9,10 +9,7 @@ import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
-import org.webpieces.nio.api.BackpressureConfig;
-import org.webpieces.nio.api.ChannelManager;
-import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.nio.api.Throttler;
+import org.webpieces.nio.api.*;
 import org.webpieces.router.api.TemplateApi;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
@@ -37,16 +34,14 @@ public class WebServerModule implements Module {
 	
 	private final WebServerConfig config;
 	private final WebServerPortInformation portLookup;
+	private final MaxRequestConfig maxRequestConfig;
 	private boolean hasCoreModule;
 
 	public WebServerModule(WebServerConfig config, WebServerPortInformation portLookup, boolean hasCoreModule) {
 		this.config = config;
 		this.portLookup = portLookup;
 		this.hasCoreModule = hasCoreModule;
-
-		if(config.getBackpressureConfig().getThrottler() == null) {
-			config.getBackpressureConfig().setThrottler(new Throttler());
-		}
+		this.maxRequestConfig = config.getBackpressureConfig().getMaxRequestConfig();
 	}
 
 	@Override
@@ -95,7 +90,13 @@ public class WebServerModule implements Module {
 		
 		return chanMgr;
 	}
-	
+
+	@Provides
+	@Singleton
+	public Throttle providesThrottle(ChannelManager cm) {
+		return cm.getThrottle();
+	}
+
 	@Provides
 	@Singleton
 	public HttpFrontendManager providesAsyncServerMgr(
@@ -106,7 +107,7 @@ public class WebServerModule implements Module {
 			WebServerConfig config,
 			MeterRegistry metrics
 	) {		
-		HttpParser httpParser = HttpParserFactory.createParser("a", new SimpleMeterRegistry(), pool);
+		HttpParser httpParser = HttpParserFactory.createParser("a", metrics, pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		InjectionConfig injConfig = new InjectionConfig(http2Parser, time, config.getHttp2Config());
 

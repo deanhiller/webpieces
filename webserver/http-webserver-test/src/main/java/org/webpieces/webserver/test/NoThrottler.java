@@ -1,9 +1,18 @@
-package org.webpieces.nio.impl.cm.basic;
+package org.webpieces.webserver.test;
 
 import org.webpieces.nio.api.Throttle;
-import org.webpieces.nio.api.Throttler;
 
-public class NoThrottle implements Throttle {
+public class NoThrottler implements Throttle {
+    @Override
+    public void increment() {
+
+    }
+
+    @Override
+    public void decrement() {
+
+    }
+
     @Override
     public boolean isThrottling() {
         return false;
@@ -11,6 +20,6 @@ public class NoThrottle implements Throttle {
 
     @Override
     public void setFunctionToInvoke(Runnable turnThrottlingOff) {
-        //ignore - we never turn it on.
+
     }
 }

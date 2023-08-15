@@ -29,7 +29,8 @@ public class BasChanSvcFactory extends ChannelManagerFactory {
 
 	@Override
 	public ChannelManager createSingleThreadedChanMgr(String name, BufferPool pool, BackpressureConfig config) {
-		BasChannelService mgr = new BasChannelService(name, select, pool, config, metrics);
+		Throttler throttler = new Throttler(config, metrics);
+		BasChannelService mgr = new BasChannelService(name, select, pool, throttler, config, metrics);
 		return new SslChannelService(mgr, pool, metrics);
 	}
 

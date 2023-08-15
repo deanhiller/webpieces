@@ -5,6 +5,8 @@ import com.webpieces.http2.api.dto.highlevel.Http2Request;
 import com.webpieces.http2.api.dto.lowlevel.Http2Method;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;
@@ -34,7 +36,6 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
@@ -44,6 +45,7 @@ import org.webpieces.util.futures.XFuture;
 import org.webpieces.util.security.Masker;
 
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 @Singleton
@@ -55,7 +57,8 @@ public class HttpsJsonClient {
 
     protected static final int UNSECURE_PORT = 80;
     protected static final int SECURE_PORT = 443;
-    private final String serviceName;
+    private final String serversName;
+    private final MeterRegistry metrics;
 
     private HttpsConfig httpsConfig;
     protected JacksonJsonConverter jsonMapper;
@@ -64,6 +67,7 @@ public class HttpsJsonClient {
     private FutureHelper futureUtil;
     private final Set<String> secureList = new HashSet<>();
     private final Set<PlatformHeaders> transferHeaders = new HashSet<>();
+    private AtomicInteger counter = new AtomicInteger(0);
 
     private Masker masker;
 
@@ -75,12 +79,15 @@ public class HttpsJsonClient {
             Http2Client client,
             FutureHelper futureUtil,
             ScheduledExecutorService schedulerSvc,
-            Masker masker
+            Masker masker,
+            MeterRegistry metrics
     ) {
         if(clientServiceConfig.getHcl() == null)
             throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
 
-        this.serviceName = clientServiceConfig.getServiceName();
+        this.serversName = clientServiceConfig.getServersName();
+        this.metrics = metrics;
+        metrics.gauge("webpieces.requests.inflight.allclients", counter, (counter) -> counter.get());
 
         List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
 
@@ -146,6 +153,7 @@ public class HttpsJsonClient {
      */
     public <T> XFuture<T> sendHttpRequest(Method method, Object request, Endpoint endpoint, Class<T> responseType, boolean forHttp) {
 
+        String clientsName = method.getDeclaringClass().getSimpleName();
         HostWithPort apiAddress = endpoint.getServerAddress();
         String httpMethod = endpoint.getHttpMethod();
         String endpointPath = endpoint.getUrlPath();
@@ -176,7 +184,7 @@ public class HttpsJsonClient {
         }
 
         XFuture<T> future = futureUtil.catchBlockWrap(
-                () -> sendAndTranslate(apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
+                () -> sendAndTranslate(clientsName, apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
                 (t) -> translateException(httpReq, t)
         );
 
@@ -215,10 +223,22 @@ public class HttpsJsonClient {
 
     }
 
-    private <T> XFuture<T> sendAndTranslate(HostWithPort apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
+    private <T> XFuture<T> sendAndTranslate(String clientsName, HostWithPort apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
         return connect
-                .thenCompose(voidd -> httpSocket.send(fullRequest))
-                .thenApply(fullResponse -> unmarshal(jsonReq, fullRequest, fullResponse, apiAddress.getPort(), responseType));
+                .thenCompose(voidd -> send(clientsName, httpSocket, fullRequest))
+                .thenApply(fullResponse -> unmarshal(clientsName, jsonReq, fullRequest, fullResponse, apiAddress.getPort(), responseType));
+    }
+
+    public XFuture<FullResponse> send(String clientsName, Http2Socket socket, FullRequest request) {
+        XFuture<FullResponse> send = socket.send(request);
+
+        //in an ideal world, we would use the async send which can notify us when 'write' is done so it is out the door, but
+        //we never know when read is done until we parse the whole message (not exactly symmetrical)
+        counter.incrementAndGet();
+        Counter requestCounter = metrics.counter("webpieces.requests", "name", clientsName);
+        requestCounter.increment();
+
+        return send;
     }
 
     protected Http2Socket createSocket(HostWithPort apiAddress, Http2SocketListener listener, boolean forHttp) {
@@ -277,7 +297,11 @@ public class HttpsJsonClient {
 
     }
 
-    private <T> T unmarshal(String jsonReq, FullRequest request, FullResponse httpResp, int port, Class<T> type) {
+    private <T> T unmarshal(String clientsName, String jsonReq, FullRequest request, FullResponse httpResp, int port, Class<T> type) {
+
+        counter.decrementAndGet();
+        Counter responseCounter = metrics.counter("webpieces.responses", "name", clientsName);
+        responseCounter.increment();
 
         DataWrapper payload = httpResp.getPayload();
         String contents = payload.createStringFromUtf8(0, payload.getReadableSize());
@@ -294,7 +318,7 @@ public class HttpsJsonClient {
 
         JsonError errorIfCanRead = failOpenForSomeServices(contents);
         if(errorIfCanRead != null) {
-            errorIfCanRead.getServiceFailureChain().add(0, serviceName);
+            errorIfCanRead.getServiceFailureChain().add(0, serversName);
         }
 
         String message = formMessage(contents, httpResp, url, jsonReq, errorIfCanRead);

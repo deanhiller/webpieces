@@ -5,7 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.nio.api.Throttler;
+import org.webpieces.nio.api.Throttle;
+import org.webpieces.nio.impl.cm.basic.Throttler;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
@@ -21,14 +22,15 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 public class RouterResponseHandlerImpl implements RouterResponseHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(RouterResponseHandlerImpl.class);
-	private static final Logger throttleLogger = LoggerFactory.getLogger(Throttler.class);
+
+	public static final Logger throttleLogger = Throttle.log;
 
     private ResponseStream stream;
-	private Throttler throttler;
+	private Throttle throttler;
 
 	private AtomicInteger count = new AtomicInteger();
 
-	public RouterResponseHandlerImpl(ResponseStream stream, Throttler throttler) {
+	public RouterResponseHandlerImpl(ResponseStream stream, Throttle throttler) {
         this.stream = stream;
 		this.throttler = throttler;
 	}

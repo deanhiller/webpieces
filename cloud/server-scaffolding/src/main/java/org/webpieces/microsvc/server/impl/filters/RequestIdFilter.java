@@ -12,8 +12,6 @@ import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class RequestIdFilter extends RouteFilter<Void> {
 
@@ -23,7 +21,7 @@ public class RequestIdFilter extends RouteFilter<Void> {
     @Inject
     public RequestIdFilter(RequestIdGenerator requestIdGenerator, ClientServiceConfig config) {
         this.requestIdGenerator = requestIdGenerator;
-        this.svcName = config.getServiceName();
+        this.svcName = config.getServersName();
     }
 
     @Override

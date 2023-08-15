@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.nio.api.MaxRequestConfig;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
@@ -49,6 +50,12 @@ public class WebpiecesServer {
 
 		File baseWorkingDir = modifyUserDirForManyEnvironments(projectName);
 
+		if(svrConfig.getBackpressureConfig().isLegacy()) {
+			//install throttler by default FOR LEGACY only - going forward, it is installed on templates(not legacy)
+			//legacy can turn off by turning legacy to false OR they can install so we can remove legacy flag
+			svrConfig.getBackpressureConfig().setMaxRequestConfig(new MaxRequestConfig());
+		}
+
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
@@ -69,7 +76,8 @@ public class WebpiecesServer {
 		WebServerConfig config = new WebServerConfig()
 										.setCorePlatformModule(coreModule)
 										.setPlatformOverrides(platformOverrides)
-										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup());
+										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
+										.setBackpressureConfig(svrConfig.getBackpressureConfig());
 
 		TemplateConfig templateConfig = new TemplateConfig();
 		

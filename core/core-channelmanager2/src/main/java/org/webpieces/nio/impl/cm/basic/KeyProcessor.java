@@ -9,7 +9,6 @@ import java.nio.channels.SelectionKey;
 import java.util.*;
 
 import org.webpieces.nio.api.Throttle;
-import org.webpieces.nio.api.Throttler;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.jdk.Keys;
 import org.webpieces.util.futures.XFuture;
@@ -40,7 +39,7 @@ public final class KeyProcessor {
 
 	private static final Logger apiLog = LoggerFactory.getLogger(DataListener.class);
 	private static final Logger log = LoggerFactory.getLogger(KeyProcessor.class);
-	private static final Logger throttleLogger = LoggerFactory.getLogger(Throttler.class);
+	public static final Logger throttleLogger = Throttle.log;
 
 	//private static BufferHelper helper = ChannelManagerFactory.bufferHelper(null);
 	private static boolean logBufferNextRead = false;
@@ -64,12 +63,7 @@ public final class KeyProcessor {
 	public KeyProcessor(String id, JdkSelect selector, BufferPool pool, MeterRegistry metrics, Throttle throttler) {
 		this.selector = selector;
 		this.pool = pool;
-
-		if(throttler == null) {
-			this.throttler = new NoThrottle();
-		} else {
-			this.throttler = throttler;
-		}
+		this.throttler = throttler;
 
 		connectionClosed = MetricsCreator.createCounter(metrics, id, "connectionsClosed", false);
 		connectionOpen = MetricsCreator.createCounter(metrics, id, "connectionsOpened", false);
