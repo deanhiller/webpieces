@@ -13,7 +13,6 @@ import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
-import java.util.function.Supplier;
 
 public class RecordServiceChainFilter extends RouteFilter<Void> {
 
@@ -22,7 +21,7 @@ public class RecordServiceChainFilter extends RouteFilter<Void> {
 
     @Inject
     public RecordServiceChainFilter(ClientServiceConfig config) {
-        serviceName = config.getServiceName();
+        serviceName = config.getServersName();
     }
 
     @Override

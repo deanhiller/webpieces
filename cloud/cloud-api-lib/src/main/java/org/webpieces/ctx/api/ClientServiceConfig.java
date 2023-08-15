@@ -2,11 +2,7 @@ package org.webpieces.ctx.api;
 
 import org.webpieces.microsvc.server.api.HeaderCtxList;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * configuration for clients and for service as they share all this information and both need it
@@ -14,21 +10,21 @@ import java.util.function.Supplier;
 public class ClientServiceConfig {
     private HeaderCtxList hcl;
     private List<Class> successExceptions;
-    private String serviceName;
+    private String serversName;
 
-    public ClientServiceConfig(HeaderCtxList hcl, String serviceName){
-        this(hcl, null, serviceName);
+    public ClientServiceConfig(HeaderCtxList hcl, String serversName){
+        this(hcl, null, serversName);
     }
     public ClientServiceConfig(HeaderCtxList hcl, List<Class> successExceptions, String serviceName){
         this.hcl = hcl;
         this.successExceptions = successExceptions;
-        this.serviceName = serviceName;
+        this.serversName = serviceName;
     }
 
 
 
-    public String getServiceName() {
-        return serviceName;
+    public String getServersName() {
+        return serversName;
     }
 
     public HeaderCtxList getHcl() {

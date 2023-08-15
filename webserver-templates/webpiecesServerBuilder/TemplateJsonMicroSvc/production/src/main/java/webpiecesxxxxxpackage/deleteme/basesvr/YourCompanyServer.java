@@ -5,6 +5,8 @@ import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.nio.api.BackpressureConfig;
+import org.webpieces.nio.api.MaxRequestConfig;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.util.futures.Logging;
 import org.webpieces.webserver.api.ServerConfig;
@@ -36,8 +38,12 @@ public abstract class YourCompanyServer {
 			String version = System.getProperty("java.version");
 			log.info("Starting Production Server under java version="+version);
 
+			MaxRequestConfig maxRequestConfig = new MaxRequestConfig();
 
 			ServerConfig config = new ServerConfig(true);
+			BackpressureConfig backpressureConfig = config.getBackpressureConfig();
+			backpressureConfig.setLegacy(false);
+			backpressureConfig.setMaxRequestConfig(maxRequestConfig);
 			YourCompanyServer server2 = yourServer.apply(config);
 
 			server2.start();

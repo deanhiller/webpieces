@@ -4,7 +4,11 @@ import org.webpieces.data.api.TwoPools;
 
 public class BackpressureConfig {
 
-	private Throttler throttler;
+	private String name = "default";
+
+	private boolean isLegacy = true;
+
+	private MaxRequestConfig maxRequestConfig;
 
 	/**
 	 * The maximum bytes that can be unacked.  After this, we stop reading from the socket putting backpressure on the
@@ -46,12 +50,27 @@ public class BackpressureConfig {
 		this.startReadingThreshold = startReadingThreshold;
 	}
 
-	public Throttler getThrottler() {
-		return throttler;
+	public MaxRequestConfig getMaxRequestConfig() {
+		return maxRequestConfig;
 	}
 
-	public void setThrottler(Throttler throttler) {
-		this.throttler = throttler;
+	public void setMaxRequestConfig(MaxRequestConfig maxRequestConfig) {
+		this.maxRequestConfig = maxRequestConfig;
 	}
 
+	public boolean isLegacy() {
+		return isLegacy;
+	}
+
+	public void setLegacy(boolean legacy) {
+		isLegacy = legacy;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

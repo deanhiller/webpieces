@@ -69,4 +69,10 @@ public interface ChannelManager {
 	
 	public String getName();
 
+	/**
+	 * Servers and clients can getThrottle to increment and decrement but only servers should allow the backpressure
+	 * mechanism to backpressure requests
+	 */
+	public Throttle getThrottle();
+
 }

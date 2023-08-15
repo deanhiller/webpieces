@@ -4,6 +4,8 @@ import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -77,6 +79,8 @@ public abstract class CompanyApiTest extends AbstractHttp2Test {
             binder.bind(HttpsConfig.class).toInstance(new HttpsConfig(true));
             binder.bind(ClientServiceConfig.class).toInstance(getConfig());
             binder.bind(ConverterConfig.class).toInstance(new ConverterConfig(true));
+
+            binder.bind(MeterRegistry.class).toInstance(new SimpleMeterRegistry());
 
             binder.bind(ClientAssertions.class).toInstance(new ClientAssertions() {
                 @Override

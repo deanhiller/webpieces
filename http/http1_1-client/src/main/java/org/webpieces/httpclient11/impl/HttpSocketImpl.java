@@ -51,7 +51,7 @@ public class HttpSocketImpl implements HttpSocket {
 	
 	private HttpParser parser;
 	private Memento memento;
-	private ConcurrentLinkedQueue<HttpResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
+	private ConcurrentLinkedQueue<CatchResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
 	private DataListener dataListener = new MyDataListener();
 	private boolean isRecording = false;
 	private MarshalState state;
@@ -143,7 +143,7 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	private HttpStreamRef actuallySendRequest(HttpRequest request, HttpResponseListener listener) {
-		HttpResponseListener l = new CatchResponseListener(listener, svrSocket);
+		CatchResponseListener l = new CatchResponseListener(listener, svrSocket);
 		ByteBuffer wrap = parser.marshalToByteBuffer(state, request);
 		
 		isConnect = false;
@@ -152,15 +152,16 @@ public class HttpSocketImpl implements HttpSocket {
 		
 		//put this on the queue before the write to be completed from the listener below
 		responsesToComplete.offer(l);
-		
-		boolean canSendChunks = false;
-		Header header = request.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING);
-		if(header != null && "chunked".equals(header.getValue()))
-			canSendChunks = true;
-		
-		boolean canSendTheChunks = canSendChunks;
-		
-		XFuture<HttpDataWriter> writer = channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect, canSendTheChunks));
+
+		int bytesTracker = 0;
+		if(request.isHasChunkedTransferHeader()) {
+			bytesTracker = -1;
+		} else if(request.getContentLength() != null && request.getContentLength() > 0) {
+			bytesTracker = request.getContentLength();
+		}
+
+		int maxBytesToSend = bytesTracker;
+		XFuture<HttpDataWriter> writer = channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state, isConnect, maxBytesToSend));
 		return new MyStreamRefImpl(writer, request);
 		
 	}
@@ -293,7 +294,7 @@ public class HttpSocketImpl implements HttpSocket {
 
 		private XFuture<HttpDataWriter> processResponse(HttpResponse msg) {
 			boolean isComplete;
-			HttpResponseListener listener;
+			CatchResponseListener listener;
 			if(msg.isHasChunkedTransferHeader() || msg.isHasNonZeroContentLength()) {					
 				listener = responsesToComplete.peek();
 				isComplete = false;
@@ -313,7 +314,7 @@ public class HttpSocketImpl implements HttpSocket {
 			socketListener.socketClosed(HttpSocketImpl.this);
 			
 			while(!responsesToComplete.isEmpty()) {
-				HttpResponseListener listener = responsesToComplete.poll();
+				CatchResponseListener listener = responsesToComplete.poll();
 				listener.failure(new SocketClosedException("Socket was closed by remote end"));
 			}
 		}
@@ -322,7 +323,7 @@ public class HttpSocketImpl implements HttpSocket {
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			log.error("Failure on channel="+channel, e);
 			while(!responsesToComplete.isEmpty()) {
-				HttpResponseListener listener = responsesToComplete.poll();
+				CatchResponseListener listener = responsesToComplete.poll();
 				if(listener != null) {
 					listener.failure(e);
 				}

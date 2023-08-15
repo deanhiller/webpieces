@@ -4,22 +4,22 @@ import com.webpieces.http2.api.dto.lowlevel.lib.StreamMsg;
 import com.webpieces.http2.api.streaming.StreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.nio.api.Throttler;
+import org.webpieces.nio.api.Throttle;
 import org.webpieces.util.futures.XFuture;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThrottleProxy implements StreamWriter {
     private static final Logger log = LoggerFactory.getLogger(ThrottleProxy.class);
-    private static final Logger throttleLogger = LoggerFactory.getLogger(Throttler.class);
+    public static final Logger THROTTLE_LOGGER = Throttle.LOG;
 
     private StreamWriter str;
-    private Throttler throttler;
+    private Throttle throttler;
     private boolean decremented;
 
     private static AtomicInteger count = new AtomicInteger();
 
-    public ThrottleProxy(StreamWriter str, Throttler throttler, boolean decremented) {
+    public ThrottleProxy(StreamWriter str, Throttle throttler, boolean decremented) {
         this.str = str;
         this.throttler = throttler;
         this.decremented = decremented;
@@ -35,10 +35,10 @@ public class ThrottleProxy implements StreamWriter {
                     throttler.decrement();
                 }
 
-                if(throttleLogger.isDebugEnabled()) {
+                if(THROTTLE_LOGGER.isDebugEnabled()) {
                     int i = count.addAndGet(1);
                     if (i % 10 == 0) {
-                        throttleLogger.debug("Response data EOM=" + i);
+                        THROTTLE_LOGGER.debug("Response data EOM=" + i);
                     }
                 }
                 decremented = true;

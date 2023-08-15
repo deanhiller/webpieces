@@ -9,7 +9,6 @@ import java.nio.channels.SelectionKey;
 import java.util.*;
 
 import org.webpieces.nio.api.Throttle;
-import org.webpieces.nio.api.Throttler;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.jdk.Keys;
 import org.webpieces.util.futures.XFuture;
@@ -40,7 +39,7 @@ public final class KeyProcessor {
 
 	private static final Logger apiLog = LoggerFactory.getLogger(DataListener.class);
 	private static final Logger log = LoggerFactory.getLogger(KeyProcessor.class);
-	private static final Logger throttleLogger = LoggerFactory.getLogger(Throttler.class);
+	public static final Logger THROTTLE_LOGGER = Throttle.LOG;
 
 	//private static BufferHelper helper = ChannelManagerFactory.bufferHelper(null);
 	private static boolean logBufferNextRead = false;
@@ -64,12 +63,7 @@ public final class KeyProcessor {
 	public KeyProcessor(String id, JdkSelect selector, BufferPool pool, MeterRegistry metrics, Throttle throttler) {
 		this.selector = selector;
 		this.pool = pool;
-
-		if(throttler == null) {
-			this.throttler = new NoThrottle();
-		} else {
-			this.throttler = throttler;
-		}
+		this.throttler = throttler;
 
 		connectionClosed = MetricsCreator.createCounter(metrics, id, "connectionsClosed", false);
 		connectionOpen = MetricsCreator.createCounter(metrics, id, "connectionsOpened", false);
@@ -142,8 +136,8 @@ public final class KeyProcessor {
 		//is processed again.
 		keySet.clear();
 
-		if(throttleLogger.isTraceEnabled() && throttler.isThrottling())
-			throttleLogger.trace("DONE processing keys. "+counts+" toProcess="+keys.getKeyCount()+" setSize="+initialSize+" now="+keySet.size());
+		if(THROTTLE_LOGGER.isTraceEnabled() && throttler.isThrottling())
+			THROTTLE_LOGGER.trace("DONE processing keys. "+counts+" toProcess="+keys.getKeyCount()+" setSize="+initialSize+" now="+keySet.size());
 	}
 	
 	private void processKey(DelayedRunnables delayedRunnables, SelectionKey key, ChannelInfo info, Counts counts) throws IOException, InterruptedException {
@@ -183,7 +177,7 @@ public final class KeyProcessor {
 		if(throttler.isThrottling()) {
 			if(delayedReads.size() < 1) {
 				//only log first one each time we turn on..
-				throttleLogger.info("START Throttling reads until server caught up on responding. chan="+cachedKey.getInfo().getChannel()+" delReads="+delayedReads.size());
+				THROTTLE_LOGGER.info("START Throttling reads until server caught up on responding. chan="+cachedKey.getInfo().getChannel()+" delReads="+delayedReads.size());
 			}
 
 			DataListener dataHandler = cachedKey.getInfo().getDataHandler();
@@ -204,7 +198,7 @@ public final class KeyProcessor {
 	private void throttleOrProcessSvrSocket(Map<SelectionKey, Runnable> delayedRunnables, CachedKey cachedKey) throws IOException {
 		SelectionKey key = cachedKey.getKey();
 		if(throttler.isThrottling()) {
-			throttleLogger.info("Throttling incoming connections to load.  not accepting YET. size="
+			THROTTLE_LOGGER.info("Throttling incoming connections to load.  not accepting YET. size="
 					+ delayedRunnables.size()+" count="+connectionCounter+" chan="+cachedKey.getInfo().getChannel()
 					+ " key="+key);
 
@@ -257,9 +251,9 @@ public final class KeyProcessor {
 			log.trace(info.getChannel()+" Incoming Connection="+key);
 
 		connectionCounter++;
-		if(throttleLogger.isDebugEnabled()) {
+		if(THROTTLE_LOGGER.isDebugEnabled()) {
 			if (connectionCounter % 10 == 0)
-				throttleLogger.debug("connection counter=" + connectionCounter);
+				THROTTLE_LOGGER.debug("connection counter=" + connectionCounter);
 		}
 
 		BasTCPServerChannel channel = (BasTCPServerChannel)info.getChannel();

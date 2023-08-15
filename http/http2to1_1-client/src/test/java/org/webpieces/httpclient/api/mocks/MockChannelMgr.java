@@ -6,6 +6,7 @@ import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.nio.api.Throttle;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -70,6 +71,11 @@ public class MockChannelMgr extends MockSuperclass implements ChannelManager {
 	public String getName() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Throttle getThrottle() {
+		throw new UnsupportedOperationException("not supported yet");
 	}
 
 	@Override

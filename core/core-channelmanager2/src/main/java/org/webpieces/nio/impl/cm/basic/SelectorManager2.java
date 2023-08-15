@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.util.Set;
 
-import org.webpieces.nio.api.Throttler;
+import org.webpieces.nio.api.Throttle;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Supplier;
@@ -50,7 +50,6 @@ public class SelectorManager2 implements SelectorListener {
 //	FIELDS/MEMBERS
 //--------------------------------------------------------------------
 	private static final Logger log = LoggerFactory.getLogger(SelectorManager2.class);
-	private static final Logger throttleLogger = LoggerFactory.getLogger(Throttler.class);
 
 	private final Throttler throttler;
 
@@ -80,9 +79,7 @@ public class SelectorManager2 implements SelectorListener {
         this.threadName = threadName;
 		this.throttler = throttler;
 
-		if(throttler != null) {
-			throttler.setFunctionToInvoke(() -> turnThrottlingOff());
-		}
+		throttler.setFunctionToInvoke(() -> turnThrottlingOff());
 	}
 
 	//--------------------------------------------------------------------
