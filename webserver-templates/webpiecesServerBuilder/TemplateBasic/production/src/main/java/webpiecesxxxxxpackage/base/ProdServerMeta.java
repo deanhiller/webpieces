@@ -85,7 +85,7 @@ public class ProdServerMeta implements WebAppMeta {
 				//if you want to remove hibernate, just remove it first from the build file and then remove
 				//all the compile error code(it will remove more than half of the jar size of the web app actually due
 				//to transitive dependencies)
-				new HibernatePlugin(pluginConfig.getCmdLineArguments()),
+				new HibernatePlugin(pluginConfig.getCmdLineArguments(), false),
 				//ANY controllers in json package or subpackages are run through this filter independent of the url
 				new JacksonPlugin(new JacksonConfig().setPackageFilterPattern("webpiecesxxxxxpackage.json.*")),
 				new BackendPlugin(pluginConfig.getCmdLineArguments()),

@@ -4,6 +4,7 @@ import static webpiecesxxxxxpackage.web.secure.crudajax.AjaxCrudUserRouteId.AJAX
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugin.hibernate.Em;
+import org.webpieces.plugin.hibernate.PersistenceHelper;
+import org.webpieces.plugin.hibernate.Transaction;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
@@ -24,7 +27,14 @@ import webpiecesxxxxxpackage.db.UserRole;
 public class AjaxCrudUserController {
 
 	private static Logger log = LoggerFactory.getLogger(AjaxCrudUserController.class);
-	
+	private PersistenceHelper persistence;
+
+	@Inject
+	public AjaxCrudUserController(PersistenceHelper persistence) {
+		this.persistence = persistence;
+	}
+
+	@Transaction
 	public Action userList() {
 		EntityManager mgr = Em.get();
 		Query query = mgr.createNamedQuery("findAllUsers");
@@ -35,7 +45,8 @@ public class AjaxCrudUserController {
 				"users", users,
 				"showPopup", showEditPopup);
 	}
-	
+
+	@Transaction
 	public Action userAddEdit(Integer id) {		
 		if(id == null) {
 			return Actions.renderThis(
@@ -48,6 +59,8 @@ public class AjaxCrudUserController {
 				"entity", user,
 				"password", null);
 	}
+
+	@Transaction
 
 	public Redirect postSaveUser(UserDbo entity, String password) {
 		//TODO: if we wire in JSR303 bean validation into the platform, it could be 
@@ -90,11 +103,13 @@ public class AjaxCrudUserController {
 		return Actions.redirect(AjaxCrudUserRouteId.AJAX_LIST_USERS);
 	}
 
+	@Transaction
 	public Render confirmDeleteUser(int id) {
 		UserDbo user = Em.get().find(UserDbo.class, id);
 		return Actions.renderThis("entity", user);
 	}
 
+	@Transaction
 	public Redirect postDeleteUser(int id) {
 		UserDbo ref = Em.get().find(UserDbo.class, id);
 		List<UserRole> roles = ref.getRoles();
