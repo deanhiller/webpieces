@@ -48,9 +48,8 @@ public class LoginRoutes extends AbstractLoginRoutes {
 	}
 
 	@Override
-	protected void addLoggedInHome(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter1) {
-		ScopedRouteBuilder scopedRouter = scopedRouter1.getScopedRouteBuilder("/secure");
-		scopedRouter.addRoute(HTTPS, HttpMethod.GET ,   "/loggedinhome",        "AppLoginController.loginHome", LoginRouteId.LOGGED_IN_HOME);
+	protected void addLoggedInHome(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter) {
+		scopedRouter.addRoute(HTTPS, HttpMethod.GET ,   "/home",        "../secure/HomeController.loginHome", LoginRouteId.LOGGED_IN_HOME);
 	}
 
 	@Override

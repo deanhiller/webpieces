@@ -7,6 +7,7 @@ import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;
@@ -44,6 +45,8 @@ import java.util.*;
 import org.webpieces.util.futures.XFuture;
 import org.webpieces.util.security.Masker;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -67,7 +70,8 @@ public class HttpsJsonClient {
     private FutureHelper futureUtil;
     private final Set<String> secureList = new HashSet<>();
     private final Set<PlatformHeaders> transferHeaders = new HashSet<>();
-    private AtomicInteger counter = new AtomicInteger(0);
+
+    private final ConcurrentMap<String, AtomicInteger> clientToCounter = new ConcurrentHashMap<>();
 
     private Masker masker;
 
@@ -87,7 +91,6 @@ public class HttpsJsonClient {
 
         this.serversName = clientServiceConfig.getServersName();
         this.metrics = metrics;
-        metrics.gauge("webpieces.requests.inflight.allclients", counter, (counter) -> counter.get());
 
         List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
 
@@ -153,7 +156,6 @@ public class HttpsJsonClient {
      */
     public <T> XFuture<T> sendHttpRequest(Method method, Object request, Endpoint endpoint, Class<T> responseType, boolean forHttp) {
 
-        String clientsName = method.getDeclaringClass().getSimpleName();
         HostWithPort apiAddress = endpoint.getServerAddress();
         String httpMethod = endpoint.getHttpMethod();
         String endpointPath = endpoint.getUrlPath();
@@ -184,7 +186,7 @@ public class HttpsJsonClient {
         }
 
         XFuture<T> future = futureUtil.catchBlockWrap(
-                () -> sendAndTranslate(clientsName, apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
+                () -> sendAndTranslate(method, apiAddress, responseType, httpSocket, connect, fullRequest, jsonRequest),
                 (t) -> translateException(httpReq, t)
         );
 
@@ -223,22 +225,48 @@ public class HttpsJsonClient {
 
     }
 
-    private <T> XFuture<T> sendAndTranslate(String clientsName, HostWithPort apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
+    private <T> XFuture<T> sendAndTranslate(Method method, HostWithPort apiAddress, Class<T> responseType, Http2Socket httpSocket, XFuture<Void> connect, FullRequest fullRequest, String jsonReq) {
+        String clientsName = method.getDeclaringClass().getSimpleName();
+        String methodName = method.getName();
+
+        Iterable<Tag> tags = List.of(
+                Tag.of("api", clientsName),
+                Tag.of("method", methodName)
+        );
+        AtomicInteger inFlightCounter = clientToCounter.compute(clientsName, (k, v) -> computeLazyToAvoidOOM(k, v, tags));
+
         return connect
-                .thenCompose(voidd -> send(clientsName, httpSocket, fullRequest))
-                .thenApply(fullResponse -> unmarshal(clientsName, jsonReq, fullRequest, fullResponse, apiAddress.getPort(), responseType));
+                .thenCompose(voidd -> send(tags, inFlightCounter, httpSocket, fullRequest))
+                .thenApply(fullResponse -> unmarshal(jsonReq, fullRequest, fullResponse, apiAddress.getPort(), responseType));
     }
 
-    public XFuture<FullResponse> send(String clientsName, Http2Socket socket, FullRequest request) {
+    //Creating a gauage in micrometer will have micrometer thread keep a reference to object forever.
+    //It is very important to do this lazy or we add a new AtomicInteger on every api call if it
+    //already exists instead of ONCE PR API CLASS (we do not even do once per method yet, though we could)
+    public AtomicInteger computeLazyToAvoidOOM(String key, AtomicInteger existing, Iterable<Tag> tags) {
+        if(existing == null) {
+            existing = new AtomicInteger(0);
+            metrics.gauge("webpieces.requests.inflight", tags, existing, (c) -> c.get());
+        }
+        return existing;
+    }
+
+    public XFuture<FullResponse> send(Iterable<Tag> tags, AtomicInteger inFlightCounter, Http2Socket socket, FullRequest request) {
         XFuture<FullResponse> send = socket.send(request);
 
         //in an ideal world, we would use the async send which can notify us when 'write' is done so it is out the door, but
         //we never know when read is done until we parse the whole message (not exactly symmetrical)
-        counter.incrementAndGet();
-        Counter requestCounter = metrics.counter("webpieces.requests", "name", clientsName);
+        Counter requestCounter = metrics.counter("webpieces.requests", tags);
         requestCounter.increment();
+        inFlightCounter.incrementAndGet();
 
-        return send;
+        return send.thenApply( (response) -> {
+            Counter responseCounter = metrics.counter("webpieces.responses", tags);
+            responseCounter.increment();
+            inFlightCounter.decrementAndGet();
+
+            return response;
+        });
     }
 
     protected Http2Socket createSocket(HostWithPort apiAddress, Http2SocketListener listener, boolean forHttp) {
@@ -297,11 +325,7 @@ public class HttpsJsonClient {
 
     }
 
-    private <T> T unmarshal(String clientsName, String jsonReq, FullRequest request, FullResponse httpResp, int port, Class<T> type) {
-
-        counter.decrementAndGet();
-        Counter responseCounter = metrics.counter("webpieces.responses", "name", clientsName);
-        responseCounter.increment();
+    private <T> T unmarshal(String jsonReq, FullRequest request, FullResponse httpResp, int port, Class<T> type) {
 
         DataWrapper payload = httpResp.getPayload();
         String contents = payload.createStringFromUtf8(0, payload.getReadableSize());

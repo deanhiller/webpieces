@@ -39,6 +39,7 @@ public class HibernatePlugin implements Plugin {
 		this.loadByClassFile = cmdLineArgs.createOptionalArg(LOAD_CLASSMETA_KEY, "true", "If you supply a *.class for 'hibernate.persistenceunit', set this flat to true", (s) -> convertBool(s));
 	}
 
+	@Deprecated
 	public HibernatePlugin(Arguments cmdLineArgs) {
 		log.info("classloader="+getClass().getClassLoader());
 		this.persistenceUnit = cmdLineArgs.createRequiredArg(PERSISTENCE_UNIT_KEY, null, "The named persistence unit from the list of them inside META-INF/persistence.xml", (s) -> s);

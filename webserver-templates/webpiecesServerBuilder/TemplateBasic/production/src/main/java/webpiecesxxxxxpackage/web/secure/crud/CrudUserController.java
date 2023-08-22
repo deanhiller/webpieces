@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugin.hibernate.Em;
+import org.webpieces.plugin.hibernate.Transaction;
 import org.webpieces.plugin.hibernate.UseQuery;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
@@ -32,7 +33,8 @@ import webpiecesxxxxxpackage.db.UserRole;
 public class CrudUserController {
 
 	private static Logger log = LoggerFactory.getLogger(CrudUserController.class);
-	
+
+	@Transaction
 	public Action userList() {
 		EntityManager mgr = Em.get();
 		Query query = mgr.createNamedQuery("findAllUsers");
@@ -40,7 +42,8 @@ public class CrudUserController {
 		List<UserDbo> users = query.getResultList();
 		return Actions.renderThis("users", users);
 	}
-	
+
+	@Transaction
 	public Action userAddEdit(Integer id) {
 		if(id == null) {
 			return Actions.renderThis(
@@ -62,6 +65,7 @@ public class CrudUserController {
 				"password", null);
 	}
 
+	@Transaction
 	public Redirect postSaveUser(@UseQuery("findByIdWithRoleJoin") UserDbo entity, 
 			List<RoleEnum> selectedRoles, @NotBlank @Size(min=4, max=20) String password) {
 //		Validation is done with JSR303 hibernate-validator so you don't need to do this BUT you could for fancier stuff...
@@ -114,11 +118,13 @@ public class CrudUserController {
 		return Actions.redirect(CrudUserRouteId.LIST_USERS);
 	}
 
+	@Transaction
 	public Render confirmDeleteUser(int id) {
 		UserDbo user = Em.get().find(UserDbo.class, id);
 		return Actions.renderThis("entity", user);
 	}
-	
+
+	@Transaction
 	public Redirect postDeleteUser(int id) {
 		UserDbo ref = Em.get().find(UserDbo.class, id);
 		List<UserRole> roles = ref.getRoles();

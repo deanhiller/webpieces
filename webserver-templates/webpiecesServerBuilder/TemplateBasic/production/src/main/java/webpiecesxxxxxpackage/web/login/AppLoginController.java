@@ -38,9 +38,7 @@ public class AppLoginController extends AbstractLoginController {
 				"password", null);
 	}
 
-	public Render loginHome() {
-		return Actions.renderThis();
-	}
+
 
 	@Override
 	protected String getLoginSessionKey() {

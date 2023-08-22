@@ -4,7 +4,7 @@ import org.webpieces.data.api.TwoPools;
 
 public class BackpressureConfig {
 
-	private String name = "default";
+	private String name = "servers";
 
 	private boolean isLegacy = true;
 
