@@ -38,7 +38,7 @@ public class AuthApiImpl implements AuthApi {
 
     @Inject
     public AuthApiImpl(
-            Auth0Config auth0Config,
+            Auth0ApiConfig auth0Config,
             Http2Client client,
             ClientSSLEngineFactory sslFactory,
             JacksonJsonConverter jsonMapper

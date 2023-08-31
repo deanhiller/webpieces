@@ -4,7 +4,7 @@ import com.webpieces.http2.api.dto.highlevel.Http2Headers;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import org.webpieces.auth0.api.AbstractAuthController;
-import org.webpieces.auth0.api.AuthRouteIdSet;
+import org.webpieces.auth0.api.Auth0Config;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AuthFilter extends RouteFilter<AuthRouteIdSet> {
+public class AuthFilter extends RouteFilter<Auth0Config> {
 
 	private FutureHelper futureUtil;
 
@@ -36,7 +36,7 @@ public class AuthFilter extends RouteFilter<AuthRouteIdSet> {
 	}
 
 	@Override
-	public void initialize(AuthRouteIdSet initialConfig) {
+	public void initialize(Auth0Config initialConfig) {
 		loginRoute = initialConfig.getLoginRoute();
 		secureFields = initialConfig.getSecureFields();
 	}

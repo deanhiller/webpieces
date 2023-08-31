@@ -1,11 +1,11 @@
 package org.webpieces.auth0.impl;
 
-public class Auth0Config {
+public class Auth0ApiConfig {
     private String auth0Domain;
     private String clientId;
     private String clientSecret;
 
-    public Auth0Config(
+    public Auth0ApiConfig(
             String auth0Domain,
             String clientId,
             String clientSecret) {

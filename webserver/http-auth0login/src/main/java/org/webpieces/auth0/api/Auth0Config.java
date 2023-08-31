@@ -2,7 +2,7 @@ package org.webpieces.auth0.api;
 
 import org.webpieces.router.api.routes.RouteId;
 
-public class AuthRouteIdSet {
+public class Auth0Config {
     private RouteId callbackRoute;
     private RouteId loginRoute;
     private RouteId logoutRoute;
@@ -12,15 +12,22 @@ public class AuthRouteIdSet {
 
     private RouteId loginDeclinedRoute;
 
+    private String controller;
+    private String packageRegEx;
+    private int filterLevel;
+
     private String[] secureFields;
 
-    public AuthRouteIdSet(
+    public Auth0Config(
             RouteId callbackRoute,
             RouteId loginRoute,
             RouteId logoutRoute,
             RouteId toRenderAfterLogin,
             RouteId toRenderAfterLogout,
             RouteId loginDeclinedRoute,
+            String controller,
+            String packageRegEx,
+            int filterLevel,
             String ... secureFields
     ) {
         this.callbackRoute = callbackRoute;
@@ -29,6 +36,9 @@ public class AuthRouteIdSet {
         this.toRenderAfterLogin = toRenderAfterLogin;
         this.toRenderAfterLogout = toRenderAfterLogout;
         this.loginDeclinedRoute = loginDeclinedRoute;
+        this.controller = controller;
+        this.packageRegEx = packageRegEx;
+        this.filterLevel = filterLevel;
         this.secureFields = secureFields;
     }
 
@@ -58,5 +68,17 @@ public class AuthRouteIdSet {
 
     public String[] getSecureFields() {
         return secureFields;
+    }
+
+    public String getController() {
+        return controller;
+    }
+
+    public String getPackageRegEx() {
+        return packageRegEx;
+    }
+
+    public int getFilterLevel() {
+        return filterLevel;
     }
 }

@@ -3,7 +3,7 @@ package org.webpieces.auth0.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.auth0.client.api.*;
-import org.webpieces.auth0.impl.Auth0Config;
+import org.webpieces.auth0.impl.Auth0ApiConfig;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.http.exception.ForbiddenException;
 import org.webpieces.router.api.controller.actions.Action;
@@ -28,19 +28,19 @@ public abstract class AbstractAuthController {
 	private static final int SIZE = 64;
 	private static final String AUTH0_SECRET_KEY = "auth0.redirect.secret";
 	private final ReverseRouteLookup reverseRouteLookup;
-	private AuthRouteIdSet authRouteIdSet;
+	private Auth0Config authRouteIdSet;
 	private final AuthApi authApi;
 	private final SingletonSupplier<String> urlEncodedCallbackUrl;
 	private final SingletonSupplier<String> callbackUrl;
-	private Auth0Config auth0Config;
+	private Auth0ApiConfig auth0Config;
 
 	private SecureRandom random = new SecureRandom();
 
 	public AbstractAuthController(
 			AuthApi authAPI,
-			Auth0Config auth0Config,
+			Auth0ApiConfig auth0Config,
 			RoutingHolder holder,
-			AuthRouteIdSet authRouteIdSet
+			Auth0Config authRouteIdSet
 	) {
 		this.authApi = authAPI;
 		this.auth0Config = auth0Config;
