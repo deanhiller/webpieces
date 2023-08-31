@@ -1,0 +1,44 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+group = 'org.webpieces.server'
+
+apply from: '../../config/global.gradle'
+
+dependencies {
+
+    implementation libs.auth0.jwks.rsa
+    api libs.auth0.jwt
+    implementation libs.webpieces.http.http2client
+    implementation libs.webpieces.http.router
+    api libs.webpieces.core.jackson
+
+    api libs.google.guice
+//    api libs.webpieces.http.shared
+//    api libs.jakarta.rest.api
+//
+//    //these 2 for validation...(which don't depend on anything)
+//    implementation libs.hibernate.validator
+//    implementation libs.jakarta.el
+//
+//    implementation libs.micrometer.core
+//
+//    testImplementation libs.apache.commons.io
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                description = 'Http Router where you feed http requests in and get responses in the form of which view needs to be shown with the arguments that you need to give to that view'
+            }
+        }
+    }
+}

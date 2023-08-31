@@ -46,7 +46,7 @@ public class MenuCreator {
 			if(!reverseRouteLookup.isGetRequest(pageDesc.getRouteId()))
 				throw new RuntimeException("Plugin "+desc.getPluginName()+" supplied an illegal route id that is not a GET request="+pageDesc.getRouteId());
 			
-			String url = reverseRouteLookup.convertToUrl(pageDesc.getRouteId());
+			String url = reverseRouteLookup.convertToUrl(pageDesc.getRouteId(), false);
 			
 			descriptors.add(new SingleMenuItem(pageDesc.getMenuTitle(), url, pageDesc.isSecure()));
 			secureMenuMap.putIfAbsent(pageDesc.getMenuCategory(), descriptors);

@@ -201,11 +201,8 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		
 		return new UrlInfo(isSecure, port, path);
 	}
-	
-	//for in the page
-	public String routeToUrl(String routeId, Map<String, Object> args, boolean isValidating) {		
-		ReversableRouter routeMeta = get(routeId);
-		
+
+	private String translate(Object routeId, Map<String, Object> args, ReversableRouter routeMeta) {
 		String urlPath = routeMeta.getFullPath();
 		List<String> pathParamNames = routeMeta.getMatchInfo().getPathParamNames();
 		for(String param : pathParamNames) {
@@ -219,29 +216,27 @@ public class ReverseRoutes implements ReverseRouteLookup {
 					strArgs = " ARG:'"+entry.getKey()+"'='"+entry.getValue()+"'   equals="+equals+"\n";
 				}
 				throw new RouteNotFoundException("missing argument.  param="+param+" is required"
-						+ " to exist(and cannot be null as well).  route="+routeId+" args="+strArgs);
+						+ " to exist(and cannot be null as well).  route="+ routeId +" args="+strArgs);
 			}
 			String encodedVal = urlEncode(val);
 			urlPath = urlPath.replace("{"+param+"}", encodedVal);
 		}
-		
-		if(isValidating)
-			return urlPath;
-		
-		return createUrl(routeMeta, urlPath);
+		return urlPath;
 	}
 
-	private String createUrl(ReversableRouter routeMeta, String urlPath) {
+	private String createUrl(ReversableRouter routeMeta, String urlPath, boolean requireFullPath) {
 		RequestContext ctx = Current.getContext();
 		RouterRequest request = ctx.getRequest();
 
+		if(!requireFullPath) {
+			boolean isBoth = routeMeta.getMatchInfo().getExposedPorts() == Port.BOTH;
 
-		boolean isBoth = routeMeta.getMatchInfo().getExposedPorts() == Port.BOTH;
-		//1. if route is 'not' https only (ie. BOTH), return url path as we can just use the relative urlPath and
-		// stay on whatever the request is using in our redirect
-		//2. OR if request is https, we can also just use the relative path since it will stay in https
-		if(isBoth || request.isHttps)
-			return urlPath;
+			//1. if route is 'not' https only (ie. BOTH), return url path as we can just use the relative urlPath and
+			// stay on whatever the request is using in our redirect
+			//2. OR if request is https, we can also just use the relative path since it will stay in https
+			if (isBoth || request.isHttps)
+				return urlPath;
+		}
 		//else request is HTTP and route to go to is HTTPS so we have to do more work
 		
 		//we are rendering an http page with a link to https so need to do special magic
@@ -265,9 +260,25 @@ public class ReverseRoutes implements ReverseRouteLookup {
 	}
 
 	@Override
-	public String convertToUrl(RouteId routeId) {
+	public String convertToUrl(RouteId routeId, boolean fullPathRequired) {
 		ReversableRouter routeMeta = get(routeId);
 		String urlPath = routeMeta.getFullPath();
-		return createUrl(routeMeta, urlPath);
+		return createUrl(routeMeta, urlPath, fullPathRequired);
+	}
+
+	@Override
+	public String convertToUrl(RouteId routeId, Map<String, Object> args, boolean fullPathRequired) {
+		ReversableRouter routeMeta = get(routeId);
+		String urlPath = translate(routeId, args, routeMeta);
+		return createUrl(routeMeta, urlPath, fullPathRequired);
+	}
+
+	//for in the page
+	public String routeToUrl(String routeId, Map<String, Object> args, boolean isValidating) {
+		ReversableRouter routeMeta = get(routeId);
+		String urlPath = translate(routeId, args, routeMeta);
+		if(isValidating)
+			return urlPath;
+		return createUrl(routeMeta, urlPath, false);
 	}
 }

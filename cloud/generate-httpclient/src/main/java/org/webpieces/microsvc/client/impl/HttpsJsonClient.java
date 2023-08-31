@@ -22,6 +22,7 @@ import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.microsvc.client.api.ClientSSLEngineFactory;
 import org.webpieces.microsvc.client.api.HttpsConfig;
 import org.webpieces.nio.api.channels.HostWithPort;
 import org.webpieces.plugin.json.JacksonJsonConverter;
@@ -63,7 +64,6 @@ public class HttpsJsonClient {
     private final String serversName;
     private final MeterRegistry metrics;
 
-    private HttpsConfig httpsConfig;
     protected JacksonJsonConverter jsonMapper;
     protected Http2Client client;
     protected ScheduledExecutorService schedulerSvc;
@@ -74,10 +74,11 @@ public class HttpsJsonClient {
     private final ConcurrentMap<String, AtomicInteger> clientToCounter = new ConcurrentHashMap<>();
 
     private Masker masker;
+    private ClientSSLEngineFactory sslFactory;
 
     @Inject
     public HttpsJsonClient(
-            HttpsConfig httpsConfig,
+            ClientSSLEngineFactory sslFactory,
             ClientServiceConfig clientServiceConfig,
             JacksonJsonConverter jsonMapper,
             Http2Client client,
@@ -86,6 +87,7 @@ public class HttpsJsonClient {
             Masker masker,
             MeterRegistry metrics
     ) {
+        this.sslFactory = sslFactory;
         if(clientServiceConfig.getHcl() == null)
             throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
 
@@ -94,7 +96,6 @@ public class HttpsJsonClient {
 
         List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
 
-        this.httpsConfig = httpsConfig;
         this.jsonMapper = jsonMapper;
         this.client = client;
         this.futureUtil = futureUtil;
@@ -113,7 +114,6 @@ public class HttpsJsonClient {
             }
         }
 
-        log.info("USING keyStoreLocation=" + httpsConfig.getKeyStoreLocation());
     }
 
     private void cancel(Http2Socket clientSocket) {
@@ -274,55 +274,8 @@ public class HttpsJsonClient {
             return client.createHttpSocket(listener);
         }
 
-        SSLEngine engine = createEngine(apiAddress.getHostOrIpAddress(), apiAddress.getPort());
+        SSLEngine engine = sslFactory.createEngine(apiAddress.getHostOrIpAddress(), apiAddress.getPort());
         return client.createHttpsSocket(engine, listener);
-    }
-
-    public SSLEngine createEngine(String host, int port) {
-
-        try {
-            String keyStoreType = "JKS";
-            if(httpsConfig.getKeyStoreLocation().endsWith(".p12")) {
-                keyStoreType = "PKCS12";
-            }
-
-            URL resource = this.getClass().getClassLoader().getResource(httpsConfig.getKeyStoreLocation());
-
-
-            InputStream in = this.getClass().getResourceAsStream(httpsConfig.getKeyStoreLocation());
-
-            if (in == null) {
-                throw new IllegalStateException("keyStoreLocation=" + httpsConfig.getKeyStoreLocation() + " was not found on classpath");
-            }
-
-            //char[] passphrase = password.toCharArray();
-            // First initialize the key and trust material.
-            KeyStore ks = KeyStore.getInstance(keyStoreType);
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-
-            ks.load(in, httpsConfig.getKeyStorePassword().toCharArray());
-
-            //****************Client side specific*********************
-
-            // TrustManager's decide whether to allow connections.
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
-
-            tmf.init(ks);
-
-            sslContext.init(null, tmf.getTrustManagers(), null);
-
-            //****************Client side specific*********************
-
-            SSLEngine engine = sslContext.createSSLEngine(host, port);
-
-            engine.setUseClientMode(true);
-
-            return engine;
-
-        } catch (Exception ex) {
-            throw new RuntimeException("Could not create SSLEngine", ex);
-        }
-
     }
 
     private <T> T unmarshal(String jsonReq, FullRequest request, FullResponse httpResp, int port, Class<T> type) {
