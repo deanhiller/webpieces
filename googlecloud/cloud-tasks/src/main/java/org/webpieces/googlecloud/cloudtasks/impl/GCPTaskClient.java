@@ -77,7 +77,7 @@ public class GCPTaskClient {
         String queueNameStr;
         org.webpieces.googlecloud.cloudtasks.api.QueueName annotation = method.getAnnotation(org.webpieces.googlecloud.cloudtasks.api.QueueName.class);
         if(annotation == null) {
-            queueNameStr = method.getDeclaringClass().getName() + "." + method.getName();
+            queueNameStr = method.getDeclaringClass().getSimpleName() + "." + method.getName();
             queueNameStr = queueNameStr.replaceAll("\\.","-");
         } else {
             queueNameStr = annotation.value();

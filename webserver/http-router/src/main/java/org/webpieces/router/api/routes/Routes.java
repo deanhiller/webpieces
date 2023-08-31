@@ -4,6 +4,6 @@ import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 
 public interface Routes {
 
-	public void configure(DomainRouteBuilder bldr);
+	public void configure(DomainRouteBuilder domainRouteBldr);
 	
 }

@@ -21,6 +21,8 @@ public class RequestContext {
 	private Messages messages;
 	private List<OverwritePlatformResponse> callbacks = new ArrayList<>();
 
+	private Map<Class, Object> requestScopeState = new HashMap<>();
+
 	private ApplicationContext applicationContext;
 
 	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request, ApplicationContext appContext) {
@@ -85,5 +87,12 @@ public class RequestContext {
 	}
 
 
+	public <T> void putState(Class<T> clazz, T state) {
+		requestScopeState.put(clazz, state);
+	}
+
+	public <T> T getState(Class<T> clazz) {
+		return (T) requestScopeState.get(clazz);
+	}
 
 }
