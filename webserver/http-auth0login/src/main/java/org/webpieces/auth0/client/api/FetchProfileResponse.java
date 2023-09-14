@@ -2,7 +2,7 @@ package org.webpieces.auth0.client.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class UserProfile {
+public class FetchProfileResponse {
     private String sub;
     private String name;
     @JsonProperty("given_name")

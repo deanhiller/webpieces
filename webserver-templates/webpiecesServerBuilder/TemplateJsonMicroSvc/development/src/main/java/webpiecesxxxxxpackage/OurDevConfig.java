@@ -1,5 +1,7 @@
 package webpiecesxxxxxpackage;
 
+import com.google.inject.Binder;
+import com.google.inject.Module;
 import webpiecesxxxxxpackage.db.DbSettingsInMemory;
 import webpiecesxxxxxpackage.services.DevConfig;
 
@@ -36,4 +38,14 @@ public class OurDevConfig implements DevConfig {
 		return 8080;
 	}
 
+	public Module getDevelopmentOverrides() {
+		return new LocalhostOverrides();
+	}
+
+	private static class LocalhostOverrides implements Module {
+		@Override
+		public void configure(Binder binder) {
+			//overrides for local development
+		}
+	}
 }

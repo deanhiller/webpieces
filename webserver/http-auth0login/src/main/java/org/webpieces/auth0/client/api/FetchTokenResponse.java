@@ -2,7 +2,7 @@ package org.webpieces.auth0.client.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AuthResponse {
+public class FetchTokenResponse {
 
     @JsonProperty("access_token")
     private String accessToken;

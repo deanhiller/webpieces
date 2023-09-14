@@ -1,13 +1,21 @@
 package org.webpieces.auth0.client.api;
 
-import com.google.inject.ImplementedBy;
-import org.webpieces.auth0.impl.*;
+import org.webpieces.microsvc.api.NotEvolutionProof;
 import org.webpieces.util.futures.XFuture;
 
-@ImplementedBy(AuthApiImpl.class)
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+
+@NotEvolutionProof
 public interface AuthApi {
 
-    public XFuture<AuthResponse> codeToTokens(AuthRequest request);
+    @POST
+    @Path("/oauth/token")
+    public XFuture<FetchTokenResponse> fetchToken(FetchTokenRequest request);
 
-    public XFuture<UserProfile> fetchProfile(FetchProfileRequest bearerToken);
+    @GET
+    @Path("/userinfo")
+    public XFuture<FetchProfileResponse> fetchProfile();
+
 }
