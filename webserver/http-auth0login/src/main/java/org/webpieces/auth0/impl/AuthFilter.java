@@ -3,8 +3,9 @@ package org.webpieces.auth0.impl;
 import com.webpieces.http2.api.dto.highlevel.Http2Headers;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2Header;
 import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
-import org.webpieces.auth0.api.AbstractAuthController;
 import org.webpieces.auth0.api.Auth0Config;
+import org.webpieces.auth0.api.Auth0Plugin;
+import org.webpieces.auth0.api.Auth0RouteId;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
@@ -13,7 +14,6 @@ import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.routes.MethodMeta;
 import org.webpieces.router.api.routes.RouteFilter;
-import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.futures.XFuture;
@@ -27,7 +27,6 @@ public class AuthFilter extends RouteFilter<Auth0Config> {
 
 	private FutureHelper futureUtil;
 
-	private RouteId loginRoute;
 	private String[] secureFields;
 
 	@Inject
@@ -37,14 +36,13 @@ public class AuthFilter extends RouteFilter<Auth0Config> {
 
 	@Override
 	public void initialize(Auth0Config initialConfig) {
-		loginRoute = initialConfig.getLoginRoute();
 		secureFields = initialConfig.getSecureFields();
 	}
 	
 	@Override
 	public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> next) {
 		Session session = Current.session();
-		if(session.containsKey(AbstractAuthController.USER_ID_TOKEN)) {
+		if(session.containsKey(Auth0Plugin.USER_ID_TOKEN)) {
 			Current.addModifyResponse(resp -> addCacheHeaders(resp));
 			
 			return futureUtil.finallyBlock(
@@ -59,7 +57,7 @@ public class AuthFilter extends RouteFilter<Auth0Config> {
 				Current.flash().keep(true);
 			}
 			
-			return XFuture.completedFuture(Actions.ajaxRedirect(loginRoute));	
+			return XFuture.completedFuture(Actions.ajaxRedirect(Auth0RouteId.LOGIN));
 		} else if(request.method == HttpMethod.GET) {
 			//store url requested in flash so after logging in, we can redirect the user
 			//back to the original page
@@ -79,7 +77,7 @@ public class AuthFilter extends RouteFilter<Auth0Config> {
 		}
 		
 		//redirect to login page..
-		return XFuture.completedFuture(Actions.redirect(loginRoute));
+		return XFuture.completedFuture(Actions.redirect(Auth0RouteId.LOGIN));
 	}
 
 	private void clearSecureFields(MethodMeta meta) {

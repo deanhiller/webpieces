@@ -9,6 +9,7 @@ import org.webpieces.recorder.impl.TestCaseRecorder;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
+import org.webpieces.util.net.URLEncoder;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -17,7 +18,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
-import java.util.Map;
+import java.nio.charset.Charset;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -49,6 +51,8 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if(args == null)
+            args = new Object[0]; //avoid needing to deal with null here
 
         if(method.getDeclaringClass() == Object.class) {
             return method.invoke(this);
@@ -96,7 +100,11 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
         log.info("Sending http request to: " + addr.getHostOrIpAddress()+":"+addr.getPort() + path);
 
-        Object body = args[0];
+        Object body = null;
+        if(args.length > 0) {
+            body = args[0];
+        }
+
         if(hasUrlParams) {
             path = transformPath(path, method, args);
             body = findBody(method, args);
@@ -129,6 +137,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         String methodName = method.getName();
         String requestName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1)+"Request";
 
+        TreeMap<String, Object> queryParams = new TreeMap<>();
         Parameter[] parameters = method.getParameters();
         for(int i = 0; i < args.length; i++) {
             Parameter param = parameters[i];
@@ -137,9 +146,21 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
             String name = param.getName();
             String variable = "{"+name+"}";
-            if(!path.contains(variable))
-                throw new IllegalArgumentException("Can't find '"+variable+"' in the path to bind in the url");
-            path = path.replace("{"+name+"}", args[i]+"");
+            if(!path.contains(variable)) {
+                if(args[i] != null) //only add if non-null
+                    queryParams.put(name, args[i]);
+                continue;
+            }
+
+            String urlEncoded = URLEncoder.encode(args[i]+"", Charset.defaultCharset());
+            path = path.replace("{"+name+"}", urlEncoded+"");
+        }
+
+        String token = "?";
+        for(Map.Entry<String, Object> queryParam : queryParams.entrySet()) {
+            String urlEncoded = URLEncoder.encode(queryParam.getValue()+"", Charset.defaultCharset());
+            path += token+queryParam.getKey()+"="+urlEncoded;
+            token = "&"; //going forward, prefix with & for every other query param
         }
 
         return path;
@@ -148,8 +169,10 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
     private Object findBody(Method method, Object[] args) {
         String methodName = method.getName();
         String requestName = methodName.substring(0, 1).toUpperCase() + methodName.substring(1)+"Request";
-        for(Object arg : args) {
-            if(arg.getClass().getSimpleName().equals(requestName))
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        for(int i = 0; i < args.length; i++) {
+            Object arg = args[i];
+            if(parameterTypes[i].getSimpleName().equals(requestName))
                 return arg;
         }
         return null;

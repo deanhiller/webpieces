@@ -1,5 +1,7 @@
-package org.webpieces.auth0.api;
+package org.webpieces.auth0.impl;
 
+import org.webpieces.auth0.api.Auth0Config;
+import org.webpieces.auth0.api.Auth0RouteId;
 import org.webpieces.auth0.impl.AuthFilter;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
@@ -21,17 +23,12 @@ public class Auth0Routes implements Routes {
 	public void configure(DomainRouteBuilder domainRouteBldr) {
 		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 
-		RouteId logoutRoute = auth0Config.getLogoutRoute();
-		RouteId loginRoute = auth0Config.getLoginRoute();
-		RouteId callbackRoute = auth0Config.getCallbackRoute();
-
-		String controller = auth0Config.getController();
 		String packageRegEx = auth0Config.getPackageRegEx();
 		int filterLevel = auth0Config.getFilterLevel();
 
-		bldr.addRoute(Port.HTTPS, HttpMethod.GET , "/logout",              controller+".logout", logoutRoute);
-		bldr.addRoute(Port.HTTPS, HttpMethod.GET , "/login",               controller+".login", loginRoute);
-		bldr.addRoute(Port.HTTPS, HttpMethod.GET, "/callback",           controller+".callback", callbackRoute);
+		bldr.addRoute(Port.HTTPS, HttpMethod.GET , "/logout","Auth0Controller.logout", Auth0RouteId.LOGOUT);
+		bldr.addRoute(Port.HTTPS, HttpMethod.GET , "/login","Auth0Controller.login", Auth0RouteId.LOGIN);
+		bldr.addRoute(Port.HTTPS, HttpMethod.GET, "/callback","Auth0Controller.callback", Auth0RouteId.CALLBACK);
 
 		//being in a package filter secures all NotFound based on changing params so hackers can't probe urls of dynamic urls of /secure/{name}
 		// guessing names and such as the filter is related to class locations not url patterns

@@ -2,7 +2,7 @@ package org.webpieces.auth0.client.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AuthRequest {
+public class FetchTokenRequest {
 
     //grant_type=authorization_code&client_id={yourClientId}&client_secret=%7ByourClientSecret%7D
     // &code=yourAuthorizationCode%7D&redirect_uri={https://yourApp/callback}")
@@ -17,6 +17,10 @@ public class AuthRequest {
     @JsonProperty("redirect_uri")
     private String callbackUrl;
 
+    private String audience;
+
+    private String scope;
+    
     public String getGrantType() {
         return grantType;
     }
@@ -55,5 +59,21 @@ public class AuthRequest {
 
     public void setCallbackUrl(String callbackUrl) {
         this.callbackUrl = callbackUrl;
+    }
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 }

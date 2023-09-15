@@ -17,10 +17,15 @@ public class RoutingHolder {
 
 	
 	public ReverseRouteLookup getReverseRouteLookup() {
+		if(reverseRouteLookup == null)
+			throw new IllegalStateException("You are calling this too early(perhaps during guice construction) and it needs to be called later in the lifecycle post guice construction");
 		return reverseRouteLookup;
 	}
 	
 	public BRouter getDomainRouter() {
+		if(reverseRouteLookup == null)
+			throw new IllegalStateException("You are calling this too early(perhaps during guice construction) and it needs to be called later in the lifecycle post guice construction");
+
 		return domainRouter;
 	}
 

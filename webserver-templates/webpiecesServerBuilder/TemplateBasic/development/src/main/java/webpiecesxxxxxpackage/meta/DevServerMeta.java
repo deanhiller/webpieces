@@ -2,6 +2,7 @@ package webpiecesxxxxxpackage.meta;
 
 import java.util.List;
 
+import com.google.inject.util.Modules;
 import org.webpieces.plugin.documentation.DocumentationConfig;
 import org.webpieces.plugin.documentation.WebpiecesDocumentationPlugin;
 import org.webpieces.plugin.hsqldb.H2DbConfig;
@@ -14,6 +15,7 @@ import org.webpieces.router.api.routes.WebAppMeta;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
+import webpiecesxxxxxpackage.OurDevConfig;
 import webpiecesxxxxxpackage.base.ProdServerMeta;
 
 public class DevServerMeta implements WebAppMeta {
@@ -27,9 +29,11 @@ public class DevServerMeta implements WebAppMeta {
 	
 	@Override
 	public List<Module> getGuiceModules() {
-		return prodMeta.getGuiceModules();
+		List<Module> prod = prodMeta.getGuiceModules();
+		Module localOverrides = new OurDevConfig().getDevelopmentOverrides();
+		Module finalModule = Modules.override(prod).with(localOverrides);
+		return Lists.newArrayList(finalModule);
 	}
-
 	@Override
 	public List<Routes> getRouteModules() {
 		return prodMeta.getRouteModules();

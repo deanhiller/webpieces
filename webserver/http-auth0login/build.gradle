@@ -14,6 +14,7 @@ apply from: '../../config/global.gradle'
 
 dependencies {
 
+    implementation libs.webpieces.microservice.clientgenerator
     implementation libs.auth0.jwks.rsa
     api libs.auth0.jwt
     implementation libs.webpieces.http.http2client
