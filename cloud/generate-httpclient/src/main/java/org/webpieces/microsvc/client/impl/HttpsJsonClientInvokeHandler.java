@@ -146,10 +146,11 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
             String name = param.getName();
             String variable = "{"+name+"}";
-            if(!path.contains(variable)) {
-                if(args[i] != null) //only add if non-null
-                    queryParams.put(name, args[i]);
-                continue;
+            QueryParam queryParam = param.getAnnotation(QueryParam.class);
+            if(queryParam != null) {
+                queryParams.put(queryParam.value(), args[i]);
+            } else if(!path.contains(variable)) {
+                throw new IllegalArgumentException("Can't find '"+variable+"' in the path to bind in the url and missing @QueryParam in case you want a query param");
             }
 
             String urlEncoded = URLEncoder.encode(args[i]+"", Charset.defaultCharset());
