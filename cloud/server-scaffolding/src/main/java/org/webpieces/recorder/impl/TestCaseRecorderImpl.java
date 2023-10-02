@@ -7,6 +7,8 @@ import org.webpieces.recorder.api.DoNotRecord;
 import org.webpieces.util.futures.XFuture;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -97,6 +99,8 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
 
         //excludes inherited fields for now...(KISS until we need it)
         Field[] fields = bean.getClass().getDeclaredFields();
+
+        // Loop through the filtered fields
         for(Field f : fields) {
             DoNotRecord annotation = f.getAnnotation(DoNotRecord.class);
             if(annotation != null) {
@@ -115,33 +119,11 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                 } else if (type.isPrimitive() || wrapperTypes.contains(type)) {
                     test.add("\t\t" + varName + "." + setMethodName + "(" + value + ");\n");
                 } else if (Map.class.isAssignableFrom(type)) {
-                    test.add("\t\t//We need to implement the one for Map. field=\"+f.getName()+\"\n");
+                    mapTestCaseGeneration(varName, test, recurseLevel, f, setMethodName, (Map<Object,Object>) value);
                 } else if (List.class.isAssignableFrom(type)) {
-                    List<Object> list = (List<Object>) value;
-                    if(list.size() == 0) {
-                        test.add("\t\t" + varName + "." + setMethodName + "(new ArrayList());\n");
-                    } else {
-                        Class<?> beanClazz = list.get(0).getClass();
-                        String beanType = beanClazz.getSimpleName();
-                        String listVarName = f.getName()+recurseLevel+"List";
-                        test.add("\t\tList<"+beanType+"> "+listVarName+" = new ArrayList<>();\n");
-                        test.add("\t\t"+varName+"."+setMethodName+"("+listVarName+");\n");
-                        for(int i = 0; i < list.size(); i++) {
-                            String itemInListVarName = f.getName()+recurseLevel+"_"+i;
-                            Object listBean = list.get(i);
-                            if(beanClazz.isEnum()) {
-                                test.add("\t\t" + listVarName + ".add(" + beanType + "." + listBean + ");\n");
-                            } else if(wrapperTypes.contains(beanClazz)) {
-                                test.add("\t\t" + listVarName + ".add(" + listBean + ");\n");
-                            } else {
-                                test.add("\t\t" + beanType + " " + itemInListVarName + " = new " + beanType + "();\n");
-                                test.add("\t\t" + listVarName + ".add(" + itemInListVarName + ");\n");
-                                writeFillInBeanCode(listBean, itemInListVarName, test, recurseLevel+1);
-                            }
-                        }
-                    }
+                    listTestCaseGeneration(varName, test, recurseLevel, f, (List<Object>) value, setMethodName);
                 } else if (Set.class.isAssignableFrom(type)) {
-                    test.add("\t\t//We need to implement the one for Set. field=\"+f.getName()+\"\n");
+                    setTestCaseGeneration(varName, test, recurseLevel, f, (Set<Object>) value, setMethodName);
                 } else if(UUID.class.isAssignableFrom(type)) {
                     test.add("\t\t UUID uuid = UUID.fromString(\"" +  value+"\");\n");
                     test.add("\t\t" + varName + "." + setMethodName + "(uuid);\n");
@@ -162,6 +144,88 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
         
     }
 
+    private void listTestCaseGeneration(String varName, TestCaseHolder test, int recurseLevel, Field f, List<Object> value, String setMethodName) {
+        List<Object> list = value;
+        if(list.size() == 0) {
+            test.add("\t\t" + varName + "." + setMethodName + "(new ArrayList());\n");
+        } else {
+            Class<?> beanClazz = list.get(0).getClass();
+            String beanType = beanClazz.getSimpleName();
+            String listVarName = f.getName()+ recurseLevel +"List";
+            test.add("\t\tList<"+beanType+"> "+listVarName+" = new ArrayList<>();\n");
+            test.add("\t\t"+ varName +"."+ setMethodName +"("+listVarName+");\n");
+            for(int i = 0; i < list.size(); i++) {
+                String itemInListVarName = f.getName()+ recurseLevel +"_"+i;
+                Object listBean = list.get(i);
+                if(beanClazz.isEnum()) {
+                    test.add("\t\t" + listVarName + ".add(" + beanType + "." + listBean + ");\n");
+                } else if(wrapperTypes.contains(beanClazz)) {
+                    test.add("\t\t" + listVarName + ".add(" + listBean + ");\n");
+                } else if(beanClazz == String.class) {
+                    test.add("\t\t" + listVarName + ".add(\"" + itemInListVarName + "\");\n");
+                } else {
+                    test.add("\t\t" + beanType + " " + itemInListVarName + " = new " + beanType + "();\n");
+                    test.add("\t\t" + listVarName + ".add(" + itemInListVarName + ");\n");
+                    writeFillInBeanCode(listBean, itemInListVarName, test, recurseLevel +1);
+                }
+            }
+        }
+    }
+
+    private void setTestCaseGeneration(String varName, TestCaseHolder test, int recurseLevel, Field f, Set<Object> value, String setMethodName) {
+        Set<Object> set = value;
+        if(set.size() == 0) {
+            test.add("\t\t" + varName + "." + setMethodName + "(new TreeSet());\n");
+        } else {
+            Class<?> beanClazz = set.toArray()[0].getClass();
+            String beanType = beanClazz.getSimpleName();
+            String setVarName = f.getName()+ recurseLevel +"Set";
+            test.add("\t\tSet<"+beanType+"> "+setVarName+" = new TreeSet<>();\n");
+            test.add("\t\t"+ varName +"."+ setMethodName +"("+setVarName+");\n");
+            for(int i = 0; i < set.size(); i++) {
+                String itemInSetVarName = f.getName()+ recurseLevel +"_"+i;
+                Object listBean = set.toArray()[i];
+                if(beanClazz.isEnum()) {
+                    test.add("\t\t" + setVarName + ".add(" + beanType + "." + listBean + ");\n");
+                } else if(wrapperTypes.contains(beanClazz)) {
+                    test.add("\t\t" + setVarName + ".add(" + listBean + ");\n");
+                } else if(beanClazz == String.class) {
+                    test.add("\t\t" + setVarName + ".add(\"" + itemInSetVarName + "\");\n");
+                } else {
+                    test.add("\t\t" + beanType + " " + itemInSetVarName + " = new " + beanType + "();\n");
+                    test.add("\t\t" + setVarName + ".add(" + itemInSetVarName + ");\n");
+                    writeFillInBeanCode(listBean, itemInSetVarName, test, recurseLevel +1);
+                }
+            }
+        }
+    }
+
+    private static <K, V> void mapTestCaseGeneration(String varName, TestCaseHolder test, int recurseLevel, Field f, String setMethodName, Map<K, V> map) {
+        // Check if the field is parameterized (generics)
+        Type fieldType = f.getGenericType();
+        List<String> typeArgumentsList = new ArrayList<>();
+
+        if (fieldType instanceof ParameterizedType) {
+            ParameterizedType paramType = (ParameterizedType) fieldType;
+            Type[] typeArguments = paramType.getActualTypeArguments();
+
+            for (Type typeArgument : typeArguments) {
+                typeArgumentsList.add(typeArgument.getTypeName());
+            }
+        }
+
+        String mapVarName = f.getName()+ recurseLevel +"Map";
+        test.add("\t\tMap<"+typeArgumentsList.get(0)+","+typeArgumentsList.get(1)+"> "+mapVarName+" = new HashMap<>();\n");
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            K key = entry.getKey();
+            V value = entry.getValue();
+            test.add("\t\t"+ mapVarName +".put("+ key +","+value+");\n");
+        }
+
+        test.add("\t\t"+ varName +"."+ setMethodName +"("+mapVarName+");\n");
+    }
+
     private void writeValidateCode(Object bean, String varName, TestCaseHolder test, int recurseLevel) {
         if(recurseLevel > 10)
             throw new IllegalStateException("Recursion greater than 10, probably a bug as beans are not that big(they shouldn't be)");
@@ -177,6 +241,8 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
 
         //excludes inherited fields for now...(KISS until we need it)
         Field[] fields = bean.getClass().getDeclaredFields();
+
+        // Loop through the filtered fields
         for(Field f : fields) {
             DoNotRecord annotation = f.getAnnotation(DoNotRecord.class);
             if(annotation != null) {
@@ -197,21 +263,9 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
                 } else if (Map.class.isAssignableFrom(type)) {
                     test.add("\t\t//We need to implement the one for Map. field="+f.getName()+"\n");
                 } else if (List.class.isAssignableFrom(type)) {
-                    List<Object> list = (List<Object>) value;
-                    if(list.size() == 0) {
-                        test.add("\t\tAssertions.assertEquals(0, " + varName + "." + getMethodName + "().size());\n");
-                    } else {
-                        String beanType = list.get(0).getClass().getSimpleName();
-                        String listVarName = f.getName()+recurseLevel+"List";
-                        test.add("\t\tList<"+beanType+"> "+listVarName+" = "+varName + "." + getMethodName + "();\n");
-                        for(int i = 0; i < list.size(); i++) {
-                            Object listBean = list.get(i);
-                            writeValidateCode(listBean, listVarName+".get("+i+")", test, recurseLevel+1);
-                        }
-                    }
-
+                    writeValidateCodeList(varName, test, recurseLevel, f, (List<Object>) value, getMethodName);
                 } else if (Set.class.isAssignableFrom(type)) {
-                    test.add("\t\t//We need to implement the one for Set. field=" + f.getName() + "\n");
+                    writeValidateCodeSet(varName, test, recurseLevel, f, (Set<Object>) value, getMethodName);
                 } else if(UUID.class.isAssignableFrom(type)) {
                     test.add("\t\tAssertions.assertEquals(\"" + value + "\", " + varName + "." +getMethodName+"().toString());\n");
                 } else if(LocalDateTime.class.isAssignableFrom(type)) {
@@ -227,6 +281,38 @@ public class TestCaseRecorderImpl implements TestCaseRecorder {
             }
         }
         
+    }
+
+    private void writeValidateCodeSet(String varName, TestCaseHolder test, int recurseLevel, Field f, Set<Object> value, String getMethodName) {
+        Set<Object> set = value;
+        if(set.size() == 0) {
+            test.add("\t\tAssertions.assertEquals(0, " + varName + "." + getMethodName + "().size());\n");
+        } else {
+            test.add("\t\tAssertions.assertEquals("+set.size()+", " + varName + "." + getMethodName + "().size());\n");
+            String beanType = set.toArray()[0].getClass().getSimpleName();
+            String setVarName = f.getName()+ recurseLevel +"Set";
+            test.add("\t\tSet<"+beanType+"> "+setVarName+" = new TreeSet<>();\n");
+            for(int i = 0; i < set.size(); i++) {
+                Object setBean = set.toArray()[i];
+                writeValidateCode(setBean, setVarName+".toArray()["+i+"]", test, recurseLevel +1);
+            }
+        }
+    }
+
+    private void writeValidateCodeList(String varName, TestCaseHolder test, int recurseLevel, Field f, List<Object> value, String getMethodName) {
+        List<Object> list = value;
+        if(list.size() == 0) {
+            test.add("\t\tAssertions.assertEquals(0, " + varName + "." + getMethodName + "().size());\n");
+        } else {
+            test.add("\t\tAssertions.assertEquals("+list.size()+", " + varName + "." + getMethodName + "().size());\n");
+            String beanType = list.get(0).getClass().getSimpleName();
+            String listVarName = f.getName()+ recurseLevel +"List";
+            test.add("\t\tList<"+beanType+"> "+listVarName+" = "+ varName + "." + getMethodName + "();\n");
+            for(int i = 0; i < list.size(); i++) {
+                Object listBean = list.get(i);
+                writeValidateCode(listBean, listVarName+".get("+i+")", test, recurseLevel +1);
+            }
+        }
     }
 
     private String fixName(String prefix, String name) {
