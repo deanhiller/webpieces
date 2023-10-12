@@ -50,7 +50,7 @@ public class FilterRoutes implements Routes {
         //builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 80);
 
         if(config.isEnableHealthCheckEndpoint())
-            builder.addContentRoute(BOTH, GET, "/health", "../impl/controllers/HealthController.health");
+            builder.addContentRoute(BOTH, GET, "/health", "../impl/controllers/expose/HealthController.health");
     }
 
 }
