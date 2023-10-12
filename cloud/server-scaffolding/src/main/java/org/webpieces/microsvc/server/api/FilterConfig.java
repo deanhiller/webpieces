@@ -2,8 +2,8 @@ package org.webpieces.microsvc.server.api;
 
 public class FilterConfig {
     private boolean entryPoint;
-    private String packageRegEx = ".*";
-    private String secureRegEx;
+    private String packageRegEx = ".*\\bexpose\\b.*";
+    private String secureRegEx = "^(?!.*\\bexpose\\b).*$";
     private boolean enableHealthCheckEndpoint = true;
 
     //Turning this off is an EXTREMELY minor performance improvement so default to on because only
@@ -21,6 +21,8 @@ public class FilterConfig {
         this.packageRegEx = packageRegEx;
         this.entryPoint = entryPoint;
     }
+
+    public FilterConfig() {}
 
     public String getPackageRegEx() {
         return packageRegEx;
