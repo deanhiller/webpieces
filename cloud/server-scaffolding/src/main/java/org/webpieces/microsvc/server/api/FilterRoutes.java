@@ -38,13 +38,13 @@ public class FilterRoutes implements Routes {
         builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 90);
         builder.addPackageFilter(regex, LogExceptionFilter.class, null, FilterPortType.ALL_FILTER, 80);
 
-        if(config.isSecure()) {
+        String secureRegEx = config.getSecureRegEx();
+        if(secureRegEx!=null && !"".equalsIgnoreCase(secureRegEx)) {
             builder.addPackageFilter(regex, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 70);
         }
 
         if(config.isRecordingEnabled())
             builder.addPackageFilter(regex, RecordingFilter.class, null, FilterPortType.ALL_FILTER, 60);
-
 
         //complicate port as-is so we will do this in Tray for now until we can port this one too ->
         //builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 80);

@@ -2,9 +2,9 @@ package org.webpieces.microsvc.server.api;
 
 public class FilterConfig {
     private boolean entryPoint;
-    private String packageRegEx;
+    private String packageRegEx = ".*";
+    private String secureRegEx;
     private boolean enableHealthCheckEndpoint = true;
-    private boolean secure;
 
     //Turning this off is an EXTREMELY minor performance improvement so default to on because only
     //requests with MicroSvcHeaders.RECORDING header will actually do recording
@@ -12,13 +12,9 @@ public class FilterConfig {
 
     private boolean enableErrorHandling = true;
 
-    public FilterConfig(String packageRegEx) {
-        this(packageRegEx, true);
-    }
-
-    public FilterConfig(boolean secure, String packageRegEx) {
-        this.packageRegEx = packageRegEx;
-        this.secure = secure;
+    public FilterConfig(String secureRegEx) {
+        this.secureRegEx = secureRegEx;
+        this.entryPoint = true;
     }
 
     public FilterConfig(String packageRegEx, boolean entryPoint) {
@@ -67,8 +63,7 @@ public class FilterConfig {
         this.recordingEnabled = recordingEnabled;
     }
 
-    public boolean isSecure() { return secure; }
+    public String getSecureRegEx() { return secureRegEx; }
 
-    public void setSecure(boolean secure) { this.secure = secure; }
-
+    public void setSecureRegEx(String secureRegEx) { this.secureRegEx = secureRegEx; }
 }
