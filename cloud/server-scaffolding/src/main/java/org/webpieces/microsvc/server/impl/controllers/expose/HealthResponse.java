@@ -1,4 +1,4 @@
-package org.webpieces.microsvc.server.impl.controllers;
+package org.webpieces.microsvc.server.impl.controllers.expose;
 
 public class HealthResponse {
     private String status = "OK";

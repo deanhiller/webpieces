@@ -1,4 +1,4 @@
-package org.webpieces.microsvc.server.impl.controllers;
+package org.webpieces.microsvc.server.impl.controllers.expose;
 
 import org.webpieces.plugin.json.Jackson;
 import org.webpieces.router.impl.compression.MimeTypes;
