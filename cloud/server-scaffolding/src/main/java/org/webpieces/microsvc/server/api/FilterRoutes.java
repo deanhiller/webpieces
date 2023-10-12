@@ -38,10 +38,8 @@ public class FilterRoutes implements Routes {
         builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 90);
         builder.addPackageFilter(regex, LogExceptionFilter.class, null, FilterPortType.ALL_FILTER, 80);
 
-        if(!config.isEntryPoint()) {
+        if(config.isSecure()) {
             builder.addPackageFilter(regex, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 70);
-        } else {
-            //builder.addPackageFilter(regex, SetupSecureTokenFilter.class, null, FilterPortType.ALL_FILTER, 160);
         }
 
         if(config.isRecordingEnabled())
