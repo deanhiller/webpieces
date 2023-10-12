@@ -2,7 +2,7 @@ package org.webpieces.microsvc.server.api;
 
 public class FilterConfig {
     private boolean entryPoint;
-    private String packageRegEx = ".*\\bexpose\\b.*";
+    private String packageRegEx = ".*";
     private String secureRegEx = "^(?!.*\\bexpose\\b).*$";
     private boolean enableHealthCheckEndpoint = true;
 
