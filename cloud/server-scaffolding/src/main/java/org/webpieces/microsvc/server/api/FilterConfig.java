@@ -1,8 +1,8 @@
 package org.webpieces.microsvc.server.api;
 
 public class FilterConfig {
-    private boolean entryPoint;
-    private String packageRegEx;
+    private String packageRegEx = ".*";
+    private String secureRegEx = "^(?!.*\\bexpose\\b).*$";
     private boolean enableHealthCheckEndpoint = true;
 
     //Turning this off is an EXTREMELY minor performance improvement so default to on because only
@@ -11,14 +11,11 @@ public class FilterConfig {
 
     private boolean enableErrorHandling = true;
 
-    public FilterConfig(String packageRegEx) {
-        this(packageRegEx, true);
+    public FilterConfig(String secureRegEx) {
+        this.secureRegEx = secureRegEx;
     }
 
-    public FilterConfig(String packageRegEx, boolean entryPoint) {
-        this.packageRegEx = packageRegEx;
-        this.entryPoint = entryPoint;
-    }
+    public FilterConfig() {}
 
     public String getPackageRegEx() {
         return packageRegEx;
@@ -45,14 +42,6 @@ public class FilterConfig {
         this.enableHealthCheckEndpoint = enableHealthCheckEndpoint;
     }
 
-    public boolean isEntryPoint() {
-        return entryPoint;
-    }
-
-    public void setEntryPoint(boolean entryPoint) {
-        this.entryPoint = entryPoint;
-    }
-
     public boolean isRecordingEnabled() {
         return recordingEnabled;
     }
@@ -60,4 +49,8 @@ public class FilterConfig {
     public void setRecordingEnabled(boolean recordingEnabled) {
         this.recordingEnabled = recordingEnabled;
     }
+
+    public String getSecureRegEx() { return secureRegEx; }
+
+    public void setSecureRegEx(String secureRegEx) { this.secureRegEx = secureRegEx; }
 }
