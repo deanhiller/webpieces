@@ -40,7 +40,7 @@ public class FilterRoutes implements Routes {
 
         String secureRegEx = config.getSecureRegEx();
         if(secureRegEx!=null && !"".equalsIgnoreCase(secureRegEx)) {
-            builder.addPackageFilter(regex, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 70);
+            builder.addPackageFilter(secureRegEx, TokenSharingFilter.class, null, FilterPortType.ALL_FILTER, 70);
         }
 
         if(config.isRecordingEnabled())
