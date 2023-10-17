@@ -86,7 +86,7 @@ public class ArgumentsImpl implements ArgumentsCheck {
 
 	@Override
 	public Supplier<String> createOptionalArg(String argumentKey, String defaultValueString, String help) {
-		return createOptionalArg(argumentKey, defaultValueString, help);
+		return createOptionalArg(argumentKey, defaultValueString, help, (s) -> s);
 	}
 
 	@Override

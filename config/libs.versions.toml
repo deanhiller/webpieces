@@ -34,7 +34,7 @@ digitalforge-log4jdbc           = { module = "org.digitalforge:log4jdbc", versio
 disruptor                       = { module = "com.conversantmedia:disruptor", version = "1.2.21" }
 elasticsearch-client            = { module = "org.elasticsearch.client:elasticsearch-rest-client", version = "7.6.1" }
 google-cloud-core               = { module = "com.google.cloud:google-cloud-core", version = "1.94.7"}
-google-cloud-logging            = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.127.5-alpha" }
+google-cloud-logging            = { module = "com.google.cloud:google-cloud-logging-logback", version = "0.130.24-alpha" }
 google-cloud-monitoring         = { module = "com.google.cloud:google-cloud-monitoring", version = "2.1.0" }
 google-cloud-storage            = { module = "com.google.cloud:google-cloud-storage", version = "1.113.15" }
 google-cloud-tasks              = { module = "com.google.cloud:google-cloud-tasks", version = "2.9.0" }
@@ -79,6 +79,7 @@ webpieces-core-statemachine     = { module = "org.webpieces.core:core-statemachi
 webpieces-core-util             = { module = "org.webpieces.core:core-util" }
 webpieces-googlecloud-storage   = { module = "org.webpieces.googlecloud:cloudstorage-client" }
 webpieces-googlecloud-tasks     = { module = "org.webpieces.googlecloud:cloud-tasks" }
+webpieces-googlecloud-logging   = { module = "org.webpieces.googlecloud:logging" }
 webpieces-http-api              = { module = "org.webpieces.http:http-api" }
 webpieces-http-client           = { module = "org.webpieces.http:http2to1_1-client" }
 webpieces-http-frontend2        = { module = "org.webpieces.http:http-frontend2" }
