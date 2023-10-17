@@ -63,6 +63,8 @@ dependencies {
     api libs.webpieces.projectcreator
 
     api libs.webpieces.googlecloud.storage
+    api libs.webpieces.googlecloud.tasks
+    api libs.webpieces.googlecloud.logging
 }
 
 publishing {
