@@ -4,7 +4,7 @@ public class RedirectResponse {
 
 	public Boolean isHttps;
 	public String domain;
-	public int port;
+	public Integer port;
 	public String redirectToPath;
 	public boolean isAjaxRedirect;
 
@@ -12,7 +12,7 @@ public class RedirectResponse {
 		this.redirectToPath = redirectToPath;
 	}
 	
-	public RedirectResponse(boolean isAjaxRedirect, boolean isHttps, String domain, int port, String redirectToPath) {
+	public RedirectResponse(boolean isAjaxRedirect, boolean isHttps, String domain, Integer port, String redirectToPath) {
 		this.isAjaxRedirect = isAjaxRedirect;
 		this.isHttps = isHttps;
 		this.domain = domain;

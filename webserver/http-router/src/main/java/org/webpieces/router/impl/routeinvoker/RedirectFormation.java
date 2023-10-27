@@ -26,7 +26,7 @@ public class RedirectFormation {
 		//if the request is https, stay in https as everything is accessible on https
 		//if the request is http, then convert to https IF new route is secure
 		boolean isSecure = request.isHttps || isHttpsOnly;
-		int port = request.port;
+		Integer port = request.port;
 		//if need to change port to https port, this is how we do it...
 		if(!request.isHttps && isHttpsOnly)
 			port = calculateHttpsPort(request);
@@ -58,20 +58,23 @@ public class RedirectFormation {
 		return ports.getHttpPort();
 	}
 
-	public int calculateHttpsPort(RouterRequest request) {
+	public Integer calculateHttpsPort(RouterRequest request) {
 		//OK, to get redirect business correct, we have to account for firewalls where clients
 		//send requests to port 80 and the request comes into our server in a different
 		//port than that...we still need to redirect back to 443 and not the port that
 		//our server is bound to
 		if(request.port == 80) {
 			//in this case, it's a firewall OR you just have your server on standard ports
-			return 443;
+			return null;
 		}
-		
+
+		if(request.getSingleHeader("x-forwarded-proto") != null)
+			return null;
+
 		//Orrrr, since it was not port 80, it's a test or other and we need to redirect
 		//to the port that our webserver bound to in https
 		PortConfig ports = portConfigLookup.getPortConfig();
-		int httpsPort = ports.getHttpsPort();
+		Integer httpsPort = ports.getHttpsPort();
 		return httpsPort;
 	}
 }

@@ -197,7 +197,7 @@ public class ReverseRoutes implements ReverseRouteLookup {
 
 		PortAndIsSecure info = redirectFormation.calculateInfo(matchInfo, requestedPort, ctx.getRequest());
 		boolean isSecure = info.isSecure();
-		int port = info.getPort();
+		Integer port = info.getPort();
 		
 		return new UrlInfo(isSecure, port, path);
 	}
@@ -242,8 +242,11 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		//we are rendering an http page with a link to https so need to do special magic
 		String domain = request.domain;
 
-		int httpsPort = redirectFormation.calculateHttpsPort(request);
-		return "https://"+domain+":"+httpsPort +urlPath;
+		Integer httpsPort = redirectFormation.calculateHttpsPort(request);
+		String portStr = "";
+		if(httpsPort != null)
+			portStr = ":"+httpsPort;
+		return "https://"+domain+portStr+urlPath;
 	}
 	
 	private String urlEncode(Object value) {

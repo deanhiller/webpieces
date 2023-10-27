@@ -19,6 +19,10 @@ public interface AuthManagementApi {
 
     @GET
     @Path("/api/v2/users/{id}")
-    public XFuture<FetchUserResponse> fetchUser(String id, String fields, @QueryParam("include_fields") Boolean includeFields);
+    public XFuture<FetchUserResponse> fetchUser(
+            String id,
+            @QueryParam("fields") String fields,
+            @QueryParam("include_fields") Boolean includeFields
+    );
 
 }
