@@ -10,7 +10,7 @@ public class PortAndIsSecure {
 		this.isSecure = isSecure;
 	}
 
-	public int getPort() {
+	public Integer getPort() {
 		return port;
 	}
 

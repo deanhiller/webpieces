@@ -164,7 +164,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 
 		UrlInfo urlInfo = reverseRoutes.routeToUrl(id, method, args, ctx, requestedPort);
 		boolean isSecure = urlInfo.isSecure();
-		int port = urlInfo.getPort();
+		Integer port = urlInfo.getPort();
 		String path = urlInfo.getPath();
 
 		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);

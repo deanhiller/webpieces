@@ -150,7 +150,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		//since request came in on port 80, url should be port 443
-		response.assertContains("https://myhost.com:443"); //notice the Https Route page is not shown	
+		response.assertContains("https://myhost.com/"); //notice the Https Route page is not shown
 	}
 
 	@Test

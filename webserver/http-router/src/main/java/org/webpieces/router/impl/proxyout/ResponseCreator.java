@@ -101,8 +101,12 @@ public class ResponseCreator {
 				prefix = "https://";
 
 			String portPostfix = "";
-			if(httpResponse.port != 443 && httpResponse.port != 80)
-				portPostfix = ":"+httpResponse.port;
+			Integer potentialPort = httpResponse.port;
+			if(potentialPort == null) {
+				portPostfix = "";
+			} else if(potentialPort != 443 && potentialPort != 80) {
+				portPostfix = ":" + potentialPort;
+			}
 
 			url = prefix + httpResponse.domain + portPostfix + httpResponse.redirectToPath;
 		} else if(httpResponse.domain != null) {
