@@ -2,6 +2,7 @@ package org.webpieces.microsvc.server.impl.controllers.expose;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.microsvc.server.api.HeaderCtxList;
 import org.webpieces.plugin.json.Jackson;
 import org.webpieces.router.impl.compression.MimeTypes;
@@ -20,8 +21,9 @@ public class MetaController {
     private HealthResponse healthResponse = new HealthResponse();
 
     @Inject
-    public MetaController(HeaderCtxList classFromClientJar) {
+    public MetaController(ClientServiceConfig config) {
 
+        HeaderCtxList classFromClientJar = config.getHcl();
         response.setImplementationVersion("development");
         try{
             String version = classFromClientJar.getClass().getPackage().getImplementationVersion();

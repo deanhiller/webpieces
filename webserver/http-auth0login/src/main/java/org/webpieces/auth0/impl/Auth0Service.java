@@ -100,6 +100,7 @@ public class Auth0Service {
                 "&client_id=" + auth0Config.getClientId() +
                 "&scope=" + urlEncodedScope +
                 "&state="+urlEncodedSecret+
+                "&access_type=offline"+
                 audience +
                 "&redirect_uri="+ urlEncodedCallbackUrl.get();
 
