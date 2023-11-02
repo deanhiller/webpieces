@@ -17,7 +17,7 @@ public class Auth0Config {
     // https://developers.google.com/gmail/api/reference/rest/v1/users/watch
     // https://developers.google.com/gmail/api/guides/push
 
-    private String gmailScopes = "openid profile email phone";
+    private String gmailScopes = "openid profile email phone offline_access";
 
     private String[] secureFields;
 
