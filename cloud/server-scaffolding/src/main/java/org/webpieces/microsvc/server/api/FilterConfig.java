@@ -4,6 +4,7 @@ public class FilterConfig {
     private String packageRegEx = ".*";
     private String secureRegEx = "^(?!.*\\bexpose\\b).*$";
     private boolean enableHealthCheckEndpoint = true;
+    private boolean enableVersionEndpoint = true;
 
     //Turning this off is an EXTREMELY minor performance improvement so default to on because only
     //requests with MicroSvcHeaders.RECORDING header will actually do recording
@@ -40,6 +41,14 @@ public class FilterConfig {
 
     public void setEnableHealthCheckEndpoint(boolean enableHealthCheckEndpoint) {
         this.enableHealthCheckEndpoint = enableHealthCheckEndpoint;
+    }
+
+    public boolean isEnableVersionEndpoint() {
+        return enableVersionEndpoint;
+    }
+
+    public void setEnableVersionEndpoint(boolean enableVersionEndpoint) {
+        this.enableVersionEndpoint = enableVersionEndpoint;
     }
 
     public boolean isRecordingEnabled() {
