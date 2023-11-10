@@ -5,7 +5,6 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import org.webpieces.googleauth.api.SaveUser;
 import org.webpieces.googleauth.client.api.AuthApi;
-import org.webpieces.googleauth.mgmt.api.AuthManagementApi;
 import org.webpieces.googleauth.api.GoogleAuthConfig;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
 import org.webpieces.nio.api.channels.HostWithPort;
@@ -49,9 +48,4 @@ public class GoogleAuthModule implements Module {
         return clientCreator.createClient(AuthApi.class, new HostWithPort("oauth2.googleapis.com", 443));
     }
 
-    @Singleton
-    @Provides
-    public AuthManagementApi createMgmtApi(RESTClientCreator clientCreator, AuthApiConfig config) {
-        return clientCreator.createClient(AuthManagementApi.class, new HostWithPort("oauth2.googleapis.com", 443));
-    }
 }
