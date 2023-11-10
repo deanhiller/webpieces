@@ -325,16 +325,17 @@ public class HttpsJsonClient {
 
     }
 
-    private String formMessage(String contents, FullResponse httpResp, String url, String jsonReq, JsonError errorIfCanRead) {
-        if(errorIfCanRead == null) {
-            return "\nresponse body='" + contents + "'" +
+    private String formMessage(String contents, FullResponse httpResp, String url, String jsonReq, JsonError error) {
+        if(error == null) {
+            return "\nWe did not receive proper JsonError json. (Check upstream server logs!!).  response body below" +
+                    "\nresponse body='" + contents + "'" +
                     "\nfullResp=" + httpResp +
                     "\nurl='" + url + "'" +
                     "\noriginalRequestBody=" + jsonReq;
         }
 
-        String serviceWithError = errorIfCanRead.getServiceWithError();
-        String message = serviceWithError+" had an error. msg="+errorIfCanRead.getError()+"  Full svc chain="+errorIfCanRead.getServiceFailureChain()+
+        String serviceWithError = error.getServiceWithError();
+        String message = serviceWithError+" had an error. msg="+error.getError()+"  Full svc chain="+error.getServiceFailureChain()+
                 "\nfullResp=" + httpResp +
                 "\nurl='" + url + "'" +
                 "\noriginalRequestBody=" + jsonReq;
@@ -372,7 +373,7 @@ public class HttpsJsonClient {
         String s = "";
 
         s += "\n\n************************************************************\n";
-        s += "            CURL REQUEST\n";
+        s += "      SENDING CURL REQUEST DOWNSTREAM(requests are a river)\n";
         s += "***************************************************************\n";
 
         s += "curl -k --request " + req.getKnownMethod().getCode() + " ";

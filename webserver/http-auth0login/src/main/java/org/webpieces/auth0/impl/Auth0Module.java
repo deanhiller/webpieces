@@ -5,7 +5,7 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import org.webpieces.auth0.api.Auth0Config;
 import org.webpieces.auth0.api.SaveUser;
-import org.webpieces.auth0.client.api.AuthApi;
+import org.webpieces.auth0.client.api.Auth0Api;
 import org.webpieces.auth0.mgmt.api.AuthManagementApi;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
 import org.webpieces.nio.api.channels.HostWithPort;
@@ -47,8 +47,8 @@ public class Auth0Module implements Module {
 
     @Singleton
     @Provides
-    public AuthApi createApi(RESTClientCreator clientCreator, Auth0ApiConfig config) {
-        return clientCreator.createClient(AuthApi.class, new HostWithPort(config.getAuth0Domain(), 443));
+    public Auth0Api createApi(RESTClientCreator clientCreator, Auth0ApiConfig config) {
+        return clientCreator.createClient(Auth0Api.class, new HostWithPort(config.getAuth0Domain(), 443));
     }
 
     @Singleton

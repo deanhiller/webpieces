@@ -39,4 +39,14 @@ public class JsonError {
     public void setServiceFailureChain(List<String> serviceFailureChain) {
         this.serviceFailureChain = serviceFailureChain;
     }
+
+    @Override
+    public String toString() {
+        return "JsonError{" +
+                "error='" + error + '\'' +
+                ", code=" + code +
+                ", serviceWithError='" + serviceWithError + '\'' +
+                ", serviceFailureChain=" + serviceFailureChain +
+                '}';
+    }
 }

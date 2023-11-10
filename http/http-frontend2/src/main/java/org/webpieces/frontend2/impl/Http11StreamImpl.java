@@ -3,6 +3,8 @@ package org.webpieces.frontend2.impl;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -264,7 +266,13 @@ public class Http11StreamImpl implements ResponseStream {
 		if(isForConnectRequeest) {
 			hasRespondedToConnect = true;
 		}
-		return socket.getChannel().write(buf);
+
+
+		try {
+			return socket.getChannel().write(buf);
+		} catch (NioClosedChannelException e) {
+			throw new NioClosedChannelException("payload not written="+payload, e);
+		}
 	}
 	
 	@Override

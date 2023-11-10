@@ -1,0 +1,39 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+    id 'jacoco' //code coverage
+    id 'eclipse'
+    id 'idea'
+    id 'signing'
+    id 'maven-publish'
+}
+
+group = 'org.webpieces.googlecloud'
+
+apply from: '../../config/global.gradle'
+
+repositories {
+    mavenCentral()
+    maven { url uri('/tmp/myRepo/') } // For testing locally
+}
+
+dependencies {
+
+    implementation libs.webpieces.http.router
+    implementation libs.webpieces.microservice.clientgenerator
+    implementation libs.google.client
+
+    //implementation 'com.google.cloud:google-cloud-core'
+//    implementation libs.google.guice
+//    api libs.webpieces.microservice.clientgenerator
+//    api libs.webpieces.microservice.api.lib
+//    api libs.webpieces.core.jackson
+//    api libs.webpieces.http.client
+//    api libs.google.cloud.tasks
+
+    //implementation libs.jakarta.inject.api
+    //implementation libs.slf4j.api
+
+//    api libs.webpieces.core.util
+
+}

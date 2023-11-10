@@ -301,10 +301,10 @@ public class RouterServiceImpl implements RouterService {
 	
 	//TODO(dhiller): This code now exists in TWO locations.  modify to share SAME code instead of copying
 	public UriInfo getUriBreakdown(String uri) {
-	    int doubleslashIndex = uri.indexOf("://");
-	    if(doubleslashIndex == -1)
+		if(!uri.startsWith("http://") && !uri.startsWith("https://"))
 	    	return new UriInfo(uri);
-	    
+
+		int doubleslashIndex = uri.indexOf("://");
 	    int domainStartIndex = doubleslashIndex+3;
 	    String prefix = uri.substring(0, doubleslashIndex);
 	    Integer port  = null;

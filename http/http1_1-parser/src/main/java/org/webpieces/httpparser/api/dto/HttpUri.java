@@ -19,10 +19,10 @@ public class HttpUri {
 	}
 
 	public UrlInfo getUriBreakdown() {
-	    int doubleslashIndex = uri.indexOf("://");
-	    if(doubleslashIndex == -1)
+		if(!uri.startsWith("http://") && !uri.startsWith("https://"))
 	    	return new UrlInfo(uri);
-	    
+
+		int doubleslashIndex = uri.indexOf("://");
 	    int domainStartIndex = doubleslashIndex+3;
 	    String prefix = uri.substring(0, doubleslashIndex);
 	    Integer port  = null;
