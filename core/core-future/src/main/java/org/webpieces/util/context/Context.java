@@ -93,6 +93,12 @@ public class Context {
             copiedMap.put(MDC_KEY, copiedMdc);
         }
 
+        Map<String, String> magicHeaders = get(HEADERS);
+        if(magicHeaders != null) {
+            Map<String, String> copiedHeaders = new HashMap<>(magicHeaders);
+            copiedMap.put(HEADERS, copiedHeaders);
+        }
+
         return copiedMap;
     }
 

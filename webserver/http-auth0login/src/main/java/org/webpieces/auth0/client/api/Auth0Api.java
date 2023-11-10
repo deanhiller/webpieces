@@ -8,7 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 @NotEvolutionProof
-public interface AuthApi {
+public interface Auth0Api {
 
     @POST
     @Path("/oauth/token")

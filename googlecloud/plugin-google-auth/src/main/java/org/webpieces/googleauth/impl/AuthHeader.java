@@ -1,23 +1,21 @@
-package org.webpieces.auth0.impl;
+package org.webpieces.googleauth.impl;
 
 import org.webpieces.util.context.PlatformHeaders;
 
-public enum Auth0Header implements PlatformHeaders {
+public enum AuthHeader implements PlatformHeaders {
 
-    AUTH_TOKEN("Authorization", null, false, true, false);
+    AUTH_TOKEN("Authorization", null, false, true);
 
     private final String headerName;
     private final String logKey;
     private final boolean isLog;
     private final boolean isSecure;
-    private final boolean isDimension;
 
-    Auth0Header(String headerName, String logKey, boolean isLog, boolean isSecure, boolean isDimension) {
+    AuthHeader(String headerName, String logKey, boolean isLog, boolean isSecure) {
         this.headerName = headerName;
         this.logKey = logKey;
         this.isLog = isLog;
         this.isSecure = isSecure;
-        this.isDimension = isDimension;
     }
 
 
@@ -48,6 +46,6 @@ public enum Auth0Header implements PlatformHeaders {
 
     @Override
     public boolean isDimensionForMetrics() {
-        return isDimension;
+        return false;
     }
 }

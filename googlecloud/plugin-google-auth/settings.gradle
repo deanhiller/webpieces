@@ -1,0 +1,10 @@
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            from(files("../../config/libs.versions.toml"))
+        }
+    }
+}
+
+includeBuild '../../cloud/generate-httpclient'
+includeBuild '../../webserver/http-router'

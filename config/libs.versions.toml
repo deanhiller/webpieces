@@ -43,6 +43,7 @@ google-grpc-protobuf            = { module = "io.grpc:grpc-protobuf", version.re
 google-grpc-stub                = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
 google-guava                    = { module = "com.google.guava:guava", version.ref = "guava" }
 google-guice                    = { module = "com.google.inject:guice", version = '5.1.0' }
+google-client                   = { module = "com.google.api-client:google-api-client", version= '2.2.0'}
 groovy                          = { module = "org.codehaus.groovy:groovy-all", version = "3.0.8" }
 h2                              = { module = "com.h2database:h2", version = "1.4.200" }
 hibernate-hikaricp              = { module = "org.hibernate:hibernate-hikaricp", version = "5.6.15.Final" }

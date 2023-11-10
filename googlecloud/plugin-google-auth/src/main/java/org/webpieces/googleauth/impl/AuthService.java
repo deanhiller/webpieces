@@ -1,16 +1,15 @@
-package org.webpieces.auth0.impl;
+package org.webpieces.googleauth.impl;
 
+import org.webpieces.googleauth.api.*;
+import org.webpieces.googleauth.client.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.auth0.api.*;
-import org.webpieces.auth0.client.api.*;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.http.exception.ForbiddenException;
 import org.webpieces.router.api.controller.actions.Actions;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.router.api.routes.RouteId;
 import org.webpieces.router.impl.RoutingHolder;
-import org.webpieces.util.SingletonSupplier;
 import org.webpieces.util.futures.XFuture;
 import org.webpieces.util.net.URLEncoder;
 
@@ -21,88 +20,69 @@ import java.security.SecureRandom;
 import java.util.*;
 
 
-public class Auth0Service {
+public class AuthService {
     public static final String AUTH0_SECRET_KEY = "auth0.redirect.secret";
-    private static final Logger log = LoggerFactory.getLogger(Auth0Service.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     public static final int SIZE = 64;
 
-    protected final Auth0Api authApi;
-    protected final JwtDecoder jwtDecoder;
-    protected final Auth0ApiConfig auth0Config;
-    protected final Auth0Config authRouteIdSet;
+    protected final AuthApi authApi;
+    protected final AuthApiConfig authConfig;
+    private final GoogleAuth googleAuth;
+    protected final GoogleAuthConfig authRouteIdSet;
     protected final RoutingHolder holder;
     protected SaveUser saveUser;
-    protected final SingletonSupplier<String> urlEncodedCallbackUrl;
-    protected final SingletonSupplier<String> callbackUrl;
     protected SecureRandom random = new SecureRandom();
 
     @Inject
-    public Auth0Service(
-            Auth0Api authApi,
-            JwtDecoder jwtDecoder,
-            Auth0ApiConfig auth0Config,
+    public AuthService(
+            AuthApi authApi,
+            AuthApiConfig authConfig,
             RoutingHolder holder,
-            Auth0Config authRouteIdSet,
+            GoogleAuth googleAuth,
+            GoogleAuthConfig authRouteIdSet,
             SaveUser saveUser
     ) {
 
         this.authApi = authApi;
-        this.jwtDecoder = jwtDecoder;
-        this.auth0Config = auth0Config;
+        this.authConfig = authConfig;
+        this.googleAuth = googleAuth;
         this.authRouteIdSet = authRouteIdSet;
         this.saveUser = saveUser;
         this.holder = holder;
-        random.setSeed(System.currentTimeMillis());
-
-        this.callbackUrl = new SingletonSupplier<>( () ->
-                holder.getReverseRouteLookup().convertToUrl(Auth0RouteId.CALLBACK, true)
-        );
-
-        this.urlEncodedCallbackUrl = new SingletonSupplier<>( () -> {
-            String url = callbackUrl.get();
-            return URLEncoder.encode(url, Charset.defaultCharset());
-        });
     }
+
     public Redirect logout() {
-        Current.session().remove(Auth0Plugin.USER_ID_TOKEN);
+        //remove logged in token
+        Current.session().remove(GoogleAuthPlugin.USER_ID_TOKEN);
 
-        RouteId renderAferLogout = authRouteIdSet.getToRenderAfterLogout();
-        String loginUrl = holder.getReverseRouteLookup().convertToUrl(renderAferLogout, true);
-        String domain = auth0Config.getAuth0Domain();
-        String clientId = auth0Config.getClientId();
-        String redirectUrl = "https://"+domain+"/v2/logout?client_id="+clientId+"&returnTo="+loginUrl;
-
-        return Actions.redirectToUrl(redirectUrl);
+        RouteId renderAfterLogout = authRouteIdSet.getToRenderAfterLogout();
+        return Actions.redirect(renderAfterLogout);
     }
 
     public Redirect login() {
-        byte[] bytes = new byte[SIZE];
-        random.nextBytes(bytes);
-        String secret = Base64.getEncoder().encodeToString(bytes);
-        String urlEncodedSecret = URLEncoder.encode(secret, Charset.defaultCharset());
+        String gcpScopes = authRouteIdSet.getGcpScopes();
+        String urlEncodedScope = URLEncoder.encode(gcpScopes, Charset.defaultCharset());
+        String plainUrl = authConfig.getCallbackUrl();
+        String urlEncodedCallbackUrl = URLEncoder.encode(plainUrl, Charset.defaultCharset());
 
-        String gmailScopes = authRouteIdSet.getGmailScopes();
-        String urlEncodedScope = URLEncoder.encode(gmailScopes, Charset.defaultCharset());
-        String audience = "";
-        if(auth0Config.getAudience() != null) {
-            String urlEncodedAudience = URLEncoder.encode(auth0Config.getAudience(), Charset.defaultCharset());
-            audience = "&audience="+urlEncodedAudience;
-        }
+        String urlEncodedSecret = generateSecret();
 
-        //only session cookie is secure so can't be tampered with
-        // (ie. no one can generate and stick a valid key in our cookie)
-        Current.session().put(AUTH0_SECRET_KEY, secret);
-        log.info("put in session="+secret+" AND auth0="+urlEncodedSecret);
+        //From google docs https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
+        //From https://www.daimto.com/how-to-get-a-google-access-token-with-curl/
+        //
+        //https://accounts.google.com/o/oauth2/v2/auth
+        // ?client_id=XXXX.apps.googleusercontent.com
+        // &redirect_uri=urn:ietf:wg:oauth:2.0:oob
+        // &scope=https://www.googleapis.com/auth/userinfo.profile
+        // &response_type=code
 
-        String domain = auth0Config.getAuth0Domain();
-        String url = "https://"+domain+"/authorize" +
-                "?response_type=code" +
-                "&client_id=" + auth0Config.getClientId() +
-                "&scope=" + urlEncodedScope +
+        String url = "https://accounts.google.com/o/oauth2/v2/auth" +
+                "?client_id=" + authConfig.getClientId() +
+                "&redirect_uri="+ urlEncodedCallbackUrl +
                 "&state="+urlEncodedSecret+
+                "&scope=" + urlEncodedScope +
                 "&access_type=offline"+
-                audience +
-                "&redirect_uri="+ urlEncodedCallbackUrl.get();
+                "&response_type=code";
 
         Current.flash().keep(true); //we must keep previous data like the url AND the secret as well
 
@@ -110,12 +90,24 @@ public class Auth0Service {
         return Actions.redirectToUrl(url);
     }
 
+    private String generateSecret() {
+        byte[] bytes = new byte[SIZE];
+        random.nextBytes(bytes);
+        String secret = Base64.getEncoder().encodeToString(bytes);
+        String urlEncodedSecret = URLEncoder.encode(secret, Charset.defaultCharset());
+        //only session cookie is secure so can't be tampered with
+        // (ie. no one can generate and stick a valid key in our cookie)
+        Current.session().put(AUTH0_SECRET_KEY, secret);
+        log.info("put in session="+secret+" AND auth0="+urlEncodedSecret);
+        return urlEncodedSecret;
+    }
+
     public XFuture<Redirect> callback() {
         log.info("queryParams="+Current.request().queryParams);
         Map<String, List<String>> queryParams = Current.request().queryParams;
         String code = fetch(queryParams, "code");
         if(code == null) {
-            Current.session().remove(Auth0Plugin.USER_ID_TOKEN);  //remove token in case there too
+            Current.session().remove(GoogleAuthPlugin.USER_ID_TOKEN);  //remove token in case there too
             Current.flash().keep(true);
             return XFuture.completedFuture(Actions.redirect(authRouteIdSet.getLoginDeclinedRoute()));
         }
@@ -123,17 +115,22 @@ public class Auth0Service {
         validateToken(queryParams);
 
         FetchTokenRequest request = new FetchTokenRequest();
-        request.setClientId(auth0Config.getClientId());
-        request.setClientSecret(auth0Config.getClientSecret());
+        request.setClientId(authConfig.getClientId());
+        request.setClientSecret(authConfig.getClientSecret());
         request.setCode(code);
         //must match callbackUrl we used in login but should be unused
-        request.setCallbackUrl(callbackUrl.get());
-        request.setAudience(auth0Config.getAudience());
-        request.setScope(authRouteIdSet.getGmailScopes());
+        request.setCallbackUrl(authConfig.getCallbackUrl());
+//        request.setAudience(authConfig.getAudience());
+        request.setScope(authRouteIdSet.getGcpScopes());
 
         return authApi.fetchToken(request)
-                .thenApply((resp) -> jwtDecoder.decodeJwt(resp))
-                .thenCompose( (profile) -> fetchPageToRedirectTo(profile));
+                .thenCompose( (resp) -> validateToken(resp))
+                .thenCompose( (resp2) -> fetchPageToRedirectTo(resp2));
+    }
+
+    private XFuture<ProfileAndTokens> validateToken(FetchTokenResponse resp) {
+        return googleAuth.fetchProfile(resp.getIdToken())
+                .thenApply((r) -> new ProfileAndTokens(resp, r));
     }
 
     private void validateToken(Map<String, List<String>> queryParams) {
@@ -149,19 +146,18 @@ public class Auth0Service {
             throw new ForbiddenException("You cheater!!!  no soup for you! state="+stateDecoded+" session="+base64Session);
     }
 
-    public XFuture<Redirect> fetchPageToRedirectTo(JwtAuth0Body profile) {
-        if(profile.getEmail() == null)
-            throw new IllegalStateException("No email so cannot lookup user");
-        else if(profile.getEmail().trim().equals(""))
-            throw new IllegalStateException("Email from google is all whitespace and no email.  we cannot proceed");
+    public XFuture<Redirect> fetchPageToRedirectTo(ProfileAndTokens tokensAndProfile) {
+        XFuture<Void> saveUserAction = saveUser.saveUserIfNotExist(tokensAndProfile);
 
-        XFuture<Void> saveUserAction = saveUser.saveUserIfNotExist(profile);
-
-        return saveUserAction.thenApply( (v) -> continueRedirect(profile));
+        return saveUserAction.thenApply( (resp) -> continueRedirect(tokensAndProfile));
     }
 
-    private Redirect continueRedirect(JwtAuth0Body profile) {
-        Current.session().put(Auth0Plugin.USER_ID_TOKEN, profile.getEmail());
+    private Redirect continueRedirect(ProfileAndTokens response) {
+        String email = response.getProfile().getEmail();
+        if(email == null) {
+            throw new IllegalStateException("saveUserIfNotExist returned a null email in SaveUserResponse");
+        }
+        Current.session().put(GoogleAuthPlugin.USER_ID_TOKEN, email);
 
         //5 cases of login  (2 and 4 similar and 3 and 5 similar)
 
