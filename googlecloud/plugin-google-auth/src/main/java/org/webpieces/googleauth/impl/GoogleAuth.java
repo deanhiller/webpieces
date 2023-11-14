@@ -59,8 +59,7 @@ public class GoogleAuth {
         // Print user identifier
         profile.setUserId(payload.getSubject());
         profile.setEmail(payload.getEmail());
-        boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
-        profile.setEmailVerified(emailVerified);
+        profile.setEmailVerified(payload.getEmailVerified());
         String name = (String) payload.get("name");
         profile.setName(name);
         String pictureUrl = (String) payload.get("picture");

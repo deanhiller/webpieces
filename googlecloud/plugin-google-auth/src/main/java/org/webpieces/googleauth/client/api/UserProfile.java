@@ -15,7 +15,7 @@ public class UserProfile {
     //        String givenName = (String) payload.get("given_name");
     private String userId;
     private String email;
-    private boolean emailVerified;
+    private Boolean emailVerified;
     private String name;
     private String pictureUrl;
     private String locale;
@@ -38,11 +38,11 @@ public class UserProfile {
         this.email = email;
     }
 
-    public boolean isEmailVerified() {
+    public Boolean isEmailVerified() {
         return emailVerified;
     }
 
-    public void setEmailVerified(boolean emailVerified) {
+    public void setEmailVerified(Boolean emailVerified) {
         this.emailVerified = emailVerified;
     }
 
