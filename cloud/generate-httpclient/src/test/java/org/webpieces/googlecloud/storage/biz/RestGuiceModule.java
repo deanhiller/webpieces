@@ -13,6 +13,7 @@ import org.webpieces.microsvc.client.api.HttpsConfig;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.plugin.json.ConverterConfig;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.context.ClientAssertions;
 
 import javax.inject.Singleton;
@@ -36,7 +37,7 @@ public class RestGuiceModule implements Module {
     @Singleton
     @Provides
     public DeansCoolApi createApi(RESTClientCreator creator) {
-        return creator.createClient(DeansCoolApi.class, new InetSocketAddress("www.google.com", 443));
+        return creator.createClient(DeansCoolApi.class, new HostWithPort("www.google.com", 443));
     }
 
     @Provides

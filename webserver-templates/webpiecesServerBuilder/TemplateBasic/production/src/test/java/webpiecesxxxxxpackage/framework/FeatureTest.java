@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.Logging;
 import org.webpieces.webserver.api.ServerConfig;
@@ -78,8 +79,8 @@ public class FeatureTest extends CompanyApiTest {
         );
         webserver.start();
 
-        serverHttpsAddr = new InetSocketAddress("localhost", webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort());
-        serverHttpAddr = new InetSocketAddress("localhost", webserver.getUnderlyingHttpChannel().getLocalAddress().getPort());
+        serverHttpsAddr = new HostWithPort("localhost", webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort());
+        serverHttpAddr = new HostWithPort("localhost", webserver.getUnderlyingHttpChannel().getLocalAddress().getPort());
     }
 
     @Override

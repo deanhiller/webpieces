@@ -1,8 +1,6 @@
 package org.webpieces.microsvc.client.impl;
 
-import org.webpieces.nio.api.channels.HostWithPort;
-
-import java.net.InetSocketAddress;
+import org.webpieces.util.HostWithPort;
 
 public class Endpoint {
     private final HostWithPort serverAddress;

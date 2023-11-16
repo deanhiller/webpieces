@@ -1,11 +1,8 @@
 package org.webpieces.httpclient;
 
-import java.net.InetSocketAddress;
-
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
@@ -19,7 +16,6 @@ import org.webpieces.httpclient11.api.HttpClient;
 import org.webpieces.httpclient11.api.HttpClientFactory;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpclient11.api.HttpStreamRef;
-import org.webpieces.httpclient11.api.SocketClosedException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;

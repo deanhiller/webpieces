@@ -8,7 +8,7 @@ import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.SneakyThrow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,6 @@ import org.webpieces.util.context.Context;
 import org.webpieces.util.context.PlatformHeaders;
 
 import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;

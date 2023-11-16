@@ -4,10 +4,7 @@ import java.net.InetSocketAddress;
 
 import com.google.inject.util.Modules;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.junit.After;
-import org.junit.Assert;
-import org.webpieces.nio.api.channels.HostWithPort;
-import org.webpieces.util.context.Context;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.Logging;
 import org.webpieces.util.futures.XFuture;
 

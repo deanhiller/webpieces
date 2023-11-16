@@ -14,6 +14,7 @@ import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.microsvc.client.api.HttpsConfig;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
 import org.webpieces.plugin.json.ConverterConfig;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.SneakyThrow;
@@ -29,8 +30,8 @@ public abstract class CompanyApiTest extends AbstractHttp2Test {
 
     private final static Logger log = LoggerFactory.getLogger(CompanyApiTest.class);
 
-    protected InetSocketAddress serverHttpsAddr;
-    protected InetSocketAddress serverHttpAddr;
+    protected HostWithPort serverHttpsAddr;
+    protected HostWithPort serverHttpAddr;
 
     private RESTClientCreator restClientCreator;
     private boolean initialized;

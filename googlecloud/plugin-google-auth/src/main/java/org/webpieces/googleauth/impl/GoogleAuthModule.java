@@ -7,7 +7,7 @@ import org.webpieces.googleauth.api.SaveUser;
 import org.webpieces.googleauth.client.api.AuthApi;
 import org.webpieces.googleauth.api.GoogleAuthConfig;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.cmdline2.Arguments;
 
 import javax.inject.Singleton;

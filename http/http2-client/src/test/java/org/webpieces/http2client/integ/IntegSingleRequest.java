@@ -1,10 +1,9 @@
 package org.webpieces.http2client.integ;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -19,7 +18,6 @@ import org.webpieces.http2client.SocketListener;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.impl.Proxy2StreamRef;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -36,7 +34,6 @@ import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import com.webpieces.http2.api.streaming.PushPromiseListener;
 import com.webpieces.http2.api.streaming.PushStreamHandle;
 import com.webpieces.http2.api.streaming.ResponseStreamHandle;
-import com.webpieces.http2.api.streaming.StreamRef;
 import com.webpieces.http2.api.streaming.StreamWriter;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 

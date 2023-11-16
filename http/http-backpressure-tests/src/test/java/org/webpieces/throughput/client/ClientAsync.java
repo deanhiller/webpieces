@@ -1,10 +1,9 @@
 package org.webpieces.throughput.client;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;

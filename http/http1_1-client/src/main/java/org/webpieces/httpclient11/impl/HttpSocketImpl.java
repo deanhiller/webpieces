@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

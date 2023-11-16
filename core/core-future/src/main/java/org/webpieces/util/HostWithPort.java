@@ -1,4 +1,4 @@
-package org.webpieces.nio.api.channels;
+package org.webpieces.util;
 
 public class HostWithPort {
     private String hostOrIpAddress;
@@ -19,5 +19,13 @@ public class HostWithPort {
 
     public int getPort() {
         return port;
+    }
+
+    @Override
+    public String toString() {
+        return "HostWithPort{" +
+                "hostOrIpAddress='" + hostOrIpAddress + '\'' +
+                ", port=" + port +
+                '}';
     }
 }

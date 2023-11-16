@@ -18,10 +18,9 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
-import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.microsvc.client.api.ClientSSLEngineFactory;
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.security.Masker;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.PlatformHeaders;
@@ -30,17 +29,11 @@ import org.webpieces.util.futures.FutureHelper;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Singleton;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
-import org.webpieces.microsvc.client.api.HttpsConfig;
 
 @Singleton
 public class HttpClientWrapper {

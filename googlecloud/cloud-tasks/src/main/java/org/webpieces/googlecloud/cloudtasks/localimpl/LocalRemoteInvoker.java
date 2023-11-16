@@ -7,13 +7,12 @@ import org.webpieces.googlecloud.cloudtasks.api.JobReference;
 import org.webpieces.googlecloud.cloudtasks.api.RemoteInvoker;
 import org.webpieces.googlecloud.cloudtasks.api.ScheduleInfo;
 import org.webpieces.googlecloud.cloudtasks.impl.Constants;
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

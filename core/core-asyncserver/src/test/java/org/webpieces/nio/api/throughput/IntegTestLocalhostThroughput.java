@@ -2,7 +2,7 @@ package org.webpieces.nio.api.throughput;
 
 import java.net.InetSocketAddress;
 
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
