@@ -23,8 +23,7 @@ import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.microsvc.client.api.ClientSSLEngineFactory;
-import org.webpieces.microsvc.client.api.HttpsConfig;
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.plugin.json.JsonError;
 import org.webpieces.util.context.Context;
@@ -33,14 +32,9 @@ import org.webpieces.util.exceptions.NioClosedChannelException;
 import org.webpieces.util.futures.FutureHelper;
 
 import javax.inject.Singleton;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
 import java.util.*;
 
 import org.webpieces.util.futures.XFuture;

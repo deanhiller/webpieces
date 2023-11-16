@@ -2,7 +2,7 @@ package org.webpieces.http2client.impl;
 
 import java.net.InetSocketAddress;
 
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;
@@ -11,7 +11,6 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketListener;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
-import org.webpieces.nio.api.channels.TCPChannel;
 
 import com.webpieces.http2.api.streaming.RequestStreamHandle;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;

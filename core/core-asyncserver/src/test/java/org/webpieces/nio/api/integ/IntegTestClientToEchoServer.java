@@ -1,9 +1,8 @@
 package org.webpieces.nio.api.integ;
 
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;

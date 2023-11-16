@@ -3,7 +3,7 @@ package org.webpieces.http2client.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.slf4j.Logger;

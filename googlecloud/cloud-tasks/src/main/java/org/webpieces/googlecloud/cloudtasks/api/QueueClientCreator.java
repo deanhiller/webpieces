@@ -2,7 +2,7 @@ package org.webpieces.googlecloud.cloudtasks.api;
 
 import org.webpieces.googlecloud.cloudtasks.impl.QueueInvokeHandler;
 import org.webpieces.microsvc.api.MethodValidator;
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 
 import javax.inject.Inject;
 import javax.inject.Provider;

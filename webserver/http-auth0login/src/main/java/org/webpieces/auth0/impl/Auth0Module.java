@@ -8,7 +8,7 @@ import org.webpieces.auth0.api.SaveUser;
 import org.webpieces.auth0.client.api.Auth0Api;
 import org.webpieces.auth0.mgmt.api.AuthManagementApi;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.cmdline2.Arguments;
 
 import javax.inject.Singleton;

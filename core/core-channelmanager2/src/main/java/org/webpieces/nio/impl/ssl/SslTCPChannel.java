@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.security.KeyStore;
 import java.util.List;
 
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 

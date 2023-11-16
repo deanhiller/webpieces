@@ -6,16 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.googlecloud.cloudtasks.api.*;
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.SingletonSupplier;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Provider;
 import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
-
-import static org.webpieces.util.context.Context.get;
 
 public class RemoteInvokerImpl implements RemoteInvoker {
 

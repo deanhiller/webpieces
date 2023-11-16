@@ -2,7 +2,7 @@ package org.webpieces.httpclient11.api;
 
 import java.net.InetSocketAddress;
 
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.httpparser.api.dto.HttpRequest;

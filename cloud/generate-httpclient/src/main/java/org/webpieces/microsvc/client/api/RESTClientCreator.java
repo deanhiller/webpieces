@@ -3,14 +3,13 @@ package org.webpieces.microsvc.client.api;
 import org.webpieces.microsvc.api.MethodValidator;
 import org.webpieces.microsvc.api.NotEvolutionProof;
 import org.webpieces.microsvc.client.impl.HttpsJsonClientInvokeHandler;
-import org.webpieces.nio.api.channels.HostWithPort;
+import org.webpieces.util.HostWithPort;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 public class RESTClientCreator {
