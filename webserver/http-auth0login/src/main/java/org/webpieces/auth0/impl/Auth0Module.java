@@ -3,6 +3,7 @@ package org.webpieces.auth0.impl;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
+import com.google.inject.multibindings.Multibinder;
 import org.webpieces.auth0.api.Auth0Config;
 import org.webpieces.auth0.api.SaveUser;
 import org.webpieces.auth0.client.api.Auth0Api;
@@ -10,6 +11,7 @@ import org.webpieces.auth0.mgmt.api.AuthManagementApi;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
 import org.webpieces.util.HostWithPort;
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.context.PlatformHeaders;
 
 import javax.inject.Singleton;
 import java.util.function.Supplier;
@@ -37,6 +39,10 @@ public class Auth0Module implements Module {
 
     @Override
     public void configure(Binder binder) {
+
+        Multibinder<PlatformHeaders> headerBinder = Multibinder.newSetBinder(binder, PlatformHeaders.class);
+        headerBinder.addBinding().toInstance(Auth0Header.AUTH_TOKEN);
+
         binder.bind(Auth0ApiConfig.class).toInstance(
                 new Auth0ApiConfig(auth0Domain.get(), auth0ClientId.get(), auth0ClientSecret.get(), auth0Audience.get()));
 

@@ -17,6 +17,7 @@ import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import org.webpieces.util.context.PlatformHeaders;
 
 public class WebpiecesToAppBindingModule implements Module {
 
@@ -51,6 +52,7 @@ public class WebpiecesToAppBindingModule implements Module {
 		Multibinder.newSetBinder(binder, BodyContentBinder.class);
 		Multibinder.newSetBinder(binder, ObjectStringConverter.class);
 		Multibinder.newSetBinder(binder, HtmlTagCreator.class);
+		Multibinder.newSetBinder(binder, PlatformHeaders.class);
 
 		//special case so the notFound controller can inspect and list all routes in a web page
 		//OR some client application can inject and introspect all web routes as well
