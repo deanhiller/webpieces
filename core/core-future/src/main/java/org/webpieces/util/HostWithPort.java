@@ -1,5 +1,7 @@
 package org.webpieces.util;
 
+import java.util.Objects;
+
 public class HostWithPort {
     private String hostOrIpAddress;
     private final int port;
@@ -27,5 +29,18 @@ public class HostWithPort {
                 "hostOrIpAddress='" + hostOrIpAddress + '\'' +
                 ", port=" + port +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HostWithPort that = (HostWithPort) o;
+        return port == that.port && Objects.equals(hostOrIpAddress, that.hostOrIpAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(hostOrIpAddress, port);
     }
 }
