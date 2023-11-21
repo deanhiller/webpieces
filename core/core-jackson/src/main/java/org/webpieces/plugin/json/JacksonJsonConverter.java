@@ -1,6 +1,7 @@
 package org.webpieces.plugin.json;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -50,27 +51,37 @@ public class JacksonJsonConverter {
 
 	public <T> T readValue(byte[] json, Class<T> clazz) {
 		try {
+			if(json.length == 0) {
+				return clazz.getDeclaredConstructor().newInstance();
+			}
 			T obj = mapper.get().readValue(json, clazz);
 			if(convertNullToEmptyStr)
 				return convertStrings(obj, true);
 			return obj;
 		} catch(JsonProcessingException e) {
 			throw new JsonReadException(e.getMessage(), e);
-		} catch (IOException e) {
+		} catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException |
+                 NoSuchMethodException e) {
 			throw SneakyThrow.sneak(e);
 		}
-	}
+    }
 
 	public <T> T readValue(String json, Class<T> clazz) {
 		try {
+			if(json.isBlank()) {
+				return clazz.getDeclaredConstructor().newInstance();
+			}
+
 			T obj = mapper.get().readValue(json, clazz);
 			if(convertNullToEmptyStr)
 				return convertStrings(obj, true);
 			return obj;
 		} catch (JsonProcessingException e) {
 			throw new JsonReadException(e);
-		}
-	}
+		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+			throw SneakyThrow.sneak(e);
+        }
+    }
 	
 	private <T> T convertStrings(T obj, boolean toEmptyStr) {
 		if (obj == null) {

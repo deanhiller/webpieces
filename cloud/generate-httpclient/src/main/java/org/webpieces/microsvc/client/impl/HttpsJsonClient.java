@@ -280,7 +280,8 @@ public class HttpsJsonClient {
 
         log.info("unmarshalling response json='" + contents + "' http=" + httpResp.getHeaders() + " from request="+jsonReq+" to " + url);
 
-        if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_200_OK) {
+        Integer status = httpResp.getHeaders().getStatus();
+        if(status >= 200 && status < 300) {
             if (type == null || Void.class == type) {
                 return null;
             }
