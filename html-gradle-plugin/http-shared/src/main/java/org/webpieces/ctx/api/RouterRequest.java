@@ -129,6 +129,8 @@ public class RouterRequest {
 	 */
 	public HttpMethod method;
 
+	public String methodString;
+
 	/**
 	 * Used by router(to create the Flash, Validation, and Session scopes in RequestContext).  Not generally needed by the Controllers
 	 * 

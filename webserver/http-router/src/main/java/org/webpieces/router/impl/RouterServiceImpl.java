@@ -266,6 +266,7 @@ public class RouterServiceImpl implements RouterService {
 		routerRequest.requestUri = uriBreakdown;
 		
 		routerRequest.method = method;
+		routerRequest.methodString = methodString;
 		routerRequest.domain = domain;
 		routerRequest.port = port;
 		int index = fullPath.indexOf("?");
