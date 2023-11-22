@@ -16,7 +16,8 @@ public enum HttpMethod {
     PUT("PUT"),
     DELETE("DELETE"),
     TRACE("TRACE"),
-    CONNECT("CONNECT");
+    CONNECT("CONNECT"),
+    UNKNOWN("UNKNOWN");
 
     private static Map<String, HttpMethod> codeToKnownStatus = new HashMap<>();
 
@@ -38,7 +39,7 @@ public enum HttpMethod {
 
     public static HttpMethod lookup(String method) {
         if(method == null)
-            return null;
+            return HttpMethod.UNKNOWN;
         return codeToKnownStatus.get(method);
     }
 
