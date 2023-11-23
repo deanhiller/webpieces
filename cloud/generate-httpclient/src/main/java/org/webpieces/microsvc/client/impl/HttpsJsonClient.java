@@ -172,7 +172,7 @@ public class HttpsJsonClient {
 
         FullRequest fullRequest = new FullRequest(httpReq, data, null);
 
-        log.info("curl request on socket(" + httpSocket + ")" + createCurl(fullRequest));
+        log.info(createCurl(fullRequest)+"\n\ncurl request on socket(" + httpSocket + ")");
 
         Map<String, Object> fullContext = Context.getContext();
         if(fullContext == null) {
@@ -367,7 +367,7 @@ public class HttpsJsonClient {
 
         String s = "";
 
-        s += "\n\n************************************************************\n";
+        s += "************************************************************\n";
         s += "      SENDING CURL REQUEST DOWNSTREAM(requests are a river)\n";
         s += "***************************************************************\n";
 
