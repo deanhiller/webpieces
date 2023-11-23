@@ -3,6 +3,8 @@ package org.webpieces.auth0.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.auth0.client.api.*;
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.Session;
 import org.webpieces.router.api.controller.actions.Redirect;
 import org.webpieces.util.futures.XFuture;
 
