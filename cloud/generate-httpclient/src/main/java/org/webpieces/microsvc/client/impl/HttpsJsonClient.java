@@ -367,8 +367,8 @@ public class HttpsJsonClient {
 
         String s = "";
 
-        s += "************************************************************\n";
-        s += "      SENDING CURL REQUEST DOWNSTREAM(requests are a river)\n";
+        s += "******SENDING CURL REQUEST DOWNSTREAM**************************\n";
+        s += "     (requests are a river) "+req.getMethodString()+" "+req.getPath()+" \n";
         s += "***************************************************************\n";
 
         s += "curl -k --request " + req.getKnownMethod().getCode() + " ";
