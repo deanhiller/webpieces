@@ -27,10 +27,14 @@ public class FetchTokenRequest {
     private String code;
     @JsonProperty("redirect_uri")
     private String callbackUrl;
-
     private String audience;
 
     private String scope;
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+
+    @JsonProperty("access_type")
+    private String accessType;
 
     public String getGrantType() {
         return grantType;
@@ -86,5 +90,21 @@ public class FetchTokenRequest {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public String getAccessType() {
+        return accessType;
+    }
+
+    public void setAccessType(String accessType) {
+        this.accessType = accessType;
     }
 }

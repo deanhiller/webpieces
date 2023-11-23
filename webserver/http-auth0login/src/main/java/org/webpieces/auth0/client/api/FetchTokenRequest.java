@@ -20,9 +20,6 @@ public class FetchTokenRequest {
     private String audience;
 
     private String scope;
-
-    @JsonProperty("refresh_token")
-    private String refreshToken;
     
     public String getGrantType() {
         return grantType;
@@ -80,11 +77,4 @@ public class FetchTokenRequest {
         this.scope = scope;
     }
 
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
 }
