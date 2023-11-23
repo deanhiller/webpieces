@@ -120,8 +120,8 @@ public class AuthService {
         request.setCode(code);
         //must match callbackUrl we used in login but should be unused
         request.setCallbackUrl(authConfig.getCallbackUrl());
-//        request.setAudience(authConfig.getAudience());
         request.setScope(authRouteIdSet.getGcpScopes());
+        request.setAccessType("offline"); //users can discard the refresh token
 
         return authApi.fetchToken(request)
                 .thenCompose( (resp) -> validateToken(resp))
