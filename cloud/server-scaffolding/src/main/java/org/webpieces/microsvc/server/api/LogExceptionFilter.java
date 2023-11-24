@@ -149,8 +149,8 @@ public class LogExceptionFilter extends RouteFilter<Void> {
 
         String s = "";
 
-        s += "\n\n************************************************************\n";
-        s += "            HTTP REQUEST RECEIVED\n";
+        s += "\n\n*********HTTP REQUEST RECEIVED****************************\n";
+        s += "         "+req.getMethodString()+" "+req.getPath()+"\n";
         s += "***************************************************************\n";
 
         s += "curl -k --request " + req.getKnownMethod().getCode() + " ";
