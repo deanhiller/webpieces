@@ -3,6 +3,7 @@ package org.webpieces.plugin.hibernate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -15,15 +16,17 @@ import org.webpieces.util.context.Context;
 @Singleton
 public class PersistenceHelper {
 
-    private final EntityManagerFactory factory;
+    private final Provider<EntityManagerFactory> factoryProvider;
     private final TxCompleters txCompleters;
 
     @Inject
     public PersistenceHelper(
-            EntityManagerFactory factory,
+            //This allows delayed loading of hibernate in case of serverless start when database is
+            //down so server still starts and serves pages that do not need a database to load
+            Provider<EntityManagerFactory> factoryProvider,
             TxCompleters txCompleters
     ) {
-        this.factory = factory;
+        this.factoryProvider = factoryProvider;
         this.txCompleters = txCompleters;
     }
 
@@ -45,7 +48,7 @@ public class PersistenceHelper {
     }
 
     private <T> T runWithHibernateSession(String executionId, Function<EntityManager, T> function) {
-
+        EntityManagerFactory factory = factoryProvider.get();
         EntityManager mgr = factory.createEntityManager();
         Em.set(mgr);
 

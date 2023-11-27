@@ -59,7 +59,7 @@ public class HibernateModule extends AbstractModule {
 		} else {
 			factory = createEntityMgrFromPuFile(pu);
 		}
-		
+
 		return factory;
 	}
 

@@ -5,6 +5,7 @@ import org.webpieces.util.futures.XFuture;
 import java.util.function.Function;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
@@ -27,12 +28,17 @@ import org.slf4j.LoggerFactory;
 public class HibernateLookup implements EntityLookup {
 
 	private static final Logger log = LoggerFactory.getLogger(HibernateLookup.class);
-	private EntityManagerFactory factory;
+	private Provider<EntityManagerFactory> factoryProvder;
 	private ObjectTranslator translator;
 	
 	@Inject
-	public HibernateLookup(EntityManagerFactory factory, ObjectTranslator translator) {
-		this.factory = factory;
+	public HibernateLookup(
+			//MUST keep Provider so serverless can start while DB is down and also
+			//serve webpages that do not need a database
+			Provider<EntityManagerFactory> factoryProvder,
+			ObjectTranslator translator
+	) {
+		this.factoryProvder = factoryProvder;
 		this.translator = translator;
 	}
 	
@@ -62,7 +68,7 @@ public class HibernateLookup implements EntityLookup {
 	}
 
 	private <T> boolean isManagedOutsideTransaction(Class<T> paramTypeToCreate) {
-		EntityManager entityManager = factory.createEntityManager();
+		EntityManager entityManager = factoryProvder.get().createEntityManager();
 		try {
 			return isManagedImpl(paramTypeToCreate, entityManager);
 		} finally {
@@ -125,6 +131,7 @@ public class HibernateLookup implements EntityLookup {
 	}
 
 	private <T> T findEntityOutsideTransaction(Meta paramMeta, ParamTreeNode tree, Function<Class<T>, T> beanCreate) {
+		EntityManagerFactory factory = factoryProvder.get();
 		EntityManager entityManager = factory.createEntityManager();
 		try {
 			return findEntityImpl((ParamMeta) paramMeta, tree, beanCreate, entityManager);

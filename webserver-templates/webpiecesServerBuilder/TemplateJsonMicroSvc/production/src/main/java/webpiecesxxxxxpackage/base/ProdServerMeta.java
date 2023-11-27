@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.microsvc.server.api.FilterConfig;
+import org.webpieces.microsvc.server.api.FilterRoutes;
 import org.webpieces.microsvc.server.api.JsonFilterRoutes;
 import org.webpieces.microsvc.server.api.RESTApiRoutes;
 import org.webpieces.plugin.hibernate.HibernatePlugin;
@@ -58,13 +59,15 @@ public class ProdServerMeta implements WebAppMeta {
 
 	@Override
     public List<Routes> getRouteModules() {
-		String regex = "webpiecesxxxxxpackage\\.json\\..*";
-		FilterConfig config = new FilterConfig(regex);
+		//uncomment to create a secure token service to service
+		//String secureRegEx = "webpiecesxxxxxpackage\\.json\\..*";
+		String secureRegEx = null;
+		FilterConfig config = new FilterConfig(secureRegEx);
 		config.setRecordingEnabled(true);
 
 		return Lists.newArrayList(
 				new MainRoutes(),
-				new JsonFilterRoutes(config),
+				new FilterRoutes(config),
 				new RESTApiRoutes(SaveApi.class, SaveController.class)
 				);
 	}
