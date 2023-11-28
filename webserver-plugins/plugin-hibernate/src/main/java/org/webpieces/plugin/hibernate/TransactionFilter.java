@@ -3,6 +3,7 @@ package org.webpieces.plugin.hibernate;
 import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -22,7 +23,7 @@ import org.webpieces.util.filters.Service;
 public class TransactionFilter extends RouteFilter<TxConfig> {
 
 	private static final Logger log = LoggerFactory.getLogger(TransactionFilter.class);
-	private EntityManagerFactory factory;
+	private Provider<EntityManagerFactory> factoryProvider;
 
 	//for test only.  I could not figure out a good way to test ALL the way from the edges without this
 	//BUT NOW webpieces has metrics so IF we metered it, we could just check the metrics but not sure this is something
@@ -32,8 +33,8 @@ public class TransactionFilter extends RouteFilter<TxConfig> {
 	private TxConfig txConfig;
 
 	@Inject
-	public TransactionFilter(EntityManagerFactory factory, TxCompleters txCompleters) {
-		this.factory = factory;
+	public TransactionFilter(Provider<EntityManagerFactory> factoryProvider, TxCompleters txCompleters) {
+		this.factoryProvider = factoryProvider;
 		this.txCompleters = txCompleters;
 	}
 	
@@ -58,6 +59,7 @@ public class TransactionFilter extends RouteFilter<TxConfig> {
 		if(Em.get() != null)
 			throw new IllegalStateException("Are you stacking two TransactionFilters as this Em should not be set yet.  be aware you do not need to call addFilter for this filter and should just include the HibernateRouteModule");
 
+		EntityManagerFactory factory = factoryProvider.get();
 		EntityManager em = factory.createEntityManager();
 		Em.set(em);
 
@@ -85,6 +87,7 @@ public class TransactionFilter extends RouteFilter<TxConfig> {
 		if(Em.get() != null)
 			throw new IllegalStateException("Are you stacking two TransactionFilters as this Em should not be set yet.  be aware you do not need to call addFilter for this filter and should just include the HibernateRouteModule");
 
+		EntityManagerFactory factory = factoryProvider.get();
 		EntityManager em = factory.createEntityManager();
 		Em.set(em);
 
