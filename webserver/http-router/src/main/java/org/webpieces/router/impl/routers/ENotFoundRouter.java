@@ -1,5 +1,7 @@
 package org.webpieces.router.impl.routers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.util.futures.XFuture;
 
 import org.webpieces.ctx.api.RequestContext;
@@ -19,6 +21,8 @@ import com.webpieces.http2.api.streaming.StreamWriter;
 
 public class ENotFoundRouter {
 
+	private static final Logger log = LoggerFactory.getLogger(ENotFoundRouter.class);
+
 	private final RouteInvoker invoker;
 	private LoadedController loadedController;
 	private Service<MethodMeta, Action> svc;
@@ -33,6 +37,8 @@ public class ENotFoundRouter {
 	}
 
 	public XFuture<StreamWriter> invokeNotFoundRoute(RequestContext ctx, ProxyStreamHandle handle, NotFoundException exc) {
+		if(log.isDebugEnabled())
+			log.debug("Not found req="+ctx.getRequest().method +" "+ ctx.getRequest().relativePath);
 		Endpoint info = new Endpoint(svc);
 		RouteInfoForNotFound data = new RouteInfoForNotFound(exc);
 		InvokeInfo invokeInfo = new InvokeInfo(ctx, handle, RouteType.NOT_FOUND, loadedController, i18nBaseBundle);
