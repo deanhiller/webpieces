@@ -159,12 +159,29 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
 
         String token = "?";
         for(Map.Entry<String, Object> queryParam : queryParams.entrySet()) {
-            String urlEncoded = URLEncoder.encode(queryParam.getValue()+"", Charset.defaultCharset());
-            path += token+queryParam.getKey()+"="+urlEncoded;
+            path += formKeyValueUrlEncoded(queryParam, token);
             token = "&"; //going forward, prefix with & for every other query param
         }
 
         return path;
+    }
+
+    private static String formKeyValueUrlEncoded(Map.Entry<String, Object> queryParam, String token) {
+        Object value = queryParam.getValue();
+
+        String snippet = "";
+        if(value instanceof List) {
+            List<Object> list = (List<Object>) value;
+            for(Object val : list) {
+                String urlEncoded = URLEncoder.encode(val + "", Charset.defaultCharset());
+                snippet = token + queryParam.getKey()+"="+urlEncoded;
+                token = "&"; //going forward, use this token now
+            }
+        } else {
+            String urlEncoded = URLEncoder.encode(value + "", Charset.defaultCharset());
+            snippet = token + queryParam.getKey() + "=" + urlEncoded;
+        }
+        return snippet;
     }
 
     private Object findBody(Method method, Object[] args) {

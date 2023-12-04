@@ -31,7 +31,7 @@ public enum StatusCode {
     HTTP_403_FORBIDDEN(403, "Forbidden", StatusType.CLIENT_ERROR),
     HTTP_404_NOT_FOUND(404, "Not Found", StatusType.CLIENT_ERROR),
     HTTP_405_METHOD_NOT_ALLOWED(405, "Method Not Allowed", StatusType.CLIENT_ERROR),
-    HTTP_406_NOT_ACCEPTABLE(404, "Not Acceptable", StatusType.CLIENT_ERROR),
+    HTTP_406_NOT_ACCEPTABLE(406, "Not Acceptable", StatusType.CLIENT_ERROR),
 
     HTTP_408_REQUEST_TIMEOUT(408, "Request Timeout", StatusType.CLIENT_ERROR),
     HTTP_409_CONFLICT(409, "Conflict", StatusType.CLIENT_ERROR),

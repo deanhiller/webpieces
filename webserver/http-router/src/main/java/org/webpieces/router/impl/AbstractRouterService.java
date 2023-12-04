@@ -56,17 +56,13 @@ public abstract class AbstractRouterService {
 			ApplicationContext ctx = webInjector.getAppContext();
 			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest, ctx);
 
-			String user = session.get("userId");
-			MDC.put("userId", user);
-
-			//TODO(dhiller): This is request heaaders choke point but need ot also perhaps setup streaming choke point
-			//here as well
+			//TODO(dhiller): This is request heaaders choke point but need ot also perhaps setup
+			// streaming choke point here as well
 			Current.setContext(requestCtx);
 			try {
 				return incomingRequestImpl(requestCtx, handler);
 			} finally {
 				Current.removeContext();
-				MDC.remove("userId");
 			}
 
 		} catch(BadCookieException e) {
