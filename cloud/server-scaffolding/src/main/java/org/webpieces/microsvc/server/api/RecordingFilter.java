@@ -16,14 +16,17 @@ import org.webpieces.util.futures.XFuture;
 
 import java.util.Map;
 
-public class RecordingFilter extends RouteFilter<Void> {
+public class RecordingFilter extends RouteFilter<FilterConfig> {
     private static final Logger log = LoggerFactory.getLogger(RecordingFilter.class.getName());
+    private boolean recordingAlwaysOn;
 
     @Override
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
-        String magic = Context.getMagic(MicroSvcHeader.RECORDING);
-        if(magic == null)
-            return nextFilter.invoke(meta);
+        if(!recordingAlwaysOn) {
+            String magic = Context.getMagic(MicroSvcHeader.RECORDING);
+            if (magic == null)
+                return nextFilter.invoke(meta);
+        }
 
         Map<String, Object> fullRequestContext = Context.copyContext();
         //let the recording begin...
@@ -51,7 +54,7 @@ public class RecordingFilter extends RouteFilter<Void> {
     }
 
     @Override
-    public void initialize(Void initialConfig) {
-
+    public void initialize(FilterConfig initialConfig) {
+        recordingAlwaysOn = initialConfig.isRecordAlwaysOn();
     }
 }
