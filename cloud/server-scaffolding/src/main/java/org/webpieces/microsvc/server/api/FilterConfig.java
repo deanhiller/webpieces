@@ -12,6 +12,8 @@ public class FilterConfig {
 
     private boolean enableErrorHandling = true;
 
+    private boolean recordAlwaysOn = false;
+
     public FilterConfig(String secureRegEx) {
         this.secureRegEx = secureRegEx;
     }
@@ -62,4 +64,12 @@ public class FilterConfig {
     public String getSecureRegEx() { return secureRegEx; }
 
     public void setSecureRegEx(String secureRegEx) { this.secureRegEx = secureRegEx; }
+
+    public boolean isRecordAlwaysOn() {
+        return recordAlwaysOn;
+    }
+
+    public void setRecordAlwaysOn(boolean recordAlwaysOn) {
+        this.recordAlwaysOn = recordAlwaysOn;
+    }
 }
