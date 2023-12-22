@@ -63,7 +63,6 @@ public class ProdServerMeta implements WebAppMeta {
 		//String secureRegEx = "webpiecesxxxxxpackage\\.json\\..*";
 		String secureRegEx = null;
 		FilterConfig config = new FilterConfig(secureRegEx);
-		config.setRecordingEnabled(true);
 
 		return Lists.newArrayList(
 				new MainRoutes(),
