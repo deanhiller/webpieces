@@ -103,7 +103,10 @@ public class ParamToObjectTranslatorImpl {
 			Annotation[] annotations = paramAnnotations[i];
 			ParamMeta fieldMeta = new ParamMeta(method, paramMeta, annotations);
 			String name = fieldMeta.getName();
-			ParamNode paramNode = paramTree.get(name);
+
+			ParamNode paramNode = fetch(paramTree, name);
+
+
 			XFuture<Object> beanFuture;
 			if(binder != null && binder.canTransform(fieldMeta.getFieldClass())) {
 				Object bean = binder.unmarshal(ctx, fieldMeta, req.body.createByteArray());
@@ -121,6 +124,24 @@ public class ParamToObjectTranslatorImpl {
 			
 		}
 		return future;
+	}
+
+	private ParamNode fetch(ParamTreeNode paramTree, String name) {
+		if(!name.contains("."))
+			return paramTree.get(name);
+
+		int index = name.indexOf(".");
+		String prefix = name.substring(0, index);
+		String postfix = name.substring(index+1);
+
+		ParamNode paramNode = paramTree.get(prefix);
+		if(paramNode instanceof ParamTreeNode) {
+			return fetch((ParamTreeNode) paramNode, postfix);
+		} else if(postfix.contains(".")) {
+			throw new IllegalArgumentException("Developer has too many '.' in the name as there is nothing found going deeper in tree");
+		}
+
+		return paramNode;
 	}
 
 	private Map<String, String> translate(Map<String, List<String>> queryParams) {
