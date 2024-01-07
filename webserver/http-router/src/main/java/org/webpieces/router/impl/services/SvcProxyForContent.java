@@ -141,16 +141,13 @@ public class SvcProxyForContent implements Service<MethodMeta, Action> {
 			//if recording is on, set it up...
 			recordingInfo.setMethod(method);
 			recordingInfo.setArgs(args);
-		}
 
-		if(t != null) {
-			if(recordingInfo != null)
+			if(t != null) {
 				recordingInfo.setFailureResponse(t);
-			return XFuture.failedFuture(t);
-		}
-
-		if(recordingInfo != null)
+				return XFuture.failedFuture(t);
+			}
 			recordingInfo.setResponse(retVal);
+		}
 
 		//record
 		try {

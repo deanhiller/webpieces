@@ -124,8 +124,20 @@ public class AuthService {
         request.setAccessType("offline"); //users can discard the refresh token
 
         return authApi.fetchToken(request)
-                .thenCompose( (resp) -> validateToken(resp))
-                .thenCompose( (resp2) -> fetchPageToRedirectTo(resp2));
+                .thenCompose( (resp) -> processTokenForNextSteps(resp) );
+    }
+
+    private XFuture<Redirect> processTokenForNextSteps(FetchTokenResponse resp) {
+        //if user forgets to checkbox, we have to send him to a public
+        // page to relogin again
+        Redirect redirect = saveUser.returnRedirectIfScopesInvalid(resp);
+        if(redirect != null) {
+            //base page after login screen
+            return XFuture.completedFuture(redirect);
+        }
+
+        return validateToken(resp)
+                .thenCompose((resp2) -> fetchPageToRedirectTo(resp2));
     }
 
     private XFuture<ProfileAndTokens> validateToken(FetchTokenResponse resp) {
@@ -136,7 +148,7 @@ public class AuthService {
     private void validateToken(Map<String, List<String>> queryParams) {
         //all queryParams are run through url decoding so no need to decode it...
         String stateDecoded = fetch(queryParams, "state");
-        String base64Session = Current.session().remove(AUTH0_SECRET_KEY);
+        String base64Session = Current.session().get(AUTH0_SECRET_KEY);
         log.info("fetch from session="+base64Session+"   state from auth0="+stateDecoded);
 
         //SECURITY, do not remove.  Cookie can't be tampered with or webpieces throws exception
@@ -158,6 +170,8 @@ public class AuthService {
             throw new IllegalStateException("saveUserIfNotExist returned a null email in SaveUserResponse");
         }
         Current.session().put(GoogleAuthPlugin.USER_ID_TOKEN, email);
+
+        String base64Session = Current.session().remove(AUTH0_SECRET_KEY);
 
         //5 cases of login  (2 and 4 similar and 3 and 5 similar)
 
