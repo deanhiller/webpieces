@@ -2,7 +2,7 @@ package org.webpieces.microsvc.server.api;
 
 import org.webpieces.microsvc.server.impl.filters.HeaderToRequestStateFilter;
 import org.webpieces.microsvc.server.impl.filters.MDCFilter;
-import org.webpieces.microsvc.server.impl.filters.RequestIdFilter;
+import org.webpieces.microsvc.server.impl.filters.RequestAtributesFilter;
 import org.webpieces.microsvc.server.impl.filters.TokenSharingFilter;
 import org.webpieces.router.api.routebldr.DomainRouteBuilder;
 import org.webpieces.router.api.routebldr.RouteBuilder;
@@ -33,7 +33,7 @@ public class FilterRoutes implements Routes {
         }
 
         builder.addPackageFilter(regex, HeaderToRequestStateFilter.class, null, FilterPortType.ALL_FILTER, 140);
-        builder.addPackageFilter(regex, RequestIdFilter.class, null, FilterPortType.ALL_FILTER, 120);
+        builder.addPackageFilter(regex, RequestAtributesFilter.class, null, FilterPortType.ALL_FILTER, 120);
         builder.addPackageFilter(regex, MDCFilter.class, null, FilterPortType.ALL_FILTER, 100);
         builder.addPackageFilter(regex, MetricsFilter.class, null, FilterPortType.ALL_FILTER, 90);
         builder.addPackageFilter(regex, LogExceptionFilter.class, null, FilterPortType.ALL_FILTER, 80);

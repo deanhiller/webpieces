@@ -13,13 +13,13 @@ import org.webpieces.util.futures.XFuture;
 
 import javax.inject.Inject;
 
-public class RequestIdFilter extends RouteFilter<Void> {
+public class RequestAtributesFilter extends RouteFilter<Void> {
 
     private final RequestIdGenerator requestIdGenerator;
     private final String svcName;
 
     @Inject
-    public RequestIdFilter(RequestIdGenerator requestIdGenerator, ClientServiceConfig config) {
+    public RequestAtributesFilter(RequestIdGenerator requestIdGenerator, ClientServiceConfig config) {
         this.requestIdGenerator = requestIdGenerator;
         this.svcName = config.getServersName();
     }
@@ -33,7 +33,10 @@ public class RequestIdFilter extends RouteFilter<Void> {
     public XFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
         RouterRequest request = meta.getCtx().getRequest();
 
+        String method = meta.getLoadedController().getControllerMethod().getName();
+
         Context.putMagic(MicroSvcHeader.REQUEST_PATH, request.relativePath);
+        Context.putMagic(MicroSvcHeader.REQUEST_ENDPOINT, method);
         String existingReqId = Context.getMagic(MicroSvcHeader.REQUEST_ID);
 
         if(existingReqId == null) {
@@ -45,6 +48,7 @@ public class RequestIdFilter extends RouteFilter<Void> {
         try {
             return nextFilter.invoke(meta);
         } finally {
+            Context.removeMagic(MicroSvcHeader.REQUEST_ENDPOINT);
             Context.removeMagic(MicroSvcHeader.REQUEST_PATH);
             if(existingReqId == null) {
                 //only clear magic if we set the magic in this filter in the first place
