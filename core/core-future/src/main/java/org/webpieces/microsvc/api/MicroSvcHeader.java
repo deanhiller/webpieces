@@ -8,6 +8,8 @@ public enum MicroSvcHeader implements PlatformHeaders {
     REQUEST_ID("x-webpieces-requestid", "requestId", true, false),
     PREVIOUS_REQUEST_ID("x-webpieces-previousid", "previousId", true, false),
 
+    REQUEST_ENDPOINT(null, "endpoint", true, false, true),
+
     REQUEST_PATH(null, "requestPath", false, false),
     RECORDING("x-webpieces-recording","recording", false, false),
 

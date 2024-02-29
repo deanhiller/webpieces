@@ -257,8 +257,8 @@ public class HttpClientWrapper {
 
         String s = "";
 
-        s += "\n\n************************************************************\n";
-        s += "            CURL REQUEST\n";
+        s += "******SENDING simulated request from in-memory queue**************************\n";
+        s += "     (requests are a river) "+req.getMethodString()+" "+req.getPath()+" \n";
         s += "***************************************************************\n";
 
         s += "curl -k --request " + req.getKnownMethod().getCode() + " ";

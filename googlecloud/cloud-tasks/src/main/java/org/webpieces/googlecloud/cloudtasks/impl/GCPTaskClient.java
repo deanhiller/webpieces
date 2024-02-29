@@ -137,7 +137,7 @@ public class GCPTaskClient {
             task1 = taskBuilder.build();
         }
 
-        log.info("curl request " + createCurl(request, () -> ("--data '" + payload + "'")));
+        log.info("curl request " + createCurl(request, httpMethod, () -> ("--data '" + payload + "'")));
 
         // Send create task request
         Task task = cloudTasksClient.createTask(queue, task1);
@@ -173,12 +173,12 @@ public class GCPTaskClient {
         return Timestamp.newBuilder().setSeconds(epochSeconds).build();
     }
 
-    private String createCurl(HttpRequest req, Supplier<String> supplier) {
+    private String createCurl(HttpRequest req, HttpMethod method, Supplier<String> supplier) {
 
         String s = "";
 
-        s += "\n\n************************************************************\n";
-        s += "            CURL REQUEST\n";
+        s += "******SENDING CURL REQUEST TO QUEUE (queue executes it later)**************************\n";
+        s += "     (requests are a river) "+method+" "+req.getUrl()+" \n";
         s += "***************************************************************\n";
 
         s += "curl -k --request " + req.getHttpMethod().name() + " ";

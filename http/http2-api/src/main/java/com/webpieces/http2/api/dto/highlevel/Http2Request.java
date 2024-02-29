@@ -28,6 +28,10 @@ public class Http2Request extends Http2Headers {
 		return Http2Method.lookup(methodString);
 	}
 
+	public String getUrl() {
+		return getScheme()+"://"+getAuthority()+"/"+getPath();
+	}
+
 	public String getMethodString() {
 		return getSingleHeaderValue(Http2HeaderName.METHOD);
 	}
