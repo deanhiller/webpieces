@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Set;
+
+import com.webpieces.http2.api.dto.lowlevel.lib.Http2HeaderName;
 import org.webpieces.util.futures.XFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -184,7 +186,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 
 		responseCreator.addDeleteCookie(response, badCookieName);
 
-		log.info("sending REDIRECT(due to bad cookie) response responseSender="+ this);
+		log.info("sending REDIRECT(due to bad cookie) response responseSender="+ httpResponse+" for req="+req.relativePath);
 
 		return process(response);
 	}
@@ -195,7 +197,9 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 			log.debug("Sending redirect response. req="+request);
 		Http2Response response = responseCreator.createRedirect(request, httpResponse);
 
-		log.info("sending REDIRECT response responseSender="+ this);
+		if(log.isInfoEnabled()) {
+			log.info("sending REDIRECT response=" + httpResponse+" for req="+request.getUrl());
+		}
 		return process(response).thenApply(s -> null);
 	}
 
@@ -265,7 +269,7 @@ public class ProxyStreamHandle implements RouterStreamHandle {
 	private XFuture<Void> sendChunkedResponse(Http2Request req, Http2Response resp, byte[] bytes) {
 
 		if(log.isDebugEnabled())
-			log.debug("sending response. size="+bytes.length+" resp="+resp+" for req="+req+" responseSender="+ this);
+			log.debug("sending response. size="+bytes.length+" resp="+resp+" for req="+req);
 
 		// Send the headers and get the responseid.
 		return process(resp)
