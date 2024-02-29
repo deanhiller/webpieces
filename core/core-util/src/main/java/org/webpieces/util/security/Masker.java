@@ -15,12 +15,16 @@ public class Masker {
 
         int lengthOfPassword = data.length();
 
-        if(lengthOfPassword < 3){
+        StringBuilder stringBuilder;
+        if(lengthOfPassword <= 3){
             return "****";
+        } else if(lengthOfPassword < 8) {
+            stringBuilder = new StringBuilder("****");
+            stringBuilder.append(data.substring(Math.max(0, data.length() - 2)));
+        } else {
+            stringBuilder = new StringBuilder("**");
+            stringBuilder.append(data.substring(Math.max(0, data.length() - 4)));
         }
-
-        StringBuilder stringBuilder = new StringBuilder("****");
-        stringBuilder.append(data.substring(Math.max(0, data.length() - 2)));
 
         return stringBuilder.toString();
     }
