@@ -112,7 +112,9 @@ public class AuthService {
             return XFuture.completedFuture(Actions.redirect(authRouteIdSet.getLoginDeclinedRoute()));
         }
 
-        validateToken(queryParams);
+        Redirect redirect = validateToken(queryParams);
+        if(redirect != null)
+            return XFuture.completedFuture(redirect);
 
         FetchTokenRequest request = new FetchTokenRequest();
         request.setClientId(authConfig.getClientId());
@@ -145,17 +147,33 @@ public class AuthService {
                 .thenApply((r) -> new ProfileAndTokens(resp, r));
     }
 
-    private void validateToken(Map<String, List<String>> queryParams) {
+    private Redirect validateToken(Map<String, List<String>> queryParams) {
         //all queryParams are run through url decoding so no need to decode it...
         String stateDecoded = fetch(queryParams, "state");
         String base64Session = Current.session().get(AUTH0_SECRET_KEY);
         log.info("fetch from session="+base64Session+"   state from auth0="+stateDecoded);
 
+        if(base64Session == null) {
+            //to reproduce this one, login, then clear cookie, then back button to google
+            //login page (our auth token is missing).
+
+            log.error("If this is showing up for normal users. we need to fix this so error message shows up");
+            //odd, but if someone cleared cookie and back button, then the flow is only partial
+            //clear cookie and redirect
+            Current.session().clear();
+            RouteId renderAfterLogout = authRouteIdSet.getToRenderAfterLogout();
+
+            Current.flash().setMessage("Missing Session, please relogin");
+            Current.flash().keep(true);
+
+            return Actions.redirect(renderAfterLogout);
+        }
         //SECURITY, do not remove.  Cookie can't be tampered with or webpieces throws exception
         //so we store secret in cookie and only auth0 can redirect back to this url after we
         //redirect to auth0 ->
         if(!base64Session.equals(stateDecoded))
             throw new ForbiddenException("You cheater!!!  no soup for you! state="+stateDecoded+" session="+base64Session);
+        return null;
     }
 
     public XFuture<Redirect> fetchPageToRedirectTo(ProfileAndTokens tokensAndProfile) {
