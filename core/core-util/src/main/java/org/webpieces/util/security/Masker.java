@@ -13,14 +13,36 @@ public class Masker {
             return null;
         }
 
-        int lengthOfPassword = data.length();
+        data = data.trim();
+        int index = data.indexOf(" ");
+        if(index < 0) {
+            return parseSecret(data);
 
-        if(lengthOfPassword < 3){
-            return "****";
         }
 
-        StringBuilder stringBuilder = new StringBuilder("****");
-        stringBuilder.append(data.substring(Math.max(0, data.length() - 2)));
+        String scheme = data.substring(0, index+1);
+        String secret = data.substring(index+1);
+
+        return scheme+" "+parseSecret(secret);
+    }
+
+    private static String parseSecret(String data) {
+
+        int lengthOfPassword = data.length();
+
+        StringBuilder stringBuilder;
+        if(lengthOfPassword <= 3){
+            return "****";
+        } else if(lengthOfPassword < 8) {
+            stringBuilder = new StringBuilder("****");
+            stringBuilder.append(data.substring(Math.max(0, data.length() - 2)));
+        } else if(lengthOfPassword > 100) {
+            stringBuilder = new StringBuilder("*");
+            stringBuilder.append(data.substring(Math.max(0, data.length() - 10)));
+        } else {
+            stringBuilder = new StringBuilder("**");
+            stringBuilder.append(data.substring(Math.max(0, data.length() - 4)));
+        }
 
         return stringBuilder.toString();
     }
