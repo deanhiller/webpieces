@@ -23,9 +23,11 @@ import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.microsvc.client.api.ClientSSLEngineFactory;
+import org.webpieces.microsvc.server.api.HeaderTranslation;
 import org.webpieces.util.HostWithPort;
 import org.webpieces.plugin.json.JacksonJsonConverter;
 import org.webpieces.plugin.json.JsonError;
+import org.webpieces.util.context.AddPlatformHeaders;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.context.PlatformHeaders;
 import org.webpieces.util.exceptions.NioClosedChannelException;
@@ -79,16 +81,12 @@ public class HttpsJsonClient {
             FutureHelper futureUtil,
             ScheduledExecutorService schedulerSvc,
             Masker masker,
-            MeterRegistry metrics
+            MeterRegistry metrics,
+            HeaderTranslation translation
     ) {
         this.sslFactory = sslFactory;
-        if(clientServiceConfig.getHcl() == null)
-            throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
-
         this.serversName = clientServiceConfig.getServersName();
         this.metrics = metrics;
-
-        List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
 
         this.jsonMapper = jsonMapper;
         this.client = client;
@@ -96,9 +94,9 @@ public class HttpsJsonClient {
         this.schedulerSvc = schedulerSvc;
         this.masker = masker;
 
-        Context.checkForDuplicates(listHeaders);
+        List<PlatformHeaders> headers = translation.getHeaders();
 
-        for(PlatformHeaders header : listHeaders) {
+        for(PlatformHeaders header : headers) {
             if(header.isSecured()) {
                 secureList.add(header.getHeaderName());
             }
@@ -108,6 +106,10 @@ public class HttpsJsonClient {
             }
         }
 
+    }
+
+    private Enum something() {
+        return null;
     }
 
     private void cancel(Http2Socket clientSocket) {
@@ -237,7 +239,7 @@ public class HttpsJsonClient {
     //Creating a gauage in micrometer will have micrometer thread keep a reference to object forever.
     //It is very important to do this lazy or we add a new AtomicInteger on every api call if it
     //already exists instead of ONCE PR API CLASS (we do not even do once per method yet, though we could)
-    public AtomicInteger computeLazyToAvoidOOM(String key, AtomicInteger existing, Iterable<Tag> tags) {
+    private AtomicInteger computeLazyToAvoidOOM(String key, AtomicInteger existing, Iterable<Tag> tags) {
         if(existing == null) {
             existing = new AtomicInteger(0);
             metrics.gauge("webpieces.requests.inflight", tags, existing, (c) -> c.get());
@@ -245,7 +247,7 @@ public class HttpsJsonClient {
         return existing;
     }
 
-    public XFuture<FullResponse> send(Iterable<Tag> tags, AtomicInteger inFlightCounter, Http2Socket socket, FullRequest request) {
+    private XFuture<FullResponse> send(Iterable<Tag> tags, AtomicInteger inFlightCounter, Http2Socket socket, FullRequest request) {
         XFuture<FullResponse> send = socket.send(request);
 
         //in an ideal world, we would use the async send which can notify us when 'write' is done so it is out the door, but

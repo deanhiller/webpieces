@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import org.webpieces.microsvc.server.api.HeaderTranslation;
 import org.webpieces.util.HostWithPort;
 import org.webpieces.util.SneakyThrow;
 import org.slf4j.Logger;
@@ -45,19 +46,14 @@ public class GCPTaskClient {
     public GCPTaskClient(
             GCPCloudTaskConfig config,
             CloudTasksClient cloudTasksClient,
-            ClientServiceConfig clientServiceConfig,
-            Masker masker
+            Masker masker,
+            HeaderTranslation translation
     ) {
         this.config = config;
         this.cloudTasksClient = cloudTasksClient;
         this.masker = masker;
 
-        if(clientServiceConfig.getHcl() == null)
-            throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
-
-        List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
-
-        Context.checkForDuplicates(listHeaders);
+        List<PlatformHeaders> listHeaders = translation.getHeaders();
 
         for(PlatformHeaders header : listHeaders) {
             if(header.isSecured())

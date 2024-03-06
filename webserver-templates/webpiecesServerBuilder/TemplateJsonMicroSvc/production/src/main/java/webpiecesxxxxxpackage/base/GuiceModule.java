@@ -24,6 +24,7 @@ import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.context.AddPlatformHeaders;
 import org.webpieces.util.context.ClientAssertions;
 import webpiecesxxxxxpackage.db.DbCredentials;
 import webpiecesxxxxxpackage.deleteme.remoteapi.RemoteApi;
@@ -74,7 +75,10 @@ public class GuiceModule implements Module {
 		//all modules have access to adding their own Startable objects to be run on server startup
 		Multibinder<Startable> uriBinder = Multibinder.newSetBinder(binder, Startable.class);
 	    uriBinder.addBinding().to(PopulateDatabase.class);
-		
+
+		Multibinder<AddPlatformHeaders> headers = Multibinder.newSetBinder(binder, AddPlatformHeaders.class);
+		headers.addBinding().to(AddCompanyHeaders.class);
+
 	    //Must bind a SimpleStorage for plugins to read/save data and render their html pages
 	    binder.bind(SimpleStorage.class).to(SimpleStorageImpl.class).asEagerSingleton();
 

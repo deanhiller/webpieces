@@ -9,6 +9,6 @@ import java.util.List;
 public class HeadersCtx implements HeaderCtxList {
     @Override
     public List<PlatformHeaders> listHeaderCtxPairs() {
-        return new ArrayList<>();
+        return null;
     }
 }

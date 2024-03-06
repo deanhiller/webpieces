@@ -23,6 +23,7 @@ import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
 import org.webpieces.util.cmdline2.Arguments;
+import org.webpieces.util.context.AddPlatformHeaders;
 import org.webpieces.util.context.ClientAssertions;
 import webpiecesxxxxxpackage.Server;
 import webpiecesxxxxxpackage.db.DbCredentials;
@@ -85,6 +86,9 @@ public class GuiceModule implements Module {
 		//all modules have access to adding their own Startable objects to be run on server startup
 		Multibinder<Startable> uriBinder = Multibinder.newSetBinder(binder, Startable.class);
 	    uriBinder.addBinding().to(PopulateDatabase.class);
+
+		Multibinder<AddPlatformHeaders> headers = Multibinder.newSetBinder(binder, AddPlatformHeaders.class);
+		headers.addBinding().to(AddCompanyHeaders.class);
 
 		Multibinder<ObjectStringConverter> conversionBinder = Multibinder.newSetBinder(binder, ObjectStringConverter.class);
 		conversionBinder.addBinding().to(EducationEnum.WebConverter.class);

@@ -3,6 +3,8 @@ package org.webpieces.router.impl;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.webpieces.ctx.api.extension.HtmlTagCreator;
+import org.webpieces.microsvc.api.AddMicroSvcHeaders;
+import org.webpieces.microsvc.api.MicroSvcHeader;
 import org.webpieces.router.api.PlatformInjector;
 import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.router.api.extensions.EntityLookup;
@@ -17,6 +19,7 @@ import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import org.webpieces.util.context.AddPlatformHeaders;
 import org.webpieces.util.context.PlatformHeaders;
 
 public class WebpiecesToAppBindingModule implements Module {
@@ -52,7 +55,8 @@ public class WebpiecesToAppBindingModule implements Module {
 		Multibinder.newSetBinder(binder, BodyContentBinder.class);
 		Multibinder.newSetBinder(binder, ObjectStringConverter.class);
 		Multibinder.newSetBinder(binder, HtmlTagCreator.class);
-		Multibinder.newSetBinder(binder, PlatformHeaders.class);
+		Multibinder<AddPlatformHeaders> platformHeaders = Multibinder.newSetBinder(binder, AddPlatformHeaders.class);
+		platformHeaders.addBinding().to(AddMicroSvcHeaders.class);
 
 		//special case so the notFound controller can inspect and list all routes in a web page
 		//OR some client application can inject and introspect all web routes as well

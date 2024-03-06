@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.microsvc.server.api.HeaderCtxList;
+import org.webpieces.microsvc.server.api.HeaderTranslation;
 import org.webpieces.recorder.impl.TestCaseHolder;
 import org.webpieces.router.api.controller.actions.Action;
 import org.webpieces.router.api.routes.MethodMeta;
@@ -23,15 +24,13 @@ public class HeaderToRequestStateFilter extends RouteFilter<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(HeaderToRequestStateFilter.class);
     private final Set<PlatformHeaders> transferKeys = new HashSet<>();
-    private HeaderCtxList headerCtxList;
 
     @Inject
-    public HeaderToRequestStateFilter(ClientServiceConfig config) {
-        headerCtxList = config.getHcl();
-        List<PlatformHeaders> platformHeaders = headerCtxList.listHeaderCtxPairs();
-        Context.checkForDuplicates(platformHeaders);
+    public HeaderToRequestStateFilter(
+            HeaderTranslation translation
+    ) {
+        List<PlatformHeaders> headers = translation.getHeaders();
 
-        List<PlatformHeaders> headers = headerCtxList.listHeaderCtxPairs();
         for (PlatformHeaders contextKey : headers) {
             if (!contextKey.isWantTransferred())
                 continue;

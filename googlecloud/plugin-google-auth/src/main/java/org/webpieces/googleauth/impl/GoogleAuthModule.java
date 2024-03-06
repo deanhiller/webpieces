@@ -8,10 +8,9 @@ import org.webpieces.googleauth.api.SaveUser;
 import org.webpieces.googleauth.client.api.AuthApi;
 import org.webpieces.googleauth.api.GoogleAuthConfig;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
-import org.webpieces.router.api.extensions.BodyContentBinder;
 import org.webpieces.util.HostWithPort;
 import org.webpieces.util.cmdline2.Arguments;
-import org.webpieces.util.context.PlatformHeaders;
+import org.webpieces.util.context.AddPlatformHeaders;
 
 import javax.inject.Singleton;
 import java.util.function.Supplier;
@@ -38,8 +37,8 @@ public class GoogleAuthModule implements Module {
     @Override
     public void configure(Binder binder) {
 
-        Multibinder<PlatformHeaders> headerBinder = Multibinder.newSetBinder(binder, PlatformHeaders.class);
-        headerBinder.addBinding().toInstance(AuthHeader.AUTH_TOKEN);
+        Multibinder<AddPlatformHeaders> htmlTagCreators = Multibinder.newSetBinder(binder, AddPlatformHeaders.class);
+        htmlTagCreators.addBinding().to(AddAuthHeader.class);
 
         binder.bind(AuthApiConfig.class).toInstance(
                 new AuthApiConfig(callbackUrl.get(), authClientId.get(), authClientSecret.get()));
