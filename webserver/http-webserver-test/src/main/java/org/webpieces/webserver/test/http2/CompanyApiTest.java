@@ -4,6 +4,7 @@ import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.multibindings.Multibinder;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.slf4j.Logger;
@@ -11,18 +12,24 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.http2client.api.Http2Client;
+import org.webpieces.microsvc.api.AddMicroSvcHeaders;
+import org.webpieces.microsvc.api.MicroSvcHeader;
 import org.webpieces.microsvc.client.api.HttpsConfig;
 import org.webpieces.microsvc.client.api.RESTClientCreator;
 import org.webpieces.plugin.json.ConverterConfig;
 import org.webpieces.util.HostWithPort;
+import org.webpieces.util.context.AddPlatformHeaders;
 import org.webpieces.util.context.ClientAssertions;
 import org.webpieces.util.context.Context;
 import org.webpieces.util.SneakyThrow;
+import org.webpieces.util.context.PlatformHeaders;
 import org.webpieces.webserver.test.Asserts;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -83,6 +90,11 @@ public abstract class CompanyApiTest extends AbstractHttp2Test {
 
             binder.bind(MeterRegistry.class).toInstance(new SimpleMeterRegistry());
 
+            Multibinder<AddPlatformHeaders> headers = Multibinder.newSetBinder(binder, AddPlatformHeaders.class);
+            for(AddPlatformHeaders ph : fetchEnums()) {
+                headers.addBinding().toInstance(ph);
+            }
+
             binder.bind(ClientAssertions.class).toInstance(new ClientAssertions() {
                 @Override
                 public void throwIfCannotGoRemote() {
@@ -91,6 +103,12 @@ public abstract class CompanyApiTest extends AbstractHttp2Test {
             });
 
         }
+    }
+
+    protected List<AddPlatformHeaders> fetchEnums() {
+        List<AddPlatformHeaders> list = new ArrayList<>();
+        list.add(new AddMicroSvcHeaders());
+        return list;
     }
 
     public <T> T createRestClient(Class<T> apiOfService) {

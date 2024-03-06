@@ -20,6 +20,7 @@ import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.microsvc.client.api.ClientSSLEngineFactory;
+import org.webpieces.microsvc.server.api.HeaderTranslation;
 import org.webpieces.util.HostWithPort;
 import org.webpieces.util.security.Masker;
 import org.webpieces.util.context.Context;
@@ -59,22 +60,17 @@ public class HttpClientWrapper {
     @Inject
     public HttpClientWrapper(
             ClientSSLEngineFactory sslFactory,
-            ClientServiceConfig clientServiceConfig,
             Http2Client client,
             FutureHelper futureUtil,
-            Masker masker
+            Masker masker,
+            HeaderTranslation translation
     ) {
         this.sslFactory = sslFactory;
         this.client = client;
         this.futureUtil = futureUtil;
         this.masker = masker;
 
-        if(clientServiceConfig.getHcl() == null)
-            throw new IllegalArgumentException("clientServiceConfig.getHcl() cannot be null and was");
-
-        List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
-
-        Context.checkForDuplicates(listHeaders);
+        List<PlatformHeaders> listHeaders = translation.getHeaders();
 
         for(PlatformHeaders header : listHeaders) {
             if(header.isSecured())

@@ -3,6 +3,7 @@ package org.webpieces.microsvc.client.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.microsvc.client.api.Authentication;
 import org.webpieces.util.HostWithPort;
 import org.webpieces.recorder.impl.EndpointInfo;
 import org.webpieces.recorder.impl.TestCaseRecorder;
@@ -35,6 +36,7 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
     private HostWithPort addr;
     private boolean hasUrlParams;
     private boolean forHttp;
+    private Authentication authentication;
 
     @Inject
     public HttpsJsonClientInvokeHandler(HttpsJsonClient clientHelper, ClientAssertions clientAssertions) {
@@ -42,14 +44,27 @@ public class HttpsJsonClientInvokeHandler implements InvocationHandler {
         this.clientAssertions = clientAssertions;
     }
 
-    public void initialize(HostWithPort addr, boolean hasUrlParams, boolean forHttp) {
+    public void initialize(HostWithPort addr, boolean hasUrlParams, boolean forHttp, Authentication authentication) {
         this.addr = addr;
         this.hasUrlParams = hasUrlParams;
         this.forHttp = forHttp;
+        this.authentication = authentication;
+        if(this.authentication == null)
+            this.authentication = new EmptyAuth();
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        Object state = authentication.setupMagic();
+        try {
+            return invokeImpl(proxy, method, args);
+        } finally {
+            authentication.resetMagic(state);
+        }
+    }
+
+    private Object invokeImpl(Object proxy, Method method, Object[] args) throws Throwable {
+
         if(args == null)
             args = new Object[0]; //avoid needing to deal with null here
 

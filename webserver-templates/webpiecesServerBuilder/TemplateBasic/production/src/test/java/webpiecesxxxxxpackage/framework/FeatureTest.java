@@ -9,11 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.ClientServiceConfig;
 import org.webpieces.util.HostWithPort;
+import org.webpieces.util.context.AddPlatformHeaders;
 import org.webpieces.util.context.Context;
-import org.webpieces.util.futures.Logging;
+import org.webpieces.util.context.PlatformHeaders;
 import org.webpieces.webserver.api.ServerConfig;
 import org.webpieces.webserver.test.http2.CompanyApiTest;
 import webpiecesxxxxxpackage.Server;
+import webpiecesxxxxxpackage.base.AddCompanyHeaders;
+import webpiecesxxxxxpackage.base.CompanyHeaders;
 import webpiecesxxxxxpackage.base.HeadersCtx;
 import webpiecesxxxxxpackage.json.ExampleRestAPI;
 import webpiecesxxxxxpackage.json.SearchApi;
@@ -21,7 +24,7 @@ import webpiecesxxxxxpackage.mock.JavaCache;
 import webpiecesxxxxxpackage.mock.MockRemoteService;
 import webpiecesxxxxxpackage.service.RemoteService;
 
-import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -86,6 +89,13 @@ public class FeatureTest extends CompanyApiTest {
     @Override
     protected ClientServiceConfig getConfig() {
         return HeadersCtx.createConfig(Server.APP_NAME);
+    }
+
+    @Override
+    protected List<AddPlatformHeaders> fetchEnums() {
+        List<AddPlatformHeaders> classes = super.fetchEnums();
+        classes.add(new AddCompanyHeaders());
+        return classes;
     }
 
     private class AppOverridesModule implements Module {

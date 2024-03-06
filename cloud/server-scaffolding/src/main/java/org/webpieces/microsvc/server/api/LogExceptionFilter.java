@@ -44,11 +44,11 @@ public class LogExceptionFilter extends RouteFilter<Void> {
     public LogExceptionFilter(
             IgnoreExceptions exceptionCheck,
             Masker masker,
-            ClientServiceConfig clientServiceConfig
+            HeaderTranslation translation
     ) {
         this.exceptionCheck = exceptionCheck;
         this.masker = masker;
-        List<PlatformHeaders> listHeaders = clientServiceConfig.getHcl().listHeaderCtxPairs();
+        List<PlatformHeaders> listHeaders = translation.getHeaders();
 
         for(PlatformHeaders header : listHeaders) {
             if(header.isSecured()) {

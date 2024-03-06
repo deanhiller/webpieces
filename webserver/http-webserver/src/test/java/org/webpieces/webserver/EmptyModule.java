@@ -18,7 +18,7 @@ public class EmptyModule implements Module {
 		binder.bind(SimpleStorage.class).toInstance(new EmptyStorage());
 		binder.bind(ApplicationContext.class).toInstance(new ApplicationContextImpl());
 
-		ClientServiceConfig config = new ClientServiceConfig(null, "deansTestSvc");
+		ClientServiceConfig config = new ClientServiceConfig(new EmptyHcl(), "deansTestSvc");
 		binder.bind(ClientServiceConfig.class).toInstance(config);
 
 		binder.bind(SSLEngineFactory.class).to(SSLEngineFactoryWebServerTesting.class);

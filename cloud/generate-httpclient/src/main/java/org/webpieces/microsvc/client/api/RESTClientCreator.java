@@ -22,19 +22,29 @@ public class RESTClientCreator {
         this.wrapperProvider = wrapperProvider;
     }
 
+    public <T> T createAuthClient(Class<T> apiInterface, HostWithPort addr, Authentication auth) {
+        return createClient(apiInterface, addr, false, false, auth);
+    }
+
     public <T> T createClient(Class<T> apiInterface, HostWithPort addr) {
-        return createClient(apiInterface, addr, false, false);
+        return createClient(apiInterface, addr, false, false, null);
     }
 
     public <T> T createClientPubsub(Class<T> apiInterface, HostWithPort addr) {
-        return createClient(apiInterface, addr, true, false);
+        return createClient(apiInterface, addr, true, false, null);
     }
 
     public <T> T createClientHttp(Class<T> apiInterface, HostWithPort addr) {
-        return createClient(apiInterface, addr, false, true);
+        return createClient(apiInterface, addr, false, true, null);
     }
 
-    public <T> T createClient(Class<T> apiInterface, HostWithPort addr, boolean createForPubSub, boolean forHttp) {
+    public <T> T createClient(
+            Class<T> apiInterface,
+            HostWithPort addr,
+            boolean createForPubSub,
+            boolean forHttp,
+            Authentication authentication
+    ) {
 
         //quick DNS check or fail
         try {
@@ -45,7 +55,7 @@ public class RESTClientCreator {
 
         HttpsJsonClientInvokeHandler invokeHandler = wrapperProvider.get();
         boolean hasUrlParams = apiInterface.getAnnotation(NotEvolutionProof.class) != null;
-        invokeHandler.initialize(addr, hasUrlParams, forHttp);
+        invokeHandler.initialize(addr, hasUrlParams, forHttp, authentication);
 
         boolean forceVoid = false;
         if(createForPubSub)
