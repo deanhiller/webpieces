@@ -120,41 +120,60 @@ public class Context {
     }
 
     public static void putMagic(PlatformHeaders header, String value) {
-        Map<String, String> magicHeaders = get(HEADERS);
-        if(magicHeaders == null) {
-            magicHeaders = new HashMap<>();
-            put(HEADERS, magicHeaders);
+        if(header.getHeaderName() != null) {
+            Map<String, String> magicHeaders = get(HEADERS);
+            if (magicHeaders == null) {
+                magicHeaders = new HashMap<>();
+                put(HEADERS, magicHeaders);
+            }
+
+            magicHeaders.put(header.getHeaderName(), value);
         }
 
-        String key = findKey(header);
-        magicHeaders.put(key, value);
-    }
+        if(header.getLoggerMDCKey() != null) {
+            Map<String, String> map = get(MDC_KEY);
+            if (map == null) {
+                map = new HashMap<>();
+                put(MDC_KEY, map);
+            }
 
-    private static String findKey(PlatformHeaders header) {
-        String headerName = header.getHeaderName();
-        if(headerName != null)
-            return headerName;
-        return header.getLoggerMDCKey();
+            map.put(header.getLoggerMDCKey(), value);
+        }
     }
 
     public static String getMagic(PlatformHeaders header) {
-        Map<String, String> magicHeaders = get(HEADERS);
-        if(magicHeaders == null) {
+        if(header.getHeaderName() != null) {
+            Map<String, String> magicHeaders = get(HEADERS);
+            if (magicHeaders == null) {
+                return null;
+            }
+            return magicHeaders.get(header.getHeaderName());
+        }
+
+        Map<String, String> map = get(MDC_KEY);
+        if (map == null) {
             return null;
         }
-        String key = findKey(header);
-        return magicHeaders.get(key);
+
+        return map.get(header.getLoggerMDCKey());
     }
 
     public static void removeMagic(PlatformHeaders header) {
-        Map<String, String> magicHeaders = get(HEADERS);
-        if(magicHeaders == null)
-            return;
+        if(header.getLoggerMDCKey() != null) {
+            Map<String, String> map = get(MDC_KEY);
+            if (map != null) {
+                map.remove(header.getLoggerMDCKey());
+            }
+        }
 
-        String key = findKey(header);
-        magicHeaders.remove(key);
-        if(magicHeaders.size() == 0) {
-            put(HEADERS, null); //clean up
+        if(header.getHeaderName() != null) {
+            Map<String, String> magicHeaders = get(HEADERS);
+            if (magicHeaders != null) {
+                magicHeaders.remove(header.getHeaderName());
+                if (magicHeaders.isEmpty()) {
+                    remove(HEADERS); //clean up
+                }
+            }
         }
     }
 
