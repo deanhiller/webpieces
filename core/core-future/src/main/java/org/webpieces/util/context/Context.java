@@ -40,8 +40,8 @@ public class Context {
                 compareHeader(header, existingFromHeader);
                 continue; // no need to add duplicate, they are the same
             } else if(existingFromMdc != null) {
-                if(header.getHeaderName() != existingFromHeader.getHeaderName())
-                    throw new IllegalStateException("header="+tuple(header)+" and header="+tuple(existingFromHeader)+" define the same mdc key " +
+                if(header.getHeaderName() != existingFromMdc.getHeaderName())
+                    throw new IllegalStateException("header="+tuple(header)+" and header="+tuple(existingFromMdc)+" define the same mdc key " +
                             "but they define getHeaderName() differently.  remove one of the plugins or modules to remove one of these headers or redine th header to match");
                 compareHeader(header, existingFromMdc);
 
