@@ -87,6 +87,8 @@ public class SchedulerImpl implements Scheduler {
                 log.info("executeIt reference " + reference.getTaskId());
                 return reference;
             });
+        } catch (Throwable e) {
+            return XFuture.failedFuture(e);
         } finally {
             Context.remove(WEBPIECES_SCHEDULE_INFO);
             Context.remove(WEBPIECES_SCHEDULE_RESPONSE);
@@ -95,6 +97,10 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public XFuture<Void> cancelJob(JobReference ref) {
-        return invoker.delete(ref);
+        try {
+            return invoker.delete(ref);
+        } catch (Throwable e) {
+            return XFuture.failedFuture(e);
+        }
     }
 }
