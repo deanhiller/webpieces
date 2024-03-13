@@ -136,6 +136,11 @@ public class HeaderPriorityParserImpl implements HeaderPriorityParser {
     	for(String keyValPair : split) {
 	    	//there are many = signs but the first one is the cookie name...the other are embedded key=value pairs
 	    	int index = keyValPair.indexOf("=");
+			//index was returning -1 in which case, we can just put(name, "") as empty
+			if(index < 0) {
+				map.put(keyValPair, "");
+				continue;
+			}
 	    	String name = keyValPair.substring(0, index).trim();
 	    	String val = keyValPair.substring(index+1).trim();
 	    	map.put(name, val);
