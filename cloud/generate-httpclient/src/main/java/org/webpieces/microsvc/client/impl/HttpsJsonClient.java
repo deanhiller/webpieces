@@ -297,16 +297,20 @@ public class HttpsJsonClient {
 
         String message = formMessage(contents, httpResp, url, jsonReq, errorIfCanRead);
 
+        //On MOST errors like 400, 401, 403, our server is doing something wrong.  we should translate to
+        //500 for these.  If you need to pass through a 400, then use 491.  We should create pass throughs
+        //for the case we would like to pass the 401, 403 as well later ->
+
         if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_400_BAD_REQUEST) {
-            //MUST translate to http 500 for this server.  ie. If the downstream servers tell US that
-            //we sent a bad request, we have a bug.  Either 1. We did not guard our clients from the
-            //bad request first sending our clients a 400 OR we simply filled out the request wrong
             throw new InternalServerErrorException("This server sent a bad request to a down stream server." + message);
         } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_401_UNAUTHORIZED) {
-            throw new UnauthorizedException("Unauthorized " + message);
+            throw new InternalServerErrorException("This server sent a bad request to a down stream server." + message);
         } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_403_FORBIDDEN) {
-            throw new ForbiddenException("Forbidden " + message);
+            throw new InternalServerErrorException("This server sent a bad request to a down stream server." + message);
         } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_500_INTERNAL_SERVER_ERROR) {
+            //if downstream server had an issue, then translate that to a bad gateway meaning we did not have an error
+            //but the downstream server did (perhaps the downstream server needs to send back a 400 OR has some
+            //bug that needs fixing, but all these are bugs).
             throw new BadGatewayException(message, errorIfCanRead);
         } else if (httpResp.getHeaders().getKnownStatusCode() == StatusCode.HTTP_502_BAD_GATEWAY) {
             throw new BadGatewayException(message, errorIfCanRead);
