@@ -10,63 +10,6 @@ public class Context {
 
     private static ThreadLocal<Map<String,Object>> context = ThreadLocal.withInitial(() -> new HashMap<>());
 
-    public static boolean wasDupsChecked = false;
-    /**
-     * We use header as the key unless null and then use mdc as the key.  Do not allow duplication
-     * including mdc can't use a header name if used as the key.
-     */
-    public synchronized static void checkForDuplicates(List<PlatformHeaders> platformHeaders) {
-        if(wasDupsChecked) //only check once 
-            return;
-
-        Map<String, PlatformHeaders> headerKeyToHeader = new HashMap<>();
-        Map<String, PlatformHeaders> mdcKeyToHeader = new HashMap<>();
-
-        for(PlatformHeaders header : platformHeaders) {
-            if(header.getHeaderName() == null && header.getLoggerMDCKey() == null) {
-                throw new IllegalArgumentException("Either header or MDC must contain a value.  both cannot be null");
-            }
-            PlatformHeaders existingFromHeader = null;
-            if(header.getHeaderName() != null)
-                existingFromHeader = headerKeyToHeader.get(header.getHeaderName());
-            PlatformHeaders existingFromMdc = null;
-            if(header.getLoggerMDCKey() != null)
-                existingFromMdc = mdcKeyToHeader.get(header.getLoggerMDCKey());
-
-            if(existingFromHeader != null) {
-                if(header.getLoggerMDCKey() != existingFromHeader.getLoggerMDCKey())
-                    throw new IllegalStateException("header="+tuple(header)+" and header="+tuple(existingFromHeader)+" define the same header " +
-                            "but they define getLoggerMDCKey differently.  remove one of the plugins or modules to remove one of these headers or redine th header to match");
-                compareHeader(header, existingFromHeader);
-                continue; // no need to add duplicate, they are the same
-            } else if(existingFromMdc != null) {
-                if(header.getHeaderName() != existingFromMdc.getHeaderName())
-                    throw new IllegalStateException("header="+tuple(header)+" and header="+tuple(existingFromMdc)+" define the same mdc key " +
-                            "but they define getHeaderName() differently.  remove one of the plugins or modules to remove one of these headers or redine th header to match");
-                compareHeader(header, existingFromMdc);
-
-                continue; //no need to add duplicate, they are the same
-            }
-
-            headerKeyToHeader.put(header.getHeaderName(), header);
-            mdcKeyToHeader.put(header.getLoggerMDCKey(), header);
-        }
-    }
-
-    private static void compareHeader(PlatformHeaders header, PlatformHeaders existingFromHeader) {
-        if(header.isWantLogged() != existingFromHeader.isWantLogged()
-            || header.isDimensionForMetrics() != existingFromHeader.isDimensionForMetrics()
-            || header.isSecured() != existingFromHeader.isSecured()
-            || header.isWantTransferred() != existingFromHeader.isWantTransferred()
-        )
-            throw new IllegalStateException("header="+tuple(header)+" and header="+tuple(existingFromHeader)+" define the same header " +
-                    "but they define their properties differently.  remove one of the plugins or modules to remove one of these headers or redine th header to match");
-    }
-
-    private static String tuple(PlatformHeaders header) {
-        return header.getClass()+"."+header;
-    }
-
     public static <T> T get(String key) {
         return (T)context.get().get(key);
     }
