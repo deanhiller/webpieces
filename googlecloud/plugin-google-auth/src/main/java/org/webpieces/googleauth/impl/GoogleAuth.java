@@ -49,8 +49,11 @@ public class GoogleAuth {
 // (Receive idTokenString by HTTPS POST)
 
         GoogleIdToken idToken = verifier.verify(idTokenString);
-        if(idToken == null)
-            throw new ForbiddenException("Invalid token");
+        if(idToken == null) {
+            //I hit some weird issue in one city where my clock was off 15 minutes (not sure why apple computer is
+            //letting my time get to be wrong)
+            throw new ForbiddenException("Invalid token (sometimes due to your computer time being incorrect :( NTP drift)");
+        }
 
         Payload payload = idToken.getPayload();
 

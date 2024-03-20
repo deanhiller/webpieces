@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.microsvc.server.api.FilterConfig;
 import org.webpieces.microsvc.server.api.FilterRoutes;
-import org.webpieces.microsvc.server.api.JsonFilterRoutes;
 import org.webpieces.microsvc.server.api.RESTApiRoutes;
 import org.webpieces.plugin.hibernate.HibernatePlugin;
 import org.webpieces.plugin.json.JacksonConfig;
