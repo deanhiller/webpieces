@@ -25,27 +25,16 @@ public class HibernatePlugin implements Plugin {
 	private Supplier<Boolean> loadByClassFile;
 
 	private HibernateConfiguration config;
-	private boolean transactionOnByDefault = true;
 
 	@Deprecated
-	public HibernatePlugin(HibernateConfig config) {
-		persistenceUnit = () -> config.getPersistenceUnit();
-		loadByClassFile = () -> false; //default to false since this is legacy using file
-	}
-
-	public HibernatePlugin(Arguments cmdLineArgs, boolean transactionOnByDefault) {this.transactionOnByDefault = transactionOnByDefault;
+	public HibernatePlugin(Arguments cmdLineArgs, boolean transactionOnByDefault) {
 		log.info("classloader="+getClass().getClassLoader());
+		config = new HibernateConfiguration();
+		config.setTransactionOnByDefault(transactionOnByDefault);
 		this.persistenceUnit = cmdLineArgs.createRequiredArg(PERSISTENCE_UNIT_KEY, null, "The named persistence unit from the list of them inside META-INF/persistence.xml", (s) -> s);
 		this.loadByClassFile = cmdLineArgs.createOptionalArg(LOAD_CLASSMETA_KEY, "true", "If you supply a *.class for 'hibernate.persistenceunit', set this flat to true", (s) -> convertBool(s));
 	}
 
-	@Deprecated
-	public HibernatePlugin(Arguments cmdLineArgs) {
-		log.info("classloader="+getClass().getClassLoader());
-		this.persistenceUnit = cmdLineArgs.createRequiredArg(PERSISTENCE_UNIT_KEY, null, "The named persistence unit from the list of them inside META-INF/persistence.xml", (s) -> s);
-		this.loadByClassFile = cmdLineArgs.createOptionalArg(LOAD_CLASSMETA_KEY, "true", "If you supply a *.class for 'hibernate.persistenceunit', set this flat to true", (s) -> convertBool(s));
-	}
-	
 	public HibernatePlugin(HibernateConfiguration config, Arguments cmdLineArgs) {
 		this.config = config;
 		log.info("classloader="+getClass().getClassLoader());
@@ -59,12 +48,12 @@ public class HibernatePlugin implements Plugin {
 	
 	@Override
 	public List<Module> getGuiceModules() {
-		return Lists.newArrayList(new HibernateModule(persistenceUnit, loadByClassFile, transactionOnByDefault));
+		return Lists.newArrayList(new HibernateModule(persistenceUnit, loadByClassFile));
 	}
 
 	@Override
 	public List<Routes> getRouteModules() {
-		return Lists.newArrayList(new HibernateRoutes(config, transactionOnByDefault));
+		return Lists.newArrayList(new HibernateRoutes(config));
 	}
 
 }

@@ -8,11 +8,9 @@ import org.webpieces.router.api.routes.Routes;
 public class HibernateRoutes implements Routes {
 
 	private HibernateConfiguration config;
-	private boolean transactionOnByDefault;
 
-	public HibernateRoutes(HibernateConfiguration config, boolean transactionOnByDefault) {
+	public HibernateRoutes(HibernateConfiguration config) {
 		this.config = config;
-		this.transactionOnByDefault = transactionOnByDefault;
 	}
 
 	@Override
@@ -22,20 +20,11 @@ public class HibernateRoutes implements Routes {
 		//as if the database goes down, you will end up with error to error to webpieces fail-safe 500 page which
 		//does not look like your website
 		//Also, we don't wrap NotFound but you could do that as well
-		String filterPath = ".*"; //every path with use the filter
-		boolean applyFilterToClassName = false;
-		if(config != null) {
-			applyFilterToClassName = config.isApplyRegExPackage();
-			if(config.getFilterRegExPath() != null)
-				filterPath = config.getFilterRegExPath();
-		}
+		String filterPath = config.getFilterRegExPath(); //every path with use the filter
+		int filterApplyLevel = config.getFilterApplyLevel();
 
-		int filterApplyLevel = 500;
-		if(config != null)
-			config.getFilterApplyLevel();
-
-		TxConfig txConfig = new TxConfig(transactionOnByDefault);
-		if(applyFilterToClassName) {
+		TxConfig txConfig = new TxConfig(config.isTransactionOnByDefault());
+		if(config.isApplyRegExPackage()) {
 			bldr.addPackageFilter(filterPath, TransactionFilter.class, txConfig, FilterPortType.ALL_FILTER, filterApplyLevel);
 		} else {
 			bldr.addFilter(filterPath, TransactionFilter.class, txConfig, FilterPortType.ALL_FILTER, filterApplyLevel);
