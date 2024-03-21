@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import org.webpieces.ctx.api.ApplicationContext;
 import org.webpieces.nio.api.SSLConfiguration;
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.plugin.hibernate.HibernateConfiguration;
 import org.webpieces.plugin.hibernate.HibernatePlugin;
 import org.webpieces.plugins.hibernate.app.ajax.AjaxHibernateCrudRoutes;
 import org.webpieces.router.api.extensions.SimpleStorage;
@@ -47,8 +48,10 @@ public class HibernateAppMeta implements WebAppMeta {
 	
 	@Override
 	public List<Plugin> getPlugins() {
+		HibernateConfiguration config = new HibernateConfiguration();
+		config.setTransactionOnByDefault(true);
 		return Lists.<Plugin>newArrayList(
-				new HibernatePlugin(pluginConfig.getCmdLineArguments()));
+				new HibernatePlugin(config, pluginConfig.getCmdLineArguments()));
 	}
 
 	private class AppModule implements Module {

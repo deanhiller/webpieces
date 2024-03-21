@@ -32,11 +32,9 @@ public class HibernateModule extends AbstractModule {
 	private Supplier<String> persistenceUnit;
 	private ClassLoader entityClassLoader;
 	private Supplier<Boolean> loadByClassFile;
-	private boolean transactionOnByDefault;
 
-	public HibernateModule(Supplier<String> persistenceUnit2, Supplier<Boolean> loadByClassFile, boolean transactionOnByDefault) {
+	public HibernateModule(Supplier<String> persistenceUnit2, Supplier<Boolean> loadByClassFile) {
 		this.loadByClassFile = loadByClassFile;
-		this.transactionOnByDefault = transactionOnByDefault;
 		//get classloader so if we are in development mode, we will use that class loader for entities
 		entityClassLoader = Thread.currentThread().getContextClassLoader();
 		this.persistenceUnit = persistenceUnit2;

@@ -2,25 +2,11 @@ package org.webpieces.plugin.hibernate;
 
 public class HibernateConfiguration {
 
-	private String filterRegExPath;
-	private int filterApplyLevel;
-	private boolean applyRegExPackage;
+	private String filterRegExPath = ".*";
+	private int filterApplyLevel = 50;
+	private boolean applyRegExPackage = true;
 
-	@Deprecated
-	public HibernateConfiguration(String filterRegExPath) {
-		this(filterRegExPath, false, 500);
-	}
-
-	public HibernateConfiguration(String filterRegExPath, boolean applyRegExPackage) {
-		this(filterRegExPath, true, 500);
-	}
-	
-	public HibernateConfiguration(String filterRegExPath, boolean applyRegExPackage, int filterApplyLevel) {
-		super();
-		this.filterRegExPath = filterRegExPath;
-		this.applyRegExPackage = applyRegExPackage;
-		this.setFilterApplyLevel(filterApplyLevel);
-	}
+	private boolean transactionOnByDefault = false;
 
 	public HibernateConfiguration() {
 		super();
@@ -46,4 +32,15 @@ public class HibernateConfiguration {
 		return applyRegExPackage;
 	}
 
+	public void setApplyRegExPackage(boolean applyRegExPackage) {
+		this.applyRegExPackage = applyRegExPackage;
+	}
+
+	public boolean isTransactionOnByDefault() {
+		return transactionOnByDefault;
+	}
+
+	public void setTransactionOnByDefault(boolean transactionOnByDefault) {
+		this.transactionOnByDefault = transactionOnByDefault;
+	}
 }

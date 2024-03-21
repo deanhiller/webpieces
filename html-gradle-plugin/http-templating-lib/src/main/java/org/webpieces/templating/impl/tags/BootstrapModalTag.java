@@ -49,8 +49,10 @@ public class BootstrapModalTag implements HtmlTag {
         println(out, "             $('#"+modalId+"').load('"+urlPath+"', function(response, status, xhr){");
         println(out, "                 if (xhr.status == "+Constants.AJAX_REDIRECT_CODE+") {");
         println(out, "                     window.location = xhr.getResponseHeader('Location')");
+		println(out, "                 } else if (xhr.status == 0) {");
+		println(out, "                     alert('Check your network connection.  Could not connect')");
         println(out, "                 } else if (xhr.status != 200) {");
-        println(out, "                     alert('Cannot connect to server.  Check your network connection')");
+        println(out, "                     alert('Bug, Internal Error. http code='+xhr.status)");
         println(out, "                 } else {");
         printXX(out, "                     $(`#"+modalId+"`).modal('show');");
         println(out, "                 }");
