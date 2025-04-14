@@ -3,10 +3,16 @@ package org.webpieces.aws.storage.impl;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompletedPart;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
 import software.amazon.awssdk.services.s3.model.UploadPartRequest;
+import software.amazon.awssdk.services.s3.model.UploadPartResponse;
 
 public class S3WritableByteChannel implements WritableByteChannel {
 
@@ -17,6 +23,8 @@ public class S3WritableByteChannel implements WritableByteChannel {
 
     private boolean closed = false;
     private int part = 1;
+    private String uploadId;
+    private List<CompletedPart> parts = new ArrayList<>();
 
     public S3WritableByteChannel(final S3Client client, final String bucket, final String key) {
 
@@ -78,9 +86,27 @@ public class S3WritableByteChannel implements WritableByteChannel {
 
         closed = true;
 
+        if(part > 1) {
+            CompleteMultipartUploadRequest req = CompleteMultipartUploadRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .uploadId(uploadId)
+                .multipartUpload((b) -> b.parts(parts))
+                .build();
+            client.completeMultipartUpload(req);
+        }
+
     }
 
     private void uploadPart() {
+
+        if(part == 1) {
+            CreateMultipartUploadRequest req = CreateMultipartUploadRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+            uploadId = client.createMultipartUpload(req).uploadId();
+        }
 
         UploadPartRequest request = UploadPartRequest.builder()
                 .bucket(bucket)
@@ -88,7 +114,9 @@ public class S3WritableByteChannel implements WritableByteChannel {
                 .partNumber(part)
                 .build();
 
-        client.uploadPart(request, RequestBody.fromRemainingByteBuffer(bb));
+        UploadPartResponse resp = client.uploadPart(request, RequestBody.fromRemainingByteBuffer(bb));
+        CompletedPart p = CompletedPart.builder().partNumber(part).eTag(resp.eTag()).build();
+        parts.add(p);
 
         part++;
         bb.clear();
